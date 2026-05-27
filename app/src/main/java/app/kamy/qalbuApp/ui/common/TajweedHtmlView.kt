@@ -2,32 +2,24 @@ package app.kamy.qalbuApp.ui.common
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
+import android.view.View
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 
 /**
- * Renders tajweed-colored Arabic HTML using the bundled tajweed font
- * (file:///android_asset/fonts/tajweed_font.ttf). Mirrors iOS
- * Design/Organisms/HTMLContentWebView.swift and AyahArabicWebBlock.swift.
- *
- * Height wraps content so long ayat are never clipped.
+ * Renders tajweed-colored Arabic HTML using the bundled tajweed font.
+ * Card height follows verse length — nothing is clipped.
  */
 @Composable
 fun TajweedHtmlView(
@@ -38,153 +30,167 @@ fun TajweedHtmlView(
 ) {
     var contentHeightPx by remember(htmlFragment, fontSizeSp, textColor) { mutableIntStateOf(0) }
     var lastLoadedHtml by remember(htmlFragment, fontSizeSp, textColor) { mutableStateOf<String?>(null) }
-    var measureGeneration by remember(htmlFragment, fontSizeSp, textColor) { mutableIntStateOf(0) }
-    val pendingRemeasures = remember { mutableListOf<Runnable>() }
-    val density = LocalDensity.current
     val wrappedHtml = remember(htmlFragment, fontSizeSp, textColor) {
         wrapTajweedHtml(htmlFragment, fontSizeSp, textColor)
     }
 
-    DisposableEffect(wrappedHtml) {
-        onDispose {
-            pendingRemeasures.forEach { remeasureHandler.removeCallbacks(it) }
-            pendingRemeasures.clear()
-        }
-    }
-    val estimatedMinHeightDp = remember(fontSizeSp) {
-        (fontSizeSp * 3.2f).coerceAtLeast(96f).dp
-    }
-
-    val heightModifier = if (contentHeightPx > 0) {
-        Modifier.height(with(density) { contentHeightPx.toDp() })
-    } else {
-        Modifier.heightIn(min = estimatedMinHeightDp)
-    }
-
-    fun applySafeHeight(px: Int) {
-        val safePx = (px * 1.4f).toInt() + 28
-        if (safePx > contentHeightPx) contentHeightPx = safePx
-    }
-
     AndroidView(
-        modifier = modifier.fillMaxWidth().then(heightModifier),
+        modifier = modifier.fillMaxWidth(),
         factory = { ctx ->
-            buildTajweedWebView(ctx).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
+            AutoHeightTajweedWebView(ctx) { px ->
+                if (px > contentHeightPx) {
+                    contentHeightPx = px
+                }
             }
         },
         update = { webView ->
-            webView.layoutParams = webView.layoutParams?.apply {
-                width = ViewGroup.LayoutParams.MATCH_PARENT
-                height = ViewGroup.LayoutParams.WRAP_CONTENT
-            } ?: ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            webView.webViewClient = object : WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    view?.let { wv ->
-                        scheduleHeightRemeasures(
-                            webView = wv,
-                            generation = measureGeneration,
-                            pending = pendingRemeasures
-                        ) { px -> applySafeHeight(px) }
-                    }
+            val autoWebView = webView as AutoHeightTajweedWebView
+            autoWebView.onHeightChanged = { px ->
+                if (px > contentHeightPx) {
+                    contentHeightPx = px
                 }
             }
             if (lastLoadedHtml != wrappedHtml) {
-                pendingRemeasures.forEach { remeasureHandler.removeCallbacks(it) }
-                pendingRemeasures.clear()
-                measureGeneration += 1
                 lastLoadedHtml = wrappedHtml
                 contentHeightPx = 0
-                webView.loadDataWithBaseURL(
-                    "file:///android_asset/",
-                    wrappedHtml,
-                    "text/html",
-                    "UTF-8",
-                    null
-                )
+                autoWebView.resetHeight()
+                autoWebView.loadHtml(wrappedHtml)
+            } else if (contentHeightPx > 0) {
+                autoWebView.applyContentHeight(contentHeightPx)
             }
         }
     )
 }
 
-private val remeasureHandler = Handler(Looper.getMainLooper())
+/**
+ * WebView that sizes itself to HTML content via [TajweedBridge] callbacks.
+ * Compose only constrains width; height comes from the View's onMeasure.
+ */
+@SuppressLint("ViewConstructor")
+private class AutoHeightTajweedWebView(
+    context: Context,
+    initialOnHeight: (Int) -> Unit
+) : WebView(context) {
 
-private const val MEASURE_GENERATION_TAG = 0x71AEE001
+    var onHeightChanged: (Int) -> Unit = initialOnHeight
+    private var contentHeightPx: Int = 0
 
-private fun scheduleHeightRemeasures(
-    webView: WebView,
-    generation: Int,
-    pending: MutableList<Runnable>,
-    onHeight: (Int) -> Unit
-) {
-    webView.setTag(MEASURE_GENERATION_TAG, generation)
-    fun remeasure() {
-        webView.evaluateJavascript(MEASURE_CONTENT_HEIGHT_JS) { raw ->
-            parseMeasuredHeight(raw)?.let { px ->
-                webView.post {
-                    if (webView.getTag(MEASURE_GENERATION_TAG) != generation) return@post
-                    onHeight(px)
+    init {
+        setBackgroundColor(0x00000000)
+        settings.javaScriptEnabled = true
+        settings.allowFileAccess = true
+        settings.useWideViewPort = false
+        settings.loadWithOverviewMode = false
+        isVerticalScrollBarEnabled = false
+        isHorizontalScrollBarEnabled = false
+        overScrollMode = OVER_SCROLL_NEVER
+        isNestedScrollingEnabled = false
+        addJavascriptInterface(TajweedBridge(), "TajweedBridge")
+        webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                scheduleHeightReports()
+            }
+        }
+        layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
+
+    fun loadHtml(html: String) {
+        loadDataWithBaseURL(
+            "file:///android_asset/",
+            html,
+            "text/html",
+            "UTF-8",
+            null
+        )
+    }
+
+    fun resetHeight() {
+        contentHeightPx = 0
+        val lp = layoutParams ?: ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        layoutParams = lp
+        requestLayout()
+    }
+
+    fun applyContentHeight(px: Int) {
+        if (px <= 0) return
+        contentHeightPx = px
+        val lp = layoutParams ?: ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        lp.height = px
+        layoutParams = lp
+        requestLayout()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val width = View.MeasureSpec.getSize(widthMeasureSpec)
+        val height = when {
+            contentHeightPx > 0 -> contentHeightPx
+            else -> {
+                // Until JS reports, reserve space from a generous estimate (font + line count).
+                val estimated = (layoutParams.width.takeIf { it > 0 } ?: width)
+                (estimated * 0.35f).toInt().coerceAtLeast(120)
+            }
+        }
+        setMeasuredDimension(width, height)
+    }
+
+    private fun scheduleHeightReports() {
+        val script = """
+            (function() {
+              function report() {
+                var b = document.body;
+                var h = Math.max(
+                  b.getBoundingClientRect().height,
+                  b.scrollHeight,
+                  b.offsetHeight,
+                  document.documentElement.scrollHeight
+                );
+                if (h > 0 && window.TajweedBridge) {
+                  TajweedBridge.reportHeight(Math.ceil(h));
+                }
+              }
+              report();
+              if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(report);
+              }
+              [80, 200, 400, 700, 1100].forEach(function(ms) {
+                setTimeout(report, ms);
+              });
+            })();
+        """.trimIndent()
+        evaluateJavascript(script, null)
+    }
+
+    private inner class TajweedBridge {
+        @JavascriptInterface
+        fun reportHeight(cssPx: Float) {
+            val px = cssPx.toInt().coerceAtLeast(1)
+            // Extra room for harakat / ayah-end badge below the last line.
+            val safePx = (px * 1.08f).toInt() + 24
+            post {
+                if (safePx > contentHeightPx) {
+                    contentHeightPx = safePx
+                    val lp = layoutParams ?: ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                    lp.height = safePx
+                    layoutParams = lp
+                    onHeightChanged(safePx)
+                    requestLayout()
                 }
             }
         }
     }
-    fun postRemeasure(delayMs: Long = 0L) {
-        val task = Runnable { remeasure() }
-        pending.add(task)
-        if (delayMs == 0L) {
-            remeasureHandler.post(task)
-        } else {
-            remeasureHandler.postDelayed(task, delayMs)
-        }
-    }
-    postRemeasure()
-    listOf(50L, 120L, 250L, 450L, 700L).forEach { postRemeasure(it) }
-}
-
-private fun parseMeasuredHeight(raw: String?): Int? {
-    if (raw.isNullOrBlank() || raw == "null") return null
-    return raw.trim().removeSurrounding("\"").toFloatOrNull()?.toInt()?.takeIf { it > 0 }
-}
-
-private const val MEASURE_CONTENT_HEIGHT_JS = """
-(function() {
-  function measure() {
-    var b = document.body;
-    var top = b.getBoundingClientRect().top;
-    var maxBottom = top;
-    var nodes = b.querySelectorAll('div, span, p');
-    for (var i = 0; i < nodes.length; i++) {
-      var r = nodes[i].getBoundingClientRect();
-      if (r.height > 0) maxBottom = Math.max(maxBottom, r.bottom);
-    }
-    var blockHeight = maxBottom - top;
-    var h = Math.max(
-      blockHeight,
-      b.scrollHeight,
-      b.offsetHeight,
-      document.documentElement.scrollHeight
-    );
-    return Math.ceil(h * 1.25) + 32;
-  }
-  return measure();
-})();
-"""
-
-@SuppressLint("SetJavaScriptEnabled")
-private fun buildTajweedWebView(context: Context): WebView = WebView(context).apply {
-    setBackgroundColor(0x00000000)
-    settings.javaScriptEnabled = true
-    settings.allowFileAccess = true
-    isVerticalScrollBarEnabled = false
-    isHorizontalScrollBarEnabled = false
-    overScrollMode = WebView.OVER_SCROLL_NEVER
-    isNestedScrollingEnabled = false
 }
 
 private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String): String {
@@ -199,19 +205,21 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
             padding: 0;
             background: transparent;
             color: $textColor;
-            overflow: visible;
+            overflow: visible !important;
+            height: auto !important;
+            min-height: 0 !important;
         }
         body {
             font-family: 'AlKhatibQuranWeb', 'KFGQPC HAFS Uthmanic Script', 'Amiri Quran', serif;
             font-size: ${fontSizeSp}px;
-            line-height: 2.1;
+            line-height: 2.15;
             direction: rtl;
             text-align: center;
             -webkit-text-size-adjust: 100%;
-            padding: 8px 10px 12px;
-            overflow: visible;
+            padding: 10px 12px 16px;
+            overflow: visible !important;
+            word-wrap: break-word;
         }
-
         .ham_wasl     { color: #AAAAAA; }
         .silent       { color: #AAAAAA; }
         .laam_shamsiya{ color: #AAAAAA; }
@@ -243,7 +251,6 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
             vertical-align: -0.06em;
             line-height: 1;
             overflow: visible;
-            font-feature-settings: "liga" 1, "kern" 1;
         }
         .ayah-end-rosette {
             grid-area: 1 / 1;
@@ -256,13 +263,11 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
             font-size: 0.44em;
             line-height: 1;
             font-weight: 700;
-            transform: translateY(-0.02em);
             color: #B45309;
         }
-
         div[lang="ar"] {
             display: block;
-            overflow: visible;
+            overflow: visible !important;
         }
     """.trimIndent()
 
@@ -271,7 +276,7 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         <html lang="ar" dir="rtl">
         <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>$css</style>
         </head>
         <body>$fragment</body>

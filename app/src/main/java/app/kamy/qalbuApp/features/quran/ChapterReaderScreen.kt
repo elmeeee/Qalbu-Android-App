@@ -298,12 +298,12 @@ private fun QalbuAyahPage(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
                 .padding(start = 16.dp, end = 64.dp, top = 56.dp, bottom = contentBottomPadding)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(8.dp))
             TajweedHtmlView(
                 htmlFragment = buildTajweedHtmlFragment(
                     verse.textUthmaniTajweed ?: verse.textUthmani,
