@@ -1,12 +1,15 @@
 package app.kamy.qalbuApp.infrastructure.audio
 
+import android.app.PendingIntent
 import android.content.Intent
 import androidx.annotation.OptIn
+import androidx.core.app.NotificationCompat
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import app.kamy.qalbuApp.MainActivity
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.infrastructure.notifications.NotificationChannels
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,8 +31,16 @@ class RecitationPlaybackService : MediaSessionService() {
             DefaultMediaNotificationProvider.Builder(this)
                 .setChannelId(NotificationChannels.MEDIA_PLAYBACK)
                 .setChannelName(R.string.recitation_notification_channel)
+                .setNotificationId(NOTIFICATION_ID)
                 .build()
         )
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // startForegroundService() requires startForeground() within ~5s. Media3 updates this
+        // notification once playback metadata is available; until then, show a placeholder.
+        startForeground(NOTIFICATION_ID, buildPlaceholderNotification())
+        return super.onStartCommand(intent, flags, startId)
     }
 
     @OptIn(UnstableApi::class)
@@ -43,5 +54,31 @@ class RecitationPlaybackService : MediaSessionService() {
             return
         }
         super.onTaskRemoved(rootIntent)
+    }
+
+    private fun buildPlaceholderNotification() = NotificationCompat.Builder(
+        this,
+        NotificationChannels.MEDIA_PLAYBACK
+    )
+        .setSmallIcon(R.mipmap.ic_launcher)
+        .setContentTitle(getString(R.string.app_name))
+        .setContentText(getString(R.string.recitation_notification_channel))
+        .setContentIntent(
+            PendingIntent.getActivity(
+                this,
+                0,
+                Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                },
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        )
+        .setOngoing(true)
+        .setSilent(true)
+        .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+        .build()
+
+    companion object {
+        private const val NOTIFICATION_ID = 8401
     }
 }
