@@ -118,8 +118,10 @@ private class AutoHeightTajweedWebView(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = View.MeasureSpec.getSize(widthMeasureSpec)
+        val density = resources.displayMetrics.density
+        val fallbackMinPx = (240f * density).toInt()
         val height = contentHeightPx.takeIf { it > 0 }
-            ?: (width * 0.4f).toInt().coerceAtLeast(160)
+            ?: (width * 0.6f).toInt().coerceAtLeast(fallbackMinPx)
         setMeasuredDimension(width, height)
     }
 
@@ -200,9 +202,11 @@ private class AutoHeightTajweedWebView(
     private inner class TajweedBridge {
         @JavascriptInterface
         fun reportHeight(cssPx: Float) {
-            val px = cssPx.toInt().coerceAtLeast(1)
+            // JS returns CSS pixels (1 CSS px = 1 dp). Convert to device pixels for setMeasuredDimension / layout height.
+            val density = resources.displayMetrics.density
+            val devicePx = (cssPx * density).toInt().coerceAtLeast(1)
             // Extra room for harakat, diacritics, and the ayah-end rosette below the last line.
-            val safePx = (px * 1.15f).toInt() + 40
+            val safePx = (devicePx * 1.15f).toInt() + (40 * density).toInt()
             post {
                 if (safePx != contentHeightPx) {
                     contentHeightPx = safePx
