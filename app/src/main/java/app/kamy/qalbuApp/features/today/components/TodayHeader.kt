@@ -39,6 +39,7 @@ import app.kamy.qalbuApp.design.theme.AlKhatibColors
 @Composable
 fun TodayHeader(
     cityName: String?,
+    locationStatus: String? = null,
     hijriLabel: String?,
     gregorianLabel: String?,
     modifier: Modifier = Modifier
@@ -71,7 +72,7 @@ fun TodayHeader(
                         modifier = Modifier.padding(end = 4.dp)
                     )
                     Text(
-                        text = cityName ?: "Locating…",
+                        text = cityName ?: locationStatus ?: "Locating…",
                         style = MaterialTheme.typography.bodySmall,
                         color = AlKhatibColors.Slate500
                     )

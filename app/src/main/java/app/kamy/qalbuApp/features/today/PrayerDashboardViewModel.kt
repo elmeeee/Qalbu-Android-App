@@ -71,13 +71,19 @@ class PrayerDashboardViewModel @Inject constructor(
             _state.update { it.copy(isLoading = false, error = "Could not determine location") }
             return
         }
+        val cityLabel = locationProvider.reverseGeocodeCity(loc.latitude, loc.longitude)
+            ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
         try {
-            val result = repository.fetchTimings(loc.latitude, loc.longitude)
+            val result = repository.fetchTimings(
+                latitude = loc.latitude,
+                longitude = loc.longitude,
+                cityName = cityLabel
+            )
             _state.update {
                 it.copy(
                     isLoading = false,
                     timings = result.timings,
-                    cityName = result.cityName,
+                    cityName = result.cityName ?: cityLabel,
                     hijriLabel = result.hijriLabel,
                     gregorianLabel = result.gregorianLabel,
                     needsPermission = false,

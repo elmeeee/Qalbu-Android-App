@@ -71,7 +71,9 @@ fun TodayScreen(
     var notificationsPrompted by remember { mutableStateOf(false) }
 
     LaunchedEffect(locationPermissions.allPermissionsGranted) {
-        if (!locationPermissions.allPermissionsGranted && !locationPrompted) {
+        if (locationPermissions.allPermissionsGranted) {
+            prayerVm.onPermissionGranted()
+        } else if (!locationPrompted) {
             locationPrompted = true
             locationPermissions.launchMultiplePermissionRequest()
         }
@@ -111,6 +113,13 @@ fun TodayScreen(
         ) {
             TodayHeader(
                 cityName = prayerState.cityName,
+                locationStatus = when {
+                    prayerState.cityName != null -> null
+                    prayerState.needsPermission -> "Enable location"
+                    prayerState.isLoading -> "Locating…"
+                    prayerState.error != null -> "Location unavailable"
+                    else -> "Locating…"
+                },
                 hijriLabel = prayerState.hijriLabel,
                 gregorianLabel = prayerState.gregorianLabel
             )
