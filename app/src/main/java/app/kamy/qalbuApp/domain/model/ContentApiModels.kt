@@ -47,6 +47,26 @@ data class RandomAyahPayload(
             verseNumber != null -> "ayah-$verseNumber"
             else -> "verse-0"
         }
+
+    /** Chapter number from API `verse_key` (e.g. `27:56` → 27). */
+    val chapterNumber: Int?
+        get() = verseKey
+            ?.substringBefore(':', missingDelimiterValue = "")
+            ?.trim()
+            ?.toIntOrNull()
+            ?.takeIf { it > 0 }
+
+    /** Human label: "An-Naml · Ayah 56" — never raw `27:56`. */
+    fun referenceLabel(chapterDisplayName: String?): String? {
+        val ayah = resolvedVerseNumber
+        val surah = chapterDisplayName?.trim()?.takeIf { it.isNotEmpty() }
+        return when {
+            surah != null && ayah != null -> "$surah · Ayah $ayah"
+            surah != null -> surah
+            ayah != null -> "Ayah $ayah"
+            else -> null
+        }
+    }
 }
 
 @Serializable

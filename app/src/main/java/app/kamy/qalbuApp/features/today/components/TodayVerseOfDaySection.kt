@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,22 +31,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.heightIn
 import app.kamy.qalbuApp.design.components.AlKhatibCard
-import app.kamy.qalbuApp.design.components.AlKhatibVerseReferenceChip
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
 import app.kamy.qalbuApp.ui.common.buildTajweedHtmlFragment
 
-/**
- * Mirrors iOS Features/Discovery/Components/TodayVerseOfDaySectionView.swift.
- */
 @Composable
 fun TodayVerseOfDaySection(
     verse: RandomAyahPayload?,
+    referenceLabel: String?,
     isLoading: Boolean,
     isPlaying: Boolean,
     onPlayAudio: () -> Unit,
@@ -63,22 +61,27 @@ fun TodayVerseOfDaySection(
             Text(
                 "✦",
                 color = MaterialTheme.colorScheme.tertiary,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelMedium
             )
             Spacer(Modifier.width(AlKhatibSpacing.sm))
             Text(
-                text = "Verse of the Day",
+                text = "Quran of the Day",
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
             )
         }
-        verse?.verseKey?.let {
+        referenceLabel?.let { label ->
             Text(
-                text = it,
+                text = label,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(start = 22.dp, top = AlKhatibSpacing.xs)
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(start = 18.dp, top = 4.dp),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
@@ -88,24 +91,17 @@ fun TodayVerseOfDaySection(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ) {
             if (verse != null) {
-                verse.verseKey?.let {
-                    AlKhatibVerseReferenceChip(label = it)
-                    Spacer(Modifier.height(AlKhatibSpacing.md))
-                }
-
-                // Arabic tajweed block
                 TajweedHtmlView(
                     htmlFragment = buildTajweedHtmlFragment(
                         verse.textUthmaniTajweed ?: verse.textUthmani,
                         verse.resolvedVerseNumber
                     ),
-                    fontSizeSp = 30,
+                    fontSizeSp = 28,
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 100.dp, max = 220.dp)
                 )
 
-                // Translation
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.replace(Regex("<[^>]+>"), "").trim()
                     if (clean.isNotEmpty()) {
@@ -113,7 +109,7 @@ fun TodayVerseOfDaySection(
                         Text(
                             text = "“$clean”",
                             color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -122,7 +118,6 @@ fun TodayVerseOfDaySection(
 
                 Spacer(Modifier.height(16.dp))
 
-                // Fixed 2×2 grid — must not use LazyVerticalGrid inside TodayScreen's verticalScroll.
                 val actionPills = listOf(
                     ActionPillData(
                         if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
@@ -164,7 +159,8 @@ fun TodayVerseOfDaySection(
                     text = "No verse available. Pull to retry.",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
@@ -200,8 +196,9 @@ private fun ActionPill(
         Spacer(Modifier.width(6.dp))
         Text(
             text = data.label,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1
         )
     }
 }

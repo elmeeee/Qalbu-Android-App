@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.theme.NavigationBarShape
 import app.kamy.qalbuApp.ui.layout.FloatingNavBarMetrics
@@ -74,8 +75,11 @@ fun FloatingTabBar(
                     label = {
                         Text(
                             text = stringResource(tab.labelRes),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Clip
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(

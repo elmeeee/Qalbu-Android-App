@@ -27,6 +27,8 @@ import javax.inject.Inject
 data class TodayUiState(
     val isLoading: Boolean = false,
     val verse: RandomAyahPayload? = null,
+    /** Surah name + ayah for Quran of the Day subtitle (e.g. "An-Naml · Ayah 56"). */
+    val verseReferenceLabel: String? = null,
     val recitations: List<RecitationPayload> = emptyList(),
     val selectedRecitationId: Int = 6,
     val translationId: Int = AppConfig.defaultTranslationId,
@@ -88,14 +90,21 @@ class TodayViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
             try {
                 val verseDeferred = async { contentRepository.getRandomAyah() }
+                val chaptersDeferred = async { contentRepository.getChapters() }
                 val recitationsDeferred = async {
                     if (_state.value.recitations.isEmpty()) contentRepository.getRecitations()
                     else _state.value.recitations
                 }
+                val verse = verseDeferred.await()
+                val chapters = chaptersDeferred.await()
+                val chapterName = verse?.chapterNumber?.let { num ->
+                    chapters.find { it.id == num }?.displayComplexName
+                }
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        verse = verseDeferred.await(),
+                        verse = verse,
+                        verseReferenceLabel = verse?.referenceLabel(chapterName),
                         recitations = recitationsDeferred.await()
                     )
                 }
@@ -130,7 +139,9 @@ class TodayViewModel @Inject constructor(
         val verse = _state.value.verse ?: return ""
         val translation = verse.translations?.firstOrNull()?.text.orEmpty()
         val arabicPlain = verse.textUthmani?.trim().orEmpty()
-        val ref = verse.verseKey?.let { "— Quran $it" } ?: ""
+        val ref = _state.value.verseReferenceLabel?.let { "— $it" }
+            ?: verse.referenceLabel(null)?.let { "— $it" }
+            ?: ""
         return buildString {
             if (arabicPlain.isNotEmpty()) {
                 appendLine(arabicPlain)

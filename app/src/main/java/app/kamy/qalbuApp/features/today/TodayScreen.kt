@@ -129,6 +129,7 @@ fun TodayScreen(
             )
             TodayVerseOfDaySection(
                 verse = todayState.verse,
+                referenceLabel = todayState.verseReferenceLabel,
                 isLoading = todayState.isLoading,
                 isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
                 onPlayAudio = {
@@ -138,8 +139,8 @@ fun TodayScreen(
                     } else {
                         audioPlayer.playVerse(
                             url = url,
-                            surahTitle = "Verse of the Day",
-                            ayahLabel = todayState.verse?.verseKey.orEmpty(),
+                            surahTitle = "Quran of the Day",
+                            ayahLabel = todayState.verseReferenceLabel.orEmpty(),
                             reciterName = todayState.recitations
                                 .firstOrNull { it.id == todayState.selectedRecitationId }
                                 ?.displayName.orEmpty()
