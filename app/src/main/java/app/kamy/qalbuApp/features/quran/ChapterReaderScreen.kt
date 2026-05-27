@@ -2,7 +2,7 @@ package app.kamy.qalbuApp.features.quran
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,9 +18,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -44,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -60,6 +60,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.HadithReference
@@ -69,6 +70,7 @@ import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
 import app.kamy.qalbuApp.ui.common.buildTajweedHtmlFragment
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,29 +82,40 @@ fun ChapterReaderScreen(
     val vm: ChapterReaderViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val audioState by audioPlayer.state.collectAsState()
-    val listState = rememberLazyListState()
     var settingsVisible by remember { mutableStateOf(false) }
 
+    val pagerState = rememberPagerState(initialPage = 0) { state.verses.size }
     val currentVerse by remember {
-        derivedStateOf { state.verses.getOrNull(listState.firstVisibleItemIndex) }
+        derivedStateOf { state.verses.getOrNull(pagerState.currentPage) }
     }
     val surahTitle = state.chapterDisplayName ?: "Surah ${state.chapterNumber}"
-    val selectedReciterName = state.recitations
-        .firstOrNull { it.identifiableId == state.selectedRecitationId }
-        ?.displayName.orEmpty()
 
-    val firstVisibleIndex by remember {
-        derivedStateOf { listState.firstVisibleItemIndex }
-    }
-    LaunchedEffect(firstVisibleIndex) {
-        vm.loadMoreIfNeeded(firstVisibleIndex)
-        state.verses.getOrNull(firstVisibleIndex)?.resolvedVerseNumber?.let { vm.logScrollPosition(it) }
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { page ->
+                vm.onPageChanged(page)
+                vm.loadMoreIfNeeded(page)
+            }
     }
 
-    LaunchedEffect(state.verses.isNotEmpty(), initialVerseNumber) {
-        if (state.verses.isNotEmpty() && initialVerseNumber != null) {
-            val idx = state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
-            if (idx >= 0) listState.animateScrollToItem(idx)
+    LaunchedEffect(state.verses.size, initialVerseNumber) {
+        if (state.verses.isEmpty() || initialVerseNumber == null) return@LaunchedEffect
+        val idx = state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
+        if (idx >= 0 && pagerState.currentPage != idx) {
+            pagerState.scrollToPage(idx)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        vm.events.collect { event ->
+            when (event) {
+                is ReaderEvent.AnimateToPage -> {
+                    if (event.index in state.verses.indices) {
+                        pagerState.animateScrollToPage(event.index)
+                    }
+                }
+            }
         }
     }
 
@@ -117,51 +130,19 @@ fun ChapterReaderScreen(
                 color = AlKhatibColors.DeepEmerald
             )
         } else {
-            LazyColumn(
-                state = listState,
+            VerticalPager(
+                state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                flingBehavior = rememberSnapFlingBehavior(listState)
-            ) {
-                itemsIndexed(state.verses, key = { _, v -> v.listIdentity }) { _, verse ->
-                    Box(
-                        modifier = Modifier
-                            .fillParentMaxHeight()
-                            .fillMaxWidth()
-                    ) {
-                        QalbuAyahPage(
-                            verse = verse,
-                            fontScale = state.fontScale,
-                            showTranslation = state.showTranslation,
-                            isPlaying = audioPlayer.isPlayingUrl(verse.audio?.url),
-                            onPlay = {
-                                val url = verse.audio?.url ?: return@QalbuAyahPage
-                                if (audioPlayer.isPlayingUrl(url)) {
-                                    audioPlayer.toggle()
-                                } else {
-                                    audioPlayer.playVerse(
-                                        url = url,
-                                        surahTitle = surahTitle,
-                                        ayahLabel = verse.verseKey.orEmpty(),
-                                        reciterName = selectedReciterName
-                                    )
-                                }
-                            },
-                            onTafsir = { verse.verseKey?.let(vm::openTafsir) },
-                            onHadith = { verse.verseKey?.let(vm::openHadith) },
-                            onPlaySurah = {
-                                val items = vm.audioQueueItems()
-                                if (items.isNotEmpty()) {
-                                    audioPlayer.playSequence(
-                                        items = items,
-                                        surahTitle = surahTitle,
-                                        reciterName = selectedReciterName
-                                    )
-                                }
-                            },
-                            isSurahPlaying = audioState.isPlaying
-                        )
-                    }
-                }
+            ) { pageIndex ->
+                val verse = state.verses.getOrNull(pageIndex) ?: return@VerticalPager
+                QalbuAyahPage(
+                    verse = verse,
+                    fontScale = state.fontScale,
+                    showTranslation = state.showTranslation,
+                    onPlay = { vm.onTapAyah(pageIndex) },
+                    onTafsir = { verse.verseKey?.let(vm::openTafsir) },
+                    onHadith = { verse.verseKey?.let(vm::openHadith) }
+                )
             }
         }
 
@@ -240,26 +221,20 @@ fun ChapterReaderScreen(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                Spacer(Modifier.height(6.dp))
+                val ayahNo = verse.resolvedVerseNumber
+                val juzNo = verse.juzNumber
                 Text(
-                    text = verse.verseKey.orEmpty(),
+                    text = buildString {
+                        append("Ayah ")
+                        append(ayahNo?.toString() ?: "-")
+                        if (juzNo != null) append(" · Juz ").append(juzNo)
+                    },
                     style = MaterialTheme.typography.labelLarge,
-                    color = AlKhatibColors.Slate500
+                    color = AlKhatibColors.Slate500,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-                if (state.showTranslation) {
-                    verse.translations?.firstOrNull()?.text?.let { translation ->
-                        val clean = translation.replace(Regex("<[^>]+>"), "").trim()
-                        if (clean.isNotEmpty()) {
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                text = clean,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = AlKhatibColors.Slate800,
-                                maxLines = 3,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                }
             }
         }
     }
@@ -270,7 +245,8 @@ fun ChapterReaderScreen(
             onDismiss = { settingsVisible = false },
             onFontScaleChange = vm::setFontScale,
             onToggleTranslation = vm::toggleTranslation,
-            onSelectRecitation = vm::selectRecitation
+            onSelectRecitation = vm::selectRecitation,
+            onSetPlaybackMode = vm::setPlaybackMode
         )
     }
 
@@ -294,14 +270,17 @@ private fun QalbuAyahPage(
     verse: RandomAyahPayload,
     fontScale: Float,
     showTranslation: Boolean,
-    isPlaying: Boolean,
-    isSurahPlaying: Boolean,
     onPlay: () -> Unit,
     onTafsir: () -> Unit,
-    onHadith: () -> Unit,
-    onPlaySurah: () -> Unit
+    onHadith: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(verse.listIdentity) {
+                detectTapGestures(onTap = { onPlay() })
+            }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -322,7 +301,7 @@ private fun QalbuAyahPage(
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.replace(Regex("<[^>]+>"), "").trim()
                     if (clean.isNotEmpty()) {
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(12.dp))
                         Text(
                             text = clean,
                             style = MaterialTheme.typography.bodyLarge,
@@ -342,18 +321,6 @@ private fun QalbuAyahPage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            ReaderSideAction(
-                icon = {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = AlKhatibColors.DeepEmerald,
-                        modifier = Modifier.size(28.dp)
-                    )
-                },
-                label = if (isPlaying) "Pause" else "Play",
-                onClick = onPlay
-            )
             ReaderSideAction(
                 icon = {
                     Icon(
@@ -377,19 +344,6 @@ private fun QalbuAyahPage(
                 },
                 label = "Hadith",
                 onClick = onHadith
-            )
-            ReaderSideAction(
-                icon = {
-                    Icon(
-                        imageVector = if (isSurahPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = "Play surah",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                label = "Surah",
-                onClick = onPlaySurah,
-                iconBackground = AlKhatibColors.DeepEmerald
             )
         }
     }
@@ -436,7 +390,8 @@ private fun ReaderSettingsSheet(
     onDismiss: () -> Unit,
     onFontScaleChange: (Float) -> Unit,
     onToggleTranslation: (Boolean) -> Unit,
-    onSelectRecitation: (Int) -> Unit
+    onSelectRecitation: (Int) -> Unit,
+    onSetPlaybackMode: (AyahPlaybackMode) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -464,6 +419,21 @@ private fun ReaderSettingsSheet(
                 Text("Show translation", modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
                 Switch(checked = state.showTranslation, onCheckedChange = onToggleTranslation)
             }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Continuous play",
+                    modifier = Modifier.weight(1f),
+                    color = AlKhatibColors.Slate900
+                )
+                Switch(
+                    checked = state.playbackMode == AyahPlaybackMode.CONTINUOUS,
+                    onCheckedChange = { enabled ->
+                        onSetPlaybackMode(
+                            if (enabled) AyahPlaybackMode.CONTINUOUS else AyahPlaybackMode.SINGLE
+                        )
+                    }
+                )
+            }
             Text("Reciter", style = MaterialTheme.typography.labelLarge, color = AlKhatibColors.Slate500)
             if (state.recitations.isEmpty()) {
                 CircularProgressIndicator(
@@ -472,9 +442,7 @@ private fun ReaderSettingsSheet(
                 )
             } else {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 360.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     items(state.recitations.size, key = { state.recitations[it].identifiableId }) { index ->

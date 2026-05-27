@@ -9,13 +9,16 @@ import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
 import app.kamy.qalbuApp.infrastructure.audio.AudioQueueItem
+import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReadingSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,6 +32,7 @@ data class ChapterReaderUiState(
     val verses: List<RandomAyahPayload> = emptyList(),
     val recitations: List<RecitationPayload> = emptyList(),
     val selectedRecitationId: Int = TranslationPreferencesStore.DEFAULT_RECITATION_ID,
+    val playbackMode: AyahPlaybackMode = AyahPlaybackMode.CONTINUOUS,
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
     val currentPage: Int = 0,
@@ -40,8 +44,16 @@ data class ChapterReaderUiState(
     val hadithVisible: Boolean = false,
     val hadithLoading: Boolean = false,
     val hadiths: List<HadithReference> = emptyList(),
-    val activeAyahKey: String? = null
+    val activeAyahKey: String? = null,
+
+    // When audio is paused/playing, keep current verse key so the UI can reflect it if needed.
+    val currentlyPlayingVerseKey: String? = null
 )
+
+enum class AyahPlaybackMode {
+    SINGLE,
+    CONTINUOUS
+}
 
 /**
  * Mirrors iOS Features/Chapter/ViewModels/ChapterVersesViewModel.swift.
@@ -50,6 +62,7 @@ data class ChapterReaderUiState(
  */
 @HiltViewModel
 class ChapterReaderViewModel @Inject constructor(
+    private val audioPlayer: AudioPlayerController,
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,
     private val translationStore: TranslationPreferencesStore,
@@ -62,6 +75,12 @@ class ChapterReaderViewModel @Inject constructor(
         )
     )
     val state: StateFlow<ChapterReaderUiState> = _state.asStateFlow()
+
+    private val _events = MutableSharedFlow<ReaderEvent>(extraBufferCapacity = 1)
+    val events = _events.asSharedFlow()
+
+    private var lastStartedVerseKey: String? = null
+    private var wasPlaying: Boolean = false
 
     init {
         _state.update {
@@ -80,6 +99,39 @@ class ChapterReaderViewModel @Inject constructor(
             translationStore.showTranslation.collect { enabled ->
                 _state.update { it.copy(showTranslation = enabled) }
             }
+        }
+
+        // Sync ViewModel with player state so we can auto-advance on completion.
+        viewModelScope.launch {
+            audioPlayer.state.collect { audio ->
+                val nextPlayingVerseKey =
+                    if (audio.currentUrl != null) audio.trackSubtitle.ifBlank { null } else null
+
+                _state.update { it.copy(currentlyPlayingVerseKey = nextPlayingVerseKey) }
+
+                val ended = wasPlaying && !audio.isPlaying && audio.currentUrl == null
+                if (ended) {
+                    maybeAutoAdvanceAfterCompletion()
+                }
+                wasPlaying = audio.isPlaying
+            }
+        }
+    }
+
+    private fun maybeAutoAdvanceAfterCompletion() {
+        val s = _state.value
+        if (s.playbackMode != AyahPlaybackMode.CONTINUOUS) return
+        val lastKey = lastStartedVerseKey ?: return
+
+        val verses = s.verses
+        val lastIndex = verses.indexOfFirst { it.verseKey == lastKey }
+        if (lastIndex < 0) return
+
+        val nextIndex = lastIndex + 1
+        if (nextIndex in verses.indices) {
+            val nextPage = verses[nextIndex]
+            playAyahAtIndex(nextIndex, nextPage)
+            _events.tryEmit(ReaderEvent.AnimateToPage(nextIndex))
         }
     }
 
@@ -162,8 +214,56 @@ class ChapterReaderViewModel @Inject constructor(
         _state.update { it.copy(fontScale = scale.coerceIn(0.85f, 1.35f)) }
     }
 
+    fun setPlaybackMode(mode: AyahPlaybackMode) {
+        _state.update { it.copy(playbackMode = mode) }
+    }
+
     fun toggleTranslation(enabled: Boolean) {
         translationStore.setShowTranslation(enabled)
+    }
+
+    fun onPageChanged(index: Int) {
+        val s = _state.value
+        if (index !in s.verses.indices) return
+        val page = s.verses[index]
+        _state.update { it.copy(currentPage = index) }
+        page.resolvedVerseNumber?.let { logScrollPosition(it) }
+    }
+
+    fun onTapAyah(index: Int) {
+        val s = _state.value
+        if (index !in s.verses.indices) return
+
+        val page = s.verses[index]
+        val verseKey = page.verseKey
+        val isSamePlaying = s.currentlyPlayingVerseKey != null && verseKey != null && verseKey == s.currentlyPlayingVerseKey
+
+        val url = page.audio?.url
+        if (url.isNullOrBlank()) return
+
+        if (isSamePlaying) {
+            audioPlayer.toggle()
+        } else {
+            playAyahAtIndex(index, page)
+        }
+    }
+
+    private fun playAyahAtIndex(index: Int, page: RandomAyahPayload) {
+        val s = _state.value
+        val surahTitle = s.chapterDisplayName ?: "Surah ${s.chapterNumber}"
+        val reciterName = s.recitations
+            .firstOrNull { it.id == s.selectedRecitationId }
+            ?.displayName.orEmpty()
+
+        val url = page.audio?.url ?: return
+        lastStartedVerseKey = page.verseKey
+        _state.update { it.copy(currentPage = index, currentlyPlayingVerseKey = page.verseKey) }
+        audioPlayer.playVerse(
+            url = url,
+            surahTitle = surahTitle,
+            ayahLabel = page.verseKey.orEmpty(),
+            reciterName = reciterName
+        )
     }
 
     fun openTafsir(ayahKey: String) {
@@ -209,4 +309,8 @@ class ChapterReaderViewModel @Inject constructor(
             runCatching { readingSessions.logReadingSession(_state.value.chapterNumber, verseNumber) }
         }
     }
+}
+
+sealed interface ReaderEvent {
+    data class AnimateToPage(val index: Int) : ReaderEvent
 }
