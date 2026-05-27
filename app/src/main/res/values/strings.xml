@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Al-Khatib</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_today">Today</string>
+    <string name="nav_reflect">Reflect</string>
+    <string name="nav_quran">Quran</string>
+    <string name="nav_account">Account</string>
+
+    <!-- Placeholder tab copy -->
+    <string name="tab_placeholder_today">Today — verse of the day, prayer dashboard, share</string>
+    <string name="tab_placeholder_reflect">Reflect — community reel feed</string>
+    <string name="tab_placeholder_quran">Quran — chapter list and reader</string>
+    <string name="tab_placeholder_account">Account — sign in, profile, settings</string>
+</resources>

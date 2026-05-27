@@ -1,0 +1,16 @@
+# Local secrets for Al-Khatib / Qalbu Android.
+# Copy this file to local.properties and fill in. local.properties is gitignored.
+#
+# These mirror iOS Config/Secrets.xcconfig keys.
+
+# Quran Foundation OAuth client secrets (per environment).
+# Used for the Basic auth header on token exchange + refresh.
+QF_OAUTH_CLIENT_SECRET_DEBUG=
+QF_OAUTH_CLIENT_SECRET_RELEASE=
+
+# Groq API key (optional — drives AI reflection drafting on Today tab).
+API_KEY_GROQ=
+AI_MODEL=qwen/qwen3-32b
+
+# Note: QF scopes must include `reading_session` for the continue-reading API.
+# After changing scopes on the QF dashboard, sign out + sign in again so a new refresh_token is issued.
