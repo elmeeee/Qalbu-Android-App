@@ -10,6 +10,7 @@ import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
 import app.kamy.qalbuApp.domain.model.VersesByChapterResponse
 import app.kamy.qalbuApp.infrastructure.network.api.ContentApiService
+import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
@@ -23,8 +24,10 @@ import javax.inject.Singleton
  */
 @Singleton
 class ContentRepository @Inject constructor(
-    private val api: ContentApiService
+    private val api: ContentApiService,
+    private val translationStore: TranslationPreferencesStore
 ) {
+    private fun selectedTranslationId(): Int = translationStore.currentTranslationId()
     private val chaptersTtlMs = 60 * 60 * 1000L
     private var cachedChapters: List<QuranChapter>? = null
     private var chaptersCachedAt: Long = 0L
@@ -43,14 +46,14 @@ class ContentRepository @Inject constructor(
         response.chapters
     }
 
-    suspend fun getRandomAyah(translationId: Int = AppConfig.defaultTranslationId): RandomAyahPayload? =
+    suspend fun getRandomAyah(translationId: Int = selectedTranslationId()): RandomAyahPayload? =
         qfCall { api.getRandomVerse(translations = translationId.toString()).verse }
 
     suspend fun getVersesByChapter(
         chapterNumber: Int,
         page: Int = 1,
         perPage: Int = 50,
-        translationId: Int = AppConfig.defaultTranslationId
+        translationId: Int = selectedTranslationId()
     ): VersesByChapterResponse = qfCall {
         api.getVersesByChapter(
             chapterNumber = chapterNumber,
@@ -58,6 +61,13 @@ class ContentRepository @Inject constructor(
             perPage = perPage,
             translations = translationId.toString()
         )
+    }
+
+    suspend fun getVerseByKey(
+        verseKey: String,
+        translationId: Int = selectedTranslationId()
+    ) = qfCall {
+        api.getVerseByKey(verseKey, translations = translationId.toString())
     }
 
     suspend fun getRecitations(): List<RecitationPayload> = qfCall {

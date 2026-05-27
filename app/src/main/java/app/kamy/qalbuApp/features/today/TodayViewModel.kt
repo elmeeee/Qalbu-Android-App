@@ -7,6 +7,7 @@ import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
+import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -44,21 +46,29 @@ data class TodayUiState(
 class TodayViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
     private val reflectRepository: ReflectRepository,
-    private val userSession: UserSession
+    private val userSession: UserSession,
+    private val translationStore: TranslationPreferencesStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TodayUiState())
     val state: StateFlow<TodayUiState> = _state.asStateFlow()
 
     init {
+        _state.update { it.copy(translationId = translationStore.currentTranslationId()) }
         loadDailyAyahWithRecitations()
+        viewModelScope.launch {
+            translationStore.translationId.drop(1).collect { id ->
+                _state.update { it.copy(translationId = id) }
+                loadDailyAyahWithRecitations()
+            }
+        }
     }
 
     fun loadDailyAyahWithRecitations() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             try {
-                val verseDeferred = async { contentRepository.getRandomAyah(_state.value.translationId) }
+                val verseDeferred = async { contentRepository.getRandomAyah() }
                 val recitationsDeferred = async {
                     if (_state.value.recitations.isEmpty()) contentRepository.getRecitations()
                     else _state.value.recitations

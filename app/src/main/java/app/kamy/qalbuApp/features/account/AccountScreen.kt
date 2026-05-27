@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,10 +40,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -137,7 +142,7 @@ fun AccountScreen(
         SettingsRow(
             icon = Icons.Filled.Translate,
             title = "Translator",
-            subtitle = "Tap to choose translation source",
+            subtitle = state.selectedTranslationName.ifBlank { "Tap to choose translation source" },
             onClick = { vm.openTranslator() }
         )
 
@@ -153,7 +158,7 @@ fun AccountScreen(
             SettingsRow(
                 icon = Icons.Filled.Schedule,
                 title = "Reminder time",
-                subtitle = "07:00",
+                subtitle = state.reminderTimeLabel.ifBlank { "07:00" },
                 onClick = { vm.toggleNotifTimeSheet(true) }
             )
         }
@@ -175,11 +180,21 @@ fun AccountScreen(
     if (state.showTranslatorSheet) {
         TranslatorSheet(
             query = state.translatorQuery,
+            selectedId = state.selectedTranslationId,
             translations = vm.filteredTranslations,
             isLoading = state.translationsLoading,
             onQueryChange = vm::setTranslatorQuery,
-            onPick = { vm.closeTranslator() },
+            onPick = vm::selectTranslation,
             onDismiss = vm::closeTranslator
+        )
+    }
+
+    if (state.showNotifTimeSheet) {
+        ReminderTimeSheet(
+            hour = state.reminderHour,
+            minute = state.reminderMinute,
+            onSave = vm::saveReminderTime,
+            onDismiss = { vm.toggleNotifTimeSheet(false) }
         )
     }
 
@@ -365,6 +380,7 @@ private fun IconBadge(icon: androidx.compose.ui.graphics.vector.ImageVector) {
 @Composable
 private fun TranslatorSheet(
     query: String,
+    selectedId: Int,
     translations: List<QFTranslation>,
     isLoading: Boolean,
     onQueryChange: (String) -> Unit,
@@ -372,34 +388,61 @@ private fun TranslatorSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = AlKhatibColors.Slate900,
+        unfocusedTextColor = AlKhatibColors.Slate900,
+        focusedBorderColor = AlKhatibColors.Teal,
+        unfocusedBorderColor = AlKhatibColors.Slate500,
+        cursorColor = AlKhatibColors.Teal,
+        focusedPlaceholderColor = AlKhatibColors.Slate500,
+        unfocusedPlaceholderColor = AlKhatibColors.Slate500
+    )
+    AlKhatibModalBottomSheet(onDismiss, sheetState) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Choose translator", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald)
+            Text(
+                "Choose translator",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
             OutlinedTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                placeholder = { Text("Search by name, author, or language") },
+                placeholder = { Text("Search by name, author, or language", color = AlKhatibColors.Slate500) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions.Default,
-                singleLine = true
+                singleLine = true,
+                colors = fieldColors
             )
             if (isLoading) Text("Loading…", color = AlKhatibColors.Slate500)
             LazyColumn(modifier = Modifier.fillMaxWidth().height(420.dp)) {
                 items(translations, key = { it.id }) { t ->
+                    val isSelected = t.id == selectedId
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                            )
                             .clickable { onPick(t) }
-                            .padding(vertical = 10.dp)
+                            .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
                         Column(Modifier.weight(1f)) {
-                            Text(t.authorName.ifBlank { t.name }, color = AlKhatibColors.Slate900, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                t.authorName.ifBlank { t.name },
+                                color = AlKhatibColors.Slate900,
+                                fontWeight = FontWeight.SemiBold
+                            )
                             Text(
                                 text = "${t.languageName} · ${t.name}",
                                 color = AlKhatibColors.Slate500,
                                 style = MaterialTheme.typography.bodySmall
                             )
+                        }
+                        if (isSelected) {
+                            Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -410,9 +453,75 @@ private fun TranslatorSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+private fun ReminderTimeSheet(
+    hour: Int,
+    minute: Int,
+    onSave: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val timeState = rememberTimePickerState(
+        initialHour = hour,
+        initialMinute = minute,
+        is24Hour = false
+    )
+    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                "Reminder time",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            Text(
+                "Choose when you want your daily verse reminder.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate500
+            )
+            TimePicker(state = timeState)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel", color = AlKhatibColors.Slate500)
+                }
+                TextButton(onClick = { onSave(timeState.hour, timeState.minute) }) {
+                    Text("Save", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AlKhatibModalBottomSheet(
+    onDismiss: () -> Unit,
+    sheetState: androidx.compose.material3.SheetState,
+    content: @Composable () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = AlKhatibColors.PureWhite,
+        contentColor = AlKhatibColors.Slate900,
+        dragHandle = { BottomSheetDefaults.DragHandle(color = AlKhatibColors.Slate500) },
+        content = { content() }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismiss: () -> Unit) {
     val sheetState = rememberModalBottomSheetState()
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    AlKhatibModalBottomSheet(onDismiss, sheetState) {
         Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text("Font size", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald)
             Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ", fontSize = (26 * scale).sp, color = AlKhatibColors.Slate900)
@@ -443,7 +552,7 @@ private fun PrayerMethodSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    AlKhatibModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()

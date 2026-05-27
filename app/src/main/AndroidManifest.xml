@@ -54,6 +54,10 @@
             </intent-filter>
         </activity>
 
+        <receiver
+            android:name=".infrastructure.notifications.DailyVerseNotificationReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>

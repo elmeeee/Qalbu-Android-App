@@ -9,12 +9,14 @@ import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
 import app.kamy.qalbuApp.infrastructure.audio.AudioQueueItem
+import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReadingSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,6 +51,7 @@ data class ChapterReaderUiState(
 class ChapterReaderViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,
+    private val translationStore: TranslationPreferencesStore,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -60,8 +63,17 @@ class ChapterReaderViewModel @Inject constructor(
     val state: StateFlow<ChapterReaderUiState> = _state.asStateFlow()
 
     init {
+        _state.update { it.copy(showTranslation = translationStore.showTranslation.value) }
         loadInitial()
         loadRecitations()
+        viewModelScope.launch {
+            translationStore.translationId.drop(1).collect { loadInitial() }
+        }
+        viewModelScope.launch {
+            translationStore.showTranslation.collect { enabled ->
+                _state.update { it.copy(showTranslation = enabled) }
+            }
+        }
     }
 
     fun loadInitial() {
@@ -123,7 +135,7 @@ class ChapterReaderViewModel @Inject constructor(
     }
 
     fun toggleTranslation(enabled: Boolean) {
-        _state.update { it.copy(showTranslation = enabled) }
+        translationStore.setShowTranslation(enabled)
     }
 
     fun openTafsir(ayahKey: String) {
