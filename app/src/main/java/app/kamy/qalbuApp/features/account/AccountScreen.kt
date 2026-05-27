@@ -178,14 +178,28 @@ fun AccountScreen(
 
     // Translator sheet
     if (state.showTranslatorSheet) {
+        val filteredTranslations = remember(state.translations, state.translatorQuery) {
+            val q = state.translatorQuery.trim().lowercase()
+            if (q.isEmpty()) {
+                state.translations
+            } else {
+                state.translations.filter {
+                    it.name.lowercase().contains(q) ||
+                        it.authorName.lowercase().contains(q) ||
+                        it.languageName.lowercase().contains(q)
+                }
+            }
+        }
         TranslatorSheet(
             query = state.translatorQuery,
             selectedId = state.selectedTranslationId,
-            translations = vm.filteredTranslations,
+            translations = filteredTranslations,
             isLoading = state.translationsLoading,
+            error = state.translationsError,
             onQueryChange = vm::setTranslatorQuery,
             onPick = vm::selectTranslation,
-            onDismiss = vm::closeTranslator
+            onDismiss = vm::closeTranslator,
+            onRetry = vm::loadTranslations
         )
     }
 
@@ -383,11 +397,14 @@ private fun TranslatorSheet(
     selectedId: Int,
     translations: List<QFTranslation>,
     isLoading: Boolean,
+    error: String?,
     onQueryChange: (String) -> Unit,
     onPick: (QFTranslation) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onRetry: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = AlKhatibColors.Slate900,
         unfocusedTextColor = AlKhatibColors.Slate900,
@@ -398,7 +415,13 @@ private fun TranslatorSheet(
         unfocusedPlaceholderColor = AlKhatibColors.Slate500
     )
     AlKhatibModalBottomSheet(onDismiss, sheetState) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Text(
                 "Choose translator",
                 style = MaterialTheme.typography.titleLarge,
@@ -414,39 +437,51 @@ private fun TranslatorSheet(
                 singleLine = true,
                 colors = fieldColors
             )
-            if (isLoading) Text("Loading…", color = AlKhatibColors.Slate500)
-            LazyColumn(modifier = Modifier.fillMaxWidth().height(420.dp)) {
-                items(translations, key = { it.id }) { t ->
-                    val isSelected = t.id == selectedId
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
-                            )
-                            .clickable { onPick(t) }
-                            .padding(horizontal = 12.dp, vertical = 10.dp)
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                t.authorName.ifBlank { t.name },
-                                color = AlKhatibColors.Slate900,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Text(
-                                text = "${t.languageName} · ${t.name}",
-                                color = AlKhatibColors.Slate500,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                        if (isSelected) {
-                            Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+            when {
+                isLoading -> Text("Loading translators…", color = AlKhatibColors.Slate500)
+                error != null -> {
+                    Text(error, color = AlKhatibColors.Danger)
+                    TextButton(onClick = onRetry) {
+                        Text("Try again", color = AlKhatibColors.Teal)
+                    }
+                }
+                translations.isEmpty() -> {
+                    Text("No translators found.", color = AlKhatibColors.Slate500)
+                }
+                else -> {
+                    translations.forEach { t ->
+                        val isSelected = t.id == selectedId
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                                )
+                                .clickable { onPick(t) }
+                                .padding(horizontal = 12.dp, vertical = 12.dp)
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(
+                                    t.authorName.ifBlank { t.name },
+                                    color = AlKhatibColors.Slate900,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = "${t.languageName.replaceFirstChar { c -> c.titlecase() }} · ${t.name}",
+                                    color = AlKhatibColors.Slate500,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            if (isSelected) {
+                                Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
             }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }

@@ -207,11 +207,11 @@ data class ContentPagination(
 
 @Serializable
 data class QFTranslation(
-    val id: Int,
-    val name: String,
-    val authorName: String,
+    val id: Int = 0,
+    val name: String = "",
+    val authorName: String = "",
     val slug: String? = null,
-    val languageName: String,
+    val languageName: String = "",
     val translatedName: TranslatedSubName? = null
 )
 
@@ -222,4 +222,4 @@ data class TranslatedSubName(
 )
 
 @Serializable
-data class TranslationsResponse(val translations: List<QFTranslation> = emptyList())
+data class TranslationsResponse(val translations: List<QFTranslation>? = null)

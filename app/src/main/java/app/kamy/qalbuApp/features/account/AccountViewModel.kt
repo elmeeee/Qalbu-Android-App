@@ -36,6 +36,7 @@ data class AccountUiState(
     val showNotifTimeSheet: Boolean = false,
     val translations: List<QFTranslation> = emptyList(),
     val translationsLoading: Boolean = false,
+    val translationsError: String? = null,
     val translatorQuery: String = "",
     val selectedTranslationId: Int = 0,
     val selectedTranslationName: String = "",
@@ -163,7 +164,7 @@ class AccountViewModel @Inject constructor(
 
     fun openTranslator() {
         _state.update { it.copy(showTranslatorSheet = true) }
-        if (_state.value.translations.isEmpty()) loadTranslations()
+        loadTranslations()
     }
 
     fun closeTranslator() = _state.update { it.copy(showTranslatorSheet = false) }
@@ -175,19 +176,32 @@ class AccountViewModel @Inject constructor(
         _state.update { it.copy(showTranslatorSheet = false) }
     }
 
-    private fun loadTranslations() {
-        _state.update { it.copy(translationsLoading = true) }
+    fun loadTranslations() {
+        _state.update { it.copy(translationsLoading = true, translationsError = null) }
         viewModelScope.launch {
             runCatching { contentRepository.getTranslations() }
                 .onSuccess { list ->
                     val sorted = list.sortedWith(
-                        compareByDescending<QFTranslation> { it.languageName.equals("English", true) }
+                        compareByDescending<QFTranslation> { it.languageName.equals("english", true) }
                             .thenBy { it.languageName }
                             .thenBy { it.authorName }
                     )
-                    _state.update { it.copy(translationsLoading = false, translations = sorted) }
+                    _state.update {
+                        it.copy(
+                            translationsLoading = false,
+                            translations = sorted,
+                            translationsError = null
+                        )
+                    }
                 }
-                .onFailure { _state.update { it.copy(translationsLoading = false) } }
+                .onFailure { t ->
+                    _state.update {
+                        it.copy(
+                            translationsLoading = false,
+                            translationsError = t.message ?: "Failed to load translators"
+                        )
+                    }
+                }
         }
     }
 
@@ -237,14 +251,14 @@ class AccountViewModel @Inject constructor(
         prayerMethodStore.setMethod(method)
     }
 
-    val filteredTranslations: List<QFTranslation>
-        get() {
-            val q = _state.value.translatorQuery.trim().lowercase()
-            if (q.isEmpty()) return _state.value.translations
-            return _state.value.translations.filter {
-                it.name.lowercase().contains(q) ||
-                    it.authorName.lowercase().contains(q) ||
-                    it.languageName.lowercase().contains(q)
-            }
+    fun filteredTranslations(): List<QFTranslation> {
+        val q = _state.value.translatorQuery.trim().lowercase()
+        val all = _state.value.translations
+        if (q.isEmpty()) return all
+        return all.filter {
+            it.name.lowercase().contains(q) ||
+                it.authorName.lowercase().contains(q) ||
+                it.languageName.lowercase().contains(q)
         }
+    }
 }

@@ -75,7 +75,7 @@ class ContentRepository @Inject constructor(
     }
 
     suspend fun getTranslations(): List<QFTranslation> = qfCall {
-        api.getTranslations().translations
+        api.getTranslations().translations.orEmpty().filter { it.id > 0 }
     }
 
     suspend fun getTafsirByAyah(resourceId: String, ayahKey: String): TafsirPayload? =
