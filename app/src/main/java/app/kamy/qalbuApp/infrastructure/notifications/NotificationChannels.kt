@@ -10,6 +10,7 @@ object NotificationChannels {
     const val PRAYER = "prayer_times"
     const val SUNNAH = "sunnah_reminders"
     const val ADHAN_PLAYBACK = "adhan_playback"
+    const val MEDIA_PLAYBACK = "media_playback"
 
     fun ensureAll(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -42,6 +43,16 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Plays the call to prayer until it finishes"
+                setSound(null, null)
+            }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(
+                MEDIA_PLAYBACK,
+                context.getString(app.kamy.qalbuApp.R.string.recitation_notification_channel),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Quran recitation controls on lock screen and in background"
                 setSound(null, null)
             }
         )

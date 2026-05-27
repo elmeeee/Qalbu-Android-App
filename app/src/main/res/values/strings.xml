@@ -19,4 +19,5 @@
     <string name="adhan_fajr_fixed_note">Subuh (Fajr) always uses Mishary Rashid Alafasy and cannot be changed.</string>
 
     <string name="recitation_notification_channel">Quran recitation</string>
+    <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
 </resources>

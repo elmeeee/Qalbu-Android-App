@@ -98,7 +98,9 @@ class AdhanPlaybackService : Service() {
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_BODY, body)
             }
-            context.startForegroundService(intent)
+            runCatching {
+                androidx.core.content.ContextCompat.startForegroundService(context, intent)
+            }
         }
     }
 }

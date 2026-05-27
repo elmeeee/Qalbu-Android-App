@@ -3,16 +3,24 @@ package app.kamy.qalbuApp.infrastructure.notifications
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /** Persists the last fetched timetable so toggles can reschedule without a new location fetch. */
 object PrayerScheduleCache {
     private const val PREFS = "qalbu_prayer_schedule_cache"
     private const val KEY_JSON = "bundle_json"
+    private const val KEY_LAT = "latitude"
+    private const val KEY_LON = "longitude"
+    private val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
-    fun save(context: Context, bundle: PrayerScheduleBundle) {
+    fun save(context: Context, bundle: PrayerScheduleBundle, latitude: Double, longitude: Double) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_JSON, bundle.toJson().toString())
+            .putFloat(KEY_LAT, latitude.toFloat())
+            .putFloat(KEY_LON, longitude.toFloat())
             .apply()
     }
 
@@ -21,6 +29,20 @@ object PrayerScheduleCache {
             .getString(KEY_JSON, null)
             ?: return null
         return runCatching { parseBundle(JSONObject(raw)) }.getOrNull()
+    }
+
+    fun loadCoordinates(context: Context): Pair<Double, Double>? {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!prefs.contains(KEY_LAT) || !prefs.contains(KEY_LON)) return null
+        val lat = prefs.getFloat(KEY_LAT, Float.NaN).toDouble()
+        val lon = prefs.getFloat(KEY_LON, Float.NaN).toDouble()
+        if (lat.isNaN() || lon.isNaN()) return null
+        return lat to lon
+    }
+
+    fun isStale(context: Context): Boolean {
+        val bundle = load(context) ?: return true
+        return bundle.dayKey != dayKeyFormat.format(Date())
     }
 
     private fun parseBundle(o: JSONObject): PrayerScheduleBundle {
@@ -44,12 +66,10 @@ object PrayerScheduleCache {
             val arr = o.getJSONArray("night")
             for (i in 0 until arr.length()) {
                 val item = arr.getJSONObject(i)
-                add(
-                    NightDivisionItem(
-                        kind = NightDivisionKind.valueOf(item.getString("kind")),
-                        fireAtMillis = item.getLong("fireAt")
-                    )
-                )
+                val kind = runCatching {
+                    NightDivisionKind.valueOf(item.getString("kind"))
+                }.getOrNull() ?: continue
+                add(NightDivisionItem(kind = kind, fireAtMillis = item.getLong("fireAt")))
             }
         }
         return PrayerScheduleBundle(

@@ -99,10 +99,25 @@ object PrayerScheduleBuilder {
         )
     }
 
-    fun upcomingOccurrences(fireAtMillis: Long, now: Long = System.currentTimeMillis()): List<Long> {
-        if (fireAtMillis > now) return listOf(fireAtMillis)
-        val tomorrow = fireAtMillis + 24 * 60 * 60 * 1000L
-        return if (tomorrow > now) listOf(tomorrow) else emptyList()
+    /**
+     * Next [daysAhead] alarm times at the same clock time (rolls the calendar forward).
+     */
+    fun upcomingOccurrences(
+        fireAtMillis: Long,
+        now: Long = System.currentTimeMillis(),
+        daysAhead: Int = 7
+    ): List<Long> {
+        if (daysAhead <= 0) return emptyList()
+        val cal = Calendar.getInstance().apply { timeInMillis = fireAtMillis }
+        while (cal.timeInMillis <= now) {
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return buildList {
+            repeat(daysAhead) {
+                add(cal.timeInMillis)
+                cal.add(Calendar.DAY_OF_YEAR, 1)
+            }
+        }
     }
 
     private fun parseHm(clean: String): Calendar? = try {

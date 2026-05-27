@@ -94,23 +94,32 @@ class TodayViewModel @Inject constructor(
         _state.update { it.copy(isLoading = true, error = null) }
         try {
             coroutineScope {
-                val verseDeferred = async { contentRepository.getRandomAyah() }
-                val chaptersDeferred = async { contentRepository.getChapters() }
+                val verseDeferred = async { runCatching { contentRepository.getRandomAyah() }.getOrNull() }
+                val chaptersDeferred = async { runCatching { contentRepository.getChapters() }.getOrDefault(emptyList()) }
                 val recitationsDeferred = async {
-                    if (_state.value.recitations.isEmpty()) contentRepository.getRecitations()
-                    else _state.value.recitations
+                    if (_state.value.recitations.isEmpty()) {
+                        runCatching { contentRepository.getRecitations() }.getOrDefault(emptyList())
+                    } else {
+                        _state.value.recitations
+                    }
                 }
                 val verse = verseDeferred.await()
                 val chapters = chaptersDeferred.await()
                 val chapterName = verse?.chapterNumber?.let { num ->
                     chapters.find { it.id == num }?.displayComplexName
                 }
+                val recitations = recitationsDeferred.await()
                 _state.update {
                     it.copy(
                         isLoading = false,
                         verse = verse,
                         verseReferenceLabel = verse?.referenceLabel(chapterName),
-                        recitations = recitationsDeferred.await()
+                        recitations = recitations,
+                        error = if (verse == null) {
+                            it.error ?: "Could not load verse of the day. Pull to retry."
+                        } else {
+                            null
+                        }
                     )
                 }
             }

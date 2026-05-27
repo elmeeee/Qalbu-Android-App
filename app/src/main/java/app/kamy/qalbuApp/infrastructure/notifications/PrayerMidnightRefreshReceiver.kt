@@ -8,16 +8,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-class BootCompletedReceiver : BroadcastReceiver() {
+/**
+ * Fires once per day to roll prayer alarms forward and refresh timings when possible.
+ */
+class PrayerMidnightRefreshReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent?) {
-        if (intent?.action != Intent.ACTION_BOOT_COMPLETED) return
-        val appContext = context.applicationContext
         val pending = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
             try {
-                runCatching { DailyVerseNotificationScheduler.reschedule(appContext) }
-                runCatching { PrayerScheduleRefresher.refresh(appContext) }
+                runCatching { PrayerScheduleRefresher.refresh(context.applicationContext) }
             } finally {
+                runCatching { PrayerNotificationScheduler.scheduleMidnightRefresh(context.applicationContext) }
                 pending.finish()
             }
         }

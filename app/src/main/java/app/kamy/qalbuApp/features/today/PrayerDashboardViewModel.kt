@@ -118,7 +118,12 @@ class PrayerDashboardViewModel @Inject constructor(
             }
             recomputeActiveAndCountdown()
             result.scheduleBundle?.let { bundle ->
-                PrayerNotificationCoordinator.onScheduleUpdated(appContext, bundle)
+                PrayerNotificationCoordinator.onScheduleUpdated(
+                    appContext,
+                    bundle,
+                    loc.latitude,
+                    loc.longitude
+                )
             }
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.message ?: "Prayer fetch failed") }

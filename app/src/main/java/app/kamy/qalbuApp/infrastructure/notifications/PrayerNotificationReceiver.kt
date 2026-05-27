@@ -6,11 +6,16 @@ import android.content.Intent
 import app.kamy.qalbuApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.qalbuApp.infrastructure.audio.AdhanPlaybackService
 import app.kamy.qalbuApp.infrastructure.preferences.AdhanPreferencesStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class PrayerNotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent == null) return
+        val appContext = context.applicationContext
         val channelId = intent.getStringExtra(EXTRA_CHANNEL_ID) ?: NotificationChannels.PRAYER
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
         val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
@@ -18,9 +23,18 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         val playAdhan = intent.getBooleanExtra(EXTRA_PLAY_ADHAN, false)
         val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
 
+        // Play adhan even when notification permission is off (exact-alarm delivery).
+        if (playAdhan && !prayerName.isNullOrBlank()) {
+            val voice = AdhanPreferencesStore.from(appContext).currentVoice()
+            val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice)
+            runCatching {
+                AdhanPlaybackService.start(appContext, rawRes, title, body)
+            }
+        }
+
         if (title.isNotEmpty()) {
             PrayerNotificationScheduler.showNotification(
-                context = context,
+                context = appContext,
                 notificationId = notificationId,
                 channelId = channelId,
                 title = title,
@@ -29,14 +43,15 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
             )
         }
 
-        if (playAdhan && !prayerName.isNullOrBlank()) {
-            val voice = AdhanPreferencesStore.from(context).currentVoice()
-            val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice)
-            AdhanPlaybackService.start(context, rawRes, title, body)
+        val pending = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+            try {
+                // Roll alarms forward only — avoid network + Hilt on every adhan fire.
+                PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+            } finally {
+                pending.finish()
+            }
         }
-
-        // Re-schedule weekly sunnah + refresh prayer alarms from cache after each fire.
-        PrayerNotificationCoordinator.rescheduleFromCache(context)
     }
 
     companion object {

@@ -1,8 +1,10 @@
 package app.kamy.qalbuApp.features.today
 
+import android.Manifest
 import android.content.Intent
 import android.os.Build
-import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,11 +36,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.permissions.rememberPermissionState
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
+import app.kamy.qalbuApp.ui.permissions.areAppNotificationsEnabled
+import app.kamy.qalbuApp.ui.permissions.canScheduleExactAlarms
+import app.kamy.qalbuApp.ui.permissions.openAppNotificationSettings
+import app.kamy.qalbuApp.ui.permissions.openExactAlarmSettings
 import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
@@ -71,20 +76,56 @@ fun TodayScreen(
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
-    val notificationsPermission = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-    // Saveable so tab switches do not re-trigger prompts.
-    var locationPrompted by rememberSaveable { mutableStateOf(false) }
-    var notificationsPrompted by rememberSaveable { mutableStateOf(false) }
+    // v2 key resets a bad saved state where notification prompt never appeared.
+    var locationPrompted by rememberSaveable(key = "location_prompt_v2") { mutableStateOf(false) }
+    var notificationsPrompted by rememberSaveable(key = "notifications_prompt_v2") { mutableStateOf(false) }
+    var exactAlarmPrompted by rememberSaveable(key = "exact_alarm_prompt_v2") { mutableStateOf(false) }
 
-    fun requestNotificationsIfNeeded() {
-        if (notificationsPrompted) return
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-        if (notificationsPermission.status.isGranted) return
-        notificationsPrompted = true
-        notificationsPermission.launchPermissionRequest()
+    suspend fun showNotificationSettingsSnackbar() {
+        val result = snackbarHostState.showSnackbar(
+            message = "Notifications are off. Enable them in Settings for prayer reminders.",
+            actionLabel = "Settings",
+            duration = SnackbarDuration.Long
+        )
+        if (result == SnackbarResult.ActionPerformed) {
+            context.openAppNotificationSettings()
+        }
     }
 
-    // First open: ask location, then notifications (never both dialogs at once).
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        notificationsPrompted = true
+        if (!granted && !context.areAppNotificationsEnabled()) {
+            scope.launch { showNotificationSettingsSnackbar() }
+        }
+    }
+
+    fun requestNotificationsIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (!context.areAppNotificationsEnabled()) {
+                scope.launch { showNotificationSettingsSnackbar() }
+            }
+            return
+        }
+        if (context.areAppNotificationsEnabled()) return
+        if (notificationsPrompted) return
+        notificationsPrompted = true
+        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        val granted = results[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            results[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            prayerVm.onPermissionGranted()
+        }
+        requestNotificationsIfNeeded()
+    }
+
+    // First open: location dialog, then notification dialog (never at the same time).
     LaunchedEffect(Unit) {
         if (locationPrompted) return@LaunchedEffect
         locationPrompted = true
@@ -92,7 +133,12 @@ fun TodayScreen(
             prayerVm.onPermissionGranted()
             requestNotificationsIfNeeded()
         } else {
-            locationPermissions.launchMultiplePermissionRequest()
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
         }
     }
 
@@ -100,18 +146,21 @@ fun TodayScreen(
         if (!locationPrompted) return@LaunchedEffect
         if (locationPermissions.allPermissionsGranted) {
             prayerVm.onPermissionGranted()
-            requestNotificationsIfNeeded()
         }
     }
 
-    LaunchedEffect(locationPermissions.permissions.map { it.status }) {
-        if (!locationPrompted) return@LaunchedEffect
-        if (locationPermissions.allPermissionsGranted) return@LaunchedEffect
-        val locationAnswered = locationPermissions.permissions.any { permission ->
-            permission.status is PermissionStatus.Denied
-        }
-        if (locationAnswered) {
-            requestNotificationsIfNeeded()
+    // Exact alarms are required for adhan to fire at the right minute (Android 12+).
+    LaunchedEffect(prayerState.timings.isNotEmpty(), exactAlarmPrompted) {
+        if (exactAlarmPrompted || prayerState.timings.isEmpty()) return@LaunchedEffect
+        if (context.canScheduleExactAlarms()) return@LaunchedEffect
+        exactAlarmPrompted = true
+        val result = snackbarHostState.showSnackbar(
+            message = "Allow exact alarms so adhan and prayer reminders arrive on time.",
+            actionLabel = "Allow",
+            duration = SnackbarDuration.Long
+        )
+        if (result == SnackbarResult.ActionPerformed) {
+            context.openExactAlarmSettings()
         }
     }
 

@@ -19,25 +19,31 @@ object PrayerNotificationScheduler {
     private const val NIGHT_REQUEST_BASE = 9_000
     private const val SUNNAH_YASIN_REQUEST = 10_001
     private const val SUNNAH_KAHF_REQUEST = 10_002
+    private const val MIDNIGHT_REFRESH_REQUEST = 11_000
     private const val NOTIFICATION_ID_BASE = 8_000
+    /** Enough lookahead without blocking the process for too long at schedule time. */
+    private const val DAYS_TO_SCHEDULE = 3
 
     fun reschedule(
         context: Context,
         bundle: PrayerScheduleBundle?,
         options: PrayerNotificationScheduleOptions
     ) {
-        cancelAll(context)
+        runCatching { cancelAll(context) }
         if (bundle == null) return
         NotificationChannels.ensureAll(context)
         val now = System.currentTimeMillis()
 
         if (options.adzanEnabled) {
             bundle.adzanPrayers.forEachIndexed { index, prayer ->
-                PrayerScheduleBuilder.upcomingOccurrences(prayer.fireAtMillis, now)
-                    .forEachIndexed { offset, fireAt ->
+                PrayerScheduleBuilder.upcomingOccurrences(
+                    prayer.fireAtMillis,
+                    now,
+                    DAYS_TO_SCHEDULE
+                ).forEachIndexed { offset, fireAt ->
                         scheduleOneShot(
                             context = context,
-                            requestCode = PRAYER_REQUEST_BASE + index * 2 + offset,
+                            requestCode = PRAYER_REQUEST_BASE + index * 20 + offset,
                             fireAt = fireAt,
                             channelId = NotificationChannels.PRAYER,
                             title = prayerTitle(prayer.name, fireAt),
@@ -53,11 +59,14 @@ object PrayerNotificationScheduler {
 
         if (options.imsakEnabled) {
             bundle.imsak?.let { imsak ->
-                PrayerScheduleBuilder.upcomingOccurrences(imsak.fireAtMillis, now)
-                    .forEachIndexed { offset, fireAt ->
+                PrayerScheduleBuilder.upcomingOccurrences(
+                    imsak.fireAtMillis,
+                    now,
+                    DAYS_TO_SCHEDULE
+                ).forEachIndexed { offset, fireAt ->
                         scheduleOneShot(
                             context = context,
-                            requestCode = PRAYER_REQUEST_BASE + 50 + offset,
+                            requestCode = PRAYER_REQUEST_BASE + 120 + offset,
                             fireAt = fireAt,
                             channelId = NotificationChannels.PRAYER,
                             title = prayerTitle("Imsak", fireAt),
@@ -77,11 +86,14 @@ object PrayerNotificationScheduler {
             }
             if (!enabled) return@forEach
             val codeOffset = division.kind.ordinal
-            PrayerScheduleBuilder.upcomingOccurrences(division.fireAtMillis, now)
-                .forEachIndexed { offset, fireAt ->
+            PrayerScheduleBuilder.upcomingOccurrences(
+                division.fireAtMillis,
+                now,
+                DAYS_TO_SCHEDULE
+            ).forEachIndexed { offset, fireAt ->
                     scheduleOneShot(
                         context = context,
-                        requestCode = NIGHT_REQUEST_BASE + codeOffset * 2 + offset,
+                        requestCode = NIGHT_REQUEST_BASE + codeOffset * 20 + offset,
                         fireAt = fireAt,
                         channelId = NotificationChannels.PRAYER,
                         title = division.kind.notificationTitle,
@@ -93,6 +105,30 @@ object PrayerNotificationScheduler {
         }
 
         scheduleSunnahReminders(context, options)
+        scheduleMidnightRefresh(context)
+    }
+
+    /** Daily roll-forward + network refresh when coordinates are cached. */
+    fun scheduleMidnightRefresh(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val cal = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_YEAR, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 5)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        if (cal.timeInMillis <= System.currentTimeMillis()) {
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        val intent = Intent(context, PrayerMidnightRefreshReceiver::class.java)
+        val pending = PendingIntent.getBroadcast(
+            context,
+            MIDNIGHT_REFRESH_REQUEST,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        setExactAlarm(alarmManager, cal.timeInMillis, pending)
     }
 
     fun scheduleSunnahReminders(context: Context, options: PrayerNotificationScheduleOptions) {
@@ -138,12 +174,20 @@ object PrayerNotificationScheduler {
 
     fun cancelAll(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        (PRAYER_REQUEST_BASE until PRAYER_REQUEST_BASE + 60).forEach { code ->
+        (PRAYER_REQUEST_BASE until PRAYER_REQUEST_BASE + 200).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
         }
-        (NIGHT_REQUEST_BASE until NIGHT_REQUEST_BASE + 10).forEach { code ->
+        (NIGHT_REQUEST_BASE until NIGHT_REQUEST_BASE + 80).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
         }
+        alarmManager.cancel(
+            PendingIntent.getBroadcast(
+                context,
+                MIDNIGHT_REFRESH_REQUEST,
+                Intent(context, PrayerMidnightRefreshReceiver::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        )
         cancelSunnah(context)
         val nm = NotificationManagerCompat.from(context)
         (NOTIFICATION_ID_BASE until NOTIFICATION_ID_BASE + 80).forEach { nm.cancel(it) }
@@ -165,8 +209,8 @@ object PrayerNotificationScheduler {
         body: String,
         silent: Boolean = false
     ) {
-        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
         NotificationChannels.ensureAll(context)
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -202,22 +246,31 @@ object PrayerNotificationScheduler {
         playAdhan: Boolean = false,
         prayerName: String? = null
     ) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, PrayerNotificationReceiver::class.java).apply {
-            putExtra(PrayerNotificationReceiver.EXTRA_CHANNEL_ID, channelId)
-            putExtra(PrayerNotificationReceiver.EXTRA_TITLE, title)
-            putExtra(PrayerNotificationReceiver.EXTRA_BODY, body)
-            putExtra(PrayerNotificationReceiver.EXTRA_NOTIFICATION_ID, notificationId)
-            putExtra(PrayerNotificationReceiver.EXTRA_KIND, kind)
-            putExtra(PrayerNotificationReceiver.EXTRA_PLAY_ADHAN, playAdhan)
-            putExtra(PrayerNotificationReceiver.EXTRA_PRAYER_NAME, prayerName)
+        runCatching {
+            val now = System.currentTimeMillis()
+            if (fireAt <= now + 2_000L) return@runCatching
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val intent = Intent(context, PrayerNotificationReceiver::class.java).apply {
+                putExtra(PrayerNotificationReceiver.EXTRA_CHANNEL_ID, channelId)
+                putExtra(PrayerNotificationReceiver.EXTRA_TITLE, title)
+                putExtra(PrayerNotificationReceiver.EXTRA_BODY, body)
+                putExtra(PrayerNotificationReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+                putExtra(PrayerNotificationReceiver.EXTRA_KIND, kind)
+                putExtra(PrayerNotificationReceiver.EXTRA_PLAY_ADHAN, playAdhan)
+                putExtra(PrayerNotificationReceiver.EXTRA_PRAYER_NAME, prayerName)
+            }
+            val pending = PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            setExactAlarm(alarmManager, fireAt, pending)
         }
-        val pending = PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+    }
+
+    private fun setExactAlarm(alarmManager: AlarmManager, fireAt: Long, pending: PendingIntent) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, fireAt, pending)
         } else {

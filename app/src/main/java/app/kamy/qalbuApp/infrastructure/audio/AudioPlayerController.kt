@@ -223,10 +223,12 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         .build()
 
     private fun ensurePlaybackService() {
-        ContextCompat.startForegroundService(
-            context,
-            Intent(context, RecitationPlaybackService::class.java)
-        )
+        runCatching {
+            ContextCompat.startForegroundService(
+                context,
+                Intent(context, RecitationPlaybackService::class.java)
+            )
+        }
     }
 
     private fun advanceQueueOrStop() {
