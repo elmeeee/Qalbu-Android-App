@@ -30,7 +30,9 @@ fun TodayPrayerMascotSection(
             state = state,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 44.dp)
+                // Push card down so only the mascot's feet touch the top edge
+                // of the card, instead of the full body sitting inside it.
+                .padding(top = 68.dp)
         )
         Image(
             painter = painterResource(R.drawable.today_mascot),
@@ -38,8 +40,9 @@ fun TodayPrayerMascotSection(
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(end = 2.dp)
-                .offset(y = (-4).dp)
+                // Pull mascot slightly outside the card so only the lower legs overlap.
+                .padding(end = (-6).dp)
+                .offset(y = 4.dp)
                 .width(132.dp)
                 .height(108.dp)
         )

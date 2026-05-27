@@ -2,12 +2,15 @@ package app.kamy.qalbuApp.ui.common
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -15,11 +18,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 
 /**
  * Renders tajweed-colored Arabic HTML using the bundled tajweed font.
- * Card height follows verse length — nothing is clipped.
+ * Height is driven by measured HTML content so harakat and ayah markers are never clipped.
  */
 @Composable
 fun TajweedHtmlView(
@@ -33,12 +38,20 @@ fun TajweedHtmlView(
     val wrappedHtml = remember(htmlFragment, fontSizeSp, textColor) {
         wrapTajweedHtml(htmlFragment, fontSizeSp, textColor)
     }
+    val density = LocalDensity.current
+    val heightModifier = if (contentHeightPx > 0) {
+        Modifier.height(with(density) { contentHeightPx.toDp() })
+    } else {
+        Modifier.heightIn(min = 140.dp)
+    }
 
     AndroidView(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .then(heightModifier),
         factory = { ctx ->
             AutoHeightTajweedWebView(ctx) { px ->
-                if (px > contentHeightPx) {
+                if (px != contentHeightPx) {
                     contentHeightPx = px
                 }
             }
@@ -46,7 +59,7 @@ fun TajweedHtmlView(
         update = { webView ->
             val autoWebView = webView as AutoHeightTajweedWebView
             autoWebView.onHeightChanged = { px ->
-                if (px > contentHeightPx) {
+                if (px != contentHeightPx) {
                     contentHeightPx = px
                 }
             }
@@ -64,9 +77,9 @@ fun TajweedHtmlView(
 
 /**
  * WebView that sizes itself to HTML content via [TajweedBridge] callbacks.
- * Compose only constrains width; height comes from the View's onMeasure.
+ * Compose applies the reported height explicitly — WebView alone is not enough.
  */
-@SuppressLint("ViewConstructor")
+@SuppressLint("ViewConstructor", "ClickableViewAccessibility")
 private class AutoHeightTajweedWebView(
     context: Context,
     initialOnHeight: (Int) -> Unit
@@ -85,6 +98,9 @@ private class AutoHeightTajweedWebView(
         isHorizontalScrollBarEnabled = false
         overScrollMode = OVER_SCROLL_NEVER
         isNestedScrollingEnabled = false
+        isScrollContainer = false
+        clipToPadding = false
+        clipChildren = false
         addJavascriptInterface(TajweedBridge(), "TajweedBridge")
         webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
@@ -95,6 +111,16 @@ private class AutoHeightTajweedWebView(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
+    }
+
+    /** Let the parent pager/scroll view handle gestures; we only display full content. */
+    override fun onTouchEvent(event: MotionEvent): Boolean = false
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val width = View.MeasureSpec.getSize(widthMeasureSpec)
+        val height = contentHeightPx.takeIf { it > 0 }
+            ?: (width * 0.4f).toInt().coerceAtLeast(160)
+        setMeasuredDimension(width, height)
     }
 
     fun loadHtml(html: String) {
@@ -130,39 +156,40 @@ private class AutoHeightTajweedWebView(
         requestLayout()
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val width = View.MeasureSpec.getSize(widthMeasureSpec)
-        val height = when {
-            contentHeightPx > 0 -> contentHeightPx
-            else -> {
-                // Until JS reports, reserve space from a generous estimate (font + line count).
-                val estimated = (layoutParams.width.takeIf { it > 0 } ?: width)
-                (estimated * 0.35f).toInt().coerceAtLeast(120)
-            }
-        }
-        setMeasuredDimension(width, height)
-    }
-
     private fun scheduleHeightReports() {
         val script = """
             (function() {
-              function report() {
-                var b = document.body;
+              function measure() {
+                var body = document.body;
+                var root = document.querySelector('[lang="ar"]') || body;
+                var bodyRect = body.getBoundingClientRect();
+                var rootRect = root.getBoundingClientRect();
+                var range = document.createRange();
+                range.selectNodeContents(root);
+                var textRect = range.getBoundingClientRect();
+                var styles = window.getComputedStyle(body);
+                var pad = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
                 var h = Math.max(
-                  b.getBoundingClientRect().height,
-                  b.scrollHeight,
-                  b.offsetHeight,
-                  document.documentElement.scrollHeight
+                  body.scrollHeight,
+                  body.offsetHeight,
+                  bodyRect.height,
+                  rootRect.bottom - bodyRect.top,
+                  textRect.bottom - bodyRect.top,
+                  textRect.height + pad
                 );
+                return Math.ceil(h);
+              }
+              function report() {
+                var h = measure();
                 if (h > 0 && window.TajweedBridge) {
-                  TajweedBridge.reportHeight(Math.ceil(h));
+                  TajweedBridge.reportHeight(h);
                 }
               }
               report();
               if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(report);
               }
-              [80, 200, 400, 700, 1100].forEach(function(ms) {
+              [50, 120, 250, 450, 800, 1200, 1800].forEach(function(ms) {
                 setTimeout(report, ms);
               });
             })();
@@ -174,10 +201,10 @@ private class AutoHeightTajweedWebView(
         @JavascriptInterface
         fun reportHeight(cssPx: Float) {
             val px = cssPx.toInt().coerceAtLeast(1)
-            // Extra room for harakat / ayah-end badge below the last line.
-            val safePx = (px * 1.08f).toInt() + 24
+            // Extra room for harakat, diacritics, and the ayah-end rosette below the last line.
+            val safePx = (px * 1.15f).toInt() + 40
             post {
-                if (safePx > contentHeightPx) {
+                if (safePx != contentHeightPx) {
                     contentHeightPx = safePx
                     val lp = layoutParams ?: ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
@@ -212,11 +239,11 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         body {
             font-family: 'AlKhatibQuranWeb', 'KFGQPC HAFS Uthmanic Script', 'Amiri Quran', serif;
             font-size: ${fontSizeSp}px;
-            line-height: 2.15;
+            line-height: 2.35;
             direction: rtl;
             text-align: center;
             -webkit-text-size-adjust: 100%;
-            padding: 10px 12px 16px;
+            padding: 12px 14px 28px;
             overflow: visible !important;
             word-wrap: break-word;
         }
@@ -245,10 +272,10 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
             unicode-bidi: embed;
             color: #B45309;
             margin-inline-start: 0.25em;
-            width: 0.95em;
-            height: 0.95em;
+            width: 1em;
+            height: 1em;
             font-size: 0.72em;
-            vertical-align: -0.06em;
+            vertical-align: -0.12em;
             line-height: 1;
             overflow: visible;
         }
@@ -268,6 +295,7 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         div[lang="ar"] {
             display: block;
             overflow: visible !important;
+            padding-bottom: 8px;
         }
     """.trimIndent()
 

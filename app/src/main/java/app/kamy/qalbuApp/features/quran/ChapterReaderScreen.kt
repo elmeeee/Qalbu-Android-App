@@ -5,12 +5,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -282,6 +284,7 @@ private fun QalbuAyahPage(
     onHadith: () -> Unit
 ) {
     val contentBottomPadding = if (audioBarVisible) 200.dp else 150.dp
+    val contentTopPadding = 56.dp
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -289,38 +292,50 @@ private fun QalbuAyahPage(
                 detectTapGestures(onTap = { onPlay() })
             }
     ) {
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-                .padding(start = 16.dp, end = 64.dp, top = 56.dp, bottom = contentBottomPadding)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(
+                    start = 16.dp,
+                    end = 64.dp,
+                    top = contentTopPadding,
+                    bottom = contentBottomPadding
+                )
         ) {
-            TajweedHtmlView(
-                htmlFragment = buildTajweedHtmlFragment(
-                    verse.textUthmaniTajweed ?: verse.textUthmani,
-                    verse.resolvedVerseNumber
-                ),
-                fontSizeSp = (30 * fontScale).toInt(),
-                modifier = Modifier.fillMaxWidth()
-            )
-            if (showTranslation) {
-                verse.translations?.firstOrNull()?.text?.let { translation ->
-                    val clean = translation.replace(Regex("<[^>]+>"), "").trim()
-                    if (clean.isNotEmpty()) {
-                        Spacer(Modifier.height(16.dp))
-                        Text(
-                            text = clean,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = AlKhatibColors.Slate800,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = maxHeight)
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                TajweedHtmlView(
+                    htmlFragment = buildTajweedHtmlFragment(
+                        verse.textUthmaniTajweed ?: verse.textUthmani,
+                        verse.resolvedVerseNumber
+                    ),
+                    fontSizeSp = (30 * fontScale).toInt(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (showTranslation) {
+                    verse.translations?.firstOrNull()?.text?.let { translation ->
+                        val clean = translation.replace(Regex("<[^>]+>"), "").trim()
+                        if (clean.isNotEmpty()) {
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                text = clean,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = AlKhatibColors.Slate800,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
+                Spacer(Modifier.height(24.dp))
             }
-            Spacer(Modifier.height(24.dp))
         }
 
         Column(

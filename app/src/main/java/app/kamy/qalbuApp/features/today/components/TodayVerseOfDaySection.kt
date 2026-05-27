@@ -91,14 +91,19 @@ fun TodayVerseOfDaySection(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ) {
             if (verse != null) {
-                TajweedHtmlView(
-                    htmlFragment = buildTajweedHtmlFragment(
-                        verse.textUthmaniTajweed ?: verse.textUthmani,
-                        verse.resolvedVerseNumber
-                    ),
-                    fontSizeSp = 28,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TajweedHtmlView(
+                        htmlFragment = buildTajweedHtmlFragment(
+                            verse.textUthmaniTajweed ?: verse.textUthmani,
+                            verse.resolvedVerseNumber
+                        ),
+                        fontSizeSp = 28,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.replace(Regex("<[^>]+>"), "").trim()
@@ -108,8 +113,11 @@ fun TodayVerseOfDaySection(
                             text = "“$clean”",
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
+                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.15f,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 4.dp),
                             softWrap = true
                         )
                     }
