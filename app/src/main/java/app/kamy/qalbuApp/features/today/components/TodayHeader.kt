@@ -23,7 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.CircularProgressIndicator
+import app.kamy.qalbuApp.design.components.AlKhatibSkeletonCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -251,11 +251,7 @@ private fun HeaderAvatar(
             contentAlignment = Alignment.Center
         ) {
             when {
-                isProfileLoading -> CircularProgressIndicator(
-                    modifier = Modifier.size(22.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 2.dp
-                )
+                isProfileLoading -> AlKhatibSkeletonCircle(size = 36.dp)
                 !avatarUrl.isNullOrBlank() -> AsyncImage(
                     model = avatarUrl,
                     contentDescription = "Account",

@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.kamy.qalbuApp.design.components.AlKhatibSkeletonOnDark
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.features.today.PrayerTheme
@@ -72,21 +73,34 @@ fun PrayerDashboardCard(
             )
             .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
-        // Countdown row
-        Text(
-            text = state.countdown,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.headlineLarge
-        )
-        Text(
-            text = state.nextPrayer?.let { "Time remaining before ${prayerDisplay(it)}" }
-                ?: if (state.needsPermission) "Allow location to see prayer times"
-                else if (state.isLoading) "Loading prayer times…"
-                else "Prayer schedule",
-            color = Color.White.copy(alpha = 0.85f),
-            style = MaterialTheme.typography.bodySmall
-        )
+        if (state.isLoading && state.timings.isEmpty()) {
+            AlKhatibSkeletonOnDark(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .height(32.dp),
+                shape = RoundedCornerShape(8.dp)
+            )
+            Spacer(Modifier.height(8.dp))
+            AlKhatibSkeletonOnDark(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(12.dp)
+            )
+        } else {
+            Text(
+                text = state.countdown,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge
+            )
+            Text(
+                text = state.nextPrayer?.let { "Time remaining before ${prayerDisplay(it)}" }
+                    ?: if (state.needsPermission) "Allow location to see prayer times"
+                    else "Prayer schedule",
+                color = Color.White.copy(alpha = 0.85f),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
         Spacer(Modifier.height(14.dp))
 
         Row(
@@ -97,8 +111,7 @@ fun PrayerDashboardCard(
                 .padding(vertical = 10.dp, horizontal = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            if (state.timings.isEmpty()) {
-                // Skeleton row
+            if (state.isLoading || state.timings.isEmpty()) {
                 repeat(6) {
                     PrayerColumnSkeleton(modifier = Modifier.weight(1f))
                 }
@@ -154,20 +167,16 @@ private fun PrayerColumnSkeleton(modifier: Modifier = Modifier) {
         modifier = modifier.padding(vertical = 8.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
+        AlKhatibSkeletonOnDark(
             modifier = Modifier
                 .width(28.dp)
                 .height(10.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.White.copy(alpha = 0.12f))
         )
         Spacer(Modifier.height(4.dp))
-        Box(
+        AlKhatibSkeletonOnDark(
             modifier = Modifier
                 .width(24.dp)
                 .height(8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.White.copy(alpha = 0.08f))
         )
     }
 }

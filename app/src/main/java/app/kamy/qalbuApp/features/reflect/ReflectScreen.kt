@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
+import app.kamy.qalbuApp.design.components.ReflectPostSkeleton
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
@@ -97,10 +98,32 @@ fun ReflectScreen(
         when {
             !state.isAuthenticated -> SignInGate(onSignIn)
             state.isLoading && state.posts.isEmpty() ->
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color.White
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 8.dp)
+                ) {
+                    ReflectStickyHeader(
+                        segment = state.segment,
+                        onSelectSegment = vm::switchSegment,
+                        modifier = Modifier.background(
+                            Brush.linearGradient(
+                                listOf(
+                                    AlKhatibColors.ForestDark,
+                                    AlKhatibColors.DeepEmerald
+                                )
+                            )
+                        )
+                    )
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        repeat(4) {
+                            ReflectPostSkeleton()
+                        }
+                    }
+                }
             state.error != null && state.posts.isEmpty() ->
                 Column(
                     modifier = Modifier.align(Alignment.Center).padding(20.dp),

@@ -127,11 +127,15 @@ fun ChapterReaderScreen(
             .background(AlKhatibColors.ScreenBackground)
     ) {
         if (state.isLoading && state.verses.isEmpty()) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = AlKhatibColors.DeepEmerald
-            )
-        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = AlKhatibColors.DeepEmerald
+                )
+            }
+        } else if (state.verses.isNotEmpty()) {
             VerticalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
@@ -147,17 +151,6 @@ fun ChapterReaderScreen(
                     onHadith = { verse.verseKey?.let(vm::openHadith) }
                 )
             }
-        }
-
-        if (state.isLoadingMore) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(bottom = 88.dp),
-                color = AlKhatibColors.DeepEmerald,
-                strokeWidth = 2.dp
-            )
         }
 
         // Top chrome — back + settings (TikTok-style overlay)

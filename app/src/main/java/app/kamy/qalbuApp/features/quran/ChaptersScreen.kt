@@ -33,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
+import app.kamy.qalbuApp.design.components.ChapterRowSkeleton
 import app.kamy.qalbuApp.design.components.AlKhatibRevelationChip
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
@@ -63,7 +65,12 @@ fun ChaptersScreen(
     val state by vm.state.collectAsState()
     val scope = rememberCoroutineScope()
     var isPullRefreshing by remember { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     val listBottomPadding = floatingNavBottomPadding()
+    val filteredChapters = remember(state.chapters, searchQuery) {
+        state.chapters.filteredBySearch(searchQuery)
+    }
+    val isSearching = searchQuery.isNotBlank()
 
     Box(
         modifier = Modifier
@@ -72,10 +79,32 @@ fun ChaptersScreen(
     ) {
         when {
             state.isLoading && state.chapters.isEmpty() && !isPullRefreshing ->
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .tabContentStatusBarInset()
+                ) {
+                    QuranListHeader(
+                        searchQuery = "",
+                        onSearchQueryChange = {},
+                        searchEnabled = false,
+                        resultCount = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                    )
+                    repeat(10) { index ->
+                        ChapterRowSkeleton(
+                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                        )
+                        if (index < 9) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                            )
+                        }
+                    }
+                }
             state.error != null && state.chapters.isEmpty() ->
                 Text(
                     text = state.error.orEmpty(),
@@ -97,6 +126,10 @@ fun ChaptersScreen(
             ) {
                 Column(Modifier.fillMaxSize()) {
                     QuranListHeader(
+                        searchQuery = searchQuery,
+                        onSearchQueryChange = { searchQuery = it },
+                        searchEnabled = true,
+                        resultCount = if (isSearching) filteredChapters.size else null,
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
@@ -107,9 +140,10 @@ fun ChaptersScreen(
                             .weight(1f),
                         contentPadding = PaddingValues(bottom = listBottomPadding)
                     ) {
-                        state.continueReading?.let { session ->
-                            item(key = "continue_reading") {
-                                ContinueReadingCard(
+                        if (!isSearching) {
+                            state.continueReading?.let { session ->
+                                item(key = "continue_reading") {
+                                    ContinueReadingCard(
                                     session = session,
                                     chapter = state.chapters.firstOrNull { it.id == session.chapterNumber },
                                     onTap = {
@@ -119,11 +153,18 @@ fun ChaptersScreen(
                                         horizontal = AlKhatibSpacing.screenHorizontal,
                                         vertical = AlKhatibSpacing.sm
                                     )
-                                )
+                                    )
+                                }
                             }
                         }
 
-                        items(state.chapters, key = { it.id }) { chapter ->
+                        if (isSearching && filteredChapters.isEmpty()) {
+                            item(key = "search_empty") {
+                                QuranSearchEmptyState(query = searchQuery)
+                            }
+                        }
+
+                        items(filteredChapters, key = { it.id }) { chapter ->
                             ChapterRow(
                                 chapter = chapter,
                                 onClick = { onOpenChapter(chapter, null) },
@@ -142,7 +183,13 @@ fun ChaptersScreen(
 }
 
 @Composable
-private fun QuranListHeader(modifier: Modifier = Modifier) {
+private fun QuranListHeader(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    searchEnabled: Boolean,
+    resultCount: Int?,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
             .tabContentStatusBarInset()
@@ -166,8 +213,14 @@ private fun QuranListHeader(modifier: Modifier = Modifier) {
                 fontWeight = FontWeight.Bold
             )
         }
+        val subtitle = when (resultCount) {
+            null -> "114 Surahs · The Noble Quran"
+            0 -> "No matches"
+            1 -> "1 surah found"
+            else -> "$resultCount surahs found"
+        }
         Text(
-            text = "114 Surahs · The Noble Quran",
+            text = subtitle,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 18.dp, top = 4.dp)
@@ -185,6 +238,12 @@ private fun QuranListHeader(modifier: Modifier = Modifier) {
                         )
                     )
                 )
+        )
+        Spacer(Modifier.height(AlKhatibSpacing.md))
+        QuranChapterSearchBar(
+            query = searchQuery,
+            onQueryChange = onSearchQueryChange,
+            enabled = searchEnabled
         )
     }
 }

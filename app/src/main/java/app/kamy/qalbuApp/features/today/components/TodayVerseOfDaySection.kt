@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.components.AlKhatibCard
+import app.kamy.qalbuApp.design.components.TodayVerseCardSkeleton
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
@@ -145,13 +146,7 @@ fun TodayVerseOfDaySection(
                     }
                 }
             } else if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                )
+                TodayVerseCardSkeleton(modifier = Modifier.fillMaxWidth())
             } else {
                 Text(
                     text = "No verse available. Pull to retry.",

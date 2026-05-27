@@ -5,4 +5,11 @@
         <item name="android:navigationBarColor">@color/al_khatib_emerald_night</item>
         <item name="android:windowBackground">@color/al_khatib_emerald_night</item>
     </style>
+
+    <style name="Theme.AlKhatib.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/al_khatib_emerald_night</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/al_khatib_emerald_night</item>
+        <item name="postSplashScreenTheme">@style/Theme.AlKhatib</item>
+    </style>
 </resources>

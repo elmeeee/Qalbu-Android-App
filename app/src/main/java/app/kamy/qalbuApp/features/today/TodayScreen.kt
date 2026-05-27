@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
@@ -38,6 +40,7 @@ import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
+import app.kamy.qalbuApp.features.today.components.TodayPrayerMascotSection
 import app.kamy.qalbuApp.features.today.components.TodayVerseOfDaySection
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.layout.floatingNavAndAudioBottomPadding
@@ -69,25 +72,46 @@ fun TodayScreen(
         )
     )
     val notificationsPermission = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-    var locationPrompted by remember { mutableStateOf(false) }
-    var notificationsPrompted by remember { mutableStateOf(false) }
+    // Saveable so tab switches do not re-trigger prompts.
+    var locationPrompted by rememberSaveable { mutableStateOf(false) }
+    var notificationsPrompted by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(locationPermissions.allPermissionsGranted) {
+    fun requestNotificationsIfNeeded() {
+        if (notificationsPrompted) return
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (notificationsPermission.status.isGranted) return
+        notificationsPrompted = true
+        notificationsPermission.launchPermissionRequest()
+    }
+
+    // First open: ask location, then notifications (never both dialogs at once).
+    LaunchedEffect(Unit) {
+        if (locationPrompted) return@LaunchedEffect
+        locationPrompted = true
         if (locationPermissions.allPermissionsGranted) {
             prayerVm.onPermissionGranted()
-        } else if (!locationPrompted) {
-            locationPrompted = true
+            requestNotificationsIfNeeded()
+        } else {
             locationPermissions.launchMultiplePermissionRequest()
         }
     }
-    LaunchedEffect(notificationsPermission.status.isGranted) {
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            !notificationsPermission.status.isGranted &&
-            !notificationsPrompted
-        ) {
-            notificationsPrompted = true
-            notificationsPermission.launchPermissionRequest()
+
+    LaunchedEffect(locationPermissions.allPermissionsGranted) {
+        if (!locationPrompted) return@LaunchedEffect
+        if (locationPermissions.allPermissionsGranted) {
+            prayerVm.onPermissionGranted()
+            requestNotificationsIfNeeded()
+        }
+    }
+
+    LaunchedEffect(locationPermissions.permissions.map { it.status }) {
+        if (!locationPrompted) return@LaunchedEffect
+        if (locationPermissions.allPermissionsGranted) return@LaunchedEffect
+        val locationAnswered = locationPermissions.permissions.any { permission ->
+            permission.status is PermissionStatus.Denied
+        }
+        if (locationAnswered) {
+            requestNotificationsIfNeeded()
         }
     }
 
@@ -146,12 +170,10 @@ fun TodayScreen(
                     contentPadding = PaddingValues(bottom = listBottomPadding)
                 ) {
                     item(key = "prayer_card") {
-                        Spacer(Modifier.height(16.dp))
-                        PrayerDashboardCard(
+                        Spacer(Modifier.height(8.dp))
+                        TodayPrayerMascotSection(
                             state = prayerState,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
+                            modifier = Modifier.padding(horizontal = 20.dp)
                         )
                     }
 
