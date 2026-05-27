@@ -5,6 +5,8 @@ import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
 import app.kamy.qalbuApp.infrastructure.network.api.AlAdhanApiService
+import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleBuilder
+import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleBundle
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -22,7 +24,8 @@ data class PrayerDayResult(
     val timings: List<PrayerEntry>,
     val cityName: String? = null,
     val hijriLabel: String? = null,
-    val gregorianLabel: String? = null
+    val gregorianLabel: String? = null,
+    val scheduleBundle: PrayerScheduleBundle? = null
 )
 
 /**
@@ -97,11 +100,13 @@ class AlAdhanRepository @Inject constructor(
         }.sortedBy { it.date }
 
         val (hijriLabel, gregorianLabel) = AlAdhanDateLabels.fromApiDate(data.date)
+        val scheduleBundle = PrayerScheduleBuilder.fromTimings(timings, baseDate)
         return PrayerDayResult(
             timings = entries,
             cityName = cityName,
             hijriLabel = hijriLabel,
-            gregorianLabel = gregorianLabel
+            gregorianLabel = gregorianLabel,
+            scheduleBundle = scheduleBundle
         )
     }
 

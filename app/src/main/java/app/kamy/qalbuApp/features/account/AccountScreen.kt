@@ -172,18 +172,60 @@ fun AccountScreen(
         AlKhatibSettingsGroup {
             AlKhatibSettingsToggleRow(
                 icon = Icons.Filled.Notifications,
-                title = "Daily verse reminder",
+                title = "Daily verse reminder · Today's surah & translation",
                 checked = state.dailyVerseEnabled,
                 onCheckedChange = vm::setDailyVerseEnabled
             )
             if (state.dailyVerseEnabled) {
                 AlKhatibSettingsNavigationRow(
                     icon = Icons.Filled.Schedule,
-                    title = "Reminder time",
+                    title = "Morning time",
                     subtitle = state.reminderTimeLabel.ifBlank { "07:00" },
                     onClick = { vm.toggleNotifTimeSheet(true) }
                 )
             }
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Notifications,
+                title = "Prayer times · Fajr, Dhuhr, Asr, Maghrib & Isha",
+                checked = state.adzanEnabled,
+                onCheckedChange = vm::setAdzanEnabled
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Schedule,
+                title = "Imsak · Reminder before Fajr while fasting",
+                checked = state.imsakEnabled,
+                onCheckedChange = vm::setImsakEnabled
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Schedule,
+                title = "Midnight · Halfway through the night",
+                checked = state.midnightEnabled,
+                onCheckedChange = vm::setMidnightEnabled
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Schedule,
+                title = "First third of night · Early night rest",
+                checked = state.firstThirdEnabled,
+                onCheckedChange = vm::setFirstThirdEnabled
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Schedule,
+                title = "Last third (Tahajud) · Best time for night prayer",
+                checked = state.tahajudEnabled,
+                onCheckedChange = vm::setTahajudEnabled
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.AutoMirrored.Filled.MenuBook,
+                title = "Surah Yasin · Thursday night before Jumu'ah",
+                checked = state.yasinReminderEnabled,
+                onCheckedChange = vm::setYasinReminderEnabled
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.AutoMirrored.Filled.MenuBook,
+                title = "Surah Al-Kahf · Friday reading reminder",
+                checked = state.kahfReminderEnabled,
+                onCheckedChange = vm::setKahfReminderEnabled
+            )
         }
 
         if (state.isSignedIn) {

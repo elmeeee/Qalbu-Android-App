@@ -9,8 +9,10 @@ import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
+import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseNotificationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
+import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
@@ -48,7 +50,14 @@ data class AccountUiState(
     val dailyVerseEnabled: Boolean = true,
     val reminderHour: Int = DailyVerseNotificationStore.DEFAULT_HOUR,
     val reminderMinute: Int = DailyVerseNotificationStore.DEFAULT_MINUTE,
-    val reminderTimeLabel: String = ""
+    val reminderTimeLabel: String = "",
+    val adzanEnabled: Boolean = true,
+    val imsakEnabled: Boolean = true,
+    val midnightEnabled: Boolean = true,
+    val firstThirdEnabled: Boolean = true,
+    val tahajudEnabled: Boolean = true,
+    val yasinReminderEnabled: Boolean = true,
+    val kahfReminderEnabled: Boolean = true
 )
 
 /**
@@ -64,7 +73,8 @@ class AccountViewModel @Inject constructor(
     private val alAdhanRepository: AlAdhanRepository,
     private val prayerMethodStore: PrayerCalculationStore,
     private val translationStore: TranslationPreferencesStore,
-    private val notificationStore: DailyVerseNotificationStore
+    private val notificationStore: DailyVerseNotificationStore,
+    private val prayerNotificationPrefs: PrayerNotificationPreferencesStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountUiState(isSignedIn = userSession.isSignedIn.value))
@@ -123,6 +133,27 @@ class AccountViewModel @Inject constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            prayerNotificationPrefs.changeTick.collect { syncPrayerNotificationState() }
+        }
+    }
+
+    private fun syncPrayerNotificationState() {
+        _state.update {
+            it.copy(
+                adzanEnabled = prayerNotificationPrefs.isAdzanEnabled(),
+                imsakEnabled = prayerNotificationPrefs.isImsakEnabled(),
+                midnightEnabled = prayerNotificationPrefs.isMidnightEnabled(),
+                firstThirdEnabled = prayerNotificationPrefs.isFirstThirdEnabled(),
+                tahajudEnabled = prayerNotificationPrefs.isTahajudEnabled(),
+                yasinReminderEnabled = prayerNotificationPrefs.isYasinReminderEnabled(),
+                kahfReminderEnabled = prayerNotificationPrefs.isKahfReminderEnabled()
+            )
+        }
+    }
+
+    private fun reschedulePrayerNotifications() {
+        PrayerNotificationCoordinator.rescheduleFromCache(appContext)
     }
 
     private fun syncPreferencesIntoState() {
@@ -249,6 +280,41 @@ class AccountViewModel @Inject constructor(
 
     fun setPrayerMethod(method: PrayerCalculationMethod) {
         prayerMethodStore.setMethod(method)
+    }
+
+    fun setAdzanEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setAdzanEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
+    fun setImsakEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setImsakEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
+    fun setMidnightEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setMidnightEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
+    fun setFirstThirdEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setFirstThirdEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
+    fun setTahajudEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setTahajudEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
+    fun setYasinReminderEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setYasinReminderEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
+    fun setKahfReminderEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setKahfReminderEnabled(enabled)
+        reschedulePrayerNotifications()
     }
 
     fun filteredTranslations(): List<QFTranslation> {

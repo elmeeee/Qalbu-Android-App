@@ -1,14 +1,18 @@
 package app.kamy.qalbuApp.features.today
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.infrastructure.location.LocationProvider
+import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
+import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,9 +47,11 @@ data class PrayerUiState(
  */
 @HiltViewModel
 class PrayerDashboardViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val repository: AlAdhanRepository,
     private val locationProvider: LocationProvider,
-    private val prayerMethodStore: PrayerCalculationStore
+    private val prayerMethodStore: PrayerCalculationStore,
+    private val prayerNotificationPrefs: PrayerNotificationPreferencesStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PrayerUiState())
@@ -57,6 +63,11 @@ class PrayerDashboardViewModel @Inject constructor(
         viewModelScope.launch { refresh() }
         viewModelScope.launch {
             prayerMethodStore.method.drop(1).collect { refresh() }
+        }
+        viewModelScope.launch {
+            prayerNotificationPrefs.changeTick.drop(1).collect {
+                PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+            }
         }
         // 1s ticker recomputes active prayer + countdown every second.
         viewModelScope.launch {
@@ -106,6 +117,9 @@ class PrayerDashboardViewModel @Inject constructor(
                 )
             }
             recomputeActiveAndCountdown()
+            result.scheduleBundle?.let { bundle ->
+                PrayerNotificationCoordinator.onScheduleUpdated(appContext, bundle)
+            }
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.message ?: "Prayer fetch failed") }
         }
