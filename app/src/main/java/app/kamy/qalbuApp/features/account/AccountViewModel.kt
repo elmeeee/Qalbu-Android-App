@@ -5,6 +5,10 @@ import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
+import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
+import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
+import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
+import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +35,9 @@ data class AccountUiState(
     val translatorQuery: String = "",
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
-    val prayerMethod: Int = 20,
+    val prayerMethod: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
+    val prayerMethods: List<PrayerMethodOption> = emptyList(),
+    val prayerMethodsLoading: Boolean = false,
     val dailyVerseEnabled: Boolean = true
 )
 
@@ -43,17 +49,25 @@ data class AccountUiState(
 class AccountViewModel @Inject constructor(
     private val userSession: UserSession,
     private val reflectRepository: ReflectRepository,
-    private val contentRepository: ContentRepository
+    private val contentRepository: ContentRepository,
+    private val alAdhanRepository: AlAdhanRepository,
+    private val prayerMethodStore: PrayerCalculationStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountUiState(isSignedIn = userSession.isSignedIn.value))
     val state: StateFlow<AccountUiState> = _state.asStateFlow()
 
     init {
+        _state.update { it.copy(prayerMethod = prayerMethodStore.current()) }
         viewModelScope.launch {
             userSession.isSignedIn.collect { signedIn ->
                 _state.update { it.copy(isSignedIn = signedIn) }
                 if (signedIn) fetchProfile() else _state.update { it.copy(profile = null) }
+            }
+        }
+        viewModelScope.launch {
+            prayerMethodStore.method.collect { method ->
+                _state.update { it.copy(prayerMethod = method) }
             }
         }
     }
@@ -103,11 +117,29 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-    fun togglePrayerSheet(show: Boolean) = _state.update { it.copy(showPrayerSheet = show) }
+    fun togglePrayerSheet(show: Boolean) {
+        _state.update { it.copy(showPrayerSheet = show) }
+        if (show && _state.value.prayerMethods.isEmpty()) loadPrayerMethods()
+    }
+
+    private fun loadPrayerMethods() {
+        _state.update { it.copy(prayerMethodsLoading = true) }
+        viewModelScope.launch {
+            runCatching { alAdhanRepository.fetchCalculationMethods() }
+                .onSuccess { methods ->
+                    _state.update { it.copy(prayerMethodsLoading = false, prayerMethods = methods) }
+                }
+                .onFailure {
+                    _state.update { it.copy(prayerMethodsLoading = false) }
+                }
+        }
+    }
     fun toggleNotifTimeSheet(show: Boolean) = _state.update { it.copy(showNotifTimeSheet = show) }
     fun setShowTranslation(enabled: Boolean) = _state.update { it.copy(showTranslation = enabled) }
     fun setDailyVerseEnabled(enabled: Boolean) = _state.update { it.copy(dailyVerseEnabled = enabled) }
-    fun setPrayerMethod(method: Int) = _state.update { it.copy(prayerMethod = method) }
+    fun setPrayerMethod(method: PrayerCalculationMethod) {
+        prayerMethodStore.setMethod(method)
+    }
 
     val filteredTranslations: List<QFTranslation>
         get() {

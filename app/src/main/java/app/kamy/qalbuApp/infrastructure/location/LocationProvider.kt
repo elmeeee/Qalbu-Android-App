@@ -19,6 +19,11 @@ import javax.inject.Singleton
 
 data class UserLocation(val latitude: Double, val longitude: Double)
 
+data class ReverseGeocodeResult(
+    val cityName: String? = null,
+    val countryCode: String? = null
+)
+
 /**
  * Thin FusedLocation wrapper. Returns null when the user hasn't granted
  * either ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION.
@@ -46,22 +51,28 @@ class LocationProvider @Inject constructor(
         return null
     }
 
-    /** Mirrors iOS PrayerTimesViewModel reverse geocode for header city label. */
-    suspend fun reverseGeocodeCity(latitude: Double, longitude: Double): String? =
+    /** Mirrors iOS PrayerTimesViewModel reverse geocode for city + country auto-detect. */
+    suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult =
         withContext(Dispatchers.IO) {
-            if (!Geocoder.isPresent()) return@withContext null
+            if (!Geocoder.isPresent()) return@withContext ReverseGeocodeResult()
             try {
                 @Suppress("DEPRECATION")
-                val addresses = Geocoder(context, Locale.getDefault()).getFromLocation(latitude, longitude, 1)
-                addresses?.firstOrNull()?.let { address ->
-                    address.locality?.takeIf { it.isNotBlank() }
-                        ?: address.subAdminArea?.takeIf { it.isNotBlank() }
-                        ?: address.adminArea?.takeIf { it.isNotBlank() }
-                }
+                val address = Geocoder(context, Locale.getDefault())
+                    .getFromLocation(latitude, longitude, 1)
+                    ?.firstOrNull()
+                ReverseGeocodeResult(
+                    cityName = address?.locality?.takeIf { it.isNotBlank() }
+                        ?: address?.subAdminArea?.takeIf { it.isNotBlank() }
+                        ?: address?.adminArea?.takeIf { it.isNotBlank() },
+                    countryCode = address?.countryCode?.takeIf { it.isNotBlank() }
+                )
             } catch (_: Throwable) {
-                null
+                ReverseGeocodeResult()
             }
         }
+
+    suspend fun reverseGeocodeCity(latitude: Double, longitude: Double): String? =
+        reverseGeocode(latitude, longitude).cityName
 
     fun coordinateLabel(latitude: Double, longitude: Double): String =
         String.format(Locale.US, "%.3f, %.3f", latitude, longitude)

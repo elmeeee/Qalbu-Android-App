@@ -3,7 +3,9 @@ package app.kamy.qalbuApp.features.today
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.domain.model.PrayerType
+import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.infrastructure.location.LocationProvider
+import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -41,7 +44,8 @@ data class PrayerUiState(
 @HiltViewModel
 class PrayerDashboardViewModel @Inject constructor(
     private val repository: AlAdhanRepository,
-    private val locationProvider: LocationProvider
+    private val locationProvider: LocationProvider,
+    private val prayerMethodStore: PrayerCalculationStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PrayerUiState())
@@ -51,6 +55,9 @@ class PrayerDashboardViewModel @Inject constructor(
 
     init {
         viewModelScope.launch { refresh() }
+        viewModelScope.launch {
+            prayerMethodStore.method.drop(1).collect { refresh() }
+        }
         // 1s ticker recomputes active prayer + countdown every second.
         viewModelScope.launch {
             while (true) {
@@ -71,13 +78,21 @@ class PrayerDashboardViewModel @Inject constructor(
             _state.update { it.copy(isLoading = false, error = "Could not determine location") }
             return
         }
-        val cityLabel = locationProvider.reverseGeocodeCity(loc.latitude, loc.longitude)
+        val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
+        if (!prayerMethodStore.hasSavedPreference) {
+            geocode.countryCode?.let { code ->
+                prayerMethodStore.setMethod(PrayerCalculationMethod.forCountryCode(code))
+            }
+        }
+        val cityLabel = geocode.cityName
             ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
+        val calculationMethod = prayerMethodStore.current()
         try {
             val result = repository.fetchTimings(
                 latitude = loc.latitude,
                 longitude = loc.longitude,
-                cityName = cityLabel
+                cityName = cityLabel,
+                method = calculationMethod
             )
             _state.update {
                 it.copy(

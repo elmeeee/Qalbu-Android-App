@@ -60,6 +60,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.QFTranslation
+import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
+import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
 import app.kamy.qalbuApp.infrastructure.auth.OAuthService
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
@@ -123,7 +125,7 @@ fun AccountScreen(
         SettingsRow(
             icon = Icons.Filled.Schedule,
             title = "Prayer calculation method",
-            subtitle = methodLabel(state.prayerMethod),
+            subtitle = state.prayerMethod.organization,
             onClick = { vm.togglePrayerSheet(true) }
         )
         SettingsRowToggle(
@@ -194,6 +196,8 @@ fun AccountScreen(
     if (state.showPrayerSheet) {
         PrayerMethodSheet(
             selected = state.prayerMethod,
+            methods = state.prayerMethods,
+            isLoading = state.prayerMethodsLoading,
             onSelect = vm::setPrayerMethod,
             onDismiss = { vm.togglePrayerSheet(false) }
         )
@@ -431,45 +435,69 @@ private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PrayerMethodSheet(selected: Int, onSelect: (Int) -> Unit, onDismiss: () -> Unit) {
+private fun PrayerMethodSheet(
+    selected: PrayerCalculationMethod,
+    methods: List<PrayerMethodOption>,
+    isLoading: Boolean,
+    onSelect: (PrayerCalculationMethod) -> Unit,
+    onDismiss: () -> Unit
+) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val methods = listOf(
-        20 to "Muhammadiyah (Indonesia)",
-        2 to "ISNA (North America)",
-        3 to "Muslim World League",
-        4 to "Umm al-Qura (Saudi Arabia)",
-        5 to "Egyptian General Authority",
-        7 to "Karachi (University of Islamic Sciences)"
-    )
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Calculation method", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald)
-            methods.forEach { (id, label) ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                "Calculation method",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            if (isLoading) {
+                Text("Loading methods…", color = AlKhatibColors.Slate500)
+            } else {
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (selected == id) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent)
-                        .clickable { onSelect(id); onDismiss() }
-                        .padding(14.dp)
+                        .height(420.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(label, color = AlKhatibColors.Slate900, modifier = Modifier.weight(1f))
-                    if (selected == id) Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                    items(methods, key = { "${it.apiKey}-${it.aladhanId}" }) { option ->
+                        val isSelected = selected == option.method
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                                )
+                                .clickable {
+                                    onSelect(option.method)
+                                    onDismiss()
+                                }
+                                .padding(14.dp)
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(option.name, color = AlKhatibColors.Slate900, fontWeight = FontWeight.Medium)
+                                Text(
+                                    option.organization,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = AlKhatibColors.Slate500
+                                )
+                            }
+                            if (isSelected) {
+                                Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-}
-
-private fun methodLabel(method: Int): String = when (method) {
-    20 -> "Muhammadiyah"
-    2 -> "ISNA"
-    3 -> "Muslim World League"
-    4 -> "Umm al-Qura"
-    5 -> "Egyptian General Authority"
-    7 -> "Karachi"
-    else -> "Method $method"
 }
 
 private fun scaleLabel(scale: Float): String = when {

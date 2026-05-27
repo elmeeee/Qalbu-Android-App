@@ -13,17 +13,33 @@ import kotlinx.serialization.Serializable
  */
 interface AlAdhanApiService {
 
+    @GET("methods")
+    suspend fun getMethods(): AlAdhanMethodsResponse
+
     @GET("timings/{timestamp}")
     suspend fun getTimings(
         @Path("timestamp") timestamp: Long,
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
-        @Query("method") method: Int = 20,
+        @Query("method") method: Int,
         @Query("school") school: Int = 0,
-        @Query("tune") tune: String? = null,
+        @Query("tune") tune: String,
         @Query("methodSettings") methodSettings: String? = null
     ): AlAdhanResponse
 }
+
+@Serializable
+data class AlAdhanMethodsResponse(
+    val code: Int? = null,
+    val status: String? = null,
+    val data: Map<String, AlAdhanMethodEntry>? = null
+)
+
+@Serializable
+data class AlAdhanMethodEntry(
+    val id: Int,
+    val name: String? = null
+)
 
 @Serializable
 data class AlAdhanResponse(

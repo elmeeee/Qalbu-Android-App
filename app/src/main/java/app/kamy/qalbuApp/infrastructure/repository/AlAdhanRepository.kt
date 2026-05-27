@@ -2,6 +2,8 @@ package app.kamy.qalbuApp.infrastructure.repository
 
 import app.kamy.qalbuApp.core.error.qfCall
 import app.kamy.qalbuApp.domain.model.PrayerType
+import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
+import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
 import app.kamy.qalbuApp.infrastructure.network.api.AlAdhanApiService
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -35,12 +37,42 @@ class AlAdhanRepository @Inject constructor(
 ) {
     private val timeFormatPatterns = listOf("HH:mm (zzz)", "HH:mm")
 
+    /** All calculation methods from Al-Adhan, with Muhammadiyah (99) replacing unnamed CUSTOM. */
+    suspend fun fetchCalculationMethods(): List<PrayerMethodOption> {
+        val resp = qfCall { api.getMethods() }
+        val fromApi = resp.data.orEmpty()
+            .filterKeys { it != "CUSTOM" }
+            .map { (key, entry) ->
+                val method = PrayerCalculationMethod.fromAladhanId(entry.id)
+                PrayerMethodOption(
+                    aladhanId = entry.id,
+                    apiKey = key,
+                    name = entry.name?.takeIf { it.isNotBlank() } ?: method.displayName,
+                    method = method
+                )
+            }
+        val muhammadiyah = PrayerMethodOption(
+            aladhanId = PrayerCalculationMethod.MUHAMMADIYAH.aladhanMethodId,
+            apiKey = "MUHAMMADIYAH",
+            name = PrayerCalculationMethod.MUHAMMADIYAH.displayName,
+            method = PrayerCalculationMethod.MUHAMMADIYAH
+        )
+        val kemenag = fromApi.firstOrNull { it.aladhanId == 20 }
+        val rest = fromApi
+            .filter { it.aladhanId != 20 }
+            .sortedBy { it.name.lowercase() }
+        return buildList {
+            add(muhammadiyah)
+            if (kemenag != null) add(kemenag)
+            addAll(rest)
+        }
+    }
+
     suspend fun fetchTimings(
         latitude: Double,
         longitude: Double,
         cityName: String? = null,
-        method: Int = 20,
-        school: Int = 0,
+        method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
         timestamp: Long = System.currentTimeMillis() / 1000L
     ): PrayerDayResult {
         val resp = qfCall {
@@ -48,8 +80,10 @@ class AlAdhanRepository @Inject constructor(
                 timestamp = timestamp,
                 latitude = latitude,
                 longitude = longitude,
-                method = method,
-                school = school
+                method = method.aladhanMethodId,
+                school = method.aladhanSchool,
+                tune = method.aladhanTune,
+                methodSettings = method.aladhanMethodSettings
             )
         }
         val data = resp.data ?: return PrayerDayResult(emptyList(), cityName)
