@@ -7,6 +7,7 @@ import app.kamy.qalbuApp.domain.adhan.AdhanVoice
 import app.kamy.qalbuApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
+import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
 import app.kamy.qalbuApp.infrastructure.audio.AdhanPreviewPlayer
@@ -55,7 +56,11 @@ data class AccountUiState(
     val reminderHour: Int = DailyVerseNotificationStore.DEFAULT_HOUR,
     val reminderMinute: Int = DailyVerseNotificationStore.DEFAULT_MINUTE,
     val reminderTimeLabel: String = "",
-    val adzanEnabled: Boolean = true,
+    val fajrNotificationEnabled: Boolean = true,
+    val dhuhrNotificationEnabled: Boolean = true,
+    val asrNotificationEnabled: Boolean = true,
+    val maghribNotificationEnabled: Boolean = true,
+    val ishaNotificationEnabled: Boolean = true,
     val imsakEnabled: Boolean = true,
     val midnightEnabled: Boolean = true,
     val firstThirdEnabled: Boolean = true,
@@ -65,7 +70,16 @@ data class AccountUiState(
     val showAdhanSheet: Boolean = false,
     val selectedAdhanVoice: AdhanVoice = AdhanVoice.DEFAULT,
     val previewingAdhanVoiceId: String? = null
-)
+) {
+    fun isPrayerNotificationEnabled(type: PrayerType): Boolean = when (type) {
+        PrayerType.FAJR -> fajrNotificationEnabled
+        PrayerType.DHUHR -> dhuhrNotificationEnabled
+        PrayerType.ASR -> asrNotificationEnabled
+        PrayerType.MAGHRIB -> maghribNotificationEnabled
+        PrayerType.ISHA -> ishaNotificationEnabled
+        else -> false
+    }
+}
 
 /**
  * Mirrors iOS Features/Settings/ViewModels/ProfileViewModel.swift +
@@ -160,7 +174,11 @@ class AccountViewModel @Inject constructor(
     private fun syncPrayerNotificationState() {
         _state.update {
             it.copy(
-                adzanEnabled = prayerNotificationPrefs.isAdzanEnabled(),
+                fajrNotificationEnabled = prayerNotificationPrefs.isPrayerEnabled(PrayerType.FAJR),
+                dhuhrNotificationEnabled = prayerNotificationPrefs.isPrayerEnabled(PrayerType.DHUHR),
+                asrNotificationEnabled = prayerNotificationPrefs.isPrayerEnabled(PrayerType.ASR),
+                maghribNotificationEnabled = prayerNotificationPrefs.isPrayerEnabled(PrayerType.MAGHRIB),
+                ishaNotificationEnabled = prayerNotificationPrefs.isPrayerEnabled(PrayerType.ISHA),
                 imsakEnabled = prayerNotificationPrefs.isImsakEnabled(),
                 midnightEnabled = prayerNotificationPrefs.isMidnightEnabled(),
                 firstThirdEnabled = prayerNotificationPrefs.isFirstThirdEnabled(),
@@ -301,8 +319,8 @@ class AccountViewModel @Inject constructor(
         prayerMethodStore.setMethod(method)
     }
 
-    fun setAdzanEnabled(enabled: Boolean) {
-        prayerNotificationPrefs.setAdzanEnabled(enabled)
+    fun setPrayerNotificationEnabled(type: PrayerType, enabled: Boolean) {
+        prayerNotificationPrefs.setPrayerEnabled(type, enabled)
         reschedulePrayerNotifications()
     }
 
@@ -355,7 +373,15 @@ class AccountViewModel @Inject constructor(
     fun notificationSummary(state: AccountUiState = _state.value): String {
         val labels = buildList {
             if (state.dailyVerseEnabled) add("Daily verse")
-            if (state.adzanEnabled) add("Prayer")
+            val enabledPrayers = PrayerType.ADZAN_NOTIFICATION_PRAYERS
+                .filter { state.isPrayerNotificationEnabled(it) }
+                .map { it.aladhanKey }
+            when {
+                enabledPrayers.size == PrayerType.ADZAN_NOTIFICATION_PRAYERS.size ->
+                    add("Prayer")
+                enabledPrayers.isNotEmpty() ->
+                    add(enabledPrayers.joinToString(", "))
+            }
             if (state.imsakEnabled) add("Imsak")
             if (state.midnightEnabled) add("Midnight")
             if (state.firstThirdEnabled) add("1st third")

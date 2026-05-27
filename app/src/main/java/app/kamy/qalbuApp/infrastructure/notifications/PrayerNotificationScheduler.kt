@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.kamy.qalbuApp.MainActivity
@@ -34,8 +33,8 @@ object PrayerNotificationScheduler {
         NotificationChannels.ensureAll(context)
         val now = System.currentTimeMillis()
 
-        if (options.adzanEnabled) {
-            bundle.adzanPrayers.forEachIndexed { index, prayer ->
+        bundle.adzanPrayers.forEachIndexed { index, prayer ->
+                if (!options.isAdzanEnabledFor(prayer.name)) return@forEachIndexed
                 PrayerScheduleBuilder.upcomingOccurrences(
                     prayer.fireAtMillis,
                     now,
@@ -55,7 +54,6 @@ object PrayerNotificationScheduler {
                         )
                     }
             }
-        }
 
         if (options.imsakEnabled) {
             bundle.imsak?.let { imsak ->
@@ -128,7 +126,7 @@ object PrayerNotificationScheduler {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        setExactAlarm(alarmManager, cal.timeInMillis, pending)
+        setExactAlarm(context, alarmManager, cal.timeInMillis, pending)
     }
 
     fun scheduleSunnahReminders(context: Context, options: PrayerNotificationScheduleOptions) {
@@ -266,17 +264,34 @@ object PrayerNotificationScheduler {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            setExactAlarm(alarmManager, fireAt, pending)
+            setExactAlarm(context, alarmManager, fireAt, pending)
         }
     }
 
-    private fun setExactAlarm(alarmManager: AlarmManager, fireAt: Long, pending: PendingIntent) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, fireAt, pending)
-        } else {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, fireAt, pending)
-        }
+    /**
+     * Uses [AlarmManager.setAlarmClock] so prayer/adhan fires on time in Doze without relying on
+     * the user granting SCHEDULE_EXACT_ALARM (inexact [setAndAllowWhileIdle] often batches until
+     * the app is opened).
+     */
+    private fun setExactAlarm(
+        context: Context,
+        alarmManager: AlarmManager,
+        fireAt: Long,
+        pending: PendingIntent
+    ) {
+        val showIntent = PendingIntent.getActivity(
+            context,
+            SHOW_ALARM_INTENT_REQUEST,
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmClock = AlarmManager.AlarmClockInfo(fireAt, showIntent)
+        alarmManager.setAlarmClock(alarmClock, pending)
     }
+
+    private const val SHOW_ALARM_INTENT_REQUEST = 7_001
 
     private fun pendingAlarm(context: Context, requestCode: Int): PendingIntent {
         val intent = Intent(context, PrayerNotificationReceiver::class.java)

@@ -92,15 +92,15 @@ class AdhanPlaybackService : Service() {
         private const val EXTRA_TITLE = "title"
         private const val EXTRA_BODY = "body"
 
-        fun start(context: Context, @RawRes rawRes: Int, title: String, body: String) {
+        fun start(context: Context, @RawRes rawRes: Int, title: String, body: String): Boolean {
             val intent = Intent(context, AdhanPlaybackService::class.java).apply {
                 putExtra(EXTRA_RAW_RES, rawRes)
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_BODY, body)
             }
-            runCatching {
+            return runCatching {
                 androidx.core.content.ContextCompat.startForegroundService(context, intent)
-            }
+            }.isSuccess
         }
     }
 }

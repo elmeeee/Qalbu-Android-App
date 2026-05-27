@@ -45,11 +45,14 @@ data class PrayerScheduleBundle(
 }
 
 data class PrayerNotificationScheduleOptions(
-    val adzanEnabled: Boolean,
+    /** Al-Adhan keys enabled for adhan, e.g. "Fajr", "Dhuhr". */
+    val enabledAdzanPrayers: Set<String>,
     val imsakEnabled: Boolean,
     val midnightEnabled: Boolean,
     val firstThirdEnabled: Boolean,
     val lastThirdEnabled: Boolean,
     val yasinReminderEnabled: Boolean,
     val kahfReminderEnabled: Boolean
-)
+) {
+    fun isAdzanEnabledFor(prayerName: String): Boolean = prayerName in enabledAdzanPrayers
+}

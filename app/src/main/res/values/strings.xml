@@ -20,4 +20,9 @@
 
     <string name="recitation_notification_channel">Quran recitation</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
+    <string name="battery_opt_snackbar_message">Allow unrestricted battery use so adhan and prayer reminders work when the app is closed.</string>
+    <string name="battery_opt_snackbar_oem_message">On %1$s phones: set Qalbu to Unrestricted / No restrictions and enable autostart so adhan works in the background.</string>
+    <string name="battery_opt_settings_title">Background &amp; battery</string>
+    <string name="battery_opt_settings_subtitle">Unrestricted — required for adhan when app is closed</string>
+    <string name="battery_opt_settings_subtitle_ok">Unrestricted — background reminders enabled</string>
 </resources>

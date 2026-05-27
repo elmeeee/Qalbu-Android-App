@@ -40,8 +40,12 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.ui.permissions.areAppNotificationsEnabled
 import app.kamy.qalbuApp.ui.permissions.canScheduleExactAlarms
+import app.kamy.qalbuApp.ui.permissions.hasAggressiveOemBatteryManagement
+import app.kamy.qalbuApp.ui.permissions.isIgnoringBatteryOptimizations
 import app.kamy.qalbuApp.ui.permissions.openAppNotificationSettings
+import app.kamy.qalbuApp.ui.permissions.openBackgroundReliabilitySettings
 import app.kamy.qalbuApp.ui.permissions.openExactAlarmSettings
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
@@ -80,6 +84,7 @@ fun TodayScreen(
     var locationPrompted by rememberSaveable(key = "location_prompt_v2") { mutableStateOf(false) }
     var notificationsPrompted by rememberSaveable(key = "notifications_prompt_v2") { mutableStateOf(false) }
     var exactAlarmPrompted by rememberSaveable(key = "exact_alarm_prompt_v2") { mutableStateOf(false) }
+    var batteryOptPrompted by rememberSaveable(key = "battery_opt_prompt_v1") { mutableStateOf(false) }
 
     suspend fun showNotificationSettingsSnackbar() {
         val result = snackbarHostState.showSnackbar(
@@ -161,6 +166,33 @@ fun TodayScreen(
         )
         if (result == SnackbarResult.ActionPerformed) {
             context.openExactAlarmSettings()
+        }
+    }
+
+    // Battery / autostart whitelist (especially Samsung, Xiaomi, Oppo).
+    LaunchedEffect(prayerState.timings.isNotEmpty(), exactAlarmPrompted, batteryOptPrompted) {
+        if (batteryOptPrompted || prayerState.timings.isEmpty()) return@LaunchedEffect
+        if (!exactAlarmPrompted && !context.canScheduleExactAlarms()) return@LaunchedEffect
+        if (context.isIgnoringBatteryOptimizations() && !hasAggressiveOemBatteryManagement()) {
+            return@LaunchedEffect
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return@LaunchedEffect
+        batteryOptPrompted = true
+        val message = if (hasAggressiveOemBatteryManagement()) {
+            context.getString(
+                R.string.battery_opt_snackbar_oem_message,
+                Build.MANUFACTURER.replaceFirstChar { it.titlecase() }
+            )
+        } else {
+            context.getString(R.string.battery_opt_snackbar_message)
+        }
+        val result = snackbarHostState.showSnackbar(
+            message = message,
+            actionLabel = "Allow",
+            duration = SnackbarDuration.Long
+        )
+        if (result == SnackbarResult.ActionPerformed) {
+            context.openBackgroundReliabilitySettings()
         }
     }
 

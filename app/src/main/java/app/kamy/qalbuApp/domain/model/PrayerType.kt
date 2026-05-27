@@ -12,6 +12,8 @@ enum class PrayerType(val aladhanKey: String) {
     ISHA("Isha");
 
     companion object {
+        val ADZAN_NOTIFICATION_PRAYERS = listOf(FAJR, DHUHR, ASR, MAGHRIB, ISHA)
+
         fun fromAladhanKey(key: String): PrayerType? = entries.firstOrNull { it.aladhanKey == key }
     }
 }

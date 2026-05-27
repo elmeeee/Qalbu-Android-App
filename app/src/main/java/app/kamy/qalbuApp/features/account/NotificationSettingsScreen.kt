@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
@@ -27,7 +28,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.domain.model.PrayerType
+import app.kamy.qalbuApp.ui.permissions.isIgnoringBatteryOptimizations
+import app.kamy.qalbuApp.ui.permissions.openBackgroundReliabilitySettings
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsGroup
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsNavigationRow
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsToggleRow
@@ -40,6 +47,8 @@ fun NotificationSettingsScreen(
     onBack: () -> Unit
 ) {
     val state by vm.state.collectAsState()
+    val context = LocalContext.current
+    val batteryUnrestricted = context.isIgnoringBatteryOptimizations()
 
     Column(
         modifier = Modifier
@@ -97,13 +106,29 @@ fun NotificationSettingsScreen(
 
         NotificationSectionLabel("Prayer")
         AlKhatibSettingsGroup {
-            AlKhatibSettingsToggleRow(
-                icon = Icons.Filled.Notifications,
-                title = "Prayer times",
-                subtitle = "Fajr, Dhuhr, Asr, Maghrib & Isha with adhan",
-                checked = state.adzanEnabled,
-                onCheckedChange = vm::setAdzanEnabled
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.BatteryChargingFull,
+                title = stringResource(R.string.battery_opt_settings_title),
+                subtitle = stringResource(
+                    if (batteryUnrestricted) {
+                        R.string.battery_opt_settings_subtitle_ok
+                    } else {
+                        R.string.battery_opt_settings_subtitle
+                    }
+                ),
+                onClick = { context.openBackgroundReliabilitySettings() }
             )
+            PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { prayer ->
+                AlKhatibSettingsToggleRow(
+                    icon = Icons.Filled.Notifications,
+                    title = prayer.aladhanKey,
+                    subtitle = prayerNotificationSubtitle(prayer),
+                    checked = state.isPrayerNotificationEnabled(prayer),
+                    onCheckedChange = { enabled ->
+                        vm.setPrayerNotificationEnabled(prayer, enabled)
+                    }
+                )
+            }
             AlKhatibSettingsToggleRow(
                 icon = Icons.Filled.WbTwilight,
                 title = "Imsak",
@@ -158,6 +183,15 @@ fun NotificationSettingsScreen(
 
         Spacer(Modifier.height(AlKhatibSpacing.xl))
     }
+}
+
+private fun prayerNotificationSubtitle(prayer: PrayerType): String = when (prayer) {
+    PrayerType.FAJR -> "Adhan at dawn"
+    PrayerType.DHUHR -> "Adhan at midday"
+    PrayerType.ASR -> "Adhan in the afternoon"
+    PrayerType.MAGHRIB -> "Adhan at sunset"
+    PrayerType.ISHA -> "Adhan at night"
+    else -> ""
 }
 
 @Composable

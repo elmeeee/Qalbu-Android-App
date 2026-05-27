@@ -15,6 +15,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent == null) return
+        val pendingResult = goAsync()
         val appContext = context.applicationContext
         val channelId = intent.getStringExtra(EXTRA_CHANNEL_ID) ?: NotificationChannels.PRAYER
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
@@ -23,13 +24,11 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         val playAdhan = intent.getBooleanExtra(EXTRA_PLAY_ADHAN, false)
         val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
 
-        // Play adhan even when notification permission is off (exact-alarm delivery).
+        var adhanPlaying = false
         if (playAdhan && !prayerName.isNullOrBlank()) {
             val voice = AdhanPreferencesStore.from(appContext).currentVoice()
             val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice)
-            runCatching {
-                AdhanPlaybackService.start(appContext, rawRes, title, body)
-            }
+            adhanPlaying = AdhanPlaybackService.start(appContext, rawRes, title, body)
         }
 
         if (title.isNotEmpty()) {
@@ -39,17 +38,17 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 channelId = channelId,
                 title = title,
                 body = body,
-                silent = playAdhan
+                // If foreground adhan could not start (OEM restrictions), use channel sound.
+                silent = playAdhan && adhanPlaying
             )
         }
 
-        val pending = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
             try {
                 // Roll alarms forward only — avoid network + Hilt on every adhan fire.
                 PrayerNotificationCoordinator.rescheduleFromCache(appContext)
             } finally {
-                pending.finish()
+                pendingResult.finish()
             }
         }
     }
