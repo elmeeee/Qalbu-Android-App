@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
+import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import java.util.Calendar
@@ -93,6 +94,7 @@ fun TodayHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .tabContentStatusBarInset()
             .background(MaterialTheme.colorScheme.background)
     ) {
         Row(

@@ -35,7 +35,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
-import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
+import app.kamy.qalbuApp.ui.layout.tabContentBottomInset
 import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
@@ -103,6 +103,7 @@ fun TodayScreen(
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
+                .tabContentBottomInset()
         ) {
             TodayHeader(
                 cityName = prayerState.cityName,
@@ -173,7 +174,6 @@ fun TodayScreen(
                 },
                 onTafsir = { todayVm.openTafsir() }
             )
-            Spacer(Modifier.height(AlKhatibSpacing.bottomNavClearance))
         }
 
         SnackbarHost(

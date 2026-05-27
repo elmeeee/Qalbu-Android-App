@@ -72,6 +72,7 @@ import app.kamy.qalbuApp.design.components.AlKhatibSettingsNavigationRow
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsToggleRow
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
+import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
@@ -111,6 +112,7 @@ fun AccountScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
         verticalArrangement = Arrangement.spacedBy(AlKhatibSpacing.lg)
@@ -198,7 +200,7 @@ fun AccountScreen(
                 Text("Sign out")
             }
         }
-        Spacer(Modifier.height(AlKhatibSpacing.bottomNavClearance))
+        Spacer(Modifier.height(AlKhatibSpacing.xl))
     }
 
     // Translator sheet

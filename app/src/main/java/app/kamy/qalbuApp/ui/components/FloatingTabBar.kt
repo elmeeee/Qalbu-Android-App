@@ -15,15 +15,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.theme.NavigationBarShape
+import app.kamy.qalbuApp.ui.layout.FloatingNavBarMetrics
 import app.kamy.qalbuApp.ui.navigation.RootTab
 
 /**
- * Material 3 floating navigation bar — pill container + [NavigationBar] with animated indicator.
+ * Floating pill tab bar — overlays scroll content; only the pill is opaque (iOS-style).
  */
 @Composable
 fun FloatingTabBar(
@@ -36,23 +37,27 @@ fun FloatingTabBar(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .padding(
+                horizontal = 20.dp,
+                vertical = FloatingNavBarMetrics.outerVerticalPadding
+            )
             .shadow(
-                elevation = 8.dp,
+                elevation = 12.dp,
                 shape = NavigationBarShape,
                 clip = false,
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
             )
             .clip(NavigationBarShape),
         shape = NavigationBarShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 3.dp
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp
     ) {
         NavigationBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(72.dp),
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                .height(FloatingNavBarMetrics.barHeight),
+            containerColor = Color.Transparent,
             tonalElevation = 0.dp
         ) {
             tabs.forEach { tab ->
@@ -78,7 +83,7 @@ fun FloatingTabBar(
                         selectedTextColor = MaterialTheme.colorScheme.primary,
                         unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        indicatorColor = MaterialTheme.colorScheme.secondaryContainer
+                        indicatorColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f)
                     )
                 )
             }

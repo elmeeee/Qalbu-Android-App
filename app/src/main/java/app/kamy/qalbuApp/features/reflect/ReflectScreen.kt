@@ -57,6 +57,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.ui.layout.floatingNavListPadding
+import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import app.kamy.qalbuApp.domain.model.ReflectFeedPost
 import coil.compose.AsyncImage
 
@@ -110,7 +112,8 @@ fun ReflectScreen(
                 onSelect = vm::switchSegment,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = 16.dp)
+                    .tabContentStatusBarInset()
+                    .padding(top = 8.dp)
             )
         }
     }
@@ -126,10 +129,12 @@ private fun ReelFeed(
     val firstVisible by remember { derivedStateOf { listState.firstVisibleItemIndex } }
     LaunchedEffect(firstVisible) { vm.loadMoreIfNeeded(firstVisible) }
 
+    val listPadding = floatingNavListPadding(extraTop = 56.dp)
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize().padding(top = 70.dp, bottom = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = listPadding,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         itemsIndexed(state.posts, key = { _, p -> p.id }) { _, post ->
             ReelPostCard(

@@ -1,12 +1,14 @@
 package app.kamy.qalbuApp.ui.root
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,7 +21,6 @@ import app.kamy.qalbuApp.features.quran.ChapterReaderScreen
 import app.kamy.qalbuApp.features.quran.ChaptersScreen
 import app.kamy.qalbuApp.features.reflect.ReflectScreen
 import app.kamy.qalbuApp.features.today.TodayScreen
-import androidx.compose.material3.MaterialTheme
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.infrastructure.auth.OAuthService
 import app.kamy.qalbuApp.ui.components.FloatingTabBar
@@ -28,14 +29,8 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import androidx.compose.ui.platform.LocalContext
 import net.openid.appauth.AuthorizationService
 
-/**
- * Hilt entry point to grab application-scoped dependencies inside a @Composable
- * without re-declaring them as Activity-injected fields. Used here so RootScreen
- * can hand the singleton AudioPlayerController and OAuthService down the tree.
- */
 @EntryPoint
 @InstallIn(SingletonComponent::class)
 interface RootEntryPoint {
@@ -44,6 +39,9 @@ interface RootEntryPoint {
     fun authorizationService(): AuthorizationService
 }
 
+/**
+ * Root shell — tab content is full-screen; [FloatingTabBar] overlays the bottom (iOS-style).
+ */
 @Composable
 fun RootScreen() {
     val context = LocalContext.current
@@ -60,31 +58,14 @@ fun RootScreen() {
     val showBottomBar = currentRoute?.startsWith("quran/reader") != true &&
         currentRoute != RootTab.Account.route
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            if (showBottomBar) {
-                FloatingTabBar(
-                    selectedRoute = currentRoute,
-                    onTabSelected = { tab ->
-                        if (currentRoute != tab.route) {
-                            navController.navigate(tab.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    }
-                )
-            }
-        }
-    ) { innerPadding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         NavHost(
             navController = navController,
             startDestination = RootTab.Default.route,
-            modifier = Modifier.fillMaxSize().padding(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             composable(RootTab.Today.route) {
                 TodayScreen(
@@ -126,6 +107,24 @@ fun RootScreen() {
                     onBack = { navController.popBackStack() }
                 )
             }
+        }
+
+        if (showBottomBar) {
+            FloatingTabBar(
+                selectedRoute = currentRoute,
+                onTabSelected = { tab ->
+                    if (currentRoute != tab.route) {
+                        navController.navigate(tab.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                },
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
     }
 }
