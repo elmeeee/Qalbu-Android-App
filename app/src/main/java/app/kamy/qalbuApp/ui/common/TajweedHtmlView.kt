@@ -5,8 +5,16 @@ import android.content.Context
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 
@@ -14,6 +22,8 @@ import androidx.compose.ui.viewinterop.AndroidView
  * Renders tajweed-colored Arabic HTML using the bundled tajweed font
  * (file:///android_asset/fonts/tajweed_font.ttf). Mirrors iOS
  * Design/Organisms/HTMLContentWebView.swift and AyahArabicWebBlock.swift.
+ *
+ * Height wraps content so long ayat are never clipped.
  *
  * @param htmlFragment the raw `<div dir="rtl" lang="ar">…</div>` produced by
  *   [app.kamy.qalbuApp.domain.model.RandomAyahPayload.tajweedWebHtmlFragment].
@@ -28,33 +38,73 @@ fun TajweedHtmlView(
     textColor: String = "#0F172A",
     modifier: Modifier = Modifier
 ) {
+    var contentHeightPx by remember(htmlFragment, fontSizeSp, textColor) { mutableIntStateOf(0) }
+    var lastLoadedHtml by remember(htmlFragment, fontSizeSp, textColor) { mutableStateOf<String?>(null) }
+    val density = LocalDensity.current
+    val wrappedHtml = remember(htmlFragment, fontSizeSp, textColor) {
+        wrapTajweedHtml(htmlFragment, fontSizeSp, textColor)
+    }
+
+    val heightModifier = if (contentHeightPx > 0) {
+        Modifier.height(with(density) { contentHeightPx.toDp() })
+    } else {
+        Modifier.heightIn(min = 48.dp)
+    }
+
     AndroidView(
-        modifier = modifier.fillMaxWidth(),
-        factory = { ctx ->
-            buildTajweedWebView(ctx)
-        },
+        modifier = modifier.fillMaxWidth().then(heightModifier),
+        factory = { ctx -> buildTajweedWebView(ctx) },
         update = { webView ->
-            val html = wrapTajweedHtml(htmlFragment, fontSizeSp, textColor)
-            webView.loadDataWithBaseURL(
-                /* baseUrl     = */ "file:///android_asset/",
-                /* data        = */ html,
-                /* mimeType    = */ "text/html",
-                /* encoding    = */ "UTF-8",
-                /* historyUrl  = */ null
-            )
+            webView.webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    view?.evaluateJavascript(MEASURE_CONTENT_HEIGHT_JS) { raw ->
+                        val px = parseMeasuredHeight(raw) ?: return@evaluateJavascript
+                        view.post {
+                            if (px > contentHeightPx) contentHeightPx = px
+                        }
+                    }
+                }
+            }
+            if (lastLoadedHtml != wrappedHtml) {
+                lastLoadedHtml = wrappedHtml
+                contentHeightPx = 0
+                webView.loadDataWithBaseURL(
+                    "file:///android_asset/",
+                    wrappedHtml,
+                    "text/html",
+                    "UTF-8",
+                    null
+                )
+            }
         }
     )
 }
 
+private fun parseMeasuredHeight(raw: String?): Int? {
+    if (raw.isNullOrBlank() || raw == "null") return null
+    return raw.trim().removeSurrounding("\"").toFloatOrNull()?.toInt()?.takeIf { it > 0 }
+}
+
+private const val MEASURE_CONTENT_HEIGHT_JS = """
+(function() {
+  var b = document.body, e = document.documentElement;
+  var h = Math.max(
+    b.scrollHeight, b.offsetHeight,
+    e.clientHeight, e.scrollHeight, e.offsetHeight
+  );
+  return Math.ceil(h) + 8;
+})();
+"""
+
 @SuppressLint("SetJavaScriptEnabled")
 private fun buildTajweedWebView(context: Context): WebView = WebView(context).apply {
     setBackgroundColor(0x00000000)
-    settings.javaScriptEnabled = false
+    settings.javaScriptEnabled = true
     settings.allowFileAccess = true
     isVerticalScrollBarEnabled = false
     isHorizontalScrollBarEnabled = false
-    webViewClient = WebViewClient()
     overScrollMode = WebView.OVER_SCROLL_NEVER
+    isNestedScrollingEnabled = false
 }
 
 /**
@@ -77,15 +127,16 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
             padding: 0;
             background: transparent;
             color: $textColor;
+            overflow: visible;
         }
         body {
             font-family: 'AlKhatibQuranWeb', 'KFGQPC HAFS Uthmanic Script', 'Amiri Quran', serif;
             font-size: ${fontSizeSp}px;
-            line-height: 1.82;
+            line-height: 1.9;
             direction: rtl;
             text-align: center;
             -webkit-text-size-adjust: 100%;
-            padding: 4px 8px;
+            padding: 4px 8px 6px;
         }
 
         /* Tajweed rule colors (community palette; adjust to match iOS one-to-one if needed). */
@@ -107,37 +158,41 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         .idgham_mutaqaribayn { color: #A1A1A1; }
         .ghunnah      { color: #FF7E1E; }
         .end          { color: #D6A100; }            /* ayah-end markers from API */
-        /* Stack rosette + eastern digits in one badge — mirrors iOS HTMLContentWebView */
+        /* Compact stacked rosette + eastern digits (iOS parity, smaller badge). */
         .ayah-end-symbol {
             display: inline-grid;
             place-items: center;
             white-space: nowrap;
             unicode-bidi: embed;
             color: #B45309;
-            margin-inline-start: 0.3em;
-            width: 1.42em;
-            height: 1.42em;
-            font-size: 1em;
-            vertical-align: -0.12em;
+            margin-inline-start: 0.25em;
+            width: 0.95em;
+            height: 0.95em;
+            font-size: 0.72em;
+            vertical-align: -0.06em;
             line-height: 1;
+            overflow: visible;
             font-feature-settings: "liga" 1, "kern" 1;
         }
         .ayah-end-rosette {
             grid-area: 1 / 1;
-            font-size: 1.42em;
+            font-size: 1em;
             line-height: 1;
             color: #B45309;
         }
         .ayah-end-number {
             grid-area: 1 / 1;
-            font-size: 0.56em;
+            font-size: 0.44em;
             line-height: 1;
             font-weight: 700;
-            transform: translateY(-0.01em);
+            transform: translateY(-0.02em);
             color: #B45309;
         }
 
-        div[lang="ar"] { display: block; }
+        div[lang="ar"] {
+            display: block;
+            overflow: visible;
+        }
     """.trimIndent()
 
     return """

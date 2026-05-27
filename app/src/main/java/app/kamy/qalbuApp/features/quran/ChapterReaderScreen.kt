@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -325,7 +324,7 @@ private fun AyahCard(
                 verse.resolvedVerseNumber
             ),
             fontSizeSp = (28 * fontScale).toInt(),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 80.dp, max = 240.dp)
+            modifier = Modifier.fillMaxWidth()
         )
         if (showTranslation) {
             verse.translations?.firstOrNull()?.text?.let { translation ->
