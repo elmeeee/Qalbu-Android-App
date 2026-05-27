@@ -46,28 +46,42 @@ class ContentRepository @Inject constructor(
         response.chapters
     }
 
-    suspend fun getRandomAyah(translationId: Int = selectedTranslationId()): RandomAyahPayload? =
-        qfCall { api.getRandomVerse(translations = translationId.toString()).verse }
+    suspend fun getRandomAyah(
+        translationId: Int = selectedTranslationId(),
+        audioRecitationId: Int = translationStore.currentRecitationId()
+    ): RandomAyahPayload? = qfCall {
+        api.getRandomVerse(
+            translations = translationId.toString(),
+            audio = audioRecitationId
+        ).verse
+    }
 
     suspend fun getVersesByChapter(
         chapterNumber: Int,
         page: Int = 1,
         perPage: Int = 50,
-        translationId: Int = selectedTranslationId()
+        translationId: Int = selectedTranslationId(),
+        audioRecitationId: Int = translationStore.currentRecitationId()
     ): VersesByChapterResponse = qfCall {
         api.getVersesByChapter(
             chapterNumber = chapterNumber,
             page = page,
             perPage = perPage,
-            translations = translationId.toString()
+            translations = translationId.toString(),
+            audio = audioRecitationId
         )
     }
 
     suspend fun getVerseByKey(
         verseKey: String,
-        translationId: Int = selectedTranslationId()
+        translationId: Int = selectedTranslationId(),
+        audioRecitationId: Int = translationStore.currentRecitationId()
     ) = qfCall {
-        api.getVerseByKey(verseKey, translations = translationId.toString())
+        api.getVerseByKey(
+            verseKey,
+            translations = translationId.toString(),
+            audio = audioRecitationId
+        )
     }
 
     suspend fun getRecitations(): List<RecitationPayload> = qfCall {

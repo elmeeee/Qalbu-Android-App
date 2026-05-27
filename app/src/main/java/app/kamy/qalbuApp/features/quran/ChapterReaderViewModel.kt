@@ -28,7 +28,7 @@ data class ChapterReaderUiState(
     val isLoadingMore: Boolean = false,
     val verses: List<RandomAyahPayload> = emptyList(),
     val recitations: List<RecitationPayload> = emptyList(),
-    val selectedRecitationId: Int = 6,
+    val selectedRecitationId: Int = TranslationPreferencesStore.DEFAULT_RECITATION_ID,
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
     val currentPage: Int = 0,
@@ -64,7 +64,12 @@ class ChapterReaderViewModel @Inject constructor(
     val state: StateFlow<ChapterReaderUiState> = _state.asStateFlow()
 
     init {
-        _state.update { it.copy(showTranslation = translationStore.showTranslation.value) }
+        _state.update {
+            it.copy(
+                showTranslation = translationStore.showTranslation.value,
+                selectedRecitationId = translationStore.currentRecitationId()
+            )
+        }
         loadChapterMeta()
         loadInitial()
         loadRecitations()
@@ -92,7 +97,11 @@ class ChapterReaderViewModel @Inject constructor(
         _state.update { it.copy(isLoading = true, error = null, verses = emptyList(), currentPage = 0) }
         viewModelScope.launch {
             runCatching {
-                contentRepository.getVersesByChapter(_state.value.chapterNumber, page = 1)
+                contentRepository.getVersesByChapter(
+                    chapterNumber = _state.value.chapterNumber,
+                    page = 1,
+                    audioRecitationId = _state.value.selectedRecitationId
+                )
             }.onSuccess { resp ->
                 _state.update {
                     it.copy(
@@ -115,7 +124,11 @@ class ChapterReaderViewModel @Inject constructor(
         _state.update { it.copy(isLoadingMore = true) }
         viewModelScope.launch {
             runCatching {
-                contentRepository.getVersesByChapter(s.chapterNumber, page = s.currentPage + 1)
+                contentRepository.getVersesByChapter(
+                    chapterNumber = s.chapterNumber,
+                    page = s.currentPage + 1,
+                    audioRecitationId = s.selectedRecitationId
+                )
             }.onSuccess { resp ->
                 _state.update {
                     it.copy(
@@ -139,7 +152,10 @@ class ChapterReaderViewModel @Inject constructor(
     }
 
     fun selectRecitation(id: Int) {
+        if (id <= 0 || id == _state.value.selectedRecitationId) return
+        translationStore.setRecitation(id)
         _state.update { it.copy(selectedRecitationId = id) }
+        loadInitial()
     }
 
     fun setFontScale(scale: Float) {

@@ -25,7 +25,12 @@ class TranslationPreferencesStore @Inject constructor(
     private val _showTranslation = MutableStateFlow(prefs.getBoolean(KEY_SHOW, true))
     val showTranslation: StateFlow<Boolean> = _showTranslation.asStateFlow()
 
+    private val _recitationId = MutableStateFlow(loadRecitationId())
+    val recitationId: StateFlow<Int> = _recitationId.asStateFlow()
+
     fun currentTranslationId(): Int = _translationId.value
+
+    fun currentRecitationId(): Int = _recitationId.value
 
     fun setTranslation(id: Int, displayName: String) {
         prefs.edit()
@@ -41,15 +46,28 @@ class TranslationPreferencesStore @Inject constructor(
         _showTranslation.value = enabled
     }
 
+    fun setRecitation(id: Int) {
+        if (id <= 0) return
+        prefs.edit().putInt(KEY_RECITATION_ID, id).apply()
+        _recitationId.value = id
+    }
+
     private fun loadTranslationId(): Int {
         val saved = prefs.getInt(KEY_ID, 0)
         return if (saved > 0) saved else AppConfig.defaultTranslationId
     }
 
+    private fun loadRecitationId(): Int {
+        val saved = prefs.getInt(KEY_RECITATION_ID, 0)
+        return if (saved > 0) saved else DEFAULT_RECITATION_ID
+    }
+
     companion object {
+        const val DEFAULT_RECITATION_ID = 6
         private const val PREFS_NAME = "qalbu_reader_prefs"
         private const val KEY_ID = "chapterReaderTranslationId"
         private const val KEY_NAME = "chapterReaderTranslationName"
         private const val KEY_SHOW = "chapterReaderShowTranslation"
+        private const val KEY_RECITATION_ID = "chapterReaderRecitationId"
     }
 }
