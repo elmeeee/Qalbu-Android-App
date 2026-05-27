@@ -28,10 +28,17 @@ import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -142,43 +149,36 @@ private fun ReelFeed(
     }
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun SegmentSwitcher(
     segment: ReflectSegment,
     onSelect: (ReflectSegment) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(Color.White.copy(alpha = 0.12f))
-            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(50))
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        SegmentChip(label = "All Reflect", selected = segment == ReflectSegment.ALL) {
-            onSelect(ReflectSegment.ALL)
-        }
-        SegmentChip(label = "My Reflect", selected = segment == ReflectSegment.MINE) {
-            onSelect(ReflectSegment.MINE)
-        }
-    }
-}
-
-@Composable
-private fun SegmentChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(if (selected) Color.White.copy(alpha = 0.15f) else Color.Transparent)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
-    ) {
-        Text(
-            text = label,
-            color = if (selected) Color.White else Color.White.copy(alpha = 0.5f),
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
-        )
+    SingleChoiceSegmentedButtonRow(modifier = modifier) {
+        SegmentedButton(
+            selected = segment == ReflectSegment.ALL,
+            onClick = { onSelect(ReflectSegment.ALL) },
+            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+            colors = SegmentedButtonDefaults.colors(
+                activeContainerColor = Color.White.copy(alpha = 0.22f),
+                activeContentColor = Color.White,
+                inactiveContainerColor = Color.Transparent,
+                inactiveContentColor = Color.White.copy(alpha = 0.55f)
+            )
+        ) { Text("All Reflect") }
+        SegmentedButton(
+            selected = segment == ReflectSegment.MINE,
+            onClick = { onSelect(ReflectSegment.MINE) },
+            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+            colors = SegmentedButtonDefaults.colors(
+                activeContainerColor = Color.White.copy(alpha = 0.22f),
+                activeContentColor = Color.White,
+                inactiveContainerColor = Color.Transparent,
+                inactiveContentColor = Color.White.copy(alpha = 0.55f)
+            )
+        ) { Text("My Reflect") }
     }
 }
 
@@ -189,15 +189,18 @@ private fun ReelPostCard(
     onLike: () -> Unit,
     onOpenVerse: () -> Unit
 ) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.White.copy(alpha = 0.06f))
-            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
-            .padding(16.dp)
+            .padding(horizontal = 18.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.1f),
+            contentColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
+    Column(modifier = Modifier.padding(16.dp)) {
         // Header
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
@@ -283,6 +286,7 @@ private fun ReelPostCard(
             )
         }
     }
+    }
 }
 
 @Composable
@@ -294,20 +298,20 @@ private fun ActionRailButton(
     onClick: () -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.08f))
-                .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            if (loading) {
+        if (loading) {
+            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-            } else {
-                IconButton(onClick = onClick, modifier = Modifier.size(40.dp)) {
-                    Icon(icon, contentDescription = label, tint = tint, modifier = Modifier.size(20.dp))
-                }
+            }
+        } else {
+            FilledIconButton(
+                onClick = onClick,
+                modifier = Modifier.size(40.dp),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = Color.White.copy(alpha = 0.12f),
+                    contentColor = tint
+                )
+            ) {
+                Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
             }
         }
         Spacer(Modifier.width(6.dp))

@@ -64,15 +64,27 @@ data class AlAdhanDate(
 )
 
 @Serializable
+data class AlAdhanCalendarMonth(
+    val number: Int? = null,
+    val en: String? = null
+)
+
+@Serializable
 data class AlAdhanGregorian(
     val date: String? = null,
-    val format: String? = null
+    val format: String? = null,
+    val day: String? = null,
+    val month: AlAdhanCalendarMonth? = null,
+    val year: String? = null
 )
 
 @Serializable
 data class AlAdhanHijri(
     val date: String? = null,
-    val format: String? = null
+    val format: String? = null,
+    val day: String? = null,
+    val month: AlAdhanCalendarMonth? = null,
+    val year: String? = null
 )
 
 @Serializable

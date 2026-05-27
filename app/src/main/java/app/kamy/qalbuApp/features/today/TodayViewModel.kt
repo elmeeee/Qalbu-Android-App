@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.core.config.AppConfig
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
@@ -35,7 +36,9 @@ data class TodayUiState(
     val showTafsir: Boolean = false,
     val isPublishing: Boolean = false,
     val publishToast: String? = null,
-    val publishToastIsError: Boolean = false
+    val publishToastIsError: Boolean = false,
+    val profile: UserProfilePayload? = null,
+    val profileLoading: Boolean = false
 )
 
 /**
@@ -56,11 +59,27 @@ class TodayViewModel @Inject constructor(
     init {
         _state.update { it.copy(translationId = translationStore.currentTranslationId()) }
         loadDailyAyahWithRecitations()
+        loadProfile()
+        viewModelScope.launch {
+            userSession.isSignedIn.collect { signedIn ->
+                if (signedIn) loadProfile() else _state.update { it.copy(profile = null) }
+            }
+        }
         viewModelScope.launch {
             translationStore.translationId.drop(1).collect { id ->
                 _state.update { it.copy(translationId = id) }
                 loadDailyAyahWithRecitations()
             }
+        }
+    }
+
+    private fun loadProfile() {
+        if (!userSession.isSignedIn.value) return
+        _state.update { it.copy(profileLoading = true) }
+        viewModelScope.launch {
+            runCatching { reflectRepository.fetchMyProfile() }
+                .onSuccess { p -> _state.update { it.copy(profile = p, profileLoading = false) } }
+                .onFailure { _state.update { it.copy(profileLoading = false) } }
         }
     }
 

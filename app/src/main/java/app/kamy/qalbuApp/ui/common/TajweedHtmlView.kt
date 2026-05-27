@@ -106,10 +106,36 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         .idgham_mutajanisayn { color: #A1A1A1; }
         .idgham_mutaqaribayn { color: #A1A1A1; }
         .ghunnah      { color: #FF7E1E; }
-        .end          { color: #D6A100; }            /* ayah-end markers */
-        .ayah-end-symbol { color: #B45309; font-size: 0.85em; padding: 0 6px; }
-        .ayah-end-rosette { font-size: 1.05em; }
-        .ayah-end-number { font-size: 0.78em; vertical-align: middle; }
+        .end          { color: #D6A100; }            /* ayah-end markers from API */
+        /* Stack rosette + eastern digits in one badge — mirrors iOS HTMLContentWebView */
+        .ayah-end-symbol {
+            display: inline-grid;
+            place-items: center;
+            white-space: nowrap;
+            unicode-bidi: embed;
+            color: #B45309;
+            margin-inline-start: 0.3em;
+            width: 1.42em;
+            height: 1.42em;
+            font-size: 1em;
+            vertical-align: -0.12em;
+            line-height: 1;
+            font-feature-settings: "liga" 1, "kern" 1;
+        }
+        .ayah-end-rosette {
+            grid-area: 1 / 1;
+            font-size: 1.42em;
+            line-height: 1;
+            color: #B45309;
+        }
+        .ayah-end-number {
+            grid-area: 1 / 1;
+            font-size: 0.56em;
+            line-height: 1;
+            font-weight: 700;
+            transform: translateY(-0.01em);
+            color: #B45309;
+        }
 
         div[lang="ar"] { display: block; }
     """.trimIndent()
@@ -137,17 +163,33 @@ fun buildTajweedHtmlFragment(textUthmaniTajweed: String?, ayahNumber: Int? = nul
     if (body.isEmpty()) return "<div dir=\"rtl\" lang=\"ar\"></div>"
     val marker = ayahEndMarkerHtml(ayahNumber)
     val spacer = if (marker.isEmpty()) "" else " "
-    // Strip any `class="end"` spans the server may have inlined — iOS does the same.
-    val cleaned = body.replace(Regex("<span\\b[^>]*\\bclass\\s*=\\s*['\"]?\\s*end\\s*['\"]?[^>]*>[\\s\\S]*?</span>", RegexOption.IGNORE_CASE), "")
-        .trim()
+    // Strip API `class="end"` spans and any trailing duplicate ayah badge text.
+    val cleaned = stripInlineAyahEndMarkers(body, ayahNumber)
         .ifEmpty { body }
     return "<div dir=\"rtl\" lang=\"ar\">$cleaned$spacer$marker</div>"
+}
+
+private val endSpanRegex =
+    Regex("<span\\b[^>]*\\bclass\\s*=\\s*['\"]?\\s*end\\s*['\"]?[^>]*>[\\s\\S]*?</span>", RegexOption.IGNORE_CASE)
+
+/** Removes server-inlined end markers so we render a single stacked badge (iOS parity). */
+private fun stripInlineAyahEndMarkers(html: String, ayahNumber: Int?): String {
+    var text = html.replace(endSpanRegex, "").trim()
+    // U+06DD Arabic End of Ayah + optional joiners + eastern digits at end of verse HTML.
+    text = text.replace(
+        Regex("\u06DD[\u200C\u200D\u200E\u200F\\s]*[\u0660-\u0669]+\$")
+    ) { "" }.trim()
+    val n = ayahNumber?.takeIf { it > 0 } ?: return text
+    val digits = easternArabicIndicDigits(n)
+    text = text.replace(Regex("\\s*${Regex.escape(digits)}\\s*$"), "").trim()
+    return text
 }
 
 private fun ayahEndMarkerHtml(ayahNumber: Int?): String {
     val n = ayahNumber?.takeIf { it > 0 } ?: return ""
     val digits = easternArabicIndicDigits(n)
-    return """<span lang="ar" dir="rtl" class="ayah-end-symbol" aria-label="Ayah $n"><span class="ayah-end-rosette" aria-hidden="true">۝</span><span class="ayah-end-number">$digits</span></span>"""
+    val rosette = "\u06DD"
+    return """<span lang="ar" dir="rtl" class="ayah-end-symbol" aria-label="Ayah $n"><span class="ayah-end-rosette" aria-hidden="true">$rosette</span><span class="ayah-end-number">$digits</span></span>"""
 }
 
 private fun easternArabicIndicDigits(value: Int): String {

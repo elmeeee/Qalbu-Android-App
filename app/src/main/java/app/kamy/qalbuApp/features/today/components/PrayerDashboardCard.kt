@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -50,19 +51,26 @@ fun PrayerDashboardCard(
             listOf(AlKhatibColors.EmeraldNight, AlKhatibColors.DeepEmerald)
         )
     }
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = Color.Transparent,
+        tonalElevation = 6.dp,
+        shadowElevation = 4.dp
+    ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(MaterialTheme.shapes.extraLarge)
             .background(brush)
             .border(
-                width = 1.5.dp,
+                width = 1.dp,
                 brush = Brush.linearGradient(
-                    listOf(Color.White.copy(alpha = 0.2f), Color.White.copy(alpha = 0.05f))
+                    listOf(Color.White.copy(alpha = 0.25f), Color.White.copy(alpha = 0.06f))
                 ),
-                shape = RoundedCornerShape(24.dp)
+                shape = MaterialTheme.shapes.extraLarge
             )
-            .padding(horizontal = 18.dp, vertical = 18.dp)
+            .padding(horizontal = 20.dp, vertical = 20.dp)
     ) {
         // Countdown row
         Text(
@@ -104,6 +112,7 @@ fun PrayerDashboardCard(
                 }
             }
         }
+    }
     }
 }
 

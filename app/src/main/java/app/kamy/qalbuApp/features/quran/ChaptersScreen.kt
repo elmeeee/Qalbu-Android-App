@@ -16,9 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -30,13 +30,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.design.components.AlKhatibCard
+import app.kamy.qalbuApp.design.components.AlKhatibCardStyle
+import app.kamy.qalbuApp.design.components.AlKhatibRevelationChip
+import app.kamy.qalbuApp.design.components.AlKhatibSectionHeader
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import app.kamy.qalbuApp.domain.model.ReadingSession
 
@@ -53,7 +62,7 @@ fun ChaptersScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         when {
             state.isLoading && state.chapters.isEmpty() ->
@@ -65,13 +74,20 @@ fun ChaptersScreen(
                 Text(
                     text = state.error.orEmpty(),
                     color = AlKhatibColors.Danger,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(32.dp)
                 )
             else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
+                modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item { ChaptersHeader() }
+                item {
+                    AlKhatibSectionHeader(
+                        title = "Quran",
+                        subtitle = "114 Surahs • The Noble Quran"
+                    )
+                }
 
                 state.continueReading?.let { session ->
                     item {
@@ -80,44 +96,23 @@ fun ChaptersScreen(
                             chapter = state.chapters.firstOrNull { it.id == session.chapterNumber },
                             onTap = {
                                 vm.continueReadingTarget()?.let { (c, v) -> onOpenChapter(c, v) }
-                            }
+                            },
+                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
                         )
                     }
                 }
 
                 items(state.chapters, key = { it.id }) { chapter ->
-                    ChapterRow(chapter = chapter, onClick = { onOpenChapter(chapter, null) })
+                    ChapterRow(
+                        chapter = chapter,
+                        onClick = { onOpenChapter(chapter, null) },
+                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                    )
                 }
+
+                item { Spacer(Modifier.height(AlKhatibSpacing.bottomNavClearance)) }
             }
         }
-    }
-}
-
-@Composable
-private fun ChaptersHeader() {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
-        Text(
-            text = "⭐ Quran",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.DeepEmerald
-        )
-        Text(
-            text = "114 Surahs • The Noble Quran",
-            style = MaterialTheme.typography.bodyMedium,
-            color = AlKhatibColors.Slate500
-        )
-        Spacer(Modifier.height(8.dp))
-        Box(
-            modifier = Modifier
-                .height(2.dp)
-                .width(80.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(AlKhatibColors.Gold, AlKhatibColors.Gold.copy(alpha = 0f))
-                    )
-                )
-        )
     }
 }
 
@@ -125,112 +120,157 @@ private fun ChaptersHeader() {
 private fun ContinueReadingCard(
     session: ReadingSession,
     chapter: QuranChapter?,
-    onTap: () -> Unit
+    onTap: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Brush.horizontalGradient(listOf(Color.White, AlKhatibColors.AmberWash)))
-            .border(1.dp, AlKhatibColors.Gold.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
-            .clickable(onClick = onTap)
-            .padding(16.dp)
+    AlKhatibCard(
+        modifier = modifier,
+        style = AlKhatibCardStyle.Elevated,
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        onClick = onTap
     ) {
-        Icon(
-            imageVector = Icons.Filled.Bookmark,
-            contentDescription = null,
-            tint = AlKhatibColors.Gold
-        )
-        Spacer(Modifier.width(12.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(AlKhatibColors.Gold.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(Icons.Filled.Bookmark, contentDescription = null, tint = AlKhatibColors.GoldDeep)
+        }
+        Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
             Text(
                 text = "CONTINUE READING",
-                style = MaterialTheme.typography.labelSmall,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
                 color = AlKhatibColors.Gold,
-                fontWeight = FontWeight.SemiBold
+                letterSpacing = 0.5.sp
             )
             Text(
-                text = chapter?.displayTitle ?: "Surah ${session.chapterNumber}",
-                style = MaterialTheme.typography.titleMedium,
-                color = AlKhatibColors.DeepEmerald,
-                fontWeight = FontWeight.Bold
+                text = chapter?.displayComplexName ?: "Surah ${session.chapterNumber}",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.Slate900,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = "Ayah ${session.verseNumber}",
-                style = MaterialTheme.typography.bodySmall,
+                fontSize = 14.sp,
                 color = AlKhatibColors.Slate500
             )
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.size(24.dp)
+        )
         }
     }
 }
 
 @Composable
-private fun ChapterRow(chapter: QuranChapter, onClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White)
-            .border(1.dp, AlKhatibColors.SoftGrey, RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-            .padding(14.dp)
+private fun ChapterRow(
+    chapter: QuranChapter,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlKhatibCard(
+        modifier = modifier,
+        onClick = onClick,
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
-        // Rotated diamond badge with chapter number
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.linearGradient(listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal))
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = chapter.id.toString(),
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
-        Spacer(Modifier.width(12.dp))
+        Row(verticalAlignment = Alignment.Top) {
+        ChapterDiamondBadge(number = chapter.id)
+        Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
-            Text(
-                text = chapter.displayTitle,
-                style = MaterialTheme.typography.titleMedium,
-                color = AlKhatibColors.Slate900,
-                fontWeight = FontWeight.SemiBold
-            )
-            Row {
-                if (chapter.revelationLabel.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(Modifier.weight(1f)) {
                     Text(
-                        text = chapter.revelationLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AlKhatibColors.Gold,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(AlKhatibColors.AmberWash)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                        text = chapter.displayComplexName,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AlKhatibColors.Slate900
                     )
+                    if (chapter.displayTranslatedName.isNotEmpty()) {
+                        Text(
+                            text = chapter.displayTranslatedName,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = AlKhatibColors.DeepEmerald.copy(alpha = 0.75f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 3.dp)
+                        )
+                    }
+                }
+                chapter.nameArabic?.takeIf { it.isNotBlank() }?.let { arabic ->
                     Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = arabic,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = AlKhatibColors.DeepEmerald,
+                        textAlign = TextAlign.End,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.05f))
+                            .padding(horizontal = 8.dp, vertical = 5.dp)
+                    )
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (chapter.revelationLabel.isNotEmpty()) {
+                    AlKhatibRevelationChip(
+                        label = chapter.revelationLabel,
+                        isMeccan = chapter.isMeccan
+                    )
                 }
                 chapter.versesCountLabel?.let {
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
                         color = AlKhatibColors.Slate500
                     )
                 }
             }
         }
-        chapter.nameArabic?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.titleLarge,
-                color = AlKhatibColors.DeepEmerald,
-                textAlign = TextAlign.End
-            )
         }
+    }
+}
+
+@Composable
+private fun ChapterDiamondBadge(number: Int) {
+    Box(
+        modifier = Modifier.size(40.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .rotate(45f)
+                .clip(RoundedCornerShape(6.dp))
+                .background(
+                    Brush.linearGradient(
+                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
+                    )
+                )
+        )
+        Text(
+            text = number.toString(),
+            color = Color.White,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }

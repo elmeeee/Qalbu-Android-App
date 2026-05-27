@@ -1,7 +1,6 @@
 package app.kamy.qalbuApp.features.today.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,14 +9,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,16 +26,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.heightIn
+import app.kamy.qalbuApp.design.components.AlKhatibCard
+import app.kamy.qalbuApp.design.components.AlKhatibVerseReferenceChip
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
 import app.kamy.qalbuApp.ui.common.buildTajweedHtmlFragment
@@ -53,64 +54,43 @@ fun TodayVerseOfDaySection(
     onTafsir: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("✦", color = AlKhatibColors.Gold, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(8.dp))
+            Text(
+                "✦",
+                color = MaterialTheme.colorScheme.tertiary,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.width(AlKhatibSpacing.sm))
             Text(
                 text = "Verse of the Day",
-                color = AlKhatibColors.DeepEmerald,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
         }
-        if (verse?.verseKey != null) {
+        verse?.verseKey?.let {
             Text(
-                text = verse.verseKey,
-                color = AlKhatibColors.DeepEmerald.copy(alpha = 0.6f),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 22.dp, top = 4.dp)
+                text = it,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(start = 22.dp, top = AlKhatibSpacing.xs)
             )
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(AlKhatibSpacing.md))
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(
-                    Brush.verticalGradient(listOf(Color.White, AlKhatibColors.MintWash))
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        listOf(
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.08f),
-                            AlKhatibColors.Gold.copy(alpha = 0.15f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                )
-                .padding(20.dp)
+        AlKhatibCard(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ) {
             if (verse != null) {
-                // Verse key chip
                 verse.verseKey?.let {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(AlKhatibColors.DeepEmerald)
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = it,
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                    Spacer(Modifier.height(16.dp))
+                    AlKhatibVerseReferenceChip(label = it)
+                    Spacer(Modifier.height(AlKhatibSpacing.md))
                 }
 
                 // Arabic tajweed block
@@ -132,7 +112,7 @@ fun TodayVerseOfDaySection(
                         Spacer(Modifier.height(12.dp))
                         Text(
                             text = "“$clean”",
-                            color = AlKhatibColors.Slate800,
+                            color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
@@ -176,12 +156,13 @@ fun TodayVerseOfDaySection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .background(AlKhatibColors.PanelGrey, RoundedCornerShape(12.dp))
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 )
             } else {
                 Text(
                     text = "No verse available. Pull to retry.",
-                    color = AlKhatibColors.Slate500,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center
                 )
@@ -202,22 +183,23 @@ private fun ActionPill(
     data: ActionPillData,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(50))
-            .background(data.tint.copy(alpha = 0.08f))
-            .border(1.dp, data.tint.copy(alpha = 0.15f), RoundedCornerShape(50))
-            .padding(vertical = 10.dp, horizontal = 12.dp)
-            .pointerInput(data) { detectTapGestures(onTap = { data.onClick() }) }
+    FilledTonalButton(
+        onClick = data.onClick,
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = ButtonDefaults.filledTonalButtonColors(
+            containerColor = data.tint.copy(alpha = 0.14f),
+            contentColor = data.tint
+        ),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            horizontal = 12.dp,
+            vertical = 10.dp
+        )
     ) {
-        Icon(imageVector = data.icon, contentDescription = data.label, tint = data.tint)
+        Icon(imageVector = data.icon, contentDescription = data.label, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text(
             text = data.label,
-            color = data.tint,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold
         )

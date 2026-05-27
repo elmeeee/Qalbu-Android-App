@@ -2,16 +2,11 @@ package app.kamy.qalbuApp.ui.root
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -24,8 +19,10 @@ import app.kamy.qalbuApp.features.quran.ChapterReaderScreen
 import app.kamy.qalbuApp.features.quran.ChaptersScreen
 import app.kamy.qalbuApp.features.reflect.ReflectScreen
 import app.kamy.qalbuApp.features.today.TodayScreen
+import androidx.compose.material3.MaterialTheme
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.infrastructure.auth.OAuthService
+import app.kamy.qalbuApp.ui.components.FloatingTabBar
 import app.kamy.qalbuApp.ui.navigation.RootTab
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
@@ -60,32 +57,27 @@ fun RootScreen() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
+    val showBottomBar = currentRoute?.startsWith("quran/reader") != true &&
+        currentRoute != RootTab.Account.route
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            val showBottomBar = currentRoute?.startsWith("quran/reader") != true
             if (showBottomBar) {
-                NavigationBar {
-                    RootTab.entries.forEach { tab ->
-                        val selected = currentRoute == tab.route
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                if (currentRoute != tab.route) {
-                                    navController.navigate(tab.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+                FloatingTabBar(
+                    selectedRoute = currentRoute,
+                    onTabSelected = { tab ->
+                        if (currentRoute != tab.route) {
+                            navController.navigate(tab.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
                                 }
-                            },
-                            icon = { Icon(tab.icon, contentDescription = stringResource(tab.labelRes)) },
-                            label = { Text(stringResource(tab.labelRes)) }
-                        )
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                     }
-                }
+                )
             }
         }
     ) { innerPadding ->
@@ -97,7 +89,8 @@ fun RootScreen() {
             composable(RootTab.Today.route) {
                 TodayScreen(
                     audioPlayer = audioPlayer,
-                    onReflectNavigate = { navController.navigate(RootTab.Reflect.route) }
+                    onReflectNavigate = { navController.navigate(RootTab.Reflect.route) },
+                    onAccountNavigate = { navController.navigate(RootTab.Account.route) }
                 )
             }
             composable(RootTab.Reflect.route) {
@@ -129,7 +122,8 @@ fun RootScreen() {
             composable(RootTab.Account.route) {
                 AccountScreen(
                     oauthService = oauthService,
-                    authService = authService
+                    authService = authService,
+                    onBack = { navController.popBackStack() }
                 )
             }
         }

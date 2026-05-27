@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,6 +35,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
@@ -49,7 +49,8 @@ import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 @Composable
 fun TodayScreen(
     audioPlayer: AudioPlayerController,
-    onReflectNavigate: () -> Unit
+    onReflectNavigate: () -> Unit,
+    onAccountNavigate: () -> Unit = {}
 ) {
     val todayVm: TodayViewModel = hiltViewModel()
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
@@ -100,15 +101,7 @@ fun TodayScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            AlKhatibColors.PanelGrey,
-                            AlKhatibColors.PanelGreyAlt,
-                            AlKhatibColors.SageTint
-                        )
-                    )
-                )
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
         ) {
             TodayHeader(
@@ -121,7 +114,10 @@ fun TodayScreen(
                     else -> "Locating…"
                 },
                 hijriLabel = prayerState.hijriLabel,
-                gregorianLabel = prayerState.gregorianLabel
+                gregorianLabel = prayerState.gregorianLabel,
+                avatarUrl = todayState.profile?.preferredAvatarUrl,
+                isProfileLoading = todayState.profileLoading,
+                onAccountClick = onAccountNavigate
             )
             Spacer(Modifier.height(16.dp))
             PrayerDashboardCard(
@@ -177,7 +173,7 @@ fun TodayScreen(
                 },
                 onTafsir = { todayVm.openTafsir() }
             )
-            Spacer(Modifier.height(100.dp))
+            Spacer(Modifier.height(AlKhatibSpacing.bottomNavClearance))
         }
 
         SnackbarHost(

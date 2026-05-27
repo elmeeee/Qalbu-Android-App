@@ -96,11 +96,12 @@ class AlAdhanRepository @Inject constructor(
             PrayerEntry(type = type, rawTime = raw, date = parsed)
         }.sortedBy { it.date }
 
+        val (hijriLabel, gregorianLabel) = AlAdhanDateLabels.fromApiDate(data.date)
         return PrayerDayResult(
             timings = entries,
             cityName = cityName,
-            hijriLabel = data.date?.hijri?.date,
-            gregorianLabel = data.date?.gregorian?.date
+            hijriLabel = hijriLabel,
+            gregorianLabel = gregorianLabel
         )
     }
 

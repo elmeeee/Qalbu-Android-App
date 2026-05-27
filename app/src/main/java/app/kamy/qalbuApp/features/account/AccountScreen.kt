@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
@@ -37,6 +38,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -63,7 +65,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.design.components.AlKhatibCard
+import app.kamy.qalbuApp.design.components.AlKhatibCardStyle
+import app.kamy.qalbuApp.design.components.AlKhatibSettingsGroup
+import app.kamy.qalbuApp.design.components.AlKhatibSettingsNavigationRow
+import app.kamy.qalbuApp.design.components.AlKhatibSettingsToggleRow
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
@@ -80,7 +88,8 @@ import net.openid.appauth.AuthorizationService
 @Composable
 fun AccountScreen(
     oauthService: OAuthService,
-    authService: AuthorizationService
+    authService: AuthorizationService,
+    onBack: (() -> Unit)? = null
 ) {
     val vm: AccountViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
@@ -101,11 +110,20 @@ fun AccountScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(AlKhatibSpacing.lg)
     ) {
+        if (onBack != null) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
         ProfileHeader(
             isSignedIn = state.isSignedIn,
             profile = state.profile,
@@ -116,64 +134,71 @@ fun AccountScreen(
             }
         )
 
-        // General
-        SectionHeader("General")
-        SettingsRow(
-            icon = Icons.Filled.TextFields,
-            title = "Font size",
-            subtitle = "Adjust Arabic & translation",
-            onClick = { vm.openFontScale() }
-        )
-
-        // Prayer settings
-        SectionHeader("Prayer settings")
-        SettingsRow(
-            icon = Icons.Filled.Schedule,
-            title = "Prayer calculation method",
-            subtitle = state.prayerMethod.organization,
-            onClick = { vm.togglePrayerSheet(true) }
-        )
-        SettingsRowToggle(
-            icon = Icons.AutoMirrored.Filled.MenuBook,
-            title = "Show translation",
-            checked = state.showTranslation,
-            onToggle = vm::setShowTranslation
-        )
-        SettingsRow(
-            icon = Icons.Filled.Translate,
-            title = "Translator",
-            subtitle = state.selectedTranslationName.ifBlank { "Tap to choose translation source" },
-            onClick = { vm.openTranslator() }
-        )
-
-        // Notifications
-        SectionHeader("Notifications")
-        SettingsRowToggle(
-            icon = Icons.Filled.Notifications,
-            title = "Daily verse reminder",
-            checked = state.dailyVerseEnabled,
-            onToggle = vm::setDailyVerseEnabled
-        )
-        if (state.dailyVerseEnabled) {
-            SettingsRow(
-                icon = Icons.Filled.Schedule,
-                title = "Reminder time",
-                subtitle = state.reminderTimeLabel.ifBlank { "07:00" },
-                onClick = { vm.toggleNotifTimeSheet(true) }
+        SettingsSectionLabel("General")
+        AlKhatibSettingsGroup {
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.TextFields,
+                title = "Font size",
+                subtitle = "Adjust Arabic & translation",
+                onClick = { vm.openFontScale() }
             )
+        }
+
+        SettingsSectionLabel("Prayer settings")
+        AlKhatibSettingsGroup {
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.Schedule,
+                title = "Prayer calculation method",
+                subtitle = state.prayerMethod.organization,
+                onClick = { vm.togglePrayerSheet(true) }
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.AutoMirrored.Filled.MenuBook,
+                title = "Show translation",
+                checked = state.showTranslation,
+                onCheckedChange = vm::setShowTranslation
+            )
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.Translate,
+                title = "Translator",
+                subtitle = state.selectedTranslationName.ifBlank { "Tap to choose translation source" },
+                onClick = { vm.openTranslator() }
+            )
+        }
+
+        SettingsSectionLabel("Notifications")
+        AlKhatibSettingsGroup {
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Notifications,
+                title = "Daily verse reminder",
+                checked = state.dailyVerseEnabled,
+                onCheckedChange = vm::setDailyVerseEnabled
+            )
+            if (state.dailyVerseEnabled) {
+                AlKhatibSettingsNavigationRow(
+                    icon = Icons.Filled.Schedule,
+                    title = "Reminder time",
+                    subtitle = state.reminderTimeLabel.ifBlank { "07:00" },
+                    onClick = { vm.toggleNotifTimeSheet(true) }
+                )
+            }
         }
 
         if (state.isSignedIn) {
             Button(
                 onClick = { vm.signOut() },
-                colors = ButtonDefaults.buttonColors(containerColor = AlKhatibColors.Danger),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !state.authBusy
+                enabled = !state.authBusy,
+                shape = MaterialTheme.shapes.large
             ) {
                 Text("Sign out")
             }
         }
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(AlKhatibSpacing.bottomNavClearance))
     }
 
     // Translator sheet
@@ -240,15 +265,16 @@ private fun ProfileHeader(
     isLoading: Boolean,
     onSignIn: () -> Unit
 ) {
+    AlKhatibCard(
+        modifier = Modifier.fillMaxWidth(),
+        style = AlKhatibCardStyle.Filled,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+    ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(listOf(Color.White, AlKhatibColors.SageMist))
-            )
-            .padding(20.dp)
+            .padding(4.dp)
     ) {
         Box(
             modifier = Modifier
@@ -311,83 +337,18 @@ private fun ProfileHeader(
             }
         }
     }
+    }
 }
 
 @Composable
-private fun SectionHeader(text: String) {
+private fun SettingsSectionLabel(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelLarge,
-        color = AlKhatibColors.Slate500,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+        modifier = Modifier.padding(start = AlKhatibSpacing.xs)
     )
-}
-
-@Composable
-private fun SettingsRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White)
-            .clickable(onClick = onClick)
-            .padding(14.dp)
-    ) {
-        IconBadge(icon = icon)
-        Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f)) {
-            Text(text = title, color = AlKhatibColors.Slate900, fontWeight = FontWeight.SemiBold)
-            Text(text = subtitle, color = AlKhatibColors.Slate500, style = MaterialTheme.typography.bodySmall)
-        }
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
-            contentDescription = null,
-            tint = AlKhatibColors.Slate500,
-            modifier = Modifier.size(18.dp)
-        )
-    }
-}
-
-@Composable
-private fun SettingsRowToggle(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    checked: Boolean,
-    onToggle: (Boolean) -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White)
-            .padding(14.dp)
-    ) {
-        IconBadge(icon = icon)
-        Spacer(Modifier.width(12.dp))
-        Text(text = title, color = AlKhatibColors.Slate900, modifier = Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
-        Switch(checked = checked, onCheckedChange = onToggle)
-    }
-}
-
-@Composable
-private fun IconBadge(icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    Box(
-        modifier = Modifier
-            .size(42.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(AlKhatibColors.Teal.copy(alpha = 0.12f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(imageVector = icon, contentDescription = null, tint = AlKhatibColors.Teal)
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -545,9 +506,9 @@ private fun AlKhatibModalBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AlKhatibColors.PureWhite,
-        contentColor = AlKhatibColors.Slate900,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = AlKhatibColors.Slate500) },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
         content = { content() }
     )
 }
