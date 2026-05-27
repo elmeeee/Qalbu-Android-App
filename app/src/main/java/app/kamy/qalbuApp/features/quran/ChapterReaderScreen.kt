@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -52,6 +54,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
@@ -98,25 +101,22 @@ fun ChapterReaderScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsPadding()
                 .background(AlKhatibColors.DeepEmerald)
-                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .padding(horizontal = 4.dp, vertical = 8.dp)
         ) {
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
             }
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = "Surah ${state.chapterNumber}",
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "${state.verses.size} ayah loaded",
-                    color = Color.White.copy(alpha = 0.75f),
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
+            Text(
+                text = state.chapterDisplayName ?: "Surah ${state.chapterNumber}",
+                color = Color.White,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             IconButton(onClick = { settingsVisible = true }) {
                 Icon(Icons.Filled.Settings, contentDescription = "Reading settings", tint = Color.White)
             }
@@ -154,7 +154,8 @@ fun ChapterReaderScreen(
                                     } else {
                                         audioPlayer.playVerse(
                                             url = url,
-                                            surahTitle = "Surah ${state.chapterNumber}",
+                                            surahTitle = state.chapterDisplayName
+                                                ?: "Surah ${state.chapterNumber}",
                                             ayahLabel = verse.verseKey.orEmpty(),
                                             reciterName = state.recitations
                                                 .firstOrNull { it.id == state.selectedRecitationId }
@@ -184,7 +185,8 @@ fun ChapterReaderScreen(
                     if (items.isNotEmpty()) {
                         audioPlayer.playSequence(
                             items = items,
-                            surahTitle = "Surah ${state.chapterNumber}",
+                            surahTitle = state.chapterDisplayName
+                                ?: "Surah ${state.chapterNumber}",
                             reciterName = state.recitations
                                 .firstOrNull { it.id == state.selectedRecitationId }
                                 ?.displayName.orEmpty()
@@ -193,6 +195,7 @@ fun ChapterReaderScreen(
                 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
                     .padding(16.dp)
                     .size(56.dp)
                     .clip(CircleShape)

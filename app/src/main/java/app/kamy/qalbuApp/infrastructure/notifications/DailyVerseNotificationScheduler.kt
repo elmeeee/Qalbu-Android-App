@@ -88,7 +88,7 @@ object DailyVerseNotificationScheduler {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle("Your verse for today")
-            .setContentText("Open Al-Khatib to read today's verse.")
+            .setContentText("Open Qalbu to read today's verse.")
             .setContentIntent(pending)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

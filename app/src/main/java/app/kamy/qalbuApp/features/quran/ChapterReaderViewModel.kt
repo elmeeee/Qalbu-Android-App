@@ -23,6 +23,7 @@ import javax.inject.Inject
 
 data class ChapterReaderUiState(
     val chapterNumber: Int = 1,
+    val chapterDisplayName: String? = null,
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
     val verses: List<RandomAyahPayload> = emptyList(),
@@ -64,6 +65,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     init {
         _state.update { it.copy(showTranslation = translationStore.showTranslation.value) }
+        loadChapterMeta()
         loadInitial()
         loadRecitations()
         viewModelScope.launch {
@@ -72,6 +74,16 @@ class ChapterReaderViewModel @Inject constructor(
         viewModelScope.launch {
             translationStore.showTranslation.collect { enabled ->
                 _state.update { it.copy(showTranslation = enabled) }
+            }
+        }
+    }
+
+    private fun loadChapterMeta() {
+        viewModelScope.launch {
+            runCatching {
+                val chapters = contentRepository.getChapters()
+                val name = chapters.find { it.id == _state.value.chapterNumber }?.displayComplexName
+                _state.update { it.copy(chapterDisplayName = name) }
             }
         }
     }
