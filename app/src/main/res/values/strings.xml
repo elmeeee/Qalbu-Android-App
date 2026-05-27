@@ -12,4 +12,9 @@
     <string name="tab_placeholder_reflect">Reflect — community reel feed</string>
     <string name="tab_placeholder_quran">Quran — chapter list and reader</string>
     <string name="tab_placeholder_account">Account — sign in, profile, settings</string>
+
+    <string name="adhan_playback_title">Adhan</string>
+    <string name="adhan_playback_body">Playing the call to prayer</string>
+    <string name="adhan_voice_subtitle">Dhuhr, Asr, Maghrib &amp; Isha</string>
+    <string name="adhan_fajr_fixed_note">Subuh (Fajr) always uses Mishary Rashid Alafasy and cannot be changed.</string>
 </resources>

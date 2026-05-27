@@ -30,7 +30,10 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.BottomSheetDefaults
@@ -60,7 +63,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,6 +77,8 @@ import app.kamy.qalbuApp.design.components.AlKhatibSettingsToggleRow
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
+import app.kamy.qalbuApp.domain.adhan.AdhanVoice
+import app.kamy.qalbuApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
@@ -153,6 +159,12 @@ fun AccountScreen(
                 title = "Prayer calculation method",
                 subtitle = state.prayerMethod.organization,
                 onClick = { vm.togglePrayerSheet(true) }
+            )
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.AutoMirrored.Filled.VolumeUp,
+                title = "Adhan voice",
+                subtitle = state.selectedAdhanVoice.displayName,
+                onClick = { vm.openAdhanSheet() }
             )
             AlKhatibSettingsToggleRow(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
@@ -298,6 +310,16 @@ fun AccountScreen(
             isLoading = state.prayerMethodsLoading,
             onSelect = vm::setPrayerMethod,
             onDismiss = { vm.togglePrayerSheet(false) }
+        )
+    }
+
+    if (state.showAdhanSheet) {
+        AdhanVoiceSheet(
+            selected = state.selectedAdhanVoice,
+            previewingVoiceId = state.previewingAdhanVoiceId,
+            onSelect = vm::selectAdhanVoice,
+            onPreview = vm::toggleAdhanPreview,
+            onDismiss = vm::closeAdhanSheet
         )
     }
 }
@@ -641,6 +663,104 @@ private fun PrayerMethodSheet(
                             if (isSelected) {
                                 Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AdhanVoiceSheet(
+    selected: AdhanVoice,
+    previewingVoiceId: String?,
+    onSelect: (AdhanVoice) -> Unit,
+    onPreview: (AdhanVoice) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                "Adhan voice",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            Text(
+                stringResource(R.string.adhan_voice_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate500
+            )
+            AlKhatibCard(
+                modifier = Modifier.fillMaxWidth(),
+                style = AlKhatibCardStyle.Filled,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            ) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        "Subuh (Fajr)",
+                        fontWeight = FontWeight.SemiBold,
+                        color = AlKhatibColors.Slate900
+                    )
+                    Text(
+                        AdhanVoiceCatalog.fajrDisplayName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AlKhatibColors.Slate500
+                    )
+                    Text(
+                        stringResource(R.string.adhan_fajr_fixed_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AlKhatibColors.Teal
+                    )
+                }
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(360.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(AdhanVoice.selectable, key = { it.id }) { voice ->
+                    val isSelected = voice == selected
+                    val isPreviewing = previewingVoiceId == voice.id
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                            )
+                            .clickable { onSelect(voice) }
+                            .padding(horizontal = 8.dp, vertical = 10.dp)
+                    ) {
+                        Column(Modifier.weight(1f).padding(horizontal = 6.dp)) {
+                            Text(voice.displayName, color = AlKhatibColors.Slate900, fontWeight = FontWeight.Medium)
+                            if (voice == AdhanVoice.DEFAULT) {
+                                Text(
+                                    "Default",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = AlKhatibColors.Slate500
+                                )
+                            }
+                        }
+                        IconButton(onClick = { onPreview(voice) }) {
+                            Icon(
+                                imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                                contentDescription = if (isPreviewing) "Stop preview" else "Preview adhan",
+                                tint = AlKhatibColors.Teal
+                            )
+                        }
+                        if (isSelected) {
+                            Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 8.dp))
                         }
                     }
                 }

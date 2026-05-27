@@ -43,7 +43,9 @@ object PrayerNotificationScheduler {
                             title = prayerTitle(prayer.name, fireAt),
                             body = prayerBody(prayer.name),
                             kind = "prayer_${prayer.name}",
-                            notificationId = NOTIFICATION_ID_BASE + index + offset
+                            notificationId = NOTIFICATION_ID_BASE + index + offset,
+                            playAdhan = true,
+                            prayerName = prayer.name
                         )
                     }
             }
@@ -160,7 +162,8 @@ object PrayerNotificationScheduler {
         notificationId: Int,
         channelId: String,
         title: String,
-        body: String
+        body: String,
+        silent: Boolean = false
     ) {
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
         NotificationChannels.ensureAll(context)
@@ -173,7 +176,7 @@ object PrayerNotificationScheduler {
             openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val notification = NotificationCompat.Builder(context, channelId)
+        val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(body)
@@ -181,8 +184,10 @@ object PrayerNotificationScheduler {
             .setContentIntent(pending)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
-        NotificationManagerCompat.from(context).notify(notificationId, notification)
+        if (silent) {
+            builder.setSilent(true)
+        }
+        NotificationManagerCompat.from(context).notify(notificationId, builder.build())
     }
 
     private fun scheduleOneShot(
@@ -193,7 +198,9 @@ object PrayerNotificationScheduler {
         title: String,
         body: String,
         kind: String,
-        notificationId: Int = requestCode
+        notificationId: Int = requestCode,
+        playAdhan: Boolean = false,
+        prayerName: String? = null
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, PrayerNotificationReceiver::class.java).apply {
@@ -202,6 +209,8 @@ object PrayerNotificationScheduler {
             putExtra(PrayerNotificationReceiver.EXTRA_BODY, body)
             putExtra(PrayerNotificationReceiver.EXTRA_NOTIFICATION_ID, notificationId)
             putExtra(PrayerNotificationReceiver.EXTRA_KIND, kind)
+            putExtra(PrayerNotificationReceiver.EXTRA_PLAY_ADHAN, playAdhan)
+            putExtra(PrayerNotificationReceiver.EXTRA_PRAYER_NAME, prayerName)
         }
         val pending = PendingIntent.getBroadcast(
             context,

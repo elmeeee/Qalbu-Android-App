@@ -3,13 +3,17 @@ package app.kamy.qalbuApp.features.account
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.kamy.qalbuApp.domain.adhan.AdhanVoice
+import app.kamy.qalbuApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
+import app.kamy.qalbuApp.infrastructure.audio.AdhanPreviewPlayer
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
+import app.kamy.qalbuApp.infrastructure.preferences.AdhanPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseNotificationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
@@ -57,7 +61,10 @@ data class AccountUiState(
     val firstThirdEnabled: Boolean = true,
     val tahajudEnabled: Boolean = true,
     val yasinReminderEnabled: Boolean = true,
-    val kahfReminderEnabled: Boolean = true
+    val kahfReminderEnabled: Boolean = true,
+    val showAdhanSheet: Boolean = false,
+    val selectedAdhanVoice: AdhanVoice = AdhanVoice.DEFAULT,
+    val previewingAdhanVoiceId: String? = null
 )
 
 /**
@@ -74,7 +81,9 @@ class AccountViewModel @Inject constructor(
     private val prayerMethodStore: PrayerCalculationStore,
     private val translationStore: TranslationPreferencesStore,
     private val notificationStore: DailyVerseNotificationStore,
-    private val prayerNotificationPrefs: PrayerNotificationPreferencesStore
+    private val prayerNotificationPrefs: PrayerNotificationPreferencesStore,
+    private val adhanPrefs: AdhanPreferencesStore,
+    private val adhanPreviewPlayer: AdhanPreviewPlayer
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountUiState(isSignedIn = userSession.isSignedIn.value))
@@ -135,6 +144,16 @@ class AccountViewModel @Inject constructor(
         }
         viewModelScope.launch {
             prayerNotificationPrefs.changeTick.collect { syncPrayerNotificationState() }
+        }
+        viewModelScope.launch {
+            adhanPrefs.selectedVoice.collect { voice ->
+                _state.update { it.copy(selectedAdhanVoice = voice) }
+            }
+        }
+        viewModelScope.launch {
+            adhanPreviewPlayer.previewingVoiceId.collect { id ->
+                _state.update { it.copy(previewingAdhanVoiceId = id) }
+            }
         }
     }
 
@@ -315,6 +334,22 @@ class AccountViewModel @Inject constructor(
     fun setKahfReminderEnabled(enabled: Boolean) {
         prayerNotificationPrefs.setKahfReminderEnabled(enabled)
         reschedulePrayerNotifications()
+    }
+
+    fun openAdhanSheet() = _state.update { it.copy(showAdhanSheet = true) }
+
+    fun closeAdhanSheet() {
+        adhanPreviewPlayer.stop()
+        _state.update { it.copy(showAdhanSheet = false) }
+    }
+
+    fun selectAdhanVoice(voice: AdhanVoice) {
+        adhanPrefs.setVoice(voice)
+        adhanPreviewPlayer.stop()
+    }
+
+    fun toggleAdhanPreview(voice: AdhanVoice) {
+        adhanPreviewPlayer.togglePreview(voice.id, AdhanVoiceCatalog.rawResForPreview(voice))
     }
 
     fun filteredTranslations(): List<QFTranslation> {

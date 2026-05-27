@@ -9,6 +9,7 @@ object NotificationChannels {
     const val DAILY_VERSE = "daily_verse"
     const val PRAYER = "prayer_times"
     const val SUNNAH = "sunnah_reminders"
+    const val ADHAN_PLAYBACK = "adhan_playback"
 
     fun ensureAll(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -33,6 +34,16 @@ object NotificationChannels {
                 "Sunnah reading",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply { description = "Weekly surah reading reminders" }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(
+                ADHAN_PLAYBACK,
+                "Adhan playback",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Plays the call to prayer until it finishes"
+                setSound(null, null)
+            }
         )
     }
 }
