@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,7 +47,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,11 +60,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
-import app.kamy.qalbuApp.ui.layout.floatingNavListPadding
+import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
+import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import app.kamy.qalbuApp.domain.model.ReflectFeedPost
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 
 /**
  * Mirrors iOS Features/Reflection/Views/ReflectionView.swift +
@@ -104,21 +111,10 @@ fun ReflectScreen(
                 }
             else -> ReelFeed(state = state, vm = vm, onOpenVerse = onOpenVerse)
         }
-
-        // Segment switcher overlay (top).
-        if (state.isAuthenticated) {
-            SegmentSwitcher(
-                segment = state.segment,
-                onSelect = vm::switchSegment,
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .tabContentStatusBarInset()
-                    .padding(top = 8.dp)
-            )
-        }
     }
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun ReelFeed(
     state: ReflectUiState,
@@ -129,14 +125,43 @@ private fun ReelFeed(
     val firstVisible by remember { derivedStateOf { listState.firstVisibleItemIndex } }
     LaunchedEffect(firstVisible) { vm.loadMoreIfNeeded(firstVisible) }
 
-    val listPadding = floatingNavListPadding(extraTop = 56.dp)
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = listPadding,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    val listBottomPadding = floatingNavBottomPadding()
+    val scope = rememberCoroutineScope()
+    var isPullRefreshing by remember { mutableStateOf(false) }
+
+    AlKhatibPullToRefresh(
+        isRefreshing = isPullRefreshing,
+        onRefresh = {
+            scope.launch {
+                isPullRefreshing = true
+                runCatching { vm.refreshFeed() }
+                isPullRefreshing = false
+            }
+        },
+        modifier = Modifier.fillMaxSize()
     ) {
-        itemsIndexed(state.posts, key = { _, p -> p.id }) { _, post ->
+        Column(Modifier.fillMaxSize()) {
+            ReflectStickyHeader(
+                segment = state.segment,
+                onSelectSegment = vm::switchSegment,
+                modifier = Modifier.background(
+                    Brush.linearGradient(
+                        listOf(
+                            AlKhatibColors.ForestDark,
+                            AlKhatibColors.DeepEmerald
+                        )
+                    )
+                )
+            )
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = PaddingValues(bottom = listBottomPadding),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+            itemsIndexed(state.posts, key = { _, p -> p.id }) { _, post ->
             ReelPostCard(
                 post = post,
                 togglingLike = post.id in state.togglingLikePostIds,
@@ -151,6 +176,53 @@ private fun ReelFeed(
                 }
             }
         }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReflectStickyHeader(
+    segment: ReflectSegment,
+    onSelectSegment: (ReflectSegment) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .tabContentStatusBarInset()
+            .padding(
+                horizontal = AlKhatibSpacing.screenHorizontal,
+                vertical = AlKhatibSpacing.md
+            )
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.labelMedium,
+                color = AlKhatibColors.GoldBright,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.width(AlKhatibSpacing.sm))
+            Text(
+                text = "Reflect",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Text(
+            text = "Community reflections",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.65f),
+            modifier = Modifier.padding(start = 18.dp, top = 4.dp)
+        )
+        Spacer(Modifier.height(AlKhatibSpacing.md))
+        SegmentSwitcher(
+            segment = segment,
+            onSelect = onSelectSegment,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

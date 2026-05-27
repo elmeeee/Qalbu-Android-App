@@ -56,14 +56,14 @@ data class RandomAyahPayload(
             ?.toIntOrNull()
             ?.takeIf { it > 0 }
 
-    /** Human label: "An-Naml · Ayah 56" — never raw `27:56`. */
+    /** Human label: "An-Nur - 24" — never raw `24:56`. */
     fun referenceLabel(chapterDisplayName: String?): String? {
         val ayah = resolvedVerseNumber
         val surah = chapterDisplayName?.trim()?.takeIf { it.isNotEmpty() }
         return when {
-            surah != null && ayah != null -> "$surah · Ayah $ayah"
+            surah != null && ayah != null -> "$surah - $ayah"
             surah != null -> surah
-            ayah != null -> "Ayah $ayah"
+            ayah != null -> ayah.toString()
             else -> null
         }
     }

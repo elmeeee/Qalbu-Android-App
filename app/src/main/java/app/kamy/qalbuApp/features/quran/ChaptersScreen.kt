@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,12 +44,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.design.components.AlKhatibRevelationChip
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import app.kamy.qalbuApp.domain.model.ReadingSession
-import app.kamy.qalbuApp.ui.layout.floatingNavListPadding
+import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
+import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +61,9 @@ fun ChaptersScreen(
 ) {
     val vm: ChaptersViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
-    val listPadding = floatingNavListPadding()
+    val scope = rememberCoroutineScope()
+    var isPullRefreshing by remember { mutableStateOf(false) }
+    val listBottomPadding = floatingNavBottomPadding()
 
     Box(
         modifier = Modifier
@@ -61,7 +71,7 @@ fun ChaptersScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         when {
-            state.isLoading && state.chapters.isEmpty() ->
+            state.isLoading && state.chapters.isEmpty() && !isPullRefreshing ->
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center),
                     color = MaterialTheme.colorScheme.primary
@@ -74,41 +84,57 @@ fun ChaptersScreen(
                         .align(Alignment.Center)
                         .padding(32.dp)
                 )
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = listPadding,
-                verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
-                item(key = "quran_header") {
-                    QuranListHeader()
-                }
-
-                state.continueReading?.let { session ->
-                    item(key = "continue_reading") {
-                        ContinueReadingCard(
-                            session = session,
-                            chapter = state.chapters.firstOrNull { it.id == session.chapterNumber },
-                            onTap = {
-                                vm.continueReadingTarget()?.let { (c, v) -> onOpenChapter(c, v) }
-                            },
-                            modifier = Modifier.padding(
-                                horizontal = AlKhatibSpacing.screenHorizontal,
-                                vertical = AlKhatibSpacing.sm
-                            )
-                        )
+            else -> AlKhatibPullToRefresh(
+                isRefreshing = isPullRefreshing,
+                onRefresh = {
+                    scope.launch {
+                        isPullRefreshing = true
+                        runCatching { vm.refresh(force = true) }
+                        isPullRefreshing = false
                     }
-                }
+                },
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(Modifier.fillMaxSize()) {
+                    QuranListHeader(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background)
+                    )
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentPadding = PaddingValues(bottom = listBottomPadding)
+                    ) {
+                        state.continueReading?.let { session ->
+                            item(key = "continue_reading") {
+                                ContinueReadingCard(
+                                    session = session,
+                                    chapter = state.chapters.firstOrNull { it.id == session.chapterNumber },
+                                    onTap = {
+                                        vm.continueReadingTarget()?.let { (c, v) -> onOpenChapter(c, v) }
+                                    },
+                                    modifier = Modifier.padding(
+                                        horizontal = AlKhatibSpacing.screenHorizontal,
+                                        vertical = AlKhatibSpacing.sm
+                                    )
+                                )
+                            }
+                        }
 
-                items(state.chapters, key = { it.id }) { chapter ->
-                    ChapterRow(
-                        chapter = chapter,
-                        onClick = { onOpenChapter(chapter, null) },
-                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-                    )
+                        items(state.chapters, key = { it.id }) { chapter ->
+                            ChapterRow(
+                                chapter = chapter,
+                                onClick = { onOpenChapter(chapter, null) },
+                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                            )
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -116,10 +142,10 @@ fun ChaptersScreen(
 }
 
 @Composable
-private fun QuranListHeader() {
+private fun QuranListHeader(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
+            .tabContentStatusBarInset()
             .padding(
                 horizontal = AlKhatibSpacing.screenHorizontal,
                 vertical = AlKhatibSpacing.md

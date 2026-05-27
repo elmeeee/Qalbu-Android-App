@@ -9,6 +9,7 @@ import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReadingSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,9 +42,13 @@ class ChaptersViewModel @Inject constructor(
     }
 
     fun loadAll(force: Boolean = false) {
+        viewModelScope.launch { refresh(force) }
+    }
+
+    suspend fun refresh(force: Boolean = true) {
         _state.update { it.copy(isLoading = true, error = null) }
-        viewModelScope.launch {
-            try {
+        try {
+            coroutineScope {
                 val chaptersDeferred = async { contentRepository.getChapters(force) }
                 val continueDeferred = async {
                     if (userSession.isSignedIn.value) {
@@ -57,9 +62,9 @@ class ChaptersViewModel @Inject constructor(
                         continueReading = continueDeferred.await()
                     )
                 }
-            } catch (t: Throwable) {
-                _state.update { it.copy(isLoading = false, error = t.message ?: "Failed to load chapters") }
             }
+        } catch (t: Throwable) {
+            _state.update { it.copy(isLoading = false, error = t.message ?: "Failed to load chapters") }
         }
     }
 

@@ -13,6 +13,7 @@ import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +28,7 @@ import javax.inject.Inject
 data class TodayUiState(
     val isLoading: Boolean = false,
     val verse: RandomAyahPayload? = null,
-    /** Surah name + ayah for Quran of the Day subtitle (e.g. "An-Naml · Ayah 56"). */
+    /** Surah name + ayah number for Quran of the Day subtitle (e.g. "An-Nur - 24"). */
     val verseReferenceLabel: String? = null,
     val recitations: List<RecitationPayload> = emptyList(),
     val selectedRecitationId: Int = 6,
@@ -86,9 +87,13 @@ class TodayViewModel @Inject constructor(
     }
 
     fun loadDailyAyahWithRecitations() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }
-            try {
+        viewModelScope.launch { refreshContent() }
+    }
+
+    suspend fun refreshContent() {
+        _state.update { it.copy(isLoading = true, error = null) }
+        try {
+            coroutineScope {
                 val verseDeferred = async { contentRepository.getRandomAyah() }
                 val chaptersDeferred = async { contentRepository.getChapters() }
                 val recitationsDeferred = async {
@@ -108,9 +113,9 @@ class TodayViewModel @Inject constructor(
                         recitations = recitationsDeferred.await()
                     )
                 }
-            } catch (t: Throwable) {
-                _state.update { it.copy(isLoading = false, error = t.message ?: "Failed to load verse") }
             }
+        } catch (t: Throwable) {
+            _state.update { it.copy(isLoading = false, error = t.message ?: "Failed to load verse") }
         }
     }
 

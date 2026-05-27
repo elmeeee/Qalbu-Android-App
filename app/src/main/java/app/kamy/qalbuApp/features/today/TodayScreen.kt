@@ -6,24 +6,24 @@ import android.Manifest
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,18 +34,17 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
-import app.kamy.qalbuApp.design.theme.AlKhatibColors
-import app.kamy.qalbuApp.ui.layout.tabContentBottomInset
+import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
 import app.kamy.qalbuApp.features.today.components.TodayVerseOfDaySection
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
+import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
-/**
- * Today tab root screen. Mirrors iOS Features/Discovery/Views/TodayDiscoveryView.swift.
- */
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TodayScreen(
     audioPlayer: AudioPlayerController,
@@ -56,11 +55,12 @@ fun TodayScreen(
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
     val todayState by todayVm.state.collectAsState()
     val prayerState by prayerVm.state.collectAsState()
-    val audioState by audioPlayer.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isPullRefreshing by remember { mutableStateOf(false) }
+    val listBottomPadding = floatingNavBottomPadding()
 
-    // Runtime permissions: location for prayer times, notifications for reminders.
     val locationPermissions = rememberMultiplePermissionsState(
         listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -98,83 +98,112 @@ fun TodayScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .verticalScroll(rememberScrollState())
-                .tabContentBottomInset()
+        AlKhatibPullToRefresh(
+            isRefreshing = isPullRefreshing,
+            onRefresh = {
+                scope.launch {
+                    isPullRefreshing = true
+                    runCatching {
+                        coroutineScope {
+                            launch { prayerVm.refresh() }
+                            launch { todayVm.refreshContent() }
+                        }
+                    }
+                    isPullRefreshing = false
+                }
+            },
+            modifier = Modifier.fillMaxSize()
         ) {
-            TodayHeader(
-                cityName = prayerState.cityName,
-                locationStatus = when {
-                    prayerState.cityName != null -> null
-                    prayerState.needsPermission -> "Enable location"
-                    prayerState.isLoading -> "Locating…"
-                    prayerState.error != null -> "Location unavailable"
-                    else -> "Locating…"
-                },
-                hijriLabel = prayerState.hijriLabel,
-                gregorianLabel = prayerState.gregorianLabel,
-                avatarUrl = todayState.profile?.preferredAvatarUrl,
-                isProfileLoading = todayState.profileLoading,
-                onAccountClick = onAccountNavigate
-            )
-            Spacer(Modifier.height(16.dp))
-            PrayerDashboardCard(
-                state = prayerState,
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-            )
-            TodayVerseOfDaySection(
-                verse = todayState.verse,
-                referenceLabel = todayState.verseReferenceLabel,
-                isLoading = todayState.isLoading,
-                isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
-                onPlayAudio = {
-                    val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
-                    if (audioPlayer.isPlayingUrl(url)) {
-                        audioPlayer.toggle()
-                    } else {
-                        audioPlayer.playVerse(
-                            url = url,
-                            surahTitle = "Quran of the Day",
-                            ayahLabel = todayState.verseReferenceLabel.orEmpty(),
-                            reciterName = todayState.recitations
-                                .firstOrNull { it.id == todayState.selectedRecitationId }
-                                ?.displayName.orEmpty()
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                TodayHeader(
+                    cityName = prayerState.cityName,
+                    locationStatus = when {
+                        prayerState.cityName != null -> null
+                        prayerState.needsPermission -> "Enable location"
+                        prayerState.isLoading -> "Locating…"
+                        prayerState.error != null -> "Location unavailable"
+                        else -> "Locating…"
+                    },
+                    hijriLabel = prayerState.hijriLabel,
+                    gregorianLabel = prayerState.gregorianLabel,
+                    avatarUrl = todayState.profile?.preferredAvatarUrl,
+                    isProfileLoading = todayState.profileLoading,
+                    onAccountClick = onAccountNavigate,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                )
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentPadding = PaddingValues(bottom = listBottomPadding)
+                ) {
+                    item(key = "prayer_card") {
+                        Spacer(Modifier.height(16.dp))
+                        PrayerDashboardCard(
+                            state = prayerState,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
                         )
                     }
-                },
-                onShare = {
-                    val text = todayVm.composeShareText()
-                    if (text.isNotBlank()) {
-                        val intent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, text)
-                        }
-                        context.startActivity(Intent.createChooser(intent, "Share verse"))
+
+                    item(key = "quran_of_day") {
+                        TodayVerseOfDaySection(
+                            verse = todayState.verse,
+                            referenceLabel = todayState.verseReferenceLabel,
+                            isLoading = todayState.isLoading,
+                            isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
+                            onPlayAudio = {
+                                val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
+                                if (audioPlayer.isPlayingUrl(url)) {
+                                    audioPlayer.toggle()
+                                } else {
+                                    audioPlayer.playVerse(
+                                        url = url,
+                                        surahTitle = "Quran of the Day",
+                                        ayahLabel = todayState.verseReferenceLabel.orEmpty(),
+                                        reciterName = todayState.recitations
+                                            .firstOrNull { it.id == todayState.selectedRecitationId }
+                                            ?.displayName.orEmpty()
+                                    )
+                                }
+                            },
+                            onShare = {
+                                val text = todayVm.composeShareText()
+                                if (text.isNotBlank()) {
+                                    val intent = Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, text)
+                                    }
+                                    context.startActivity(Intent.createChooser(intent, "Share verse"))
+                                }
+                            },
+                            onReflect = {
+                                if (todayVm.isSignedIn()) {
+                                    val text = todayVm.composeShareText()
+                                    if (text.isNotBlank()) {
+                                        val intent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_TEXT, text)
+                                        }
+                                        context.startActivity(Intent.createChooser(intent, "Share reflection"))
+                                    }
+                                } else {
+                                    onReflectNavigate()
+                                }
+                            },
+                            onTafsir = { todayVm.openTafsir() }
+                        )
                     }
-                },
-                onReflect = {
-                    if (todayVm.isSignedIn()) {
-                        // TODO: wire authorId from a session profile cache.
-                        // For now, prompt user to share via system sheet as fallback.
-                        val text = todayVm.composeShareText()
-                        if (text.isNotBlank()) {
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, text)
-                            }
-                            context.startActivity(Intent.createChooser(intent, "Share reflection"))
-                        }
-                    } else {
-                        onReflectNavigate()
-                    }
-                },
-                onTafsir = { todayVm.openTafsir() }
-            )
+                }
+            }
         }
 
         SnackbarHost(

@@ -70,6 +70,15 @@ class ReflectViewModel @Inject constructor(
     }
 
     fun loadPosts(reset: Boolean = false) {
+        viewModelScope.launch { loadPostsInternal(reset) }
+    }
+
+    suspend fun refreshFeed() {
+        if (!_state.value.isAuthenticated) return
+        loadPostsInternal(reset = true)
+    }
+
+    private suspend fun loadPostsInternal(reset: Boolean) {
         val s = _state.value
         if (!s.isAuthenticated) return
         if (!reset && (s.isLoadingMore || !s.hasMore)) return
@@ -79,40 +88,38 @@ class ReflectViewModel @Inject constructor(
             if (reset) it.copy(isLoading = true, error = null)
             else it.copy(isLoadingMore = true)
         }
-        viewModelScope.launch {
-            try {
-                val envelope = when (s.segment) {
-                    ReflectSegment.ALL -> repository.fetchAllReflectFeed(targetPage)
-                    ReflectSegment.MINE -> repository.fetchMyReflections(targetPage)
-                }
-                val newPosts = envelope.items
-                _state.update {
-                    val combined = if (reset) newPosts else it.posts + newPosts
-                    it.copy(
-                        isLoading = false,
-                        isLoadingMore = false,
-                        posts = combined,
-                        currentPage = envelope.currentPage ?: targetPage,
-                        hasMore = (envelope.currentPage ?: targetPage) < (envelope.pages ?: targetPage)
-                    )
-                }
-            } catch (e: QFError.MissingUserSession) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        isLoadingMore = false,
-                        isAuthenticated = false,
-                        error = "Session expired"
-                    )
-                }
-            } catch (t: Throwable) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        isLoadingMore = false,
-                        error = t.message ?: "Failed to load feed"
-                    )
-                }
+        try {
+            val envelope = when (s.segment) {
+                ReflectSegment.ALL -> repository.fetchAllReflectFeed(targetPage)
+                ReflectSegment.MINE -> repository.fetchMyReflections(targetPage)
+            }
+            val newPosts = envelope.items
+            _state.update {
+                val combined = if (reset) newPosts else it.posts + newPosts
+                it.copy(
+                    isLoading = false,
+                    isLoadingMore = false,
+                    posts = combined,
+                    currentPage = envelope.currentPage ?: targetPage,
+                    hasMore = (envelope.currentPage ?: targetPage) < (envelope.pages ?: targetPage)
+                )
+            }
+        } catch (e: QFError.MissingUserSession) {
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isLoadingMore = false,
+                    isAuthenticated = false,
+                    error = "Session expired"
+                )
+            }
+        } catch (t: Throwable) {
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isLoadingMore = false,
+                    error = t.message ?: "Failed to load feed"
+                )
             }
         }
     }
