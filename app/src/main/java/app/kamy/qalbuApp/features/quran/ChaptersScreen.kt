@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,6 +38,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -64,13 +68,33 @@ fun ChaptersScreen(
     val vm: ChaptersViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val searchFocusRequester = remember { FocusRequester() }
     var isPullRefreshing by remember { mutableStateOf(false) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    var isSearchFieldFocused by remember { mutableStateOf(false) }
     val listBottomPadding = floatingNavBottomPadding()
-    val filteredChapters = remember(state.chapters, searchQuery) {
-        state.chapters.filteredBySearch(searchQuery)
+    val activeSearchQuery = remember(searchQuery) { searchQuery.normalizedSearchQuery() }
+    val isSearching = isSearchFieldFocused && activeSearchQuery.isNotEmpty()
+    val displayedChapters = remember(state.chapters, activeSearchQuery, isSearching) {
+        if (isSearching) state.chapters.searchChapters(activeSearchQuery) else state.chapters
     }
-    val isSearching = searchQuery.isNotBlank()
+
+    fun clearSearch() {
+        searchQuery = ""
+        isSearchFieldFocused = false
+        keyboardController?.hide()
+        focusManager.clearFocus()
+    }
+
+    fun onSearchFocusChange(focused: Boolean) {
+        isSearchFieldFocused = focused
+        if (!focused) {
+            keyboardController?.hide()
+            searchQuery = ""
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -87,8 +111,13 @@ fun ChaptersScreen(
                     QuranListHeader(
                         searchQuery = "",
                         onSearchQueryChange = {},
+                        onClearSearch = {},
                         searchEnabled = false,
+                        isSearching = false,
+                        showSuggestions = false,
+                        onSuggestionClick = {},
                         resultCount = null,
+                        searchFocusRequester = searchFocusRequester,
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
@@ -128,8 +157,18 @@ fun ChaptersScreen(
                     QuranListHeader(
                         searchQuery = searchQuery,
                         onSearchQueryChange = { searchQuery = it },
+                        onClearSearch = ::clearSearch,
                         searchEnabled = true,
-                        resultCount = if (isSearching) filteredChapters.size else null,
+                        isSearching = isSearching,
+                        showSuggestions = isSearchFieldFocused && activeSearchQuery.isEmpty(),
+                        onSuggestionClick = { suggestion ->
+                            searchQuery = suggestion
+                            isSearchFieldFocused = true
+                            searchFocusRequester.requestFocus()
+                        },
+                        resultCount = if (isSearching) displayedChapters.size else null,
+                        onSearchFocusChange = ::onSearchFocusChange,
+                        searchFocusRequester = searchFocusRequester,
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
@@ -158,13 +197,13 @@ fun ChaptersScreen(
                             }
                         }
 
-                        if (isSearching && filteredChapters.isEmpty()) {
+                        if (isSearching && displayedChapters.isEmpty()) {
                             item(key = "search_empty") {
-                                QuranSearchEmptyState(query = searchQuery)
+                                QuranSearchEmptyState(query = activeSearchQuery)
                             }
                         }
 
-                        items(filteredChapters, key = { it.id }) { chapter ->
+                        items(displayedChapters, key = { it.id }) { chapter ->
                             ChapterRow(
                                 chapter = chapter,
                                 onClick = { onOpenChapter(chapter, null) },
@@ -186,8 +225,14 @@ fun ChaptersScreen(
 private fun QuranListHeader(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    onClearSearch: () -> Unit,
     searchEnabled: Boolean,
+    isSearching: Boolean,
+    showSuggestions: Boolean,
+    onSuggestionClick: (String) -> Unit,
     resultCount: Int?,
+    searchFocusRequester: FocusRequester,
+    onSearchFocusChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -240,11 +285,34 @@ private fun QuranListHeader(
                 )
         )
         Spacer(Modifier.height(AlKhatibSpacing.md))
-        QuranChapterSearchBar(
-            query = searchQuery,
-            onQueryChange = onSearchQueryChange,
-            enabled = searchEnabled
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            QuranChapterSearchBar(
+                query = searchQuery,
+                onQueryChange = onSearchQueryChange,
+                onClear = onClearSearch,
+                onFocusChange = onSearchFocusChange,
+                onDismiss = onClearSearch,
+                enabled = searchEnabled,
+                focusRequester = searchFocusRequester,
+                modifier = Modifier.weight(1f)
+            )
+            if (isSearching && searchEnabled) {
+                TextButton(onClick = onClearSearch) {
+                    Text(
+                        text = "Cancel",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+        if (showSuggestions && searchEnabled) {
+            Spacer(Modifier.height(AlKhatibSpacing.sm))
+            QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
+        }
     }
 }
 
