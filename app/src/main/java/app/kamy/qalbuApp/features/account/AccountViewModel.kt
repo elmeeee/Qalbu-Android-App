@@ -352,6 +352,24 @@ class AccountViewModel @Inject constructor(
         adhanPreviewPlayer.togglePreview(voice.id, AdhanVoiceCatalog.rawResForPreview(voice))
     }
 
+    fun notificationSummary(state: AccountUiState = _state.value): String {
+        val labels = buildList {
+            if (state.dailyVerseEnabled) add("Daily verse")
+            if (state.adzanEnabled) add("Prayer")
+            if (state.imsakEnabled) add("Imsak")
+            if (state.midnightEnabled) add("Midnight")
+            if (state.firstThirdEnabled) add("1st third")
+            if (state.tahajudEnabled) add("Tahajud")
+            if (state.yasinReminderEnabled) add("Yasin")
+            if (state.kahfReminderEnabled) add("Al-Kahf")
+        }
+        return when {
+            labels.isEmpty() -> "All reminders off"
+            labels.size >= 6 -> "${labels.size} reminders on"
+            else -> labels.joinToString(" · ")
+        }
+    }
+
     fun filteredTranslations(): List<QFTranslation> {
         val q = _state.value.translatorQuery.trim().lowercase()
         val all = _state.value.translations

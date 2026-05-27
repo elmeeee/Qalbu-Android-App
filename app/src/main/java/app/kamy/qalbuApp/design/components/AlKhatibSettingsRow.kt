@@ -73,7 +73,8 @@ fun AlKhatibSettingsToggleRow(
     title: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    subtitle: String? = null
 ) {
     ListItem(
         modifier = modifier.fillMaxWidth(),
@@ -83,6 +84,15 @@ fun AlKhatibSettingsToggleRow(
         },
         headlineContent = {
             Text(title, style = MaterialTheme.typography.titleMedium)
+        },
+        supportingContent = subtitle?.let {
+            {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         },
         trailingContent = {
             Switch(checked = checked, onCheckedChange = onCheckedChange)

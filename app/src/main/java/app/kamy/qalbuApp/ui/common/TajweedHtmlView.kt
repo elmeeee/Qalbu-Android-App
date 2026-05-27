@@ -2,12 +2,15 @@ package app.kamy.qalbuApp.ui.common
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -24,12 +27,6 @@ import androidx.compose.ui.viewinterop.AndroidView
  * Design/Organisms/HTMLContentWebView.swift and AyahArabicWebBlock.swift.
  *
  * Height wraps content so long ayat are never clipped.
- *
- * @param htmlFragment the raw `<div dir="rtl" lang="ar">…</div>` produced by
- *   [app.kamy.qalbuApp.domain.model.RandomAyahPayload.tajweedWebHtmlFragment].
- * @param fontSizeSp base Arabic font size in CSS px (we treat 1px≈1sp here).
- *   Compose callers should pass a value already multiplied by their fontScale.
- * @param textColor CSS color (e.g., "#0F172A") — usually scheme.onSurface.toArgbHex().
  */
 @Composable
 fun TajweedHtmlView(
@@ -40,15 +37,28 @@ fun TajweedHtmlView(
 ) {
     var contentHeightPx by remember(htmlFragment, fontSizeSp, textColor) { mutableIntStateOf(0) }
     var lastLoadedHtml by remember(htmlFragment, fontSizeSp, textColor) { mutableStateOf<String?>(null) }
+    var measureGeneration by remember(htmlFragment, fontSizeSp, textColor) { mutableIntStateOf(0) }
+    val pendingRemeasures = remember { mutableListOf<Runnable>() }
     val density = LocalDensity.current
     val wrappedHtml = remember(htmlFragment, fontSizeSp, textColor) {
         wrapTajweedHtml(htmlFragment, fontSizeSp, textColor)
     }
 
+    DisposableEffect(wrappedHtml) {
+        onDispose {
+            pendingRemeasures.forEach { remeasureHandler.removeCallbacks(it) }
+            pendingRemeasures.clear()
+        }
+    }
+    val estimatedMinHeightDp = remember(fontSizeSp) {
+        // Generous floor while the WebView measures (Arabic line metrics + diacritics).
+        (fontSizeSp * 2.4f).coerceAtLeast(72f).dp
+    }
+
     val heightModifier = if (contentHeightPx > 0) {
         Modifier.height(with(density) { contentHeightPx.toDp() })
     } else {
-        Modifier.heightIn(min = 48.dp)
+        Modifier.heightIn(min = estimatedMinHeightDp)
     }
 
     AndroidView(
@@ -57,15 +67,21 @@ fun TajweedHtmlView(
         update = { webView ->
             webView.webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
-                    view?.evaluateJavascript(MEASURE_CONTENT_HEIGHT_JS) { raw ->
-                        val px = parseMeasuredHeight(raw) ?: return@evaluateJavascript
-                        view.post {
+                    view?.let { wv ->
+                        scheduleHeightRemeasures(
+                            webView = wv,
+                            generation = measureGeneration,
+                            pending = pendingRemeasures
+                        ) { px ->
                             if (px > contentHeightPx) contentHeightPx = px
                         }
                     }
                 }
             }
             if (lastLoadedHtml != wrappedHtml) {
+                pendingRemeasures.forEach { remeasureHandler.removeCallbacks(it) }
+                pendingRemeasures.clear()
+                measureGeneration += 1
                 lastLoadedHtml = wrappedHtml
                 contentHeightPx = 0
                 webView.loadDataWithBaseURL(
@@ -80,6 +96,40 @@ fun TajweedHtmlView(
     )
 }
 
+private val remeasureHandler = Handler(Looper.getMainLooper())
+
+private const val MEASURE_GENERATION_TAG = 0x71AEE001
+
+private fun scheduleHeightRemeasures(
+    webView: WebView,
+    generation: Int,
+    pending: MutableList<Runnable>,
+    onHeight: (Int) -> Unit
+) {
+    webView.setTag(MEASURE_GENERATION_TAG, generation)
+    fun remeasure() {
+        webView.evaluateJavascript(MEASURE_CONTENT_HEIGHT_JS) { raw ->
+            parseMeasuredHeight(raw)?.let { px ->
+                webView.post {
+                    if (webView.getTag(MEASURE_GENERATION_TAG) != generation) return@post
+                    onHeight(px)
+                }
+            }
+        }
+    }
+    fun postRemeasure(delayMs: Long = 0L) {
+        val task = Runnable { remeasure() }
+        pending.add(task)
+        if (delayMs == 0L) {
+            remeasureHandler.post(task)
+        } else {
+            remeasureHandler.postDelayed(task, delayMs)
+        }
+    }
+    postRemeasure()
+    listOf(50L, 120L, 250L, 450L, 700L).forEach { postRemeasure(it) }
+}
+
 private fun parseMeasuredHeight(raw: String?): Int? {
     if (raw.isNullOrBlank() || raw == "null") return null
     return raw.trim().removeSurrounding("\"").toFloatOrNull()?.toInt()?.takeIf { it > 0 }
@@ -87,12 +137,25 @@ private fun parseMeasuredHeight(raw: String?): Int? {
 
 private const val MEASURE_CONTENT_HEIGHT_JS = """
 (function() {
-  var b = document.body, e = document.documentElement;
-  var h = Math.max(
-    b.scrollHeight, b.offsetHeight,
-    e.clientHeight, e.scrollHeight, e.offsetHeight
-  );
-  return Math.ceil(h) + 8;
+  function measure() {
+    var b = document.body;
+    var top = b.getBoundingClientRect().top;
+    var maxBottom = top;
+    var nodes = b.querySelectorAll('div, span, p');
+    for (var i = 0; i < nodes.length; i++) {
+      var r = nodes[i].getBoundingClientRect();
+      if (r.height > 0) maxBottom = Math.max(maxBottom, r.bottom);
+    }
+    var blockHeight = maxBottom - top;
+    var h = Math.max(
+      blockHeight,
+      b.scrollHeight,
+      b.offsetHeight,
+      document.documentElement.scrollHeight
+    );
+    return Math.ceil(h * 1.12) + 20;
+  }
+  return measure();
 })();
 """
 
@@ -107,14 +170,6 @@ private fun buildTajweedWebView(context: Context): WebView = WebView(context).ap
     isNestedScrollingEnabled = false
 }
 
-/**
- * Wraps a tajweed HTML fragment in a full document with the bundled font,
- * sensible defaults for RTL Arabic, and inline color tokens for tajweed rules.
- *
- * The class names below match what the QF Content API returns inside
- * `text_uthmani_tajweed` (see iOS QuranVerseArabic.swift). Colors are taken from
- * tajweed.online / community conventions; tune later to match iOS exactly.
- */
 private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String): String {
     val css = """
         @font-face {
@@ -132,18 +187,18 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         body {
             font-family: 'AlKhatibQuranWeb', 'KFGQPC HAFS Uthmanic Script', 'Amiri Quran', serif;
             font-size: ${fontSizeSp}px;
-            line-height: 1.9;
+            line-height: 2.1;
             direction: rtl;
             text-align: center;
             -webkit-text-size-adjust: 100%;
-            padding: 4px 8px 6px;
+            padding: 8px 10px 12px;
+            overflow: visible;
         }
 
-        /* Tajweed rule colors (community palette; adjust to match iOS one-to-one if needed). */
-        .ham_wasl     { color: #AAAAAA; }            /* hamzat al-wasl */
+        .ham_wasl     { color: #AAAAAA; }
         .silent       { color: #AAAAAA; }
         .laam_shamsiya{ color: #AAAAAA; }
-        .madda_normal { color: #537FFF; }            /* madd 2 */
+        .madda_normal { color: #537FFF; }
         .madda_permissible { color: #4050FF; }
         .madda_necessary   { color: #000EBC; }
         .madda_obligatory  { color: #2144C1; }
@@ -157,8 +212,7 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         .idgham_mutajanisayn { color: #A1A1A1; }
         .idgham_mutaqaribayn { color: #A1A1A1; }
         .ghunnah      { color: #FF7E1E; }
-        .end          { color: #D6A100; }            /* ayah-end markers from API */
-        /* Compact stacked rosette + eastern digits (iOS parity, smaller badge). */
+        .end          { color: #D6A100; }
         .ayah-end-symbol {
             display: inline-grid;
             place-items: center;
@@ -208,17 +262,11 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
     """.trimIndent()
 }
 
-/**
- * Helper to build the same `<div dir="rtl" lang="ar">…</div>` wrapper that the iOS
- * `RandomAyahPayload.tajweedWebHTMLFragment()` produces. Use this on a raw
- * `text_uthmani_tajweed` value before passing to [TajweedHtmlView].
- */
 fun buildTajweedHtmlFragment(textUthmaniTajweed: String?, ayahNumber: Int? = null): String {
     val body = textUthmaniTajweed?.trim().orEmpty()
     if (body.isEmpty()) return "<div dir=\"rtl\" lang=\"ar\"></div>"
     val marker = ayahEndMarkerHtml(ayahNumber)
     val spacer = if (marker.isEmpty()) "" else " "
-    // Strip API `class="end"` spans and any trailing duplicate ayah badge text.
     val cleaned = stripInlineAyahEndMarkers(body, ayahNumber)
         .ifEmpty { body }
     return "<div dir=\"rtl\" lang=\"ar\">$cleaned$spacer$marker</div>"
@@ -227,10 +275,8 @@ fun buildTajweedHtmlFragment(textUthmaniTajweed: String?, ayahNumber: Int? = nul
 private val endSpanRegex =
     Regex("<span\\b[^>]*\\bclass\\s*=\\s*['\"]?\\s*end\\s*['\"]?[^>]*>[\\s\\S]*?</span>", RegexOption.IGNORE_CASE)
 
-/** Removes server-inlined end markers so we render a single stacked badge (iOS parity). */
 private fun stripInlineAyahEndMarkers(html: String, ayahNumber: Int?): String {
     var text = html.replace(endSpanRegex, "").trim()
-    // U+06DD Arabic End of Ayah + optional joiners + eastern digits at end of verse HTML.
     text = text.replace(
         Regex("\u06DD[\u200C\u200D\u200E\u200F\\s]*[\u0660-\u0669]+\$")
     ) { "" }.trim()

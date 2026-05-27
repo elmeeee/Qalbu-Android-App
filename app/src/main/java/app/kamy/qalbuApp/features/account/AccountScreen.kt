@@ -57,7 +57,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -101,6 +104,7 @@ fun AccountScreen(
     val vm: AccountViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var showNotificationSettings by rememberSaveable { mutableStateOf(false) }
 
     val signInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -114,147 +118,22 @@ fun AccountScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .tabContentStatusBarInset()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
-        verticalArrangement = Arrangement.spacedBy(AlKhatibSpacing.lg)
-    ) {
-        if (onBack != null) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-        ProfileHeader(
-            isSignedIn = state.isSignedIn,
-            profile = state.profile,
-            isLoading = state.isLoading,
+    if (showNotificationSettings) {
+        NotificationSettingsScreen(
+            vm = vm,
+            onBack = { showNotificationSettings = false }
+        )
+    } else {
+        AccountSettingsContent(
+            state = state,
+            vm = vm,
+            onBack = onBack,
+            onOpenNotifications = { showNotificationSettings = true },
             onSignIn = {
                 val intent = oauthService.buildAuthorizationIntent(authService)
                 signInLauncher.launch(intent)
             }
         )
-
-        SettingsSectionLabel("General")
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsNavigationRow(
-                icon = Icons.Filled.TextFields,
-                title = "Font size",
-                subtitle = "Adjust Arabic & translation",
-                onClick = { vm.openFontScale() }
-            )
-        }
-
-        SettingsSectionLabel("Prayer settings")
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsNavigationRow(
-                icon = Icons.Filled.Schedule,
-                title = "Prayer calculation method",
-                subtitle = state.prayerMethod.organization,
-                onClick = { vm.togglePrayerSheet(true) }
-            )
-            AlKhatibSettingsNavigationRow(
-                icon = Icons.AutoMirrored.Filled.VolumeUp,
-                title = "Adhan voice",
-                subtitle = state.selectedAdhanVoice.displayName,
-                onClick = { vm.openAdhanSheet() }
-            )
-            AlKhatibSettingsToggleRow(
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = "Show translation",
-                checked = state.showTranslation,
-                onCheckedChange = vm::setShowTranslation
-            )
-            AlKhatibSettingsNavigationRow(
-                icon = Icons.Filled.Translate,
-                title = "Translator",
-                subtitle = state.selectedTranslationName.ifBlank { "Tap to choose translation source" },
-                onClick = { vm.openTranslator() }
-            )
-        }
-
-        SettingsSectionLabel("Notifications")
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsToggleRow(
-                icon = Icons.Filled.Notifications,
-                title = "Daily verse reminder · Today's surah & translation",
-                checked = state.dailyVerseEnabled,
-                onCheckedChange = vm::setDailyVerseEnabled
-            )
-            if (state.dailyVerseEnabled) {
-                AlKhatibSettingsNavigationRow(
-                    icon = Icons.Filled.Schedule,
-                    title = "Morning time",
-                    subtitle = state.reminderTimeLabel.ifBlank { "07:00" },
-                    onClick = { vm.toggleNotifTimeSheet(true) }
-                )
-            }
-            AlKhatibSettingsToggleRow(
-                icon = Icons.Filled.Notifications,
-                title = "Prayer times · Fajr, Dhuhr, Asr, Maghrib & Isha",
-                checked = state.adzanEnabled,
-                onCheckedChange = vm::setAdzanEnabled
-            )
-            AlKhatibSettingsToggleRow(
-                icon = Icons.Filled.Schedule,
-                title = "Imsak · Reminder before Fajr while fasting",
-                checked = state.imsakEnabled,
-                onCheckedChange = vm::setImsakEnabled
-            )
-            AlKhatibSettingsToggleRow(
-                icon = Icons.Filled.Schedule,
-                title = "Midnight · Halfway through the night",
-                checked = state.midnightEnabled,
-                onCheckedChange = vm::setMidnightEnabled
-            )
-            AlKhatibSettingsToggleRow(
-                icon = Icons.Filled.Schedule,
-                title = "First third of night · Early night rest",
-                checked = state.firstThirdEnabled,
-                onCheckedChange = vm::setFirstThirdEnabled
-            )
-            AlKhatibSettingsToggleRow(
-                icon = Icons.Filled.Schedule,
-                title = "Last third (Tahajud) · Best time for night prayer",
-                checked = state.tahajudEnabled,
-                onCheckedChange = vm::setTahajudEnabled
-            )
-            AlKhatibSettingsToggleRow(
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = "Surah Yasin · Thursday night before Jumu'ah",
-                checked = state.yasinReminderEnabled,
-                onCheckedChange = vm::setYasinReminderEnabled
-            )
-            AlKhatibSettingsToggleRow(
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = "Surah Al-Kahf · Friday reading reminder",
-                checked = state.kahfReminderEnabled,
-                onCheckedChange = vm::setKahfReminderEnabled
-            )
-        }
-
-        if (state.isSignedIn) {
-            Button(
-                onClick = { vm.signOut() },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !state.authBusy,
-                shape = MaterialTheme.shapes.large
-            ) {
-                Text("Sign out")
-            }
-        }
-        Spacer(Modifier.height(AlKhatibSpacing.xl))
     }
 
     // Translator sheet
@@ -321,6 +200,105 @@ fun AccountScreen(
             onPreview = vm::toggleAdhanPreview,
             onDismiss = vm::closeAdhanSheet
         )
+    }
+}
+
+@Composable
+private fun AccountSettingsContent(
+    state: AccountUiState,
+    vm: AccountViewModel,
+    onBack: (() -> Unit)?,
+    onOpenNotifications: () -> Unit,
+    onSignIn: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(AlKhatibSpacing.lg)
+    ) {
+        if (onBack != null) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        ProfileHeader(
+            isSignedIn = state.isSignedIn,
+            profile = state.profile,
+            isLoading = state.isLoading,
+            onSignIn = onSignIn
+        )
+
+        SettingsSectionLabel("General")
+        AlKhatibSettingsGroup {
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.TextFields,
+                title = "Font size",
+                subtitle = "Adjust Arabic & translation",
+                onClick = { vm.openFontScale() }
+            )
+        }
+
+        SettingsSectionLabel("Prayer settings")
+        AlKhatibSettingsGroup {
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.Schedule,
+                title = "Prayer calculation method",
+                subtitle = state.prayerMethod.organization,
+                onClick = { vm.togglePrayerSheet(true) }
+            )
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.AutoMirrored.Filled.VolumeUp,
+                title = "Adhan voice",
+                subtitle = state.selectedAdhanVoice.displayName,
+                onClick = { vm.openAdhanSheet() }
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.AutoMirrored.Filled.MenuBook,
+                title = "Show translation",
+                checked = state.showTranslation,
+                onCheckedChange = vm::setShowTranslation
+            )
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.Translate,
+                title = "Translator",
+                subtitle = state.selectedTranslationName.ifBlank { "Tap to choose translation source" },
+                onClick = { vm.openTranslator() }
+            )
+        }
+
+        SettingsSectionLabel("Notifications")
+        AlKhatibSettingsGroup {
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.Notifications,
+                title = "Reminders",
+                subtitle = vm.notificationSummary(state),
+                onClick = onOpenNotifications
+            )
+        }
+
+        if (state.isSignedIn) {
+            Button(
+                onClick = { vm.signOut() },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.authBusy,
+                shape = MaterialTheme.shapes.large
+            ) {
+                Text("Sign out")
+            }
+        }
+        Spacer(Modifier.height(AlKhatibSpacing.xl))
     }
 }
 

@@ -108,7 +108,8 @@ fun TodayVerseOfDaySection(
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            softWrap = true
                         )
                     }
                 }
