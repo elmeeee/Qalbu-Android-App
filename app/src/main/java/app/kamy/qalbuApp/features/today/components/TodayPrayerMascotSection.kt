@@ -41,8 +41,7 @@ fun TodayPrayerMascotSection(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 // Pull mascot slightly outside the card so only the lower legs overlap.
-                .padding(end = (-6).dp)
-                .offset(y = 4.dp)
+                .offset(x = 6.dp, y = 4.dp)
                 .width(132.dp)
                 .height(108.dp)
         )
