@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -51,8 +52,7 @@ fun TajweedHtmlView(
         }
     }
     val estimatedMinHeightDp = remember(fontSizeSp) {
-        // Generous floor while the WebView measures (Arabic line metrics + diacritics).
-        (fontSizeSp * 2.4f).coerceAtLeast(72f).dp
+        (fontSizeSp * 3.2f).coerceAtLeast(96f).dp
     }
 
     val heightModifier = if (contentHeightPx > 0) {
@@ -61,10 +61,29 @@ fun TajweedHtmlView(
         Modifier.heightIn(min = estimatedMinHeightDp)
     }
 
+    fun applySafeHeight(px: Int) {
+        val safePx = (px * 1.4f).toInt() + 28
+        if (safePx > contentHeightPx) contentHeightPx = safePx
+    }
+
     AndroidView(
         modifier = modifier.fillMaxWidth().then(heightModifier),
-        factory = { ctx -> buildTajweedWebView(ctx) },
+        factory = { ctx ->
+            buildTajweedWebView(ctx).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+        },
         update = { webView ->
+            webView.layoutParams = webView.layoutParams?.apply {
+                width = ViewGroup.LayoutParams.MATCH_PARENT
+                height = ViewGroup.LayoutParams.WRAP_CONTENT
+            } ?: ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
             webView.webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     view?.let { wv ->
@@ -72,9 +91,7 @@ fun TajweedHtmlView(
                             webView = wv,
                             generation = measureGeneration,
                             pending = pendingRemeasures
-                        ) { px ->
-                            if (px > contentHeightPx) contentHeightPx = px
-                        }
+                        ) { px -> applySafeHeight(px) }
                     }
                 }
             }
@@ -153,7 +170,7 @@ private const val MEASURE_CONTENT_HEIGHT_JS = """
       b.offsetHeight,
       document.documentElement.scrollHeight
     );
-    return Math.ceil(h * 1.12) + 20;
+    return Math.ceil(h * 1.25) + 32;
   }
   return measure();
 })();

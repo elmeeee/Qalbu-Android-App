@@ -3,6 +3,8 @@ package app.kamy.qalbuApp.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,6 +45,7 @@ fun FloatingAudioBar(
     visible: Boolean,
     onToggle: () -> Unit,
     onDismiss: () -> Unit,
+    onOpenPlayback: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -64,7 +67,18 @@ fun FloatingAudioBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 8.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
+                    .padding(start = 8.dp, end = 4.dp, top = 8.dp, bottom = 8.dp)
+                    .then(
+                        if (onOpenPlayback != null) {
+                            Modifier.clickable(
+                                interactionSource = MutableInteractionSource(),
+                                indication = null,
+                                onClick = onOpenPlayback
+                            )
+                        } else {
+                            Modifier
+                        }
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onToggle) {

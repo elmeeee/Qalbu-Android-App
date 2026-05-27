@@ -262,7 +262,9 @@ class ChapterReaderViewModel @Inject constructor(
             url = url,
             surahTitle = surahTitle,
             ayahLabel = page.verseKey.orEmpty(),
-            reciterName = reciterName
+            reciterName = reciterName,
+            chapterNumber = s.chapterNumber,
+            ayahNumber = page.resolvedVerseNumber
         )
     }
 

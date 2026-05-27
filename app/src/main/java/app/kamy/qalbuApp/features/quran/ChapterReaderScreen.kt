@@ -69,6 +69,7 @@ import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
+import app.kamy.qalbuApp.ui.components.FloatingAudioBarMetrics
 import app.kamy.qalbuApp.ui.common.buildTajweedHtmlFragment
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -77,6 +78,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 fun ChapterReaderScreen(
     audioPlayer: AudioPlayerController,
     initialVerseNumber: Int? = null,
+    audioBarVisible: Boolean = false,
     onBack: () -> Unit
 ) {
     val vm: ChapterReaderViewModel = hiltViewModel()
@@ -139,6 +141,7 @@ fun ChapterReaderScreen(
                     verse = verse,
                     fontScale = state.fontScale,
                     showTranslation = state.showTranslation,
+                    audioBarVisible = audioBarVisible,
                     onPlay = { vm.onTapAyah(pageIndex) },
                     onTafsir = { verse.verseKey?.let(vm::openTafsir) },
                     onHadith = { verse.verseKey?.let(vm::openHadith) }
@@ -196,7 +199,12 @@ fun ChapterReaderScreen(
             }
         }
 
-        // Bottom caption — surah name + ayah (TikTok-style)
+        // Bottom caption — surah name + ayah (above floating audio bar)
+        val surahCaptionBottom = if (audioBarVisible) {
+            FloatingAudioBarMetrics.barHeight + FloatingAudioBarMetrics.bottomGap + 12.dp
+        } else {
+            20.dp
+        }
         currentVerse?.let { verse ->
             Column(
                 modifier = Modifier
@@ -211,7 +219,12 @@ fun ChapterReaderScreen(
                             )
                         )
                     )
-                    .padding(start = 20.dp, end = 12.dp, bottom = 20.dp, top = 48.dp)
+                    .padding(
+                        start = 20.dp,
+                        end = 12.dp,
+                        bottom = surahCaptionBottom,
+                        top = 48.dp
+                    )
             ) {
                 Text(
                     text = surahTitle,
@@ -270,10 +283,12 @@ private fun QalbuAyahPage(
     verse: RandomAyahPayload,
     fontScale: Float,
     showTranslation: Boolean,
+    audioBarVisible: Boolean,
     onPlay: () -> Unit,
     onTafsir: () -> Unit,
     onHadith: () -> Unit
 ) {
+    val contentBottomPadding = if (audioBarVisible) 200.dp else 150.dp
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -284,11 +299,11 @@ private fun QalbuAyahPage(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 64.dp, top = 56.dp, bottom = 120.dp)
+                .padding(start = 16.dp, end = 64.dp, top = 56.dp, bottom = contentBottomPadding)
                 .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(Modifier.height(8.dp))
             TajweedHtmlView(
                 htmlFragment = buildTajweedHtmlFragment(
                     verse.textUthmaniTajweed ?: verse.textUthmani,
@@ -301,7 +316,7 @@ private fun QalbuAyahPage(
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.replace(Regex("<[^>]+>"), "").trim()
                     if (clean.isNotEmpty()) {
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(16.dp))
                         Text(
                             text = clean,
                             style = MaterialTheme.typography.bodyLarge,
@@ -312,12 +327,16 @@ private fun QalbuAyahPage(
                     }
                 }
             }
+            Spacer(Modifier.height(24.dp))
         }
 
         Column(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 10.dp, bottom = 100.dp),
+                .padding(
+                    end = 10.dp,
+                    bottom = if (audioBarVisible) 180.dp else 120.dp
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {

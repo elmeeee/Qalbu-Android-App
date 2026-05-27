@@ -1,11 +1,13 @@
 package app.kamy.qalbuApp.infrastructure.audio
 
 import android.content.Context
+import android.content.Intent
 import androidx.annotation.OptIn
+import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import app.kamy.qalbuApp.core.config.AppConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -35,24 +37,33 @@ data class AudioPlaybackState(
     val trackSubtitle: String = "",
     val reciterName: String = "",
     val activeIndex: Int? = null,
-    val queue: List<AudioQueueItem> = emptyList()
-)
+    val queue: List<AudioQueueItem> = emptyList(),
+    /** Surah number for navigating back to the Quran reader. */
+    val chapterNumber: Int? = null,
+    val ayahNumber: Int? = null
+) {
+    val hasReaderNavigation: Boolean = chapterNumber != null && chapterNumber > 0
+}
+
+fun parseVerseKey(verseKey: String?): Pair<Int, Int>? {
+    if (verseKey.isNullOrBlank()) return null
+    val parts = verseKey.split(":")
+    if (parts.size != 2) return null
+    val chapter = parts[0].trim().toIntOrNull() ?: return null
+    val ayah = parts[1].trim().toIntOrNull() ?: return null
+    return chapter to ayah
+}
 
 /**
- * Mirrors iOS Features/Discovery/ViewModels/AudioPlayerViewModel.swift.
- *
  * Singleton-scoped ExoPlayer wrapper that exposes a [StateFlow] for Compose UIs.
- * Survives configuration changes; tied to the application process lifetime.
- *
- * iOS uses AVPlayer with a 0.5s timeObserver; we emit progress every 250ms
- * while playing so the UI stays smooth.
  */
 @Singleton
 class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
-    @ApplicationContext context: Context
+    @ApplicationContext private val context: Context,
+    private val playbackEngine: PlaybackEngine
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    private val player: ExoPlayer = ExoPlayer.Builder(context).build()
+    private val player get() = playbackEngine.player
 
     private val _state = MutableStateFlow(AudioPlaybackState())
     val state: StateFlow<AudioPlaybackState> = _state.asStateFlow()
@@ -61,6 +72,9 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _state.value = _state.value.copy(isPlaying = isPlaying)
+                if (isPlaying) {
+                    ensurePlaybackService()
+                }
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -74,16 +88,18 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
                 val newIndex = player.currentMediaItemIndex
                 val item = current.queue.getOrNull(newIndex)
                 if (item != null) {
+                    val parsed = parseVerseKey(item.verseKey)
                     _state.value = current.copy(
                         currentUrl = item.url,
                         trackSubtitle = item.label,
-                        activeIndex = newIndex
+                        activeIndex = newIndex,
+                        chapterNumber = parsed?.first ?: current.chapterNumber,
+                        ayahNumber = parsed?.second ?: item.ayahNumber.takeIf { it > 0 }
                     )
                 }
             }
         })
 
-        // Progress emitter.
         scope.launch {
             while (true) {
                 if (player.isPlaying) {
@@ -97,15 +113,25 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         }
     }
 
-    /** Single-verse playback (Today screen + per-ayah taps). */
-    fun playVerse(url: String, surahTitle: String, ayahLabel: String, reciterName: String) {
+    fun playVerse(
+        url: String,
+        surahTitle: String,
+        ayahLabel: String,
+        reciterName: String,
+        chapterNumber: Int? = null,
+        ayahNumber: Int? = null
+    ) {
         val absolute = AppConfig.absoluteVerseMediaUrl(url)
+        val parsed = parseVerseKey(ayahLabel)
+        val chapter = chapterNumber ?: parsed?.first
+        val ayah = ayahNumber ?: parsed?.second
         val queueItem = AudioQueueItem(
-            verseKey = "$surahTitle-$ayahLabel",
-            ayahNumber = 0,
+            verseKey = ayahLabel,
+            ayahNumber = ayah ?: 0,
             url = absolute,
             label = ayahLabel
         )
+        val mediaItem = buildMediaItem(absolute, surahTitle, ayahLabel, reciterName)
         _state.value = AudioPlaybackState(
             isPlaying = true,
             currentUrl = absolute,
@@ -113,26 +139,33 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
             trackSubtitle = ayahLabel,
             reciterName = reciterName,
             queue = listOf(queueItem),
-            activeIndex = 0
+            activeIndex = 0,
+            chapterNumber = chapter,
+            ayahNumber = ayah
         )
-        player.setMediaItem(MediaItem.fromUri(absolute))
+        player.setMediaItem(mediaItem)
         player.prepare()
         player.playWhenReady = true
+        ensurePlaybackService()
     }
 
-    /** Continuous queue playback (Quran intro tap → play entire surah). */
     fun playSequence(
         items: List<AudioQueueItem>,
         surahTitle: String,
         reciterName: String,
-        startIndex: Int = 0
+        startIndex: Int = 0,
+        chapterNumber: Int? = null
     ) {
         if (items.isEmpty()) return
         val resolved = items.map { it.copy(url = AppConfig.absoluteVerseMediaUrl(it.url)) }
-        player.setMediaItems(resolved.map { MediaItem.fromUri(it.url) }, startIndex, 0L)
+        val mediaItems = resolved.map { item ->
+            buildMediaItem(item.url, surahTitle, item.label, reciterName)
+        }
+        player.setMediaItems(mediaItems, startIndex, 0L)
         player.prepare()
         player.playWhenReady = true
         val starting = resolved.getOrNull(startIndex)
+        val parsed = parseVerseKey(starting?.verseKey)
         _state.value = AudioPlaybackState(
             isPlaying = true,
             currentUrl = starting?.url,
@@ -140,8 +173,11 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
             trackSubtitle = starting?.label.orEmpty(),
             reciterName = reciterName,
             queue = resolved,
-            activeIndex = startIndex
+            activeIndex = startIndex,
+            chapterNumber = chapterNumber ?: parsed?.first,
+            ayahNumber = parsed?.second ?: starting?.ayahNumber?.takeIf { it > 0 }
         )
+        ensurePlaybackService()
     }
 
     fun toggle() {
@@ -154,6 +190,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         player.stop()
         player.clearMediaItems()
         _state.value = AudioPlaybackState()
+        context.stopService(Intent(context, RecitationPlaybackService::class.java))
     }
 
     fun seekTo(progress: Float) {
@@ -169,12 +206,33 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         return _state.value.currentUrl == absolute && _state.value.isPlaying
     }
 
+    private fun buildMediaItem(
+        url: String,
+        surahTitle: String,
+        ayahLabel: String,
+        reciterName: String
+    ): MediaItem = MediaItem.Builder()
+        .setUri(url)
+        .setMediaMetadata(
+            MediaMetadata.Builder()
+                .setTitle(surahTitle)
+                .setArtist(reciterName)
+                .setAlbumTitle(ayahLabel)
+                .build()
+        )
+        .build()
+
+    private fun ensurePlaybackService() {
+        ContextCompat.startForegroundService(
+            context,
+            Intent(context, RecitationPlaybackService::class.java)
+        )
+    }
+
     private fun advanceQueueOrStop() {
         val current = _state.value
         val next = (current.activeIndex ?: 0) + 1
         if (next < current.queue.size) {
-            // ExoPlayer handles its own transition for queues; this is the fallback
-            // for single-item playback that just ended.
             player.seekToNext()
             player.play()
         } else {

@@ -17,4 +17,6 @@
     <string name="adhan_playback_body">Playing the call to prayer</string>
     <string name="adhan_voice_subtitle">Dhuhr, Asr, Maghrib &amp; Isha</string>
     <string name="adhan_fajr_fixed_note">Subuh (Fajr) always uses Mishary Rashid Alafasy and cannot be changed.</string>
+
+    <string name="recitation_notification_channel">Quran recitation</string>
 </resources>

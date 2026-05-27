@@ -62,13 +62,13 @@ fun RootScreen() {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    val showBottomBar = currentRoute?.startsWith("quran/reader") != true &&
-        currentRoute != RootTab.Account.route
+    val isReaderRoute = currentRoute?.startsWith("quran/reader") == true
+    val showBottomBar = !isReaderRoute && currentRoute != RootTab.Account.route
     val showAudioBar = audioState.currentUrl != null
     val audioBarBottomPadding = if (showBottomBar) {
         floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
     } else {
-        0.dp
+        FloatingAudioBarMetrics.bottomGap
     }
 
     Box(
@@ -110,6 +110,7 @@ fun RootScreen() {
                 ChapterReaderScreen(
                     audioPlayer = audioPlayer,
                     initialVerseNumber = initialAyah,
+                    audioBarVisible = showAudioBar,
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -128,17 +129,20 @@ fun RootScreen() {
                 visible = true,
                 onToggle = { audioPlayer.toggle() },
                 onDismiss = { audioPlayer.stop() },
+                onOpenPlayback = {
+                    val chapter = audioState.chapterNumber ?: return@FloatingAudioBar
+                    val ayah = audioState.ayahNumber ?: -1
+                    val readerRoute = "quran/reader/$chapter?ayah=$ayah"
+                    if (currentRoute != readerRoute) {
+                        navController.navigate(readerRoute) {
+                            launchSingleTop = true
+                        }
+                    }
+                }.takeIf { audioState.hasReaderNavigation },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
                     .padding(bottom = audioBarBottomPadding)
-                    .then(
-                        if (!showBottomBar) {
-                            Modifier.navigationBarsPadding()
-                                .padding(bottom = FloatingAudioBarMetrics.bottomGap)
-                        } else {
-                            Modifier
-                        }
-                    )
             )
         }
 
