@@ -40,7 +40,7 @@ import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
 import app.kamy.qalbuApp.features.today.components.TodayVerseOfDaySection
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
-import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
+import app.kamy.qalbuApp.ui.layout.floatingNavAndAudioBottomPadding
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -55,11 +55,12 @@ fun TodayScreen(
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
     val todayState by todayVm.state.collectAsState()
     val prayerState by prayerVm.state.collectAsState()
+    val audioState by audioPlayer.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var isPullRefreshing by remember { mutableStateOf(false) }
-    val listBottomPadding = floatingNavBottomPadding()
+    val listBottomPadding = floatingNavAndAudioBottomPadding(audioState.currentUrl != null)
 
     val locationPermissions = rememberMultiplePermissionsState(
         listOf(
@@ -165,12 +166,17 @@ fun TodayScreen(
                                 if (audioPlayer.isPlayingUrl(url)) {
                                     audioPlayer.toggle()
                                 } else {
+                                    val surahTitle = todayState.verseReferenceLabel
+                                        ?.substringBefore(" - ")
+                                        ?.trim()
+                                        .orEmpty()
+                                        .ifBlank { "Quran of the Day" }
                                     audioPlayer.playVerse(
                                         url = url,
-                                        surahTitle = "Quran of the Day",
-                                        ayahLabel = todayState.verseReferenceLabel.orEmpty(),
+                                        surahTitle = surahTitle,
+                                        ayahLabel = todayState.verse?.verseKey.orEmpty(),
                                         reciterName = todayState.recitations
-                                            .firstOrNull { it.id == todayState.selectedRecitationId }
+                                            .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
                                             ?.displayName.orEmpty()
                                     )
                                 }

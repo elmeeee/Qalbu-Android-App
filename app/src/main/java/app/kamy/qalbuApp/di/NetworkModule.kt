@@ -25,7 +25,7 @@ import kotlinx.serialization.json.Json
 import net.openid.appauth.AuthorizationService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import com.chuckerteam.chucker.api.ChuckerInterceptor
+// import com.chuckerteam.chucker.api.ChuckerInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
@@ -64,18 +64,12 @@ object NetworkModule {
     @Named("oauth")
     fun provideOauthClient(
         hostFallbackInterceptor: HostFallbackInterceptor,
-        logging: HttpLoggingInterceptor,
-        @ApplicationContext context: Context
+        logging: HttpLoggingInterceptor
     ): OkHttpClient =
         OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(hostFallbackInterceptor)
-            .apply {
-                if (BuildConfig.DEBUG) {
-                    addInterceptor(ChuckerInterceptor.Builder(context).build())
-                }
-            }
             .addInterceptor(logging)
             .build()
 
@@ -94,11 +88,11 @@ object NetworkModule {
             .readTimeout(20, TimeUnit.SECONDS)
             .addInterceptor(hostFallbackInterceptor)
             .addInterceptor(ContentAuthInterceptor(tokenManager))
-            .apply {
-                if (BuildConfig.DEBUG) {
-                    addInterceptor(ChuckerInterceptor.Builder(context).build())
-                }
-            }
+            // .apply {
+            //     if (BuildConfig.DEBUG) {
+            //         addInterceptor(ChuckerInterceptor.Builder(context).build())
+            //     }
+            // }
             .addInterceptor(logging)
             .build()
 
@@ -122,11 +116,11 @@ object NetworkModule {
             .addInterceptor(
                 UserAuthInterceptor(userSession, refreshManager, oauthService, authServiceProvider)
             )
-            .apply {
-                if (BuildConfig.DEBUG) {
-                    addInterceptor(ChuckerInterceptor.Builder(context).build())
-                }
-            }
+            // .apply {
+            //     if (BuildConfig.DEBUG) {
+            //         addInterceptor(ChuckerInterceptor.Builder(context).build())
+            //     }
+            // }
             .addInterceptor(logging)
             .build()
 
@@ -141,11 +135,11 @@ object NetworkModule {
         OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
-            .apply {
-                if (BuildConfig.DEBUG) {
-                    addInterceptor(ChuckerInterceptor.Builder(context).build())
-                }
-            }
+            // .apply {
+            //     if (BuildConfig.DEBUG) {
+            //         addInterceptor(ChuckerInterceptor.Builder(context).build())
+            //     }
+            // }
             .addInterceptor(logging)
             .build()
 

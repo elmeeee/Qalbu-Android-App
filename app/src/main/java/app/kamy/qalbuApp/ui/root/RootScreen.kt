@@ -2,13 +2,16 @@ package app.kamy.qalbuApp.ui.root
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -23,7 +26,10 @@ import app.kamy.qalbuApp.features.reflect.ReflectScreen
 import app.kamy.qalbuApp.features.today.TodayScreen
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.infrastructure.auth.OAuthService
+import app.kamy.qalbuApp.ui.components.FloatingAudioBar
+import app.kamy.qalbuApp.ui.components.FloatingAudioBarMetrics
 import app.kamy.qalbuApp.ui.components.FloatingTabBar
+import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import app.kamy.qalbuApp.ui.navigation.RootTab
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
@@ -49,6 +55,7 @@ fun RootScreen() {
         EntryPointAccessors.fromApplication(context.applicationContext, RootEntryPoint::class.java)
     }
     val audioPlayer = entryPoint.audioPlayer()
+    val audioState by audioPlayer.state.collectAsState()
     val oauthService = entryPoint.oauthService()
     val authService = entryPoint.authorizationService()
 
@@ -57,6 +64,12 @@ fun RootScreen() {
     val currentRoute = backStackEntry?.destination?.route
     val showBottomBar = currentRoute?.startsWith("quran/reader") != true &&
         currentRoute != RootTab.Account.route
+    val showAudioBar = audioState.currentUrl != null
+    val audioBarBottomPadding = if (showBottomBar) {
+        floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
+    } else {
+        0.dp
+    }
 
     Box(
         modifier = Modifier
@@ -107,6 +120,26 @@ fun RootScreen() {
                     onBack = { navController.popBackStack() }
                 )
             }
+        }
+
+        if (showAudioBar) {
+            FloatingAudioBar(
+                state = audioState,
+                visible = true,
+                onToggle = { audioPlayer.toggle() },
+                onDismiss = { audioPlayer.stop() },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = audioBarBottomPadding)
+                    .then(
+                        if (!showBottomBar) {
+                            Modifier.navigationBarsPadding()
+                                .padding(bottom = FloatingAudioBarMetrics.bottomGap)
+                        } else {
+                            Modifier
+                        }
+                    )
+            )
         }
 
         if (showBottomBar) {

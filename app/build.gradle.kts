@@ -165,9 +165,9 @@ dependencies {
     // Image loading
     implementation(libs.coil.compose)
 
-    // Debug HTTP inspector (Chucker)
-    debugImplementation(libs.chucker)
-    releaseImplementation(libs.chucker.no.op)
+    // Debug HTTP inspector (Chucker) — uncomment to re-enable
+    // debugImplementation(libs.chucker)
+    // releaseImplementation(libs.chucker.no.op)
 
     // Test
     testImplementation(libs.junit)
