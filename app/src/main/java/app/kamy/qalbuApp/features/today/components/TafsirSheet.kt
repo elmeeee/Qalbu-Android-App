@@ -1,14 +1,12 @@
 package app.kamy.qalbuApp.features.today.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -24,15 +22,13 @@ import app.kamy.qalbuApp.features.reader.ReaderErrorState
 import app.kamy.qalbuApp.features.reader.ReaderKnowledgeSheetBackground
 import app.kamy.qalbuApp.features.reader.ReaderLoadingSkeleton
 import app.kamy.qalbuApp.features.reader.ReaderSheetDivider
+import app.kamy.qalbuApp.features.reader.ReaderSheetScrollBody
 import app.kamy.qalbuApp.features.reader.ReaderSheetTopBar
 import app.kamy.qalbuApp.features.reader.VerseContextHeader
 import app.kamy.qalbuApp.ui.common.ReaderHtmlView
 import app.kamy.qalbuApp.ui.common.looksLikeHtml
 import app.kamy.qalbuApp.ui.common.stripHtmlTags
 
-/**
- * Bottom sheet for Ibn Kathir (resource 169) tafsir — mirrors iOS TafsirReaderSheet.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TafsirSheet(
@@ -71,17 +67,21 @@ fun TafsirSheet(
             ReaderSheetDivider()
 
             when {
-                isLoading -> ReaderLoadingSkeleton()
-                error != null -> ReaderErrorState(
-                    title = "Couldn't load tafsir",
-                    description = error,
-                    onRetry = onReload
-                )
-                commentaryUnavailable -> ReaderEmptyState(
-                    title = "No commentary here",
-                    description = "This verse doesn't include tafsir text for this source yet."
-                )
-                else -> TafsirBody(rawText)
+                isLoading -> ReaderSheetScrollBody { ReaderLoadingSkeleton() }
+                error != null -> ReaderSheetScrollBody {
+                    ReaderErrorState(
+                        title = "Couldn't load tafsir",
+                        description = error,
+                        onRetry = onReload
+                    )
+                }
+                commentaryUnavailable -> ReaderSheetScrollBody {
+                    ReaderEmptyState(
+                        title = "No commentary here",
+                        description = "This verse doesn't include tafsir text for this source yet."
+                    )
+                }
+                else -> ReaderSheetScrollBody { TafsirBody(rawText) }
             }
         }
     }
@@ -89,24 +89,18 @@ fun TafsirSheet(
 
 @Composable
 private fun TafsirBody(rawHtml: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        if (rawHtml.looksLikeHtml()) {
-            ReaderHtmlView(htmlBody = rawHtml, modifier = Modifier.fillMaxWidth())
-        } else {
-            Text(
-                text = rawHtml.stripHtmlTags(),
-                color = AlKhatibColors.Slate900,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
-                    fontWeight = FontWeight.Normal,
-                    lineHeight = androidx.compose.material3.MaterialTheme.typography.bodyLarge.lineHeight * 1.35f
-                ),
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
-            )
-        }
+    if (rawHtml.looksLikeHtml()) {
+        ReaderHtmlView(htmlBody = rawHtml, modifier = Modifier.fillMaxWidth())
+    } else {
+        Text(
+            text = rawHtml.stripHtmlTags(),
+            color = AlKhatibColors.Slate900,
+            style = MaterialTheme.typography.bodyLarge.copy(
+                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.35f
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 8.dp)
+        )
     }
 }

@@ -1,10 +1,16 @@
 package app.kamy.qalbuApp.ui.common
 
 import android.annotation.SuppressLint
-import android.graphics.Color as AndroidColor
+import android.content.Context
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -18,7 +24,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 
 /**
- * Auto-height WebView for tafsir / commentary HTML (LTR prose).
+ * Auto-height WebView for tafsir / hadith HTML. Parent [Column] scrolls; this view expands to full content.
  */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -30,21 +36,30 @@ fun ReaderHtmlView(
     var contentHeightPx by remember(htmlBody) { mutableIntStateOf(0) }
     var lastLoaded by remember(htmlBody) { mutableStateOf<String?>(null) }
     val wrapped = remember(htmlBody) { wrapReaderProseHtml(htmlBody) }
+    val heightModifier = if (contentHeightPx > 0) {
+        Modifier.height(with(density) { contentHeightPx.toDp() })
+    } else {
+        Modifier.heightIn(min = 80.dp)
+    }
 
     AndroidView(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .then(heightModifier),
         factory = { ctx ->
             AutoHeightReaderWebView(ctx) { px ->
-                val dp = with(density) { px.toDp() }
-                if (dp > 0.dp) contentHeightPx = px
+                if (px > 0 && px != contentHeightPx) {
+                    contentHeightPx = px
+                }
             }.apply {
-                setBackgroundColor(AndroidColor.TRANSPARENT)
+                setBackgroundColor(android.graphics.Color.TRANSPARENT)
             }
         },
         update = { webView ->
             webView.onHeightChanged = { px ->
-                val dp = with(density) { px.toDp() }
-                if (dp > 0.dp) contentHeightPx = px
+                if (px > 0 && px != contentHeightPx) {
+                    contentHeightPx = px
+                }
             }
             if (lastLoaded != wrapped) {
                 lastLoaded = wrapped
@@ -58,51 +73,69 @@ fun ReaderHtmlView(
     )
 }
 
-@SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
+@SuppressLint("ViewConstructor", "ClickableViewAccessibility", "SetJavaScriptEnabled")
 private class AutoHeightReaderWebView(
-    context: android.content.Context,
-    private val onMeasured: (Int) -> Unit
+    context: Context,
+    initialOnHeight: (Int) -> Unit
 ) : WebView(context) {
-    var onHeightChanged: ((Int) -> Unit)? = null
+    var onHeightChanged: (Int) -> Unit = initialOnHeight
+    private var contentHeightPx: Int = 0
 
     init {
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = false
+        settings.useWideViewPort = false
+        settings.loadWithOverviewMode = false
         isVerticalScrollBarEnabled = false
         isHorizontalScrollBarEnabled = false
         overScrollMode = OVER_SCROLL_NEVER
-        addJavascriptInterface(ReaderHeightBridge { px ->
-            post {
-                onHeightChanged?.invoke(px)
-                onMeasured(px)
-            }
-        }, "ReaderBridge")
+        isNestedScrollingEnabled = false
+        isScrollContainer = false
+        clipToPadding = false
+        clipChildren = false
+        addJavascriptInterface(ReaderHeightBridge(), "ReaderBridge")
         webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
-                evaluateJavascript(
-                    "(function(){ return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight); })();"
-                ) { raw ->
-                    raw?.trim()?.removeSurrounding("\"")?.toIntOrNull()?.let { h ->
-                        if (h > 0) {
-                            post {
-                                onHeightChanged?.invoke(h)
-                                onMeasured(h)
-                            }
-                        }
-                    }
-                }
+                scheduleHeightReports()
             }
         }
+        layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean = false
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val width = View.MeasureSpec.getSize(widthMeasureSpec)
+        val density = resources.displayMetrics.density
+        val fallbackMinPx = (80f * density).toInt()
+        val height = contentHeightPx.takeIf { it > 0 }
+            ?: fallbackMinPx
+        setMeasuredDimension(width, height)
     }
 
     fun resetHeight() {
-        layoutParams = layoutParams?.apply { height = 1 } ?: LayoutParams(LayoutParams.MATCH_PARENT, 1)
+        contentHeightPx = 0
+        val lp = layoutParams ?: ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        lp.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        layoutParams = lp
+        requestLayout()
     }
 
     fun applyContentHeight(px: Int) {
-        val h = px.coerceAtLeast(1)
-        layoutParams = layoutParams?.apply { height = h }
-            ?: LayoutParams(LayoutParams.MATCH_PARENT, h)
+        if (px <= 0) return
+        contentHeightPx = px
+        val lp = layoutParams ?: ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        lp.height = px
+        layoutParams = lp
         requestLayout()
     }
 
@@ -115,12 +148,42 @@ private class AutoHeightReaderWebView(
             null
         )
     }
-}
 
-private class ReaderHeightBridge(private val onHeight: (Int) -> Unit) {
-    @JavascriptInterface
-    fun reportHeight(px: Int) {
-        if (px > 0) onHeight(px)
+    private fun scheduleHeightReports() {
+        val script = """
+            (function() {
+              function measure() {
+                var body = document.body;
+                var html = document.documentElement;
+                return Math.max(
+                  body ? body.scrollHeight : 0,
+                  body ? body.offsetHeight : 0,
+                  html ? html.scrollHeight : 0,
+                  html ? html.offsetHeight : 0
+                );
+              }
+              var h = measure();
+              if (window.ReaderBridge && h > 0) {
+                ReaderBridge.reportHeight(h);
+              }
+              return h;
+            })();
+        """.trimIndent()
+        evaluateJavascript(script, null)
+        postDelayed({ evaluateJavascript(script, null) }, 120)
+        postDelayed({ evaluateJavascript(script, null) }, 400)
+    }
+
+    private inner class ReaderHeightBridge {
+        @JavascriptInterface
+        fun reportHeight(px: Int) {
+            if (px <= 0) return
+            post {
+                contentHeightPx = px
+                onHeightChanged(px)
+                applyContentHeight(px)
+            }
+        }
     }
 }
 
@@ -135,6 +198,7 @@ fun wrapReaderProseHtml(body: String): String {
             color: #1E293B;
             overflow: visible !important;
             height: auto !important;
+            min-height: 0 !important;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -142,8 +206,10 @@ fun wrapReaderProseHtml(body: String): String {
             line-height: 1.65;
             direction: ltr;
             text-align: left;
-            padding: 4px 2px 20px;
+            padding: 4px 2px 24px;
             -webkit-text-size-adjust: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
         h1, h2, h3, h4 { color: $hex; font-weight: 600; margin: 1em 0 0.5em; }
         p { margin: 0 0 0.85em; }
@@ -163,8 +229,16 @@ fun wrapReaderProseHtml(body: String): String {
     """.trimIndent()
 }
 
-fun String.stripHtmlTags(): String = replace(Regex("<[^>]+>"), " ")
-    .replace(Regex("\\s+"), " ")
+fun String.stripHtmlTags(): String = this
+    .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
+    .replace(Regex("</p>", RegexOption.IGNORE_CASE), "\n\n")
+    .replace(Regex("<[^>]+>"), "")
+    .replace(Regex("&nbsp;", RegexOption.IGNORE_CASE), " ")
+    .replace(Regex("&amp;", RegexOption.IGNORE_CASE), "&")
+    .replace(Regex("&lt;", RegexOption.IGNORE_CASE), "<")
+    .replace(Regex("&gt;", RegexOption.IGNORE_CASE), ">")
+    .replace(Regex("[ \t]+"), " ")
+    .replace(Regex("\n{3,}"), "\n\n")
     .trim()
 
 fun String.looksLikeHtml(): Boolean {

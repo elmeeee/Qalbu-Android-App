@@ -8,11 +8,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WifiOff
@@ -46,6 +49,7 @@ fun ReaderKnowledgeSheetBackground(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .fillMaxHeight()
             .background(
                 Brush.verticalGradient(
                     colors = listOf(AlKhatibColors.OffWhite, AlKhatibColors.SageMist)
@@ -55,6 +59,23 @@ fun ReaderKnowledgeSheetBackground(
     ) {
         content()
     }
+}
+
+/** Scrollable body below fixed sheet header — required for long tafsir / hadith. */
+@Composable
+fun ColumnScope.ReaderSheetScrollBody(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = modifier
+            .weight(1f, fill = true)
+            .fillMaxWidth()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        content = content
+    )
 }
 
 @Composable
@@ -140,9 +161,7 @@ fun ReaderSheetDivider() {
 @Composable
 fun ReaderLoadingSkeleton(lines: Int = 8) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 18.dp),
+        modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         repeat(lines) { i ->

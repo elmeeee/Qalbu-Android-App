@@ -5,11 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Forum
@@ -32,9 +29,6 @@ import app.kamy.qalbuApp.domain.model.HadithReference
 import app.kamy.qalbuApp.ui.common.ReaderHtmlView
 import app.kamy.qalbuApp.ui.common.looksLikeHtml
 
-/**
- * Hadith references for an ayah — mirrors iOS HadithReaderSheet.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HadithSheet(
@@ -76,49 +70,45 @@ fun HadithSheet(
             ReaderSheetDivider()
 
             when {
-                isLoading -> Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    repeat(3) { HadithCardSkeleton() }
-                }
-                error != null -> ReaderErrorState(
-                    title = "Couldn't load hadith",
-                    description = error,
-                    onRetry = onReload
-                )
-                empty -> ReaderEmptyState(
-                    title = "No hadith here",
-                    description = "No hadith references are linked to this ayah yet.",
-                    icon = Icons.Filled.Forum
-                )
-                else -> Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items.forEach { item ->
-                        HadithCard(item)
+                isLoading -> ReaderSheetScrollBody {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        repeat(3) { HadithCardSkeleton() }
                     }
-                    if (hasMore) {
-                        FilledTonalButton(
-                            onClick = onLoadMore,
-                            enabled = !isLoadingMore,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            if (isLoadingMore) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    strokeWidth = 2.dp,
-                                    color = AlKhatibColors.DeepEmerald
-                                )
-                            } else {
-                                Text("Load more", fontWeight = FontWeight.SemiBold)
+                }
+                error != null -> ReaderSheetScrollBody {
+                    ReaderErrorState(
+                        title = "Couldn't load hadith",
+                        description = error,
+                        onRetry = onReload
+                    )
+                }
+                empty -> ReaderSheetScrollBody {
+                    ReaderEmptyState(
+                        title = "No hadith here",
+                        description = "No hadith references are linked to this ayah yet.",
+                        icon = Icons.Filled.Forum
+                    )
+                }
+                else -> ReaderSheetScrollBody {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        items.forEach { item ->
+                            HadithCard(item)
+                        }
+                        if (hasMore) {
+                            FilledTonalButton(
+                                onClick = onLoadMore,
+                                enabled = !isLoadingMore,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                if (isLoadingMore) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = AlKhatibColors.DeepEmerald
+                                    )
+                                } else {
+                                    Text("Load more", fontWeight = FontWeight.SemiBold)
+                                }
                             }
                         }
                     }
@@ -173,7 +163,8 @@ private fun HadithCard(item: HadithDisplayItem) {
                 text = item.body,
                 style = MaterialTheme.typography.bodyLarge,
                 color = AlKhatibColors.Slate900,
-                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2f
+                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2f,
+                modifier = Modifier.fillMaxWidth()
             )
         }
         item.gradeLines.forEach { line ->

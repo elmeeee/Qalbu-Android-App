@@ -2,7 +2,6 @@
     <string name="app_name">Qalbu</string>
 
     <string name="splash_greeting_arabic">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</string>
-    <string name="splash_greeting_transliteration">As-salāmu ‘alaykum wa raḥmatullāhi wa barakātuh</string>
 
     <!-- Bottom navigation -->
     <string name="nav_today">Today</string>

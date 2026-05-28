@@ -1,5 +1,6 @@
 package app.kamy.qalbuApp.features.reader
 
+import app.kamy.qalbuApp.domain.model.HadithGrade
 import app.kamy.qalbuApp.domain.model.HadithReference
 import app.kamy.qalbuApp.ui.common.looksLikeHtml
 import app.kamy.qalbuApp.ui.common.stripHtmlTags
@@ -17,10 +18,12 @@ fun List<HadithReference>.toDisplayItems(): List<HadithDisplayItem> =
     mapNotNull { it.toDisplayItem() }
 
 private fun HadithReference.toDisplayItem(): HadithDisplayItem? {
-    val text = hadith?.firstOrNull() ?: return null
-    val rawBody = text.body?.trim().orEmpty()
-    if (rawBody.isEmpty()) return null
+    val texts = hadith.orEmpty().filter { !it.body.isNullOrBlank() }
+    if (texts.isEmpty()) return null
+
+    val rawBody = texts.joinToString(separator = "\n\n") { it.body!!.trim() }
     val body = if (rawBody.looksLikeHtml()) rawBody else rawBody.stripHtmlTags()
+    if (body.isBlank()) return null
 
     val source = name?.trim().orEmpty()
     val sourceName = source.ifEmpty { collection?.trim().orEmpty().ifEmpty { "Hadith" } }
@@ -30,18 +33,16 @@ private fun HadithReference.toDisplayItem(): HadithDisplayItem? {
         bookNumber?.trim()?.takeIf { it.isNotEmpty() }?.let { add("Book $it") }
     }
 
-    val gradeLines = (text.grades.orEmpty()).mapNotNull { grade ->
-        val by = grade.gradedBy?.trim().orEmpty()
-        val value = grade.grade?.trim().orEmpty()
-        when {
-            by.isEmpty() && value.isEmpty() -> null
-            by.isEmpty() -> value
-            value.isEmpty() -> by
-            else -> "$value — $by"
-        }
+    val gradeLines = texts.flatMap { text -> text.grades.orEmpty() }
+        .mapNotNull { grade -> grade.toDisplayLine() }
+        .distinct()
+
+    val chapterTitle = texts.firstNotNullOfOrNull { t ->
+        t.chapterTitle?.trim()?.takeIf { it.isNotEmpty() }
     }
 
-    val id = listOfNotNull(collection, hadithNumber, urn?.toString(), text.urn?.toString())
+    val id = listOfNotNull(collection, hadithNumber, urn?.toString())
+        .plus(texts.mapNotNull { it.urn?.toString() })
         .joinToString("-")
         .ifEmpty { "${sourceName.hashCode()}-${body.hashCode()}" }
 
@@ -49,8 +50,19 @@ private fun HadithReference.toDisplayItem(): HadithDisplayItem? {
         id = id,
         sourceName = sourceName,
         referenceLabel = referenceParts.takeIf { it.isNotEmpty() }?.joinToString(" · "),
-        chapterTitle = text.chapterTitle?.trim()?.takeIf { it.isNotEmpty() },
+        chapterTitle = chapterTitle,
         body = body,
         gradeLines = gradeLines
     )
+}
+
+private fun HadithGrade.toDisplayLine(): String? {
+    val by = gradedBy?.trim().orEmpty()
+    val value = grade?.trim().orEmpty()
+    return when {
+        by.isEmpty() && value.isEmpty() -> null
+        by.isEmpty() -> value
+        value.isEmpty() -> by
+        else -> "$value — $by"
+    }
 }
