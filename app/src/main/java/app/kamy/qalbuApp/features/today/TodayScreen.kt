@@ -51,6 +51,7 @@ import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
 import app.kamy.qalbuApp.features.today.components.TodayPrayerMascotSection
 import app.kamy.qalbuApp.features.today.components.TodayVerseOfDaySection
+import app.kamy.qalbuApp.features.share.AiShareSheet
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.layout.floatingNavAndAudioBottomPadding
 import kotlinx.coroutines.coroutineScope
@@ -60,7 +61,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun TodayScreen(
     audioPlayer: AudioPlayerController,
-    onReflectNavigate: () -> Unit,
     onAccountNavigate: () -> Unit = {}
 ) {
     val todayVm: TodayViewModel = hiltViewModel()
@@ -284,30 +284,8 @@ fun TodayScreen(
                                     )
                                 }
                             },
-                            onShare = {
-                                val text = todayVm.composeShareText()
-                                if (text.isNotBlank()) {
-                                    val intent = Intent(Intent.ACTION_SEND).apply {
-                                        type = "text/plain"
-                                        putExtra(Intent.EXTRA_TEXT, text)
-                                    }
-                                    context.startActivity(Intent.createChooser(intent, "Share verse"))
-                                }
-                            },
-                            onReflect = {
-                                if (todayVm.isSignedIn()) {
-                                    val text = todayVm.composeShareText()
-                                    if (text.isNotBlank()) {
-                                        val intent = Intent(Intent.ACTION_SEND).apply {
-                                            type = "text/plain"
-                                            putExtra(Intent.EXTRA_TEXT, text)
-                                        }
-                                        context.startActivity(Intent.createChooser(intent, "Share reflection"))
-                                    }
-                                } else {
-                                    onReflectNavigate()
-                                }
-                            },
+                            aiShareLoading = todayState.aiShareLoading,
+                            onAiShare = { todayVm.openAiShare() },
                             onTafsir = { todayVm.openTafsir() }
                         )
                     }
@@ -325,6 +303,38 @@ fun TodayScreen(
         isVisible = todayState.showTafsir,
         isLoading = todayState.tafsirLoading,
         tafsir = todayState.tafsir,
-        onDismiss = { todayVm.dismissTafsir() }
+        verseReference = todayState.verseReferenceLabel.orEmpty(),
+        error = todayState.tafsirError,
+        onDismiss = { todayVm.dismissTafsir() },
+        onReload = { todayVm.reloadTafsir() }
+    )
+
+    AiShareSheet(
+        visible = todayState.aiShareVisible,
+        loading = todayState.aiShareLoading,
+        draft = todayState.aiShareDraft,
+        error = todayState.aiShareError,
+        isPublishing = todayState.isPublishing,
+        showPublish = todayVm.isSignedIn(),
+        onDismiss = { todayVm.dismissAiShare() },
+        onDraftChange = todayVm::updateAiShareDraft,
+        onRegenerate = todayVm::regenerateAiShare,
+        onShare = { draft ->
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, draft)
+            }
+            context.startActivity(Intent.createChooser(intent, "Share reflection"))
+        },
+        onPublish = {
+            val authorId = todayState.profile?.id
+            if (authorId.isNullOrBlank()) {
+                scope.launch {
+                    snackbarHostState.showSnackbar("Profile still loading — try again in a moment.")
+                }
+            } else {
+                todayVm.publishReflectionToReflect(authorId)
+            }
+        }
     )
 }

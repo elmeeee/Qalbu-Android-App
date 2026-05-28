@@ -1,5 +1,6 @@
 package app.kamy.qalbuApp.features.quran
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -29,10 +30,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -63,10 +67,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.features.share.AiShareSheet
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
-import app.kamy.qalbuApp.domain.model.HadithReference
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.features.reader.HadithSheet
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
@@ -86,6 +92,8 @@ fun ChapterReaderScreen(
     val vm: ChapterReaderViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val audioState by audioPlayer.state.collectAsState()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     var settingsVisible by remember { mutableStateOf(false) }
 
     val pagerState = rememberPagerState(initialPage = 0) { state.verses.size }
@@ -108,6 +116,13 @@ fun ChapterReaderScreen(
         val idx = state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
         if (idx >= 0 && pagerState.currentPage != idx) {
             pagerState.scrollToPage(idx)
+        }
+    }
+
+    LaunchedEffect(state.publishMessage) {
+        state.publishMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            vm.clearPublishMessage()
         }
     }
 
@@ -149,6 +164,7 @@ fun ChapterReaderScreen(
                     showTranslation = state.showTranslation,
                     audioBarVisible = audioBarVisible,
                     onPlay = { vm.onTapAyah(pageIndex) },
+                    onAiShare = { vm.openAiShare(pageIndex) },
                     onTafsir = { verse.verseKey?.let(vm::openTafsir) },
                     onHadith = { verse.verseKey?.let(vm::openHadith) }
                 )
@@ -245,6 +261,13 @@ fun ChapterReaderScreen(
                 )
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = if (audioBarVisible) 100.dp else 24.dp)
+        )
     }
 
     if (settingsVisible) {
@@ -258,18 +281,53 @@ fun ChapterReaderScreen(
         )
     }
 
+    val activeVerseReference = remember(state.activeAyahKey, state.verses, state.chapterDisplayName) {
+        state.activeAyahKey?.let { key ->
+            state.verses.find { it.verseKey == key }?.referenceLabel(state.chapterDisplayName)
+        }.orEmpty().ifEmpty { state.activeAyahKey.orEmpty() }
+    }
+
     TafsirSheet(
         isVisible = state.tafsirVisible,
         isLoading = state.tafsirLoading,
         tafsir = state.tafsir,
-        onDismiss = { vm.dismissTafsir() }
+        verseReference = activeVerseReference,
+        error = state.tafsirError,
+        onDismiss = { vm.dismissTafsir() },
+        onReload = { vm.reloadTafsir() }
     )
 
     HadithSheet(
         isVisible = state.hadithVisible,
         isLoading = state.hadithLoading,
+        isLoadingMore = state.hadithLoadingMore,
+        hasMore = state.hadithHasMore,
         hadiths = state.hadiths,
-        onDismiss = { vm.dismissHadith() }
+        verseReference = activeVerseReference,
+        error = state.hadithError,
+        onDismiss = { vm.dismissHadith() },
+        onReload = { vm.reloadHadith() },
+        onLoadMore = { vm.loadMoreHadith() }
+    )
+
+    AiShareSheet(
+        visible = state.aiShareVisible,
+        loading = state.aiShareLoading,
+        draft = state.aiShareDraft,
+        error = state.aiShareError,
+        isPublishing = state.isPublishing,
+        showPublish = vm.isSignedIn(),
+        onDismiss = { vm.dismissAiShare() },
+        onDraftChange = vm::updateAiShareDraft,
+        onRegenerate = vm::regenerateAiShare,
+        onShare = { draft ->
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, draft)
+            }
+            context.startActivity(Intent.createChooser(intent, "Share reflection"))
+        },
+        onPublish = { vm.publishAiReflection() }
     )
 }
 
@@ -280,6 +338,7 @@ private fun QalbuAyahPage(
     showTranslation: Boolean,
     audioBarVisible: Boolean,
     onPlay: () -> Unit,
+    onAiShare: () -> Unit,
     onTafsir: () -> Unit,
     onHadith: () -> Unit
 ) {
@@ -348,6 +407,18 @@ private fun QalbuAyahPage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
+            ReaderSideAction(
+                icon = {
+                    Icon(
+                        Icons.Filled.AutoAwesome,
+                        contentDescription = "AI reflection",
+                        tint = AlKhatibColors.Gold,
+                        modifier = Modifier.size(26.dp)
+                    )
+                },
+                label = "AI",
+                onClick = onAiShare
+            )
             ReaderSideAction(
                 icon = {
                     Icon(
@@ -522,53 +593,5 @@ private fun ReciterRow(
                 .height(1.dp)
                 .background(AlKhatibColors.SoftGrey)
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HadithSheet(
-    isVisible: Boolean,
-    isLoading: Boolean,
-    hadiths: List<HadithReference>,
-    onDismiss: () -> Unit
-) {
-    if (!isVisible) return
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(
-                "Hadith references",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
-            )
-            when {
-                isLoading -> CircularProgressIndicator(color = AlKhatibColors.DeepEmerald)
-                hadiths.isEmpty() -> Text("No hadith for this ayah.", color = AlKhatibColors.Slate500)
-                else -> hadiths.forEach { h ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(AlKhatibColors.LightGrey)
-                            .padding(12.dp)
-                    ) {
-                        Text(
-                            text = "${h.collection.orEmpty()} ${h.bookNumber.orEmpty()}".trim(),
-                            color = AlKhatibColors.Gold,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = h.hadith?.firstOrNull()?.body?.replace(Regex("<[^>]+>"), "")?.trim().orEmpty(),
-                            color = AlKhatibColors.Slate900,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-        }
     }
 }

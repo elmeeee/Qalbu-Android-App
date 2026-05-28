@@ -2,7 +2,9 @@ package app.kamy.qalbuApp.features.reflect
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.kamy.qalbuApp.core.error.QFError
+import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
+import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
+import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.ReflectFeedPost
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
@@ -104,21 +106,15 @@ class ReflectViewModel @Inject constructor(
                     hasMore = (envelope.currentPage ?: targetPage) < (envelope.pages ?: targetPage)
                 )
             }
-        } catch (e: QFError.MissingUserSession) {
-            _state.update {
-                it.copy(
-                    isLoading = false,
-                    isLoadingMore = false,
-                    isAuthenticated = false,
-                    error = "Session expired"
-                )
-            }
         } catch (t: Throwable) {
+            val signedOut = userSession.invalidateIfAuthenticationFailure(t)
             _state.update {
                 it.copy(
                     isLoading = false,
                     isLoadingMore = false,
-                    error = t.message ?: "Failed to load feed"
+                    isAuthenticated = if (signedOut) false else it.isAuthenticated,
+                    error = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE
+                    else t.message ?: "Failed to load feed"
                 )
             }
         }
@@ -168,13 +164,25 @@ class ReflectViewModel @Inject constructor(
                     }
                 }
             } catch (t: Throwable) {
+                val signedOut = userSession.invalidateIfAuthenticationFailure(t)
                 _state.update { s ->
                     val rollIdx = s.posts.indexOfFirst { it.id == postId }
-                    if (rollIdx < 0) s.copy(togglingLikePostIds = s.togglingLikePostIds - postId)
-                    else s.copy(
-                        togglingLikePostIds = s.togglingLikePostIds - postId,
-                        posts = s.posts.toMutableList().also { it[rollIdx] = original }
-                    )
+                    val rolled = if (rollIdx < 0) {
+                        s.copy(togglingLikePostIds = s.togglingLikePostIds - postId)
+                    } else {
+                        s.copy(
+                            togglingLikePostIds = s.togglingLikePostIds - postId,
+                            posts = s.posts.toMutableList().also { it[rollIdx] = original }
+                        )
+                    }
+                    if (signedOut) {
+                        rolled.copy(
+                            isAuthenticated = false,
+                            error = SESSION_EXPIRED_MESSAGE
+                        )
+                    } else {
+                        rolled
+                    }
                 }
             }
         }

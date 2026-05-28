@@ -1,6 +1,7 @@
 package app.kamy.qalbuApp.infrastructure.network
 
 import app.kamy.qalbuApp.core.config.AppConfig
+import app.kamy.qalbuApp.core.error.isAuthHttpFailure
 import app.kamy.qalbuApp.infrastructure.auth.OAuthService
 import app.kamy.qalbuApp.infrastructure.auth.RefreshTokenManager
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
@@ -11,10 +12,11 @@ import okhttp3.Response
 import javax.inject.Provider
 
 /**
- * Adds the user's access token to Reflect / Auth v1 requests, and refreshes on 401.
- * Mirrors iOS QFApiClient.withUser401RefreshRetry.
+ * Adds Quran Foundation user auth headers for Reflect / Auth v1 (`x-auth-token`,
+ * `x-client-id`). QF expects the access token in [x-auth-token], not only
+ * `Authorization` — missing [x-auth-token] returns HTTP 400.
  *
- * Refresh is single-flight via [RefreshTokenManager] so concurrent 401s don't all
+ * Refresh is single-flight via [RefreshTokenManager] so concurrent 401/403s don't all
  * race to spend the same refresh token.
  */
 class UserAuthInterceptor(
@@ -27,15 +29,12 @@ class UserAuthInterceptor(
         val original = chain.request()
         val token = runBlocking { userSession.userAccessToken() }
         val req = original.newBuilder()
-            .apply { if (!token.isNullOrEmpty()) header("Authorization", "Bearer $token") }
-            .header("x-client-id", AppConfig.qfOauthClientId)
-            .header("Accept", "application/json")
+            .apply { applyUserAuthHeaders(token) }
             .build()
         val response = chain.proceed(req)
-        if (response.code != 401) return response
+        if (!response.needsAuthRefresh()) return response
 
         response.close()
-        // Attempt single-flight refresh; if it fails, surface 401 to the caller.
         val refreshed = try {
             runBlocking {
                 refreshManager.refreshIfNeeded {
@@ -43,19 +42,34 @@ class UserAuthInterceptor(
                 }
                 userSession.userAccessToken()
             }
-        } catch (t: Throwable) {
+        } catch (_: Throwable) {
+            runBlocking { userSession.clear() }
             null
         }
 
         if (refreshed.isNullOrEmpty()) {
-            // Refresh failed — replay original 401 by issuing the same request again
-            // (the server will produce its 401 body which the caller can inspect).
             return chain.proceed(req)
         }
 
-        val retried = req.newBuilder()
-            .header("Authorization", "Bearer $refreshed")
+        val retried = original.newBuilder()
+            .apply { applyUserAuthHeaders(refreshed) }
             .build()
         return chain.proceed(retried)
+    }
+
+    private fun Response.needsAuthRefresh(): Boolean =
+        isAuthHttpFailure(code, peekBody(PEEK_BODY_BYTES).string())
+
+    private fun okhttp3.Request.Builder.applyUserAuthHeaders(token: String?) {
+        header("x-client-id", AppConfig.qfOauthClientId)
+        header("Accept", "application/json")
+        if (!token.isNullOrEmpty()) {
+            header("x-auth-token", token)
+            header("Authorization", "Bearer $token")
+        }
+    }
+
+    private companion object {
+        private const val PEEK_BODY_BYTES = 64L * 1024L
     }
 }

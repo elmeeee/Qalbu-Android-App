@@ -11,6 +11,10 @@ import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
 import app.kamy.qalbuApp.infrastructure.audio.AdhanPreviewPlayer
+import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
+import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
+import app.kamy.qalbuApp.core.error.isAuthenticationFailure
+import app.kamy.qalbuApp.infrastructure.auth.IdTokenProfileParser
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
@@ -35,6 +39,10 @@ data class AccountUiState(
     val isLoading: Boolean = false,
     val authBusy: Boolean = false,
     val profile: UserProfilePayload? = null,
+    /** From OIDC id_token when Reflect profile is still loading or unavailable. */
+    val sessionDisplayName: String? = null,
+    val sessionUsername: String? = null,
+    val sessionAvatarUrl: String? = null,
     val isSignedIn: Boolean = false,
     val error: String? = null,
     val showFontScaleSheet: Boolean = false,
@@ -105,10 +113,25 @@ class AccountViewModel @Inject constructor(
 
     init {
         syncPreferencesIntoState()
+        if (userSession.isSignedIn.value) {
+            refreshSessionFromIdToken()
+        }
         viewModelScope.launch {
             userSession.isSignedIn.collect { signedIn ->
                 _state.update { it.copy(isSignedIn = signedIn) }
-                if (signedIn) fetchProfile() else _state.update { it.copy(profile = null) }
+                if (signedIn) {
+                    refreshSessionFromIdToken()
+                    fetchProfile()
+                } else {
+                    _state.update {
+                        it.copy(
+                            profile = null,
+                            sessionDisplayName = null,
+                            sessionUsername = null,
+                            sessionAvatarUrl = null
+                        )
+                    }
+                }
             }
         }
         viewModelScope.launch {
@@ -212,9 +235,39 @@ class AccountViewModel @Inject constructor(
         if (!userSession.isSignedIn.value) return
         _state.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            runCatching { reflectRepository.fetchMyProfile() }
-                .onSuccess { p -> _state.update { it.copy(isLoading = false, profile = p) } }
-                .onFailure { t -> _state.update { it.copy(isLoading = false, error = t.message) } }
+            try {
+                val p = reflectRepository.fetchMyProfile()
+                _state.update { it.copy(isLoading = false, profile = p, error = null) }
+            } catch (t: Throwable) {
+                val signedOut = userSession.invalidateIfAuthenticationFailure(t)
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        profile = if (signedOut) null else it.profile,
+                        error = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE else t.message
+                    )
+                }
+            }
+        }
+    }
+
+    /** Call after OAuth completes so profile + id_token claims load immediately. */
+    fun onSignedIn() {
+        refreshSessionFromIdToken()
+        fetchProfile()
+    }
+
+    private fun refreshSessionFromIdToken() {
+        viewModelScope.launch {
+            val idToken = userSession.userIdToken() ?: return@launch
+            val parsed = IdTokenProfileParser.parse(idToken) ?: return@launch
+            _state.update {
+                it.copy(
+                    sessionDisplayName = parsed.displayName,
+                    sessionUsername = parsed.username,
+                    sessionAvatarUrl = parsed.pictureUrl
+                )
+            }
         }
     }
 
@@ -222,7 +275,15 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(authBusy = true) }
             userSession.clear()
-            _state.update { it.copy(authBusy = false, profile = null) }
+            _state.update {
+                it.copy(
+                    authBusy = false,
+                    profile = null,
+                    sessionDisplayName = null,
+                    sessionUsername = null,
+                    sessionAvatarUrl = null
+                )
+            }
         }
     }
 

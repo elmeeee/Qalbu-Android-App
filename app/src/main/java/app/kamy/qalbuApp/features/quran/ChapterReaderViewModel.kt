@@ -4,15 +4,24 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.core.config.AppConfig
+import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
+import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
+import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.HadithReference
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
+import app.kamy.qalbuApp.domain.share.VerseShareTextComposer
 import app.kamy.qalbuApp.infrastructure.audio.AudioQueueItem
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
+import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReadingSessionRepository
+import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,13 +50,25 @@ data class ChapterReaderUiState(
     val tafsirVisible: Boolean = false,
     val tafsirLoading: Boolean = false,
     val tafsir: TafsirPayload? = null,
+    val tafsirError: String? = null,
     val hadithVisible: Boolean = false,
     val hadithLoading: Boolean = false,
+    val hadithLoadingMore: Boolean = false,
+    val hadithHasMore: Boolean = false,
+    val hadithPage: Int = 0,
+    val hadithError: String? = null,
     val hadiths: List<HadithReference> = emptyList(),
     val activeAyahKey: String? = null,
 
     // When audio is paused/playing, keep current verse key so the UI can reflect it if needed.
-    val currentlyPlayingVerseKey: String? = null
+    val currentlyPlayingVerseKey: String? = null,
+    val aiShareVisible: Boolean = false,
+    val aiShareLoading: Boolean = false,
+    val aiShareDraft: String = "",
+    val aiShareError: String? = null,
+    val aiShareVerseIndex: Int? = null,
+    val isPublishing: Boolean = false,
+    val publishMessage: String? = null
 )
 
 enum class AyahPlaybackMode {
@@ -65,6 +86,9 @@ class ChapterReaderViewModel @Inject constructor(
     private val audioPlayer: AudioPlayerController,
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,
+    private val shareComposer: VerseShareTextComposer,
+    private val reflectRepository: ReflectRepository,
+    private val userSession: UserSession,
     private val translationStore: TranslationPreferencesStore,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -269,29 +293,225 @@ class ChapterReaderViewModel @Inject constructor(
     }
 
     fun openTafsir(ayahKey: String) {
-        _state.update { it.copy(tafsirVisible = true, tafsirLoading = true, tafsir = null, activeAyahKey = ayahKey) }
+        _state.update {
+            it.copy(
+                tafsirVisible = true,
+                tafsirLoading = true,
+                tafsir = null,
+                tafsirError = null,
+                activeAyahKey = ayahKey
+            )
+        }
         viewModelScope.launch {
-            runCatching { contentRepository.getTafsirByAyah("169", ayahKey) }
-                .onSuccess { t -> _state.update { it.copy(tafsir = t, tafsirLoading = false) } }
-                .onFailure { _state.update { it.copy(tafsirLoading = false) } }
+            _state.value.verses.find { it.verseKey == ayahKey }?.let { verse ->
+                shareComposer.prefetchShareTextIfNeeded(
+                    verse,
+                    verse.referenceLabel(_state.value.chapterDisplayName)
+                )
+            }
+            loadTafsir(ayahKey)
+        }
+    }
+
+    fun reloadTafsir() {
+        val key = _state.value.activeAyahKey ?: return
+        _state.update { it.copy(tafsirLoading = true, tafsirError = null) }
+        viewModelScope.launch { loadTafsir(key) }
+    }
+
+    private suspend fun loadTafsir(ayahKey: String) {
+        try {
+            val t = contentRepository.getTafsirByAyah("169", ayahKey)
+            _state.update { it.copy(tafsir = t, tafsirLoading = false, tafsirError = null) }
+        } catch (e: Throwable) {
+            _state.update {
+                it.copy(tafsirLoading = false, tafsirError = e.message ?: "Could not load tafsir")
+            }
         }
     }
 
     fun dismissTafsir() {
-        _state.update { it.copy(tafsirVisible = false) }
+        _state.update { it.copy(tafsirVisible = false, tafsirError = null) }
     }
 
     fun openHadith(ayahKey: String) {
-        _state.update { it.copy(hadithVisible = true, hadithLoading = true, hadiths = emptyList(), activeAyahKey = ayahKey) }
-        viewModelScope.launch {
-            runCatching { contentRepository.getHadithsByAyah(ayahKey, limit = 5) }
-                .onSuccess { resp -> _state.update { it.copy(hadiths = resp.hadiths.orEmpty(), hadithLoading = false) } }
-                .onFailure { _state.update { it.copy(hadithLoading = false) } }
+        _state.update {
+            it.copy(
+                hadithVisible = true,
+                hadithLoading = true,
+                hadithLoadingMore = false,
+                hadiths = emptyList(),
+                hadithError = null,
+                hadithHasMore = false,
+                activeAyahKey = ayahKey
+            )
+        }
+        viewModelScope.launch { loadHadith(ayahKey, page = 1, append = false) }
+    }
+
+    fun reloadHadith() {
+        val key = _state.value.activeAyahKey ?: return
+        _state.update { it.copy(hadithLoading = true, hadithError = null) }
+        viewModelScope.launch { loadHadith(key, page = 1, append = false) }
+    }
+
+    fun loadMoreHadith() {
+        val key = _state.value.activeAyahKey ?: return
+        val s = _state.value
+        if (s.hadithLoadingMore || !s.hadithHasMore) return
+        viewModelScope.launch { loadHadith(key, page = s.hadithPage + 1, append = true) }
+    }
+
+    private suspend fun loadHadith(ayahKey: String, page: Int, append: Boolean) {
+        if (append) {
+            _state.update { it.copy(hadithLoadingMore = true) }
+        }
+        try {
+            val resp = contentRepository.getHadithsByAyah(ayahKey, page = page, limit = HADITH_PAGE_LIMIT)
+            val batch = resp.hadiths.orEmpty()
+            _state.update { s ->
+                s.copy(
+                    hadiths = if (append) s.hadiths + batch else batch,
+                    hadithLoading = false,
+                    hadithLoadingMore = false,
+                    hadithHasMore = resp.hasMore == true,
+                    hadithPage = resp.page ?: page,
+                    hadithError = null
+                )
+            }
+        } catch (e: Throwable) {
+            _state.update {
+                it.copy(
+                    hadithLoading = false,
+                    hadithLoadingMore = false,
+                    hadithError = e.message ?: "Could not load hadith"
+                )
+            }
         }
     }
 
     fun dismissHadith() {
-        _state.update { it.copy(hadithVisible = false) }
+        _state.update {
+            it.copy(hadithVisible = false, hadithError = null, hadithLoadingMore = false)
+        }
+    }
+
+    private companion object {
+        const val HADITH_PAGE_LIMIT = 4
+    }
+
+    fun isSignedIn(): Boolean = userSession.isSignedIn.value
+
+    fun openAiShare(verseIndex: Int) {
+        if (verseIndex !in _state.value.verses.indices) return
+        _state.update {
+            it.copy(
+                aiShareVisible = true,
+                aiShareLoading = true,
+                aiShareDraft = "",
+                aiShareError = null,
+                aiShareVerseIndex = verseIndex
+            )
+        }
+        loadAiShareDraft(forceRefresh = false)
+    }
+
+    fun dismissAiShare() {
+        _state.update {
+            it.copy(
+                aiShareVisible = false,
+                aiShareLoading = false,
+                aiShareError = null,
+                aiShareVerseIndex = null
+            )
+        }
+    }
+
+    fun updateAiShareDraft(text: String) {
+        _state.update { it.copy(aiShareDraft = text) }
+    }
+
+    fun regenerateAiShare() = loadAiShareDraft(forceRefresh = true)
+
+    private fun loadAiShareDraft(forceRefresh: Boolean) {
+        val index = _state.value.aiShareVerseIndex ?: return
+        val verse = _state.value.verses.getOrNull(index) ?: return
+        val reference = verse.referenceLabel(_state.value.chapterDisplayName)
+        viewModelScope.launch {
+            _state.update { it.copy(aiShareLoading = true, aiShareError = null) }
+            runCatching {
+                shareComposer.prepareShareText(verse, reference, forceRefresh = forceRefresh)
+            }.onSuccess { text ->
+                _state.update { it.copy(aiShareLoading = false, aiShareDraft = text) }
+            }.onFailure { t ->
+                _state.update {
+                    it.copy(
+                        aiShareLoading = false,
+                        aiShareError = t.message ?: "Could not generate share text"
+                    )
+                }
+            }
+        }
+    }
+
+    fun publishAiReflection() {
+        if (!userSession.isSignedIn.value) {
+            _state.update { it.copy(publishMessage = "Sign in from Account to publish.") }
+            return
+        }
+        val index = _state.value.aiShareVerseIndex ?: return
+        val verse = _state.value.verses.getOrNull(index) ?: return
+        val verseKey = verse.verseKey ?: return
+        val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        val idempotencyKey = "reflect:$verseKey:$dayKey"
+        val reference = verse.referenceLabel(_state.value.chapterDisplayName)
+
+        viewModelScope.launch {
+            val body = _state.value.aiShareDraft.trim().ifBlank {
+                shareComposer.quickReflectionText(verse, reference)
+            }
+            if (body.isBlank()) return@launch
+            _state.update { it.copy(isPublishing = true, publishMessage = null) }
+            val authorId = try {
+                reflectRepository.fetchMyProfile().id
+            } catch (t: Throwable) {
+                userSession.invalidateIfAuthenticationFailure(t)
+                _state.update {
+                    it.copy(
+                        isPublishing = false,
+                        publishMessage = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE
+                        else "Could not load your profile."
+                    )
+                }
+                return@launch
+            }
+            if (authorId.isNullOrBlank()) {
+                _state.update {
+                    it.copy(isPublishing = false, publishMessage = "Could not load your profile.")
+                }
+                return@launch
+            }
+            runCatching {
+                reflectRepository.createReflectionPost(body, verseKey, authorId, idempotencyKey)
+            }.onSuccess {
+                _state.update {
+                    it.copy(isPublishing = false, publishMessage = "Published to Reflect")
+                }
+            }.onFailure { t ->
+                userSession.invalidateIfAuthenticationFailure(t)
+                _state.update {
+                    it.copy(
+                        isPublishing = false,
+                        publishMessage = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE
+                        else t.message ?: "Publish failed"
+                    )
+                }
+            }
+        }
+    }
+
+    fun clearPublishMessage() {
+        _state.update { it.copy(publishMessage = null) }
     }
 
     /** Builds an [AudioQueueItem] list for playing the entire surah. */

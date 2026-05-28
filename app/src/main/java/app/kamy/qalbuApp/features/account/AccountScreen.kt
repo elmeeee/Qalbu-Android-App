@@ -112,9 +112,18 @@ fun AccountScreen(
         val data = result.data ?: return@rememberLauncherForActivityResult
         val (response, ex) = oauthService.parseRedirect(data)
         if (response != null) {
-            scope.launch { oauthService.exchangeAuthorizationResponse(authService, response) }
+            scope.launch {
+                oauthService.exchangeAuthorizationResponse(authService, response)
+                vm.onSignedIn()
+            }
         } else if (ex != null && result.resultCode == Activity.RESULT_OK) {
             // Errors surface via vm.error in future iterations.
+        }
+    }
+
+    LaunchedEffect(state.isSignedIn) {
+        if (state.isSignedIn && state.profile == null && !state.isLoading) {
+            vm.fetchProfile()
         }
     }
 
@@ -232,6 +241,9 @@ private fun AccountSettingsContent(
         ProfileHeader(
             isSignedIn = state.isSignedIn,
             profile = state.profile,
+            sessionDisplayName = state.sessionDisplayName,
+            sessionUsername = state.sessionUsername,
+            sessionAvatarUrl = state.sessionAvatarUrl,
             isLoading = state.isLoading,
             onSignIn = onSignIn
         )
@@ -306,9 +318,17 @@ private fun AccountSettingsContent(
 private fun ProfileHeader(
     isSignedIn: Boolean,
     profile: app.kamy.qalbuApp.domain.model.UserProfilePayload?,
+    sessionDisplayName: String?,
+    sessionUsername: String?,
+    sessionAvatarUrl: String?,
     isLoading: Boolean,
     onSignIn: () -> Unit
 ) {
+    val avatarUrl = profile?.preferredAvatarUrl ?: sessionAvatarUrl
+    val displayTitle = profile?.displayTitle
+        ?: sessionDisplayName
+        ?: if (isLoading) "Loading…" else null
+    val username = profile?.username ?: sessionUsername
     AlKhatibCard(
         modifier = Modifier.fillMaxWidth(),
         style = AlKhatibCardStyle.Filled,
@@ -327,10 +347,10 @@ private fun ProfileHeader(
                 .background(AlKhatibColors.LightGrey),
             contentAlignment = Alignment.Center
         ) {
-            if (profile?.preferredAvatarUrl != null) {
+            if (avatarUrl != null) {
                 AsyncImage(
-                    model = profile.preferredAvatarUrl,
-                    contentDescription = profile.displayTitle,
+                    model = avatarUrl,
+                    contentDescription = displayTitle ?: "Profile photo",
                     modifier = Modifier.fillMaxSize().clip(CircleShape)
                 )
             } else {
@@ -341,12 +361,12 @@ private fun ProfileHeader(
         Column(Modifier.weight(1f)) {
             if (isSignedIn) {
                 Text(
-                    text = profile?.displayTitle ?: if (isLoading) "Loading…" else "Signed in",
+                    text = displayTitle ?: "Signed in",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = AlKhatibColors.DeepEmerald
                 )
-                profile?.username?.let {
+                username?.let {
                     Text(
                         text = "@$it",
                         style = MaterialTheme.typography.bodySmall,

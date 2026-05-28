@@ -124,6 +124,17 @@ object NetworkModule {
             .addInterceptor(logging)
             .build()
 
+    /** Groq OpenAI-compatible API (API key in Authorization header). */
+    @Provides
+    @Singleton
+    @Named("groq")
+    fun provideGroqOkHttp(logging: HttpLoggingInterceptor): OkHttpClient =
+        OkHttpClient.Builder()
+            .connectTimeout(45, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
+            .addInterceptor(logging)
+            .build()
+
     /** OkHttp for Al-Adhan public prayer times API (no auth). */
     @Provides
     @Singleton

@@ -83,7 +83,6 @@ fun RootScreen() {
             composable(RootTab.Today.route) {
                 TodayScreen(
                     audioPlayer = audioPlayer,
-                    onReflectNavigate = { navController.navigate(RootTab.Reflect.route) },
                     onAccountNavigate = { navController.navigate(RootTab.Account.route) }
                 )
             }

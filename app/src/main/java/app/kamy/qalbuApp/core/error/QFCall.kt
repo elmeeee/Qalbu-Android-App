@@ -13,9 +13,10 @@ suspend inline fun <T> qfCall(crossinline block: suspend () -> T): T {
     } catch (e: QFError) {
         throw e
     } catch (e: HttpException) {
-        when (e.code()) {
-            401 -> throw QFError.AuthExpired
-            else -> throw QFError.HttpStatus(e.code(), e.response()?.errorBody()?.string())
+        val body = e.response()?.errorBody()?.string()
+        when {
+            isAuthHttpFailure(e.code(), body) -> throw QFError.AuthExpired
+            else -> throw QFError.HttpStatus(e.code(), body)
         }
     } catch (e: java.io.IOException) {
         throw QFError.Network(e)

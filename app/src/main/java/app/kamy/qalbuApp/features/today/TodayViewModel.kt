@@ -3,10 +3,14 @@ package app.kamy.qalbuApp.features.today
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.core.config.AppConfig
+import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
+import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
+import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
+import app.kamy.qalbuApp.domain.share.VerseShareTextComposer
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
@@ -28,7 +32,6 @@ import javax.inject.Inject
 data class TodayUiState(
     val isLoading: Boolean = false,
     val verse: RandomAyahPayload? = null,
-    /** Surah name + ayah number for Quran of the Day subtitle (e.g. "An-Nur - 24"). */
     val verseReferenceLabel: String? = null,
     val recitations: List<RecitationPayload> = emptyList(),
     val selectedRecitationId: Int = 6,
@@ -36,22 +39,24 @@ data class TodayUiState(
     val error: String? = null,
     val tafsirLoading: Boolean = false,
     val tafsir: TafsirPayload? = null,
+    val tafsirError: String? = null,
     val showTafsir: Boolean = false,
     val isPublishing: Boolean = false,
     val publishToast: String? = null,
     val publishToastIsError: Boolean = false,
     val profile: UserProfilePayload? = null,
-    val profileLoading: Boolean = false
+    val profileLoading: Boolean = false,
+    val aiShareVisible: Boolean = false,
+    val aiShareLoading: Boolean = false,
+    val aiShareDraft: String = "",
+    val aiShareError: String? = null
 )
 
-/**
- * Mirrors iOS TodayDiscoveryViewModel + TodayVerseActionsViewModel +
- * TodayReflectionPublishViewModel combined.
- */
 @HiltViewModel
 class TodayViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
     private val reflectRepository: ReflectRepository,
+    private val shareComposer: VerseShareTextComposer,
     private val userSession: UserSession,
     private val translationStore: TranslationPreferencesStore
 ) : ViewModel() {
@@ -69,8 +74,9 @@ class TodayViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            translationStore.translationId.drop(1).collect { id ->
-                _state.update { it.copy(translationId = id) }
+            translationStore.translationId.drop(1).collect {
+                _state.update { it.copy(translationId = translationStore.currentTranslationId()) }
+                shareComposer.clearCaches()
                 loadDailyAyahWithRecitations()
             }
         }
@@ -80,9 +86,13 @@ class TodayViewModel @Inject constructor(
         if (!userSession.isSignedIn.value) return
         _state.update { it.copy(profileLoading = true) }
         viewModelScope.launch {
-            runCatching { reflectRepository.fetchMyProfile() }
-                .onSuccess { p -> _state.update { it.copy(profile = p, profileLoading = false) } }
-                .onFailure { _state.update { it.copy(profileLoading = false) } }
+            try {
+                val p = reflectRepository.fetchMyProfile()
+                _state.update { it.copy(profile = p, profileLoading = false) }
+            } catch (t: Throwable) {
+                userSession.invalidateIfAuthenticationFailure(t)
+                _state.update { it.copy(profileLoading = false, profile = null) }
+            }
         }
     }
 
@@ -122,6 +132,9 @@ class TodayViewModel @Inject constructor(
                         }
                     )
                 }
+                verse?.let { v ->
+                    shareComposer.prefetchShareTextIfNeeded(v, _state.value.verseReferenceLabel)
+                }
             }
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.message ?: "Failed to load verse") }
@@ -133,50 +146,101 @@ class TodayViewModel @Inject constructor(
     }
 
     fun openTafsir() {
-        val verseKey = _state.value.verse?.verseKey ?: return
-        _state.update { it.copy(showTafsir = true, tafsirLoading = true, tafsir = null) }
+        val verse = _state.value.verse ?: return
+        val verseKey = verse.verseKey ?: return
+        _state.update {
+            it.copy(showTafsir = true, tafsirLoading = true, tafsir = null, tafsirError = null)
+        }
         viewModelScope.launch {
-            try {
-                val tafsir = contentRepository.getTafsirByAyah(resourceId = "169", ayahKey = verseKey)
-                _state.update { it.copy(tafsir = tafsir, tafsirLoading = false) }
-            } catch (t: Throwable) {
-                _state.update { it.copy(tafsirLoading = false, error = t.message) }
+            shareComposer.prefetchShareTextIfNeeded(verse, _state.value.verseReferenceLabel)
+            loadTafsir(verseKey)
+        }
+    }
+
+    fun reloadTafsir() {
+        val verseKey = _state.value.verse?.verseKey ?: return
+        _state.update { it.copy(tafsirLoading = true, tafsirError = null) }
+        viewModelScope.launch { loadTafsir(verseKey) }
+    }
+
+    private suspend fun loadTafsir(verseKey: String) {
+        try {
+            val tafsir = contentRepository.getTafsirByAyah(resourceId = "169", ayahKey = verseKey)
+            _state.update { it.copy(tafsir = tafsir, tafsirLoading = false, tafsirError = null) }
+        } catch (t: Throwable) {
+            _state.update {
+                it.copy(tafsirLoading = false, tafsirError = t.message ?: "Could not load tafsir")
             }
         }
     }
 
     fun dismissTafsir() {
-        _state.update { it.copy(showTafsir = false) }
+        _state.update { it.copy(showTafsir = false, tafsirError = null) }
     }
 
-    fun composeShareText(): String {
-        val verse = _state.value.verse ?: return ""
-        val translation = verse.translations?.firstOrNull()?.text.orEmpty()
-        val arabicPlain = verse.textUthmani?.trim().orEmpty()
-        val ref = _state.value.verseReferenceLabel?.let { "— $it" }
-            ?: verse.referenceLabel(null)?.let { "— $it" }
-            ?: ""
-        return buildString {
-            if (arabicPlain.isNotEmpty()) {
-                appendLine(arabicPlain)
-                appendLine()
+    fun openAiShare() {
+        if (_state.value.verse == null) return
+        _state.update {
+            it.copy(
+                aiShareVisible = true,
+                aiShareLoading = true,
+                aiShareDraft = "",
+                aiShareError = null
+            )
+        }
+        loadAiShareDraft(forceRefresh = false)
+    }
+
+    fun dismissAiShare() {
+        _state.update {
+            it.copy(
+                aiShareVisible = false,
+                aiShareLoading = false,
+                aiShareError = null
+            )
+        }
+    }
+
+    fun updateAiShareDraft(text: String) {
+        _state.update { it.copy(aiShareDraft = text) }
+    }
+
+    fun regenerateAiShare() = loadAiShareDraft(forceRefresh = true)
+
+    private fun loadAiShareDraft(forceRefresh: Boolean) {
+        val verse = _state.value.verse ?: return
+        viewModelScope.launch {
+            _state.update { it.copy(aiShareLoading = true, aiShareError = null) }
+            runCatching {
+                shareComposer.prepareShareText(
+                    verse,
+                    _state.value.verseReferenceLabel,
+                    forceRefresh = forceRefresh
+                )
+            }.onSuccess { text ->
+                _state.update { it.copy(aiShareLoading = false, aiShareDraft = text) }
+            }.onFailure { t ->
+                _state.update {
+                    it.copy(
+                        aiShareLoading = false,
+                        aiShareError = t.message ?: "Could not generate share text"
+                    )
+                }
             }
-            if (translation.isNotEmpty()) {
-                appendLine(translation.replace(Regex("<[^>]+>"), "").trim())
-                appendLine()
-            }
-            if (ref.isNotEmpty()) append(ref)
         }
     }
 
     fun publishReflectionToReflect(authorId: String, idempotencyKeyDate: Date = Date()) {
         val verse = _state.value.verse ?: return
         val verseKey = verse.verseKey ?: return
-        val body = composeShareText().ifBlank { return }
         val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(idempotencyKeyDate)
         val idempotencyKey = "reflect:$verseKey:$dayKey"
 
         viewModelScope.launch {
+            val body = _state.value.aiShareDraft.trim().ifBlank {
+                shareComposer.quickReflectionText(verse, _state.value.verseReferenceLabel)
+            }
+            if (body.isBlank()) return@launch
             _state.update { it.copy(isPublishing = true, publishToast = null) }
             try {
                 reflectRepository.createReflectionPost(body, verseKey, authorId, idempotencyKey)
@@ -184,14 +248,17 @@ class TodayViewModel @Inject constructor(
                     it.copy(
                         isPublishing = false,
                         publishToast = "Published to Reflect",
-                        publishToastIsError = false
+                        publishToastIsError = false,
+                        aiShareVisible = false
                     )
                 }
             } catch (t: Throwable) {
+                userSession.invalidateIfAuthenticationFailure(t)
                 _state.update {
                     it.copy(
                         isPublishing = false,
-                        publishToast = t.message ?: "Publish failed",
+                        publishToast = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE
+                        else t.message ?: "Publish failed",
                         publishToastIsError = true
                     )
                 }

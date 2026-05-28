@@ -13,10 +13,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -46,9 +45,9 @@ fun TodayVerseOfDaySection(
     referenceLabel: String?,
     isLoading: Boolean,
     isPlaying: Boolean,
+    aiShareLoading: Boolean = false,
     onPlayAudio: () -> Unit,
-    onShare: () -> Unit,
-    onReflect: () -> Unit,
+    onAiShare: () -> Unit,
     onTafsir: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -131,8 +130,12 @@ fun TodayVerseOfDaySection(
                         if (isPlaying) "Pause" else "Audio",
                         AlKhatibColors.DeepEmerald
                     ) { onPlayAudio() },
-                    ActionPillData(Icons.Filled.Share, "Share", AlKhatibColors.BlueLink, onShare),
-                    ActionPillData(Icons.Filled.Edit, "Reflect", AlKhatibColors.Gold, onReflect),
+                    ActionPillData(
+                        Icons.Filled.AutoAwesome,
+                        if (aiShareLoading) "…" else "AI",
+                        AlKhatibColors.Gold,
+                        onAiShare
+                    ),
                     ActionPillData(Icons.Filled.AutoStories, "Tafsir", AlKhatibColors.IndigoAccent, onTafsir)
                 )
                 Column(
