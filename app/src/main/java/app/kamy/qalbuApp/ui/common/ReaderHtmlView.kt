@@ -228,20 +228,3 @@ fun wrapReaderProseHtml(body: String): String {
         </html>
     """.trimIndent()
 }
-
-fun String.stripHtmlTags(): String = this
-    .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
-    .replace(Regex("</p>", RegexOption.IGNORE_CASE), "\n\n")
-    .replace(Regex("<[^>]+>"), "")
-    .replace(Regex("&nbsp;", RegexOption.IGNORE_CASE), " ")
-    .replace(Regex("&amp;", RegexOption.IGNORE_CASE), "&")
-    .replace(Regex("&lt;", RegexOption.IGNORE_CASE), "<")
-    .replace(Regex("&gt;", RegexOption.IGNORE_CASE), ">")
-    .replace(Regex("[ \t]+"), " ")
-    .replace(Regex("\n{3,}"), "\n\n")
-    .trim()
-
-fun String.looksLikeHtml(): Boolean {
-    val t = trim()
-    return t.contains('<') && t.contains('>') && Regex("<[a-zA-Z][^>]*>").containsMatchIn(t)
-}

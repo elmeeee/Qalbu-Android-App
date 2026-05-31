@@ -2,11 +2,13 @@ package app.kamy.qalbuApp.features.today
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.content.Context
 import app.kamy.qalbuApp.core.config.AppConfig
 import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshotStore
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
@@ -16,6 +18,7 @@ import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +57,7 @@ data class TodayUiState(
 
 @HiltViewModel
 class TodayViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val contentRepository: ContentRepository,
     private val reflectRepository: ReflectRepository,
     private val shareComposer: VerseShareTextComposer,
@@ -133,6 +137,7 @@ class TodayViewModel @Inject constructor(
                     )
                 }
                 verse?.let { v ->
+                    DailyVerseSnapshotStore.save(appContext, v, chapterName)
                     shareComposer.prefetchShareTextIfNeeded(v, _state.value.verseReferenceLabel)
                 }
             }

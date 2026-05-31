@@ -42,7 +42,7 @@ object NotificationChannels {
                 "Adhan playback",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Plays the call to prayer until it finishes"
+                description = "Plays the call to prayer — use lock screen or headset controls to stop"
                 setSound(null, null)
             }
         )

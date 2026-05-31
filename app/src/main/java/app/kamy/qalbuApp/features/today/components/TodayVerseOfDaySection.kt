@@ -38,6 +38,7 @@ import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
 import app.kamy.qalbuApp.ui.common.buildTajweedHtmlFragment
+import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 
 @Composable
 fun TodayVerseOfDaySection(
@@ -92,7 +93,8 @@ fun TodayVerseOfDaySection(
             if (verse != null) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TajweedHtmlView(
                         htmlFragment = buildTajweedHtmlFragment(
@@ -100,25 +102,25 @@ fun TodayVerseOfDaySection(
                             verse.resolvedVerseNumber
                         ),
                         fontSizeSp = 28,
+                        compact = true,
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
 
-                verse.translations?.firstOrNull()?.text?.let { translation ->
-                    val clean = translation.replace(Regex("<[^>]+>"), "").trim()
-                    if (clean.isNotEmpty()) {
-                        Spacer(Modifier.height(12.dp))
-                        Text(
-                            text = "“$clean”",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium,
-                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.15f,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 4.dp),
-                            softWrap = true
-                        )
+                    verse.translations?.firstOrNull()?.text?.let { translation ->
+                        val clean = translation.toVerseTranslationPlainText()
+                        if (clean.isNotEmpty()) {
+                            Text(
+                                text = "“$clean”",
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyMedium,
+                                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.15f,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 4.dp),
+                                softWrap = true
+                            )
+                        }
                     }
                 }
 

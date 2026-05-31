@@ -79,6 +79,7 @@ import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
 import app.kamy.qalbuApp.ui.components.FloatingAudioBarMetrics
 import app.kamy.qalbuApp.ui.common.buildTajweedHtmlFragment
+import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -359,16 +360,16 @@ private fun QalbuAyahPage(
                     end = 64.dp,
                     top = contentTopPadding,
                     bottom = contentBottomPadding
-                )
+                ),
+            contentAlignment = Alignment.Center
         ) {
             val scrollState = rememberScrollState()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = maxHeight)
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TajweedHtmlView(
                     htmlFragment = buildTajweedHtmlFragment(
@@ -376,13 +377,13 @@ private fun QalbuAyahPage(
                         verse.resolvedVerseNumber
                     ),
                     fontSizeSp = (30 * fontScale).toInt(),
+                    compact = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 if (showTranslation) {
                     verse.translations?.firstOrNull()?.text?.let { translation ->
-                        val clean = translation.replace(Regex("<[^>]+>"), "").trim()
+                        val clean = translation.toVerseTranslationPlainText()
                         if (clean.isNotEmpty()) {
-                            Spacer(Modifier.height(16.dp))
                             Text(
                                 text = clean,
                                 style = MaterialTheme.typography.bodyLarge,

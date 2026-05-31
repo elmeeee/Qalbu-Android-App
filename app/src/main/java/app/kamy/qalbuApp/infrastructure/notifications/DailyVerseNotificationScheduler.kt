@@ -9,6 +9,13 @@ import androidx.core.app.NotificationManagerCompat
 import app.kamy.qalbuApp.MainActivity
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseNotificationStore
+import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshot
+import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshotStore
+import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import java.util.Calendar
 
 /**
@@ -17,20 +24,20 @@ import java.util.Calendar
 object DailyVerseNotificationScheduler {
 
     const val CHANNEL_ID = "daily_verse"
+    const val EXTRA_CHAPTER = "daily_verse_chapter"
+    const val EXTRA_AYAH = "daily_verse_ayah"
+
     private const val REQUEST_CODE = 7001
     private const val NOTIFICATION_ID = 7001
 
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface DailyVerseEntryPoint {
+        fun contentRepository(): ContentRepository
+    }
+
     fun ensureChannel(context: Context) {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O) return
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
-        val channel = android.app.NotificationChannel(
-            CHANNEL_ID,
-            "Daily verse",
-            android.app.NotificationManager.IMPORTANCE_DEFAULT
-        ).apply {
-            description = "Morning Quran verse reminder"
-        }
-        manager.createNotificationChannel(channel)
+        NotificationChannels.ensureAll(context)
     }
 
     fun reschedule(context: Context) {
@@ -74,10 +81,36 @@ object DailyVerseNotificationScheduler {
         scheduleAt(context, hour, minute)
     }
 
-    fun showNotification(context: Context) {
+    suspend fun resolveSnapshot(context: Context): DailyVerseSnapshot? {
+        DailyVerseSnapshotStore.loadForToday(context)?.let { return it }
+        return runCatching {
+            val repo = EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                DailyVerseEntryPoint::class.java
+            ).contentRepository()
+            val verse = repo.getRandomAyah() ?: return null
+            val chapterName = verse.chapterNumber?.let { chapter ->
+                repo.getChapters().find { it.id == chapter }?.displayComplexName
+            }
+            DailyVerseSnapshotStore.save(context, verse, chapterName)
+            DailyVerseSnapshotStore.loadForToday(context)
+        }.getOrNull()
+    }
+
+    fun showNotification(context: Context, snapshot: DailyVerseSnapshot? = null) {
         ensureChannel(context)
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
+
+        val resolved = snapshot ?: DailyVerseSnapshotStore.loadForToday(context)
+        val body = resolved?.notificationBody()
+            ?: "Open Qalbu to read today's verse."
+
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            resolved?.let {
+                putExtra(EXTRA_CHAPTER, it.chapterNumber)
+                putExtra(EXTRA_AYAH, it.ayahNumber)
+            }
         }
         val pending = PendingIntent.getActivity(
             context,
@@ -85,10 +118,11 @@ object DailyVerseNotificationScheduler {
             openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+        val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Your verse for today")
-            .setContentText("Open Qalbu to read today's verse.")
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(pending)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

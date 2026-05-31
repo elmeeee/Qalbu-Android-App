@@ -2,8 +2,7 @@ package app.kamy.qalbuApp.features.reader
 
 import app.kamy.qalbuApp.domain.model.HadithGrade
 import app.kamy.qalbuApp.domain.model.HadithReference
-import app.kamy.qalbuApp.ui.common.looksLikeHtml
-import app.kamy.qalbuApp.ui.common.stripHtmlTags
+import app.kamy.qalbuApp.ui.common.toReaderPlainText
 
 data class HadithDisplayItem(
     val id: String,
@@ -21,8 +20,9 @@ private fun HadithReference.toDisplayItem(): HadithDisplayItem? {
     val texts = hadith.orEmpty().filter { !it.body.isNullOrBlank() }
     if (texts.isEmpty()) return null
 
-    val rawBody = texts.joinToString(separator = "\n\n") { it.body!!.trim() }
-    val body = if (rawBody.looksLikeHtml()) rawBody else rawBody.stripHtmlTags()
+    val body = texts
+        .joinToString(separator = "\n\n") { it.body!!.trim() }
+        .toReaderPlainText()
     if (body.isBlank()) return null
 
     val source = name?.trim().orEmpty()

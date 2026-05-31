@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -49,7 +50,10 @@ interface RootEntryPoint {
  * Root shell — tab content is full-screen; [FloatingTabBar] overlays the bottom (iOS-style).
  */
 @Composable
-fun RootScreen() {
+fun RootScreen(
+    pendingDeepLinkRoute: String? = null,
+    onDeepLinkHandled: () -> Unit = {}
+) {
     val context = LocalContext.current
     val entryPoint = remember(context.applicationContext) {
         EntryPointAccessors.fromApplication(context.applicationContext, RootEntryPoint::class.java)
@@ -60,6 +64,13 @@ fun RootScreen() {
     val authService = entryPoint.authorizationService()
 
     val navController = rememberNavController()
+    LaunchedEffect(pendingDeepLinkRoute) {
+        val route = pendingDeepLinkRoute ?: return@LaunchedEffect
+        navController.navigate(route) {
+            launchSingleTop = true
+        }
+        onDeepLinkHandled()
+    }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val isReaderRoute = currentRoute?.startsWith("quran/reader") == true

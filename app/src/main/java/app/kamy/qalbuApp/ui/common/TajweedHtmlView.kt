@@ -31,18 +31,20 @@ fun TajweedHtmlView(
     htmlFragment: String,
     fontSizeSp: Int = 32,
     textColor: String = "#0F172A",
+    compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    var contentHeightPx by remember(htmlFragment, fontSizeSp, textColor) { mutableIntStateOf(0) }
-    var lastLoadedHtml by remember(htmlFragment, fontSizeSp, textColor) { mutableStateOf<String?>(null) }
-    val wrappedHtml = remember(htmlFragment, fontSizeSp, textColor) {
-        wrapTajweedHtml(htmlFragment, fontSizeSp, textColor)
+    var contentHeightPx by remember(htmlFragment, fontSizeSp, textColor, compact) { mutableIntStateOf(0) }
+    var lastLoadedHtml by remember(htmlFragment, fontSizeSp, textColor, compact) { mutableStateOf<String?>(null) }
+    val wrappedHtml = remember(htmlFragment, fontSizeSp, textColor, compact) {
+        wrapTajweedHtml(htmlFragment, fontSizeSp, textColor, compact)
     }
     val density = LocalDensity.current
+    val minHeightDp = if (compact) 56.dp else 140.dp
     val heightModifier = if (contentHeightPx > 0) {
         Modifier.height(with(density) { contentHeightPx.toDp() })
     } else {
-        Modifier.heightIn(min = 140.dp)
+        Modifier.heightIn(min = minHeightDp)
     }
 
     AndroidView(
@@ -119,9 +121,9 @@ private class AutoHeightTajweedWebView(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = View.MeasureSpec.getSize(widthMeasureSpec)
         val density = resources.displayMetrics.density
-        val fallbackMinPx = (240f * density).toInt()
+        val fallbackMinPx = (72f * density).toInt()
         val height = contentHeightPx.takeIf { it > 0 }
-            ?: (width * 0.6f).toInt().coerceAtLeast(fallbackMinPx)
+            ?: fallbackMinPx
         setMeasuredDimension(width, height)
     }
 
@@ -162,24 +164,11 @@ private class AutoHeightTajweedWebView(
         val script = """
             (function() {
               function measure() {
-                var body = document.body;
-                var root = document.querySelector('[lang="ar"]') || body;
-                var bodyRect = body.getBoundingClientRect();
-                var rootRect = root.getBoundingClientRect();
-                var range = document.createRange();
-                range.selectNodeContents(root);
-                var textRect = range.getBoundingClientRect();
-                var styles = window.getComputedStyle(body);
+                var root = document.querySelector('[lang="ar"]') || document.body;
+                var rect = root.getBoundingClientRect();
+                var styles = window.getComputedStyle(root);
                 var pad = parseFloat(styles.paddingTop) + parseFloat(styles.paddingBottom);
-                var h = Math.max(
-                  body.scrollHeight,
-                  body.offsetHeight,
-                  bodyRect.height,
-                  rootRect.bottom - bodyRect.top,
-                  textRect.bottom - bodyRect.top,
-                  textRect.height + pad
-                );
-                return Math.ceil(h);
+                return Math.ceil(rect.height + pad);
               }
               function report() {
                 var h = measure();
@@ -205,8 +194,7 @@ private class AutoHeightTajweedWebView(
             // JS returns CSS pixels (1 CSS px = 1 dp). Convert to device pixels for setMeasuredDimension / layout height.
             val density = resources.displayMetrics.density
             val devicePx = (cssPx * density).toInt().coerceAtLeast(1)
-            // Extra room for harakat, diacritics, and the ayah-end rosette below the last line.
-            val safePx = (devicePx * 1.15f).toInt() + (40 * density).toInt()
+            val safePx = devicePx + (10 * density).toInt()
             post {
                 if (safePx != contentHeightPx) {
                     contentHeightPx = safePx
@@ -224,7 +212,10 @@ private class AutoHeightTajweedWebView(
     }
 }
 
-private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String): String {
+private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String, compact: Boolean): String {
+    val bodyPadding = if (compact) "4px 10px 0" else "12px 14px 4px"
+    val lineHeight = if (compact) "2.05" else "2.35"
+    val rootPaddingBottom = if (compact) "0" else "4px"
     val css = """
         @font-face {
             font-family: 'AlKhatibQuranWeb';
@@ -243,11 +234,11 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         body {
             font-family: 'AlKhatibQuranWeb', 'KFGQPC HAFS Uthmanic Script', 'Amiri Quran', serif;
             font-size: ${fontSizeSp}px;
-            line-height: 2.35;
+            line-height: $lineHeight;
             direction: rtl;
             text-align: center;
             -webkit-text-size-adjust: 100%;
-            padding: 12px 14px 28px;
+            padding: $bodyPadding;
             overflow: visible !important;
             word-wrap: break-word;
         }
@@ -299,7 +290,7 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
         div[lang="ar"] {
             display: block;
             overflow: visible !important;
-            padding-bottom: 8px;
+            padding-bottom: $rootPaddingBottom;
         }
     """.trimIndent()
 
@@ -317,7 +308,7 @@ private fun wrapTajweedHtml(fragment: String, fontSizeSp: Int, textColor: String
 }
 
 fun buildTajweedHtmlFragment(textUthmaniTajweed: String?, ayahNumber: Int? = null): String {
-    val body = textUthmaniTajweed?.trim().orEmpty()
+    val body = textUthmaniTajweed?.sanitizeTajweedArabicHtml().orEmpty()
     if (body.isEmpty()) return "<div dir=\"rtl\" lang=\"ar\"></div>"
     val marker = ayahEndMarkerHtml(ayahNumber)
     val spacer = if (marker.isEmpty()) "" else " "

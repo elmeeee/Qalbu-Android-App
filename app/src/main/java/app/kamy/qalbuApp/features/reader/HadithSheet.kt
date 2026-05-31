@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Forum
@@ -26,8 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.HadithReference
-import app.kamy.qalbuApp.ui.common.ReaderHtmlView
-import app.kamy.qalbuApp.ui.common.looksLikeHtml
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,12 +88,12 @@ fun HadithSheet(
                         icon = Icons.Filled.Forum
                     )
                 }
-                else -> ReaderSheetScrollBody {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items.forEach { item ->
-                            HadithCard(item)
-                        }
-                        if (hasMore) {
+                else -> ReaderSheetLazyBody {
+                    items(items, key = { it.id }) { item ->
+                        HadithCard(item)
+                    }
+                    if (hasMore) {
+                        item(key = "load_more") {
                             FilledTonalButton(
                                 onClick = onLoadMore,
                                 enabled = !isLoadingMore,
@@ -156,17 +155,13 @@ private fun HadithCard(item: HadithDisplayItem) {
                 color = AlKhatibColors.Gold
             )
         }
-        if (item.body.looksLikeHtml()) {
-            ReaderHtmlView(htmlBody = item.body, modifier = Modifier.fillMaxWidth())
-        } else {
-            Text(
-                text = item.body,
-                style = MaterialTheme.typography.bodyLarge,
-                color = AlKhatibColors.Slate900,
-                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2f,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        Text(
+            text = item.body,
+            style = MaterialTheme.typography.bodyLarge,
+            color = AlKhatibColors.Slate900,
+            lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.35f,
+            modifier = Modifier.fillMaxWidth()
+        )
         item.gradeLines.forEach { line ->
             Row(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -181,7 +176,8 @@ private fun HadithCard(item: HadithDisplayItem) {
                 Text(
                     text = line,
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.DeepEmerald.copy(alpha = 0.85f)
+                    color = AlKhatibColors.DeepEmerald.copy(alpha = 0.85f),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

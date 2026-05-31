@@ -28,7 +28,13 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         if (playAdhan && !prayerName.isNullOrBlank()) {
             val voice = AdhanPreferencesStore.from(appContext).currentVoice()
             val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice)
-            adhanPlaying = AdhanPlaybackService.start(appContext, rawRes, title, body)
+            adhanPlaying = AdhanPlaybackService.start(
+                context = appContext,
+                rawRes = rawRes,
+                title = title,
+                body = body,
+                notificationId = notificationId
+            )
         }
 
         if (title.isNotEmpty()) {
@@ -39,7 +45,8 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 title = title,
                 body = body,
                 // If foreground adhan could not start (OEM restrictions), use channel sound.
-                silent = playAdhan && adhanPlaying
+                silent = playAdhan && adhanPlaying,
+                showStopAdhan = playAdhan && adhanPlaying
             )
         }
 

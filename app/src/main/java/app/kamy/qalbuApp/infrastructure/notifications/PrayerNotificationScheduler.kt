@@ -8,6 +8,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.kamy.qalbuApp.MainActivity
 import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.infrastructure.audio.AdhanStopReceiver
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -205,7 +206,8 @@ object PrayerNotificationScheduler {
         channelId: String,
         title: String,
         body: String,
-        silent: Boolean = false
+        silent: Boolean = false,
+        showStopAdhan: Boolean = false
     ) {
         NotificationChannels.ensureAll(context)
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
@@ -228,6 +230,23 @@ object PrayerNotificationScheduler {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
         if (silent) {
             builder.setSilent(true)
+        }
+        if (showStopAdhan) {
+            val stopPending = PendingIntent.getBroadcast(
+                context,
+                notificationId + 50_000,
+                AdhanStopReceiver.intent(
+                    context,
+                    notificationId
+                ),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.setDeleteIntent(stopPending)
+            builder.addAction(
+                android.R.drawable.ic_media_pause,
+                context.getString(R.string.adhan_stop),
+                stopPending
+            )
         }
         NotificationManagerCompat.from(context).notify(notificationId, builder.build())
     }
