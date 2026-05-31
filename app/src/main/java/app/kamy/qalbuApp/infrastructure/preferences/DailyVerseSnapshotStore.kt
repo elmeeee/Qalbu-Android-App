@@ -31,7 +31,6 @@ data class DailyVerseSnapshot(
     }
 }
 
-/** Cached verse-of-the-day payload for notification copy and deep links. */
 object DailyVerseSnapshotStore {
 
     private const val PREFS = "daily_verse_snapshot"

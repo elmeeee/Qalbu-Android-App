@@ -58,7 +58,6 @@ object NetworkModule {
     @Singleton
     fun provideHostFallbackInterceptor(): HostFallbackInterceptor = HostFallbackInterceptor()
 
-    /** Bare OkHttp for OAuth token endpoint requests (no Authorization injection). */
     @Provides
     @Singleton
     @Named("oauth")
@@ -73,7 +72,6 @@ object NetworkModule {
             .addInterceptor(logging)
             .build()
 
-    /** OkHttp client for Content API (client_credentials token). */
     @Provides
     @Singleton
     @ContentApi
@@ -96,7 +94,6 @@ object NetworkModule {
             .addInterceptor(logging)
             .build()
 
-    /** OkHttp client for user-token endpoints (Reflect, Auth v1). */
     @Provides
     @Singleton
     @Named("user")
@@ -124,7 +121,7 @@ object NetworkModule {
             .addInterceptor(logging)
             .build()
 
-    /** Groq OpenAI-compatible API (API key in Authorization header). */
+
     @Provides
     @Singleton
     @Named("groq")
@@ -135,7 +132,6 @@ object NetworkModule {
             .addInterceptor(logging)
             .build()
 
-    /** OkHttp for Al-Adhan public prayer times API (no auth). */
     @Provides
     @Singleton
     @AlAdhanApi
@@ -206,11 +202,6 @@ object NetworkModule {
         json = json
     )
 
-    /**
-     * AppAuth's [AuthorizationService] holds a Chrome Custom Tabs warm-up connection
-     * and must be disposed when the Activity dies. We keep a singleton-scoped instance
-     * because token refresh happens off-Activity (inside an OkHttp interceptor).
-     */
     @Provides
     @Singleton
     fun provideAuthorizationService(@ApplicationContext context: Context): AuthorizationService =

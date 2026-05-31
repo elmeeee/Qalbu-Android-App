@@ -28,19 +28,12 @@ data class PrayerDayResult(
     val scheduleBundle: PrayerScheduleBundle? = null
 )
 
-/**
- * Mirrors iOS Infrastructure/Services prayer-time fetcher in PrayerTimesController.
- *
- * Calls the public Al-Adhan timings endpoint and reshapes the response into a list
- * of [PrayerEntry] sorted by time-of-day.
- */
 @Singleton
 class AlAdhanRepository @Inject constructor(
     private val api: AlAdhanApiService
 ) {
     private val timeFormatPatterns = listOf("HH:mm (zzz)", "HH:mm")
 
-    /** All calculation methods from Al-Adhan, with Muhammadiyah (99) replacing unnamed CUSTOM. */
     suspend fun fetchCalculationMethods(): List<PrayerMethodOption> {
         val resp = qfCall { api.getMethods() }
         val fromApi = resp.data.orEmpty()

@@ -2,9 +2,6 @@ package app.kamy.qalbuApp.ui.common
 
 import androidx.core.text.HtmlCompat
 
-/**
- * Decodes translation HTML from the Content API into clean, readable plain text.
- */
 fun String.toVerseTranslationPlainText(): String {
     val trimmed = trim()
     if (trimmed.isEmpty()) return ""
@@ -20,9 +17,6 @@ fun String.toVerseTranslationPlainText(): String {
         .trim()
 }
 
-/**
- * Strips block-level HTML wrappers from tajweed Arabic so WebView height hugs the glyphs.
- */
 fun String.sanitizeTajweedArabicHtml(): String {
     if (isBlank()) return ""
     return trim()

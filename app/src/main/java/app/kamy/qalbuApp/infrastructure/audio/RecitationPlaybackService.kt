@@ -15,9 +15,6 @@ import app.kamy.qalbuApp.infrastructure.notifications.NotificationChannels
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-/**
- * Keeps recitation alive in background / lock screen with system media controls.
- */
 @AndroidEntryPoint
 class RecitationPlaybackService : MediaSessionService() {
 

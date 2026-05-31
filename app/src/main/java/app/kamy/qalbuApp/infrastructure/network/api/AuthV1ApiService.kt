@@ -7,11 +7,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-/**
- * Quran Foundation Auth v1 API (prefix: `auth/v1`).
- * Mirrors iOS Networking/Endpoints/ReadingSessionEndpoints.swift. Requires user OAuth token
- * with the `reading_session` scope.
- */
 interface AuthV1ApiService {
 
     @GET("reading-sessions")

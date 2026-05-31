@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Short-lived preview playback for Account adhan picker (does not use [AudioPlayerController]). */
 @Singleton
 class AdhanPreviewPlayer @Inject constructor(
     @ApplicationContext private val context: Context

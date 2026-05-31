@@ -1,8 +1,5 @@
 package app.kamy.qalbuApp.domain.model
 
-/**
- * Mirrors iOS Domain/Enums/PrayerType.swift.
- */
 enum class PrayerType(val aladhanKey: String) {
     FAJR("Fajr"),
     SUNRISE("Sunrise"),

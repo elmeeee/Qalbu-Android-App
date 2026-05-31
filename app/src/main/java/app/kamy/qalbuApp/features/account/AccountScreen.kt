@@ -90,10 +90,6 @@ import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import net.openid.appauth.AuthorizationService
 
-/**
- * Mirrors iOS Features/Settings/Views/ProfileView.swift. Provides sign in/out,
- * profile header, and preference rows (translator, prayer method, notifications).
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(

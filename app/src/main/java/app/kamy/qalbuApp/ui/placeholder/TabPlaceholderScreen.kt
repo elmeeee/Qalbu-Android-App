@@ -13,10 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-/**
- * Placeholder screen used during Phase 1 scaffolding. Each tab in iOS has a
- * dedicated feature module — those land in Phase 2+.
- */
 @Composable
 fun TabPlaceholderScreen(
     title: String,

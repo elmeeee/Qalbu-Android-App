@@ -24,7 +24,6 @@ sealed class AiReflectionException(message: String) : Exception(message) {
     )
 }
 
-/** Groq chat completions — mirrors iOS AIClient. */
 @Singleton
 class AiReflectionRepository @Inject constructor(
     @javax.inject.Named("groq") private val httpClient: OkHttpClient,

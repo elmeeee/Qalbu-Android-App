@@ -16,10 +16,6 @@ import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.features.today.PrayerUiState
 
-/**
- * Prayer dashboard with the resting goat mascot (iOS Today parity).
- * Mascot overlaps the top-right of the prayer card.
- */
 @Composable
 fun TodayPrayerMascotSection(
     state: PrayerUiState,

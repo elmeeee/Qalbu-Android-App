@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/** Persists the last fetched timetable so toggles can reschedule without a new location fetch. */
 object PrayerScheduleCache {
     private const val PREFS = "qalbu_prayer_schedule_cache"
     private const val KEY_JSON = "bundle_json"

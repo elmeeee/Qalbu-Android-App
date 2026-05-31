@@ -6,9 +6,6 @@ import app.kamy.qalbuApp.infrastructure.network.api.AlAdhanHijri
 import java.text.Normalizer
 import java.util.Locale
 
-/**
- * Formats Al-Adhan `date` payload like iOS: "20 May 2026" / "10 Dhu al-Hijj 1447".
- */
 internal object AlAdhanDateLabels {
 
     fun fromApiDate(date: AlAdhanDate?): Pair<String?, String?> {
@@ -52,7 +49,6 @@ internal object AlAdhanDateLabels {
         return rawDate?.let { formatFromDdMmYyyy(it, monthFromRaw) }
     }
 
-    /** API fallback: `10-12-1447` when nested month object is missing. */
     private fun formatFromDdMmYyyy(raw: String, monthFromRaw: (Int?) -> String?): String? {
         val parts = raw.trim().split("-")
         if (parts.size != 3) return raw.replace("-", " ")

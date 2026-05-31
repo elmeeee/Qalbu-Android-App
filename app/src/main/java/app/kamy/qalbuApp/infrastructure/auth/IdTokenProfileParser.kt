@@ -3,7 +3,6 @@ package app.kamy.qalbuApp.infrastructure.auth
 import android.util.Base64
 import org.json.JSONObject
 
-/** Display fields parsed from the OIDC id_token (fallback before Reflect profile loads). */
 data class IdTokenProfile(
     val displayName: String?,
     val username: String?,

@@ -2,7 +2,6 @@ package app.kamy.qalbuApp.core.error
 
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 
-/** User-facing copy when Reflect / profile calls fail after refresh. */
 const val SESSION_EXPIRED_MESSAGE = "Session expired. Sign in again from Account."
 
 fun isAuthHttpFailure(code: Int, body: String?): Boolean {
@@ -35,10 +34,6 @@ fun Throwable.isAuthenticationFailure(): Boolean = when (this) {
 fun Throwable.userFacingAuthOrApiMessage(): String =
     if (isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE else message ?: "Request failed"
 
-/**
- * Clears stored user tokens when the failure is auth-related.
- * @return true if the session was invalidated.
- */
 suspend fun UserSession.invalidateIfAuthenticationFailure(error: Throwable): Boolean {
     if (!error.isAuthenticationFailure()) return false
     clear()

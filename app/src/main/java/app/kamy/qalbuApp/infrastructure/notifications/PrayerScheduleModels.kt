@@ -1,6 +1,5 @@
 package app.kamy.qalbuApp.infrastructure.notifications
 
-/** One local notification fire time for adzan or imsak. */
 data class PrayerNotificationItem(
     val name: String,
     val fireAtMillis: Long
@@ -34,7 +33,6 @@ data class NightDivisionItem(
     val fireAtMillis: Long
 )
 
-/** Cached prayer timetable used to (re)schedule local notifications. */
 data class PrayerScheduleBundle(
     val adzanPrayers: List<PrayerNotificationItem>,
     val imsak: PrayerNotificationItem?,
@@ -45,7 +43,6 @@ data class PrayerScheduleBundle(
 }
 
 data class PrayerNotificationScheduleOptions(
-    /** Al-Adhan keys enabled for adhan, e.g. "Fajr", "Dhuhr". */
     val enabledAdzanPrayers: Set<String>,
     val imsakEnabled: Boolean,
     val midnightEnabled: Boolean,

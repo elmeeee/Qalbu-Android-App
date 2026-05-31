@@ -11,14 +11,6 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Provider
 
-/**
- * Adds Quran Foundation user auth headers for Reflect / Auth v1 (`x-auth-token`,
- * `x-client-id`). QF expects the access token in [x-auth-token], not only
- * `Authorization` — missing [x-auth-token] returns HTTP 400.
- *
- * Refresh is single-flight via [RefreshTokenManager] so concurrent 401/403s don't all
- * race to spend the same refresh token.
- */
 class UserAuthInterceptor(
     private val userSession: UserSession,
     private val refreshManager: RefreshTokenManager,

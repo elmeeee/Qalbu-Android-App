@@ -30,12 +30,6 @@ data class ReflectUiState(
     val togglingLikePostIds: Set<String> = emptySet()
 )
 
-/**
- * Mirrors iOS Features/Reflection/ViewModels/ReflectionViewModel.swift.
- *
- * Vertical reel feed with optimistic like updates and pagination at index
- * `posts.size - 3`. Resets pagination on segment switch.
- */
 @HiltViewModel
 class ReflectViewModel @Inject constructor(
     private val repository: ReflectRepository,
@@ -127,10 +121,6 @@ class ReflectViewModel @Inject constructor(
         loadPosts(reset = false)
     }
 
-    /**
-     * Optimistic like toggle: flip UI immediately, await API, roll back on failure.
-     * Mirrors iOS ReflectionViewModel.toggleLike.
-     */
     fun toggleLike(postId: String) {
         val current = _state.value
         if (postId in current.togglingLikePostIds) return

@@ -14,10 +14,6 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-/**
- * Quran Reflect API (prefix: `quran-reflect/v1`).
- * Mirrors iOS Networking/Endpoints/ReflectEndpoints.swift. Requires user OAuth token.
- */
 interface ReflectApiService {
 
     @GET("users/profile")

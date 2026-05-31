@@ -3,10 +3,6 @@ package app.kamy.qalbuApp.core.error
 import app.kamy.qalbuApp.core.error.QFError
 import retrofit2.HttpException
 
-/**
- * Maps Retrofit / IO exceptions into the [QFError] hierarchy so repositories
- * expose a single Throwable type. Mirrors iOS QFError mapping in QFApiClient.
- */
 suspend inline fun <T> qfCall(crossinline block: suspend () -> T): T {
     return try {
         block()

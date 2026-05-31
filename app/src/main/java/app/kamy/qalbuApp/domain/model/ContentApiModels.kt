@@ -31,7 +31,6 @@ data class RandomAyahPayload(
     val audio: AudioPayload? = null,
     val translations: List<InlineTranslation>? = null
 ) {
-    /** Mirrors iOS `RandomAyahPayload.resolvedVerseNumber`. */
     val resolvedVerseNumber: Int?
         get() {
             verseNumber?.let { if (it > 0) return it }
@@ -39,7 +38,6 @@ data class RandomAyahPayload(
             return tail.toIntOrNull()?.takeIf { it > 0 }
         }
 
-    /** Mirrors iOS `listIdentity`. */
     val listIdentity: String
         get() = when {
             !verseKey.isNullOrEmpty() -> verseKey
@@ -48,7 +46,6 @@ data class RandomAyahPayload(
             else -> "verse-0"
         }
 
-    /** Chapter number from API `verse_key` (e.g. `27:56` → 27). */
     val chapterNumber: Int?
         get() = verseKey
             ?.substringBefore(':', missingDelimiterValue = "")
@@ -56,7 +53,6 @@ data class RandomAyahPayload(
             ?.toIntOrNull()
             ?.takeIf { it > 0 }
 
-    /** Human label: "An-Nur - 24" — never raw `24:56`. */
     fun referenceLabel(chapterDisplayName: String?): String? {
         val ayah = resolvedVerseNumber
         val surah = chapterDisplayName?.trim()?.takeIf { it.isNotEmpty() }

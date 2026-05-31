@@ -8,12 +8,6 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Mirrors iOS Infrastructure/Networking/QFUserSession.swift.
- *
- * Holds the signed-in user's access/refresh tokens and exposes them as
- * Flows so Compose can react to auth state changes.
- */
 @Singleton
 class UserSession @Inject constructor(
     private val storage: SecureTokenStorage

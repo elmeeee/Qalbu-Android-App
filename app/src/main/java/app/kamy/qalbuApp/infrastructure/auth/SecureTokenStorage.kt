@@ -9,12 +9,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * EncryptedSharedPreferences-backed secure storage for OAuth tokens. Mirrors
- * the role of iOS Keychain in `QFUserSession`.
- *
- * Backed by AES256-GCM master key + AES256-GCM value encryption (Android Keystore).
- */
 @Singleton
 class SecureTokenStorage @Inject constructor(
     @ApplicationContext context: Context

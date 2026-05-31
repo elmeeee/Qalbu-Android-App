@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Mirrors iOS PrayerNotificationPreferences. */
 @Singleton
 class PrayerNotificationPreferencesStore @Inject constructor(
     @ApplicationContext context: Context
@@ -64,7 +63,6 @@ open class PrayerNotificationPreferencesStoreBase(
     fun setYasinReminderEnabled(enabled: Boolean) = setBool(KEY_YASIN, enabled)
     fun setKahfReminderEnabled(enabled: Boolean) = setBool(KEY_KAHF, enabled)
 
-    /** @deprecated Use [isPrayerEnabled] per prayer; kept for migration reads. */
     fun isAdzanEnabled(): Boolean =
         PrayerType.ADZAN_NOTIFICATION_PRAYERS.any { isPrayerEnabled(it) }
 
@@ -77,7 +75,6 @@ open class PrayerNotificationPreferencesStoreBase(
         else -> error("Not an adzan prayer: $type")
     }
 
-    /** Before per-prayer keys existed, one master toggle controlled all five. */
     private fun legacyAdzanDefault(): Boolean = bool(KEY_ADZAN, default = true)
 
     private fun bool(key: String, default: Boolean): Boolean {

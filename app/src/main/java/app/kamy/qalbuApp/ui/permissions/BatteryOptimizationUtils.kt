@@ -10,14 +10,12 @@ import android.provider.Settings
 import androidx.core.net.toUri
 import java.util.Locale
 
-/** Whether the app is exempt from Doze / app-standby battery restrictions. */
 fun Context.isIgnoringBatteryOptimizations(): Boolean {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
     val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
     return pm.isIgnoringBatteryOptimizations(packageName)
 }
 
-/** Samsung, Xiaomi, Oppo, and similar OEMs need extra steps beyond the stock dialog. */
 fun hasAggressiveOemBatteryManagement(): Boolean {
     val brand = Build.BRAND.lowercase(Locale.US)
     val manufacturer = Build.MANUFACTURER.lowercase(Locale.US)
@@ -40,10 +38,6 @@ fun hasAggressiveOemBatteryManagement(): Boolean {
     return targets.any { it in brand || it in manufacturer }
 }
 
-/**
- * Opens the system screen to whitelist this app from battery optimization.
- * Returns true if an activity was started. User confirmation is always required.
- */
 fun Context.requestIgnoreBatteryOptimizations(): Boolean {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
     if (isIgnoringBatteryOptimizations()) return true
@@ -55,7 +49,6 @@ fun Context.requestIgnoreBatteryOptimizations(): Boolean {
     return openBatteryOptimizationList()
 }
 
-/** OEM-specific autostart / unrestricted battery screens (best-effort). */
 fun Context.openManufacturerBatterySettings(): Boolean {
     val pkg = packageName
     val candidates = buildList {
@@ -148,9 +141,6 @@ fun Context.openManufacturerBatterySettings(): Boolean {
     return candidates.any { startActivitySafely(it) }
 }
 
-/**
- * Stock whitelist dialog first; on aggressive OEMs also opens autostart/battery UI when needed.
- */
 fun Context.openBackgroundReliabilitySettings() {
     if (isIgnoringBatteryOptimizations()) {
         if (hasAggressiveOemBatteryManagement()) {

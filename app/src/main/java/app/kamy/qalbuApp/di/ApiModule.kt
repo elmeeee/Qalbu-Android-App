@@ -16,9 +16,6 @@ import retrofit2.Retrofit
 import retrofit2.create
 import javax.inject.Singleton
 
-/**
- * Wires the four Retrofit instances from [NetworkModule] into typed service interfaces.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object ApiModule {

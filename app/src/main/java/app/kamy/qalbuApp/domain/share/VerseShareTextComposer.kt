@@ -9,10 +9,6 @@ import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Mirrors iOS TodayShareTextComposer — AI reflection grounded in tafsir + hadith,
- * formatted for social share.
- */
 @Singleton
 class VerseShareTextComposer @Inject constructor(
     private val contentRepository: ContentRepository,

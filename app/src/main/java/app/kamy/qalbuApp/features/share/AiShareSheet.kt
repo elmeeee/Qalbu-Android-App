@@ -75,7 +75,7 @@ fun AiShareSheet(
                 )
             }
             Text(
-                text = "Draft uses tafsir & hadith + AI (same format as iOS). Edit, then share or publish.",
+                text = "Draft uses tafsir & hadith + AI. Edit, then share or publish.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

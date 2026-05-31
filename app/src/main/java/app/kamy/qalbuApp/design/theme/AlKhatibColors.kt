@@ -2,10 +2,6 @@ package app.kamy.qalbuApp.design.theme
 
 import androidx.compose.ui.graphics.Color
 
-/**
- * Mirrors iOS `Color.Token` in Design/Tokens/DesignTokens.swift.
- * Hex values are 1:1 with the iOS palette.
- */
 object AlKhatibColors {
     val DeepEmerald = Color(0xFF064E3B)
     val Teal = Color(0xFF0D9488)

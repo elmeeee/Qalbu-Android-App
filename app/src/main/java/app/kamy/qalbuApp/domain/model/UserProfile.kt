@@ -42,7 +42,6 @@ data class UserProfilePayload(
     val country: String? = null,
     val followed: Boolean? = null
 ) {
-    /** Mirrors iOS `UserProfilePayload.displayTitle`. */
     val displayTitle: String
         get() {
             val parts = listOfNotNull(firstName, lastName).filter { it.isNotEmpty() }
@@ -51,7 +50,6 @@ data class UserProfilePayload(
             return if (id.isEmpty()) "Profile" else id
         }
 
-    /** Mirrors iOS `UserProfilePayload.preferredAvatarURL`. */
     val preferredAvatarUrl: String?
         get() = avatarUrls?.medium ?: avatarUrls?.large ?: avatarUrls?.small
 }

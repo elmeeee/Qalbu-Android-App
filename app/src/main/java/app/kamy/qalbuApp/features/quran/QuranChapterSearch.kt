@@ -59,15 +59,11 @@ import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import java.text.Normalizer
 
-/** Trimmed query used for filtering — keeps UI state in sync with list mode. */
 fun String.normalizedSearchQuery(): String = trim()
 
 fun List<QuranChapter>.filteredBySearch(query: String): List<QuranChapter> =
     searchChapters(query)
 
-/**
- * Smart surah search: aliases, multi-word tokens, revelation filters, and relevance ranking.
- */
 fun List<QuranChapter>.searchChapters(query: String): List<QuranChapter> {
     val q = query.normalizedSearchQuery()
     if (q.isEmpty()) return this
@@ -116,7 +112,6 @@ private val REVELATION_FILTERS = mapOf(
 private fun revelationFilterFor(normalizedQuery: String): Boolean? =
     REVELATION_FILTERS[normalizedQuery]
 
-/** Common Indonesian / English names and typos → surah number. */
 private val CHAPTER_ALIASES = mapOf(
     "fatihah" to 1,
     "fatiha" to 1,

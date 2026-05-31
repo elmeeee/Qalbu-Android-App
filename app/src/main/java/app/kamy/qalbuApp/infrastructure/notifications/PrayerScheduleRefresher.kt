@@ -4,9 +4,6 @@ import android.content.Context
 import app.kamy.qalbuApp.di.PrayerRefreshEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 
-/**
- * Refreshes cached prayer alarms (network when coordinates are stored, otherwise rolls forward).
- */
 object PrayerScheduleRefresher {
 
     suspend fun refresh(context: Context) {

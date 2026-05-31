@@ -64,7 +64,6 @@ fun ReaderKnowledgeSheetBackground(
     }
 }
 
-/** Scrollable body below fixed sheet header — required for long tafsir / hadith. */
 @Composable
 fun ColumnScope.ReaderSheetScrollBody(
     modifier: Modifier = Modifier,
@@ -81,7 +80,6 @@ fun ColumnScope.ReaderSheetScrollBody(
     )
 }
 
-/** Lazy list body for long feeds (hadith cards) — avoids nested scroll + WebView clipping. */
 @Composable
 fun ColumnScope.ReaderSheetLazyBody(
     modifier: Modifier = Modifier,

@@ -76,11 +76,6 @@ enum class AyahPlaybackMode {
     CONTINUOUS
 }
 
-/**
- * Mirrors iOS Features/Chapter/ViewModels/ChapterVersesViewModel.swift.
- *
- * Receives the chapter number via navigation arguments (SavedStateHandle).
- */
 @HiltViewModel
 class ChapterReaderViewModel @Inject constructor(
     private val audioPlayer: AudioPlayerController,
@@ -514,7 +509,6 @@ class ChapterReaderViewModel @Inject constructor(
         _state.update { it.copy(publishMessage = null) }
     }
 
-    /** Builds an [AudioQueueItem] list for playing the entire surah. */
     fun audioQueueItems(): List<AudioQueueItem> = _state.value.verses.mapNotNull { v ->
         val url = v.audio?.url ?: return@mapNotNull null
         AudioQueueItem(
@@ -525,7 +519,6 @@ class ChapterReaderViewModel @Inject constructor(
         )
     }
 
-    /** Mirrors iOS ReadingSessionTracker — debounced "current scroll position" logger. */
     fun logScrollPosition(verseNumber: Int) {
         viewModelScope.launch {
             runCatching { readingSessions.logReadingSession(_state.value.chapterNumber, verseNumber) }

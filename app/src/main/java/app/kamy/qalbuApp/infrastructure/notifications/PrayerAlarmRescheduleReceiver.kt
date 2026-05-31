@@ -8,9 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-/**
- * Re-schedules prayer alarms after boot, time zone changes, app updates, etc.
- */
 class PrayerAlarmRescheduleReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {

@@ -21,7 +21,6 @@ object PrayerNotificationScheduler {
     private const val SUNNAH_KAHF_REQUEST = 10_002
     private const val MIDNIGHT_REFRESH_REQUEST = 11_000
     private const val NOTIFICATION_ID_BASE = 8_000
-    /** Enough lookahead without blocking the process for too long at schedule time. */
     private const val DAYS_TO_SCHEDULE = 3
 
     fun reschedule(
@@ -107,7 +106,6 @@ object PrayerNotificationScheduler {
         scheduleMidnightRefresh(context)
     }
 
-    /** Daily roll-forward + network refresh when coordinates are cached. */
     fun scheduleMidnightRefresh(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val cal = Calendar.getInstance().apply {
@@ -287,11 +285,6 @@ object PrayerNotificationScheduler {
         }
     }
 
-    /**
-     * Uses [AlarmManager.setAlarmClock] so prayer/adhan fires on time in Doze without relying on
-     * the user granting SCHEDULE_EXACT_ALARM (inexact [setAndAllowWhileIdle] often batches until
-     * the app is opened).
-     */
     private fun setExactAlarm(
         context: Context,
         alarmManager: AlarmManager,

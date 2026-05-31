@@ -38,7 +38,6 @@ data class AudioPlaybackState(
     val reciterName: String = "",
     val activeIndex: Int? = null,
     val queue: List<AudioQueueItem> = emptyList(),
-    /** Surah number for navigating back to the Quran reader. */
     val chapterNumber: Int? = null,
     val ayahNumber: Int? = null
 ) {
@@ -54,9 +53,6 @@ fun parseVerseKey(verseKey: String?): Pair<Int, Int>? {
     return chapter to ayah
 }
 
-/**
- * Singleton-scoped ExoPlayer wrapper that exposes a [StateFlow] for Compose UIs.
- */
 @Singleton
 class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
     @ApplicationContext private val context: Context,

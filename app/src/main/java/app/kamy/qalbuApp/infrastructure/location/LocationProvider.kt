@@ -24,13 +24,6 @@ data class ReverseGeocodeResult(
     val countryCode: String? = null
 )
 
-/**
- * Thin FusedLocation wrapper. Returns null when the user hasn't granted
- * either ACCESS_FINE_LOCATION or ACCESS_COARSE_LOCATION.
- *
- * Compose layer (Accompanist `rememberMultiplePermissionsState`) is responsible
- * for prompting the user — we just read the current grant state here.
- */
 @Singleton
 class LocationProvider @Inject constructor(
     @ApplicationContext private val context: Context
@@ -39,7 +32,6 @@ class LocationProvider @Inject constructor(
     suspend fun currentLocation(): UserLocation? {
         if (!hasAnyPermission()) return null
         val client = LocationServices.getFusedLocationProviderClient(context)
-        // GPS can be null right after permission grant — retry briefly like iOS location updates.
         repeat(4) { attempt ->
             val location = client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null).await()
                 ?: client.lastLocation.await()
@@ -51,7 +43,6 @@ class LocationProvider @Inject constructor(
         return null
     }
 
-    /** Mirrors iOS PrayerTimesViewModel reverse geocode for city + country auto-detect. */
     suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult =
         withContext(Dispatchers.IO) {
             if (!Geocoder.isPresent()) return@withContext ReverseGeocodeResult()

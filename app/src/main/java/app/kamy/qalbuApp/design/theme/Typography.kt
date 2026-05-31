@@ -1,22 +1,17 @@
 package app.kamy.qalbuApp.design.theme
 
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
+import app.kamy.qalbuApp.R
 
-/**
- * Quran Arabic typeface. Prefer res/font/tajweed_font.ttf when bundled; until then
- * use a serif stack so the app builds and runs without the iOS font asset.
- */
-val TajweedFontFamily = FontFamily.Serif
 
-/**
- * Default Material 3 typography. Customize per-screen for Arabic vs Latin runs.
- * The Quran reader uses [TajweedFontFamily] with line-height 1.82 (matching iOS
- * QuranVerseArabic.swift).
- */
+val TajweedFontFamily = FontFamily(Font(R.font.tajweed_font))
+
+
 val AlKhatibTypography: Typography = Typography(
     displayLarge = TextStyle(fontSize = 57.sp, lineHeight = 64.sp, fontWeight = FontWeight.Normal),
     displayMedium = TextStyle(fontSize = 45.sp, lineHeight = 52.sp, fontWeight = FontWeight.Normal),
@@ -34,11 +29,6 @@ val AlKhatibTypography: Typography = Typography(
     labelSmall = TextStyle(fontSize = 11.sp, lineHeight = 16.sp, fontWeight = FontWeight.Medium)
 )
 
-/**
- * Tajweed text style for ayah rendering. The actual rendering of tajweed-colored
- * markup happens inside a WebView using the bundled font (see WebView wrapper in
- * Phase 2). This style is for plain-Arabic fallbacks.
- */
 val TajweedTextStyle = TextStyle(
     fontFamily = TajweedFontFamily,
     fontSize = 28.sp,

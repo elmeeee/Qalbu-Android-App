@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Mirrors iOS ChapterReaderPreferences — selected Quran translation for content API. */
 @Singleton
 class TranslationPreferencesStore @Inject constructor(
     @ApplicationContext context: Context

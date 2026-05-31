@@ -124,7 +124,6 @@ data class ReflectFeedAuthor(
     val verified: Boolean? = null,
     val avatarUrls: UserProfileAvatarUrls? = null
 ) {
-    /** Mirrors iOS `ReflectFeedAuthor.displayName`. */
     val displayName: String
         get() {
             val parts = listOfNotNull(firstName, lastName).filter { it.isNotEmpty() }
@@ -133,7 +132,6 @@ data class ReflectFeedAuthor(
             return id ?: "Contributor"
         }
 
-    /** Mirrors iOS `ReflectFeedAuthor.avatarURL`. */
     val avatarUrl: String?
         get() = avatarUrls?.medium ?: avatarUrls?.large ?: avatarUrls?.small
 }

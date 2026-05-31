@@ -70,10 +70,6 @@ import app.kamy.qalbuApp.domain.model.ReflectFeedPost
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 
-/**
- * Mirrors iOS Features/Reflection/Views/ReflectionView.swift +
- * ReflectReelFeedView.swift. Full-screen vertical feed of community reflections.
- */
 @Composable
 fun ReflectScreen(
     onSignIn: () -> Unit,

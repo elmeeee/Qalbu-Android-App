@@ -20,14 +20,6 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-/**
- * Mirrors iOS Infrastructure/Networking/QFOAuthService.swift.
- *
- * Wraps AppAuth-Android's PKCE flow. The browser tab is launched from
- * [buildAuthorizationIntent]; the Activity must catch the redirect intent
- * via the manifest filter (scheme `alkhatib`, host `oauth`, path `/callback`)
- * and call [exchangeAuthorizationResponse] with the parsed response.
- */
 @Singleton
 class OAuthService @Inject constructor(
     @ApplicationContext private val appContext: Context,
@@ -39,7 +31,6 @@ class OAuthService @Inject constructor(
             Uri.parse(AppConfig.qfOauthTokenUrl)
         )
 
-    /** Build the browser intent that begins authorization. Caller must startActivity it. */
     fun buildAuthorizationIntent(authService: AuthorizationService): Intent {
         val request = AuthorizationRequest.Builder(
             serviceConfig,
@@ -53,15 +44,10 @@ class OAuthService @Inject constructor(
         return authService.getAuthorizationRequestIntent(request)
     }
 
-    /** Parse the redirect intent returned to MainActivity. */
     fun parseRedirect(intent: Intent): Pair<AuthorizationResponse?, AuthorizationException?> {
         return AuthorizationResponse.fromIntent(intent) to AuthorizationException.fromIntent(intent)
     }
 
-    /**
-     * Exchange the authorization code for access + refresh tokens.
-     * Persists them via [UserSession] on success.
-     */
     suspend fun exchangeAuthorizationResponse(
         authService: AuthorizationService,
         response: AuthorizationResponse
@@ -96,10 +82,6 @@ class OAuthService @Inject constructor(
         )
     }
 
-    /**
-     * Refresh-token grant. Called from the 401 interceptor.
-     * Mirrors iOS QFApiClient.refreshUserAccessToken().
-     */
     suspend fun refreshAccessToken(authService: AuthorizationService) {
         val refreshToken = userSession.userRefreshToken()
         if (refreshToken.isNullOrEmpty()) throw QFError.MissingUserSession

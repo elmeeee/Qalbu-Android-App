@@ -11,7 +11,6 @@ object PrayerScheduleBuilder {
 
     private val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
-    /** Builds notification schedule from Al-Adhan timings map (iOS PrayerTimesController parity). */
     fun fromTimings(
         timings: Map<String, String>,
         scheduleDay: Date = Date()
@@ -77,7 +76,6 @@ object PrayerScheduleBuilder {
         )
     }
 
-    /** Fallback when only [PrayerEntry] list is available (no imsak/night keys). */
     fun fromPrayerEntries(entries: List<PrayerEntry>): PrayerScheduleBundle? {
         val adzanTypes = setOf(
             PrayerType.FAJR,
@@ -99,9 +97,6 @@ object PrayerScheduleBuilder {
         )
     }
 
-    /**
-     * Next [daysAhead] alarm times at the same clock time (rolls the calendar forward).
-     */
     fun upcomingOccurrences(
         fireAtMillis: Long,
         now: Long = System.currentTimeMillis(),

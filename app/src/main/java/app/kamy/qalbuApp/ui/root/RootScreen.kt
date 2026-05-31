@@ -46,9 +46,6 @@ interface RootEntryPoint {
     fun authorizationService(): AuthorizationService
 }
 
-/**
- * Root shell — tab content is full-screen; [FloatingTabBar] overlays the bottom (iOS-style).
- */
 @Composable
 fun RootScreen(
     pendingDeepLinkRoute: String? = null,

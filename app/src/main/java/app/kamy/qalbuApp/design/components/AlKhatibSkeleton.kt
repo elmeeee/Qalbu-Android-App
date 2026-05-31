@@ -77,7 +77,6 @@ fun AlKhatibSkeletonCircle(size: Dp) {
     )
 }
 
-/** Skeleton for on-dark surfaces (e.g. prayer card). */
 @Composable
 fun AlKhatibSkeletonOnDark(
     modifier: Modifier = Modifier,

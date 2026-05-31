@@ -2,13 +2,6 @@ package app.kamy.qalbuApp.core.config
 
 import app.kamy.qalbuApp.BuildConfig
 
-/**
- * Mirrors iOS `AppEndpoints.Runtime` + `AppEndpoints.Prefix` + path helpers in
- * Core/Configuration/AppEndpoints.swift.
- *
- * Values come from BuildConfig (per build type) which is wired from
- * iOS Config/Debug.xcconfig and Config/Release.xcconfig.
- */
 object AppConfig {
 
     // ---- Quran Foundation base URLs ----
@@ -35,27 +28,18 @@ object AppConfig {
     val groqApiKey: String? = BuildConfig.API_KEY_GROQ.ifBlank { null }
     val aiModel: String = BuildConfig.AI_MODEL
 
-    /**
-     * Mirrors iOS `AppEndpoints.Prefix`.
-     */
     object Prefix {
         const val contentAPI = "content/api/v4"
         const val quranReflect = "quran-reflect/v1"
         const val authV1 = "auth/v1"
     }
 
-    /**
-     * Mirrors iOS `AppEndpoints.OAuth`.
-     */
     object OAuth {
         const val directory = "oauth2"
         const val token = "token"
         const val introspect = "introspect"
     }
 
-    /**
-     * Mirrors iOS `AppEndpoints.Content`.
-     */
     object Content {
         const val chapters = "chapters"
         const val versesRandom = "verses/random"
@@ -68,9 +52,6 @@ object AppConfig {
             "tafsirs/$resourceId/by_ayah/$ayahKey"
     }
 
-    /**
-     * Mirrors iOS `AppEndpoints.Reflect`.
-     */
     object Reflect {
         const val activityDays = "activity_days"
         const val posts = "posts"
@@ -80,17 +61,10 @@ object AppConfig {
         fun postToggleLike(postId: String) = "posts/$postId/toggle-like"
     }
 
-    /**
-     * Mirrors iOS `AppEndpoints.AuthV1`.
-     */
     object AuthV1 {
         const val readingSessions = "reading-sessions"
     }
 
-    /**
-     * Mirrors iOS `AppEndpoints.URLBuilder.absoluteVerseMediaURLString`.
-     * Resolves verse audio URLs that may be relative, protocol-relative, or absolute.
-     */
     fun absoluteVerseMediaUrl(raw: String): String = when {
         raw.startsWith("//") -> "https:$raw"
         raw.startsWith("http") -> raw

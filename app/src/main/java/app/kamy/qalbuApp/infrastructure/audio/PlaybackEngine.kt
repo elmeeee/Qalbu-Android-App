@@ -14,7 +14,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Shared ExoPlayer + [MediaSession] for recitation (lock screen, background, notification). */
 @Singleton
 class PlaybackEngine @Inject constructor(
     @ApplicationContext context: Context

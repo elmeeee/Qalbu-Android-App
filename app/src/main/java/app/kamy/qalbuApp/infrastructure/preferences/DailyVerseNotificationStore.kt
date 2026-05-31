@@ -11,7 +11,6 @@ import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Mirrors iOS DailyVerseNotificationPreferences. */
 @Singleton
 class DailyVerseNotificationStore @Inject constructor(
     @ApplicationContext context: Context

@@ -24,9 +24,6 @@ data class ChaptersUiState(
     val error: String? = null
 )
 
-/**
- * Mirrors iOS Features/Chapter/ViewModels/QuranChaptersViewModel.swift.
- */
 @HiltViewModel
 class ChaptersViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
@@ -68,7 +65,6 @@ class ChaptersViewModel @Inject constructor(
         }
     }
 
-    /** Resolves the continue-reading session into a chapter + verse for navigation. */
     fun continueReadingTarget(): Pair<QuranChapter, Int>? {
         val s = _state.value.continueReading ?: return null
         val chapter = _state.value.chapters.firstOrNull { it.id == s.chapterNumber } ?: return null

@@ -3,7 +3,6 @@ package app.kamy.qalbuApp.domain.adhan
 import androidx.annotation.RawRes
 import app.kamy.qalbuApp.R
 
-/** User-selectable adhan for Dhuhr, Asr, Maghrib, and Isha. Fajr always uses [FAJR_FIXED]. */
 enum class AdhanVoice(
     val id: String,
     val displayName: String,

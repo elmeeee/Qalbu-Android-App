@@ -20,9 +20,6 @@ enum class AlKhatibCardStyle {
     Outlined
 }
 
-/**
- * Material 3 card wrapper — use instead of manual Box + border + shadow.
- */
 @Composable
 fun AlKhatibCard(
     modifier: Modifier = Modifier,

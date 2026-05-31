@@ -4,10 +4,6 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import java.net.UnknownHostException
 
-/**
- * Retries with a fallback host when DNS resolution fails for known QF prod hosts.
- * This keeps the app usable on networks where specific DNS entries are blocked.
- */
 class HostFallbackInterceptor : Interceptor {
     private val fallbackHosts = mapOf(
         "apis.quran.foundation" to "apis-prelive.quran.foundation",

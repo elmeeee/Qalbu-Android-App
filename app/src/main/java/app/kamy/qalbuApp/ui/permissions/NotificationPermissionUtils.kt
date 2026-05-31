@@ -7,11 +7,9 @@ import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 
-/** Whether the user can receive notifications (runtime permission + app toggle). */
 fun Context.areAppNotificationsEnabled(): Boolean =
     NotificationManagerCompat.from(this).areNotificationsEnabled()
 
-/** Opens this app's notification settings (permission + channels). */
 fun Context.openAppNotificationSettings() {
     val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {

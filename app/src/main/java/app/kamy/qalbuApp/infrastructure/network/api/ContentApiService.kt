@@ -12,17 +12,6 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-/**
- * Quran Foundation Content API (prefix: `content/api/v4`).
- * Mirrors iOS Networking/Endpoints/QuranContentEndpoints.swift.
- *
- * The default verse field set matches iOS:
- *  - fields = text_uthmani,text_uthmani_tajweed
- *  - translation_fields = resource_name
- *  - audio = 6 (default recitation)
- *  - translations = 22 (default — overridable per-call)
- *  - language = en
- */
 interface ContentApiService {
 
     @GET("chapters")

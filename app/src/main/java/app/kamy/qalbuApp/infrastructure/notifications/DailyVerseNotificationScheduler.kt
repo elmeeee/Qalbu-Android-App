@@ -18,9 +18,6 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import java.util.Calendar
 
-/**
- * Schedules a daily local notification — mirrors iOS DailyVerseNotificationScheduler.
- */
 object DailyVerseNotificationScheduler {
 
     const val CHANNEL_ID = "daily_verse"

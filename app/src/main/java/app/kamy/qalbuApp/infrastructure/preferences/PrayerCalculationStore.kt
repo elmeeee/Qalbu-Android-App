@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Persists prayer calculation method — mirrors iOS UserDefaults `prayer_calculation_method`. */
 @Singleton
 class PrayerCalculationStore @Inject constructor(
     @ApplicationContext context: Context

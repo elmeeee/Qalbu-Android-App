@@ -2,7 +2,6 @@ package app.kamy.qalbuApp.design.theme
 
 import androidx.compose.ui.unit.dp
 
-/** Consistent spacing rhythm (8dp grid). */
 object AlKhatibSpacing {
     val xs = 4.dp
     val sm = 8.dp

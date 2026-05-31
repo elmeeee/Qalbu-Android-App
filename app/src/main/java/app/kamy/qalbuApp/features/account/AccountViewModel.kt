@@ -39,7 +39,6 @@ data class AccountUiState(
     val isLoading: Boolean = false,
     val authBusy: Boolean = false,
     val profile: UserProfilePayload? = null,
-    /** From OIDC id_token when Reflect profile is still loading or unavailable. */
     val sessionDisplayName: String? = null,
     val sessionUsername: String? = null,
     val sessionAvatarUrl: String? = null,
@@ -89,10 +88,6 @@ data class AccountUiState(
     }
 }
 
-/**
- * Mirrors iOS Features/Settings/ViewModels/ProfileViewModel.swift +
- * TranslatorSelectionViewModel.swift.
- */
 @HiltViewModel
 class AccountViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
@@ -251,7 +246,6 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-    /** Call after OAuth completes so profile + id_token claims load immediately. */
     fun onSignedIn() {
         refreshSessionFromIdToken()
         fetchProfile()

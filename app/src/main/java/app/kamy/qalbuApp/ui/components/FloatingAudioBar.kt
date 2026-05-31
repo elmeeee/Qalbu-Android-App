@@ -36,9 +36,6 @@ object FloatingAudioBarMetrics {
     val bottomGap = 8.dp
 }
 
-/**
- * Mini player shown while recitation audio is active. Hidden automatically when playback stops.
- */
 @Composable
 fun FloatingAudioBar(
     state: AudioPlaybackState,

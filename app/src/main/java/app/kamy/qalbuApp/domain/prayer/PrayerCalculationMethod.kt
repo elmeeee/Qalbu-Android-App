@@ -1,10 +1,5 @@
 package app.kamy.qalbuApp.domain.prayer
 
-/**
- * Mirrors iOS Core/Prayer/PrayerCalculationMethod.swift — Al-Adhan IDs, tune, and methodSettings.
- *
- * Indonesia: [KEMENAG] = API method 20 (Kementerian Agama); [MUHAMMADIYAH] = custom method 99.
- */
 enum class PrayerCalculationMethod(val rawValue: String) {
     MUHAMMADIYAH("muhammadiyah"),
     KEMENAG("kemenag"),

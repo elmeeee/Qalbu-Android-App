@@ -35,7 +35,6 @@ class AdhanPreferencesStore @Inject constructor(
     }
 }
 
-/** Non-Hilt access from broadcast receivers and services. */
 class AdhanPreferencesStoreBase(private val prefs: android.content.SharedPreferences) {
     fun currentVoice(): AdhanVoice = AdhanVoice.fromId(prefs.getString(KEY_VOICE_ID, null))
 

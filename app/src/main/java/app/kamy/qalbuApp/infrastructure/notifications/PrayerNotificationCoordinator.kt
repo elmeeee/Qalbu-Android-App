@@ -22,7 +22,6 @@ object PrayerNotificationCoordinator {
         scheduleAsync(appContext)
     }
 
-    /** Reschedules from disk on a background thread (never blocks the UI). */
     fun rescheduleFromCache(context: Context) {
         scheduleAsync(context.applicationContext)
     }

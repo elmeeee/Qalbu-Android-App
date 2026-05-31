@@ -24,16 +24,11 @@ import androidx.media3.session.MediaSessionService
 import app.kamy.qalbuApp.MainActivity
 import app.kamy.qalbuApp.infrastructure.notifications.NotificationChannels
 
-/** Platform volume broadcast keys — not all are public on [AudioManager]. */
 private const val VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION"
 private const val EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE"
 private const val EXTRA_VOLUME_STREAM_VALUE = "android.media.EXTRA_VOLUME_STREAM_VALUE"
 private const val EXTRA_PREV_VOLUME_STREAM_VALUE = "android.media.EXTRA_PREV_VOLUME_STREAM_VALUE"
 
-/**
- * Adhan playback with [MediaSession] so users can stop from lock screen, headset buttons,
- * volume keys, notification swipe, and system media controls.
- */
 class AdhanPlaybackService : MediaSessionService() {
 
     private var player: ExoPlayer? = null

@@ -21,11 +21,14 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
 enum class PrayerTheme { DAYLIGHT, NIGHT }
+
+private const val PRAYER_GRACE_PERIOD_MS = 15 * 60 * 1000L
 
 data class PrayerUiState(
     val isLoading: Boolean = false,
@@ -33,6 +36,8 @@ data class PrayerUiState(
     val activePrayer: PrayerType? = null,
     val nextPrayer: PrayerType? = null,
     val countdown: String = "--:--:--",
+    val countdownSubtitle: String = "Prayer schedule",
+    val isGracePeriod: Boolean = false,
     val cityName: String? = null,
     val hijriLabel: String? = null,
     val gregorianLabel: String? = null,
@@ -41,10 +46,6 @@ data class PrayerUiState(
     val error: String? = null
 )
 
-/**
- * Mirrors iOS Features/Discovery/ViewModels/PrayerDashboardViewModel.swift
- * + PrayerTimesViewModel.swift combined into one Compose-friendly state holder.
- */
 @HiltViewModel
 class PrayerDashboardViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
@@ -58,6 +59,9 @@ class PrayerDashboardViewModel @Inject constructor(
     val state: StateFlow<PrayerUiState> = _state.asStateFlow()
 
     private val timeFormatter = SimpleDateFormat("hh:mm a", Locale.US)
+    private val dayKeyFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    private var scheduleDayKey: String? = null
+    private var dayRefreshInFlight = false
 
     init {
         viewModelScope.launch { refresh() }
@@ -116,6 +120,7 @@ class PrayerDashboardViewModel @Inject constructor(
                     error = null
                 )
             }
+            scheduleDayKey = dayKey()
             recomputeActiveAndCountdown()
             result.scheduleBundle?.let { bundle ->
                 PrayerNotificationCoordinator.onScheduleUpdated(
@@ -137,23 +142,82 @@ class PrayerDashboardViewModel @Inject constructor(
     private fun recomputeActiveAndCountdown() {
         val now = Date()
         val timings = _state.value.timings.ifEmpty { return }
-        val active = timings.lastOrNull { it.date.before(now) }?.type ?: timings.first().type
-        val next = timings.firstOrNull { it.date.after(now) } ?: timings.first()
+
+        val todayKey = dayKey()
+        if (scheduleDayKey != null && scheduleDayKey != todayKey && !dayRefreshInFlight) {
+            dayRefreshInFlight = true
+            viewModelScope.launch {
+                refresh()
+                dayRefreshInFlight = false
+            }
+        }
+
+        val lastPassed = timings.lastOrNull { it.date.before(now) }
+        val active = lastPassed?.type ?: timings.first().type
+        val theme = if (active == PrayerType.MAGHRIB || active == PrayerType.ISHA) {
+            PrayerTheme.NIGHT
+        } else {
+            PrayerTheme.DAYLIGHT
+        }
+
+        if (lastPassed != null) {
+            val elapsedMs = now.time - lastPassed.date.time
+            if (elapsedMs in 0 until PRAYER_GRACE_PERIOD_MS) {
+                _state.update {
+                    it.copy(
+                        activePrayer = active,
+                        nextPrayer = null,
+                        countdown = formatDurationMs(elapsedMs),
+                        countdownSubtitle = "${prayerDisplayName(lastPassed.type)} prayer has passed",
+                        isGracePeriod = true,
+                        theme = theme
+                    )
+                }
+                return
+            }
+        }
+
+        val next = resolveNextPrayerEntry(timings, now)
         val deltaMs = (next.date.time - now.time).coerceAtLeast(0L)
-        val seconds = (deltaMs / 1000L) % 60
-        val minutes = (deltaMs / (1000L * 60)) % 60
-        val hours = (deltaMs / (1000L * 60 * 60))
-        val countdown = "%02d:%02d:%02d".format(hours, minutes, seconds)
-        val theme = if (active == PrayerType.MAGHRIB || active == PrayerType.ISHA)
-            PrayerTheme.NIGHT else PrayerTheme.DAYLIGHT
         _state.update {
             it.copy(
                 activePrayer = active,
                 nextPrayer = next.type,
-                countdown = countdown,
+                countdown = formatDurationMs(deltaMs),
+                countdownSubtitle = "Time remaining before ${prayerDisplayName(next.type)}",
+                isGracePeriod = false,
                 theme = theme
             )
         }
+    }
+
+    private fun resolveNextPrayerEntry(timings: List<PrayerEntry>, now: Date): PrayerEntry {
+        timings.firstOrNull { it.date.after(now) }?.let { return it }
+        val anchor = timings.firstOrNull { it.type == PrayerType.FAJR } ?: timings.first()
+        val nextDay = Calendar.getInstance().apply {
+            time = anchor.date
+            add(Calendar.DAY_OF_YEAR, 1)
+        }.time
+        return anchor.copy(date = nextDay)
+    }
+
+    private fun formatDurationMs(durationMs: Long): String {
+        val totalSeconds = (durationMs / 1000L).coerceAtLeast(0L)
+        val seconds = totalSeconds % 60
+        val minutes = (totalSeconds / 60) % 60
+        val hours = totalSeconds / 3600
+        return "%02d:%02d:%02d".format(hours, minutes, seconds)
+    }
+
+    private fun dayKey(): String = dayKeyFormatter.format(Date())
+
+    private fun prayerDisplayName(type: PrayerType): String = when (type) {
+        PrayerType.FAJR -> "Fajr"
+        PrayerType.SUNRISE -> "Sunrise"
+        PrayerType.DHUHR -> "Dhuhr"
+        PrayerType.ASR -> "Asr"
+        PrayerType.MAGHRIB -> "Maghrib"
+        PrayerType.ISHA -> "Isha"
     }
 
     fun formatPrayerTime(date: Date): String = timeFormatter.format(date)

@@ -23,9 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 
-/**
- * Auto-height WebView for tafsir / hadith HTML. Parent [Column] scrolls; this view expands to full content.
- */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun ReaderHtmlView(

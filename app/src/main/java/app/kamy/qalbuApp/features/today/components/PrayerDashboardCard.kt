@@ -33,12 +33,6 @@ import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-/**
- * Mirrors iOS Features/Discovery/Components/PrayerDashboardCard.swift.
- *
- * Renders the rounded gradient prayer-time card with countdown, label, and a row
- * of 6 prayer columns. Switches to a darker gradient at Maghrib/Isha.
- */
 @Composable
 fun PrayerDashboardCard(
     state: PrayerUiState,
@@ -94,9 +88,11 @@ fun PrayerDashboardCard(
                 style = MaterialTheme.typography.headlineLarge
             )
             Text(
-                text = state.nextPrayer?.let { "Time remaining before ${prayerDisplay(it)}" }
-                    ?: if (state.needsPermission) "Allow location to see prayer times"
-                    else "Prayer schedule",
+                text = when {
+                    state.needsPermission -> "Allow location to see prayer times"
+                    state.timings.isEmpty() -> "Prayer schedule"
+                    else -> state.countdownSubtitle
+                },
                 color = Color.White.copy(alpha = 0.85f),
                 style = MaterialTheme.typography.bodySmall
             )

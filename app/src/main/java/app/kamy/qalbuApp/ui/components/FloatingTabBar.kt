@@ -24,9 +24,6 @@ import app.kamy.qalbuApp.design.theme.NavigationBarShape
 import app.kamy.qalbuApp.ui.layout.FloatingNavBarMetrics
 import app.kamy.qalbuApp.ui.navigation.RootTab
 
-/**
- * Floating pill tab bar — overlays scroll content; only the pill is opaque (iOS-style).
- */
 @Composable
 fun FloatingTabBar(
     selectedRoute: String?,

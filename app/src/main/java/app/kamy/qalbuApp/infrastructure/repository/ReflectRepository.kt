@@ -17,32 +17,21 @@ import java.util.TimeZone
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Mirrors iOS Infrastructure/Services/ReflectRepository.swift +
- * UserHabitRepository.swift. Wraps the Reflect API.
- */
 @Singleton
 class ReflectRepository @Inject constructor(
     private val api: ReflectApiService
 ) {
-    /** Mirrors iOS UserHabitRepository.fetchMyProfile. */
     suspend fun fetchMyProfile(): UserProfilePayload = qfCall { api.getMyProfile() }
 
-    /** Mirrors iOS ReflectRepository feed paging. */
     suspend fun fetchAllReflectFeed(page: Int, limit: Int = 20): ReflectFeedEnvelope =
         qfCall { api.getPostsFeed(page = page, limit = limit) }
 
     suspend fun fetchMyReflections(page: Int, limit: Int = 20): ReflectFeedEnvelope =
         qfCall { api.getMyPosts(page = page, limit = limit) }
 
-    /** Mirrors iOS ReflectRepository.togglePostLike with optimistic semantics handled by VM. */
     suspend fun togglePostLike(postId: String): Boolean =
         qfCall { api.togglePostLike(postId).liked }
 
-    /**
-     * Mirrors iOS ReflectRepository.createReflectionPost + UserHabitRepository.logActivityDay.
-     * Builds the post payload from the verse key, then logs activity_day with `verses_read=1`.
-     */
     suspend fun createReflectionPost(
         body: String,
         verseKey: String,
@@ -71,7 +60,6 @@ class ReflectRepository @Inject constructor(
             api.createPost(PostCreateRequest(payload), idempotencyKey = idempotencyKey)
         }
 
-        // Best-effort activity_day logging (iOS UserHabitRepository pattern).
         runCatching {
             qfCall {
                 api.logActivityDay(
@@ -88,7 +76,6 @@ class ReflectRepository @Inject constructor(
         return envelope.createdPost
     }
 
-    /** Helpers ------------------------------------------------------------- */
     private fun parseVerseKey(key: String): Pair<Int, Int>? {
         val parts = key.split(':')
         if (parts.size != 2) return null

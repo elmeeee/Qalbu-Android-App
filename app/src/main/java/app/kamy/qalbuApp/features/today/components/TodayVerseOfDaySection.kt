@@ -37,7 +37,6 @@ import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
-import app.kamy.qalbuApp.ui.common.buildTajweedHtmlFragment
 import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 
 @Composable
@@ -97,10 +96,8 @@ fun TodayVerseOfDaySection(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TajweedHtmlView(
-                        htmlFragment = buildTajweedHtmlFragment(
-                            verse.textUthmaniTajweed ?: verse.textUthmani,
-                            verse.resolvedVerseNumber
-                        ),
+                        textUthmaniTajweed = verse.textUthmaniTajweed ?: verse.textUthmani,
+                        ayahNumber = verse.resolvedVerseNumber,
                         fontSizeSp = 28,
                         compact = true,
                         modifier = Modifier.fillMaxWidth()

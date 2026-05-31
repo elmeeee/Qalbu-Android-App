@@ -6,14 +6,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -77,9 +76,9 @@ import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
-import app.kamy.qalbuApp.ui.components.FloatingAudioBarMetrics
-import app.kamy.qalbuApp.ui.common.buildTajweedHtmlFragment
+import app.kamy.qalbuApp.ui.common.TajweedTextAlign
 import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
+import app.kamy.qalbuApp.ui.components.FloatingAudioBarMetrics
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -164,10 +163,7 @@ fun ChapterReaderScreen(
                     fontScale = state.fontScale,
                     showTranslation = state.showTranslation,
                     audioBarVisible = audioBarVisible,
-                    onPlay = { vm.onTapAyah(pageIndex) },
-                    onAiShare = { vm.openAiShare(pageIndex) },
-                    onTafsir = { verse.verseKey?.let(vm::openTafsir) },
-                    onHadith = { verse.verseKey?.let(vm::openHadith) }
+                    onPlay = { vm.onTapAyah(pageIndex) }
                 )
             }
         }
@@ -211,12 +207,26 @@ fun ChapterReaderScreen(
             }
         }
 
-        // Bottom caption — surah name + ayah (above floating audio bar)
         val surahCaptionBottom = if (audioBarVisible) {
             FloatingAudioBarMetrics.barHeight + FloatingAudioBarMetrics.bottomGap + 12.dp
         } else {
             20.dp
         }
+
+        if (state.verses.isNotEmpty()) {
+            ReaderFloatingActions(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(
+                        end = 8.dp,
+                        bottom = if (audioBarVisible) 188.dp else 128.dp
+                    ),
+                onAiShare = { vm.openAiShare(pagerState.currentPage) },
+                onTafsir = { currentVerse?.verseKey?.let(vm::openTafsir) },
+                onHadith = { currentVerse?.verseKey?.let(vm::openHadith) }
+            )
+        }
+
         currentVerse?.let { verse ->
             Column(
                 modifier = Modifier
@@ -338,75 +348,78 @@ private fun QalbuAyahPage(
     fontScale: Float,
     showTranslation: Boolean,
     audioBarVisible: Boolean,
-    onPlay: () -> Unit,
-    onAiShare: () -> Unit,
-    onTafsir: () -> Unit,
-    onHadith: () -> Unit
+    onPlay: () -> Unit
 ) {
-    val contentBottomPadding = if (audioBarVisible) 200.dp else 150.dp
     val contentTopPadding = 56.dp
+    val contentBottomPadding = if (audioBarVisible) 200.dp else 152.dp
+    val scrollState = rememberScrollState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(verse.listIdentity) {
                 detectTapGestures(onTap = { onPlay() })
-            }
+            },
+        contentAlignment = Alignment.Center
     ) {
-        BoxWithConstraints(
+        Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
                 .padding(
-                    start = 16.dp,
-                    end = 64.dp,
+                    start = 20.dp,
+                    end = 20.dp,
                     top = contentTopPadding,
                     bottom = contentBottomPadding
                 ),
-            contentAlignment = Alignment.Center
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TajweedHtmlView(
-                    htmlFragment = buildTajweedHtmlFragment(
-                        verse.textUthmaniTajweed ?: verse.textUthmani,
-                        verse.resolvedVerseNumber
-                    ),
-                    fontSizeSp = (30 * fontScale).toInt(),
-                    compact = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (showTranslation) {
-                    verse.translations?.firstOrNull()?.text?.let { translation ->
-                        val clean = translation.toVerseTranslationPlainText()
-                        if (clean.isNotEmpty()) {
-                            Text(
-                                text = clean,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = AlKhatibColors.Slate800,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+            TajweedHtmlView(
+                textUthmaniTajweed = verse.textUthmaniTajweed ?: verse.textUthmani,
+                ayahNumber = verse.resolvedVerseNumber,
+                fontSizeSp = (30 * fontScale).toInt(),
+                compact = true,
+                textAlign = TajweedTextAlign.Justify,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (showTranslation) {
+                verse.translations?.firstOrNull()?.text?.let { translation ->
+                    val clean = translation.toVerseTranslationPlainText()
+                    if (clean.isNotEmpty()) {
+                        Text(
+                            text = clean,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.35f
+                            ),
+                            color = AlKhatibColors.Slate800,
+                            textAlign = TextAlign.Justify,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
-                Spacer(Modifier.height(24.dp))
             }
         }
+    }
+}
 
+@Composable
+private fun ReaderFloatingActions(
+    modifier: Modifier = Modifier,
+    onAiShare: () -> Unit,
+    onTafsir: () -> Unit,
+    onHadith: () -> Unit
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(22.dp),
+        color = Color.White.copy(alpha = 0.94f),
+        shadowElevation = 8.dp,
+        tonalElevation = 2.dp
+    ) {
         Column(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(
-                    end = 10.dp,
-                    bottom = if (audioBarVisible) 180.dp else 120.dp
-                ),
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             ReaderSideAction(
                 icon = {
@@ -414,7 +427,7 @@ private fun QalbuAyahPage(
                         Icons.Filled.AutoAwesome,
                         contentDescription = "AI reflection",
                         tint = AlKhatibColors.Gold,
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 label = "AI",
@@ -426,7 +439,7 @@ private fun QalbuAyahPage(
                         Icons.AutoMirrored.Filled.MenuBook,
                         contentDescription = "Tafsir",
                         tint = AlKhatibColors.IndigoAccent,
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 label = "Tafsir",
@@ -438,7 +451,7 @@ private fun QalbuAyahPage(
                         Icons.Filled.Forum,
                         contentDescription = "Hadith",
                         tint = AlKhatibColors.Gold,
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                 },
                 label = "Hadith",

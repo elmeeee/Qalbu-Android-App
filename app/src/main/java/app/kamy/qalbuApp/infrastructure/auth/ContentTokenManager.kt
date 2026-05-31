@@ -14,13 +14,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 
-/**
- * Mirrors iOS Infrastructure/Networking/QFAuthManager.swift.
- *
- * Manages the **Content API** access token (OAuth2 client_credentials grant).
- * The token is cached in [SecureTokenStorage] and refreshed when expired
- * or when callers explicitly clear it after a 401.
- */
 @Singleton
 class ContentTokenManager @Inject constructor(
     @Named("oauth") private val oauthClient: OkHttpClient,

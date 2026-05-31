@@ -80,7 +80,6 @@ fun TodayScreen(
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
     )
-    // v2 key resets a bad saved state where notification prompt never appeared.
     var locationPrompted by rememberSaveable(key = "location_prompt_v2") { mutableStateOf(false) }
     var notificationsPrompted by rememberSaveable(key = "notifications_prompt_v2") { mutableStateOf(false) }
     var exactAlarmPrompted by rememberSaveable(key = "exact_alarm_prompt_v2") { mutableStateOf(false) }

@@ -54,9 +54,6 @@ import java.util.Calendar
 
 private const val DATE_ALTERNATE_MS = 4_000L
 
-/**
- * Today tab header — greeting, alternating Hijri/Gregorian date, location, account avatar.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodayHeader(

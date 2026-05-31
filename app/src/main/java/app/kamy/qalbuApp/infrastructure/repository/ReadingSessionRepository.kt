@@ -7,12 +7,6 @@ import app.kamy.qalbuApp.infrastructure.network.api.AuthV1ApiService
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Mirrors iOS Infrastructure/Services/ReadingSessionRepository.swift.
- *
- * Backs the "Continue reading" card on the Quran tab and the background
- * ReadingSessionTracker that logs scroll position to /auth/v1/reading-sessions.
- */
 @Singleton
 class ReadingSessionRepository @Inject constructor(
     private val api: AuthV1ApiService

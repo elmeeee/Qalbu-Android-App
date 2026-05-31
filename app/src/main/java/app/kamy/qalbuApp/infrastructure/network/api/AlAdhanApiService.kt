@@ -5,12 +5,6 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import kotlinx.serialization.Serializable
 
-/**
- * Al-Adhan public prayer times API (no auth, base `https://api.aladhan.com/v1`).
- * Mirrors iOS Core/Configuration/AppEndpoints.URLBuilder.alAdhanTimings.
- *
- * Method IDs follow Al-Adhan docs (Muhammadiyah/Shafi defaults wired in Phase 2).
- */
 interface AlAdhanApiService {
 
     @GET("methods")

@@ -15,10 +15,6 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.long
 
-/**
- * Backing serializer that accepts either string, int, or double from JSON and produces String.
- * Reflect API mixes id encodings across endpoints — see iOS PostAPIModels.swift `decodeFeedID`.
- */
 internal object StringFromAnyScalarSerializer : KSerializer<String> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("StringFromAnyScalar", PrimitiveKind.STRING)
@@ -38,9 +34,6 @@ internal object StringFromAnyScalarSerializer : KSerializer<String> {
     }
 }
 
-/**
- * Nullable variant for optional id fields.
- */
 internal object NullableStringFromAnyScalarSerializer : KSerializer<String?> {
     private val delegate = String.serializer().nullable
 

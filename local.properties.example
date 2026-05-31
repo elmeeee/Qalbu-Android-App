@@ -1,7 +1,6 @@
 # Local secrets for Al-Khatib / Qalbu Android.
 # Copy this file to local.properties and fill in. local.properties is gitignored.
 #
-# These mirror iOS Config/Secrets.xcconfig keys.
 
 # Quran Foundation OAuth client secrets (per environment).
 # Used for the Basic auth header on token exchange + refresh.

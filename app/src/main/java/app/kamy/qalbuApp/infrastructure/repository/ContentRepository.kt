@@ -16,12 +16,6 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Mirrors iOS Infrastructure/Services/QuranContentRepository.swift.
- *
- * In-memory cache for chapters (1h TTL — iOS APICache).
- * All calls go through [qfCall] which maps Retrofit exceptions to QFError.
- */
 @Singleton
 class ContentRepository @Inject constructor(
     private val api: ContentApiService,
