@@ -8,6 +8,9 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import kotlin.math.roundToInt
 import androidx.annotation.OptIn
 import androidx.annotation.RawRes
 import androidx.core.app.NotificationManagerCompat
@@ -34,8 +37,15 @@ class AdhanPlaybackService : MediaSessionService() {
     private var player: ExoPlayer? = null
     private var mediaSession: MediaSession? = null
     private var playbackStarted = false
+    private var volumeStopEnabled = false
     private var linkedNotificationId = -1
     private var volumeReceiver: BroadcastReceiver? = null
+    private var savedAlarmVolume: Int? = null
+    private val audioManager: AudioManager by lazy {
+        getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    }
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val enableVolumeStopRunnable = Runnable { volumeStopEnabled = true }
 
     @OptIn(UnstableApi::class)
     override fun onCreate() {
@@ -120,11 +130,6 @@ class AdhanPlaybackService : MediaSessionService() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) {
                     playbackStarted = true
-                    return
-                }
-                // Lock screen / headset pause → stop adhan (one-shot, not meant to resume).
-                if (playbackStarted && exo.playbackState == Player.STATE_READY) {
-                    releaseAndStop()
                 }
             }
         })
@@ -143,20 +148,58 @@ class AdhanPlaybackService : MediaSessionService() {
                 )
                 .build()
         )
+        boostAlarmVolume()
         exo.prepare()
         exo.play()
 
         player = exo
         mediaSession = session
+        scheduleVolumeStopListener()
+    }
+
+    private fun boostAlarmVolume() {
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+        if (maxVolume <= 0) return
+        val targetVolume = (maxVolume * ADHAN_VOLUME_FRACTION)
+            .roundToInt()
+            .coerceIn(1, maxVolume)
+        val currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+        savedAlarmVolume = currentVolume
+        if (currentVolume < targetVolume) {
+            audioManager.setStreamVolume(
+                AudioManager.STREAM_ALARM,
+                targetVolume,
+                /* flags= */ 0
+            )
+        }
+    }
+
+    private fun restoreAlarmVolume() {
+        val previousVolume = savedAlarmVolume ?: return
+        savedAlarmVolume = null
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+        if (maxVolume <= 0) return
+        audioManager.setStreamVolume(
+            AudioManager.STREAM_ALARM,
+            previousVolume.coerceIn(0, maxVolume),
+            /* flags= */ 0
+        )
+    }
+
+    private fun scheduleVolumeStopListener() {
+        unregisterVolumeStopListener()
+        volumeStopEnabled = false
+        mainHandler.removeCallbacks(enableVolumeStopRunnable)
         registerVolumeStopListener()
+        // Ignore spurious VOLUME_CHANGED broadcasts while ExoPlayer grabs audio focus.
+        mainHandler.postDelayed(enableVolumeStopRunnable, VOLUME_STOP_GRACE_MS)
     }
 
     private fun registerVolumeStopListener() {
-        unregisterVolumeStopListener()
         val filter = IntentFilter(VOLUME_CHANGED_ACTION)
         volumeReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                if (!playbackStarted) return
+                if (!playbackStarted || !volumeStopEnabled) return
                 val streamType = intent.getIntExtra(EXTRA_VOLUME_STREAM_TYPE, -1)
                 if (streamType != AudioManager.STREAM_ALARM && streamType != AudioManager.STREAM_MUSIC) {
                     return
@@ -177,6 +220,8 @@ class AdhanPlaybackService : MediaSessionService() {
     }
 
     private fun unregisterVolumeStopListener() {
+        mainHandler.removeCallbacks(enableVolumeStopRunnable)
+        volumeStopEnabled = false
         volumeReceiver?.let { receiver ->
             runCatching { unregisterReceiver(receiver) }
         }
@@ -190,16 +235,13 @@ class AdhanPlaybackService : MediaSessionService() {
     }
 
     private fun cancelLinkedNotifications() {
-        val nm = NotificationManagerCompat.from(this)
-        nm.cancel(NOTIFICATION_ID)
-        if (linkedNotificationId >= 0) {
-            nm.cancel(linkedNotificationId)
-            linkedNotificationId = -1
-        }
+        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
+        linkedNotificationId = -1
     }
 
     private fun releasePlayer() {
         unregisterVolumeStopListener()
+        restoreAlarmVolume()
         playbackStarted = false
         mediaSession?.release()
         mediaSession = null
@@ -210,6 +252,8 @@ class AdhanPlaybackService : MediaSessionService() {
     companion object {
         private const val NOTIFICATION_ID = 12_001
         private const val SESSION_ID = "QalbuAdhan"
+        private const val VOLUME_STOP_GRACE_MS = 1_500L
+        private const val ADHAN_VOLUME_FRACTION = 0.4f
         private const val EXTRA_RAW_RES = "raw_res"
         private const val EXTRA_TITLE = "title"
         private const val EXTRA_BODY = "body"
