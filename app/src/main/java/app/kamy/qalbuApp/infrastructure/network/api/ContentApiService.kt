@@ -24,7 +24,7 @@ interface ContentApiService {
         @Query("language") language: String = "en",
         @Query("translations") translations: String = "22",
         @Query("audio") audio: Int = 6,
-        @Query("fields") fields: String = "text_uthmani,text_uthmani_tajweed",
+        @Query("fields") fields: String = "text_uthmani",
         @Query("translation_fields") translationFields: String = "resource_name"
     ): RandomAyahResponse
 
@@ -34,7 +34,7 @@ interface ContentApiService {
         @Query("language") language: String = "en",
         @Query("translations") translations: String = "22",
         @Query("audio") audio: Int = 6,
-        @Query("fields") fields: String = "text_uthmani,text_uthmani_tajweed",
+        @Query("fields") fields: String = "text_uthmani",
         @Query("translation_fields") translationFields: String = "resource_name",
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = 50
@@ -46,7 +46,7 @@ interface ContentApiService {
         @Query("language") language: String = "en",
         @Query("translations") translations: String = "22",
         @Query("audio") audio: Int = 6,
-        @Query("fields") fields: String = "text_uthmani,text_uthmani_tajweed",
+        @Query("fields") fields: String = "text_uthmani",
         @Query("translation_fields") translationFields: String = "resource_name"
     ): SingleVerseResponse
 

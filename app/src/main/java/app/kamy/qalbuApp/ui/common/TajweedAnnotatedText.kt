@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.text.HtmlCompat
@@ -21,17 +21,20 @@ private val ayahEndSymbolRegex =
     Regex("<span\\b[^>]*\\bclass\\s*=\\s*['\"]?\\s*ayah-end-symbol\\s*['\"]?[^>]*>[\\s\\S]*?</span>", RegexOption.IGNORE_CASE)
 
 fun buildTajweedAnnotatedString(
-    textUthmaniTajweed: String?,
+    textUthmani: String?,
     ayahNumber: Int? = null,
     baseColor: Color = Color(0xFF0F172A),
-    markerFontSize: TextUnit? = null
+    markerFontSize: TextUnit = TextUnit.Unspecified,
+    markerFontFamily: FontFamily? = null
 ): AnnotatedString {
-    val body = textUthmaniTajweed?.sanitizeTajweedArabicHtml().orEmpty()
+    val body = textUthmani?.sanitizeTajweedArabicHtml().orEmpty()
     if (body.isEmpty()) return AnnotatedString("")
     val cleaned = stripInlineAyahEndMarkers(body, ayahNumber).ifEmpty { body }
     return buildAnnotatedString {
         appendTajweedHtml(cleaned, baseColor)
-        ayahNumber?.takeIf { it > 0 }?.let { appendAyahEndMarker(it, markerFontSize) }
+        ayahNumber?.takeIf { it > 0 }?.let {
+            appendAyahEndMarker(it, markerFontSize, markerFontFamily)
+        }
     }
 }
 
@@ -63,20 +66,22 @@ private fun AnnotatedString.Builder.appendTajweedHtml(html: String, baseColor: C
     }
 }
 
-private fun AnnotatedString.Builder.appendAyahEndMarker(ayahNumber: Int, markerFontSize: TextUnit?) {
+private fun AnnotatedString.Builder.appendAyahEndMarker(
+    ayahNumber: Int,
+    markerFontSize: TextUnit,
+    markerFontFamily: FontFamily?
+) {
     val markerColor = Color(0xFFB45309)
-    append(" ")
-    withStyle(SpanStyle(color = markerColor, fontSize = markerFontSize)) {
-        append("\u06DD")
-    }
+    append("\u2009")
     withStyle(
         SpanStyle(
             color = markerColor,
             fontSize = markerFontSize,
-            fontWeight = FontWeight.Bold
+            fontFamily = markerFontFamily
         )
     ) {
-        append(easternArabicIndicDigits(ayahNumber))
+        // U+06DD draws Eastern-Arabic digits inside the ayah rosette in Uthmani fonts.
+        append("\u06DD${easternArabicIndicDigits(ayahNumber)}")
     }
 }
 

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlaybackState
@@ -43,6 +44,7 @@ fun FloatingAudioBar(
     onToggle: () -> Unit,
     onDismiss: () -> Unit,
     onOpenPlayback: (() -> Unit)? = null,
+    reserveTrailingSpace: Dp = 0.dp,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -54,7 +56,7 @@ fun FloatingAudioBar(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(start = 16.dp, end = 16.dp + reserveTrailingSpace),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
                 containerColor = AlKhatibColors.DeepEmerald

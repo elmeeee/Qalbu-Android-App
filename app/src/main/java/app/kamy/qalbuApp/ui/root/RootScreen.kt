@@ -146,6 +146,7 @@ fun RootScreen(
                         }
                     }
                 }.takeIf { audioState.hasReaderNavigation },
+                reserveTrailingSpace = if (isReaderRoute) 52.dp else 0.dp,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()

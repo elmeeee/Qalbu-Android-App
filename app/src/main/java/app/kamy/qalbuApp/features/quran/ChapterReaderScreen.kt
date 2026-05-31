@@ -1,6 +1,11 @@
 package app.kamy.qalbuApp.features.quran
 
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -29,6 +34,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -95,6 +102,7 @@ fun ChapterReaderScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var settingsVisible by remember { mutableStateOf(false) }
+    var verseMenuExpanded by remember { mutableStateOf(false) }
 
     val pagerState = rememberPagerState(initialPage = 0) { state.verses.size }
     val currentVerse by remember {
@@ -117,6 +125,10 @@ fun ChapterReaderScreen(
         if (idx >= 0 && pagerState.currentPage != idx) {
             pagerState.scrollToPage(idx)
         }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        verseMenuExpanded = false
     }
 
     LaunchedEffect(state.publishMessage) {
@@ -214,16 +226,26 @@ fun ChapterReaderScreen(
         }
 
         if (state.verses.isNotEmpty()) {
-            ReaderFloatingActions(
+            val readerActionsBottom = FloatingAudioBarMetrics.bottomGap + 14.dp
+            ReaderVerseActionsMenu(
+                expanded = verseMenuExpanded,
+                onToggle = { verseMenuExpanded = !verseMenuExpanded },
                 modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(
-                        end = 8.dp,
-                        bottom = if (audioBarVisible) 188.dp else 128.dp
-                    ),
-                onAiShare = { vm.openAiShare(pagerState.currentPage) },
-                onTafsir = { currentVerse?.verseKey?.let(vm::openTafsir) },
-                onHadith = { currentVerse?.verseKey?.let(vm::openHadith) }
+                    .align(Alignment.BottomEnd)
+                    .navigationBarsPadding()
+                    .padding(end = 10.dp, bottom = readerActionsBottom),
+                onAiShare = {
+                    verseMenuExpanded = false
+                    vm.openAiShare(pagerState.currentPage)
+                },
+                onTafsir = {
+                    verseMenuExpanded = false
+                    currentVerse?.verseKey?.let(vm::openTafsir)
+                },
+                onHadith = {
+                    verseMenuExpanded = false
+                    currentVerse?.verseKey?.let(vm::openHadith)
+                }
             )
         }
 
@@ -351,7 +373,7 @@ private fun QalbuAyahPage(
     onPlay: () -> Unit
 ) {
     val contentTopPadding = 56.dp
-    val contentBottomPadding = if (audioBarVisible) 200.dp else 152.dp
+    val contentBottomPadding = if (audioBarVisible) 188.dp else 148.dp
     val scrollState = rememberScrollState()
 
     Box(
@@ -375,7 +397,7 @@ private fun QalbuAyahPage(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             TajweedHtmlView(
-                textUthmaniTajweed = verse.textUthmaniTajweed ?: verse.textUthmani,
+                textUthmani = verse.textUthmani,
                 ayahNumber = verse.resolvedVerseNumber,
                 fontSizeSp = (30 * fontScale).toInt(),
                 compact = true,
@@ -402,96 +424,115 @@ private fun QalbuAyahPage(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ReaderFloatingActions(
-    modifier: Modifier = Modifier,
+private fun ReaderVerseActionsMenu(
+    expanded: Boolean,
+    onToggle: () -> Unit,
     onAiShare: () -> Unit,
     onTafsir: () -> Unit,
-    onHadith: () -> Unit
+    onHadith: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Surface(
+    Column(
         modifier = modifier,
-        shape = RoundedCornerShape(22.dp),
-        color = Color.White.copy(alpha = 0.94f),
-        shadowElevation = 8.dp,
-        tonalElevation = 2.dp
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
         ) {
-            ReaderSideAction(
-                icon = {
-                    Icon(
-                        Icons.Filled.AutoAwesome,
-                        contentDescription = "AI reflection",
-                        tint = AlKhatibColors.Gold,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                label = "AI",
-                onClick = onAiShare
-            )
-            ReaderSideAction(
-                icon = {
-                    Icon(
-                        Icons.AutoMirrored.Filled.MenuBook,
-                        contentDescription = "Tafsir",
-                        tint = AlKhatibColors.IndigoAccent,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                label = "Tafsir",
-                onClick = onTafsir
-            )
-            ReaderSideAction(
-                icon = {
-                    Icon(
-                        Icons.Filled.Forum,
-                        contentDescription = "Hadith",
-                        tint = AlKhatibColors.Gold,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                label = "Hadith",
-                onClick = onHadith
-            )
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                ReaderCompactMenuItem(
+                    icon = {
+                        Icon(
+                            Icons.Filled.AutoAwesome,
+                            contentDescription = null,
+                            tint = AlKhatibColors.Gold,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    label = "AI",
+                    onClick = onAiShare
+                )
+                ReaderCompactMenuItem(
+                    icon = {
+                        Icon(
+                            Icons.AutoMirrored.Filled.MenuBook,
+                            contentDescription = null,
+                            tint = AlKhatibColors.IndigoAccent,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    label = "Tafsir",
+                    onClick = onTafsir
+                )
+                ReaderCompactMenuItem(
+                    icon = {
+                        Icon(
+                            Icons.Filled.Forum,
+                            contentDescription = null,
+                            tint = AlKhatibColors.Gold,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    label = "Hadith",
+                    onClick = onHadith
+                )
+            }
+        }
+
+        Surface(
+            onClick = onToggle,
+            shape = CircleShape,
+            color = Color.White.copy(alpha = 0.96f),
+            shadowElevation = 4.dp,
+            modifier = Modifier.size(40.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.Close else Icons.Filled.AutoStories,
+                    contentDescription = if (expanded) "Close verse actions" else "Study tools",
+                    tint = if (expanded) AlKhatibColors.Slate800 else AlKhatibColors.DeepEmerald,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ReaderSideAction(
+private fun ReaderCompactMenuItem(
     icon: @Composable () -> Unit,
     label: String,
-    onClick: () -> Unit,
-    iconBackground: Color = AlKhatibColors.LightGrey
+    onClick: () -> Unit
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(4.dp)
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White.copy(alpha = 0.96f),
+        shadowElevation = 3.dp
     ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(iconBackground),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             icon()
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = AlKhatibColors.Slate800
+            )
         }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontSize = 10.sp,
-            color = AlKhatibColors.Slate500,
-            maxLines = 1
-        )
     }
 }
 

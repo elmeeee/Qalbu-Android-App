@@ -96,7 +96,7 @@ fun TodayVerseOfDaySection(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     TajweedHtmlView(
-                        textUthmaniTajweed = verse.textUthmaniTajweed ?: verse.textUthmani,
+                        textUthmani = verse.textUthmani,
                         ayahNumber = verse.resolvedVerseNumber,
                         fontSizeSp = 28,
                         compact = true,
