@@ -100,7 +100,7 @@ object DailyVerseNotificationScheduler {
 
         val resolved = snapshot ?: DailyVerseSnapshotStore.loadForToday(context)
         val body = resolved?.notificationBody()
-            ?: "Open Qalbu to read today's verse."
+            ?: context.getString(R.string.daily_verse_notif_fallback)
 
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -117,7 +117,7 @@ object DailyVerseNotificationScheduler {
         )
         val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Your verse for today")
+            .setContentTitle(context.getString(R.string.daily_verse_notif_title))
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(pending)

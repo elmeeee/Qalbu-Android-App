@@ -3,6 +3,7 @@ package app.kamy.qalbuApp.domain.share
 import app.kamy.qalbuApp.domain.model.HadithReference
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.infrastructure.ai.AiReflectionRepository
+import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Date
@@ -12,7 +13,8 @@ import javax.inject.Singleton
 @Singleton
 class VerseShareTextComposer @Inject constructor(
     private val contentRepository: ContentRepository,
-    private val aiReflection: AiReflectionRepository
+    private val aiReflection: AiReflectionRepository,
+    private val appLanguageStore: AppLanguageStore
 ) {
     private val shareTextCache = LinkedHashMap<String, String>()
     private val shareTafsirCache = LinkedHashMap<String, String>()
@@ -124,7 +126,7 @@ class VerseShareTextComposer @Inject constructor(
                     .hadiths
                     .orEmpty()
                     .take(3)
-                    .joinToString("\n\n") { formatHadithForPrompt(it) }
+                    .joinToString("\n\n") { formatHadithForPrompt(it, appLanguageStore.current().apiCode) }
                     .take(1_200)
             }.getOrNull()
         }
@@ -148,24 +150,26 @@ class VerseShareTextComposer @Inject constructor(
         val hadithText = hadith?.replace("\n", " ")?.trim().orEmpty()
         val sourceName = verse.translations?.firstOrNull()?.resourceName?.trim().orEmpty()
 
+        val outputLanguage = appLanguageStore.current().aiPromptLanguage
         val system = """
             You write concise Islamic reflections for social sharing.
             Return plain text only (no JSON, no markdown code fences).
             Keep aqidah-safe and avoid inventing hadith references.
             Stay faithful to the provided verse, tafsir, and hadith context.
+            Write all output in $outputLanguage.
         """.trimIndent()
 
         val user = """
             Write TWO sections in plain text (no JSON, no code fences):
 
-            SECTION 1 — REFLECTION (4-6 short lines, English):
+            SECTION 1 — REFLECTION (4-6 short lines, $outputLanguage):
             Focus on practical heart-check and behavior.
             Do not include the verse quote, reference line, hashtags, or the dua header.
             Keep under 70 words.
             When citing hadith, use only the hadith context below (collection/number if present).
             Do not invent facts outside the given verse + tafsir + hadith.
 
-            SECTION 2 — DUA (English, 1-2 short sentences only):
+            SECTION 2 — DUA ($outputLanguage, 1-2 short sentences only):
             Start section 2 with exactly this line on its own:
             🤲 *Ya Allah,*
             Then write a fresh, personalized supplication tied to this verse (under 35 words).
@@ -191,12 +195,14 @@ class VerseShareTextComposer @Inject constructor(
         tafsir: String?,
         hadith: String?
     ): String? {
+        val outputLanguage = appLanguageStore.current().aiPromptLanguage
         val system = """
             You write short Islamic supplications for social sharing.
             Return plain text only. Stay faithful to the given verse context.
+            Write in $outputLanguage.
         """.trimIndent()
         val user = """
-            Write only a DUA block in English.
+            Write only a DUA block in $outputLanguage.
             Start with exactly:
             🤲 *Ya Allah,*
             Then 1-2 short personalized sentences (under 35 words) based on the verse.
@@ -445,10 +451,11 @@ class VerseShareTextComposer @Inject constructor(
             return verseKey
         }
 
-        private fun formatHadithForPrompt(hadith: HadithReference): String {
+        private fun formatHadithForPrompt(hadith: HadithReference, preferredLang: String): String {
             val body = hadith.hadith
-                ?.firstOrNull { it.lang.equals("en", ignoreCase = true) }
+                ?.firstOrNull { it.lang.equals(preferredLang, ignoreCase = true) }
                 ?.body
+                ?: hadith.hadith?.firstOrNull { it.lang.equals("en", ignoreCase = true) }?.body
                 ?: hadith.hadith?.firstOrNull()?.body
             val citation = listOfNotNull(
                 hadith.collection?.takeIf { it.isNotBlank() },

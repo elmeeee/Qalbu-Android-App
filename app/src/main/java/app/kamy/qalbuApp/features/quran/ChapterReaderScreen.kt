@@ -74,6 +74,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.features.share.AiShareSheet
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
@@ -108,7 +110,7 @@ fun ChapterReaderScreen(
     val currentVerse by remember {
         derivedStateOf { state.verses.getOrNull(pagerState.currentPage) }
     }
-    val surahTitle = state.chapterDisplayName ?: "Surah ${state.chapterNumber}"
+    val surahTitle = state.chapterDisplayName ?: stringResource(R.string.surah_number, state.chapterNumber)
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
@@ -204,7 +206,7 @@ fun ChapterReaderScreen(
                 IconButton(onClick = onBack) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.back),
                         tint = AlKhatibColors.Slate900
                     )
                 }
@@ -212,7 +214,7 @@ fun ChapterReaderScreen(
                 IconButton(onClick = { settingsVisible = true }) {
                     Icon(
                         Icons.Filled.Settings,
-                        contentDescription = "Reading settings",
+                        contentDescription = stringResource(R.string.reading_settings_a11y),
                         tint = AlKhatibColors.Slate900
                     )
                 }
@@ -358,7 +360,7 @@ fun ChapterReaderScreen(
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, draft)
             }
-            context.startActivity(Intent.createChooser(intent, "Share reflection"))
+            context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_reflection)))
         },
         onPublish = { vm.publishAiReflection() }
     )
@@ -469,7 +471,7 @@ private fun ReaderVerseActionsMenu(
                             modifier = Modifier.size(16.dp)
                         )
                     },
-                    label = "Tafsir",
+                    label = stringResource(R.string.tafsir),
                     onClick = onTafsir
                 )
                 ReaderCompactMenuItem(
@@ -481,7 +483,7 @@ private fun ReaderVerseActionsMenu(
                             modifier = Modifier.size(16.dp)
                         )
                     },
-                    label = "Hadith",
+                    label = stringResource(R.string.hadith),
                     onClick = onHadith
                 )
             }
@@ -495,9 +497,11 @@ private fun ReaderVerseActionsMenu(
             modifier = Modifier.size(40.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
+                val closeActionsLabel = stringResource(R.string.close_verse_actions)
+                val studyToolsLabel = stringResource(R.string.study_tools)
                 Icon(
                     imageVector = if (expanded) Icons.Filled.Close else Icons.Filled.AutoStories,
-                    contentDescription = if (expanded) "Close verse actions" else "Study tools",
+                    contentDescription = if (expanded) closeActionsLabel else studyToolsLabel,
                     tint = if (expanded) AlKhatibColors.Slate800 else AlKhatibColors.DeepEmerald,
                     modifier = Modifier.size(20.dp)
                 )
@@ -556,12 +560,12 @@ private fun ReaderSettingsSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Reading settings",
+                stringResource(R.string.reading_settings),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = AlKhatibColors.DeepEmerald
             )
-            Text("Text size", style = MaterialTheme.typography.labelLarge, color = AlKhatibColors.Slate500)
+            Text(stringResource(R.string.text_size), style = MaterialTheme.typography.labelLarge, color = AlKhatibColors.Slate500)
             Slider(
                 value = state.fontScale,
                 onValueChange = onFontScaleChange,
@@ -569,12 +573,12 @@ private fun ReaderSettingsSheet(
                 steps = 9
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Show translation", modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
+                Text(stringResource(R.string.show_translation), modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
                 Switch(checked = state.showTranslation, onCheckedChange = onToggleTranslation)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Continuous play",
+                    stringResource(R.string.continuous_play),
                     modifier = Modifier.weight(1f),
                     color = AlKhatibColors.Slate900
                 )
@@ -587,7 +591,7 @@ private fun ReaderSettingsSheet(
                     }
                 )
             }
-            Text("Reciter", style = MaterialTheme.typography.labelLarge, color = AlKhatibColors.Slate500)
+            Text(stringResource(R.string.reciter), style = MaterialTheme.typography.labelLarge, color = AlKhatibColors.Slate500)
             if (state.recitations.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally),

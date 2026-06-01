@@ -27,6 +27,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
@@ -67,7 +69,7 @@ fun AiShareSheet(
                     tint = AlKhatibColors.DeepEmerald
                 )
                 Text(
-                    text = "AI reflection",
+                    text = stringResource(R.string.ai_reflection),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = AlKhatibColors.DeepEmerald,
@@ -75,7 +77,7 @@ fun AiShareSheet(
                 )
             }
             Text(
-                text = "Draft uses tafsir & hadith + AI. Edit, then share or publish.",
+                text = stringResource(R.string.ai_share_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -103,7 +105,7 @@ fun AiShareSheet(
                         .fillMaxWidth()
                         .heightIn(min = 160.dp, max = 320.dp),
                     enabled = !loading,
-                    placeholder = { Text("Your reflection will appear here…") }
+                    placeholder = { Text(stringResource(R.string.ai_share_placeholder)) }
                 )
                 if (loading) {
                     Row(
@@ -117,7 +119,7 @@ fun AiShareSheet(
                             strokeWidth = 2.dp
                         )
                         Text(
-                            text = "Regenerating…",
+                            text = stringResource(R.string.regenerating),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -134,7 +136,7 @@ fun AiShareSheet(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Filled.Refresh, contentDescription = null)
-                    Text("Regenerate", modifier = Modifier.padding(start = 6.dp))
+                    Text(stringResource(R.string.regenerate), modifier = Modifier.padding(start = 6.dp))
                 }
                 FilledTonalButton(
                     onClick = { if (draft.isNotBlank()) onShare(draft) },
@@ -142,7 +144,7 @@ fun AiShareSheet(
                     modifier = Modifier.weight(1f)
                 ) {
                     Icon(Icons.Filled.Share, contentDescription = null)
-                    Text("Share", modifier = Modifier.padding(start = 6.dp))
+                    Text(stringResource(R.string.share), modifier = Modifier.padding(start = 6.dp))
                 }
             }
             if (showPublish && onPublish != null) {
@@ -157,14 +159,18 @@ fun AiShareSheet(
                             strokeWidth = 2.dp
                         )
                     }
-                    Text(if (isPublishing) "Publishing…" else "Publish to Reflect")
+                    val publishingLabel = stringResource(R.string.publishing)
+                    val publishLabel = stringResource(R.string.publish_to_reflect)
+                    Text(
+                        if (isPublishing) publishingLabel else publishLabel
+                    )
                 }
             }
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             ) {
-                Text("Close")
+                Text(stringResource(R.string.close))
             }
         }
     }

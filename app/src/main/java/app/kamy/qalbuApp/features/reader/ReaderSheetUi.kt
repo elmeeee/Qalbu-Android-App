@@ -33,6 +33,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -280,7 +282,7 @@ fun ReaderErrorState(
             textAlign = TextAlign.Center
         )
         Button(onClick = onRetry) {
-            Text("Try again")
+            Text(stringResource(R.string.try_again))
         }
     }
 }

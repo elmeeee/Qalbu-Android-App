@@ -53,6 +53,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -126,7 +128,7 @@ fun ReflectScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(state.error.orEmpty(), color = Color.White)
-                    TextButton(onClick = { vm.loadPosts(reset = true) }) { Text("Retry", color = AlKhatibColors.GoldBright) }
+                    TextButton(onClick = { vm.loadPosts(reset = true) }) { Text(stringResource(R.string.retry), color = AlKhatibColors.GoldBright) }
                 }
             else -> ReelFeed(state = state, vm = vm, onOpenVerse = onOpenVerse)
         }
@@ -263,7 +265,7 @@ private fun SegmentSwitcher(
                 inactiveContainerColor = Color.Transparent,
                 inactiveContentColor = Color.White.copy(alpha = 0.55f)
             )
-        ) { Text("All Reflect") }
+        ) { Text(stringResource(R.string.reflect_all)) }
         SegmentedButton(
             selected = segment == ReflectSegment.MINE,
             onClick = { onSelect(ReflectSegment.MINE) },
@@ -274,7 +276,7 @@ private fun SegmentSwitcher(
                 inactiveContainerColor = Color.Transparent,
                 inactiveContentColor = Color.White.copy(alpha = 0.55f)
             )
-        ) { Text("My Reflect") }
+        ) { Text(stringResource(R.string.reflect_mine)) }
     }
 }
 
@@ -438,6 +440,6 @@ private fun SignInGate(onSignIn: () -> Unit) {
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(20.dp))
-        Button(onClick = onSignIn) { Text("Sign in with Quran Foundation") }
+        Button(onClick = onSignIn) { Text(stringResource(R.string.sign_in_qf)) }
     }
 }

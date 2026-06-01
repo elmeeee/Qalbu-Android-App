@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
+import app.kamy.qalbuApp.R
 
 object NotificationChannels {
     const val DAILY_VERSE = "daily_verse"
@@ -18,41 +19,41 @@ object NotificationChannels {
         manager.createNotificationChannel(
             NotificationChannel(
                 DAILY_VERSE,
-                "Daily verse",
+                context.getString(R.string.channel_daily_verse),
                 NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = "Morning Quran verse reminder" }
+            ).apply { description = context.getString(R.string.channel_daily_verse_desc) }
         )
         manager.createNotificationChannel(
             NotificationChannel(
                 PRAYER,
-                "Prayer times",
+                context.getString(R.string.channel_prayer),
                 NotificationManager.IMPORTANCE_HIGH
-            ).apply { description = "Adzan and night prayer reminders" }
+            ).apply { description = context.getString(R.string.channel_prayer_desc) }
         )
         manager.createNotificationChannel(
             NotificationChannel(
                 SUNNAH,
-                "Sunnah reading",
+                context.getString(R.string.channel_sunnah),
                 NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = "Weekly surah reading reminders" }
+            ).apply { description = context.getString(R.string.channel_sunnah_desc) }
         )
         manager.createNotificationChannel(
             NotificationChannel(
                 ADHAN_PLAYBACK,
-                "Adhan playback",
+                context.getString(R.string.adhan_playback_title),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Plays the call to prayer — press volume up or down to stop"
+                description = context.getString(R.string.adhan_playback_body)
                 setSound(null, null)
             }
         )
         manager.createNotificationChannel(
             NotificationChannel(
                 MEDIA_PLAYBACK,
-                context.getString(app.kamy.qalbuApp.R.string.recitation_notification_channel),
+                context.getString(R.string.recitation_notification_channel),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Quran recitation controls on lock screen and in background"
+                description = context.getString(R.string.recitation_notification_channel)
                 setSound(null, null)
             }
         )

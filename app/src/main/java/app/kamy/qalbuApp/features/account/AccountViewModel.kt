@@ -10,6 +10,7 @@ import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
+import app.kamy.qalbuApp.core.locale.AppLanguage
 import app.kamy.qalbuApp.infrastructure.audio.AdhanPreviewPlayer
 import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
@@ -19,13 +20,16 @@ import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
 import app.kamy.qalbuApp.infrastructure.preferences.AdhanPreferencesStore
+import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseNotificationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
+import app.kamy.qalbuApp.domain.share.VerseShareTextComposer
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
+import app.kamy.qalbuApp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,6 +79,8 @@ data class AccountUiState(
     val yasinReminderEnabled: Boolean = true,
     val kahfReminderEnabled: Boolean = true,
     val showAdhanSheet: Boolean = false,
+    val showLanguageSheet: Boolean = false,
+    val appLanguage: AppLanguage = AppLanguage.ENGLISH,
     val selectedAdhanVoice: AdhanVoice = AdhanVoice.DEFAULT,
     val previewingAdhanVoiceId: String? = null
 ) {
@@ -100,7 +106,9 @@ class AccountViewModel @Inject constructor(
     private val notificationStore: DailyVerseNotificationStore,
     private val prayerNotificationPrefs: PrayerNotificationPreferencesStore,
     private val adhanPrefs: AdhanPreferencesStore,
-    private val adhanPreviewPlayer: AdhanPreviewPlayer
+    private val adhanPreviewPlayer: AdhanPreviewPlayer,
+    private val appLanguageStore: AppLanguageStore,
+    private val shareComposer: VerseShareTextComposer
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountUiState(isSignedIn = userSession.isSignedIn.value))
@@ -221,9 +229,33 @@ class AccountViewModel @Inject constructor(
                 dailyVerseEnabled = notificationStore.isEnabled(),
                 reminderHour = notificationStore.morningHour(),
                 reminderMinute = notificationStore.morningMinute(),
-                reminderTimeLabel = notificationStore.formattedMorningTime()
+                reminderTimeLabel = notificationStore.formattedMorningTime(),
+                appLanguage = appLanguageStore.current()
             )
         }
+    }
+
+    fun openLanguageSheet() {
+        _state.update { it.copy(showLanguageSheet = true) }
+    }
+
+    fun closeLanguageSheet() {
+        _state.update { it.copy(showLanguageSheet = false) }
+    }
+
+    fun setAppLanguage(language: AppLanguage) {
+        if (language == appLanguageStore.current()) {
+            closeLanguageSheet()
+            return
+        }
+        appLanguageStore.set(language)
+        contentRepository.clearCache()
+        shareComposer.clearCaches()
+        viewModelScope.launch {
+            PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+            DailyVerseNotificationScheduler.reschedule(appContext)
+        }
+        _state.update { it.copy(appLanguage = language, showLanguageSheet = false) }
     }
 
     fun fetchProfile() {
@@ -305,7 +337,9 @@ class AccountViewModel @Inject constructor(
             runCatching { contentRepository.getTranslations() }
                 .onSuccess { list ->
                     val sorted = list.sortedWith(
-                        compareByDescending<QFTranslation> { it.languageName.equals("english", true) }
+                        compareByDescending<QFTranslation> {
+                            it.languageName.equals(preferredTranslationLanguageName(), true)
+                        }
                             .thenBy { it.languageName }
                             .thenBy { it.authorName }
                     )
@@ -321,7 +355,7 @@ class AccountViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             translationsLoading = false,
-                            translationsError = t.message ?: "Failed to load translators"
+                            translationsError = t.message ?: appContext.getString(R.string.failed_load_translators)
                         )
                     }
                 }
@@ -427,28 +461,43 @@ class AccountViewModel @Inject constructor(
 
     fun notificationSummary(state: AccountUiState = _state.value): String {
         val labels = buildList {
-            if (state.dailyVerseEnabled) add("Daily verse")
+            if (state.dailyVerseEnabled) add(appContext.getString(R.string.notif_summary_daily_verse))
             val enabledPrayers = PrayerType.ADZAN_NOTIFICATION_PRAYERS
                 .filter { state.isPrayerNotificationEnabled(it) }
-                .map { it.aladhanKey }
+                .map { appContext.getString(prayerNameRes(it)) }
             when {
                 enabledPrayers.size == PrayerType.ADZAN_NOTIFICATION_PRAYERS.size ->
-                    add("Prayer")
+                    add(appContext.getString(R.string.notif_summary_prayer))
                 enabledPrayers.isNotEmpty() ->
                     add(enabledPrayers.joinToString(", "))
             }
-            if (state.imsakEnabled) add("Imsak")
-            if (state.midnightEnabled) add("Midnight")
-            if (state.firstThirdEnabled) add("1st third")
-            if (state.tahajudEnabled) add("Tahajud")
-            if (state.yasinReminderEnabled) add("Yasin")
-            if (state.kahfReminderEnabled) add("Al-Kahf")
+            if (state.imsakEnabled) add(appContext.getString(R.string.notif_summary_imsak))
+            if (state.midnightEnabled) add(appContext.getString(R.string.notif_summary_midnight))
+            if (state.firstThirdEnabled) add(appContext.getString(R.string.notif_summary_first_third))
+            if (state.tahajudEnabled) add(appContext.getString(R.string.notif_summary_tahajud))
+            if (state.yasinReminderEnabled) add(appContext.getString(R.string.notif_summary_yasin))
+            if (state.kahfReminderEnabled) add(appContext.getString(R.string.notif_summary_kahf))
         }
         return when {
-            labels.isEmpty() -> "All reminders off"
-            labels.size >= 6 -> "${labels.size} reminders on"
+            labels.isEmpty() -> appContext.getString(R.string.notif_summary_all_off)
+            labels.size >= 6 -> appContext.getString(R.string.notif_summary_count, labels.size)
             else -> labels.joinToString(" · ")
         }
+    }
+
+    private fun preferredTranslationLanguageName(): String = when (appLanguageStore.current()) {
+        AppLanguage.INDONESIAN -> "indonesian"
+        AppLanguage.MALAY -> "malay"
+        AppLanguage.ENGLISH -> "english"
+    }
+
+    private fun prayerNameRes(type: PrayerType): Int = when (type) {
+        PrayerType.FAJR -> R.string.prayer_fajr
+        PrayerType.DHUHR -> R.string.prayer_dhuhr
+        PrayerType.ASR -> R.string.prayer_asr
+        PrayerType.MAGHRIB -> R.string.prayer_maghrib
+        PrayerType.ISHA -> R.string.prayer_isha
+        else -> R.string.prayer_fajr
     }
 
     fun filteredTranslations(): List<QFTranslation> {

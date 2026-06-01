@@ -22,6 +22,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,7 +58,7 @@ fun HadithSheet(
         ReaderKnowledgeSheetBackground(
             modifier = Modifier.fillMaxHeight(0.92f)
         ) {
-            ReaderSheetTopBar(title = "Hadith", onDone = onDismiss)
+            ReaderSheetTopBar(title = stringResource(R.string.hadith), onDone = onDismiss)
             VerseContextHeader(
                 verseReference = verseReference,
                 icon = Icons.Filled.Forum,
@@ -76,14 +78,14 @@ fun HadithSheet(
                 }
                 error != null -> ReaderSheetScrollBody {
                     ReaderErrorState(
-                        title = "Couldn't load hadith",
+                        title = stringResource(R.string.hadith_load_error),
                         description = error,
                         onRetry = onReload
                     )
                 }
                 empty -> ReaderSheetScrollBody {
                     ReaderEmptyState(
-                        title = "No hadith here",
+                        title = stringResource(R.string.hadith_empty),
                         description = "No hadith references are linked to this ayah yet.",
                         icon = Icons.Filled.Forum
                     )
@@ -106,7 +108,7 @@ fun HadithSheet(
                                         color = AlKhatibColors.DeepEmerald
                                     )
                                 } else {
-                                    Text("Load more", fontWeight = FontWeight.SemiBold)
+                                    Text(stringResource(R.string.load_more), fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }

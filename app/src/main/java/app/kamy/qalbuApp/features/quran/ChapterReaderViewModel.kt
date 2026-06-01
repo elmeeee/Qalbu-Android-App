@@ -3,6 +3,7 @@ package app.kamy.qalbuApp.features.quran
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.core.config.AppConfig
 import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
@@ -23,6 +24,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -78,6 +81,7 @@ enum class AyahPlaybackMode {
 
 @HiltViewModel
 class ChapterReaderViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val audioPlayer: AudioPlayerController,
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,
@@ -490,7 +494,7 @@ class ChapterReaderViewModel @Inject constructor(
                 reflectRepository.createReflectionPost(body, verseKey, authorId, idempotencyKey)
             }.onSuccess {
                 _state.update {
-                    it.copy(isPublishing = false, publishMessage = "Published to Reflect")
+                    it.copy(isPublishing = false, publishMessage = appContext.getString(R.string.published_to_reflect))
                 }
             }.onFailure { t ->
                 userSession.invalidateIfAuthenticationFailure(t)

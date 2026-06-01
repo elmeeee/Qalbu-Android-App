@@ -40,6 +40,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
@@ -411,8 +413,8 @@ fun QuranChapterSearchBar(
     onQueryChange: (String) -> Unit,
     onClear: () -> Unit,
     onFocusChange: (Boolean) -> Unit,
-    onDismiss: () -> Unit = {},
     modifier: Modifier = Modifier,
+    onDismiss: () -> Unit = {},
     enabled: Boolean = true,
     focusRequester: FocusRequester = remember { FocusRequester() },
     placeholder: String = "Search surah, number, or place…"
@@ -615,14 +617,14 @@ fun QuranSearchEmptyState(
         }
         Spacer(Modifier.height(16.dp))
         Text(
-            text = "No surah found",
+            text = stringResource(R.string.no_matches),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(6.dp))
         Text(
-            text = "Nothing matches “${query.normalizedSearchQuery()}”. Try a surah number, Arabic name, or “Makkah” / “Madinah”.",
+            text = stringResource(R.string.search_empty_message, query.normalizedSearchQuery()),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

@@ -1,6 +1,7 @@
 package app.kamy.qalbuApp.features.account
 
 import android.app.Activity
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -63,6 +64,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -79,6 +81,7 @@ import app.kamy.qalbuApp.design.components.AlKhatibSettingsNavigationRow
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsToggleRow
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
+import app.kamy.qalbuApp.core.locale.AppLanguage
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import app.kamy.qalbuApp.domain.adhan.AdhanVoice
 import app.kamy.qalbuApp.domain.adhan.AdhanVoiceCatalog
@@ -99,6 +102,7 @@ fun AccountScreen(
 ) {
     val vm: AccountViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+    val context = LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     var showNotificationSettings by rememberSaveable { mutableStateOf(false) }
 
@@ -206,6 +210,17 @@ fun AccountScreen(
             onDismiss = vm::closeAdhanSheet
         )
     }
+
+    if (state.showLanguageSheet) {
+        LanguageSheet(
+            selected = state.appLanguage,
+            onSelect = { language ->
+                vm.setAppLanguage(language)
+                (context as? ComponentActivity)?.recreate()
+            },
+            onDismiss = vm::closeLanguageSheet
+        )
+    }
 }
 
 @Composable
@@ -229,7 +244,7 @@ private fun AccountSettingsContent(
             IconButton(onClick = onBack) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -244,49 +259,55 @@ private fun AccountSettingsContent(
             onSignIn = onSignIn
         )
 
-        SettingsSectionLabel("General")
+        SettingsSectionLabel(stringResource(R.string.general))
         AlKhatibSettingsGroup {
             AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.Translate,
+                title = stringResource(R.string.language_settings_title),
+                subtitle = stringResource(state.appLanguage.labelRes),
+                onClick = { vm.openLanguageSheet() }
+            )
+            AlKhatibSettingsNavigationRow(
                 icon = Icons.Filled.TextFields,
-                title = "Font size",
-                subtitle = "Adjust Arabic & translation",
+                title = stringResource(R.string.font_size),
+                subtitle = stringResource(R.string.font_size_subtitle),
                 onClick = { vm.openFontScale() }
             )
         }
 
-        SettingsSectionLabel("Prayer settings")
+        SettingsSectionLabel(stringResource(R.string.prayer_settings))
         AlKhatibSettingsGroup {
             AlKhatibSettingsNavigationRow(
                 icon = Icons.Filled.Schedule,
-                title = "Prayer calculation method",
+                title = stringResource(R.string.prayer_calculation_method),
                 subtitle = state.prayerMethod.organization,
                 onClick = { vm.togglePrayerSheet(true) }
             )
             AlKhatibSettingsNavigationRow(
                 icon = Icons.AutoMirrored.Filled.VolumeUp,
-                title = "Adhan voice",
+                title = stringResource(R.string.adhan_voice),
                 subtitle = state.selectedAdhanVoice.displayName,
                 onClick = { vm.openAdhanSheet() }
             )
             AlKhatibSettingsToggleRow(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = "Show translation",
+                title = stringResource(R.string.show_translation),
                 checked = state.showTranslation,
                 onCheckedChange = vm::setShowTranslation
             )
             AlKhatibSettingsNavigationRow(
                 icon = Icons.Filled.Translate,
-                title = "Translator",
-                subtitle = state.selectedTranslationName.ifBlank { "Tap to choose translation source" },
+                title = stringResource(R.string.translator),
+                subtitle = state.selectedTranslationName.ifBlank { stringResource(R.string.translator_hint) },
                 onClick = { vm.openTranslator() }
             )
         }
 
-        SettingsSectionLabel("Notifications")
+        SettingsSectionLabel(stringResource(R.string.notifications))
         AlKhatibSettingsGroup {
             AlKhatibSettingsNavigationRow(
                 icon = Icons.Filled.Notifications,
-                title = "Reminders",
+                title = stringResource(R.string.reminders),
                 subtitle = vm.notificationSummary(state),
                 onClick = onOpenNotifications
             )
@@ -303,7 +324,7 @@ private fun AccountSettingsContent(
                 enabled = !state.authBusy,
                 shape = MaterialTheme.shapes.large
             ) {
-                Text("Sign out")
+                Text(stringResource(R.string.sign_out))
             }
         }
         Spacer(Modifier.height(AlKhatibSpacing.xl))
@@ -321,9 +342,10 @@ private fun ProfileHeader(
     onSignIn: () -> Unit
 ) {
     val avatarUrl = profile?.preferredAvatarUrl ?: sessionAvatarUrl
+    val loadingLabel = stringResource(R.string.loading)
     val displayTitle = profile?.displayTitle
         ?: sessionDisplayName
-        ?: if (isLoading) "Loading…" else null
+        ?: if (isLoading) loadingLabel else null
     val username = profile?.username ?: sessionUsername
     AlKhatibCard(
         modifier = Modifier.fillMaxWidth(),
@@ -346,7 +368,7 @@ private fun ProfileHeader(
             if (avatarUrl != null) {
                 AsyncImage(
                     model = avatarUrl,
-                    contentDescription = displayTitle ?: "Profile photo",
+                    contentDescription = displayTitle ?: stringResource(R.string.profile_photo),
                     modifier = Modifier.fillMaxSize().clip(CircleShape)
                 )
             } else {
@@ -357,7 +379,7 @@ private fun ProfileHeader(
         Column(Modifier.weight(1f)) {
             if (isSignedIn) {
                 Text(
-                    text = displayTitle ?: "Signed in",
+                    text = displayTitle ?: stringResource(R.string.signed_in),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = AlKhatibColors.DeepEmerald
@@ -378,13 +400,13 @@ private fun ProfileHeader(
                 }
             } else {
                 Text(
-                    text = "Sync Reflections",
+                    text = stringResource(R.string.sync_reflections),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = AlKhatibColors.DeepEmerald
                 )
                 Text(
-                    text = "Sign in to back up your reflections and join the community.",
+                    text = stringResource(R.string.sign_in_prompt),
                     style = MaterialTheme.typography.bodySmall,
                     color = AlKhatibColors.Slate500
                 )
@@ -392,7 +414,7 @@ private fun ProfileHeader(
                 Button(onClick = onSignIn) {
                     Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Sign in")
+                    Text(stringResource(R.string.sign_in))
                 }
             }
         }
@@ -444,7 +466,7 @@ private fun TranslatorSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "Choose translator",
+                stringResource(R.string.choose_translator),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = AlKhatibColors.DeepEmerald
@@ -452,22 +474,22 @@ private fun TranslatorSheet(
             OutlinedTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                placeholder = { Text("Search by name, author, or language", color = AlKhatibColors.Slate500) },
+                placeholder = { Text(stringResource(R.string.search_translator_placeholder), color = AlKhatibColors.Slate500) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions.Default,
                 singleLine = true,
                 colors = fieldColors
             )
             when {
-                isLoading -> Text("Loading translators…", color = AlKhatibColors.Slate500)
+                isLoading -> Text(stringResource(R.string.loading_translators), color = AlKhatibColors.Slate500)
                 error != null -> {
                     Text(error, color = AlKhatibColors.Danger)
                     TextButton(onClick = onRetry) {
-                        Text("Try again", color = AlKhatibColors.Teal)
+                        Text(stringResource(R.string.try_again), color = AlKhatibColors.Teal)
                     }
                 }
                 translations.isEmpty() -> {
-                    Text("No translators found.", color = AlKhatibColors.Slate500)
+                    Text(stringResource(R.string.no_translators), color = AlKhatibColors.Slate500)
                 }
                 else -> {
                     translations.forEach { t ->
@@ -530,13 +552,13 @@ private fun ReminderTimeSheet(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "Reminder time",
+                stringResource(R.string.reminder_time_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = AlKhatibColors.DeepEmerald
             )
             Text(
-                "Choose when you want your daily verse reminder.",
+                stringResource(R.string.reminder_time_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = AlKhatibColors.Slate500
             )
@@ -546,10 +568,10 @@ private fun ReminderTimeSheet(
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel", color = AlKhatibColors.Slate500)
+                    Text(stringResource(R.string.cancel), color = AlKhatibColors.Slate500)
                 }
                 TextButton(onClick = { onSave(timeState.hour, timeState.minute) }) {
-                    Text("Save", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.save), color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -579,9 +601,9 @@ private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismi
     val sheetState = rememberModalBottomSheetState()
     AlKhatibModalBottomSheet(onDismiss, sheetState) {
         Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("Font size", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald)
+            Text(stringResource(R.string.font_size), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald)
             Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ", fontSize = (26 * scale).sp, color = AlKhatibColors.Slate900)
-            Text("In the name of God, the Most Gracious, the Most Merciful.", fontSize = (14 * scale).sp, color = AlKhatibColors.Slate800)
+            Text(stringResource(R.string.font_preview_translation), fontSize = (14 * scale).sp, color = AlKhatibColors.Slate800)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("A", fontSize = 14.sp, color = AlKhatibColors.Slate500)
                 Slider(
@@ -616,13 +638,13 @@ private fun PrayerMethodSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                "Calculation method",
+                stringResource(R.string.calculation_method),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = AlKhatibColors.DeepEmerald
             )
             if (isLoading) {
-                Text("Loading methods…", color = AlKhatibColors.Slate500)
+                Text(stringResource(R.string.loading_methods), color = AlKhatibColors.Slate500)
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -683,7 +705,7 @@ private fun AdhanVoiceSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                "Adhan voice",
+                stringResource(R.string.adhan_voice_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = AlKhatibColors.DeepEmerald
@@ -700,7 +722,7 @@ private fun AdhanVoiceSheet(
             ) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        "Subuh (Fajr)",
+                        stringResource(R.string.subuh_fajr),
                         fontWeight = FontWeight.SemiBold,
                         color = AlKhatibColors.Slate900
                     )
@@ -740,16 +762,18 @@ private fun AdhanVoiceSheet(
                             Text(voice.displayName, color = AlKhatibColors.Slate900, fontWeight = FontWeight.Medium)
                             if (voice == AdhanVoice.DEFAULT) {
                                 Text(
-                                    "Default",
+                                    stringResource(R.string.default_label),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = AlKhatibColors.Slate500
                                 )
                             }
                         }
                         IconButton(onClick = { onPreview(voice) }) {
+                            val stopPreviewLabel = stringResource(R.string.stop_preview)
+                            val previewAdhanLabel = stringResource(R.string.preview_adhan)
                             Icon(
                                 imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                                contentDescription = if (isPreviewing) "Stop preview" else "Preview adhan",
+                                contentDescription = if (isPreviewing) stopPreviewLabel else previewAdhanLabel,
                                 tint = AlKhatibColors.Teal
                             )
                         }
@@ -763,9 +787,76 @@ private fun AdhanVoiceSheet(
     }
 }
 
-private fun scaleLabel(scale: Float): String = when {
-    scale < 0.95f -> "Small"
-    scale < 1.1f -> "Medium"
-    scale < 1.25f -> "Large"
-    else -> "Extra large"
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LanguageSheet(
+    selected: AppLanguage,
+    onSelect: (AppLanguage) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                .padding(bottom = AlKhatibSpacing.xl),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.language_settings_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            Text(
+                text = stringResource(R.string.language_settings_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = AlKhatibColors.Slate500,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            AppLanguage.entries.forEach { language ->
+                val isSelected = language == selected
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                        )
+                        .clickable { onSelect(language) }
+                        .padding(horizontal = 12.dp, vertical = 14.dp)
+                ) {
+                    Text(
+                        text = stringResource(language.labelRes),
+                        modifier = Modifier.weight(1f),
+                        color = AlKhatibColors.Slate900,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                    )
+                    if (isSelected) {
+                        Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun scaleLabel(scale: Float): String {
+    val small = stringResource(R.string.font_scale_small)
+    val medium = stringResource(R.string.font_scale_medium)
+    val large = stringResource(R.string.font_scale_large)
+    val extraLarge = stringResource(R.string.font_scale_extra_large)
+    return when {
+        scale < 0.95f -> small
+        scale < 1.1f -> medium
+        scale < 1.25f -> large
+        else -> extraLarge
+    }
 }

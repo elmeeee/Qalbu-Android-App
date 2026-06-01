@@ -38,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.semantics.contentDescription
@@ -90,6 +92,8 @@ fun TodayHeader(
         !gregorianLabel.isNullOrBlank() -> gregorianLabel
         else -> hijriLabel.orEmpty()
     }
+
+    val dateSwitchA11y = stringResource(R.string.date_switch_a11y)
 
     Column(
         modifier = modifier
@@ -144,7 +148,7 @@ fun TodayHeader(
                         )
                         .semantics {
                             if (canAlternate) {
-                                contentDescription = "Date, tap to switch between calendars"
+                                contentDescription = dateSwitchA11y
                             }
                         },
                     transitionSpec = {
@@ -175,7 +179,7 @@ fun TodayHeader(
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
-                        text = cityName ?: locationStatus ?: "Locating…",
+                        text = cityName ?: locationStatus ?: stringResource(R.string.locating),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary,
@@ -199,7 +203,7 @@ fun TodayHeader(
                 )
                 Spacer(Modifier.width(3.dp))
                 Text(
-                    text = "Today",
+                    text = stringResource(R.string.today_label),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -251,14 +255,14 @@ private fun HeaderAvatar(
                 isProfileLoading -> AlKhatibSkeletonCircle(size = 36.dp)
                 !avatarUrl.isNullOrBlank() -> AsyncImage(
                     model = avatarUrl,
-                    contentDescription = "Account",
+                    contentDescription = stringResource(R.string.account),
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
                 )
                 else -> Icon(
                     imageVector = Icons.Filled.Person,
-                    contentDescription = "Account",
+                    contentDescription = stringResource(R.string.account),
                     tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(22.dp)
                 )
@@ -269,11 +273,15 @@ private fun HeaderAvatar(
 
 @Composable
 private fun rememberGreeting(): String {
+    val morning = stringResource(R.string.greeting_morning)
+    val afternoon = stringResource(R.string.greeting_afternoon)
+    val evening = stringResource(R.string.greeting_evening)
+    val night = stringResource(R.string.greeting_night)
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     return when (hour) {
-        in 3..11 -> "Good Morning"
-        in 12..17 -> "Good Afternoon"
-        in 18..20 -> "Good Evening"
-        else -> "Good Night"
+        in 3..11 -> morning
+        in 12..17 -> afternoon
+        in 18..20 -> evening
+        else -> night
     }
 }

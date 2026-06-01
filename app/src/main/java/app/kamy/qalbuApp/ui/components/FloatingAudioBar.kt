@@ -23,10 +23,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
@@ -44,9 +47,10 @@ fun FloatingAudioBar(
     onToggle: () -> Unit,
     onDismiss: () -> Unit,
     onOpenPlayback: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
     reserveTrailingSpace: Dp = 0.dp,
-    modifier: Modifier = Modifier
 ) {
+    val openPlaybackInteractionSource = remember { MutableInteractionSource() }
     AnimatedVisibility(
         visible = visible,
         modifier = modifier,
@@ -70,7 +74,7 @@ fun FloatingAudioBar(
                     .then(
                         if (onOpenPlayback != null) {
                             Modifier.clickable(
-                                interactionSource = MutableInteractionSource(),
+                                interactionSource = openPlaybackInteractionSource,
                                 indication = null,
                                 onClick = onOpenPlayback
                             )
@@ -80,10 +84,12 @@ fun FloatingAudioBar(
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                val pauseLabel = stringResource(R.string.pause)
+                val audioLabel = stringResource(R.string.audio)
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = if (state.isPlaying) "Pause" else "Play",
+                        contentDescription = if (state.isPlaying) pauseLabel else audioLabel,
                         tint = androidx.compose.ui.graphics.Color.White,
                         modifier = Modifier.size(28.dp)
                     )
@@ -93,7 +99,7 @@ fun FloatingAudioBar(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
-                        text = state.trackTitle.ifBlank { "Playing" },
+                        text = state.trackTitle.ifBlank { stringResource(R.string.playing) },
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = androidx.compose.ui.graphics.Color.White,
@@ -120,7 +126,7 @@ fun FloatingAudioBar(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         Icons.Filled.Close,
-                        contentDescription = "Stop",
+                        contentDescription = stringResource(R.string.stop),
                         tint = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.9f)
                     )
                 }

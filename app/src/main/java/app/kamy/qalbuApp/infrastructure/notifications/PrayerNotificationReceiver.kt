@@ -18,11 +18,15 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         val appContext = context.applicationContext
         val channelId = intent.getStringExtra(EXTRA_CHANNEL_ID) ?: NotificationChannels.PRAYER
-        val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
-        val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
         val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, 0)
         val playAdhan = intent.getBooleanExtra(EXTRA_PLAY_ADHAN, false)
         val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
+        val kind = intent.getStringExtra(EXTRA_KIND)
+        val fireAt = System.currentTimeMillis()
+        val title = AppNotificationCopy.resolveTitle(appContext, kind, prayerName, fireAt)
+            .ifBlank { intent.getStringExtra(EXTRA_TITLE).orEmpty() }
+        val body = AppNotificationCopy.resolveBody(appContext, kind, prayerName)
+            .ifBlank { intent.getStringExtra(EXTRA_BODY).orEmpty() }
 
         var adhanPlaying = false
         if (playAdhan && !prayerName.isNullOrBlank()) {

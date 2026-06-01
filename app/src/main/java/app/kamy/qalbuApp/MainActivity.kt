@@ -1,5 +1,6 @@
 package app.kamy.qalbuApp
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +12,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.kamy.qalbuApp.design.theme.AlKhatibTheme
+import app.kamy.qalbuApp.core.locale.AppLocale
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
+import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.ui.root.RootScreen
 import app.kamy.qalbuApp.ui.splash.AppSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,6 +23,11 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val deepLinkRoute = mutableStateOf<String?>(null)
+
+    override fun attachBaseContext(newBase: Context) {
+        val language = AppLanguageStore.from(newBase).current()
+        super.attachBaseContext(AppLocale.wrap(newBase, language))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()

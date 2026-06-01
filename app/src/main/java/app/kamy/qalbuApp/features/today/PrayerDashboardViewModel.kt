@@ -10,7 +10,9 @@ import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordina
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
+import app.kamy.qalbuApp.infrastructure.notifications.AppNotificationCopy
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
+import app.kamy.qalbuApp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -90,7 +92,7 @@ class PrayerDashboardViewModel @Inject constructor(
         }
         val loc = locationProvider.currentLocation()
         if (loc == null) {
-            _state.update { it.copy(isLoading = false, error = "Could not determine location") }
+            _state.update { it.copy(isLoading = false, error = appContext.getString(R.string.location_failed)) }
             return
         }
         val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
@@ -131,7 +133,7 @@ class PrayerDashboardViewModel @Inject constructor(
                 )
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: "Prayer fetch failed") }
+            _state.update { it.copy(isLoading = false, error = t.message ?: appContext.getString(R.string.prayer_fetch_failed)) }
         }
     }
 
@@ -168,7 +170,10 @@ class PrayerDashboardViewModel @Inject constructor(
                         activePrayer = active,
                         nextPrayer = null,
                         countdown = formatDurationMs(elapsedMs),
-                        countdownSubtitle = "${prayerDisplayName(lastPassed.type)} prayer has passed",
+                        countdownSubtitle = appContext.getString(
+                            R.string.prayer_grace_passed,
+                            prayerDisplayName(lastPassed.type)
+                        ),
                         isGracePeriod = true,
                         theme = theme
                     )
@@ -184,7 +189,10 @@ class PrayerDashboardViewModel @Inject constructor(
                 activePrayer = active,
                 nextPrayer = next.type,
                 countdown = formatDurationMs(deltaMs),
-                countdownSubtitle = "Time remaining before ${prayerDisplayName(next.type)}",
+                countdownSubtitle = appContext.getString(
+                    R.string.prayer_time_remaining,
+                    prayerDisplayName(next.type)
+                ),
                 isGracePeriod = false,
                 theme = theme
             )
@@ -211,14 +219,8 @@ class PrayerDashboardViewModel @Inject constructor(
 
     private fun dayKey(): String = dayKeyFormatter.format(Date())
 
-    private fun prayerDisplayName(type: PrayerType): String = when (type) {
-        PrayerType.FAJR -> "Fajr"
-        PrayerType.SUNRISE -> "Sunrise"
-        PrayerType.DHUHR -> "Dhuhr"
-        PrayerType.ASR -> "Asr"
-        PrayerType.MAGHRIB -> "Maghrib"
-        PrayerType.ISHA -> "Isha"
-    }
+    private fun prayerDisplayName(type: PrayerType): String =
+        AppNotificationCopy.prayerDisplayName(appContext, type.aladhanKey)
 
     fun formatPrayerTime(date: Date): String = timeFormatter.format(date)
 }

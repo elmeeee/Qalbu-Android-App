@@ -1,0 +1,222 @@
+<resources>
+    <string name="app_name">Qalbu</string>
+
+    <string name="splash_greeting_arabic">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</string>
+
+    <string name="language_english">English</string>
+    <string name="language_indonesian">Bahasa Indonesia</string>
+    <string name="language_malay">Bahasa Melayu</string>
+    <string name="language_settings_title">Bahasa aplikasi</string>
+    <string name="language_settings_subtitle">English, Indonesia, atau Melayu</string>
+
+    <string name="nav_today">Hari Ini</string>
+    <string name="nav_reflect">Refleksi</string>
+    <string name="nav_quran">Al-Quran</string>
+    <string name="nav_account">Akun</string>
+
+    <string name="back">Kembali</string>
+    <string name="loading">Memuat…</string>
+    <string name="signed_in">Sudah masuk</string>
+    <string name="profile_photo">Foto profil</string>
+    <string name="account">Akun</string>
+    <string name="locating">Mencari lokasi…</string>
+    <string name="today_label">Hari Ini</string>
+    <string name="date_switch_a11y">Tanggal, ketuk untuk ganti kalender</string>
+
+    <string name="greeting_morning">Selamat Pagi</string>
+    <string name="greeting_afternoon">Selamat Siang</string>
+    <string name="greeting_evening">Selamat Sore</string>
+    <string name="greeting_night">Selamat Malam</string>
+
+    <string name="prayer_fajr">Subuh</string>
+    <string name="prayer_sunrise">Terbit</string>
+    <string name="prayer_dhuhr">Dzuhur</string>
+    <string name="prayer_asr">Ashar</string>
+    <string name="prayer_maghrib">Maghrib</string>
+    <string name="prayer_isha">Isya</string>
+    <string name="prayer_imsak">Imsak</string>
+
+    <string name="prayer_allow_location">Izinkan lokasi untuk melihat waktu sholat</string>
+    <string name="prayer_schedule">Jadwal sholat</string>
+    <string name="prayer_grace_passed">Sholat %1$s sudah lewat</string>
+    <string name="prayer_time_remaining">Sisa waktu sebelum %1$s</string>
+    <string name="prayer_fetch_failed">Gagal memuat jadwal sholat</string>
+    <string name="location_failed">Tidak dapat menentukan lokasi</string>
+
+    <string name="general">Umum</string>
+    <string name="font_size">Ukuran font</string>
+    <string name="font_size_subtitle">Atur Arab &amp; terjemahan</string>
+    <string name="prayer_settings">Pengaturan sholat</string>
+    <string name="prayer_calculation_method">Metode perhitungan sholat</string>
+    <string name="adhan_voice">Suara adzan</string>
+    <string name="show_translation">Tampilkan terjemahan</string>
+    <string name="translator">Penerjemah</string>
+    <string name="translator_hint">Ketuk untuk pilih sumber terjemahan</string>
+    <string name="notifications">Notifikasi</string>
+    <string name="reminders">Pengingat</string>
+    <string name="sign_out">Keluar</string>
+    <string name="sync_reflections">Sinkronkan Refleksi</string>
+    <string name="sign_in_prompt">Masuk untuk mencadangkan refleksi dan bergabung dengan komunitas.</string>
+    <string name="sign_in">Masuk</string>
+
+    <string name="notif_summary_daily_verse">Ayat harian</string>
+    <string name="notif_summary_prayer">Sholat</string>
+    <string name="notif_summary_imsak">Imsak</string>
+    <string name="notif_summary_midnight">Tengah malam</string>
+    <string name="notif_summary_first_third">Sepertiga awal</string>
+    <string name="notif_summary_tahajud">Tahajud</string>
+    <string name="notif_summary_yasin">Yasin</string>
+    <string name="notif_summary_kahf">Al-Kahf</string>
+    <string name="notif_summary_all_off">Semua pengingat mati</string>
+    <string name="notif_summary_count">%1$d pengingat aktif</string>
+
+    <string name="notifications_title">Notifikasi</string>
+    <string name="notifications_intro">Pilih pengingat yang Anda inginkan. Adzan bunyi saat waktu sholat aktif.</string>
+    <string name="section_quran">Al-Quran</string>
+    <string name="daily_verse">Ayat harian</string>
+    <string name="daily_verse_subtitle">Surah dan terjemahan pagi</string>
+    <string name="reminder_time">Waktu pengingat</string>
+    <string name="section_prayer">Sholat</string>
+    <string name="imsak">Imsak</string>
+    <string name="imsak_subtitle">Sebelum Subuh saat puasa</string>
+    <string name="section_night">Malam</string>
+    <string name="midnight">Tengah malam</string>
+    <string name="midnight_subtitle">Pertengahan malam</string>
+    <string name="first_third">Sepertiga awal</string>
+    <string name="first_third_subtitle">Istirahat awal malam</string>
+    <string name="last_third">Sepertiga akhir</string>
+    <string name="last_third_subtitle">Waktu terbaik tahajud</string>
+    <string name="section_sunnah">Bacaan sunnah</string>
+    <string name="surah_yasin">Surah Yasin</string>
+    <string name="surah_yasin_subtitle">Kamis malam sebelum Jumat</string>
+    <string name="surah_kahf">Surah Al-Kahf</string>
+    <string name="surah_kahf_subtitle">Pengingat bacaan Jumat</string>
+    <string name="prayer_notif_fajr_sub">Adzan saat subuh</string>
+    <string name="prayer_notif_dhuhr_sub">Adzan saat dzuhur</string>
+    <string name="prayer_notif_asr_sub">Adzan saat ashar</string>
+    <string name="prayer_notif_maghrib_sub">Adzan saat maghrib</string>
+    <string name="prayer_notif_isha_sub">Adzan saat isya</string>
+
+    <string name="channel_daily_verse">Ayat harian</string>
+    <string name="channel_daily_verse_desc">Pengingat ayat Al-Quran pagi</string>
+    <string name="channel_prayer">Waktu sholat</string>
+    <string name="channel_prayer_desc">Adzan dan pengingat sholat malam</string>
+    <string name="channel_sunnah">Bacaan sunnah</string>
+    <string name="channel_sunnah_desc">Pengingat bacaan surah mingguan</string>
+
+    <string name="prayer_notif_title">Waktunya %1$s · %2$s</string>
+    <string name="prayer_body_fajr">Dunia masih tidur. Anda belum tentu.</string>
+    <string name="prayer_body_dhuhr">Berhenti sejenak. Sholat. Lalu lanjutkan.</string>
+    <string name="prayer_body_asr">Malaikat menyaksikan. Jangan lewatkan sholat ini.</string>
+    <string name="prayer_body_maghrib">Matahari baru terbenam. Sholat ini tidak bisa ditunda.</string>
+    <string name="prayer_body_isha">Akhiri hari dengan cara yang benar.</string>
+    <string name="prayer_body_imsak">Persiapkan puasa. Fajar sudah dekat.</string>
+    <string name="prayer_body_default">Sekarang waktunya sholat %1$s.</string>
+    <string name="night_midnight_title">🌙 Tengah Malam</string>
+    <string name="night_midnight_body">Malam sudah setengah. Sholat Witir sebelum tidur — jangan sampai terlewat.</string>
+    <string name="night_first_third_title">🌃 Malam Dimulai</string>
+    <string name="night_first_third_body">Istirahatlah. Sepertiga akhir malam milik Anda — bangun untuk kebaikan yang siang tidak bisa beri.</string>
+    <string name="night_last_third_title">✨ Sepertiga Akhir Telah Tiba</string>
+    <string name="night_last_third_body">Allah turun ke langit dunia. Jam paling berkah hari ini dimulai.</string>
+    <string name="sunnah_yasin_title">📖 Baca Surah Yasin</string>
+    <string name="sunnah_yasin_body">Malam Kamis — waktu berkah membaca Surah Yasin sebelum Jumat.</string>
+    <string name="sunnah_kahf_title">📖 Baca Surah Al-Kahf</string>
+    <string name="sunnah_kahf_body">Hari Jumat — baca Surah Al-Kahf untuk cahaya hingga Jumat berikutnya.</string>
+    <string name="daily_verse_notif_title">Ayat Anda hari ini</string>
+    <string name="daily_verse_notif_fallback">Buka Qalbu untuk ayat hari ini.</string>
+
+    <string name="adhan_playback_title">Adzan</string>
+    <string name="adhan_playback_body">Memutar panggilan sholat</string>
+    <string name="adhan_stop">Stop adzan</string>
+    <string name="adhan_voice_subtitle">Dzuhur, Ashar, Maghrib &amp; Isya</string>
+    <string name="adhan_fajr_fixed_note">Subuh selalu memakai Mishary Rashid Alafasy dan tidak bisa diubah.</string>
+
+    <string name="recitation_notification_channel">Tilawah Al-Quran</string>
+    <string name="exact_alarm_rationale">Izinkan alarm tepat agar adzan dan pengingat sholat tiba tepat waktu.</string>
+    <string name="battery_opt_snackbar_message">Izinkan baterai tanpa batas agar adzan dan pengingat sholat berjalan saat aplikasi ditutup.</string>
+    <string name="battery_opt_snackbar_oem_message">Di HP %1$s: set Qalbu ke Tanpa batas / Unrestricted dan aktifkan autostart agar adzan berjalan di latar belakang.</string>
+    <string name="battery_opt_settings_title">Latar belakang &amp; baterai</string>
+    <string name="battery_opt_settings_subtitle">Tanpa batas — diperlukan untuk adzan saat app ditutup</string>
+    <string name="battery_opt_settings_subtitle_ok">Tanpa batas — pengingat latar belakang aktif</string>
+
+    <string name="tab_placeholder_today">Hari Ini — ayat harian, jadwal sholat, bagikan</string>
+    <string name="tab_placeholder_reflect">Refleksi — feed komunitas</string>
+    <string name="tab_placeholder_quran">Al-Quran — daftar surah dan pembaca</string>
+    <string name="tab_placeholder_account">Akun — masuk, profil, pengaturan</string>
+
+    <string name="cancel">Batal</string>
+    <string name="save">Simpan</string>
+    <string name="try_again">Coba lagi</string>
+    <string name="close">Tutup</string>
+    <string name="share">Bagikan</string>
+    <string name="regenerate">Buat ulang</string>
+    <string name="retry">Coba lagi</string>
+    <string name="load_more">Muat lagi</string>
+
+    <string name="quran_title">Al-Quran</string>
+    <string name="quran_subtitle">114 Surah · Al-Quran</string>
+    <string name="one_surah_found">1 surah ditemukan</string>
+    <string name="surahs_found">%1$d surah ditemukan</string>
+    <string name="continue_reading">Lanjutkan baca</string>
+    <string name="surah_number">Surah %1$d</string>
+    <string name="ayah_number">Ayat %1$d</string>
+    <string name="no_matches">Tidak ada hasil</string>
+    <string name="search_surah_placeholder">Cari surah, nomor, atau tempat…</string>
+    <string name="search_empty_message">Tidak ada yang cocok dengan “%1$s”. Coba nomor surah, nama Arab, atau “Makkah” / “Madinah”.</string>
+    <string name="reading_settings">Pengaturan baca</string>
+    <string name="text_size">Ukuran teks</string>
+    <string name="continuous_play">Putar berkelanjutan</string>
+    <string name="reciter">Qari</string>
+    <string name="study_tools">Alat kajian</string>
+    <string name="close_verse_actions">Tutup aksi ayat</string>
+    <string name="share_reflection">Bagikan refleksi</string>
+
+    <string name="verse_of_day">Al-Quran Hari Ini</string>
+    <string name="pause">Jeda</string>
+    <string name="audio">Audio</string>
+    <string name="tafsir">Tafsir</string>
+    <string name="hadith">Hadits</string>
+    <string name="no_verse_retry">Ayat tidak tersedia. Tarik untuk coba lagi.</string>
+
+    <string name="reflect_all">Semua Refleksi</string>
+    <string name="reflect_mine">Refleksi Saya</string>
+    <string name="sign_in_qf">Masuk dengan Quran Foundation</string>
+    <string name="reflect_community">Refleksi komunitas</string>
+
+    <string name="tafsir_load_error">Gagal memuat tafsir</string>
+    <string name="tafsir_empty">Belum ada tafsir di sini</string>
+    <string name="hadith_load_error">Gagal memuat hadits</string>
+    <string name="hadith_empty">Belum ada hadits di sini</string>
+    <string name="ai_share_placeholder">Refleksi Anda akan muncul di sini…</string>
+    <string name="ai_reflection">Refleksi AI</string>
+    <string name="ai_share_hint">Draf memakai tafsir &amp; hadits + AI. Edit, lalu bagikan atau publikasikan.</string>
+    <string name="regenerating">Membuat ulang…</string>
+    <string name="publish_to_reflect">Publikasikan ke Refleksi</string>
+    <string name="publishing">Mempublikasikan…</string>
+    <string name="playing">Memutar</string>
+    <string name="stop">Stop</string>
+
+    <string name="choose_translator">Pilih penerjemah</string>
+    <string name="search_translator_placeholder">Cari nama, penulis, atau bahasa</string>
+    <string name="loading_translators">Memuat penerjemah…</string>
+    <string name="no_translators">Penerjemah tidak ditemukan.</string>
+    <string name="failed_load_translators">Gagal memuat penerjemah</string>
+    <string name="reminder_time_title">Waktu pengingat</string>
+    <string name="reminder_time_subtitle">Pilih waktu pengingat ayat harian.</string>
+    <string name="calculation_method">Metode perhitungan</string>
+    <string name="loading_methods">Memuat metode…</string>
+    <string name="adhan_voice_title">Suara adzan</string>
+    <string name="subuh_fajr">Subuh (Fajr)</string>
+    <string name="default_label">Default</string>
+    <string name="preview_adhan">Pratinjau adzan</string>
+    <string name="stop_preview">Stop pratinjau</string>
+    <string name="font_scale_small">Kecil</string>
+    <string name="font_scale_medium">Sedang</string>
+    <string name="font_scale_large">Besar</string>
+    <string name="font_scale_extra_large">Sangat besar</string>
+    <string name="font_preview_translation">Dengan nama Allah Yang Maha Pengasih, Maha Penyayang.</string>
+    <string name="reading_settings_a11y">Pengaturan baca</string>
+
+    <string name="published_to_reflect">Dipublikasikan ke Refleksi</string>
+    <string name="sign_in_to_publish">Masuk untuk publikasikan refleksi</string>
+</resources>

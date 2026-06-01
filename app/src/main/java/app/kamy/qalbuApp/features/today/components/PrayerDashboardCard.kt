@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -87,10 +89,12 @@ fun PrayerDashboardCard(
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.headlineLarge
             )
+            val allowLocationLabel = stringResource(R.string.prayer_allow_location)
+            val scheduleLabel = stringResource(R.string.prayer_schedule)
             Text(
                 text = when {
-                    state.needsPermission -> "Allow location to see prayer times"
-                    state.timings.isEmpty() -> "Prayer schedule"
+                    state.needsPermission -> allowLocationLabel
+                    state.timings.isEmpty() -> scheduleLabel
                     else -> state.countdownSubtitle
                 },
                 color = Color.White.copy(alpha = 0.85f),
@@ -177,11 +181,20 @@ private fun PrayerColumnSkeleton(modifier: Modifier = Modifier) {
     }
 }
 
-private fun prayerDisplay(type: PrayerType): String = when (type) {
-    PrayerType.FAJR -> "Fajr"
-    PrayerType.SUNRISE -> "Sunrise"
-    PrayerType.DHUHR -> "Dhuhr"
-    PrayerType.ASR -> "Asr"
-    PrayerType.MAGHRIB -> "Maghrib"
-    PrayerType.ISHA -> "Isha"
+@Composable
+private fun prayerDisplay(type: PrayerType): String {
+    val fajr = stringResource(R.string.prayer_fajr)
+    val sunrise = stringResource(R.string.prayer_sunrise)
+    val dhuhr = stringResource(R.string.prayer_dhuhr)
+    val asr = stringResource(R.string.prayer_asr)
+    val maghrib = stringResource(R.string.prayer_maghrib)
+    val isha = stringResource(R.string.prayer_isha)
+    return when (type) {
+        PrayerType.FAJR -> fajr
+        PrayerType.SUNRISE -> sunrise
+        PrayerType.DHUHR -> dhuhr
+        PrayerType.ASR -> asr
+        PrayerType.MAGHRIB -> maghrib
+        PrayerType.ISHA -> isha
+    }
 }

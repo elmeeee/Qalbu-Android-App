@@ -3,6 +3,7 @@ package app.kamy.qalbuApp.features.today
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import android.content.Context
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.core.config.AppConfig
 import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
@@ -252,7 +253,7 @@ class TodayViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isPublishing = false,
-                        publishToast = "Published to Reflect",
+                        publishToast = appContext.getString(R.string.published_to_reflect),
                         publishToastIsError = false,
                         aiShareVisible = false
                     )

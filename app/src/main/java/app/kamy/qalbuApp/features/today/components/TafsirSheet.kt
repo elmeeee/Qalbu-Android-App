@@ -12,6 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,7 +56,7 @@ fun TafsirSheet(
         ReaderKnowledgeSheetBackground(
             modifier = Modifier.fillMaxHeight(0.92f)
         ) {
-            ReaderSheetTopBar(title = "Tafsir", onDone = onDismiss)
+            ReaderSheetTopBar(title = stringResource(R.string.tafsir), onDone = onDismiss)
             VerseContextHeader(
                 verseReference = verseReference,
                 icon = Icons.AutoMirrored.Filled.MenuBook,
@@ -70,14 +72,14 @@ fun TafsirSheet(
                 isLoading -> ReaderSheetScrollBody { ReaderLoadingSkeleton() }
                 error != null -> ReaderSheetScrollBody {
                     ReaderErrorState(
-                        title = "Couldn't load tafsir",
+                        title = stringResource(R.string.tafsir_load_error),
                         description = error,
                         onRetry = onReload
                     )
                 }
                 commentaryUnavailable -> ReaderSheetScrollBody {
                     ReaderEmptyState(
-                        title = "No commentary here",
+                        title = stringResource(R.string.tafsir_empty),
                         description = "This verse doesn't include tafsir text for this source yet."
                     )
                 }

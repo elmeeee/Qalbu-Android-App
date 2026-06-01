@@ -41,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -252,17 +254,20 @@ private fun QuranListHeader(
             )
             Spacer(Modifier.width(AlKhatibSpacing.sm))
             Text(
-                text = "Quran",
+                text = stringResource(R.string.quran_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
         }
+        val defaultSubtitle = stringResource(R.string.quran_subtitle)
+        val noMatchesSubtitle = stringResource(R.string.no_matches)
+        val oneSurahSubtitle = stringResource(R.string.one_surah_found)
         val subtitle = when (resultCount) {
-            null -> "114 Surahs · The Noble Quran"
-            0 -> "No matches"
-            1 -> "1 surah found"
-            else -> "$resultCount surahs found"
+            null -> defaultSubtitle
+            0 -> noMatchesSubtitle
+            1 -> oneSurahSubtitle
+            else -> stringResource(R.string.surahs_found, resultCount)
         }
         Text(
             text = subtitle,
@@ -297,12 +302,13 @@ private fun QuranListHeader(
                 onDismiss = onClearSearch,
                 enabled = searchEnabled,
                 focusRequester = searchFocusRequester,
+                placeholder = stringResource(R.string.search_surah_placeholder),
                 modifier = Modifier.weight(1f)
             )
             if (isSearching && searchEnabled) {
                 TextButton(onClick = onClearSearch) {
                     Text(
-                        text = "Cancel",
+                        text = stringResource(R.string.cancel),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -351,13 +357,13 @@ private fun ContinueReadingCard(
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(
-                    text = "Continue reading",
+                    text = stringResource(R.string.continue_reading),
                     style = MaterialTheme.typography.labelSmall,
                     color = AlKhatibColors.GoldDeep,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = chapter?.displayComplexName ?: "Surah ${session.chapterNumber}",
+                    text = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -365,7 +371,7 @@ private fun ContinueReadingCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Ayah ${session.verseNumber}",
+                    text = stringResource(R.string.ayah_number, session.verseNumber),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

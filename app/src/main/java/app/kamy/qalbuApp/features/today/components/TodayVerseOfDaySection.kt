@@ -24,6 +24,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -65,7 +67,7 @@ fun TodayVerseOfDaySection(
             )
             Spacer(Modifier.width(AlKhatibSpacing.sm))
             Text(
-                text = "Quran of the Day",
+                text = stringResource(R.string.verse_of_day),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
@@ -123,10 +125,13 @@ fun TodayVerseOfDaySection(
 
                 Spacer(Modifier.height(16.dp))
 
+                val pauseLabel = stringResource(R.string.pause)
+                val audioLabel = stringResource(R.string.audio)
+                val tafsirLabel = stringResource(R.string.tafsir)
                 val actionPills = listOf(
                     ActionPillData(
                         if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        if (isPlaying) "Pause" else "Audio",
+                        if (isPlaying) pauseLabel else audioLabel,
                         AlKhatibColors.DeepEmerald
                     ) { onPlayAudio() },
                     ActionPillData(
@@ -135,7 +140,7 @@ fun TodayVerseOfDaySection(
                         AlKhatibColors.Gold,
                         onAiShare
                     ),
-                    ActionPillData(Icons.Filled.AutoStories, "Tafsir", AlKhatibColors.IndigoAccent, onTafsir)
+                    ActionPillData(Icons.Filled.AutoStories, tafsirLabel, AlKhatibColors.IndigoAccent, onTafsir)
                 )
                 Column(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -159,7 +164,7 @@ fun TodayVerseOfDaySection(
                 TodayVerseCardSkeleton(modifier = Modifier.fillMaxWidth())
             } else {
                 Text(
-                    text = "No verse available. Pull to retry.",
+                    text = stringResource(R.string.no_verse_retry),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,

@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.domain.model.PrayerType
+import app.kamy.qalbuApp.infrastructure.notifications.AppNotificationCopy
 import app.kamy.qalbuApp.ui.permissions.isIgnoringBatteryOptimizations
 import app.kamy.qalbuApp.ui.permissions.openBackgroundReliabilitySettings
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsGroup
@@ -66,12 +67,12 @@ fun NotificationSettingsScreen(
             IconButton(onClick = onBack) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
             Text(
-                text = "Notifications",
+                text = stringResource(R.string.notifications_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
@@ -79,32 +80,32 @@ fun NotificationSettingsScreen(
         }
 
         Text(
-            text = "Choose which reminders you want. Prayer adhan plays when prayer times are on.",
+            text = stringResource(R.string.notifications_intro),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = AlKhatibSpacing.xs)
         )
 
-        NotificationSectionLabel("Quran")
+        NotificationSectionLabel(stringResource(R.string.section_quran))
         AlKhatibSettingsGroup {
             AlKhatibSettingsToggleRow(
                 icon = Icons.Filled.Notifications,
-                title = "Daily verse",
-                subtitle = "Morning surah and translation",
+                title = stringResource(R.string.daily_verse),
+                subtitle = stringResource(R.string.daily_verse_subtitle),
                 checked = state.dailyVerseEnabled,
                 onCheckedChange = vm::setDailyVerseEnabled
             )
             if (state.dailyVerseEnabled) {
                 AlKhatibSettingsNavigationRow(
                     icon = Icons.Filled.Schedule,
-                    title = "Reminder time",
+                    title = stringResource(R.string.reminder_time),
                     subtitle = state.reminderTimeLabel.ifBlank { "7:00 AM" },
                     onClick = { vm.toggleNotifTimeSheet(true) }
                 )
             }
         }
 
-        NotificationSectionLabel("Prayer")
+        NotificationSectionLabel(stringResource(R.string.section_prayer))
         AlKhatibSettingsGroup {
             AlKhatibSettingsNavigationRow(
                 icon = Icons.Filled.BatteryChargingFull,
@@ -121,8 +122,8 @@ fun NotificationSettingsScreen(
             PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { prayer ->
                 AlKhatibSettingsToggleRow(
                     icon = Icons.Filled.Notifications,
-                    title = prayer.aladhanKey,
-                    subtitle = prayerNotificationSubtitle(prayer),
+                    title = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
+                    subtitle = prayerNotificationSubtitle(context, prayer),
                     checked = state.isPrayerNotificationEnabled(prayer),
                     onCheckedChange = { enabled ->
                         vm.setPrayerNotificationEnabled(prayer, enabled)
@@ -131,51 +132,51 @@ fun NotificationSettingsScreen(
             }
             AlKhatibSettingsToggleRow(
                 icon = Icons.Filled.WbTwilight,
-                title = "Imsak",
-                subtitle = "Before Fajr while fasting",
+                title = stringResource(R.string.imsak),
+                subtitle = stringResource(R.string.imsak_subtitle),
                 checked = state.imsakEnabled,
                 onCheckedChange = vm::setImsakEnabled
             )
         }
 
-        NotificationSectionLabel("Night")
+        NotificationSectionLabel(stringResource(R.string.section_night))
         AlKhatibSettingsGroup {
             AlKhatibSettingsToggleRow(
                 icon = Icons.Filled.Bedtime,
-                title = "Midnight",
-                subtitle = "Halfway through the night",
+                title = stringResource(R.string.midnight),
+                subtitle = stringResource(R.string.midnight_subtitle),
                 checked = state.midnightEnabled,
                 onCheckedChange = vm::setMidnightEnabled
             )
             AlKhatibSettingsToggleRow(
                 icon = Icons.Filled.Bedtime,
-                title = "First third",
-                subtitle = "Early night rest",
+                title = stringResource(R.string.first_third),
+                subtitle = stringResource(R.string.first_third_subtitle),
                 checked = state.firstThirdEnabled,
                 onCheckedChange = vm::setFirstThirdEnabled
             )
             AlKhatibSettingsToggleRow(
                 icon = Icons.Filled.Bedtime,
-                title = "Last third",
-                subtitle = "Best time for tahajud",
+                title = stringResource(R.string.last_third),
+                subtitle = stringResource(R.string.last_third_subtitle),
                 checked = state.tahajudEnabled,
                 onCheckedChange = vm::setTahajudEnabled
             )
         }
 
-        NotificationSectionLabel("Sunnah reading")
+        NotificationSectionLabel(stringResource(R.string.section_sunnah))
         AlKhatibSettingsGroup {
             AlKhatibSettingsToggleRow(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = "Surah Yasin",
-                subtitle = "Thursday night before Jumu'ah",
+                title = stringResource(R.string.surah_yasin),
+                subtitle = stringResource(R.string.surah_yasin_subtitle),
                 checked = state.yasinReminderEnabled,
                 onCheckedChange = vm::setYasinReminderEnabled
             )
             AlKhatibSettingsToggleRow(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = "Surah Al-Kahf",
-                subtitle = "Friday reading reminder",
+                title = stringResource(R.string.surah_kahf),
+                subtitle = stringResource(R.string.surah_kahf_subtitle),
                 checked = state.kahfReminderEnabled,
                 onCheckedChange = vm::setKahfReminderEnabled
             )
@@ -185,22 +186,23 @@ fun NotificationSettingsScreen(
     }
 }
 
-private fun prayerNotificationSubtitle(prayer: PrayerType): String = when (prayer) {
-    PrayerType.FAJR -> "Adhan at dawn"
-    PrayerType.DHUHR -> "Adhan at midday"
-    PrayerType.ASR -> "Adhan in the afternoon"
-    PrayerType.MAGHRIB -> "Adhan at sunset"
-    PrayerType.ISHA -> "Adhan at night"
-    else -> ""
-}
+private fun prayerNotificationSubtitle(context: android.content.Context, prayer: PrayerType): String =
+    when (prayer) {
+        PrayerType.FAJR -> context.getString(R.string.prayer_notif_fajr_sub)
+        PrayerType.DHUHR -> context.getString(R.string.prayer_notif_dhuhr_sub)
+        PrayerType.ASR -> context.getString(R.string.prayer_notif_asr_sub)
+        PrayerType.MAGHRIB -> context.getString(R.string.prayer_notif_maghrib_sub)
+        PrayerType.ISHA -> context.getString(R.string.prayer_notif_isha_sub)
+        else -> ""
+    }
 
 @Composable
 private fun NotificationSectionLabel(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = AlKhatibSpacing.xs)
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(horizontal = AlKhatibSpacing.xs, vertical = AlKhatibSpacing.xs)
     )
 }
