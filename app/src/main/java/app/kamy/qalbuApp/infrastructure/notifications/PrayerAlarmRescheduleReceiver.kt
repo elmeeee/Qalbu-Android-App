@@ -29,7 +29,7 @@ class PrayerAlarmRescheduleReceiver : BroadcastReceiver() {
     companion object {
         private val RESCHEDULE_ACTIONS = setOf(
             Intent.ACTION_BOOT_COMPLETED,
-            Intent.ACTION_TIME_SET,
+            "android.intent.action.TIME_SET",
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
             Intent.ACTION_LOCALE_CHANGED,
