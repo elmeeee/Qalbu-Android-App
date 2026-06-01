@@ -12,7 +12,6 @@ import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
 import app.kamy.qalbuApp.core.locale.AppLanguage
 import app.kamy.qalbuApp.infrastructure.audio.AdhanPreviewPlayer
-import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.infrastructure.auth.IdTokenProfileParser
@@ -271,7 +270,7 @@ class AccountViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         profile = if (signedOut) null else it.profile,
-                        error = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE else t.message
+                        error = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired) else t.message
                     )
                 }
             }

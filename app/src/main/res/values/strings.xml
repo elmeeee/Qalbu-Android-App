@@ -175,6 +175,7 @@
     <string name="continue_reading">Continue reading</string>
     <string name="surah_number">Surah %1$d</string>
     <string name="ayah_number">Ayah %1$d</string>
+    <string name="ayah_label">Ayah %1$s</string>
     <string name="no_matches">No matches</string>
     <string name="search_surah_placeholder">Search surah, number, or place…</string>
     <string name="search_empty_message">Nothing matches “%1$s”. Try a surah number, Arabic name, or “Makkah” / “Madinah”.</string>
@@ -239,4 +240,57 @@
     <!-- Toasts -->
     <string name="published_to_reflect">Published to Reflect</string>
     <string name="sign_in_to_publish">Sign in to publish reflections</string>
+
+    <!-- Location & permissions -->
+    <string name="location_enable">Enable location</string>
+    <string name="location_unavailable">Location unavailable</string>
+    <string name="notifications_disabled_snackbar">Notifications are off. Enable them in Settings for prayer reminders.</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_allow">Allow</string>
+    <string name="profile_still_loading">Profile still loading — try again in a moment.</string>
+
+    <!-- Reflect extras -->
+    <string name="reflect_sign_in_title">Sign in to Reflect</string>
+    <string name="reflect_sign_in_subtitle">Sync your reflections across devices and join the community feed.</string>
+    <string name="reflect_contributor">Contributor</string>
+    <string name="verified">Verified</string>
+    <string name="reflect_feed_load_failed">Failed to load feed</string>
+
+    <!-- Reader sheets -->
+    <string name="done">Done</string>
+    <string name="this_verse">This verse</string>
+    <string name="commentary">Commentary</string>
+    <string name="tafsir_empty_detail">This verse doesn\'t include tafsir text for this source yet.</string>
+    <string name="hadith_empty_detail">No hadith references are linked to this ayah yet.</string>
+    <string name="hadith_book_number">Book %1$s</string>
+    <string name="juz_number">Juz %1$d</string>
+    <string name="ai_label">AI</string>
+    <string name="clear_search_a11y">Clear search</string>
+
+    <!-- Errors -->
+    <string name="session_expired">Session expired. Sign in again from Account.</string>
+    <string name="request_failed">Request failed</string>
+    <string name="verse_load_failed">Failed to load verse</string>
+    <string name="verse_of_day_load_failed">Could not load verse of the day. Pull to retry.</string>
+    <string name="tafsir_load_failed">Could not load tafsir</string>
+    <string name="hadith_load_failed">Could not load hadith</string>
+    <string name="share_generate_failed">Could not generate share text</string>
+    <string name="publish_failed">Publish failed</string>
+    <string name="profile_load_failed">Could not load your profile.</string>
+    <string name="sign_in_to_publish_account">Sign in from Account to publish.</string>
+    <string name="verses_load_failed">Failed to load verses</string>
+    <string name="chapters_load_failed">Failed to load chapters</string>
+
+    <!-- AI share draft -->
+    <string name="share_allah_says">قَالَ اللَّهُ تَعَالَى</string>
+    <string name="share_verse_ref">(%1$s)</string>
+    <string name="share_fallback_reflection">This ayah reminds me to slow down and check my heart before I speak or act.</string>
+    <string name="share_guaranteed_intro">This verse stayed with me today.</string>
+    <string name="share_dua_opener">🤲 Ya Allah,</string>
+    <string name="share_hashtags">#QuranReminder #ReadReflectShare</string>
+
+    <plurals name="hadith_count">
+        <item quantity="one">%d hadith</item>
+        <item quantity="other">%d hadiths</item>
+    </plurals>
 </resources>

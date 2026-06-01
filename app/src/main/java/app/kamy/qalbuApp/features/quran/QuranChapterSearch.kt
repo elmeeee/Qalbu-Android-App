@@ -417,8 +417,9 @@ fun QuranChapterSearchBar(
     onDismiss: () -> Unit = {},
     enabled: Boolean = true,
     focusRequester: FocusRequester = remember { FocusRequester() },
-    placeholder: String = "Search surah, number, or place…"
+    placeholder: String? = null,
 ) {
+    val resolvedPlaceholder = placeholder ?: stringResource(R.string.search_surah_placeholder)
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val activeQuery = query.normalizedSearchQuery()
@@ -523,7 +524,7 @@ fun QuranChapterSearchBar(
                     Box(contentAlignment = Alignment.CenterStart) {
                         if (activeQuery.isEmpty()) {
                             Text(
-                                text = placeholder,
+                                text = resolvedPlaceholder,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
                                 maxLines = 1
@@ -540,7 +541,7 @@ fun QuranChapterSearchBar(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Clear search",
+                        contentDescription = stringResource(R.string.clear_search_a11y),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )

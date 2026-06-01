@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.core.config.AppConfig
-import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.HadithReference
@@ -187,7 +186,7 @@ class ChapterReaderViewModel @Inject constructor(
                     )
                 }
             }.onFailure { t ->
-                _state.update { it.copy(isLoading = false, error = t.message ?: "Failed to load verses") }
+                _state.update { it.copy(isLoading = false, error = t.message ?: appContext.getString(R.string.verses_load_failed)) }
             }
         }
     }
@@ -273,7 +272,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     private fun playAyahAtIndex(index: Int, page: RandomAyahPayload) {
         val s = _state.value
-        val surahTitle = s.chapterDisplayName ?: "Surah ${s.chapterNumber}"
+        val surahTitle = s.chapterDisplayName ?: appContext.getString(R.string.surah_number, s.chapterNumber)
         val reciterName = s.recitations
             .firstOrNull { it.id == s.selectedRecitationId }
             ?.displayName.orEmpty()
@@ -324,7 +323,7 @@ class ChapterReaderViewModel @Inject constructor(
             _state.update { it.copy(tafsir = t, tafsirLoading = false, tafsirError = null) }
         } catch (e: Throwable) {
             _state.update {
-                it.copy(tafsirLoading = false, tafsirError = e.message ?: "Could not load tafsir")
+                it.copy(tafsirLoading = false, tafsirError = e.message ?: appContext.getString(R.string.tafsir_load_failed))
             }
         }
     }
@@ -383,7 +382,7 @@ class ChapterReaderViewModel @Inject constructor(
                 it.copy(
                     hadithLoading = false,
                     hadithLoadingMore = false,
-                    hadithError = e.message ?: "Could not load hadith"
+                    hadithError = e.message ?: appContext.getString(R.string.hadith_load_failed)
                 )
             }
         }
@@ -446,7 +445,7 @@ class ChapterReaderViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         aiShareLoading = false,
-                        aiShareError = t.message ?: "Could not generate share text"
+                        aiShareError = t.message ?: appContext.getString(R.string.share_generate_failed)
                     )
                 }
             }
@@ -455,7 +454,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun publishAiReflection() {
         if (!userSession.isSignedIn.value) {
-            _state.update { it.copy(publishMessage = "Sign in from Account to publish.") }
+            _state.update { it.copy(publishMessage = appContext.getString(R.string.sign_in_to_publish_account)) }
             return
         }
         val index = _state.value.aiShareVerseIndex ?: return
@@ -478,15 +477,15 @@ class ChapterReaderViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isPublishing = false,
-                        publishMessage = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE
-                        else "Could not load your profile."
+                        publishMessage = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
+                        else appContext.getString(R.string.profile_load_failed)
                     )
                 }
                 return@launch
             }
             if (authorId.isNullOrBlank()) {
                 _state.update {
-                    it.copy(isPublishing = false, publishMessage = "Could not load your profile.")
+                    it.copy(isPublishing = false, publishMessage = appContext.getString(R.string.profile_load_failed))
                 }
                 return@launch
             }
@@ -501,8 +500,8 @@ class ChapterReaderViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isPublishing = false,
-                        publishMessage = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE
-                        else t.message ?: "Publish failed"
+                        publishMessage = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
+                        else t.message ?: appContext.getString(R.string.publish_failed)
                     )
                 }
             }

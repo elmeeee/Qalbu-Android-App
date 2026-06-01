@@ -119,7 +119,7 @@ fun ReaderSheetTopBar(
         Spacer(Modifier.weight(1f))
         TextButton(onClick = onDone) {
             Text(
-                "Done",
+                stringResource(R.string.done),
                 fontWeight = FontWeight.SemiBold,
                 color = AlKhatibColors.DeepEmerald
             )
@@ -133,6 +133,7 @@ fun VerseContextHeader(
     icon: ImageVector,
     subtitle: String?
 ) {
+    val thisVerseLabel = stringResource(R.string.this_verse)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -154,7 +155,7 @@ fun VerseContextHeader(
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = verseReference.ifBlank { "This verse" },
+                text = verseReference.ifBlank { thisVerseLabel },
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = AlKhatibColors.DeepEmerald

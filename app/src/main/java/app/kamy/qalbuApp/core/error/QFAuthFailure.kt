@@ -1,8 +1,8 @@
 package app.kamy.qalbuApp.core.error
 
+import android.content.Context
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
-
-const val SESSION_EXPIRED_MESSAGE = "Session expired. Sign in again from Account."
 
 fun isAuthHttpFailure(code: Int, body: String?): Boolean {
     if (code == 401) return true
@@ -31,8 +31,9 @@ fun Throwable.isAuthenticationFailure(): Boolean = when (this) {
     }
 }
 
-fun Throwable.userFacingAuthOrApiMessage(): String =
-    if (isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE else message ?: "Request failed"
+fun Throwable.userFacingAuthOrApiMessage(context: Context): String =
+    if (isAuthenticationFailure()) context.getString(R.string.session_expired)
+    else message ?: context.getString(R.string.request_failed)
 
 suspend fun UserSession.invalidateIfAuthenticationFailure(error: Throwable): Boolean {
     if (!error.isAuthenticationFailure()) return false

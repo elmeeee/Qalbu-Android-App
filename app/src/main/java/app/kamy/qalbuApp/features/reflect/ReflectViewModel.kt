@@ -1,14 +1,16 @@
 package app.kamy.qalbuApp.features.reflect
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.ReflectFeedPost
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +34,7 @@ data class ReflectUiState(
 
 @HiltViewModel
 class ReflectViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val repository: ReflectRepository,
     private val userSession: UserSession
 ) : ViewModel() {
@@ -107,8 +110,8 @@ class ReflectViewModel @Inject constructor(
                     isLoading = false,
                     isLoadingMore = false,
                     isAuthenticated = if (signedOut) false else it.isAuthenticated,
-                    error = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE
-                    else t.message ?: "Failed to load feed"
+                    error = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
+                    else t.message ?: appContext.getString(R.string.reflect_feed_load_failed)
                 )
             }
         }
@@ -168,7 +171,7 @@ class ReflectViewModel @Inject constructor(
                     if (signedOut) {
                         rolled.copy(
                             isAuthenticated = false,
-                            error = SESSION_EXPIRED_MESSAGE
+                            error = appContext.getString(R.string.session_expired)
                         )
                     } else {
                         rolled

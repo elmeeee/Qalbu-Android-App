@@ -79,6 +79,13 @@ fun ReflectScreen(
 ) {
     val vm: ReflectViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+    val reflectTitle = stringResource(R.string.nav_reflect)
+    val reflectCommunity = stringResource(R.string.reflect_community)
+    val shareLabel = stringResource(R.string.share)
+    val contributorLabel = stringResource(R.string.reflect_contributor)
+    val verifiedLabel = stringResource(R.string.verified)
+    val signInTitle = stringResource(R.string.reflect_sign_in_title)
+    val signInSubtitle = stringResource(R.string.reflect_sign_in_subtitle)
 
     Box(
         modifier = Modifier
@@ -94,7 +101,7 @@ fun ReflectScreen(
             )
     ) {
         when {
-            !state.isAuthenticated -> SignInGate(onSignIn)
+            !state.isAuthenticated -> SignInGate(onSignIn, signInTitle, signInSubtitle)
             state.isLoading && state.posts.isEmpty() ->
                 Column(
                     modifier = Modifier
@@ -104,6 +111,8 @@ fun ReflectScreen(
                     ReflectStickyHeader(
                         segment = state.segment,
                         onSelectSegment = vm::switchSegment,
+                        reflectTitle = reflectTitle,
+                        reflectCommunity = reflectCommunity,
                         modifier = Modifier.background(
                             Brush.linearGradient(
                                 listOf(
@@ -130,7 +139,16 @@ fun ReflectScreen(
                     Text(state.error.orEmpty(), color = Color.White)
                     TextButton(onClick = { vm.loadPosts(reset = true) }) { Text(stringResource(R.string.retry), color = AlKhatibColors.GoldBright) }
                 }
-            else -> ReelFeed(state = state, vm = vm, onOpenVerse = onOpenVerse)
+            else -> ReelFeed(
+                state = state,
+                vm = vm,
+                onOpenVerse = onOpenVerse,
+                reflectTitle = reflectTitle,
+                reflectCommunity = reflectCommunity,
+                shareLabel = shareLabel,
+                contributorLabel = contributorLabel,
+                verifiedLabel = verifiedLabel
+            )
         }
     }
 }
@@ -140,7 +158,12 @@ fun ReflectScreen(
 private fun ReelFeed(
     state: ReflectUiState,
     vm: ReflectViewModel,
-    onOpenVerse: (String) -> Unit
+    onOpenVerse: (String) -> Unit,
+    reflectTitle: String,
+    reflectCommunity: String,
+    shareLabel: String,
+    contributorLabel: String,
+    verifiedLabel: String
 ) {
     val listState = rememberLazyListState()
     val firstVisible by remember { derivedStateOf { listState.firstVisibleItemIndex } }
@@ -165,6 +188,8 @@ private fun ReelFeed(
             ReflectStickyHeader(
                 segment = state.segment,
                 onSelectSegment = vm::switchSegment,
+                reflectTitle = reflectTitle,
+                reflectCommunity = reflectCommunity,
                 modifier = Modifier.background(
                     Brush.linearGradient(
                         listOf(
@@ -187,7 +212,10 @@ private fun ReelFeed(
                 post = post,
                 togglingLike = post.id in state.togglingLikePostIds,
                 onLike = { vm.toggleLike(post.id) },
-                onOpenVerse = { post.references?.firstOrNull()?.verseKey?.let(onOpenVerse) }
+                onOpenVerse = { post.references?.firstOrNull()?.verseKey?.let(onOpenVerse) },
+                contributorLabel = contributorLabel,
+                verifiedLabel = verifiedLabel,
+                shareLabel = shareLabel
             )
         }
         if (state.isLoadingMore) {
@@ -206,6 +234,8 @@ private fun ReelFeed(
 private fun ReflectStickyHeader(
     segment: ReflectSegment,
     onSelectSegment: (ReflectSegment) -> Unit,
+    reflectTitle: String,
+    reflectCommunity: String,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -226,14 +256,14 @@ private fun ReflectStickyHeader(
             )
             Spacer(Modifier.width(AlKhatibSpacing.sm))
             Text(
-                text = "Reflect",
+                text = reflectTitle,
                 style = MaterialTheme.typography.titleLarge,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
         }
         Text(
-            text = "Community reflections",
+            text = reflectCommunity,
             style = MaterialTheme.typography.bodySmall,
             color = Color.White.copy(alpha = 0.65f),
             modifier = Modifier.padding(start = 18.dp, top = 4.dp)
@@ -285,7 +315,10 @@ private fun ReelPostCard(
     post: ReflectFeedPost,
     togglingLike: Boolean,
     onLike: () -> Unit,
-    onOpenVerse: () -> Unit
+    onOpenVerse: () -> Unit,
+    contributorLabel: String,
+    verifiedLabel: String,
+    shareLabel: String
 ) {
     Card(
         modifier = Modifier
@@ -310,7 +343,7 @@ private fun ReelPostCard(
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = post.author?.displayName ?: "Contributor",
+                        text = post.author?.displayName ?: contributorLabel,
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
                         style = MaterialTheme.typography.titleMedium
@@ -319,7 +352,7 @@ private fun ReelPostCard(
                         Spacer(Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Filled.Bookmark,
-                            contentDescription = "Verified",
+                            contentDescription = verifiedLabel,
                             tint = AlKhatibColors.Gold,
                             modifier = Modifier.size(14.dp)
                         )
@@ -379,7 +412,7 @@ private fun ReelPostCard(
             ActionRailButton(
                 icon = Icons.Filled.Share,
                 tint = Color.White.copy(alpha = 0.8f),
-                label = "Share",
+                label = shareLabel,
                 onClick = { /* TODO: share */ }
             )
         }
@@ -418,7 +451,7 @@ private fun ActionRailButton(
 }
 
 @Composable
-private fun SignInGate(onSignIn: () -> Unit) {
+private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
     Column(
         modifier = Modifier.fillMaxSize().padding(32.dp),
         verticalArrangement = Arrangement.Center,
@@ -427,7 +460,7 @@ private fun SignInGate(onSignIn: () -> Unit) {
         Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null, tint = AlKhatibColors.GoldBright, modifier = Modifier.size(56.dp))
         Spacer(Modifier.height(16.dp))
         Text(
-            text = "Sign in to Reflect",
+            text = title,
             color = Color.White,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.headlineSmall,
@@ -435,7 +468,7 @@ private fun SignInGate(onSignIn: () -> Unit) {
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Sync your reflections across devices and join the community feed.",
+            text = subtitle,
             color = Color.White.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )

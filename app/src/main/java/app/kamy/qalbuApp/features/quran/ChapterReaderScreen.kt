@@ -283,12 +283,11 @@ fun ChapterReaderScreen(
                 Spacer(Modifier.height(6.dp))
                 val ayahNo = verse.resolvedVerseNumber
                 val juzNo = verse.juzNumber
+                val ayahLabel = ayahNo?.let { stringResource(R.string.ayah_number, it) }
+                    ?: stringResource(R.string.ayah_label, "—")
+                val juzLabel = juzNo?.let { stringResource(R.string.juz_number, it) }
                 Text(
-                    text = buildString {
-                        append("Ayah ")
-                        append(ayahNo?.toString() ?: "-")
-                        if (juzNo != null) append(" · Juz ").append(juzNo)
-                    },
+                    text = listOfNotNull(ayahLabel, juzLabel).joinToString(" · "),
                     style = MaterialTheme.typography.labelLarge,
                     color = AlKhatibColors.Slate500,
                     maxLines = 1,
@@ -459,7 +458,7 @@ private fun ReaderVerseActionsMenu(
                             modifier = Modifier.size(16.dp)
                         )
                     },
-                    label = "AI",
+                    label = stringResource(R.string.ai_label),
                     onClick = onAiShare
                 )
                 ReaderCompactMenuItem(

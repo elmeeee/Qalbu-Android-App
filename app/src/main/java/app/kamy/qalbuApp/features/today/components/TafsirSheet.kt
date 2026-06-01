@@ -43,6 +43,8 @@ fun TafsirSheet(
     onReload: () -> Unit = {}
 ) {
     if (!isVisible) return
+    val commentaryLabel = stringResource(R.string.commentary)
+    val tafsirEmptyDetail = stringResource(R.string.tafsir_empty_detail)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val rawText = tafsir?.text?.trim().orEmpty()
     val commentaryUnavailable = !isLoading && error == null && rawText.isEmpty()
@@ -63,7 +65,7 @@ fun TafsirSheet(
                 subtitle = when {
                     isLoading -> null
                     tafsir?.resourceName != null -> tafsir.resourceName
-                    else -> "Commentary"
+                    else -> commentaryLabel
                 }
             )
             ReaderSheetDivider()
@@ -80,7 +82,7 @@ fun TafsirSheet(
                 commentaryUnavailable -> ReaderSheetScrollBody {
                     ReaderEmptyState(
                         title = stringResource(R.string.tafsir_empty),
-                        description = "This verse doesn't include tafsir text for this source yet."
+                        description = tafsirEmptyDetail
                     )
                 }
                 else -> ReaderSheetScrollBody { TafsirBody(rawText) }

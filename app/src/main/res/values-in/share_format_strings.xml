@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_brand_header">*Qalbu | Quran Foundation*</string>
+    <string name="share_brand_tagline">_1 Ayat, 1 Hari 📖 Baca, Renung, Bagikan_</string>
+
+    <string name="share_addr_morning_1">_Saudaraku pagi ini..._</string>
+    <string name="share_addr_morning_2">_Saudariku pagi ini..._</string>
+    <string name="share_addr_morning_3">_Sahabatku pagi ini..._</string>
+    <string name="share_addr_afternoon_1">_Sahabatku siang ini..._</string>
+    <string name="share_addr_afternoon_2">_Saudaraku siang ini..._</string>
+    <string name="share_addr_afternoon_3">_Teman seperjuangan siang ini..._</string>
+    <string name="share_addr_evening_1">_Sahabatku sore ini..._</string>
+    <string name="share_addr_evening_2">_Saudaraku sore ini..._</string>
+    <string name="share_addr_evening_3">_Saudariku sore ini..._</string>
+    <string name="share_addr_night_1">_Sahabatku malam ini..._</string>
+    <string name="share_addr_night_2">_Saudaraku malam ini..._</string>
+    <string name="share_addr_night_3">_Saudariku malam ini..._</string>
+
+    <string name="share_hook_monday">*Saat minggu baru dimulai,*</string>
+    <string name="share_hook_tuesday">*Saat Selasa berjalan,*</string>
+    <string name="share_hook_wednesday">*Pengingat pertengahan minggu,*</string>
+    <string name="share_hook_thursday">*Saat Kamis berlalu,*</string>
+    <string name="share_hook_friday">*Saat Jumat mendekat,*</string>
+    <string name="share_hook_saturday">*Akhir pekan ini,*</string>
+    <string name="share_hook_sunday">*Pada Minggu ini,*</string>
+
+    <string name="share_reminder_morning_1">mulailah hari dengan kejernihan sebelum kamu menyerap setiap suara di sekitarmu.</string>
+    <string name="share_reminder_morning_2">tanamkan niat sejak pagi: verifikasi sebelum percaya, dan renungkan sebelum bereaksi.</string>
+    <string name="share_reminder_morning_3">jadikan ayat ini jangkar pikiranmu sebelum kesibukan datang.</string>
+    <string name="share_reminder_afternoon_1">berhenti sejenak di tengah hari dan luruskan kembali hatimu pada kebenaran.</string>
+    <string name="share_reminder_afternoon_2">jaga kedamaianmu dengan menyaring apa yang kamu dengar dan ulang.</string>
+    <string name="share_reminder_afternoon_3">biarkan ayat ini menghentikan asumsi dan mengembalikan kejernihan.</string>
+    <string name="share_reminder_evening_1">sebelum hari berakhir, kembalikan hatimu pada kebenaran dan kerendahan hati.</string>
+    <string name="share_reminder_evening_2">perlambat langkah malam ini dan lepaskan kesimpulan yang dibentuk tanpa kepastian.</string>
+    <string name="share_reminder_evening_3">biarkan ayat ini membersihkan kebisingan hari ini sebelum masuk ke hatimu.</string>
+    <string name="share_reminder_night_1">sebelum tidur, tinggalkan gosip dan pegang teguh apa yang jelas.</string>
+    <string name="share_reminder_night_2">akhiri malam dengan renungan, bukan asumsi.</string>
+    <string name="share_reminder_night_3">jadikan ayat ini filter terakhir sebelum kamu beristirahat.</string>
+
+    <string name="share_hashtag_monday">#MondayMotivation 🌅</string>
+    <string name="share_hashtag_tuesday">#TuesdayTadabbur 🌿</string>
+    <string name="share_hashtag_wednesday">#WednesdayWisdom ✨</string>
+    <string name="share_hashtag_thursday">#ThursdayReflection 📚</string>
+    <string name="share_hashtag_friday">#JumuahReminder 🌙</string>
+    <string name="share_hashtag_saturday">#SaturdayReflection 🍃</string>
+    <string name="share_hashtag_sunday">#SundaySerenity ☁️</string>
+    <string name="share_hashtag_quran">#QuranReminder 🌿</string>
+    <string name="share_hashtag_rrs">#ReadReflectShare 🤍</string>
+</resources>

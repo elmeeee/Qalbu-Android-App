@@ -3,6 +3,7 @@ package app.kamy.qalbuApp.features.today
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.kamy.qalbuApp.core.locale.AppStrings
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.infrastructure.location.LocationProvider
@@ -10,7 +11,6 @@ import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordina
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
-import app.kamy.qalbuApp.infrastructure.notifications.AppNotificationCopy
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import app.kamy.qalbuApp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,13 +51,16 @@ data class PrayerUiState(
 @HiltViewModel
 class PrayerDashboardViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
+    private val strings: AppStrings,
     private val repository: AlAdhanRepository,
     private val locationProvider: LocationProvider,
     private val prayerMethodStore: PrayerCalculationStore,
     private val prayerNotificationPrefs: PrayerNotificationPreferencesStore
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(PrayerUiState())
+    private val _state = MutableStateFlow(
+        PrayerUiState(countdownSubtitle = strings.getString(R.string.prayer_schedule))
+    )
     val state: StateFlow<PrayerUiState> = _state.asStateFlow()
 
     private val timeFormatter = SimpleDateFormat("hh:mm a", Locale.US)
@@ -92,7 +95,7 @@ class PrayerDashboardViewModel @Inject constructor(
         }
         val loc = locationProvider.currentLocation()
         if (loc == null) {
-            _state.update { it.copy(isLoading = false, error = appContext.getString(R.string.location_failed)) }
+            _state.update { it.copy(isLoading = false, error = strings.getString(R.string.location_failed)) }
             return
         }
         val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
@@ -133,7 +136,7 @@ class PrayerDashboardViewModel @Inject constructor(
                 )
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: appContext.getString(R.string.prayer_fetch_failed)) }
+            _state.update { it.copy(isLoading = false, error = t.message ?: strings.getString(R.string.prayer_fetch_failed)) }
         }
     }
 
@@ -170,7 +173,7 @@ class PrayerDashboardViewModel @Inject constructor(
                         activePrayer = active,
                         nextPrayer = null,
                         countdown = formatDurationMs(elapsedMs),
-                        countdownSubtitle = appContext.getString(
+                        countdownSubtitle = strings.getString(
                             R.string.prayer_grace_passed,
                             prayerDisplayName(lastPassed.type)
                         ),
@@ -189,7 +192,7 @@ class PrayerDashboardViewModel @Inject constructor(
                 activePrayer = active,
                 nextPrayer = next.type,
                 countdown = formatDurationMs(deltaMs),
-                countdownSubtitle = appContext.getString(
+                countdownSubtitle = strings.getString(
                     R.string.prayer_time_remaining,
                     prayerDisplayName(next.type)
                 ),
@@ -219,8 +222,14 @@ class PrayerDashboardViewModel @Inject constructor(
 
     private fun dayKey(): String = dayKeyFormatter.format(Date())
 
-    private fun prayerDisplayName(type: PrayerType): String =
-        AppNotificationCopy.prayerDisplayName(appContext, type.aladhanKey)
+    private fun prayerDisplayName(type: PrayerType): String = when (type) {
+        PrayerType.FAJR -> strings.getString(R.string.prayer_fajr)
+        PrayerType.SUNRISE -> strings.getString(R.string.prayer_sunrise)
+        PrayerType.DHUHR -> strings.getString(R.string.prayer_dhuhr)
+        PrayerType.ASR -> strings.getString(R.string.prayer_asr)
+        PrayerType.MAGHRIB -> strings.getString(R.string.prayer_maghrib)
+        PrayerType.ISHA -> strings.getString(R.string.prayer_isha)
+    }
 
     fun formatPrayerTime(date: Date): String = timeFormatter.format(date)
 }

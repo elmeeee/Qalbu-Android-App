@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_brand_header">*Qalbu | Quran Foundation*</string>
+    <string name="share_brand_tagline">_1 Verse, 1 Day 📖 Read, Reflect, Share_</string>
+
+    <string name="share_addr_morning_1">_My brother this morning..._</string>
+    <string name="share_addr_morning_2">_My sister this morning..._</string>
+    <string name="share_addr_morning_3">_Dear soul this morning..._</string>
+    <string name="share_addr_afternoon_1">_My friend this afternoon..._</string>
+    <string name="share_addr_afternoon_2">_Dear heart this afternoon..._</string>
+    <string name="share_addr_afternoon_3">_Beloved seeker this afternoon..._</string>
+    <string name="share_addr_evening_1">_My friend this evening..._</string>
+    <string name="share_addr_evening_2">_Dear soul this evening..._</string>
+    <string name="share_addr_evening_3">_My brother this evening..._</string>
+    <string name="share_addr_night_1">_Dear heart tonight..._</string>
+    <string name="share_addr_night_2">_My friend tonight..._</string>
+    <string name="share_addr_night_3">_Beloved seeker tonight..._</string>
+
+    <string name="share_hook_monday">*As a new week begins,*</string>
+    <string name="share_hook_tuesday">*As this Tuesday moves on,*</string>
+    <string name="share_hook_wednesday">*Midweek reminder,*</string>
+    <string name="share_hook_thursday">*As Thursday passes,*</string>
+    <string name="share_hook_friday">*As Jumu\'ah approaches,*</string>
+    <string name="share_hook_saturday">*This weekend,*</string>
+    <string name="share_hook_sunday">*On this Sunday,*</string>
+
+    <string name="share_reminder_morning_1">start your day with clarity before you absorb every voice around you.</string>
+    <string name="share_reminder_morning_2">set your intention early: verify before believing, and reflect before reacting.</string>
+    <string name="share_reminder_morning_3">let this verse anchor your mind before the rush begins.</string>
+    <string name="share_reminder_afternoon_1">pause in the middle of your day and realign your heart with what is true.</string>
+    <string name="share_reminder_afternoon_2">protect your peace by filtering what you hear and what you repeat.</string>
+    <string name="share_reminder_afternoon_3">let this verse interrupt assumptions and restore clarity.</string>
+    <string name="share_reminder_evening_1">before the day closes, return your heart to truth and humility.</string>
+    <string name="share_reminder_evening_2">slow down tonight and release conclusions you built without certainty.</string>
+    <string name="share_reminder_evening_3">let this verse cleanse today\'s noise before it enters your heart.</string>
+    <string name="share_reminder_night_1">before you rest, leave rumours behind and hold on to what is clear.</string>
+    <string name="share_reminder_night_2">close your night with reflection, not assumptions.</string>
+    <string name="share_reminder_night_3">let this verse be your final filter before sleep.</string>
+
+    <string name="share_hashtag_monday">#MondayMotivation 🌅</string>
+    <string name="share_hashtag_tuesday">#TuesdayTadabbur 🌿</string>
+    <string name="share_hashtag_wednesday">#WednesdayWisdom ✨</string>
+    <string name="share_hashtag_thursday">#ThursdayReflection 📚</string>
+    <string name="share_hashtag_friday">#JumuahReminder 🌙</string>
+    <string name="share_hashtag_saturday">#SaturdayReflection 🍃</string>
+    <string name="share_hashtag_sunday">#SundaySerenity ☁️</string>
+    <string name="share_hashtag_quran">#QuranReminder 🌿</string>
+    <string name="share_hashtag_rrs">#ReadReflectShare 🤍</string>
+</resources>

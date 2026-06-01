@@ -1,5 +1,7 @@
 package app.kamy.qalbuApp.features.reader
 
+import android.content.Context
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.domain.model.HadithGrade
 import app.kamy.qalbuApp.domain.model.HadithReference
 import app.kamy.qalbuApp.ui.common.toReaderPlainText
@@ -13,10 +15,10 @@ data class HadithDisplayItem(
     val gradeLines: List<String>
 )
 
-fun List<HadithReference>.toDisplayItems(): List<HadithDisplayItem> =
-    mapNotNull { it.toDisplayItem() }
+fun List<HadithReference>.toDisplayItems(context: Context): List<HadithDisplayItem> =
+    mapNotNull { it.toDisplayItem(context) }
 
-private fun HadithReference.toDisplayItem(): HadithDisplayItem? {
+private fun HadithReference.toDisplayItem(context: Context): HadithDisplayItem? {
     val texts = hadith.orEmpty().filter { !it.body.isNullOrBlank() }
     if (texts.isEmpty()) return null
 
@@ -26,11 +28,11 @@ private fun HadithReference.toDisplayItem(): HadithDisplayItem? {
     if (body.isBlank()) return null
 
     val source = name?.trim().orEmpty()
-    val sourceName = source.ifEmpty { collection?.trim().orEmpty().ifEmpty { "Hadith" } }
+    val sourceName = source.ifEmpty { collection?.trim().orEmpty().ifEmpty { context.getString(R.string.hadith) } }
 
     val referenceParts = buildList {
         hadithNumber?.trim()?.takeIf { it.isNotEmpty() }?.let { add("#$it") }
-        bookNumber?.trim()?.takeIf { it.isNotEmpty() }?.let { add("Book $it") }
+        bookNumber?.trim()?.takeIf { it.isNotEmpty() }?.let { add(context.getString(R.string.hadith_book_number, it)) }
     }
 
     val gradeLines = texts.flatMap { text -> text.grades.orEmpty() }

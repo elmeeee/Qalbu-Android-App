@@ -160,6 +160,7 @@
     <string name="continue_reading">Teruskan bacaan</string>
     <string name="surah_number">Surah %1$d</string>
     <string name="ayah_number">Ayat %1$d</string>
+    <string name="ayah_label">Ayat %1$s</string>
     <string name="no_matches">Tiada padanan</string>
     <string name="search_surah_placeholder">Cari surah, nombor, atau tempat…</string>
     <string name="search_empty_message">Tiada padanan untuk “%1$s”. Cuba nombor surah, nama Arab, atau “Makkah” / “Madinah”.</string>
@@ -219,4 +220,48 @@
 
     <string name="published_to_reflect">Diterbitkan ke Refleksi</string>
     <string name="sign_in_to_publish">Log masuk untuk terbitkan refleksi</string>
+
+    <string name="location_enable">Dayakan lokasi</string>
+    <string name="location_unavailable">Lokasi tidak tersedia</string>
+    <string name="notifications_disabled_snackbar">Pemberitahuan dimatikan. Dayakan dalam Tetapan untuk peringatan solat.</string>
+    <string name="action_settings">Tetapan</string>
+    <string name="action_allow">Benarkan</string>
+    <string name="profile_still_loading">Profil masih dimuatkan — cuba lagi sebentar.</string>
+    <string name="reflect_sign_in_title">Log masuk ke Refleksi</string>
+    <string name="reflect_sign_in_subtitle">Segerakkan refleksi anda merentas peranti dan sertai suapan komuniti.</string>
+    <string name="reflect_contributor">Penyumbang</string>
+    <string name="verified">Disahkan</string>
+    <string name="reflect_feed_load_failed">Gagal memuatkan suapan</string>
+    <string name="done">Selesai</string>
+    <string name="this_verse">Ayat ini</string>
+    <string name="commentary">Tafsir</string>
+    <string name="tafsir_empty_detail">Ayat ini belum mempunyai teks tafsir untuk sumber ini.</string>
+    <string name="hadith_empty_detail">Tiada rujukan hadis dipautkan kepada ayat ini lagi.</string>
+    <string name="hadith_book_number">Kitab %1$s</string>
+    <string name="juz_number">Juz %1$d</string>
+    <string name="ai_label">AI</string>
+    <string name="clear_search_a11y">Kosongkan carian</string>
+    <string name="session_expired">Sesi tamat. Log masuk semula dari Akaun.</string>
+    <string name="request_failed">Permintaan gagal</string>
+    <string name="verse_load_failed">Gagal memuatkan ayat</string>
+    <string name="verse_of_day_load_failed">Tidak dapat memuatkan ayat hari ini. Tarik untuk cuba lagi.</string>
+    <string name="tafsir_load_failed">Tidak dapat memuatkan tafsir</string>
+    <string name="hadith_load_failed">Tidak dapat memuatkan hadis</string>
+    <string name="share_generate_failed">Tidak dapat menjana teks kongsi</string>
+    <string name="publish_failed">Penerbitan gagal</string>
+    <string name="profile_load_failed">Tidak dapat memuatkan profil anda.</string>
+    <string name="sign_in_to_publish_account">Log masuk dari Akaun untuk terbitkan.</string>
+    <string name="verses_load_failed">Gagal memuatkan ayat</string>
+    <string name="chapters_load_failed">Gagal memuatkan surah</string>
+
+    <string name="share_allah_says">قَالَ اللَّهُ تَعَالَى</string>
+    <string name="share_verse_ref">(%1$s)</string>
+    <string name="share_fallback_reflection">Ayat ini ingatkan saya untuk tenung dulu sebelum cakap atau bertindak.</string>
+    <string name="share_guaranteed_intro">Ayat ini membuak-buak dalam fikiran hari ini.</string>
+    <string name="share_dua_opener">🤲 Ya Allah,</string>
+    <string name="share_hashtags">#PeringatanQuran #BacaRenungKongsi</string>
+
+    <plurals name="hadith_count">
+        <item quantity="other">%d hadis</item>
+    </plurals>
 </resources>

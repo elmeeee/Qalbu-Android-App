@@ -1,11 +1,15 @@
 package app.kamy.qalbuApp.domain.share
 
+import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.core.locale.AppLanguage
+import app.kamy.qalbuApp.core.locale.AppStrings
 import app.kamy.qalbuApp.domain.model.HadithReference
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.infrastructure.ai.AiReflectionRepository
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.Calendar
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,7 +18,8 @@ import javax.inject.Singleton
 class VerseShareTextComposer @Inject constructor(
     private val contentRepository: ContentRepository,
     private val aiReflection: AiReflectionRepository,
-    private val appLanguageStore: AppLanguageStore
+    private val appLanguageStore: AppLanguageStore,
+    private val strings: AppStrings
 ) {
     private val shareTextCache = LinkedHashMap<String, String>()
     private val shareTafsirCache = LinkedHashMap<String, String>()
@@ -44,7 +49,7 @@ class VerseShareTextComposer @Inject constructor(
         return guaranteedFaithfulShareText(
             verseKey = verseKey,
             referenceLabel = referenceLabel,
-            arabic = verse.textUthmani,
+            arabic = verse.fullArabicForShare(),
             translation = verse.translations?.firstOrNull()?.text,
             tafsir = tafsir,
             hadith = hadith
@@ -65,7 +70,7 @@ class VerseShareTextComposer @Inject constructor(
         }
 
         val verseKey = verse.verseKey
-        val arabic = verse.textUthmani
+        val arabic = verse.fullArabicForShare()
         val translation = verse.translations?.firstOrNull()?.text
         val tafsir = loadTafsirForShare(verseKey)
         val hadith = loadHadithForShare(verseKey)
@@ -143,6 +148,11 @@ class VerseShareTextComposer @Inject constructor(
         tafsir: String?,
         hadith: String?
     ): String? {
+        val language = appLanguageStore.current()
+        val outputLanguage = language.aiPromptLanguage
+        val toneHint = language.aiToneHint
+        val languageRule = language.aiLanguageRule
+        val duaOpener = strings.getString(R.string.share_dua_opener)
         val verseLabel = humanLabel(verse.verseKey, referenceLabel)
         val translationText = translation.stripHtml()
         val arabicText = arabic?.trim().orEmpty()
@@ -150,43 +160,42 @@ class VerseShareTextComposer @Inject constructor(
         val hadithText = hadith?.replace("\n", " ")?.trim().orEmpty()
         val sourceName = verse.translations?.firstOrNull()?.resourceName?.trim().orEmpty()
 
-        val outputLanguage = appLanguageStore.current().aiPromptLanguage
         val system = """
-            You write concise Islamic reflections for social sharing.
-            Return plain text only (no JSON, no markdown code fences).
-            Keep aqidah-safe and avoid inventing hadith references.
-            Stay faithful to the provided verse, tafsir, and hadith context.
-            Write all output in $outputLanguage.
+            You help Muslims write short personal reflections to share with friends.
+            The verse (Arabic + translation) is shown separately — do NOT quote or repeat it.
+            Return plain text only. No headings, lists, markdown, or labels.
+            $languageRule
+            Tone: $toneHint
+            Sound like a real person — not AI, not a sermon, not a blog.
         """.trimIndent()
 
         val user = """
-            Write TWO sections in plain text (no JSON, no code fences):
+            Write ONLY the reflection + dua in $outputLanguage.
 
-            SECTION 1 — REFLECTION (4-6 short lines, $outputLanguage):
-            Focus on practical heart-check and behavior.
-            Do not include the verse quote, reference line, hashtags, or the dua header.
-            Keep under 70 words.
-            When citing hadith, use only the hadith context below (collection/number if present).
-            Do not invent facts outside the given verse + tafsir + hadith.
+            Structure:
+            • 3–5 short sentences (max 55 words): one honest takeaway for daily life. First person is fine.
+            • Blank line.
+            • One line starting with: $duaOpener
+              Then 1–2 natural dua sentences (max 28 words).
 
-            SECTION 2 — DUA ($outputLanguage, 1-2 short sentences only):
-            Start section 2 with exactly this line on its own:
-            🤲 *Ya Allah,*
-            Then write a fresh, personalized supplication tied to this verse (under 35 words).
-            Do not repeat the fixed phrase "purify our hearts and our tongues".
+            Avoid completely:
+            - "Section", "Reflection", "Dua", numbered lists, bullet points
+            - Sermon phrases: "Let us", "Indeed", "Furthermore", "In today's world", "As Muslims we must"
+            - Robotic or overly poetic language
+            - Repeating the verse, translation, or surah name
 
-            Verse reference: $verseLabel
-            Verse number: ${verse.resolvedVerseNumber ?: ""}
-            Juz: ${verse.juzNumber ?: ""}
-            Page: ${verse.pageNumber ?: ""}
-            Translation: ${translationText.ifBlank { "N/A" }}
-            Translation source: ${sourceName.ifBlank { "N/A" }}
-            Arabic (context): ${arabicText.ifBlank { "N/A" }}
-            Tafsir: ${tafsirText.ifBlank { "N/A" }.take(1_200)}
-            Hadith: ${hadithText.ifBlank { "N/A" }.take(1_000)}
+            Context (do not copy verbatim):
+            Verse: $verseLabel
+            Translation meaning: ${translationText.ifBlank { "N/A" }}
+            Tafsir hint: ${tafsirText.ifBlank { "N/A" }.take(900)}
+            Hadith hint: ${hadithText.ifBlank { "N/A" }.take(800)}
+            Arabic (meaning only, do not output Arabic): ${arabicText.ifBlank { "N/A" }.take(400)}
+            Source: ${sourceName.ifBlank { "N/A" }}
         """.trimIndent()
 
-        return aiReflection.complete(system = system, user = user, temperature = 0.35)
+        return aiReflection.complete(system = system, user = user, temperature = 0.62)
+            ?.let { humanizeAiOutput(it, language) }
+            ?.takeIf { it.isNotBlank() }
     }
 
     private suspend fun generatePersonalizedDua(
@@ -195,25 +204,26 @@ class VerseShareTextComposer @Inject constructor(
         tafsir: String?,
         hadith: String?
     ): String? {
-        val outputLanguage = appLanguageStore.current().aiPromptLanguage
+        val language = appLanguageStore.current()
+        val outputLanguage = language.aiPromptLanguage
+        val toneHint = language.aiToneHint
+        val languageRule = language.aiLanguageRule
+        val duaOpener = strings.getString(R.string.share_dua_opener)
         val system = """
-            You write short Islamic supplications for social sharing.
-            Return plain text only. Stay faithful to the given verse context.
-            Write in $outputLanguage.
+            Write a short personal dua for sharing. Plain text. $languageRule
+            Tone: $toneHint — natural, not robotic.
         """.trimIndent()
         val user = """
-            Write only a DUA block in $outputLanguage.
-            Start with exactly:
-            🤲 *Ya Allah,*
-            Then 1-2 short personalized sentences (under 35 words) based on the verse.
-            Do not repeat generic stock phrases like "purify our hearts and our tongues".
+            Write only a dua in $outputLanguage.
+            Start with exactly: $duaOpener
+            Then 1–2 short sentences (max 28 words). No headings or markdown.
 
             Verse: $verseLabel
             Translation: ${translation.stripHtml().ifBlank { "N/A" }}
-            Tafsir: ${tafsir?.take(220).orEmpty().ifBlank { "N/A" }}
-            Hadith: ${hadith?.take(400).orEmpty().ifBlank { "N/A" }}
         """.trimIndent()
-        return aiReflection.complete(system = system, user = user, temperature = 0.35)
+        return aiReflection.complete(system = system, user = user, temperature = 0.58)
+            ?.let { humanizeAiOutput(it, language) }
+            ?.takeIf { it.isNotBlank() }
     }
 
     private fun buildFaithfulShareText(
@@ -227,34 +237,10 @@ class VerseShareTextComposer @Inject constructor(
         val cleanedTranslation = translation.stripHtml()
         val cleanedArabic = arabic?.trim().orEmpty()
         val verseLabel = humanLabel(verseKey, referenceLabel)
-
-        val verseBlock = when {
-            cleanedTranslation.isNotEmpty() ->
-                "📖 _\"$cleanedTranslation\"_\n($verseLabel)"
-            cleanedArabic.isNotEmpty() ->
-                "📖 _${cleanedArabic}_\n($verseLabel)"
-            else -> "📖 ($verseLabel)"
-        }
-
         val aiBody = aiReflection?.trim().orEmpty()
         if (aiBody.isEmpty()) return null
         if (!isReflectionAligned(reflectionForAlignment(aiBody), cleanedTranslation, tafsir)) return null
-
-        val now = Date()
-        return """
-            *Al-Khatib | Quran Foundation*
-            _1 Verse, 1 Day 📖 Read, Reflect, Share_
-
-            ${dynamicAddressLine(now)}
-            ${dynamicTransitionLine(now)}
-
-            $ALLAH_SAYS_ARABIC
-            $verseBlock
-
-            $aiBody
-
-            ${hashtagsBlock(now)}
-        """.trimIndent()
+        return buildShareDocument(verseLabel, cleanedTranslation, cleanedArabic, aiBody)
     }
 
     private suspend fun guaranteedFaithfulShareText(
@@ -269,137 +255,167 @@ class VerseShareTextComposer @Inject constructor(
         val cleanedTranslation = translation.stripHtml()
         val cleanedArabic = arabic?.trim().orEmpty()
         val tafsirLine = tafsir?.trim().orEmpty()
-        val verseBlock = when {
-            cleanedTranslation.isNotEmpty() ->
-                "📖 _\"$cleanedTranslation\"_\n($verseLabel)"
-            cleanedArabic.isNotEmpty() ->
-                "📖 _${cleanedArabic}_\n($verseLabel)"
-            else -> "📖 ($verseLabel)"
-        }
-        val tafsirSummary = if (tafsirLine.isEmpty()) {
-            "Take this verse as a direct reminder to verify before reacting and to guard your tongue with truth."
-        } else {
-            tafsirLine.take(220)
-        }
-        val dua = generatePersonalizedDua(
-            verseLabel = verseLabel,
-            translation = translation,
-            tafsir = tafsir,
-            hadith = hadith
-        ).orEmpty()
-        val now = Date()
-        return buildString {
-            appendLine("*Al-Khatib | Quran Foundation*")
-            appendLine("_1 Verse, 1 Day 📖 Read, Reflect, Share_")
+        val reflectionBody = buildString {
+            appendLine(strings.getString(R.string.share_guaranteed_intro))
             appendLine()
-            appendLine("_My friend..._")
-            appendLine("Let this verse guide what you believe, what you repeat, and what you carry in your heart.")
-            appendLine()
-            appendLine(ALLAH_SAYS_ARABIC)
-            appendLine(verseBlock)
-            appendLine()
-            appendLine("Reflection:")
-            appendLine(tafsirSummary)
-            if (dua.isNotBlank()) {
+            append(
+                if (tafsirLine.isEmpty()) {
+                    strings.getString(R.string.share_fallback_reflection)
+                } else {
+                    humanizeTafsirSnippet(tafsirLine.take(200))
+                }
+            )
+            val dua = generatePersonalizedDua(
+                verseLabel = verseLabel,
+                translation = translation,
+                tafsir = tafsir,
+                hadith = hadith
+            )
+            if (!dua.isNullOrBlank()) {
+                appendLine()
                 appendLine()
                 append(dua)
             }
+        }.trim()
+        return buildShareDocument(verseLabel, cleanedTranslation, cleanedArabic, reflectionBody)
+    }
+
+    private fun buildShareDocument(
+        verseLabel: String,
+        cleanedTranslation: String,
+        cleanedArabic: String,
+        body: String
+    ): String {
+        val now = Date()
+        return buildString {
+            appendLine(strings.getString(R.string.share_brand_header))
+            appendLine(strings.getString(R.string.share_brand_tagline))
+            appendLine()
+            appendLine(dynamicAddressLine(now))
+            appendLine(dynamicTransitionLine(now))
+            appendLine()
+            appendLine(strings.getString(R.string.share_allah_says))
+            appendLine(buildVerseBlock(cleanedArabic, cleanedTranslation, verseLabel))
+            appendLine()
+            append(body.trim())
             appendLine()
             appendLine()
             append(hashtagsBlock(now))
         }.trim()
     }
 
-    private fun reflectionForAlignment(aiBody: String): String =
-        aiBody.substringBefore(DUA_HEADER_MARKER).trim()
+    private fun buildVerseBlock(arabic: String, translation: String, label: String): String =
+        buildString {
+            append("📖 ")
+            when {
+                arabic.isNotEmpty() && translation.isNotEmpty() -> {
+                    appendLine("_${formatArabicBlock(arabic)}_")
+                    appendLine("_\"$translation\"_")
+                    append("($label)")
+                }
+                translation.isNotEmpty() -> {
+                    appendLine("_\"$translation\"_")
+                    append("($label)")
+                }
+                arabic.isNotEmpty() -> {
+                    appendLine("_${formatArabicBlock(arabic)}_")
+                    append("($label)")
+                }
+                else -> append("($label)")
+            }
+        }
 
     private fun dynamicAddressLine(now: Date): String {
-        val options = when (ShareDayPeriod.forDate(now)) {
+        val ids = when (ShareDayPeriod.forDate(now)) {
             ShareDayPeriod.MORNING -> listOf(
-                "_My brother this morning..._",
-                "_My sister this morning..._",
-                "_Dear soul this morning..._"
+                R.string.share_addr_morning_1,
+                R.string.share_addr_morning_2,
+                R.string.share_addr_morning_3
             )
             ShareDayPeriod.AFTERNOON -> listOf(
-                "_My friend this afternoon..._",
-                "_Dear heart this afternoon..._",
-                "_Beloved seeker this afternoon..._"
+                R.string.share_addr_afternoon_1,
+                R.string.share_addr_afternoon_2,
+                R.string.share_addr_afternoon_3
             )
             ShareDayPeriod.EVENING -> listOf(
-                "_My friend this evening..._",
-                "_Dear soul this evening..._",
-                "_My brother this evening..._"
+                R.string.share_addr_evening_1,
+                R.string.share_addr_evening_2,
+                R.string.share_addr_evening_3
             )
             ShareDayPeriod.NIGHT -> listOf(
-                "_Dear heart tonight..._",
-                "_My friend tonight..._",
-                "_Beloved seeker tonight..._"
+                R.string.share_addr_night_1,
+                R.string.share_addr_night_2,
+                R.string.share_addr_night_3
             )
         }
-        return options.random()
+        return strings.getString(ids.random())
     }
 
     private fun dynamicTransitionLine(now: Date): String =
         "${dayAwareHook(now)} ${periodAwareReminder(now)}"
 
     private fun dayAwareHook(now: Date): String {
-        val cal = java.util.Calendar.getInstance().apply { time = now }
-        return when (cal.get(java.util.Calendar.DAY_OF_WEEK)) {
-            java.util.Calendar.MONDAY -> "*As a new week begins,*"
-            java.util.Calendar.TUESDAY -> "*As this Tuesday moves on,*"
-            java.util.Calendar.WEDNESDAY -> "*Midweek reminder,*"
-            java.util.Calendar.THURSDAY -> "*As Thursday passes,*"
-            java.util.Calendar.FRIDAY -> "*As Jumu'ah approaches,*"
-            java.util.Calendar.SATURDAY -> "*This weekend,*"
-            else -> "*On this Sunday,*"
+        val id = when (Calendar.getInstance().apply { time = now }.get(Calendar.DAY_OF_WEEK)) {
+            Calendar.MONDAY -> R.string.share_hook_monday
+            Calendar.TUESDAY -> R.string.share_hook_tuesday
+            Calendar.WEDNESDAY -> R.string.share_hook_wednesday
+            Calendar.THURSDAY -> R.string.share_hook_thursday
+            Calendar.FRIDAY -> R.string.share_hook_friday
+            Calendar.SATURDAY -> R.string.share_hook_saturday
+            else -> R.string.share_hook_sunday
         }
+        return strings.getString(id)
     }
 
     private fun periodAwareReminder(now: Date): String {
-        val reminders = when (ShareDayPeriod.forDate(now)) {
+        val ids = when (ShareDayPeriod.forDate(now)) {
             ShareDayPeriod.MORNING -> listOf(
-                "start your day with clarity before you absorb every voice around you.",
-                "set your intention early: verify before believing, and reflect before reacting.",
-                "let this verse anchor your mind before the rush begins."
+                R.string.share_reminder_morning_1,
+                R.string.share_reminder_morning_2,
+                R.string.share_reminder_morning_3
             )
             ShareDayPeriod.AFTERNOON -> listOf(
-                "pause in the middle of your day and realign your heart with what is true.",
-                "protect your peace by filtering what you hear and what you repeat.",
-                "let this verse interrupt assumptions and restore clarity."
+                R.string.share_reminder_afternoon_1,
+                R.string.share_reminder_afternoon_2,
+                R.string.share_reminder_afternoon_3
             )
             ShareDayPeriod.EVENING -> listOf(
-                "before the day closes, return your heart to truth and humility.",
-                "slow down tonight and release conclusions you built without certainty.",
-                "let this verse cleanse today's noise before it enters your heart."
+                R.string.share_reminder_evening_1,
+                R.string.share_reminder_evening_2,
+                R.string.share_reminder_evening_3
             )
             ShareDayPeriod.NIGHT -> listOf(
-                "before you rest, leave rumours behind and hold on to what is clear.",
-                "close your night with reflection, not assumptions.",
-                "let this verse be your final filter before sleep."
+                R.string.share_reminder_night_1,
+                R.string.share_reminder_night_2,
+                R.string.share_reminder_night_3
             )
         }
-        return reminders.random()
+        return strings.getString(ids.random())
     }
 
     private fun hashtagsBlock(now: Date): String {
-        val cal = java.util.Calendar.getInstance().apply { time = now }
-        val daySpecific = when (cal.get(java.util.Calendar.DAY_OF_WEEK)) {
-            java.util.Calendar.MONDAY -> "#MondayMotivation 🌅"
-            java.util.Calendar.TUESDAY -> "#TuesdayTadabbur 🌿"
-            java.util.Calendar.WEDNESDAY -> "#WednesdayWisdom ✨"
-            java.util.Calendar.THURSDAY -> "#ThursdayReflection 📚"
-            java.util.Calendar.FRIDAY -> "#JumuahReminder 🌙"
-            java.util.Calendar.SATURDAY -> "#SaturdayReflection 🍃"
-            else -> "#SundaySerenity ☁️"
+        val dayTag = when (Calendar.getInstance().apply { time = now }.get(Calendar.DAY_OF_WEEK)) {
+            Calendar.MONDAY -> strings.getString(R.string.share_hashtag_monday)
+            Calendar.TUESDAY -> strings.getString(R.string.share_hashtag_tuesday)
+            Calendar.WEDNESDAY -> strings.getString(R.string.share_hashtag_wednesday)
+            Calendar.THURSDAY -> strings.getString(R.string.share_hashtag_thursday)
+            Calendar.FRIDAY -> strings.getString(R.string.share_hashtag_friday)
+            Calendar.SATURDAY -> strings.getString(R.string.share_hashtag_saturday)
+            else -> strings.getString(R.string.share_hashtag_sunday)
         }
-        return """
-            #QuranReminder 🌿
-            #ReadReflectShare 🤍
-            $daySpecific
-        """.trimIndent()
+        return buildString {
+            appendLine(strings.getString(R.string.share_hashtag_quran))
+            appendLine(strings.getString(R.string.share_hashtag_rrs))
+            append(dayTag)
+        }.trim()
     }
 
+    private fun reflectionForAlignment(aiBody: String): String =
+        aiBody.substringBefore("🤲").trim()
+
     private fun isReflectionAligned(reflection: String, translation: String, tafsir: String?): Boolean {
+        if (reflection.length < 20) return false
+        if (appLanguageStore.current() != AppLanguage.ENGLISH) return true
         val source = "$translation ${tafsir.orEmpty()}".lowercase().trim()
         if (source.isEmpty()) return true
         val reflectionLower = reflection.lowercase()
@@ -412,10 +428,14 @@ class VerseShareTextComposer @Inject constructor(
     }
 
     private fun shareCacheKey(verse: RandomAyahPayload): String? {
-        verse.verseKey?.takeIf { it.isNotBlank() }?.let { return it }
-        verse.id?.let { return "id-$it" }
+        val lang = appLanguageStore.current().tag
+        verse.verseKey?.takeIf { it.isNotBlank() }?.let { return "$lang:v4:$it" }
+        verse.id?.let { return "$lang:v4:id-$it" }
         return null
     }
+
+    private fun humanLabel(verseKey: String?, referenceLabel: String?): String =
+        Companion.humanLabel(verseKey, referenceLabel, strings)
 
     private fun trimCachesIfNeeded() {
         trimMap(shareTextCache)
@@ -432,24 +452,120 @@ class VerseShareTextComposer @Inject constructor(
 
     companion object {
         private const val TAFSIR_RESOURCE_ID = "169"
-        private const val ALLAH_SAYS_ARABIC = "قَالَ اللَّهُ تَعَالَى"
-        private const val DUA_HEADER_MARKER = "🤲 *Ya Allah,*"
 
-        fun humanLabel(verseKey: String?, referenceLabel: String?): String {
+        fun humanLabel(verseKey: String?, referenceLabel: String?, strings: AppStrings? = null): String {
             if (!referenceLabel.isNullOrBlank()) {
-                return referenceLabel.replace(" - ", "・")
+                return referenceLabel.replace(" - ", "・").trim()
             }
-            if (verseKey.isNullOrBlank()) return "Quran"
+            if (verseKey.isNullOrBlank()) {
+                return strings?.getString(R.string.quran_title) ?: "Quran"
+            }
             val parts = verseKey.split(":")
             if (parts.size == 2) {
                 val chapter = parts[0].toIntOrNull()
                 val ayah = parts[1].toIntOrNull()
                 if (chapter != null && ayah != null) {
-                    return "Surah $chapter・$ayah"
+                    return if (strings != null) {
+                        "${strings.getString(R.string.surah_number, chapter)}・$ayah"
+                    } else {
+                        "Surah $chapter・$ayah"
+                    }
                 }
             }
             return verseKey
         }
+
+        fun sanitizeAiOutput(raw: String): String = raw
+            .replace(Regex("(?is)<think>.*?</think>"), "")
+            .replace(Regex("(?im)^SECTION\\s*\\d+\\s*[—–-]?.*$"), "")
+            .replace(Regex("(?im)^(reflection|dua|refleksi|doa)\\s*[—–-]?.*$"), "")
+            .replace(Regex("[*_`]"), "")
+            .lines()
+            .map { it.trimEnd() }
+            .filter { it.isNotBlank() }
+            .joinToString("\n")
+            .replace(Regex("\n{3,}"), "\n\n")
+            .trim()
+
+        fun humanizeAiOutput(raw: String, language: AppLanguage): String {
+            var text = sanitizeAiOutput(raw)
+            val sermonPatterns = listOf(
+                "(?i)in today'?s (fast-paced )?world",
+                "(?i)let us remember",
+                "(?i)it is important to (note|remember)",
+                "(?i)as muslims,? we (must|should)",
+                "(?i)furthermore,",
+                "(?i)in conclusion,",
+                "(?i)this (verse|ayah) (teaches|reminds) us that"
+            )
+            sermonPatterns.forEach { pattern ->
+                text = text.replace(Regex(pattern), "")
+            }
+            text = text.replace(Regex(" {2,}"), " ")
+                .replace(Regex("\n{3,}"), "\n\n")
+                .trim()
+            if (language != AppLanguage.ENGLISH && looksMostlyEnglish(text)) {
+                text = text.lines()
+                    .filterNot { looksMostlyEnglish(it) && !it.trimStart().startsWith("🤲") }
+                    .joinToString("\n")
+                    .trim()
+            }
+            return text
+        }
+
+        private fun looksMostlyEnglish(text: String): Boolean {
+            val words = text.lowercase()
+                .split(Regex("[^a-zA-Z']+"))
+                .filter { it.length >= 3 }
+            if (words.size < 4) return false
+            val englishHints = setOf(
+                "the", "and", "that", "this", "with", "your", "from", "have", "will",
+                "should", "remember", "verse", "allah", "indeed", "let", "our"
+            )
+            val hits = words.count { it in englishHints }
+            return hits >= words.size / 3
+        }
+
+        fun humanizeTafsirSnippet(raw: String): String =
+            raw.trim()
+                .replace(Regex("(?i)^in (this|the) verse,?"), "")
+                .replace(Regex("\\s+"), " ")
+                .trim()
+                .let { snippet ->
+                    if (snippet.endsWith(".")) snippet else "$snippet."
+                }
+
+        fun formatArabicBlock(arabic: String): String =
+            arabic.trim()
+                .replace(Regex("\\s+"), " ")
+                .let { block ->
+                    // Keep full ayah on one flowing line for clean copy/share; RTL renders in apps.
+                    block
+                }
+
+        fun RandomAyahPayload.fullArabicForShare(): String {
+            val candidates = listOf(
+                textUthmani,
+                textUthmaniSimple,
+                textUthmaniTajweed,
+                textImlaei,
+                textImlaeiSimple,
+                textQpcHafs,
+                textIndopak
+            )
+            return candidates.firstNotNullOfOrNull { it?.toPlainArabic()?.takeIf { ar -> ar.isNotBlank() } }
+                .orEmpty()
+        }
+
+        private fun String.toPlainArabic(): String = trim()
+            .replace(Regex("<[^>]+>"), "")
+            .replace(Regex("<p\\b[^>]*>", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("</p>", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("<div\\b[^>]*>", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("</div>", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
 
         private fun formatHadithForPrompt(hadith: HadithReference, preferredLang: String): String {
             val body = hadith.hadith

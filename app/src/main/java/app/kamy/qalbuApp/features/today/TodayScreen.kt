@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -85,10 +86,21 @@ fun TodayScreen(
     var exactAlarmPrompted by rememberSaveable(key = "exact_alarm_prompt_v2") { mutableStateOf(false) }
     var batteryOptPrompted by rememberSaveable(key = "battery_opt_prompt_v1") { mutableStateOf(false) }
 
+    val notificationsDisabledMsg = stringResource(R.string.notifications_disabled_snackbar)
+    val settingsLabel = stringResource(R.string.action_settings)
+    val exactAlarmMsg = stringResource(R.string.exact_alarm_rationale)
+    val allowLabel = stringResource(R.string.action_allow)
+    val locationEnable = stringResource(R.string.location_enable)
+    val locating = stringResource(R.string.locating)
+    val locationUnavailable = stringResource(R.string.location_unavailable)
+    val shareReflectionLabel = stringResource(R.string.share_reflection)
+    val profileStillLoading = stringResource(R.string.profile_still_loading)
+    val verseOfDayTitle = stringResource(R.string.verse_of_day)
+
     suspend fun showNotificationSettingsSnackbar() {
         val result = snackbarHostState.showSnackbar(
-            message = "Notifications are off. Enable them in Settings for prayer reminders.",
-            actionLabel = "Settings",
+            message = notificationsDisabledMsg,
+            actionLabel = settingsLabel,
             duration = SnackbarDuration.Long
         )
         if (result == SnackbarResult.ActionPerformed) {
@@ -159,8 +171,8 @@ fun TodayScreen(
         if (context.canScheduleExactAlarms()) return@LaunchedEffect
         exactAlarmPrompted = true
         val result = snackbarHostState.showSnackbar(
-            message = "Allow exact alarms so adhan and prayer reminders arrive on time.",
-            actionLabel = "Allow",
+            message = exactAlarmMsg,
+            actionLabel = allowLabel,
             duration = SnackbarDuration.Long
         )
         if (result == SnackbarResult.ActionPerformed) {
@@ -187,7 +199,7 @@ fun TodayScreen(
         }
         val result = snackbarHostState.showSnackbar(
             message = message,
-            actionLabel = "Allow",
+            actionLabel = allowLabel,
             duration = SnackbarDuration.Long
         )
         if (result == SnackbarResult.ActionPerformed) {
@@ -228,10 +240,10 @@ fun TodayScreen(
                     cityName = prayerState.cityName,
                     locationStatus = when {
                         prayerState.cityName != null -> null
-                        prayerState.needsPermission -> "Enable location"
-                        prayerState.isLoading -> "Locating…"
-                        prayerState.error != null -> "Location unavailable"
-                        else -> "Locating…"
+                        prayerState.needsPermission -> locationEnable
+                        prayerState.isLoading -> locating
+                        prayerState.error != null -> locationUnavailable
+                        else -> locating
                     },
                     hijriLabel = prayerState.hijriLabel,
                     gregorianLabel = prayerState.gregorianLabel,
@@ -272,7 +284,7 @@ fun TodayScreen(
                                         ?.substringBefore(" - ")
                                         ?.trim()
                                         .orEmpty()
-                                        .ifBlank { "Quran of the Day" }
+                                        .ifBlank { verseOfDayTitle }
                                     audioPlayer.playVerse(
                                         url = url,
                                         surahTitle = surahTitle,
@@ -323,13 +335,13 @@ fun TodayScreen(
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, draft)
             }
-            context.startActivity(Intent.createChooser(intent, "Share reflection"))
+            context.startActivity(Intent.createChooser(intent, shareReflectionLabel))
         },
         onPublish = {
             val authorId = todayState.profile?.id
             if (authorId.isNullOrBlank()) {
                 scope.launch {
-                    snackbarHostState.showSnackbar("Profile still loading — try again in a moment.")
+                    snackbarHostState.showSnackbar(profileStillLoading)
                 }
             } else {
                 todayVm.publishReflectionToReflect(authorId)

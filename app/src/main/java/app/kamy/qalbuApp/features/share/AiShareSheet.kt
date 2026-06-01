@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import app.kamy.qalbuApp.R
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 
@@ -78,8 +80,9 @@ fun AiShareSheet(
             }
             Text(
                 text = stringResource(R.string.ai_share_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.bodyMedium.copy(textAlign = TextAlign.Start),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth()
             )
             error?.let {
                 Text(
@@ -105,6 +108,10 @@ fun AiShareSheet(
                         .fillMaxWidth()
                         .heightIn(min = 160.dp, max = 320.dp),
                     enabled = !loading,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                        textAlign = TextAlign.Start,
+                        textDirection = TextDirection.Content
+                    ),
                     placeholder = { Text(stringResource(R.string.ai_share_placeholder)) }
                 )
                 if (loading) {

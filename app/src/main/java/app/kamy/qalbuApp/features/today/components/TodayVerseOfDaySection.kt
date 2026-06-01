@@ -128,6 +128,7 @@ fun TodayVerseOfDaySection(
                 val pauseLabel = stringResource(R.string.pause)
                 val audioLabel = stringResource(R.string.audio)
                 val tafsirLabel = stringResource(R.string.tafsir)
+                val aiLabel = stringResource(R.string.ai_label)
                 val actionPills = listOf(
                     ActionPillData(
                         if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
@@ -136,7 +137,7 @@ fun TodayVerseOfDaySection(
                     ) { onPlayAudio() },
                     ActionPillData(
                         Icons.Filled.AutoAwesome,
-                        if (aiShareLoading) "…" else "AI",
+                        if (aiShareLoading) "…" else aiLabel,
                         AlKhatibColors.Gold,
                         onAiShare
                     ),

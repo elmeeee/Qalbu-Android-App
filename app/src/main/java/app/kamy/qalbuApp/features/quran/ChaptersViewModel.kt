@@ -1,13 +1,16 @@
 package app.kamy.qalbuApp.features.quran
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import app.kamy.qalbuApp.domain.model.ReadingSession
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReadingSessionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +29,7 @@ data class ChaptersUiState(
 
 @HiltViewModel
 class ChaptersViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,
     private val userSession: UserSession
@@ -61,7 +65,7 @@ class ChaptersViewModel @Inject constructor(
                 }
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: "Failed to load chapters") }
+            _state.update { it.copy(isLoading = false, error = t.message ?: appContext.getString(R.string.chapters_load_failed)) }
         }
     }
 

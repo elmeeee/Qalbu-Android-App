@@ -22,6 +22,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.kamy.qalbuApp.R
 import androidx.compose.ui.graphics.Color
@@ -45,8 +46,10 @@ fun HadithSheet(
     onLoadMore: () -> Unit = {}
 ) {
     if (!isVisible) return
+    val context = LocalContext.current
+    val hadithEmptyDetail = stringResource(R.string.hadith_empty_detail)
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val items = hadiths.toDisplayItems()
+    val items = hadiths.toDisplayItems(context)
     val empty = !isLoading && error == null && items.isEmpty()
 
     ModalBottomSheet(
@@ -64,7 +67,7 @@ fun HadithSheet(
                 icon = Icons.Filled.Forum,
                 subtitle = when {
                     isLoading -> null
-                    items.isNotEmpty() -> "${items.size} hadith${if (items.size == 1) "" else "s"}"
+                    items.isNotEmpty() -> stringResource(R.plurals.hadith_count, items.size, items.size)
                     else -> null
                 }
             )
@@ -86,7 +89,7 @@ fun HadithSheet(
                 empty -> ReaderSheetScrollBody {
                     ReaderEmptyState(
                         title = stringResource(R.string.hadith_empty),
-                        description = "No hadith references are linked to this ayah yet.",
+                        description = hadithEmptyDetail,
                         icon = Icons.Filled.Forum
                     )
                 }

@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import android.content.Context
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.core.config.AppConfig
-import app.kamy.qalbuApp.core.error.SESSION_EXPIRED_MESSAGE
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
@@ -131,7 +130,7 @@ class TodayViewModel @Inject constructor(
                         verseReferenceLabel = verse?.referenceLabel(chapterName),
                         recitations = recitations,
                         error = if (verse == null) {
-                            it.error ?: "Could not load verse of the day. Pull to retry."
+                            it.error ?: appContext.getString(R.string.verse_of_day_load_failed)
                         } else {
                             null
                         }
@@ -143,7 +142,7 @@ class TodayViewModel @Inject constructor(
                 }
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: "Failed to load verse") }
+            _state.update { it.copy(isLoading = false, error = t.message ?: appContext.getString(R.string.verse_load_failed)) }
         }
     }
 
@@ -175,7 +174,7 @@ class TodayViewModel @Inject constructor(
             _state.update { it.copy(tafsir = tafsir, tafsirLoading = false, tafsirError = null) }
         } catch (t: Throwable) {
             _state.update {
-                it.copy(tafsirLoading = false, tafsirError = t.message ?: "Could not load tafsir")
+                it.copy(tafsirLoading = false, tafsirError = t.message ?: appContext.getString(R.string.tafsir_load_failed))
             }
         }
     }
@@ -229,7 +228,7 @@ class TodayViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         aiShareLoading = false,
-                        aiShareError = t.message ?: "Could not generate share text"
+                        aiShareError = t.message ?: appContext.getString(R.string.share_generate_failed)
                     )
                 }
             }
@@ -263,8 +262,8 @@ class TodayViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isPublishing = false,
-                        publishToast = if (t.isAuthenticationFailure()) SESSION_EXPIRED_MESSAGE
-                        else t.message ?: "Publish failed",
+                        publishToast = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
+                        else t.message ?: appContext.getString(R.string.publish_failed),
                         publishToastIsError = true
                     )
                 }
