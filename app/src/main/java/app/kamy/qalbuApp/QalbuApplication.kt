@@ -28,9 +28,8 @@ class QalbuApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         NotificationChannels.ensureAll(this)
-        DailyVerseNotificationScheduler.reschedule(this)
-        // Restore prayer alarms from cache so adhan works when the app is not open.
-        PrayerNotificationCoordinator.rescheduleFromCache(this)
+        runCatching { DailyVerseNotificationScheduler.reschedule(this) }
+        runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
         if (PrayerScheduleCache.loadCoordinates(this) != null) {
             appScope.launch {
                 runCatching { PrayerScheduleRefresher.refresh(this@QalbuApplication) }

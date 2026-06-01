@@ -272,16 +272,12 @@ object PrayerNotificationScheduler {
         fireAt: Long,
         pending: PendingIntent
     ) {
-        val showIntent = PendingIntent.getActivity(
-            context,
-            SHOW_ALARM_INTENT_REQUEST,
-            Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        ExactAlarmScheduler.schedule(
+            context = context,
+            triggerAtMillis = fireAt,
+            pending = pending,
+            showIntentRequestCode = SHOW_ALARM_INTENT_REQUEST
         )
-        val alarmClock = AlarmManager.AlarmClockInfo(fireAt, showIntent)
-        alarmManager.setAlarmClock(alarmClock, pending)
     }
 
     private const val SHOW_ALARM_INTENT_REQUEST = 7_001

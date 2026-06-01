@@ -165,7 +165,7 @@ fun TodayScreen(
         }
     }
 
-    // Exact alarms are required for adhan to fire at the right minute (Android 12+).
+    // Exact alarms: auto-prompted on app open via ExactAlarmPermissionGate in MainActivity.
     LaunchedEffect(prayerState.timings.isNotEmpty(), exactAlarmPrompted) {
         if (exactAlarmPrompted || prayerState.timings.isEmpty()) return@LaunchedEffect
         if (context.canScheduleExactAlarms()) return@LaunchedEffect

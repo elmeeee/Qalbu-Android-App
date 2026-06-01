@@ -63,18 +63,14 @@ object DailyVerseNotificationScheduler {
     fun scheduleAt(context: Context, hour: Int, minute: Int) {
         ensureChannel(context)
         cancel(context)
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val trigger = nextTriggerMillis(hour, minute)
         val pending = pendingIntent(context)
-        val showIntent = PendingIntent.getActivity(
-            context,
-            SHOW_ALARM_INTENT_REQUEST,
-            Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        ExactAlarmScheduler.schedule(
+            context = context,
+            triggerAtMillis = trigger,
+            pending = pending,
+            showIntentRequestCode = SHOW_ALARM_INTENT_REQUEST
         )
-        alarmManager.setAlarmClock(AlarmManager.AlarmClockInfo(trigger, showIntent), pending)
     }
 
     fun scheduleNext(context: Context) {

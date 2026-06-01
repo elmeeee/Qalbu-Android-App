@@ -15,6 +15,7 @@ import app.kamy.qalbuApp.design.theme.AlKhatibTheme
 import app.kamy.qalbuApp.core.locale.AppLocale
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
+import app.kamy.qalbuApp.ui.permissions.ExactAlarmPermissionGate
 import app.kamy.qalbuApp.ui.root.RootScreen
 import app.kamy.qalbuApp.ui.splash.AppSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
                 if (showGreetingSplash) {
                     AppSplashScreen(onFinished = { showGreetingSplash = false })
                 } else {
+                    ExactAlarmPermissionGate()
                     RootScreen(
                         pendingDeepLinkRoute = pendingRoute,
                         onDeepLinkHandled = { deepLinkRoute.value = null }
