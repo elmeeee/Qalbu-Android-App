@@ -18,6 +18,7 @@ import app.kamy.qalbuApp.infrastructure.auth.IdTokenProfileParser
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
+import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleRefresher
 import app.kamy.qalbuApp.infrastructure.preferences.AdhanPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseNotificationStore
@@ -405,6 +406,10 @@ class AccountViewModel @Inject constructor(
 
     fun setPrayerMethod(method: PrayerCalculationMethod) {
         prayerMethodStore.setMethod(method)
+        viewModelScope.launch {
+            runCatching { PrayerScheduleRefresher.refresh(appContext) }
+            PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+        }
     }
 
     fun setPrayerNotificationEnabled(type: PrayerType, enabled: Boolean) {

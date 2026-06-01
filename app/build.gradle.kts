@@ -17,6 +17,13 @@ val localProps = Properties().apply {
 fun secret(key: String, default: String = ""): String =
     (localProps.getProperty(key) ?: System.getenv(key) ?: default)
 
+val releaseStoreFile = secret("RELEASE_STORE_FILE")
+val hasReleaseSigning = releaseStoreFile.isNotBlank() &&
+    rootProject.file(releaseStoreFile).exists() &&
+    secret("RELEASE_STORE_PASSWORD").isNotBlank() &&
+    secret("RELEASE_KEY_ALIAS").isNotBlank() &&
+    secret("RELEASE_KEY_PASSWORD").isNotBlank()
+
 android {
     namespace = "app.kamy.qalbuApp"
     compileSdk = 36
@@ -32,6 +39,17 @@ android {
 
         // OAuth callback host/scheme used by AppAuth's RedirectUriReceiverActivity manifest placeholder.
         manifestPlaceholders["appAuthRedirectScheme"] = "alkhatib"
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = secret("RELEASE_STORE_PASSWORD")
+                keyAlias = secret("RELEASE_KEY_ALIAS")
+                keyPassword = secret("RELEASE_KEY_PASSWORD")
+            }
+        }
     }
 
     buildFeatures {
@@ -66,6 +84,9 @@ android {
         }
         release {
             isMinifyEnabled = false
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

@@ -11,5 +11,12 @@ QF_OAUTH_CLIENT_SECRET_RELEASE=
 API_KEY_GROQ=
 AI_MODEL=qwen/qwen3-32b
 
+# Release signing (Play Store upload). Paths are relative to project root.
+# Generate with: keytool -genkeypair -v -keystore keystore/qalbu-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias qalbu
+RELEASE_STORE_FILE=keystore/qalbu-release.jks
+RELEASE_STORE_PASSWORD=
+RELEASE_KEY_ALIAS=qalbu
+RELEASE_KEY_PASSWORD=
+
 # Note: QF scopes must include `reading_session` for the continue-reading API.
 # After changing scopes on the QF dashboard, sign out + sign in again so a new refresh_token is issued.

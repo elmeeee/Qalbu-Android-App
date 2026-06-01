@@ -33,7 +33,7 @@ object PrayerNotificationCoordinator {
     }
 
     private fun rescheduleBlocking(appContext: Context) {
-        val bundle = PrayerScheduleCache.load(appContext) ?: return
+        val bundle = PrayerScheduleCache.load(appContext)
         val options = PrayerNotificationPreferencesStore.from(appContext).scheduleOptions()
         PrayerNotificationScheduler.reschedule(appContext, bundle, options)
     }

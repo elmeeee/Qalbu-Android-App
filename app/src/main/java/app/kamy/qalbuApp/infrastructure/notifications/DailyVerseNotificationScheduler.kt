@@ -26,6 +26,7 @@ object DailyVerseNotificationScheduler {
 
     private const val REQUEST_CODE = 7001
     private const val NOTIFICATION_ID = 7001
+    private const val SHOW_ALARM_INTENT_REQUEST = 7_002
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
@@ -61,18 +62,32 @@ object DailyVerseNotificationScheduler {
 
     fun scheduleAt(context: Context, hour: Int, minute: Int) {
         ensureChannel(context)
+        cancel(context)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val trigger = nextTriggerMillis(hour, minute)
-        alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP,
-            trigger,
-            AlarmManager.INTERVAL_DAY,
-            pendingIntent(context)
+        val pending = pendingIntent(context)
+        val showIntent = PendingIntent.getActivity(
+            context,
+            SHOW_ALARM_INTENT_REQUEST,
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        alarmManager.setAlarmClock(AlarmManager.AlarmClockInfo(trigger, showIntent), pending)
     }
 
     fun scheduleNext(context: Context) {
         val prefs = context.getSharedPreferences("qalbu_notification_prefs", Context.MODE_PRIVATE)
+        val enabled = if (!prefs.contains("dailyVerseNotificationsEnabled")) {
+            true
+        } else {
+            prefs.getBoolean("dailyVerseNotificationsEnabled", true)
+        }
+        if (!enabled) {
+            cancel(context)
+            return
+        }
         val hour = prefs.getInt("dailyVerseNotificationHour", DailyVerseNotificationStore.DEFAULT_HOUR)
         val minute = prefs.getInt("dailyVerseNotificationMinute", DailyVerseNotificationStore.DEFAULT_MINUTE)
         scheduleAt(context, hour, minute)

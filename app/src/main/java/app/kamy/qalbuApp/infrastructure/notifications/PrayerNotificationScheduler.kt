@@ -20,16 +20,19 @@ object PrayerNotificationScheduler {
     private const val SUNNAH_KAHF_REQUEST = 10_002
     private const val MIDNIGHT_REFRESH_REQUEST = 11_000
     private const val NOTIFICATION_ID_BASE = 8_000
-    private const val DAYS_TO_SCHEDULE = 3
+    private const val DAYS_TO_SCHEDULE = 7
 
     fun reschedule(
         context: Context,
         bundle: PrayerScheduleBundle?,
         options: PrayerNotificationScheduleOptions
     ) {
-        runCatching { cancelAll(context) }
-        if (bundle == null) return
         NotificationChannels.ensureAll(context)
+        runCatching { cancelAll(context) }
+        scheduleSunnahReminders(context, options)
+        scheduleMidnightRefresh(context)
+        if (bundle == null) return
+
         val now = System.currentTimeMillis()
 
         bundle.adzanPrayers.forEachIndexed { index, prayer ->
@@ -100,9 +103,6 @@ object PrayerNotificationScheduler {
                     )
                 }
         }
-
-        scheduleSunnahReminders(context, options)
-        scheduleMidnightRefresh(context)
     }
 
     fun scheduleMidnightRefresh(context: Context) {
