@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.infrastructure.notifications.AppNotificationCopy
+import app.kamy.qalbuApp.ui.permissions.hasAggressiveOemBatteryManagement
 import app.kamy.qalbuApp.ui.permissions.isIgnoringBatteryOptimizations
 import app.kamy.qalbuApp.ui.permissions.openBackgroundReliabilitySettings
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsGroup
@@ -49,6 +50,7 @@ fun NotificationSettingsScreen(
 ) {
     val state by vm.state.collectAsState()
     val context = LocalContext.current
+    val showBatterySettings = hasAggressiveOemBatteryManagement()
     val batteryUnrestricted = context.isIgnoringBatteryOptimizations()
 
     Column(
@@ -107,18 +109,20 @@ fun NotificationSettingsScreen(
 
         NotificationSectionLabel(stringResource(R.string.section_prayer))
         AlKhatibSettingsGroup {
-            AlKhatibSettingsNavigationRow(
-                icon = Icons.Filled.BatteryChargingFull,
-                title = stringResource(R.string.battery_opt_settings_title),
-                subtitle = stringResource(
-                    if (batteryUnrestricted) {
-                        R.string.battery_opt_settings_subtitle_ok
-                    } else {
-                        R.string.battery_opt_settings_subtitle
-                    }
-                ),
-                onClick = { context.openBackgroundReliabilitySettings() }
-            )
+            if (showBatterySettings) {
+                AlKhatibSettingsNavigationRow(
+                    icon = Icons.Filled.BatteryChargingFull,
+                    title = stringResource(R.string.battery_opt_settings_title),
+                    subtitle = stringResource(
+                        if (batteryUnrestricted) {
+                            R.string.battery_opt_settings_subtitle_ok
+                        } else {
+                            R.string.battery_opt_settings_subtitle
+                        }
+                    ),
+                    onClick = { context.openBackgroundReliabilitySettings() }
+                )
+            }
             PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { prayer ->
                 AlKhatibSettingsToggleRow(
                     icon = Icons.Filled.Notifications,

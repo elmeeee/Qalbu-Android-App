@@ -133,10 +133,10 @@
 
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Benarkan penggera tepat supaya azan dan peringatan solat sampai tepat masa.</string>
-    <string name="battery_opt_snackbar_message">Benarkan bateri tanpa had supaya azan dan peringatan solat berfungsi apabila aplikasi ditutup.</string>
-    <string name="battery_opt_snackbar_oem_message">Pada telefon %1$s: set Qalbu ke Tanpa had / Unrestricted dan dayakan autostart supaya azan berfungsi di latar belakang.</string>
+    <string name="battery_opt_snackbar_message">Pada sesetengah telefon, benarkan bateri tanpa had supaya azan berfungsi apabila aplikasi ditutup.</string>
+    <string name="battery_opt_snackbar_oem_message">Pada telefon %1$s: set Qalbu ke Tanpa had dan dayakan autostart supaya azan berfungsi di latar belakang.</string>
     <string name="battery_opt_settings_title">Latar belakang &amp; bateri</string>
-    <string name="battery_opt_settings_subtitle">Tanpa had — diperlukan untuk azan apabila app ditutup</string>
+    <string name="battery_opt_settings_subtitle">Tanpa had — disyorkan untuk jenama telefon ini</string>
     <string name="battery_opt_settings_subtitle_ok">Tanpa had — peringatan latar belakang dihidupkan</string>
 
     <string name="tab_placeholder_today">Hari Ini — ayat harian, jadual solat, kongsi</string>
@@ -147,6 +147,27 @@
     <string name="cancel">Batal</string>
     <string name="save">Simpan</string>
     <string name="try_again">Cuba lagi</string>
+    <string name="error_no_internet_title">Tiada sambungan internet</string>
+    <string name="error_no_internet_body">Semak sambungan anda dan cuba lagi.</string>
+    <string name="error_server_title">Pelayan tidak tersedia</string>
+    <string name="error_server_body">Sesuatu tidak kena di pihak kami. Sila cuba lagi sebentar lagi.</string>
+    <string name="error_forbidden_title">Akses ditolak</string>
+    <string name="error_forbidden_body">Anda tidak mempunyai kebenaran untuk memuatkan kandungan ini.</string>
+    <string name="error_unauthorized_title">Sesi tamat</string>
+    <string name="error_unauthorized_body">Log masuk semula dari Akaun untuk teruskan.</string>
+    <string name="error_not_found_title">Kandungan tidak dijumpai</string>
+    <string name="error_not_found_body">Kandungan yang anda cari tidak dijumpai.</string>
+    <string name="error_client_title">Permintaan gagal</string>
+    <string name="error_client_body">Permintaan tidak dapat diselesaikan. Sila cuba lagi.</string>
+    <string name="error_parsing_title">Respons tidak dijangka</string>
+    <string name="error_parsing_body">Data diterima dalam format yang tidak dijangka. Sila cuba lagi.</string>
+    <string name="error_config_title">Persediaan belum siap</string>
+    <string name="error_config_body">Aplikasi belum bersedia memuatkan kandungan. Sila cuba lagi.</string>
+    <string name="error_generic_title">Sesuatu tidak kena</string>
+    <string name="error_generic_body">Sila cuba lagi. Jika masalah berterusan, semak sambungan anda.</string>
+    <string name="error_prayer_fetch_title">Gagal memuatkan waktu solat</string>
+    <string name="error_location_title">Lokasi tidak tersedia</string>
+    <string name="error_location_body">Dayakan akses lokasi untuk paparkan waktu solat yang tepat.</string>
     <string name="close">Tutup</string>
     <string name="share">Kongsi</string>
     <string name="regenerate">Jana semula</string>

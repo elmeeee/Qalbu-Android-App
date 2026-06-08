@@ -78,7 +78,9 @@ import androidx.compose.ui.res.stringResource
 import app.kamy.qalbuApp.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.features.share.AiShareSheet
+import app.kamy.qalbuApp.design.components.AlKhatibErrorState
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.features.reader.HadithSheet
 import app.kamy.qalbuApp.domain.model.RecitationPayload
@@ -111,6 +113,7 @@ fun ChapterReaderScreen(
         derivedStateOf { state.verses.getOrNull(pagerState.currentPage) }
     }
     val surahTitle = state.chapterDisplayName ?: stringResource(R.string.surah_number, state.chapterNumber)
+    val loadErrorDisplay = state.error.rememberErrorDisplay(R.string.verses_load_failed)
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }
@@ -164,6 +167,18 @@ fun ChapterReaderScreen(
             ) {
                 CircularProgressIndicator(
                     color = AlKhatibColors.DeepEmerald
+                )
+            }
+        } else if (state.error != null && state.verses.isEmpty() && loadErrorDisplay != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding(),
+                contentAlignment = Alignment.Center
+            ) {
+                AlKhatibErrorState(
+                    display = loadErrorDisplay,
+                    onRetry = { vm.loadInitial() }
                 )
             }
         } else if (state.verses.isNotEmpty()) {

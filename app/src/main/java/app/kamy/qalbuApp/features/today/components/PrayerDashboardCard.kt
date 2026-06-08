@@ -26,20 +26,26 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.kamy.qalbuApp.design.components.AlKhatibErrorStateDark
 import app.kamy.qalbuApp.design.components.AlKhatibSkeletonOnDark
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.features.today.PrayerTheme
 import app.kamy.qalbuApp.features.today.PrayerUiState
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
 fun PrayerDashboardCard(
     state: PrayerUiState,
+    onRetry: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val fetchErrorDisplay = state.error
+        ?.takeIf { !state.needsPermission }
+        ?.rememberErrorDisplay(R.string.error_prayer_fetch_title)
     val brush = when (state.theme) {
         PrayerTheme.DAYLIGHT -> Brush.linearGradient(
             listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
@@ -81,6 +87,12 @@ fun PrayerDashboardCard(
                 modifier = Modifier
                     .fillMaxWidth(0.7f)
                     .height(12.dp)
+            )
+        } else if (fetchErrorDisplay != null && state.timings.isEmpty()) {
+            AlKhatibErrorStateDark(
+                display = fetchErrorDisplay,
+                onRetry = onRetry,
+                modifier = Modifier.fillMaxWidth()
             )
         } else {
             Text(

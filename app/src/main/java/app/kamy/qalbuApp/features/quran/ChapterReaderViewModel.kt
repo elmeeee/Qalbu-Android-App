@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.core.config.AppConfig
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.HadithReference
@@ -48,17 +50,17 @@ data class ChapterReaderUiState(
     val showTranslation: Boolean = true,
     val currentPage: Int = 0,
     val hasMore: Boolean = true,
-    val error: String? = null,
+    val error: AppError? = null,
     val tafsirVisible: Boolean = false,
     val tafsirLoading: Boolean = false,
     val tafsir: TafsirPayload? = null,
-    val tafsirError: String? = null,
+    val tafsirError: AppError? = null,
     val hadithVisible: Boolean = false,
     val hadithLoading: Boolean = false,
     val hadithLoadingMore: Boolean = false,
     val hadithHasMore: Boolean = false,
     val hadithPage: Int = 0,
-    val hadithError: String? = null,
+    val hadithError: AppError? = null,
     val hadiths: List<HadithReference> = emptyList(),
     val activeAyahKey: String? = null,
 
@@ -67,7 +69,7 @@ data class ChapterReaderUiState(
     val aiShareVisible: Boolean = false,
     val aiShareLoading: Boolean = false,
     val aiShareDraft: String = "",
-    val aiShareError: String? = null,
+    val aiShareError: AppError? = null,
     val aiShareVerseIndex: Int? = null,
     val isPublishing: Boolean = false,
     val publishMessage: String? = null
@@ -186,7 +188,7 @@ class ChapterReaderViewModel @Inject constructor(
                     )
                 }
             }.onFailure { t ->
-                _state.update { it.copy(isLoading = false, error = t.message ?: appContext.getString(R.string.verses_load_failed)) }
+                _state.update { it.copy(isLoading = false, error = t.toAppError()) }
             }
         }
     }
@@ -323,7 +325,7 @@ class ChapterReaderViewModel @Inject constructor(
             _state.update { it.copy(tafsir = t, tafsirLoading = false, tafsirError = null) }
         } catch (e: Throwable) {
             _state.update {
-                it.copy(tafsirLoading = false, tafsirError = e.message ?: appContext.getString(R.string.tafsir_load_failed))
+                it.copy(tafsirLoading = false, tafsirError = e.toAppError())
             }
         }
     }
@@ -382,7 +384,7 @@ class ChapterReaderViewModel @Inject constructor(
                 it.copy(
                     hadithLoading = false,
                     hadithLoadingMore = false,
-                    hadithError = e.message ?: appContext.getString(R.string.hadith_load_failed)
+                    hadithError = e.toAppError()
                 )
             }
         }
@@ -445,7 +447,7 @@ class ChapterReaderViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         aiShareLoading = false,
-                        aiShareError = t.message ?: appContext.getString(R.string.share_generate_failed)
+                        aiShareError = t.toAppError()
                     )
                 }
             }

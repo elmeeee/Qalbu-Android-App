@@ -28,6 +28,7 @@ import app.kamy.qalbuApp.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.HadithReference
 
@@ -40,7 +41,7 @@ fun HadithSheet(
     hasMore: Boolean = false,
     hadiths: List<HadithReference>,
     verseReference: String,
-    error: String? = null,
+    error: AppError? = null,
     onDismiss: () -> Unit,
     onReload: () -> Unit = {},
     onLoadMore: () -> Unit = {}
@@ -81,9 +82,9 @@ fun HadithSheet(
                 }
                 error != null -> ReaderSheetScrollBody {
                     ReaderErrorState(
-                        title = stringResource(R.string.hadith_load_error),
-                        description = error,
-                        onRetry = onReload
+                        error = error,
+                        onRetry = onReload,
+                        featureTitleRes = R.string.hadith_load_error
                     )
                 }
                 empty -> ReaderSheetScrollBody {

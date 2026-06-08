@@ -133,10 +133,10 @@
 
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Izinkan alarm tepat agar adzan dan pengingat sholat tiba tepat waktu.</string>
-    <string name="battery_opt_snackbar_message">Izinkan baterai tanpa batas agar adzan dan pengingat sholat berjalan saat aplikasi ditutup.</string>
-    <string name="battery_opt_snackbar_oem_message">Di HP %1$s: set Qalbu ke Tanpa batas / Unrestricted dan aktifkan autostart agar adzan berjalan di latar belakang.</string>
+    <string name="battery_opt_snackbar_message">Di beberapa HP, izinkan baterai tanpa batas agar adzan berjalan saat app ditutup.</string>
+    <string name="battery_opt_snackbar_oem_message">Di HP %1$s: set Qalbu ke Tanpa batas dan aktifkan autostart agar adzan berjalan di latar belakang.</string>
     <string name="battery_opt_settings_title">Latar belakang &amp; baterai</string>
-    <string name="battery_opt_settings_subtitle">Tanpa batas — diperlukan untuk adzan saat app ditutup</string>
+    <string name="battery_opt_settings_subtitle">Tanpa batas — disarankan untuk merek HP ini</string>
     <string name="battery_opt_settings_subtitle_ok">Tanpa batas — pengingat latar belakang aktif</string>
 
     <string name="tab_placeholder_today">Hari Ini — ayat harian, jadwal sholat, bagikan</string>
@@ -147,6 +147,27 @@
     <string name="cancel">Batal</string>
     <string name="save">Simpan</string>
     <string name="try_again">Coba lagi</string>
+    <string name="error_no_internet_title">Tidak ada koneksi internet</string>
+    <string name="error_no_internet_body">Periksa koneksi Anda lalu coba lagi.</string>
+    <string name="error_server_title">Server tidak tersedia</string>
+    <string name="error_server_body">Terjadi masalah di sisi kami. Silakan coba lagi sebentar lagi.</string>
+    <string name="error_forbidden_title">Akses ditolak</string>
+    <string name="error_forbidden_body">Anda tidak memiliki izin untuk memuat konten ini.</string>
+    <string name="error_unauthorized_title">Sesi berakhir</string>
+    <string name="error_unauthorized_body">Masuk lagi dari Akun untuk melanjutkan.</string>
+    <string name="error_not_found_title">Konten tidak ditemukan</string>
+    <string name="error_not_found_body">Konten yang Anda cari tidak ditemukan.</string>
+    <string name="error_client_title">Permintaan gagal</string>
+    <string name="error_client_body">Permintaan tidak dapat diselesaikan. Silakan coba lagi.</string>
+    <string name="error_parsing_title">Respons tidak dikenali</string>
+    <string name="error_parsing_body">Data diterima dalam format yang tidak dikenali. Silakan coba lagi.</string>
+    <string name="error_config_title">Pengaturan belum siap</string>
+    <string name="error_config_body">Aplikasi belum siap memuat konten. Silakan coba lagi.</string>
+    <string name="error_generic_title">Terjadi kesalahan</string>
+    <string name="error_generic_body">Silakan coba lagi. Jika masalah berlanjut, periksa koneksi Anda.</string>
+    <string name="error_prayer_fetch_title">Gagal memuat jadwal sholat</string>
+    <string name="error_location_title">Lokasi tidak tersedia</string>
+    <string name="error_location_body">Aktifkan akses lokasi untuk menampilkan waktu sholat yang akurat.</string>
     <string name="close">Tutup</string>
     <string name="share">Bagikan</string>
     <string name="regenerate">Buat ulang</string>

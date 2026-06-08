@@ -13,7 +13,9 @@ import android.os.Looper
 import kotlin.math.roundToInt
 import androidx.annotation.OptIn
 import androidx.annotation.RawRes
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import app.kamy.qalbuApp.R
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -68,10 +70,18 @@ class AdhanPlaybackService : MediaSessionService() {
             }
             intent != null && intent.hasExtra(EXTRA_RAW_RES) -> {
                 linkedNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
+                val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
+                // startForegroundService() requires startForeground() within ~5s. Media3 updates
+                // this notification once playback metadata is available; until then, show a placeholder.
+                startForeground(
+                    NOTIFICATION_ID,
+                    buildPlaceholderNotification(title, body)
+                )
                 startAdhan(
                     rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0),
-                    title = intent.getStringExtra(EXTRA_TITLE).orEmpty(),
-                    body = intent.getStringExtra(EXTRA_BODY).orEmpty()
+                    title = title,
+                    body = body
                 )
             }
         }
@@ -235,9 +245,53 @@ class AdhanPlaybackService : MediaSessionService() {
     }
 
     private fun cancelLinkedNotifications() {
+        if (linkedNotificationId >= 0) {
+            NotificationManagerCompat.from(this).cancel(linkedNotificationId)
+        }
         NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
         linkedNotificationId = -1
     }
+
+    private fun buildPlaceholderNotification(title: String, body: String) =
+        NotificationCompat.Builder(this, NotificationChannels.ADHAN_PLAYBACK)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(
+                title.ifBlank { getString(R.string.adhan_playback_title) }
+            )
+            .setContentText(
+                body.ifBlank { getString(R.string.adhan_playback_body) }
+            )
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    Intent(this, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    },
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
+            .setOngoing(true)
+            .setSilent(true)
+            .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+            .apply {
+                val stopPending = PendingIntent.getBroadcast(
+                    this@AdhanPlaybackService,
+                    NOTIFICATION_ID,
+                    AdhanStopReceiver.intent(
+                        this@AdhanPlaybackService,
+                        linkedNotificationId.takeIf { it >= 0 }
+                    ),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                setDeleteIntent(stopPending)
+                addAction(
+                    android.R.drawable.ic_media_pause,
+                    getString(R.string.adhan_stop),
+                    stopPending
+                )
+            }
+            .build()
 
     private fun releasePlayer() {
         unregisterVolumeStopListener()

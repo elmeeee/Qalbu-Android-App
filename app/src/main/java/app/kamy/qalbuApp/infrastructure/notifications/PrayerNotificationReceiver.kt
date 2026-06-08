@@ -49,7 +49,8 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 title = title,
                 body = body,
                 // If foreground adhan could not start (OEM restrictions), use channel sound.
-                silent = playAdhan && adhanPlaying
+                silent = playAdhan && adhanPlaying,
+                showStopAdhan = playAdhan && adhanPlaying
             )
         }
 

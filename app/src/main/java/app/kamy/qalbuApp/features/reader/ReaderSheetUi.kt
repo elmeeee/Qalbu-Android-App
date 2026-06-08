@@ -21,10 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,7 +40,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import app.kamy.qalbuApp.design.components.AlKhatibErrorState
 import app.kamy.qalbuApp.design.components.AlKhatibSkeletonLine
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 
 @Composable
@@ -252,39 +252,13 @@ fun ReaderEmptyState(
 
 @Composable
 fun ReaderErrorState(
-    title: String,
-    description: String,
-    onRetry: () -> Unit
+    error: AppError,
+    onRetry: () -> Unit,
+    featureTitleRes: Int? = null
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 28.dp, vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Filled.WifiOff,
-            contentDescription = null,
-            tint = AlKhatibColors.Slate500,
-            modifier = Modifier.size(44.dp)
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = AlKhatibColors.Slate900,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodyMedium,
-            color = AlKhatibColors.Slate500,
-            textAlign = TextAlign.Center
-        )
-        Button(onClick = onRetry) {
-            Text(stringResource(R.string.try_again))
-        }
+    val display = error.rememberErrorDisplay(featureTitleRes)
+    if (display != null) {
+        AlKhatibErrorState(display = display, onRetry = onRetry)
     }
 }
 

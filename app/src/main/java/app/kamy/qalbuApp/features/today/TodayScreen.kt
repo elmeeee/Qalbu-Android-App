@@ -165,9 +165,10 @@ fun TodayScreen(
         }
     }
 
-    // Exact alarms: auto-prompted on app open via ExactAlarmPermissionGate in MainActivity.
+    // Exact alarms: API 33+ uses USE_EXACT_ALARM (auto-granted). API 31–32 may need one-time consent.
     LaunchedEffect(prayerState.timings.isNotEmpty(), exactAlarmPrompted) {
         if (exactAlarmPrompted || prayerState.timings.isEmpty()) return@LaunchedEffect
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return@LaunchedEffect
         if (context.canScheduleExactAlarms()) return@LaunchedEffect
         exactAlarmPrompted = true
         val result = snackbarHostState.showSnackbar(
@@ -180,23 +181,17 @@ fun TodayScreen(
         }
     }
 
-    // Battery / autostart whitelist (especially Samsung, Xiaomi, Oppo).
-    LaunchedEffect(prayerState.timings.isNotEmpty(), exactAlarmPrompted, batteryOptPrompted) {
+    // Battery / autostart — only on OEMs that kill background apps (Samsung, Xiaomi, Oppo, …).
+    LaunchedEffect(prayerState.timings.isNotEmpty(), batteryOptPrompted) {
         if (batteryOptPrompted || prayerState.timings.isEmpty()) return@LaunchedEffect
-        if (!exactAlarmPrompted && !context.canScheduleExactAlarms()) return@LaunchedEffect
-        if (context.isIgnoringBatteryOptimizations() && !hasAggressiveOemBatteryManagement()) {
-            return@LaunchedEffect
-        }
+        if (!hasAggressiveOemBatteryManagement()) return@LaunchedEffect
+        if (context.isIgnoringBatteryOptimizations()) return@LaunchedEffect
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return@LaunchedEffect
         batteryOptPrompted = true
-        val message = if (hasAggressiveOemBatteryManagement()) {
-            context.getString(
-                R.string.battery_opt_snackbar_oem_message,
-                Build.MANUFACTURER.replaceFirstChar { it.titlecase() }
-            )
-        } else {
-            context.getString(R.string.battery_opt_snackbar_message)
-        }
+        val message = context.getString(
+            R.string.battery_opt_snackbar_oem_message,
+            Build.MANUFACTURER.replaceFirstChar { it.titlecase() }
+        )
         val result = snackbarHostState.showSnackbar(
             message = message,
             actionLabel = allowLabel,
@@ -241,8 +236,8 @@ fun TodayScreen(
                     locationStatus = when {
                         prayerState.cityName != null -> null
                         prayerState.needsPermission -> locationEnable
+                        prayerState.error?.kind == app.kamy.qalbuApp.core.error.AppErrorKind.Location -> locationUnavailable
                         prayerState.isLoading -> locating
-                        prayerState.error != null -> locationUnavailable
                         else -> locating
                     },
                     hijriLabel = prayerState.hijriLabel,
@@ -265,6 +260,7 @@ fun TodayScreen(
                         Spacer(Modifier.height(8.dp))
                         TodayPrayerMascotSection(
                             state = prayerState,
+                            onRetry = { scope.launch { prayerVm.refresh() } },
                             modifier = Modifier.padding(horizontal = 20.dp)
                         )
                     }
@@ -274,6 +270,7 @@ fun TodayScreen(
                             verse = todayState.verse,
                             referenceLabel = todayState.verseReferenceLabel,
                             isLoading = todayState.isLoading,
+                            error = todayState.error,
                             isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
                             onPlayAudio = {
                                 val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
@@ -297,7 +294,8 @@ fun TodayScreen(
                             },
                             aiShareLoading = todayState.aiShareLoading,
                             onAiShare = { todayVm.openAiShare() },
-                            onTafsir = { todayVm.openTafsir() }
+                            onTafsir = { todayVm.openTafsir() },
+                            onRetry = { scope.launch { todayVm.refreshContent() } }
                         )
                     }
                 }

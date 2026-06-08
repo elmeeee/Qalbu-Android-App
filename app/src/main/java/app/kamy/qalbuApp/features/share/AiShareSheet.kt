@@ -33,7 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.design.components.AlKhatibInlineError
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +44,7 @@ fun AiShareSheet(
     visible: Boolean,
     loading: Boolean,
     draft: String,
-    error: String?,
+    error: AppError?,
     isPublishing: Boolean,
     showPublish: Boolean,
     onDismiss: () -> Unit,
@@ -52,6 +55,7 @@ fun AiShareSheet(
 ) {
     if (!visible) return
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val errorDisplay = error.rememberErrorDisplay(R.string.share_generate_failed)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState
@@ -84,11 +88,10 @@ fun AiShareSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth()
             )
-            error?.let {
-                Text(
-                    text = it,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
+            errorDisplay?.let { display ->
+                AlKhatibInlineError(
+                    display = display,
+                    onRetry = onRegenerate
                 )
             }
             if (loading && draft.isEmpty()) {

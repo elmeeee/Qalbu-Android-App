@@ -145,10 +145,10 @@
 
     <string name="recitation_notification_channel">Quran recitation</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
-    <string name="battery_opt_snackbar_message">Allow unrestricted battery use so adhan and prayer reminders work when the app is closed.</string>
-    <string name="battery_opt_snackbar_oem_message">On %1$s phones: set Qalbu to Unrestricted / No restrictions and enable autostart so adhan works in the background.</string>
+    <string name="battery_opt_snackbar_message">On some phones, allow unrestricted battery so adhan works when the app is closed.</string>
+    <string name="battery_opt_snackbar_oem_message">On %1$s phones: set Qalbu to Unrestricted and enable autostart so adhan works in the background.</string>
     <string name="battery_opt_settings_title">Background &amp; battery</string>
-    <string name="battery_opt_settings_subtitle">Unrestricted — required for adhan when app is closed</string>
+    <string name="battery_opt_settings_subtitle">Unrestricted — recommended on this phone brand</string>
     <string name="battery_opt_settings_subtitle_ok">Unrestricted — background reminders enabled</string>
 
     <!-- Placeholder tab copy -->
@@ -161,6 +161,27 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="try_again">Try again</string>
+    <string name="error_no_internet_title">No internet connection</string>
+    <string name="error_no_internet_body">Check your connection and try again.</string>
+    <string name="error_server_title">Server unavailable</string>
+    <string name="error_server_body">Something went wrong on our side. Please try again in a moment.</string>
+    <string name="error_forbidden_title">Access denied</string>
+    <string name="error_forbidden_body">You don\'t have permission to load this content.</string>
+    <string name="error_unauthorized_title">Session expired</string>
+    <string name="error_unauthorized_body">Sign in again from Account to continue.</string>
+    <string name="error_not_found_title">Content not found</string>
+    <string name="error_not_found_body">We couldn\'t find what you were looking for.</string>
+    <string name="error_client_title">Request failed</string>
+    <string name="error_client_body">The request could not be completed. Please try again.</string>
+    <string name="error_parsing_title">Unexpected response</string>
+    <string name="error_parsing_body">We received data in an unexpected format. Please try again.</string>
+    <string name="error_config_title">Setup incomplete</string>
+    <string name="error_config_body">The app isn\'t ready to load content yet. Please try again.</string>
+    <string name="error_generic_title">Something went wrong</string>
+    <string name="error_generic_body">Please try again. If the problem continues, check your connection.</string>
+    <string name="error_prayer_fetch_title">Couldn\'t load prayer times</string>
+    <string name="error_location_title">Location unavailable</string>
+    <string name="error_location_body">Enable location access to show accurate prayer times.</string>
     <string name="close">Close</string>
     <string name="share">Share</string>
     <string name="regenerate">Regenerate</string>

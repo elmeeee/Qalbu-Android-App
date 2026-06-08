@@ -74,14 +74,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.design.components.AlKhatibCard
 import app.kamy.qalbuApp.design.components.AlKhatibCardStyle
+import app.kamy.qalbuApp.design.components.AlKhatibInlineError
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsGroup
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsNavigationRow
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsToggleRow
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.core.locale.AppLanguage
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import app.kamy.qalbuApp.domain.adhan.AdhanVoice
 import app.kamy.qalbuApp.domain.adhan.AdhanVoiceCatalog
@@ -196,7 +199,9 @@ fun AccountScreen(
             selected = state.prayerMethod,
             methods = state.prayerMethods,
             isLoading = state.prayerMethodsLoading,
+            error = state.prayerMethodsError,
             onSelect = vm::setPrayerMethod,
+            onRetry = vm::loadPrayerMethods,
             onDismiss = { vm.togglePrayerSheet(false) }
         )
     }
@@ -256,6 +261,8 @@ private fun AccountSettingsContent(
             sessionUsername = state.sessionUsername,
             sessionAvatarUrl = state.sessionAvatarUrl,
             isLoading = state.isLoading,
+            error = state.error,
+            onRetry = vm::fetchProfile,
             onSignIn = onSignIn
         )
 
@@ -339,10 +346,13 @@ private fun ProfileHeader(
     sessionUsername: String?,
     sessionAvatarUrl: String?,
     isLoading: Boolean,
+    error: AppError?,
+    onRetry: () -> Unit,
     onSignIn: () -> Unit
 ) {
     val avatarUrl = profile?.preferredAvatarUrl ?: sessionAvatarUrl
     val loadingLabel = stringResource(R.string.loading)
+    val profileErrorDisplay = error.rememberErrorDisplay(R.string.profile_load_failed)
     val displayTitle = profile?.displayTitle
         ?: sessionDisplayName
         ?: if (isLoading) loadingLabel else null
@@ -398,6 +408,13 @@ private fun ProfileHeader(
                         color = AlKhatibColors.Teal
                     )
                 }
+                profileErrorDisplay?.let { display ->
+                    Spacer(Modifier.height(8.dp))
+                    AlKhatibInlineError(
+                        display = display,
+                        onRetry = onRetry
+                    )
+                }
             } else {
                 Text(
                     text = stringResource(R.string.sync_reflections),
@@ -440,13 +457,14 @@ private fun TranslatorSheet(
     selectedId: Int,
     translations: List<QFTranslation>,
     isLoading: Boolean,
-    error: String?,
+    error: AppError?,
     onQueryChange: (String) -> Unit,
     onPick: (QFTranslation) -> Unit,
     onDismiss: () -> Unit,
     onRetry: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val errorDisplay = error.rememberErrorDisplay(R.string.failed_load_translators)
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = AlKhatibColors.Slate900,
@@ -482,11 +500,11 @@ private fun TranslatorSheet(
             )
             when {
                 isLoading -> Text(stringResource(R.string.loading_translators), color = AlKhatibColors.Slate500)
-                error != null -> {
-                    Text(error, color = AlKhatibColors.Danger)
-                    TextButton(onClick = onRetry) {
-                        Text(stringResource(R.string.try_again), color = AlKhatibColors.Teal)
-                    }
+                errorDisplay != null -> {
+                    AlKhatibInlineError(
+                        display = errorDisplay,
+                        onRetry = onRetry
+                    )
                 }
                 translations.isEmpty() -> {
                     Text(stringResource(R.string.no_translators), color = AlKhatibColors.Slate500)
@@ -626,10 +644,13 @@ private fun PrayerMethodSheet(
     selected: PrayerCalculationMethod,
     methods: List<PrayerMethodOption>,
     isLoading: Boolean,
+    error: AppError?,
     onSelect: (PrayerCalculationMethod) -> Unit,
+    onRetry: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val errorDisplay = error.rememberErrorDisplay(R.string.error_prayer_fetch_title)
     AlKhatibModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
@@ -645,6 +666,11 @@ private fun PrayerMethodSheet(
             )
             if (isLoading) {
                 Text(stringResource(R.string.loading_methods), color = AlKhatibColors.Slate500)
+            } else if (errorDisplay != null) {
+                AlKhatibInlineError(
+                    display = errorDisplay,
+                    onRetry = onRetry
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier

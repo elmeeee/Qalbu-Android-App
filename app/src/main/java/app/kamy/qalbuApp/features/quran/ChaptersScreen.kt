@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.design.components.AlKhatibErrorState
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.design.components.ChapterRowSkeleton
 import app.kamy.qalbuApp.design.components.AlKhatibRevelationChip
@@ -58,6 +59,7 @@ import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import app.kamy.qalbuApp.domain.model.ReadingSession
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import kotlinx.coroutines.launch
@@ -77,6 +79,7 @@ fun ChaptersScreen(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var isSearchFieldFocused by remember { mutableStateOf(false) }
     val listBottomPadding = floatingNavBottomPadding()
+    val errorDisplay = state.error.rememberErrorDisplay(R.string.chapters_load_failed)
     val activeSearchQuery = remember(searchQuery) { searchQuery.normalizedSearchQuery() }
     val isSearching = isSearchFieldFocused && activeSearchQuery.isNotEmpty()
     val displayedChapters = remember(state.chapters, activeSearchQuery, isSearching) {
@@ -136,13 +139,11 @@ fun ChaptersScreen(
                         }
                     }
                 }
-            state.error != null && state.chapters.isEmpty() ->
-                Text(
-                    text = state.error.orEmpty(),
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(32.dp)
+            state.error != null && state.chapters.isEmpty() && errorDisplay != null ->
+                AlKhatibErrorState(
+                    display = errorDisplay,
+                    onRetry = { vm.loadAll(force = true) },
+                    modifier = Modifier.align(Alignment.Center)
                 )
             else -> AlKhatibPullToRefresh(
                 isRefreshing = isPullRefreshing,

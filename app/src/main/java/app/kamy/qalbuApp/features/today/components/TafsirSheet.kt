@@ -17,6 +17,7 @@ import app.kamy.qalbuApp.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.TafsirPayload
 import app.kamy.qalbuApp.features.reader.ReaderEmptyState
@@ -38,7 +39,7 @@ fun TafsirSheet(
     isLoading: Boolean,
     tafsir: TafsirPayload?,
     verseReference: String,
-    error: String? = null,
+    error: AppError? = null,
     onDismiss: () -> Unit,
     onReload: () -> Unit = {}
 ) {
@@ -74,9 +75,9 @@ fun TafsirSheet(
                 isLoading -> ReaderSheetScrollBody { ReaderLoadingSkeleton() }
                 error != null -> ReaderSheetScrollBody {
                     ReaderErrorState(
-                        title = stringResource(R.string.tafsir_load_error),
-                        description = error,
-                        onRetry = onReload
+                        error = error,
+                        onRetry = onReload,
+                        featureTitleRes = R.string.tafsir_load_error
                     )
                 }
                 commentaryUnavailable -> ReaderSheetScrollBody {

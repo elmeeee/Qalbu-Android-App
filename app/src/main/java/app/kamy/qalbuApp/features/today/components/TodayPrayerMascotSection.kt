@@ -19,11 +19,13 @@ import app.kamy.qalbuApp.features.today.PrayerUiState
 @Composable
 fun TodayPrayerMascotSection(
     state: PrayerUiState,
+    onRetry: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         PrayerDashboardCard(
             state = state,
+            onRetry = onRetry,
             modifier = Modifier
                 .fillMaxWidth()
                 // Push card down so only the mascot's feet touch the top edge

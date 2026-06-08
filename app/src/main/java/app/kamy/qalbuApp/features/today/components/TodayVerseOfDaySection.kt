@@ -34,10 +34,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.design.components.AlKhatibCard
+import app.kamy.qalbuApp.design.components.AlKhatibErrorStateCompact
 import app.kamy.qalbuApp.design.components.TodayVerseCardSkeleton
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
+import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
 import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 
@@ -46,13 +49,16 @@ fun TodayVerseOfDaySection(
     verse: RandomAyahPayload?,
     referenceLabel: String?,
     isLoading: Boolean,
+    error: AppError? = null,
     isPlaying: Boolean,
     aiShareLoading: Boolean = false,
     onPlayAudio: () -> Unit,
     onAiShare: () -> Unit,
     onTafsir: () -> Unit,
+    onRetry: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val errorDisplay = error.rememberErrorDisplay(R.string.verse_of_day_load_failed)
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -163,6 +169,11 @@ fun TodayVerseOfDaySection(
                 }
             } else if (isLoading) {
                 TodayVerseCardSkeleton(modifier = Modifier.fillMaxWidth())
+            } else if (errorDisplay != null) {
+                AlKhatibErrorStateCompact(
+                    display = errorDisplay,
+                    onRetry = onRetry
+                )
             } else {
                 Text(
                     text = stringResource(R.string.no_verse_retry),

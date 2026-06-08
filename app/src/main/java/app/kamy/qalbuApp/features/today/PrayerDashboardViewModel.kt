@@ -12,6 +12,9 @@ import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.core.error.AppErrorKind
+import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -45,7 +48,7 @@ data class PrayerUiState(
     val gregorianLabel: String? = null,
     val theme: PrayerTheme = PrayerTheme.DAYLIGHT,
     val needsPermission: Boolean = false,
-    val error: String? = null
+    val error: AppError? = null
 )
 
 @HiltViewModel
@@ -95,7 +98,7 @@ class PrayerDashboardViewModel @Inject constructor(
         }
         val loc = locationProvider.currentLocation()
         if (loc == null) {
-            _state.update { it.copy(isLoading = false, error = strings.getString(R.string.location_failed)) }
+            _state.update { it.copy(isLoading = false, error = AppError(AppErrorKind.Location)) }
             return
         }
         val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
@@ -136,7 +139,7 @@ class PrayerDashboardViewModel @Inject constructor(
                 )
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: strings.getString(R.string.prayer_fetch_failed)) }
+            _state.update { it.copy(isLoading = false, error = t.toAppError()) }
         }
     }
 

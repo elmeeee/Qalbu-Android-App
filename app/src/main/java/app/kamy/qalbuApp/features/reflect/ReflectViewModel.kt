@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.core.error.AppErrorKind
+import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.domain.model.ReflectFeedPost
@@ -28,7 +31,7 @@ data class ReflectUiState(
     val posts: List<ReflectFeedPost> = emptyList(),
     val currentPage: Int = 0,
     val hasMore: Boolean = true,
-    val error: String? = null,
+    val error: AppError? = null,
     val togglingLikePostIds: Set<String> = emptySet()
 )
 
@@ -110,8 +113,7 @@ class ReflectViewModel @Inject constructor(
                     isLoading = false,
                     isLoadingMore = false,
                     isAuthenticated = if (signedOut) false else it.isAuthenticated,
-                    error = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
-                    else t.message ?: appContext.getString(R.string.reflect_feed_load_failed)
+                    error = t.toAppError()
                 )
             }
         }
@@ -171,7 +173,7 @@ class ReflectViewModel @Inject constructor(
                     if (signedOut) {
                         rolled.copy(
                             isAuthenticated = false,
-                            error = appContext.getString(R.string.session_expired)
+                            error = AppError(AppErrorKind.Unauthorized)
                         )
                     } else {
                         rolled

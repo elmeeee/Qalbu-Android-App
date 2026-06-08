@@ -12,6 +12,9 @@ import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
 import app.kamy.qalbuApp.core.locale.AppLanguage
 import app.kamy.qalbuApp.infrastructure.audio.AdhanPreviewPlayer
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.core.error.AppErrorKind
+import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.infrastructure.auth.IdTokenProfileParser
@@ -47,14 +50,14 @@ data class AccountUiState(
     val sessionUsername: String? = null,
     val sessionAvatarUrl: String? = null,
     val isSignedIn: Boolean = false,
-    val error: String? = null,
+    val error: AppError? = null,
     val showFontScaleSheet: Boolean = false,
     val showTranslatorSheet: Boolean = false,
     val showPrayerSheet: Boolean = false,
     val showNotifTimeSheet: Boolean = false,
     val translations: List<QFTranslation> = emptyList(),
     val translationsLoading: Boolean = false,
-    val translationsError: String? = null,
+    val translationsError: AppError? = null,
     val translatorQuery: String = "",
     val selectedTranslationId: Int = 0,
     val selectedTranslationName: String = "",
@@ -63,6 +66,7 @@ data class AccountUiState(
     val prayerMethod: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
     val prayerMethods: List<PrayerMethodOption> = emptyList(),
     val prayerMethodsLoading: Boolean = false,
+    val prayerMethodsError: AppError? = null,
     val dailyVerseEnabled: Boolean = true,
     val reminderHour: Int = DailyVerseNotificationStore.DEFAULT_HOUR,
     val reminderMinute: Int = DailyVerseNotificationStore.DEFAULT_MINUTE,
@@ -271,7 +275,7 @@ class AccountViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         profile = if (signedOut) null else it.profile,
-                        error = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired) else t.message
+                        error = t.toAppError()
                     )
                 }
             }
@@ -355,7 +359,7 @@ class AccountViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             translationsLoading = false,
-                            translationsError = t.message ?: appContext.getString(R.string.failed_load_translators)
+                            translationsError = t.toAppError()
                         )
                     }
                 }
@@ -367,15 +371,15 @@ class AccountViewModel @Inject constructor(
         if (show && _state.value.prayerMethods.isEmpty()) loadPrayerMethods()
     }
 
-    private fun loadPrayerMethods() {
-        _state.update { it.copy(prayerMethodsLoading = true) }
+    fun loadPrayerMethods() {
+        _state.update { it.copy(prayerMethodsLoading = true, prayerMethodsError = null) }
         viewModelScope.launch {
             runCatching { alAdhanRepository.fetchCalculationMethods() }
                 .onSuccess { methods ->
-                    _state.update { it.copy(prayerMethodsLoading = false, prayerMethods = methods) }
+                    _state.update { it.copy(prayerMethodsLoading = false, prayerMethods = methods, prayerMethodsError = null) }
                 }
-                .onFailure {
-                    _state.update { it.copy(prayerMethodsLoading = false) }
+                .onFailure { t ->
+                    _state.update { it.copy(prayerMethodsLoading = false, prayerMethodsError = t.toAppError()) }
                 }
         }
     }

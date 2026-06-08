@@ -3,7 +3,8 @@ package app.kamy.qalbuApp.features.quran
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import app.kamy.qalbuApp.domain.model.ReadingSession
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
@@ -24,7 +25,7 @@ data class ChaptersUiState(
     val isLoading: Boolean = false,
     val chapters: List<QuranChapter> = emptyList(),
     val continueReading: ReadingSession? = null,
-    val error: String? = null
+    val error: AppError? = null
 )
 
 @HiltViewModel
@@ -65,7 +66,7 @@ class ChaptersViewModel @Inject constructor(
                 }
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: appContext.getString(R.string.chapters_load_failed)) }
+            _state.update { it.copy(isLoading = false, error = t.toAppError()) }
         }
     }
 

@@ -16,29 +16,32 @@ import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationSche
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
 
 /**
- * Android 12+ requires user consent for exact alarms — apps cannot grant this silently.
- * We auto-open the one-tap system screen on first launch, then reschedule when allowed.
+ * Android 12–12L (API 31–32) requires user consent for [SCHEDULE_EXACT_ALARM].
+ * Android 13+ uses [USE_EXACT_ALARM], granted automatically at install like the Clock app.
  */
 @Composable
 fun ExactAlarmPermissionGate() {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
-
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var autoPromptedThisSession by remember { mutableStateOf(false) }
+    val needsExactAlarmPrompt =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
 
     fun rescheduleIfAllowed() {
-        if (!context.canScheduleExactAlarms()) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !context.canScheduleExactAlarms()) {
+            return
+        }
         runCatching { DailyVerseNotificationScheduler.reschedule(context) }
         runCatching { PrayerNotificationCoordinator.rescheduleFromCache(context) }
     }
 
     LaunchedEffect(Unit) {
-        if (context.canScheduleExactAlarms()) {
+        if (context.canScheduleExactAlarms() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             rescheduleIfAllowed()
             return@LaunchedEffect
         }
-        if (!autoPromptedThisSession) {
+        if (needsExactAlarmPrompt && !autoPromptedThisSession) {
             autoPromptedThisSession = true
             context.openExactAlarmSettings()
         }

@@ -35,22 +35,18 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -62,6 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.design.components.AlKhatibErrorStateDark
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.design.components.ReflectPostSkeleton
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
@@ -70,6 +67,7 @@ import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import app.kamy.qalbuApp.domain.model.ReflectFeedPost
 import coil.compose.AsyncImage
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -86,6 +84,7 @@ fun ReflectScreen(
     val verifiedLabel = stringResource(R.string.verified)
     val signInTitle = stringResource(R.string.reflect_sign_in_title)
     val signInSubtitle = stringResource(R.string.reflect_sign_in_subtitle)
+    val errorDisplay = state.error.rememberErrorDisplay(R.string.reflect_feed_load_failed)
 
     Box(
         modifier = Modifier
@@ -131,14 +130,12 @@ fun ReflectScreen(
                         }
                     }
                 }
-            state.error != null && state.posts.isEmpty() ->
-                Column(
-                    modifier = Modifier.align(Alignment.Center).padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(state.error.orEmpty(), color = Color.White)
-                    TextButton(onClick = { vm.loadPosts(reset = true) }) { Text(stringResource(R.string.retry), color = AlKhatibColors.GoldBright) }
-                }
+            state.error != null && state.posts.isEmpty() && errorDisplay != null ->
+                AlKhatibErrorStateDark(
+                    display = errorDisplay,
+                    onRetry = { vm.loadPosts(reset = true) },
+                    modifier = Modifier.align(Alignment.Center)
+                )
             else -> ReelFeed(
                 state = state,
                 vm = vm,
@@ -171,17 +168,10 @@ private fun ReelFeed(
 
     val listBottomPadding = floatingNavBottomPadding()
     val scope = rememberCoroutineScope()
-    var isPullRefreshing by remember { mutableStateOf(false) }
 
     AlKhatibPullToRefresh(
-        isRefreshing = isPullRefreshing,
-        onRefresh = {
-            scope.launch {
-                isPullRefreshing = true
-                runCatching { vm.refreshFeed() }
-                isPullRefreshing = false
-            }
-        },
+        isRefreshing = state.isLoading && state.posts.isNotEmpty(),
+        onRefresh = { scope.launch { vm.refreshFeed() } },
         modifier = Modifier.fillMaxSize()
     ) {
         Column(Modifier.fillMaxSize()) {
@@ -373,6 +363,7 @@ private fun ReelPostCard(
                         .clip(RoundedCornerShape(50))
                         .background(AlKhatibColors.Gold.copy(alpha = 0.18f))
                         .border(1.dp, AlKhatibColors.Gold.copy(alpha = 0.45f), RoundedCornerShape(50))
+                        .clickable(onClick = onOpenVerse)
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Icon(Icons.AutoMirrored.Filled.MenuBook, null, tint = AlKhatibColors.GoldBright, modifier = Modifier.size(14.dp))

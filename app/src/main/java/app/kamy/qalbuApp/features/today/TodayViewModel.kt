@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import android.content.Context
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.core.config.AppConfig
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.core.error.AppErrorKind
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
+import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshotStore
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
@@ -39,10 +42,10 @@ data class TodayUiState(
     val recitations: List<RecitationPayload> = emptyList(),
     val selectedRecitationId: Int = 6,
     val translationId: Int = AppConfig.defaultTranslationId,
-    val error: String? = null,
+    val error: AppError? = null,
     val tafsirLoading: Boolean = false,
     val tafsir: TafsirPayload? = null,
-    val tafsirError: String? = null,
+    val tafsirError: AppError? = null,
     val showTafsir: Boolean = false,
     val isPublishing: Boolean = false,
     val publishToast: String? = null,
@@ -52,7 +55,7 @@ data class TodayUiState(
     val aiShareVisible: Boolean = false,
     val aiShareLoading: Boolean = false,
     val aiShareDraft: String = "",
-    val aiShareError: String? = null
+    val aiShareError: AppError? = null
 )
 
 @HiltViewModel
@@ -129,11 +132,7 @@ class TodayViewModel @Inject constructor(
                         verse = verse,
                         verseReferenceLabel = verse?.referenceLabel(chapterName),
                         recitations = recitations,
-                        error = if (verse == null) {
-                            it.error ?: appContext.getString(R.string.verse_of_day_load_failed)
-                        } else {
-                            null
-                        }
+                        error = if (verse == null) AppError(AppErrorKind.NotFound) else null
                     )
                 }
                 verse?.let { v ->
@@ -142,7 +141,7 @@ class TodayViewModel @Inject constructor(
                 }
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.message ?: appContext.getString(R.string.verse_load_failed)) }
+            _state.update { it.copy(isLoading = false, error = t.toAppError()) }
         }
     }
 
@@ -174,7 +173,7 @@ class TodayViewModel @Inject constructor(
             _state.update { it.copy(tafsir = tafsir, tafsirLoading = false, tafsirError = null) }
         } catch (t: Throwable) {
             _state.update {
-                it.copy(tafsirLoading = false, tafsirError = t.message ?: appContext.getString(R.string.tafsir_load_failed))
+                it.copy(tafsirLoading = false, tafsirError = t.toAppError())
             }
         }
     }
@@ -228,7 +227,7 @@ class TodayViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         aiShareLoading = false,
-                        aiShareError = t.message ?: appContext.getString(R.string.share_generate_failed)
+                        aiShareError = t.toAppError()
                     )
                 }
             }
