@@ -108,9 +108,11 @@ fun ChapterReaderScreen(
     var settingsVisible by remember { mutableStateOf(false) }
     var verseMenuExpanded by remember { mutableStateOf(false) }
 
-    val pagerState = rememberPagerState(initialPage = 0) { state.verses.size }
+    // Pager requires pageCount > 0; verses may be empty while the first page is loading.
+    val verseCount = state.verses.size
+    val pagerState = rememberPagerState(initialPage = 0) { verseCount.coerceAtLeast(1) }
     val currentVerse by remember {
-        derivedStateOf { state.verses.getOrNull(pagerState.currentPage) }
+        derivedStateOf { state.verses.getOrNull(pagerState.currentPage.coerceIn(0, (verseCount - 1).coerceAtLeast(0))) }
     }
     val surahTitle = state.chapterDisplayName ?: stringResource(R.string.surah_number, state.chapterNumber)
     val loadErrorDisplay = state.error.rememberErrorDisplay(R.string.verses_load_failed)
@@ -124,8 +126,16 @@ fun ChapterReaderScreen(
             }
     }
 
-    LaunchedEffect(state.verses.size, initialVerseNumber) {
-        if (state.verses.isEmpty() || initialVerseNumber == null) return@LaunchedEffect
+    LaunchedEffect(verseCount) {
+        if (verseCount == 0) return@LaunchedEffect
+        val lastIndex = verseCount - 1
+        if (pagerState.currentPage > lastIndex) {
+            pagerState.scrollToPage(lastIndex)
+        }
+    }
+
+    LaunchedEffect(verseCount, initialVerseNumber) {
+        if (verseCount == 0 || initialVerseNumber == null) return@LaunchedEffect
         val idx = state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
         if (idx >= 0 && pagerState.currentPage != idx) {
             pagerState.scrollToPage(idx)
@@ -143,11 +153,12 @@ fun ChapterReaderScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(vm, pagerState) {
         vm.events.collect { event ->
             when (event) {
                 is ReaderEvent.AnimateToPage -> {
-                    if (event.index in state.verses.indices) {
+                    val verses = vm.state.value.verses
+                    if (event.index in verses.indices) {
                         pagerState.animateScrollToPage(event.index)
                     }
                 }
@@ -253,7 +264,7 @@ fun ChapterReaderScreen(
                     .padding(end = 10.dp, bottom = readerActionsBottom),
                 onAiShare = {
                     verseMenuExpanded = false
-                    vm.openAiShare(pagerState.currentPage)
+                    vm.openAiShare(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
                 },
                 onTafsir = {
                     verseMenuExpanded = false

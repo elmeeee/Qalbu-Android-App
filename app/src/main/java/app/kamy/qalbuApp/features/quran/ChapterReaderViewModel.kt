@@ -48,7 +48,8 @@ data class ChapterReaderUiState(
     val playbackMode: AyahPlaybackMode = AyahPlaybackMode.CONTINUOUS,
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
-    val currentPage: Int = 0,
+    val currentVerseIndex: Int = 0,
+    val loadedApiPage: Int = 0,
     val hasMore: Boolean = true,
     val error: AppError? = null,
     val tafsirVisible: Boolean = false,
@@ -170,7 +171,16 @@ class ChapterReaderViewModel @Inject constructor(
     }
 
     fun loadInitial() {
-        _state.update { it.copy(isLoading = true, error = null, verses = emptyList(), currentPage = 0) }
+        _state.update {
+            it.copy(
+                isLoading = true,
+                error = null,
+                verses = emptyList(),
+                currentVerseIndex = 0,
+                loadedApiPage = 0,
+                hasMore = true
+            )
+        }
         viewModelScope.launch {
             runCatching {
                 contentRepository.getVersesByChapter(
@@ -183,7 +193,8 @@ class ChapterReaderViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         verses = resp.verses,
-                        currentPage = resp.pagination?.currentPage ?: 1,
+                        currentVerseIndex = 0,
+                        loadedApiPage = resp.pagination?.currentPage ?: 1,
                         hasMore = resp.pagination?.hasNextPage ?: false
                     )
                 }
@@ -195,22 +206,28 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun loadMoreIfNeeded(currentIndex: Int) {
         val s = _state.value
-        if (s.isLoadingMore || !s.hasMore) return
+        if (s.isLoadingMore || !s.hasMore || s.verses.isEmpty()) return
         if (currentIndex < s.verses.size - 3) return
+        val nextApiPage = s.loadedApiPage + 1
         _state.update { it.copy(isLoadingMore = true) }
         viewModelScope.launch {
             runCatching {
                 contentRepository.getVersesByChapter(
                     chapterNumber = s.chapterNumber,
-                    page = s.currentPage + 1,
+                    page = nextApiPage,
                     audioRecitationId = s.selectedRecitationId
                 )
             }.onSuccess { resp ->
+                if (resp.verses.isEmpty()) {
+                    _state.update { it.copy(isLoadingMore = false, hasMore = false) }
+                    return@onSuccess
+                }
                 _state.update {
+                    val merged = (it.verses + resp.verses).distinctBy { verse -> verse.listIdentity }
                     it.copy(
                         isLoadingMore = false,
-                        verses = it.verses + resp.verses,
-                        currentPage = resp.pagination?.currentPage ?: (it.currentPage + 1),
+                        verses = merged,
+                        loadedApiPage = resp.pagination?.currentPage ?: nextApiPage,
                         hasMore = resp.pagination?.hasNextPage ?: false
                     )
                 }
@@ -250,7 +267,7 @@ class ChapterReaderViewModel @Inject constructor(
         val s = _state.value
         if (index !in s.verses.indices) return
         val page = s.verses[index]
-        _state.update { it.copy(currentPage = index) }
+        _state.update { it.copy(currentVerseIndex = index) }
         page.resolvedVerseNumber?.let { logScrollPosition(it) }
     }
 
@@ -281,7 +298,7 @@ class ChapterReaderViewModel @Inject constructor(
 
         val url = page.audio?.url ?: return
         lastStartedVerseKey = page.verseKey
-        _state.update { it.copy(currentPage = index, currentlyPlayingVerseKey = page.verseKey) }
+        _state.update { it.copy(currentVerseIndex = index, currentlyPlayingVerseKey = page.verseKey) }
         audioPlayer.playVerse(
             url = url,
             surahTitle = surahTitle,

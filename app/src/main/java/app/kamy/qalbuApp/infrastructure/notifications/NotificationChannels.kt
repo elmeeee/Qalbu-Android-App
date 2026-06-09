@@ -41,10 +41,11 @@ object NotificationChannels {
             NotificationChannel(
                 ADHAN_PLAYBACK,
                 context.getString(R.string.adhan_playback_title),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.adhan_playback_body)
                 setSound(null, null)
+                enableVibration(false)
             }
         )
         manager.createNotificationChannel(

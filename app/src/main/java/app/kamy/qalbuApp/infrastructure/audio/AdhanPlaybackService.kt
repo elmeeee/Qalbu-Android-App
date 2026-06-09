@@ -1,6 +1,7 @@
 package app.kamy.qalbuApp.infrastructure.audio
 
 import android.app.PendingIntent
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -9,24 +10,20 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
+import android.os.PowerManager
 import kotlin.math.roundToInt
-import androidx.annotation.OptIn
 import androidx.annotation.RawRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import app.kamy.qalbuApp.R
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.DefaultMediaNotificationProvider
-import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaSessionService
 import app.kamy.qalbuApp.MainActivity
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.infrastructure.notifications.NotificationChannels
 
 private const val VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION"
@@ -34,32 +31,26 @@ private const val EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_
 private const val EXTRA_VOLUME_STREAM_VALUE = "android.media.EXTRA_VOLUME_STREAM_VALUE"
 private const val EXTRA_PREV_VOLUME_STREAM_VALUE = "android.media.EXTRA_PREV_VOLUME_STREAM_VALUE"
 
-class AdhanPlaybackService : MediaSessionService() {
+/**
+ * Foreground alarm playback for adhan. Uses a plain [Service] (not MediaSessionService) so
+ * scheduled alarms can start playback reliably from a [BroadcastReceiver] in the background.
+ */
+class AdhanPlaybackService : Service() {
 
     private var player: ExoPlayer? = null
-    private var mediaSession: MediaSession? = null
     private var playbackStarted = false
     private var volumeStopEnabled = false
     private var linkedNotificationId = -1
     private var volumeReceiver: BroadcastReceiver? = null
     private var savedAlarmVolume: Int? = null
+    private var wakeLock: PowerManager.WakeLock? = null
     private val audioManager: AudioManager by lazy {
         getSystemService(Context.AUDIO_SERVICE) as AudioManager
     }
     private val mainHandler = Handler(Looper.getMainLooper())
     private val enableVolumeStopRunnable = Runnable { volumeStopEnabled = true }
 
-    @OptIn(UnstableApi::class)
-    override fun onCreate() {
-        super.onCreate()
-        NotificationChannels.ensureAll(this)
-        setMediaNotificationProvider(
-            DefaultMediaNotificationProvider.Builder(this)
-                .setChannelId(NotificationChannels.ADHAN_PLAYBACK)
-                .setNotificationId(NOTIFICATION_ID)
-                .build()
-        )
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when {
@@ -72,27 +63,19 @@ class AdhanPlaybackService : MediaSessionService() {
                 linkedNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
                 val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
-                // startForegroundService() requires startForeground() within ~5s. Media3 updates
-                // this notification once playback metadata is available; until then, show a placeholder.
-                startForeground(
-                    NOTIFICATION_ID,
-                    buildPlaceholderNotification(title, body)
-                )
-                startAdhan(
-                    rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0),
-                    title = title,
-                    body = body
-                )
+                val rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0)
+                NotificationChannels.ensureAll(this)
+                startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body))
+                acquireWakeLock()
+                startAdhan(rawRes, title, body)
             }
         }
-        return super.onStartCommand(intent, flags, startId)
+        return START_NOT_STICKY
     }
-
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
-        mediaSession
 
     override fun onDestroy() {
         releasePlayer()
+        releaseWakeLock()
         super.onDestroy()
     }
 
@@ -103,30 +86,17 @@ class AdhanPlaybackService : MediaSessionService() {
         }
         releasePlayer()
 
-        val sessionActivity = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(this, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
         val exo = ExoPlayer.Builder(this)
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setUsage(C.USAGE_ALARM)
-                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_SONIFICATION)
                     .build(),
-                /* handleAudioFocus= */ true
+                // Alarms must not defer to media audio-focus while the device is locked.
+                /* handleAudioFocus= */ false
             )
-            .setHandleAudioBecomingNoisy(true)
-            .build()
-
-        @OptIn(UnstableApi::class)
-        val session = MediaSession.Builder(this, exo)
-            .setId(SESSION_ID)
-            .setSessionActivity(sessionActivity)
+            .setHandleAudioBecomingNoisy(false)
+            .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
 
         exo.addListener(object : Player.Listener {
@@ -142,29 +112,37 @@ class AdhanPlaybackService : MediaSessionService() {
                     playbackStarted = true
                 }
             }
+
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                releaseAndStop()
+            }
         })
 
         val uri = Uri.parse("android.resource://$packageName/$rawRes")
-        val displayTitle = title.ifBlank { getString(app.kamy.qalbuApp.R.string.adhan_playback_title) }
-        val displayBody = body.ifBlank { getString(app.kamy.qalbuApp.R.string.adhan_playback_body) }
-        exo.setMediaItem(
-            MediaItem.Builder()
-                .setUri(uri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(displayTitle)
-                        .setArtist(displayBody)
-                        .build()
-                )
-                .build()
-        )
+        exo.setMediaItem(MediaItem.fromUri(uri))
+        exo.volume = 1f
         boostAlarmVolume()
         exo.prepare()
         exo.play()
 
         player = exo
-        mediaSession = session
         scheduleVolumeStopListener()
+    }
+
+    private fun acquireWakeLock() {
+        releaseWakeLock()
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Qalbu:AdhanPlayback").apply {
+            setReferenceCounted(false)
+            acquire(10 * 60 * 1000L)
+        }
+    }
+
+    private fun releaseWakeLock() {
+        wakeLock?.let { lock ->
+            runCatching { if (lock.isHeld) lock.release() }
+        }
+        wakeLock = null
     }
 
     private fun boostAlarmVolume() {
@@ -201,7 +179,6 @@ class AdhanPlaybackService : MediaSessionService() {
         volumeStopEnabled = false
         mainHandler.removeCallbacks(enableVolumeStopRunnable)
         registerVolumeStopListener()
-        // Ignore spurious VOLUME_CHANGED broadcasts while ExoPlayer grabs audio focus.
         mainHandler.postDelayed(enableVolumeStopRunnable, VOLUME_STOP_GRACE_MS)
     }
 
@@ -241,6 +218,8 @@ class AdhanPlaybackService : MediaSessionService() {
     private fun releaseAndStop() {
         cancelLinkedNotifications()
         releasePlayer()
+        releaseWakeLock()
+        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
 
@@ -252,15 +231,11 @@ class AdhanPlaybackService : MediaSessionService() {
         linkedNotificationId = -1
     }
 
-    private fun buildPlaceholderNotification(title: String, body: String) =
+    private fun buildForegroundNotification(title: String, body: String) =
         NotificationCompat.Builder(this, NotificationChannels.ADHAN_PLAYBACK)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(
-                title.ifBlank { getString(R.string.adhan_playback_title) }
-            )
-            .setContentText(
-                body.ifBlank { getString(R.string.adhan_playback_body) }
-            )
+            .setContentTitle(title.ifBlank { getString(R.string.adhan_playback_title) })
+            .setContentText(body.ifBlank { getString(R.string.adhan_playback_body) })
             .setContentIntent(
                 PendingIntent.getActivity(
                     this,
@@ -273,7 +248,8 @@ class AdhanPlaybackService : MediaSessionService() {
             )
             .setOngoing(true)
             .setSilent(true)
-            .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .apply {
                 val stopPending = PendingIntent.getBroadcast(
                     this@AdhanPlaybackService,
@@ -297,15 +273,12 @@ class AdhanPlaybackService : MediaSessionService() {
         unregisterVolumeStopListener()
         restoreAlarmVolume()
         playbackStarted = false
-        mediaSession?.release()
-        mediaSession = null
         player?.release()
         player = null
     }
 
     companion object {
         private const val NOTIFICATION_ID = 12_001
-        private const val SESSION_ID = "QalbuAdhan"
         private const val VOLUME_STOP_GRACE_MS = 1_500L
         private const val ADHAN_VOLUME_FRACTION = 0.4f
         private const val EXTRA_RAW_RES = "raw_res"

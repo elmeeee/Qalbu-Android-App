@@ -8,6 +8,7 @@ import app.kamy.qalbuApp.infrastructure.notifications.NotificationChannels
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleCache
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleRefresher
+import app.kamy.qalbuApp.infrastructure.network.NetworkDebugger
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,7 @@ class QalbuApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         NotificationChannels.ensureAll(this)
+        NetworkDebugger.install(this)
         runCatching { DailyVerseNotificationScheduler.reschedule(this) }
         runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
         if (PrayerScheduleCache.loadCoordinates(this) != null) {

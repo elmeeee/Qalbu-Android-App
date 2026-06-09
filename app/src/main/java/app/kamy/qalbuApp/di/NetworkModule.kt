@@ -15,6 +15,7 @@ import app.kamy.qalbuApp.infrastructure.network.ContentAuthInterceptor
 import app.kamy.qalbuApp.infrastructure.network.HostFallbackInterceptor
 import app.kamy.qalbuApp.infrastructure.network.ReflectApi
 import app.kamy.qalbuApp.infrastructure.network.UserAuthInterceptor
+import app.kamy.qalbuApp.infrastructure.network.NetworkDebugger
 import app.kamy.qalbuApp.infrastructure.network.buildRetrofit
 import dagger.Module
 import dagger.Provides
@@ -25,7 +26,6 @@ import kotlinx.serialization.json.Json
 import net.openid.appauth.AuthorizationService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-// import com.chuckerteam.chucker.api.ChuckerInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
@@ -69,6 +69,7 @@ object NetworkModule {
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .addInterceptor(hostFallbackInterceptor)
+            .let(NetworkDebugger::applyTo)
             .addInterceptor(logging)
             .build()
 
@@ -86,11 +87,7 @@ object NetworkModule {
             .readTimeout(20, TimeUnit.SECONDS)
             .addInterceptor(hostFallbackInterceptor)
             .addInterceptor(ContentAuthInterceptor(tokenManager))
-            // .apply {
-            //     if (BuildConfig.DEBUG) {
-            //         addInterceptor(ChuckerInterceptor.Builder(context).build())
-            //     }
-            // }
+            .let(NetworkDebugger::applyTo)
             .addInterceptor(logging)
             .build()
 
@@ -113,11 +110,7 @@ object NetworkModule {
             .addInterceptor(
                 UserAuthInterceptor(userSession, refreshManager, oauthService, authServiceProvider)
             )
-            // .apply {
-            //     if (BuildConfig.DEBUG) {
-            //         addInterceptor(ChuckerInterceptor.Builder(context).build())
-            //     }
-            // }
+            .let(NetworkDebugger::applyTo)
             .addInterceptor(logging)
             .build()
 
@@ -129,6 +122,7 @@ object NetworkModule {
         OkHttpClient.Builder()
             .connectTimeout(45, TimeUnit.SECONDS)
             .readTimeout(90, TimeUnit.SECONDS)
+            .let(NetworkDebugger::applyTo)
             .addInterceptor(logging)
             .build()
 
@@ -142,11 +136,7 @@ object NetworkModule {
         OkHttpClient.Builder()
             .connectTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
-            // .apply {
-            //     if (BuildConfig.DEBUG) {
-            //         addInterceptor(ChuckerInterceptor.Builder(context).build())
-            //     }
-            // }
+            .let(NetworkDebugger::applyTo)
             .addInterceptor(logging)
             .build()
 

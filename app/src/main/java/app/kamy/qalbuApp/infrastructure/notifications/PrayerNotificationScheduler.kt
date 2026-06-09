@@ -4,6 +4,8 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import androidx.annotation.RawRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.kamy.qalbuApp.MainActivity
@@ -205,7 +207,8 @@ object PrayerNotificationScheduler {
         title: String,
         body: String,
         silent: Boolean = false,
-        showStopAdhan: Boolean = false
+        showStopAdhan: Boolean = false,
+        @RawRes adhanSoundRes: Int? = null
     ) {
         NotificationChannels.ensureAll(context)
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
@@ -228,6 +231,11 @@ object PrayerNotificationScheduler {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
         if (silent) {
             builder.setSilent(true)
+        } else if (adhanSoundRes != null) {
+            val soundUri = Uri.parse("android.resource://${context.packageName}/$adhanSoundRes")
+            builder.setSound(soundUri)
+            builder.setCategory(NotificationCompat.CATEGORY_ALARM)
+            builder.setPriority(NotificationCompat.PRIORITY_MAX)
         }
         if (showStopAdhan) {
             val stopPending = PendingIntent.getBroadcast(
