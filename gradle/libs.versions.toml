@@ -42,8 +42,7 @@ media3 = "1.4.1"
 coil = "2.7.0"
 
 # Debugging
-# 4.1.0 aligns with Kotlin 2.0.x used by this project.
-chucker = "4.1.0"
+prowl = "1.0.0"
 
 # Test
 junit = "4.13.2"
@@ -106,8 +105,8 @@ androidx-media3-session = { group = "androidx.media3", name = "media3-session", 
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 # Debugging
-chucker = { group = "com.github.chuckerteam.chucker", name = "library", version.ref = "chucker" }
-chucker-no-op = { group = "com.github.chuckerteam.chucker", name = "library-no-op", version.ref = "chucker" }
+prowl = { group = "io.github.prowllabs", name = "prowl", version.ref = "prowl" }
+prowl-grpc = { group = "io.github.prowllabs", name = "prowl-grpc", version.ref = "prowl" }
 
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }

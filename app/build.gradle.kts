@@ -186,9 +186,9 @@ dependencies {
     // Image loading
     implementation(libs.coil.compose)
 
-    // Debug HTTP inspector (Chucker) — uncomment to re-enable
-    // debugImplementation(libs.chucker)
-    // releaseImplementation(libs.chucker.no.op)
+    // Debug network inspector — ProwlKit (debug builds only)
+    debugImplementation(libs.prowl)
+    debugImplementation(libs.prowl.grpc)
 
     // Test
     testImplementation(libs.junit)

@@ -5,7 +5,7 @@ import com.prowllabs.prowl.Prowl
 import com.prowllabs.prowl.applyProwl
 import okhttp3.OkHttpClient
 
-/** Debug-only ProwlKit wiring (Chucker replacement with mocking support). */
+/** Debug-only ProwlKit wiring with mocking support. */
 object NetworkDebugger {
     fun install(application: Application) {
         Prowl.start(application)
