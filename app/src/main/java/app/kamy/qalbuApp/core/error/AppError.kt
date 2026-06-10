@@ -7,6 +7,7 @@ enum class AppErrorKind {
     NotFound,
     ClientError,
     ServerError,
+    RateLimited,
     Parsing,
     MissingConfig,
     Location,
@@ -15,24 +16,35 @@ enum class AppErrorKind {
 
 data class AppError(
     val kind: AppErrorKind,
+    val apiMessage: String? = null,
     val debugMessage: String? = null
 )
 
-fun Throwable.toAppError(): AppError = when (this) {
-    is QFError.Network -> AppError(AppErrorKind.NoInternet, message)
-    is QFError.AuthExpired, is QFError.MissingUserSession -> AppError(AppErrorKind.Unauthorized, message)
-    is QFError.MissingContentToken -> AppError(AppErrorKind.MissingConfig, message)
-    is QFError.HttpStatus -> when (code) {
-        401 -> AppError(AppErrorKind.Unauthorized, bodyText ?: message)
-        403 -> AppError(AppErrorKind.Forbidden, bodyText ?: message)
-        404 -> AppError(AppErrorKind.NotFound, bodyText ?: message)
-        in 400..499 -> AppError(AppErrorKind.ClientError, bodyText ?: message)
-        in 500..599 -> AppError(AppErrorKind.ServerError, bodyText ?: message)
-        else -> AppError(AppErrorKind.Generic, bodyText ?: message)
+private fun QFError.HttpStatus.toAppError(): AppError {
+    val parsed = parseApiErrorBody(bodyText)
+    val apiMessage = parsed?.message?.takeIf { it.isNotBlank() }
+    val kind = when (code) {
+        401 -> AppErrorKind.Unauthorized
+        403 -> AppErrorKind.Forbidden
+        404 -> AppErrorKind.NotFound
+        429 -> AppErrorKind.RateLimited
+        in 400..499 -> AppErrorKind.ClientError
+        in 500..599 -> AppErrorKind.ServerError
+        else -> AppErrorKind.Generic
     }
-    is QFError.Parsing -> AppError(AppErrorKind.Parsing, detail)
+    return AppError(kind = kind, apiMessage = apiMessage, debugMessage = bodyText ?: message)
+}
+
+fun Throwable.toAppError(): AppError = when (this) {
+    is QFError.Network -> AppError(AppErrorKind.NoInternet, debugMessage = message)
+    is QFError.AuthExpired, is QFError.MissingUserSession ->
+        AppError(AppErrorKind.Unauthorized, debugMessage = message)
+    is QFError.MissingContentToken ->
+        AppError(AppErrorKind.MissingConfig, debugMessage = message)
+    is QFError.HttpStatus -> toAppError()
+    is QFError.Parsing -> AppError(AppErrorKind.Parsing, debugMessage = detail)
     else -> when {
-        isAuthenticationFailure() -> AppError(AppErrorKind.Unauthorized, message)
-        else -> AppError(AppErrorKind.Generic, message)
+        isAuthenticationFailure() -> AppError(AppErrorKind.Unauthorized, debugMessage = message)
+        else -> AppError(AppErrorKind.Generic, debugMessage = message)
     }
 }

@@ -151,6 +151,8 @@
     <string name="error_no_internet_body">Semak sambungan anda dan cuba lagi.</string>
     <string name="error_server_title">Pelayan tidak tersedia</string>
     <string name="error_server_body">Sesuatu tidak kena di pihak kami. Sila cuba lagi sebentar lagi.</string>
+    <string name="error_rate_limit_title">Terlalu banyak permintaan</string>
+    <string name="error_rate_limit_body">Tunggu sebentar dan cuba lagi.</string>
     <string name="error_forbidden_title">Akses ditolak</string>
     <string name="error_forbidden_body">Anda tidak mempunyai kebenaran untuk memuatkan kandungan ini.</string>
     <string name="error_unauthorized_title">Sesi tamat</string>

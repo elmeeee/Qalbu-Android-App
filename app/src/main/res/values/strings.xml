@@ -165,6 +165,8 @@
     <string name="error_no_internet_body">Check your connection and try again.</string>
     <string name="error_server_title">Server unavailable</string>
     <string name="error_server_body">Something went wrong on our side. Please try again in a moment.</string>
+    <string name="error_rate_limit_title">Too many requests</string>
+    <string name="error_rate_limit_body">Please wait a moment and try again.</string>
     <string name="error_forbidden_title">Access denied</string>
     <string name="error_forbidden_body">You don\'t have permission to load this content.</string>
     <string name="error_unauthorized_title">Session expired</string>

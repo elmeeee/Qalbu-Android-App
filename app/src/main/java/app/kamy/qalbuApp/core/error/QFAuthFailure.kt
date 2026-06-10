@@ -7,6 +7,7 @@ import app.kamy.qalbuApp.infrastructure.auth.UserSession
 fun isAuthHttpFailure(code: Int, body: String?): Boolean {
     if (code == 401) return true
     if (code != 403) return false
+    if (parseApiErrorBody(body)?.type == "forbidden") return false
     val lower = body?.lowercase().orEmpty()
     return lower.contains("token") && lower.contains("expired")
         || lower.contains("token expired")
@@ -31,9 +32,11 @@ fun Throwable.isAuthenticationFailure(): Boolean = when (this) {
     }
 }
 
-fun Throwable.userFacingAuthOrApiMessage(context: Context): String =
-    if (isAuthenticationFailure()) context.getString(R.string.session_expired)
-    else message ?: context.getString(R.string.request_failed)
+fun Throwable.userFacingAuthOrApiMessage(context: Context): String {
+    if (isAuthenticationFailure()) return context.getString(R.string.session_expired)
+    val fromApi = (this as? QFError.HttpStatus)?.bodyText?.let(::parseApiErrorBody)?.message
+    return fromApi?.takeIf { it.isNotBlank() } ?: message ?: context.getString(R.string.request_failed)
+}
 
 suspend fun UserSession.invalidateIfAuthenticationFailure(error: Throwable): Boolean {
     if (!error.isAuthenticationFailure()) return false

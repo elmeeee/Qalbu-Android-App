@@ -151,6 +151,8 @@
     <string name="error_no_internet_body">Periksa koneksi Anda lalu coba lagi.</string>
     <string name="error_server_title">Server tidak tersedia</string>
     <string name="error_server_body">Terjadi masalah di sisi kami. Silakan coba lagi sebentar lagi.</string>
+    <string name="error_rate_limit_title">Terlalu banyak permintaan</string>
+    <string name="error_rate_limit_body">Tunggu sebentar lalu coba lagi.</string>
     <string name="error_forbidden_title">Akses ditolak</string>
     <string name="error_forbidden_body">Anda tidak memiliki izin untuk memuat konten ini.</string>
     <string name="error_unauthorized_title">Sesi berakhir</string>
