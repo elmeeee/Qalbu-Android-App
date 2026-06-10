@@ -231,8 +231,14 @@ class ChapterReaderViewModel @Inject constructor(
                         hasMore = resp.pagination?.hasNextPage ?: false
                     )
                 }
-            }.onFailure {
-                _state.update { it.copy(isLoadingMore = false) }
+            }.onFailure { t ->
+                _state.update {
+                    it.copy(
+                        isLoadingMore = false,
+                        publishMessage = t.toAppError().apiMessage
+                            ?: appContext.getString(R.string.error_generic_body)
+                    )
+                }
             }
         }
     }

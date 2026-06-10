@@ -17,12 +17,14 @@ enum class AppErrorKind {
 data class AppError(
     val kind: AppErrorKind,
     val apiMessage: String? = null,
+    val apiType: String? = null,
     val debugMessage: String? = null
 )
 
 private fun QFError.HttpStatus.toAppError(): AppError {
     val parsed = parseApiErrorBody(bodyText)
     val apiMessage = parsed?.message?.takeIf { it.isNotBlank() }
+    val apiType = parsed?.type?.takeIf { it.isNotBlank() }
     val kind = when (code) {
         401 -> AppErrorKind.Unauthorized
         403 -> AppErrorKind.Forbidden
@@ -32,7 +34,7 @@ private fun QFError.HttpStatus.toAppError(): AppError {
         in 500..599 -> AppErrorKind.ServerError
         else -> AppErrorKind.Generic
     }
-    return AppError(kind = kind, apiMessage = apiMessage, debugMessage = bodyText ?: message)
+    return AppError(kind = kind, apiMessage = apiMessage, apiType = apiType, debugMessage = bodyText ?: message)
 }
 
 fun Throwable.toAppError(): AppError = when (this) {

@@ -25,6 +25,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -80,6 +82,7 @@ fun ChaptersScreen(
     var isSearchFieldFocused by remember { mutableStateOf(false) }
     val listBottomPadding = floatingNavBottomPadding()
     val errorDisplay = state.error.rememberErrorDisplay(R.string.chapters_load_failed)
+    val snackbarHostState = remember { SnackbarHostState() }
     val activeSearchQuery = remember(searchQuery) { searchQuery.normalizedSearchQuery() }
     val isSearching = isSearchFieldFocused && activeSearchQuery.isNotEmpty()
     val displayedChapters = remember(state.chapters, activeSearchQuery, isSearching) {
@@ -143,7 +146,9 @@ fun ChaptersScreen(
                 AlKhatibErrorState(
                     display = errorDisplay,
                     onRetry = { vm.loadAll(force = true) },
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = AlKhatibSpacing.screenHorizontal)
                 )
             else -> AlKhatibPullToRefresh(
                 isRefreshing = isPullRefreshing,
@@ -151,6 +156,14 @@ fun ChaptersScreen(
                     scope.launch {
                         isPullRefreshing = true
                         runCatching { vm.refresh(force = true) }
+                            .onFailure { t ->
+                                // Chapters already exist — show a snackbar so the
+                                // error is not silently lost.
+                                val msg = state.error?.apiMessage
+                                    ?: t.message
+                                    ?: "Couldn't refresh chapters"
+                                snackbarHostState.showSnackbar(msg)
+                            }
                         isPullRefreshing = false
                     }
                 },
@@ -221,6 +234,13 @@ fun ChaptersScreen(
                 }
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+        )
     }
 }
 

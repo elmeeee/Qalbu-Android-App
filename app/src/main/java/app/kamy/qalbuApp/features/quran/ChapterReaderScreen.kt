@@ -184,7 +184,8 @@ fun ChapterReaderScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .statusBarsPadding(),
+                    .statusBarsPadding()
+                    .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 AlKhatibErrorState(

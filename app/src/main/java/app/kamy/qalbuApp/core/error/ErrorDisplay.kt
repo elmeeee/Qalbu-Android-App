@@ -16,7 +16,8 @@ enum class ErrorIcon {
 data class ErrorDisplay(
     val title: String,
     val description: String,
-    val icon: ErrorIcon
+    val icon: ErrorIcon,
+    val apiType: String? = null
 )
 
 fun AppError.toDisplay(
@@ -65,5 +66,5 @@ fun AppError.toDisplay(
         AppErrorKind.ServerError, AppErrorKind.ClientError, AppErrorKind.Parsing -> ErrorIcon.Server
         AppErrorKind.MissingConfig, AppErrorKind.Generic -> ErrorIcon.Generic
     }
-    return ErrorDisplay(title = title, description = description, icon = icon)
+    return ErrorDisplay(title = title, description = description, icon = icon, apiType = apiType?.takeIf { it.isNotBlank() })
 }

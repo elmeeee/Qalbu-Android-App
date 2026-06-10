@@ -134,7 +134,9 @@ fun ReflectScreen(
                 AlKhatibErrorStateDark(
                     display = errorDisplay,
                     onRetry = { vm.loadPosts(reset = true) },
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(horizontal = AlKhatibSpacing.screenHorizontal)
                 )
             else -> ReelFeed(
                 state = state,
