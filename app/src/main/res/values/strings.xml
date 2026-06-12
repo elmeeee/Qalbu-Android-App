@@ -201,7 +201,15 @@
     <string name="ayah_number">Ayah %1$d</string>
     <string name="ayah_label">Ayah %1$s</string>
     <string name="no_matches">No matches</string>
-    <string name="search_surah_placeholder">Search surah, ayah (2:255), or place…</string>
+    <string name="search_surah_placeholder">Search surah, ayah, or keyword…</string>
+    <string name="search_section_surahs">Surahs</string>
+    <string name="search_section_navigation">Go to</string>
+    <string name="search_section_verses">Verses</string>
+    <string name="search_result_surah">Surah</string>
+    <string name="search_result_page">Page</string>
+    <string name="search_result_juz">Juz</string>
+    <string name="search_results_found">%1$d results</string>
+    <string name="quran_search_failed">Search failed</string>
     <string name="verse_reference_result">Surah %1$d · Ayah %2$d</string>
     <string name="verse_reference_unavailable">Chapter not loaded yet</string>
     <string name="search_empty_message">Nothing matches “%1$s”. Try a surah number, Arabic name, or “Makkah” / “Madinah”.</string>

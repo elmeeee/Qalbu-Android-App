@@ -48,7 +48,7 @@ class ContentTokenManager @Inject constructor(
 
         val formBody = FormBody.Builder()
             .add("grant_type", "client_credentials")
-            .add("scope", "content")
+            .add("scope", AppConfig.qfClientCredentialsScopes)
             .build()
 
         val req = Request.Builder()

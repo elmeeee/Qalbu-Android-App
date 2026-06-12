@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,23 +35,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
-import app.kamy.qalbuApp.R
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.design.components.AlKhatibErrorState
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.design.components.ChapterRowSkeleton
@@ -61,6 +57,8 @@ import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import app.kamy.qalbuApp.domain.model.ReadingSession
+import app.kamy.qalbuApp.domain.model.SearchNavResult
+import app.kamy.qalbuApp.domain.model.SearchVerseResult
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
@@ -74,35 +72,35 @@ fun ChaptersScreen(
     val vm: ChaptersViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val scope = rememberCoroutineScope()
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
     val searchFocusRequester = remember { FocusRequester() }
     var isPullRefreshing by remember { mutableStateOf(false) }
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    var isSearchFieldFocused by remember { mutableStateOf(false) }
     val listBottomPadding = floatingNavBottomPadding()
     val errorDisplay = state.error.rememberErrorDisplay(R.string.chapters_load_failed)
     val snackbarHostState = remember { SnackbarHostState() }
-    val activeSearchQuery = remember(searchQuery) { searchQuery.normalizedSearchQuery() }
-    val isSearching = isSearchFieldFocused && activeSearchQuery.isNotEmpty()
-    val verseRef = remember(activeSearchQuery) { parseVerseReference(activeSearchQuery) }
-    val displayedChapters = remember(state.chapters, activeSearchQuery, isSearching) {
-        if (isSearching) state.chapters.searchChapters(activeSearchQuery) else state.chapters
-    }
+    val isSearching = state.isSearchActive && state.searchQuery.isNotBlank()
+    val activeQuery = state.searchQuery.normalizedSearchQuery()
+    val hasSearchResults = state.verseRef != null ||
+        state.localSearchChapters.isNotEmpty() ||
+        state.remoteNavigation.isNotEmpty() ||
+        state.remoteVerses.isNotEmpty()
 
-    fun clearSearch() {
-        searchQuery = ""
-        isSearchFieldFocused = false
-        keyboardController?.hide()
-        focusManager.clearFocus()
-    }
-
-    fun onSearchFocusChange(focused: Boolean) {
-        isSearchFieldFocused = focused
-        if (!focused) {
-            keyboardController?.hide()
-            searchQuery = ""
+    fun openVerse(chapterNumber: Int, ayah: Int) {
+        vm.chapterForNumber(chapterNumber)?.let { chapter ->
+            onOpenChapter(chapter, ayah)
+            vm.clearSearch()
         }
+    }
+
+    fun openNavResult(result: SearchNavResult) {
+        when (result.type) {
+            "surah" -> result.chapterNumber?.let { openVerse(it, ayah = 1) }
+            "page", "juz" -> Unit
+            else -> result.chapterNumber?.let { openVerse(it, ayah = 1) }
+        }
+    }
+
+    fun openVerseResult(result: SearchVerseResult) {
+        openVerse(result.chapterNumber, result.ayahNumber)
     }
 
     Box(
@@ -127,6 +125,7 @@ fun ChaptersScreen(
                         onSuggestionClick = {},
                         resultCount = null,
                         searchFocusRequester = searchFocusRequester,
+                        onSearchFocusChange = {},
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
@@ -158,8 +157,6 @@ fun ChaptersScreen(
                         isPullRefreshing = true
                         runCatching { vm.refresh(force = true) }
                             .onFailure { t ->
-                                // Chapters already exist — show a snackbar so the
-                                // error is not silently lost.
                                 val msg = state.error?.apiMessage
                                     ?: t.message
                                     ?: "Couldn't refresh chapters"
@@ -172,20 +169,25 @@ fun ChaptersScreen(
             ) {
                 Column(Modifier.fillMaxSize()) {
                     QuranListHeader(
-                        searchQuery = searchQuery,
-                        onSearchQueryChange = { searchQuery = it },
-                        onClearSearch = ::clearSearch,
+                        searchQuery = state.searchQuery,
+                        onSearchQueryChange = vm::onSearchQueryChange,
+                        onClearSearch = vm::clearSearch,
                         searchEnabled = true,
                         isSearching = isSearching,
-                        showSuggestions = isSearchFieldFocused && activeSearchQuery.isEmpty(),
+                        showSuggestions = state.isSearchActive && activeQuery.isEmpty(),
                         onSuggestionClick = { suggestion ->
-                            searchQuery = suggestion
-                            isSearchFieldFocused = true
+                            vm.onSearchQueryChange(suggestion)
+                            vm.onSearchActiveChange(true)
                             searchFocusRequester.requestFocus()
                         },
-                        resultCount = if (isSearching) displayedChapters.size else null,
-                        onSearchFocusChange = ::onSearchFocusChange,
+                        resultCount = if (isSearching) {
+                            state.localSearchChapters.size +
+                                state.remoteNavigation.size +
+                                state.remoteVerses.size +
+                                if (state.verseRef != null) 1 else 0
+                        } else null,
                         searchFocusRequester = searchFocusRequester,
+                        onSearchFocusChange = vm::onSearchActiveChange,
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
@@ -200,50 +202,118 @@ fun ChaptersScreen(
                             state.continueReading?.let { session ->
                                 item(key = "continue_reading") {
                                     ContinueReadingCard(
-                                    session = session,
-                                    chapter = state.chapters.firstOrNull { it.id == session.chapterNumber },
-                                    onTap = {
-                                        vm.continueReadingTarget()?.let { (c, v) -> onOpenChapter(c, v) }
-                                    },
-                                    modifier = Modifier.padding(
-                                        horizontal = AlKhatibSpacing.screenHorizontal,
-                                        vertical = AlKhatibSpacing.sm
-                                    )
+                                        session = session,
+                                        chapter = state.chapters.firstOrNull { it.id == session.chapterNumber },
+                                        onTap = {
+                                            vm.continueReadingTarget()?.let { (c, v) -> onOpenChapter(c, v) }
+                                        },
+                                        modifier = Modifier.padding(
+                                            horizontal = AlKhatibSpacing.screenHorizontal,
+                                            vertical = AlKhatibSpacing.sm
+                                        )
                                     )
                                 }
                             }
                         }
 
-                        if (isSearching && verseRef != null) {
-                            item(key = "verse_ref_${verseRef.chapter}_${verseRef.ayah}") {
-                                VerseReferenceResultRow(
-                                    reference = verseRef,
-                                    chapter = state.chapters.firstOrNull { it.id == verseRef.chapter },
-                                    onOpen = { chapter, ayah ->
-                                        onOpenChapter(chapter, ayah)
-                                        clearSearch()
-                                    },
+                        if (isSearching) {
+                            state.verseRef?.let { ref ->
+                                item(key = "verse_ref_${ref.chapter}_${ref.ayah}") {
+                                    VerseReferenceResultRow(
+                                        reference = ref,
+                                        chapter = vm.chapterForNumber(ref.chapter),
+                                        onOpen = { chapter, ayah -> openVerse(chapter.id, ayah) },
+                                        modifier = Modifier.padding(
+                                            horizontal = AlKhatibSpacing.screenHorizontal,
+                                            vertical = 4.dp
+                                        )
+                                    )
+                                }
+                            }
+
+                            if (state.localSearchChapters.isNotEmpty()) {
+                                item(key = "label_local_surahs") {
+                                    QuranSearchSectionLabel(stringResource(R.string.search_section_surahs))
+                                }
+                                items(state.localSearchChapters, key = { "local_${it.id}" }) { chapter ->
+                                    ChapterRow(
+                                        chapter = chapter,
+                                        onClick = {
+                                            onOpenChapter(chapter, null)
+                                            vm.clearSearch()
+                                        },
+                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                    )
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                    )
+                                }
+                            }
+
+                            if (state.remoteNavigation.isNotEmpty()) {
+                                item(key = "label_remote_nav") {
+                                    QuranSearchSectionLabel(stringResource(R.string.search_section_navigation))
+                                }
+                                items(state.remoteNavigation, key = { "nav_${it.type}_${it.key}" }) { result ->
+                                    SearchNavResultRow(
+                                        result = result,
+                                        enabled = result.type == "surah" && result.chapterNumber != null,
+                                        onClick = { openNavResult(result) },
+                                    )
+                                }
+                            }
+
+                            if (state.remoteVerses.isNotEmpty()) {
+                                item(key = "label_remote_verses") {
+                                    QuranSearchSectionLabel(stringResource(R.string.search_section_verses))
+                                }
+                                items(state.remoteVerses, key = { "verse_${it.verseKey}" }) { result ->
+                                    SearchVerseResultRow(
+                                        result = result,
+                                        enabled = vm.chapterForNumber(result.chapterNumber) != null,
+                                        onClick = { openVerseResult(result) }
+                                    )
+                                }
+                            }
+
+                            if (state.searchLoading) {
+                                item(key = "search_loading") {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        QuranSearchLoadingRow()
+                                    }
+                                }
+                            }
+
+                            state.searchError?.let { error ->
+                                item(key = "search_error") {
+                                    QuranSearchErrorRow(
+                                        error = error,
+                                        onRetry = { vm.onSearchQueryChange(state.searchQuery) }
+                                    )
+                                }
+                            }
+
+                            if (!state.searchLoading && !hasSearchResults && state.searchError == null) {
+                                item(key = "search_empty") {
+                                    QuranSearchEmptyState(query = activeQuery)
+                                }
+                            }
+                        } else {
+                            items(state.chapters, key = { it.id }) { chapter ->
+                                ChapterRow(
+                                    chapter = chapter,
+                                    onClick = { onOpenChapter(chapter, null) },
                                     modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
                                 )
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                )
                             }
-                        }
-
-                        if (isSearching && displayedChapters.isEmpty() && verseRef == null) {
-                            item(key = "search_empty") {
-                                QuranSearchEmptyState(query = activeSearchQuery)
-                            }
-                        }
-
-                        items(displayedChapters, key = { it.id }) { chapter ->
-                            ChapterRow(
-                                chapter = chapter,
-                                onClick = { onOpenChapter(chapter, null) },
-                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-                            )
                         }
                     }
                 }
@@ -303,7 +373,7 @@ private fun QuranListHeader(
             null -> defaultSubtitle
             0 -> noMatchesSubtitle
             1 -> oneSurahSubtitle
-            else -> stringResource(R.string.surahs_found, resultCount)
+            else -> stringResource(R.string.search_results_found, resultCount)
         }
         Text(
             text = subtitle,
@@ -495,45 +565,6 @@ private fun ChapterRow(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun VerseReferenceResultRow(
-    reference: VerseReference,
-    chapter: QuranChapter?,
-    onOpen: (QuranChapter, Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val label = stringResource(R.string.verse_reference_result, reference.chapter, reference.ayah)
-    Surface(
-        onClick = {
-            chapter?.let { onOpen(it, reference.ayah) }
-        },
-        enabled = chapter != null,
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.DeepEmerald
-            )
-            chapter?.let {
-                Text(
-                    text = it.displayComplexName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate500
-                )
-            } ?: Text(
-                text = stringResource(R.string.verse_reference_unavailable),
-                style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500
-            )
         }
     }
 }

@@ -4,10 +4,12 @@ import app.kamy.qalbuApp.infrastructure.network.AlAdhanApi
 import app.kamy.qalbuApp.infrastructure.network.AuthV1Api
 import app.kamy.qalbuApp.infrastructure.network.ContentApi
 import app.kamy.qalbuApp.infrastructure.network.ReflectApi
+import app.kamy.qalbuApp.infrastructure.network.SearchApi
 import app.kamy.qalbuApp.infrastructure.network.api.AlAdhanApiService
 import app.kamy.qalbuApp.infrastructure.network.api.AuthV1ApiService
 import app.kamy.qalbuApp.infrastructure.network.api.ContentApiService
 import app.kamy.qalbuApp.infrastructure.network.api.ReflectApiService
+import app.kamy.qalbuApp.infrastructure.network.api.SearchApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,5 +40,10 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideAlAdhanApi(@AlAdhanApi retrofit: Retrofit): AlAdhanApiService =
+        retrofit.create()
+
+    @Provides
+    @Singleton
+    fun provideSearchApi(@SearchApi retrofit: Retrofit): SearchApiService =
         retrofit.create()
 }

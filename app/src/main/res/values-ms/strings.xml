@@ -186,7 +186,15 @@
     <string name="ayah_number">Ayat %1$d</string>
     <string name="ayah_label">Ayat %1$s</string>
     <string name="no_matches">Tiada padanan</string>
-    <string name="search_surah_placeholder">Cari surah, ayat (2:255), atau tempat…</string>
+    <string name="search_surah_placeholder">Cari surah, ayat, atau kata kunci…</string>
+    <string name="search_section_surahs">Surah</string>
+    <string name="search_section_navigation">Pergi ke</string>
+    <string name="search_section_verses">Ayat</string>
+    <string name="search_result_surah">Surah</string>
+    <string name="search_result_page">Halaman</string>
+    <string name="search_result_juz">Juz</string>
+    <string name="search_results_found">%1$d hasil</string>
+    <string name="quran_search_failed">Carian gagal</string>
     <string name="verse_reference_result">Surah %1$d · Ayat %2$d</string>
     <string name="verse_reference_unavailable">Surah belum dimuatkan</string>
     <string name="location_settings_title">Lokasi solat</string>
