@@ -49,7 +49,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import android.content.Intent
 import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -80,6 +82,8 @@ fun ReflectScreen(
     val reflectTitle = stringResource(R.string.nav_reflect)
     val reflectCommunity = stringResource(R.string.reflect_community)
     val shareLabel = stringResource(R.string.share)
+    val shareReflectionLabel = stringResource(R.string.share_reflection)
+    val context = LocalContext.current
     val contributorLabel = stringResource(R.string.reflect_contributor)
     val verifiedLabel = stringResource(R.string.verified)
     val signInTitle = stringResource(R.string.reflect_sign_in_title)
@@ -145,6 +149,22 @@ fun ReflectScreen(
                 reflectTitle = reflectTitle,
                 reflectCommunity = reflectCommunity,
                 shareLabel = shareLabel,
+                onSharePost = { post ->
+                    val body = (post.body ?: "").replace(Regex("<[^>]+>"), "").trim()
+                    val verseKey = post.references?.firstOrNull()?.verseKey
+                    val text = buildString {
+                        append(body)
+                        if (!verseKey.isNullOrBlank()) {
+                            if (isNotEmpty()) append("\n\n")
+                            append("— $verseKey")
+                        }
+                    }.ifBlank { return@ReelFeed }
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, text)
+                    }
+                    context.startActivity(Intent.createChooser(intent, shareReflectionLabel))
+                },
                 contributorLabel = contributorLabel,
                 verifiedLabel = verifiedLabel
             )
@@ -161,6 +181,7 @@ private fun ReelFeed(
     reflectTitle: String,
     reflectCommunity: String,
     shareLabel: String,
+    onSharePost: (ReflectFeedPost) -> Unit,
     contributorLabel: String,
     verifiedLabel: String
 ) {
@@ -207,7 +228,8 @@ private fun ReelFeed(
                 onOpenVerse = { post.references?.firstOrNull()?.verseKey?.let(onOpenVerse) },
                 contributorLabel = contributorLabel,
                 verifiedLabel = verifiedLabel,
-                shareLabel = shareLabel
+                shareLabel = shareLabel,
+                onShare = { onSharePost(post) }
             )
         }
         if (state.isLoadingMore) {
@@ -310,7 +332,8 @@ private fun ReelPostCard(
     onOpenVerse: () -> Unit,
     contributorLabel: String,
     verifiedLabel: String,
-    shareLabel: String
+    shareLabel: String,
+    onShare: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -406,7 +429,7 @@ private fun ReelPostCard(
                 icon = Icons.Filled.Share,
                 tint = Color.White.copy(alpha = 0.8f),
                 label = shareLabel,
-                onClick = { /* TODO: share */ }
+                onClick = onShare
             )
         }
     }

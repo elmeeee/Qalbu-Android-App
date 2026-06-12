@@ -55,7 +55,8 @@ data class TodayUiState(
     val aiShareVisible: Boolean = false,
     val aiShareLoading: Boolean = false,
     val aiShareDraft: String = "",
-    val aiShareError: AppError? = null
+    val aiShareError: AppError? = null,
+    val showReciterSheet: Boolean = false
 )
 
 @HiltViewModel
@@ -72,7 +73,12 @@ class TodayViewModel @Inject constructor(
     val state: StateFlow<TodayUiState> = _state.asStateFlow()
 
     init {
-        _state.update { it.copy(translationId = translationStore.currentTranslationId()) }
+        _state.update {
+            it.copy(
+                translationId = translationStore.currentTranslationId(),
+                selectedRecitationId = translationStore.currentRecitationId()
+            )
+        }
         loadDailyAyahWithRecitations()
         loadProfile()
         viewModelScope.launch {
@@ -145,8 +151,22 @@ class TodayViewModel @Inject constructor(
         }
     }
 
+    fun openReciterSheet() {
+        _state.update { it.copy(showReciterSheet = true) }
+    }
+
+    fun dismissReciterSheet() {
+        _state.update { it.copy(showReciterSheet = false) }
+    }
+
     fun selectRecitation(id: Int) {
-        _state.update { it.copy(selectedRecitationId = id) }
+        if (id <= 0 || id == _state.value.selectedRecitationId) {
+            _state.update { it.copy(showReciterSheet = false) }
+            return
+        }
+        translationStore.setRecitation(id)
+        _state.update { it.copy(selectedRecitationId = id, showReciterSheet = false) }
+        loadDailyAyahWithRecitations()
     }
 
     fun openTafsir() {

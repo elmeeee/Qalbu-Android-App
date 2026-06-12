@@ -21,7 +21,9 @@ data class UserLocation(val latitude: Double, val longitude: Double)
 
 data class ReverseGeocodeResult(
     val cityName: String? = null,
-    val countryCode: String? = null
+    val countryCode: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
 
 @Singleton
@@ -67,6 +69,30 @@ class LocationProvider @Inject constructor(
 
     fun coordinateLabel(latitude: Double, longitude: Double): String =
         String.format(Locale.US, "%.3f, %.3f", latitude, longitude)
+
+    suspend fun forwardGeocode(query: String): ReverseGeocodeResult? =
+        withContext(Dispatchers.IO) {
+            val trimmed = query.trim()
+            if (trimmed.isEmpty() || !Geocoder.isPresent()) return@withContext null
+            try {
+                @Suppress("DEPRECATION")
+                val address = Geocoder(context, Locale.getDefault())
+                    .getFromLocationName(trimmed, 1)
+                    ?.firstOrNull()
+                    ?: return@withContext null
+                ReverseGeocodeResult(
+                    cityName = address.locality?.takeIf { it.isNotBlank() }
+                        ?: address.subAdminArea?.takeIf { it.isNotBlank() }
+                        ?: address.adminArea?.takeIf { it.isNotBlank() }
+                        ?: trimmed,
+                    countryCode = address.countryCode?.takeIf { it.isNotBlank() },
+                    latitude = address.latitude,
+                    longitude = address.longitude
+                )
+            } catch (_: Throwable) {
+                null
+            }
+        }
 
     fun hasAnyPermission(): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==

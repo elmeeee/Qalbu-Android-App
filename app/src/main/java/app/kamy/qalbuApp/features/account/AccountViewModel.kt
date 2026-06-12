@@ -283,8 +283,21 @@ class AccountViewModel @Inject constructor(
     }
 
     fun onSignedIn() {
+        _state.update { it.copy(error = null) }
         refreshSessionFromIdToken()
         fetchProfile()
+    }
+
+    fun onSignInFailed(message: String) {
+        _state.update {
+            it.copy(
+                authBusy = false,
+                error = AppError(
+                    kind = AppErrorKind.Generic,
+                    apiMessage = message.ifBlank { appContext.getString(R.string.sign_in_failed) }
+                )
+            )
+        }
     }
 
     private fun refreshSessionFromIdToken() {

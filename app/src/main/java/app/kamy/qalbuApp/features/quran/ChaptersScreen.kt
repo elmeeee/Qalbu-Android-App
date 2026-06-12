@@ -85,6 +85,7 @@ fun ChaptersScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val activeSearchQuery = remember(searchQuery) { searchQuery.normalizedSearchQuery() }
     val isSearching = isSearchFieldFocused && activeSearchQuery.isNotEmpty()
+    val verseRef = remember(activeSearchQuery) { parseVerseReference(activeSearchQuery) }
     val displayedChapters = remember(state.chapters, activeSearchQuery, isSearching) {
         if (isSearching) state.chapters.searchChapters(activeSearchQuery) else state.chapters
     }
@@ -213,7 +214,21 @@ fun ChaptersScreen(
                             }
                         }
 
-                        if (isSearching && displayedChapters.isEmpty()) {
+                        if (isSearching && verseRef != null) {
+                            item(key = "verse_ref_${verseRef.chapter}_${verseRef.ayah}") {
+                                VerseReferenceResultRow(
+                                    reference = verseRef,
+                                    chapter = state.chapters.firstOrNull { it.id == verseRef.chapter },
+                                    onOpen = { chapter, ayah ->
+                                        onOpenChapter(chapter, ayah)
+                                        clearSearch()
+                                    },
+                                    modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                )
+                            }
+                        }
+
+                        if (isSearching && displayedChapters.isEmpty() && verseRef == null) {
                             item(key = "search_empty") {
                                 QuranSearchEmptyState(query = activeSearchQuery)
                             }
@@ -480,6 +495,45 @@ private fun ChapterRow(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun VerseReferenceResultRow(
+    reference: VerseReference,
+    chapter: QuranChapter?,
+    onOpen: (QuranChapter, Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val label = stringResource(R.string.verse_reference_result, reference.chapter, reference.ayah)
+    Surface(
+        onClick = {
+            chapter?.let { onOpen(it, reference.ayah) }
+        },
+        enabled = chapter != null,
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            chapter?.let {
+                Text(
+                    text = it.displayComplexName,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AlKhatibColors.Slate500
+                )
+            } ?: Text(
+                text = stringResource(R.string.verse_reference_unavailable),
+                style = MaterialTheme.typography.bodySmall,
+                color = AlKhatibColors.Slate500
+            )
         }
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,6 +42,8 @@ import java.util.Locale
 fun PrayerDashboardCard(
     state: PrayerUiState,
     onRetry: () -> Unit = {},
+    onOpenCalendar: () -> Unit = {},
+    onOpenLocation: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val fetchErrorDisplay = state.error
@@ -115,6 +118,25 @@ fun PrayerDashboardCard(
         }
         Spacer(Modifier.height(14.dp))
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextButton(onClick = onOpenCalendar) {
+                Text(
+                    text = stringResource(R.string.prayer_calendar),
+                    color = Color.White.copy(alpha = 0.88f),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+            TextButton(onClick = onOpenLocation) {
+                Text(
+                    text = stringResource(R.string.location_change),
+                    color = Color.White.copy(alpha = 0.88f),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

@@ -16,12 +16,17 @@ import app.kamy.qalbuApp.core.locale.AppLocale
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.ui.permissions.ExactAlarmPermissionGate
+import app.kamy.qalbuApp.infrastructure.preferences.OnboardingStore
+import app.kamy.qalbuApp.ui.onboarding.OnboardingScreen
 import app.kamy.qalbuApp.ui.root.RootScreen
 import app.kamy.qalbuApp.ui.splash.AppSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var onboardingStore: OnboardingStore
 
     private val deepLinkRoute = mutableStateOf<String?>(null)
 
@@ -35,19 +40,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         deepLinkRoute.value = intent.toQuranDeepLinkRoute()
         enableEdgeToEdge()
+        val needsOnboarding = !onboardingStore.isComplete()
         setContent {
             var showGreetingSplash by rememberSaveable { mutableStateOf(true) }
+            var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
             val pendingRoute by deepLinkRoute
 
             AlKhatibTheme {
-                if (showGreetingSplash) {
-                    AppSplashScreen(onFinished = { showGreetingSplash = false })
-                } else {
-                    ExactAlarmPermissionGate()
-                    RootScreen(
-                        pendingDeepLinkRoute = pendingRoute,
-                        onDeepLinkHandled = { deepLinkRoute.value = null }
-                    )
+                when {
+                    showGreetingSplash -> AppSplashScreen(onFinished = { showGreetingSplash = false })
+                    showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })
+                    else -> {
+                        ExactAlarmPermissionGate()
+                        RootScreen(
+                            pendingDeepLinkRoute = pendingRoute,
+                            onDeepLinkHandled = { deepLinkRoute.value = null }
+                        )
+                    }
                 }
             }
         }

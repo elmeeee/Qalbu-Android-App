@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,8 +52,10 @@ fun TodayVerseOfDaySection(
     isLoading: Boolean,
     error: AppError? = null,
     isPlaying: Boolean,
+    reciterName: String? = null,
     aiShareLoading: Boolean = false,
     onPlayAudio: () -> Unit,
+    onReciterClick: () -> Unit = {},
     onAiShare: () -> Unit,
     onTafsir: () -> Unit,
     onRetry: () -> Unit = {},
@@ -149,6 +152,21 @@ fun TodayVerseOfDaySection(
                     ),
                     ActionPillData(Icons.Filled.AutoStories, tafsirLabel, AlKhatibColors.IndigoAccent, onTafsir)
                 )
+                reciterName?.takeIf { it.isNotBlank() }?.let { name ->
+                    TextButton(
+                        onClick = onReciterClick,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "${stringResource(R.string.reciter)}: $name",
+                            color = AlKhatibColors.Slate500,
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
                 Column(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxWidth()

@@ -28,6 +28,16 @@ data class PrayerDayResult(
     val scheduleBundle: PrayerScheduleBundle? = null
 )
 
+data class PrayerCalendarDay(
+    val day: Int,
+    val gregorianLabel: String,
+    val hijriLabel: String?,
+    val fajr: String,
+    val dhuhr: String,
+    val maghrib: String,
+    val isha: String
+)
+
 @Singleton
 class AlAdhanRepository @Inject constructor(
     private val api: AlAdhanApiService
@@ -102,6 +112,49 @@ class AlAdhanRepository @Inject constructor(
             scheduleBundle = scheduleBundle
         )
     }
+
+    suspend fun fetchMonthCalendar(
+        year: Int,
+        month: Int,
+        latitude: Double,
+        longitude: Double,
+        method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod
+    ): List<PrayerCalendarDay> {
+        val resp = qfCall {
+            api.getCalendar(
+                year = year,
+                month = month,
+                latitude = latitude,
+                longitude = longitude,
+                method = method.aladhanMethodId,
+                school = method.aladhanSchool,
+                tune = method.aladhanTune,
+                methodSettings = method.aladhanMethodSettings
+            )
+        }
+        return resp.data.orEmpty().mapNotNull { day ->
+            val timings = day.timings.orEmpty()
+            val gregorian = day.date?.gregorian ?: return@mapNotNull null
+            val dayNumber = gregorian.day?.toIntOrNull() ?: return@mapNotNull null
+            val monthName = gregorian.month?.en.orEmpty()
+            val yearLabel = gregorian.year.orEmpty()
+            val (hijriLabel, _) = AlAdhanDateLabels.fromApiDate(day.date)
+            PrayerCalendarDay(
+                day = dayNumber,
+                gregorianLabel = listOf(dayNumber.toString(), monthName, yearLabel)
+                    .filter { it.isNotBlank() }
+                    .joinToString(" "),
+                hijriLabel = hijriLabel,
+                fajr = formatRawTime(timings["Fajr"]),
+                dhuhr = formatRawTime(timings["Dhuhr"]),
+                maghrib = formatRawTime(timings["Maghrib"]),
+                isha = formatRawTime(timings["Isha"])
+            )
+        }
+    }
+
+    private fun formatRawTime(raw: String?): String =
+        raw?.substringBefore(" ")?.trim().orEmpty().ifBlank { "--:--" }
 
     private fun todayDate(): Date = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0)

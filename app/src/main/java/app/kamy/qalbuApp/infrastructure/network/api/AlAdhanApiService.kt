@@ -20,7 +20,26 @@ interface AlAdhanApiService {
         @Query("tune") tune: String,
         @Query("methodSettings") methodSettings: String? = null
     ): AlAdhanResponse
+
+    @GET("calendar/{year}/{month}")
+    suspend fun getCalendar(
+        @Path("year") year: Int,
+        @Path("month") month: Int,
+        @Query("latitude") latitude: Double,
+        @Query("longitude") longitude: Double,
+        @Query("method") method: Int,
+        @Query("school") school: Int = 0,
+        @Query("tune") tune: String,
+        @Query("methodSettings") methodSettings: String? = null
+    ): AlAdhanCalendarResponse
 }
+
+@Serializable
+data class AlAdhanCalendarResponse(
+    val code: Int? = null,
+    val status: String? = null,
+    val data: List<AlAdhanData>? = null
+)
 
 @Serializable
 data class AlAdhanMethodsResponse(

@@ -116,11 +116,16 @@ fun AccountScreen(
         val (response, ex) = oauthService.parseRedirect(data)
         if (response != null) {
             scope.launch {
-                oauthService.exchangeAuthorizationResponse(authService, response)
-                vm.onSignedIn()
+                try {
+                    oauthService.exchangeAuthorizationResponse(authService, response)
+                    vm.onSignedIn()
+                } catch (t: Throwable) {
+                    vm.onSignInFailed(t.message.orEmpty())
+                }
             }
-        } else if (ex != null && result.resultCode == Activity.RESULT_OK) {
-            // Errors surface via vm.error in future iterations.
+        } else if (ex != null) {
+            val message = ex.errorDescription ?: ex.message.orEmpty()
+            if (message.isNotBlank()) vm.onSignInFailed(message)
         }
     }
 
@@ -432,6 +437,10 @@ private fun ProfileHeader(
                     Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.sign_in))
+                }
+                profileErrorDisplay?.let { display ->
+                    Spacer(Modifier.height(8.dp))
+                    AlKhatibInlineError(display = display)
                 }
             }
         }

@@ -66,6 +66,7 @@ fun TodayHeader(
     avatarUrl: String? = null,
     isProfileLoading: Boolean = false,
     onAccountClick: () -> Unit = {},
+    onLocationClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val greeting = rememberGreeting()
@@ -170,7 +171,11 @@ fun TodayHeader(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable(onClick = onLocationClick)
+                        .padding(end = 4.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.LocationOn,

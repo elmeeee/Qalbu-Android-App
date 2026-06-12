@@ -3,19 +3,23 @@ package app.kamy.qalbuApp.features.today
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.core.error.AppError
+import app.kamy.qalbuApp.core.error.AppErrorKind
+import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.core.locale.AppStrings
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.infrastructure.location.LocationProvider
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
+import app.kamy.qalbuApp.infrastructure.preferences.LocationMode
+import app.kamy.qalbuApp.infrastructure.preferences.LocationPreferencesStore
+import app.kamy.qalbuApp.infrastructure.preferences.SavedManualLocation
+import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
+import app.kamy.qalbuApp.infrastructure.repository.PrayerCalendarDay
+import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
-import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
-import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
-import app.kamy.qalbuApp.core.error.AppError
-import app.kamy.qalbuApp.core.error.AppErrorKind
-import app.kamy.qalbuApp.core.error.toAppError
-import app.kamy.qalbuApp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -48,7 +52,26 @@ data class PrayerUiState(
     val gregorianLabel: String? = null,
     val theme: PrayerTheme = PrayerTheme.DAYLIGHT,
     val needsPermission: Boolean = false,
-    val error: AppError? = null
+    val isManualLocation: Boolean = false,
+    val error: AppError? = null,
+    val showLocationSheet: Boolean = false,
+    val showCalendarSheet: Boolean = false,
+    val locationQuery: String = "",
+    val locationSaving: Boolean = false,
+    val locationSaveError: String? = null,
+    val calendarLoading: Boolean = false,
+    val calendarDays: List<PrayerCalendarDay> = emptyList(),
+    val calendarError: AppError? = null,
+    val calendarYear: Int = Calendar.getInstance().get(Calendar.YEAR),
+    val calendarMonth: Int = Calendar.getInstance().get(Calendar.MONTH) + 1
+)
+
+private data class ResolvedPrayerLocation(
+    val latitude: Double,
+    val longitude: Double,
+    val cityLabel: String,
+    val countryCode: String?,
+    val isManual: Boolean
 )
 
 @HiltViewModel
@@ -57,6 +80,7 @@ class PrayerDashboardViewModel @Inject constructor(
     private val strings: AppStrings,
     private val repository: AlAdhanRepository,
     private val locationProvider: LocationProvider,
+    private val locationPrefs: LocationPreferencesStore,
     private val prayerMethodStore: PrayerCalculationStore,
     private val prayerNotificationPrefs: PrayerNotificationPreferencesStore
 ) : ViewModel() {
@@ -70,6 +94,7 @@ class PrayerDashboardViewModel @Inject constructor(
     private val dayKeyFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private var scheduleDayKey: String? = null
     private var dayRefreshInFlight = false
+    private var lastResolvedLocation: ResolvedPrayerLocation? = null
 
     init {
         viewModelScope.launch { refresh() }
@@ -81,7 +106,6 @@ class PrayerDashboardViewModel @Inject constructor(
                 PrayerNotificationCoordinator.rescheduleFromCache(appContext)
             }
         }
-        // 1s ticker recomputes active prayer + countdown every second.
         viewModelScope.launch {
             while (true) {
                 delay(1000L)
@@ -92,39 +116,57 @@ class PrayerDashboardViewModel @Inject constructor(
 
     suspend fun refresh() {
         _state.update { it.copy(isLoading = true, error = null) }
-        if (!locationProvider.hasAnyPermission()) {
-            _state.update { it.copy(isLoading = false, needsPermission = true) }
-            return
+        when (val resolved = resolveLocation()) {
+            LocationResolveResult.NeedsPermission -> {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        needsPermission = true,
+                        isManualLocation = false
+                    )
+                }
+            }
+            LocationResolveResult.Unavailable -> {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = AppError(AppErrorKind.Location),
+                        needsPermission = false
+                    )
+                }
+            }
+            is LocationResolveResult.Success -> {
+                lastResolvedLocation = resolved.location
+                fetchTimings(resolved.location)
+            }
         }
-        val loc = locationProvider.currentLocation()
-        if (loc == null) {
-            _state.update { it.copy(isLoading = false, error = AppError(AppErrorKind.Location)) }
-            return
-        }
-        val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
+    }
+
+    private suspend fun fetchTimings(location: ResolvedPrayerLocation) {
         if (!prayerMethodStore.hasSavedPreference) {
-            geocode.countryCode?.let { code ->
+            location.countryCode?.let { code ->
                 prayerMethodStore.setMethod(PrayerCalculationMethod.forCountryCode(code))
             }
         }
-        val cityLabel = geocode.cityName
-            ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
         val calculationMethod = prayerMethodStore.current()
         try {
             val result = repository.fetchTimings(
-                latitude = loc.latitude,
-                longitude = loc.longitude,
-                cityName = cityLabel,
+                latitude = location.latitude,
+                longitude = location.longitude,
+                cityName = location.cityLabel,
                 method = calculationMethod
             )
+            val cityName = result.cityName ?: location.cityLabel
+            locationPrefs.saveActiveLabel(cityName)
             _state.update {
                 it.copy(
                     isLoading = false,
                     timings = result.timings,
-                    cityName = result.cityName ?: cityLabel,
+                    cityName = cityName,
                     hijriLabel = result.hijriLabel,
                     gregorianLabel = result.gregorianLabel,
                     needsPermission = false,
+                    isManualLocation = location.isManual,
                     error = null
                 )
             }
@@ -134,17 +176,183 @@ class PrayerDashboardViewModel @Inject constructor(
                 PrayerNotificationCoordinator.onScheduleUpdated(
                     appContext,
                     bundle,
-                    loc.latitude,
-                    loc.longitude
+                    location.latitude,
+                    location.longitude
                 )
+            }
+            if (_state.value.showCalendarSheet) {
+                loadCalendarMonth(_state.value.calendarYear, _state.value.calendarMonth)
             }
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.toAppError()) }
         }
     }
 
+    private suspend fun resolveLocation(): LocationResolveResult {
+        if (locationPrefs.mode() == LocationMode.MANUAL) {
+            val manual = locationPrefs.manualLocation()
+                ?: return LocationResolveResult.Unavailable
+            return LocationResolveResult.Success(
+                ResolvedPrayerLocation(
+                    latitude = manual.latitude,
+                    longitude = manual.longitude,
+                    cityLabel = manual.label,
+                    countryCode = manual.countryCode,
+                    isManual = true
+                )
+            )
+        }
+        if (!locationProvider.hasAnyPermission()) {
+            return LocationResolveResult.NeedsPermission
+        }
+        val loc = locationProvider.currentLocation() ?: return LocationResolveResult.Unavailable
+        val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
+        val cityLabel = geocode.cityName
+            ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
+        return LocationResolveResult.Success(
+            ResolvedPrayerLocation(
+                latitude = loc.latitude,
+                longitude = loc.longitude,
+                cityLabel = cityLabel,
+                countryCode = geocode.countryCode,
+                isManual = false
+            )
+        )
+    }
+
     fun onPermissionGranted() {
+        locationPrefs.setMode(LocationMode.GPS)
         viewModelScope.launch { refresh() }
+    }
+
+    fun openLocationSheet() {
+        _state.update {
+            it.copy(
+                showLocationSheet = true,
+                locationQuery = it.cityName.orEmpty(),
+                locationSaveError = null
+            )
+        }
+    }
+
+    fun dismissLocationSheet() {
+        _state.update { it.copy(showLocationSheet = false, locationSaveError = null) }
+    }
+
+    fun updateLocationQuery(query: String) {
+        _state.update { it.copy(locationQuery = query, locationSaveError = null) }
+    }
+
+    fun saveManualLocation() {
+        val query = _state.value.locationQuery.trim()
+        if (query.isEmpty()) return
+        viewModelScope.launch {
+            _state.update { it.copy(locationSaving = true, locationSaveError = null) }
+            val geocoded = locationProvider.forwardGeocode(query)
+            if (geocoded?.latitude == null || geocoded.longitude == null) {
+                _state.update {
+                    it.copy(
+                        locationSaving = false,
+                        locationSaveError = strings.getString(R.string.location_search_not_found)
+                    )
+                }
+                return@launch
+            }
+            val saved = SavedManualLocation(
+                latitude = geocoded.latitude,
+                longitude = geocoded.longitude,
+                label = geocoded.cityName ?: query,
+                countryCode = geocoded.countryCode
+            )
+            locationPrefs.saveManual(saved)
+            _state.update {
+                it.copy(
+                    locationSaving = false,
+                    showLocationSheet = false,
+                    needsPermission = false
+                )
+            }
+            refresh()
+        }
+    }
+
+    fun useCurrentLocation() {
+        locationPrefs.setMode(LocationMode.GPS)
+        _state.update { it.copy(showLocationSheet = false, locationSaveError = null) }
+        viewModelScope.launch { refresh() }
+    }
+
+    fun openCalendarSheet() {
+        val now = Calendar.getInstance()
+        val year = now.get(Calendar.YEAR)
+        val month = now.get(Calendar.MONTH) + 1
+        _state.update {
+            it.copy(
+                showCalendarSheet = true,
+                calendarYear = year,
+                calendarMonth = month,
+                calendarError = null
+            )
+        }
+        viewModelScope.launch { loadCalendarMonth(year, month) }
+    }
+
+    fun dismissCalendarSheet() {
+        _state.update { it.copy(showCalendarSheet = false) }
+    }
+
+    fun reloadCalendar() {
+        val year = _state.value.calendarYear
+        val month = _state.value.calendarMonth
+        viewModelScope.launch { loadCalendarMonth(year, month) }
+    }
+
+    fun shiftCalendarMonth(delta: Int) {
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.YEAR, _state.value.calendarYear)
+            set(Calendar.MONTH, _state.value.calendarMonth - 1)
+            add(Calendar.MONTH, delta)
+        }
+        val year = cal.get(Calendar.YEAR)
+        val month = cal.get(Calendar.MONTH) + 1
+        _state.update { it.copy(calendarYear = year, calendarMonth = month) }
+        viewModelScope.launch { loadCalendarMonth(year, month) }
+    }
+
+    private suspend fun loadCalendarMonth(year: Int, month: Int) {
+        val location = lastResolvedLocation ?: when (val resolved = resolveLocation()) {
+            is LocationResolveResult.Success -> resolved.location.also { lastResolvedLocation = it }
+            else -> {
+                _state.update {
+                    it.copy(
+                        calendarLoading = false,
+                        calendarError = AppError(AppErrorKind.Location)
+                    )
+                }
+                return
+            }
+        }
+        _state.update { it.copy(calendarLoading = true, calendarError = null) }
+        try {
+            val days = repository.fetchMonthCalendar(
+                year = year,
+                month = month,
+                latitude = location.latitude,
+                longitude = location.longitude,
+                method = prayerMethodStore.current()
+            )
+            _state.update { it.copy(calendarLoading = false, calendarDays = days) }
+        } catch (t: Throwable) {
+            _state.update {
+                it.copy(calendarLoading = false, calendarError = t.toAppError())
+            }
+        }
+    }
+
+    private sealed class LocationResolveResult {
+        data object NeedsPermission : LocationResolveResult()
+        data object Unavailable : LocationResolveResult()
+        data class Success(val location: ResolvedPrayerLocation) : LocationResolveResult()
     }
 
     private fun recomputeActiveAndCountdown() {

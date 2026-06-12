@@ -26,6 +26,7 @@ import app.kamy.qalbuApp.features.quran.ChaptersScreen
 import app.kamy.qalbuApp.features.reflect.ReflectScreen
 import app.kamy.qalbuApp.features.today.TodayScreen
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
+import app.kamy.qalbuApp.infrastructure.audio.parseVerseKey
 import app.kamy.qalbuApp.infrastructure.auth.OAuthService
 import app.kamy.qalbuApp.ui.components.FloatingAudioBar
 import app.kamy.qalbuApp.ui.components.FloatingAudioBarMetrics
@@ -96,7 +97,13 @@ fun RootScreen(
             }
             composable(RootTab.Reflect.route) {
                 ReflectScreen(
-                    onSignIn = { navController.navigate(RootTab.Account.route) }
+                    onSignIn = { navController.navigate(RootTab.Account.route) },
+                    onOpenVerse = { verseKey ->
+                        val (chapter, ayah) = parseVerseKey(verseKey) ?: return@ReflectScreen
+                        navController.navigate("quran/reader/$chapter?ayah=$ayah") {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
             composable(RootTab.Quran.route) {

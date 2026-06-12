@@ -51,7 +51,13 @@ import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
 import app.kamy.qalbuApp.features.today.components.TodayPrayerMascotSection
+import app.kamy.qalbuApp.features.today.components.PrayerCalendarSheet
+import app.kamy.qalbuApp.features.today.components.PrayerLocationSheet
+import app.kamy.qalbuApp.features.today.components.TodayReciterSheet
 import app.kamy.qalbuApp.features.today.components.TodayVerseOfDaySection
+import app.kamy.qalbuApp.infrastructure.preferences.LocationMode
+import app.kamy.qalbuApp.infrastructure.preferences.LocationPreferencesStore
+import app.kamy.qalbuApp.infrastructure.preferences.OnboardingStore
 import app.kamy.qalbuApp.features.share.AiShareSheet
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.layout.floatingNavAndAudioBottomPadding
@@ -96,6 +102,10 @@ fun TodayScreen(
     val shareReflectionLabel = stringResource(R.string.share_reflection)
     val profileStillLoading = stringResource(R.string.profile_still_loading)
     val verseOfDayTitle = stringResource(R.string.verse_of_day)
+    val onboardingComplete = remember { OnboardingStore.from(context).isComplete() }
+    val hasManualLocation = remember {
+        LocationPreferencesStore.from(context).mode() == LocationMode.MANUAL
+    }
 
     suspend fun showNotificationSettingsSnackbar() {
         val result = snackbarHostState.showSnackbar(
@@ -141,10 +151,15 @@ fun TodayScreen(
         requestNotificationsIfNeeded()
     }
 
-    // First open: location dialog, then notification dialog (never at the same time).
-    LaunchedEffect(Unit) {
-        if (locationPrompted) return@LaunchedEffect
+    // First open after onboarding: location dialog, then notification dialog.
+    LaunchedEffect(onboardingComplete) {
+        if (!onboardingComplete || locationPrompted) return@LaunchedEffect
         locationPrompted = true
+        if (hasManualLocation) {
+            scope.launch { prayerVm.refresh() }
+            requestNotificationsIfNeeded()
+            return@LaunchedEffect
+        }
         if (locationPermissions.allPermissionsGranted) {
             prayerVm.onPermissionGranted()
             requestNotificationsIfNeeded()
@@ -245,6 +260,7 @@ fun TodayScreen(
                     avatarUrl = todayState.profile?.preferredAvatarUrl,
                     isProfileLoading = todayState.profileLoading,
                     onAccountClick = onAccountNavigate,
+                    onLocationClick = prayerVm::openLocationSheet,
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.background)
@@ -261,6 +277,8 @@ fun TodayScreen(
                         TodayPrayerMascotSection(
                             state = prayerState,
                             onRetry = { scope.launch { prayerVm.refresh() } },
+                            onOpenCalendar = prayerVm::openCalendarSheet,
+                            onOpenLocation = prayerVm::openLocationSheet,
                             modifier = Modifier.padding(horizontal = 20.dp)
                         )
                     }
@@ -272,6 +290,10 @@ fun TodayScreen(
                             isLoading = todayState.isLoading,
                             error = todayState.error,
                             isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
+                            reciterName = todayState.recitations
+                                .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
+                                ?.displayName,
+                            onReciterClick = todayVm::openReciterSheet,
                             onPlayAudio = {
                                 val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
                                 if (audioPlayer.isPlayingUrl(url)) {
@@ -307,6 +329,38 @@ fun TodayScreen(
             modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
         )
     }
+
+    PrayerLocationSheet(
+        visible = prayerState.showLocationSheet,
+        query = prayerState.locationQuery,
+        saving = prayerState.locationSaving,
+        error = prayerState.locationSaveError,
+        onQueryChange = prayerVm::updateLocationQuery,
+        onSave = prayerVm::saveManualLocation,
+        onUseGps = prayerVm::useCurrentLocation,
+        onDismiss = prayerVm::dismissLocationSheet
+    )
+
+    PrayerCalendarSheet(
+        visible = prayerState.showCalendarSheet,
+        year = prayerState.calendarYear,
+        month = prayerState.calendarMonth,
+        days = prayerState.calendarDays,
+        loading = prayerState.calendarLoading,
+        error = prayerState.calendarError,
+        onDismiss = prayerVm::dismissCalendarSheet,
+        onPreviousMonth = { prayerVm.shiftCalendarMonth(-1) },
+        onNextMonth = { prayerVm.shiftCalendarMonth(1) },
+        onRetry = prayerVm::reloadCalendar
+    )
+
+    TodayReciterSheet(
+        visible = todayState.showReciterSheet,
+        recitations = todayState.recitations,
+        selectedRecitationId = todayState.selectedRecitationId,
+        onDismiss = todayVm::dismissReciterSheet,
+        onSelectRecitation = todayVm::selectRecitation
+    )
 
     TafsirSheet(
         isVisible = todayState.showTafsir,
