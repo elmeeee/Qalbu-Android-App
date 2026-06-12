@@ -28,11 +28,21 @@ object PrayerScheduleRefresher {
                 )
                 val bundle = result.scheduleBundle
                 if (bundle != null) {
+                    val formatter = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                    val meta = PrayerScheduleCache.WidgetMeta(
+                        cityLabel = result.cityName.orEmpty(),
+                        hijriLabel = result.hijriLabel,
+                        gregorianLabel = result.gregorianLabel,
+                        timings = result.timings.associate {
+                            it.type.aladhanKey to formatter.format(it.date)
+                        }
+                    )
                     PrayerNotificationCoordinator.onScheduleUpdated(
                         appContext,
                         bundle,
                         coords.first,
-                        coords.second
+                        coords.second,
+                        meta = meta
                     )
                     return
                 }

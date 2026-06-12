@@ -51,7 +51,6 @@ import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
 import app.kamy.qalbuApp.features.today.components.TodayPrayerMascotSection
-import app.kamy.qalbuApp.features.today.components.PrayerCalendarSheet
 import app.kamy.qalbuApp.features.today.components.PrayerLocationSheet
 import app.kamy.qalbuApp.features.today.components.TodayReciterSheet
 import app.kamy.qalbuApp.features.today.components.TodayVerseOfDaySection
@@ -68,7 +67,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun TodayScreen(
     audioPlayer: AudioPlayerController,
-    onAccountNavigate: () -> Unit = {}
+    onAccountNavigate: () -> Unit = {},
+    onOpenPrayerCalendar: () -> Unit = {}
 ) {
     val todayVm: TodayViewModel = hiltViewModel()
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
@@ -277,7 +277,7 @@ fun TodayScreen(
                         TodayPrayerMascotSection(
                             state = prayerState,
                             onRetry = { scope.launch { prayerVm.refresh() } },
-                            onOpenCalendar = prayerVm::openCalendarSheet,
+                            onOpenCalendar = onOpenPrayerCalendar,
                             onOpenLocation = prayerVm::openLocationSheet,
                             modifier = Modifier.padding(horizontal = 20.dp)
                         )
@@ -339,19 +339,6 @@ fun TodayScreen(
         onSave = prayerVm::saveManualLocation,
         onUseGps = prayerVm::useCurrentLocation,
         onDismiss = prayerVm::dismissLocationSheet
-    )
-
-    PrayerCalendarSheet(
-        visible = prayerState.showCalendarSheet,
-        year = prayerState.calendarYear,
-        month = prayerState.calendarMonth,
-        days = prayerState.calendarDays,
-        loading = prayerState.calendarLoading,
-        error = prayerState.calendarError,
-        onDismiss = prayerVm::dismissCalendarSheet,
-        onPreviousMonth = { prayerVm.shiftCalendarMonth(-1) },
-        onNextMonth = { prayerVm.shiftCalendarMonth(1) },
-        onRetry = prayerVm::reloadCalendar
     )
 
     TodayReciterSheet(

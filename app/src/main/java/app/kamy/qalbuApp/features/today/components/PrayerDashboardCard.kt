@@ -124,7 +124,7 @@ fun PrayerDashboardCard(
         ) {
             TextButton(onClick = onOpenCalendar) {
                 Text(
-                    text = stringResource(R.string.prayer_calendar),
+                    text = stringResource(R.string.prayer_calendar_open),
                     color = Color.White.copy(alpha = 0.88f),
                     style = MaterialTheme.typography.labelMedium
                 )

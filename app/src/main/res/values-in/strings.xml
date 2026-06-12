@@ -179,6 +179,12 @@
 
     <string name="quran_title">Al-Quran</string>
     <string name="quran_subtitle">114 Surah · Al-Quran</string>
+    <string name="quran_subtitle_juz">30 Juz · Al-Quran</string>
+    <string name="quran_tab_surah">Surah</string>
+    <string name="quran_tab_juz">Juz</string>
+    <string name="juz_load_failed">Gagal memuat daftar juz</string>
+    <string name="juz_verses_count">%1$d ayat</string>
+    <string name="juz_starts_at">Mulai dari %1$s</string>
     <string name="one_surah_found">1 surah ditemukan</string>
     <string name="surahs_found">%1$d surah ditemukan</string>
     <string name="continue_reading">Lanjutkan baca</string>
@@ -207,10 +213,16 @@
     <string name="prayer_calendar">Kalender sholat</string>
     <string name="prayer_calendar_load_failed">Gagal memuat kalender sholat</string>
     <string name="prayer_widget_title">Jadwal sholat</string>
-    <string name="prayer_widget_description">Hitung mundur sholat berikutnya</string>
+    <string name="prayer_widget_description">Jadwal sholat lengkap dengan hitung mundur</string>
     <string name="prayer_widget_empty">Buka Qalbu untuk memuat jadwal sholat</string>
     <string name="prayer_widget_next">Berikutnya: %1$s pukul %2$s</string>
     <string name="prayer_widget_grace">%1$s baru saja dimulai</string>
+    <string name="prayer_widget_next_label">Sholat berikutnya</string>
+    <string name="prayer_widget_in_progress">Sekarang</string>
+    <string name="prayer_widget_at_time">Adzan pukul %1$s</string>
+    <string name="prayer_calendar_open">Kalender bulanan</string>
+    <string name="prayer_calendar_title">Kalender sholat</string>
+    <string name="prayer_calendar_hint">Ketuk hari untuk melihat semua waktu sholat pada tanggal tersebut.</string>
     <string name="onboarding_welcome_title">Selamat datang di Qalbu</string>
     <string name="onboarding_welcome_body">Teman Quran harian Anda — jadwal sholat, refleksi, dan komunitas dalam satu aplikasi.</string>
     <string name="onboarding_location_title">Di mana Anda sholat?</string>

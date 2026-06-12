@@ -39,7 +39,9 @@ import javax.inject.Inject
 
 data class ChapterReaderUiState(
     val chapterNumber: Int = 1,
+    val juzNumber: Int? = null,
     val chapterDisplayName: String? = null,
+    val chapterLookup: Map<Int, String> = emptyMap(),
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
     val verses: List<RandomAyahPayload> = emptyList(),
@@ -94,9 +96,12 @@ class ChapterReaderViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    private val juzNumber: Int? = savedStateHandle.get<Int>("juzNumber")
+
     private val _state = MutableStateFlow(
         ChapterReaderUiState(
-            chapterNumber = savedStateHandle.get<Int>("chapter") ?: 1
+            chapterNumber = savedStateHandle.get<Int>("chapter") ?: 1,
+            juzNumber = juzNumber
         )
     )
     val state: StateFlow<ChapterReaderUiState> = _state.asStateFlow()
@@ -106,6 +111,8 @@ class ChapterReaderViewModel @Inject constructor(
 
     private var lastStartedVerseKey: String? = null
     private var wasPlaying: Boolean = false
+    private var pendingScrollVerseKey: String? =
+        savedStateHandle.get<String>("verseKey")?.takeIf { it.isNotBlank() }
 
     init {
         _state.update {
@@ -164,8 +171,18 @@ class ChapterReaderViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 val chapters = contentRepository.getChapters()
-                val name = chapters.find { it.id == _state.value.chapterNumber }?.displayComplexName
-                _state.update { it.copy(chapterDisplayName = name) }
+                val lookup = chapters.associate { it.id to it.displayComplexName }
+                if (juzNumber != null) {
+                    _state.update {
+                        it.copy(
+                            chapterLookup = lookup,
+                            chapterDisplayName = appContext.getString(R.string.juz_number, juzNumber)
+                        )
+                    }
+                } else {
+                    val name = chapters.find { it.id == _state.value.chapterNumber }?.displayComplexName
+                    _state.update { it.copy(chapterDisplayName = name, chapterLookup = lookup) }
+                }
             }
         }
     }
@@ -183,11 +200,7 @@ class ChapterReaderViewModel @Inject constructor(
         }
         viewModelScope.launch {
             runCatching {
-                contentRepository.getVersesByChapter(
-                    chapterNumber = _state.value.chapterNumber,
-                    page = 1,
-                    audioRecitationId = _state.value.selectedRecitationId
-                )
+                fetchVersePage(page = 1)
             }.onSuccess { resp ->
                 _state.update {
                     it.copy(
@@ -198,6 +211,7 @@ class ChapterReaderViewModel @Inject constructor(
                         hasMore = resp.pagination?.hasNextPage ?: false
                     )
                 }
+                tryScrollToPendingVerse()
             }.onFailure { t ->
                 _state.update { it.copy(isLoading = false, error = t.toAppError()) }
             }
@@ -207,16 +221,18 @@ class ChapterReaderViewModel @Inject constructor(
     fun loadMoreIfNeeded(currentIndex: Int) {
         val s = _state.value
         if (s.isLoadingMore || !s.hasMore || s.verses.isEmpty()) return
-        if (currentIndex < s.verses.size - 3) return
+        if (pendingScrollVerseKey == null && currentIndex < s.verses.size - 3) return
+        loadNextPage()
+    }
+
+    private fun loadNextPage() {
+        val s = _state.value
+        if (s.isLoadingMore || !s.hasMore || s.verses.isEmpty()) return
         val nextApiPage = s.loadedApiPage + 1
         _state.update { it.copy(isLoadingMore = true) }
         viewModelScope.launch {
             runCatching {
-                contentRepository.getVersesByChapter(
-                    chapterNumber = s.chapterNumber,
-                    page = nextApiPage,
-                    audioRecitationId = s.selectedRecitationId
-                )
+                fetchVersePage(page = nextApiPage)
             }.onSuccess { resp ->
                 if (resp.verses.isEmpty()) {
                     _state.update { it.copy(isLoadingMore = false, hasMore = false) }
@@ -231,6 +247,7 @@ class ChapterReaderViewModel @Inject constructor(
                         hasMore = resp.pagination?.hasNextPage ?: false
                     )
                 }
+                tryScrollToPendingVerse()
             }.onFailure { t ->
                 _state.update {
                     it.copy(
@@ -241,6 +258,43 @@ class ChapterReaderViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun fetchVersePage(page: Int) =
+        if (juzNumber != null) {
+            contentRepository.getVersesByJuz(
+                juzNumber = juzNumber,
+                page = page,
+                audioRecitationId = _state.value.selectedRecitationId
+            )
+        } else {
+            contentRepository.getVersesByChapter(
+                chapterNumber = _state.value.chapterNumber,
+                page = page,
+                audioRecitationId = _state.value.selectedRecitationId
+            )
+        }
+
+    private fun tryScrollToPendingVerse() {
+        val key = pendingScrollVerseKey ?: return
+        val s = _state.value
+        val idx = s.verses.indexOfFirst { it.verseKey == key }
+        if (idx >= 0) {
+            pendingScrollVerseKey = null
+            _events.tryEmit(ReaderEvent.AnimateToPage(idx))
+            return
+        }
+        if (s.hasMore && !s.isLoadingMore) {
+            loadNextPage()
+        } else if (!s.hasMore) {
+            pendingScrollVerseKey = null
+        }
+    }
+
+    private fun chapterDisplayNameFor(verse: RandomAyahPayload): String? {
+        val chapterNum = verse.chapterNumber ?: return _state.value.chapterDisplayName
+        return _state.value.chapterLookup[chapterNum]
+            ?: _state.value.chapterDisplayName
     }
 
     private fun loadRecitations() {
@@ -274,7 +328,8 @@ class ChapterReaderViewModel @Inject constructor(
         if (index !in s.verses.indices) return
         val page = s.verses[index]
         _state.update { it.copy(currentVerseIndex = index) }
-        page.resolvedVerseNumber?.let { logScrollPosition(it) }
+        val chapterNum = page.chapterNumber ?: s.chapterNumber
+        page.resolvedVerseNumber?.let { logScrollPosition(chapterNum, it) }
     }
 
     fun onTapAyah(index: Int) {
@@ -297,7 +352,9 @@ class ChapterReaderViewModel @Inject constructor(
 
     private fun playAyahAtIndex(index: Int, page: RandomAyahPayload) {
         val s = _state.value
-        val surahTitle = s.chapterDisplayName ?: appContext.getString(R.string.surah_number, s.chapterNumber)
+        val chapterNum = page.chapterNumber ?: s.chapterNumber
+        val surahTitle = chapterDisplayNameFor(page)
+            ?: appContext.getString(R.string.surah_number, chapterNum)
         val reciterName = s.recitations
             .firstOrNull { it.id == s.selectedRecitationId }
             ?.displayName.orEmpty()
@@ -310,7 +367,7 @@ class ChapterReaderViewModel @Inject constructor(
             surahTitle = surahTitle,
             ayahLabel = page.verseKey.orEmpty(),
             reciterName = reciterName,
-            chapterNumber = s.chapterNumber,
+            chapterNumber = chapterNum,
             ayahNumber = page.resolvedVerseNumber
         )
     }
@@ -329,7 +386,7 @@ class ChapterReaderViewModel @Inject constructor(
             _state.value.verses.find { it.verseKey == ayahKey }?.let { verse ->
                 shareComposer.prefetchShareTextIfNeeded(
                     verse,
-                    verse.referenceLabel(_state.value.chapterDisplayName)
+                    verse.referenceLabel(chapterDisplayNameFor(verse))
                 )
             }
             loadTafsir(ayahKey)
@@ -459,7 +516,7 @@ class ChapterReaderViewModel @Inject constructor(
     private fun loadAiShareDraft(forceRefresh: Boolean) {
         val index = _state.value.aiShareVerseIndex ?: return
         val verse = _state.value.verses.getOrNull(index) ?: return
-        val reference = verse.referenceLabel(_state.value.chapterDisplayName)
+        val reference = verse.referenceLabel(chapterDisplayNameFor(verse))
         viewModelScope.launch {
             _state.update { it.copy(aiShareLoading = true, aiShareError = null) }
             runCatching {
@@ -487,7 +544,7 @@ class ChapterReaderViewModel @Inject constructor(
         val verseKey = verse.verseKey ?: return
         val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
         val idempotencyKey = "reflect:$verseKey:$dayKey"
-        val reference = verse.referenceLabel(_state.value.chapterDisplayName)
+        val reference = verse.referenceLabel(chapterDisplayNameFor(verse))
 
         viewModelScope.launch {
             val body = _state.value.aiShareDraft.trim().ifBlank {
@@ -547,9 +604,9 @@ class ChapterReaderViewModel @Inject constructor(
         )
     }
 
-    fun logScrollPosition(verseNumber: Int) {
+    fun logScrollPosition(chapterNumber: Int, verseNumber: Int) {
         viewModelScope.launch {
-            runCatching { readingSessions.logReadingSession(_state.value.chapterNumber, verseNumber) }
+            runCatching { readingSessions.logReadingSession(chapterNumber, verseNumber) }
         }
     }
 }

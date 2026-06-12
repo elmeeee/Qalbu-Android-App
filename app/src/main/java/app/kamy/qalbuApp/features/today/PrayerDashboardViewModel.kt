@@ -16,7 +16,7 @@ import app.kamy.qalbuApp.infrastructure.preferences.LocationMode
 import app.kamy.qalbuApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.SavedManualLocation
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
-import app.kamy.qalbuApp.infrastructure.repository.PrayerCalendarDay
+import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleCache
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
@@ -55,15 +55,9 @@ data class PrayerUiState(
     val isManualLocation: Boolean = false,
     val error: AppError? = null,
     val showLocationSheet: Boolean = false,
-    val showCalendarSheet: Boolean = false,
     val locationQuery: String = "",
     val locationSaving: Boolean = false,
-    val locationSaveError: String? = null,
-    val calendarLoading: Boolean = false,
-    val calendarDays: List<PrayerCalendarDay> = emptyList(),
-    val calendarError: AppError? = null,
-    val calendarYear: Int = Calendar.getInstance().get(Calendar.YEAR),
-    val calendarMonth: Int = Calendar.getInstance().get(Calendar.MONTH) + 1
+    val locationSaveError: String? = null
 )
 
 private data class ResolvedPrayerLocation(
@@ -177,11 +171,14 @@ class PrayerDashboardViewModel @Inject constructor(
                     appContext,
                     bundle,
                     location.latitude,
-                    location.longitude
+                    location.longitude,
+                    meta = buildWidgetMeta(
+                        cityName = cityName,
+                        hijriLabel = result.hijriLabel,
+                        gregorianLabel = result.gregorianLabel,
+                        timings = result.timings
+                    )
                 )
-            }
-            if (_state.value.showCalendarSheet) {
-                loadCalendarMonth(_state.value.calendarYear, _state.value.calendarMonth)
             }
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.toAppError()) }
@@ -282,71 +279,19 @@ class PrayerDashboardViewModel @Inject constructor(
         viewModelScope.launch { refresh() }
     }
 
-    fun openCalendarSheet() {
-        val now = Calendar.getInstance()
-        val year = now.get(Calendar.YEAR)
-        val month = now.get(Calendar.MONTH) + 1
-        _state.update {
-            it.copy(
-                showCalendarSheet = true,
-                calendarYear = year,
-                calendarMonth = month,
-                calendarError = null
-            )
-        }
-        viewModelScope.launch { loadCalendarMonth(year, month) }
-    }
-
-    fun dismissCalendarSheet() {
-        _state.update { it.copy(showCalendarSheet = false) }
-    }
-
-    fun reloadCalendar() {
-        val year = _state.value.calendarYear
-        val month = _state.value.calendarMonth
-        viewModelScope.launch { loadCalendarMonth(year, month) }
-    }
-
-    fun shiftCalendarMonth(delta: Int) {
-        val cal = Calendar.getInstance().apply {
-            set(Calendar.YEAR, _state.value.calendarYear)
-            set(Calendar.MONTH, _state.value.calendarMonth - 1)
-            add(Calendar.MONTH, delta)
-        }
-        val year = cal.get(Calendar.YEAR)
-        val month = cal.get(Calendar.MONTH) + 1
-        _state.update { it.copy(calendarYear = year, calendarMonth = month) }
-        viewModelScope.launch { loadCalendarMonth(year, month) }
-    }
-
-    private suspend fun loadCalendarMonth(year: Int, month: Int) {
-        val location = lastResolvedLocation ?: when (val resolved = resolveLocation()) {
-            is LocationResolveResult.Success -> resolved.location.also { lastResolvedLocation = it }
-            else -> {
-                _state.update {
-                    it.copy(
-                        calendarLoading = false,
-                        calendarError = AppError(AppErrorKind.Location)
-                    )
-                }
-                return
-            }
-        }
-        _state.update { it.copy(calendarLoading = true, calendarError = null) }
-        try {
-            val days = repository.fetchMonthCalendar(
-                year = year,
-                month = month,
-                latitude = location.latitude,
-                longitude = location.longitude,
-                method = prayerMethodStore.current()
-            )
-            _state.update { it.copy(calendarLoading = false, calendarDays = days) }
-        } catch (t: Throwable) {
-            _state.update {
-                it.copy(calendarLoading = false, calendarError = t.toAppError())
-            }
-        }
+    private fun buildWidgetMeta(
+        cityName: String,
+        hijriLabel: String?,
+        gregorianLabel: String?,
+        timings: List<PrayerEntry>
+    ): PrayerScheduleCache.WidgetMeta {
+        val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return PrayerScheduleCache.WidgetMeta(
+            cityLabel = cityName,
+            hijriLabel = hijriLabel,
+            gregorianLabel = gregorianLabel,
+            timings = timings.associate { it.type.aladhanKey to formatter.format(it.date) }
+        )
     }
 
     private sealed class LocationResolveResult {

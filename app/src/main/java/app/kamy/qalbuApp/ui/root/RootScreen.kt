@@ -24,6 +24,7 @@ import app.kamy.qalbuApp.features.account.AccountScreen
 import app.kamy.qalbuApp.features.quran.ChapterReaderScreen
 import app.kamy.qalbuApp.features.quran.ChaptersScreen
 import app.kamy.qalbuApp.features.reflect.ReflectScreen
+import app.kamy.qalbuApp.features.today.PrayerCalendarScreen
 import app.kamy.qalbuApp.features.today.TodayScreen
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.infrastructure.audio.parseVerseKey
@@ -71,8 +72,10 @@ fun RootScreen(
     }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    val isReaderRoute = currentRoute?.startsWith("quran/reader") == true
-    val showBottomBar = !isReaderRoute && currentRoute != RootTab.Account.route
+    val isReaderRoute = currentRoute?.startsWith("quran/reader") == true ||
+        currentRoute?.startsWith("quran/juz") == true
+    val isPrayerCalendarRoute = currentRoute == "prayer/calendar"
+    val showBottomBar = !isReaderRoute && !isPrayerCalendarRoute && currentRoute != RootTab.Account.route
     val showAudioBar = audioState.currentUrl != null
     val audioBarBottomPadding = if (showBottomBar) {
         floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
@@ -92,8 +95,14 @@ fun RootScreen(
             composable(RootTab.Today.route) {
                 TodayScreen(
                     audioPlayer = audioPlayer,
-                    onAccountNavigate = { navController.navigate(RootTab.Account.route) }
+                    onAccountNavigate = { navController.navigate(RootTab.Account.route) },
+                    onOpenPrayerCalendar = {
+                        navController.navigate("prayer/calendar") { launchSingleTop = true }
+                    }
                 )
+            }
+            composable("prayer/calendar") {
+                PrayerCalendarScreen(onBack = { navController.popBackStack() })
             }
             composable(RootTab.Reflect.route) {
                 ReflectScreen(
@@ -110,6 +119,10 @@ fun RootScreen(
                 ChaptersScreen(
                     onOpenChapter = { chapter, initialVerse ->
                         navController.navigate("quran/reader/${chapter.id}?ayah=${initialVerse ?: -1}")
+                    },
+                    onOpenJuz = { juzNumber, verseKey ->
+                        val keyArg = verseKey?.let { java.net.URLEncoder.encode(it, Charsets.UTF_8.name()) }.orEmpty()
+                        navController.navigate("quran/juz/$juzNumber?verseKey=$keyArg")
                     }
                 )
             }
@@ -124,6 +137,23 @@ fun RootScreen(
                 ChapterReaderScreen(
                     audioPlayer = audioPlayer,
                     initialVerseNumber = initialAyah,
+                    audioBarVisible = showAudioBar,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(
+                route = "quran/juz/{juzNumber}?verseKey={verseKey}",
+                arguments = listOf(
+                    navArgument("juzNumber") { type = NavType.IntType },
+                    navArgument("verseKey") { type = NavType.StringType; defaultValue = "" }
+                )
+            ) { entry ->
+                val verseKey = entry.arguments?.getString("verseKey")
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { java.net.URLDecoder.decode(it, Charsets.UTF_8.name()) }
+                ChapterReaderScreen(
+                    audioPlayer = audioPlayer,
+                    initialVerseKey = verseKey,
                     audioBarVisible = showAudioBar,
                     onBack = { navController.popBackStack() }
                 )

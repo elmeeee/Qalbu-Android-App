@@ -24,6 +24,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -32,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,6 +60,7 @@ import app.kamy.qalbuApp.design.components.AlKhatibRevelationChip
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.QuranChapter
+import app.kamy.qalbuApp.domain.model.QuranJuz
 import app.kamy.qalbuApp.domain.model.ReadingSession
 import app.kamy.qalbuApp.domain.model.SearchNavResult
 import app.kamy.qalbuApp.domain.model.SearchVerseResult
@@ -67,7 +72,8 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChaptersScreen(
-    onOpenChapter: (chapter: QuranChapter, initialVerse: Int?) -> Unit
+    onOpenChapter: (chapter: QuranChapter, initialVerse: Int?) -> Unit,
+    onOpenJuz: (juzNumber: Int, verseKey: String?) -> Unit
 ) {
     val vm: ChaptersViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
@@ -94,7 +100,10 @@ fun ChaptersScreen(
     fun openNavResult(result: SearchNavResult) {
         when (result.type) {
             "surah" -> result.chapterNumber?.let { openVerse(it, ayah = 1) }
-            "page", "juz" -> Unit
+            "juz" -> result.key.toIntOrNull()?.let { juzNumber ->
+                vm.openJuz(juzNumber, onOpenJuz)
+            }
+            "page" -> Unit
             else -> result.chapterNumber?.let { openVerse(it, ayah = 1) }
         }
     }
@@ -121,6 +130,9 @@ fun ChaptersScreen(
                         onClearSearch = {},
                         searchEnabled = false,
                         isSearching = false,
+                        browseMode = state.browseMode,
+                        onBrowseModeChange = vm::setBrowseMode,
+                        showBrowseTabs = false,
                         showSuggestions = false,
                         onSuggestionClick = {},
                         resultCount = null,
@@ -174,6 +186,9 @@ fun ChaptersScreen(
                         onClearSearch = vm::clearSearch,
                         searchEnabled = true,
                         isSearching = isSearching,
+                        browseMode = state.browseMode,
+                        onBrowseModeChange = vm::setBrowseMode,
+                        showBrowseTabs = !isSearching,
                         showSuggestions = state.isSearchActive && activeQuery.isEmpty(),
                         onSuggestionClick = { suggestion ->
                             vm.onSearchQueryChange(suggestion)
@@ -192,13 +207,14 @@ fun ChaptersScreen(
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
                     )
+                    key(state.browseMode) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
                         contentPadding = PaddingValues(bottom = listBottomPadding)
                     ) {
-                        if (!isSearching) {
+                        if (!isSearching && state.browseMode == QuranBrowseMode.SURAH) {
                             state.continueReading?.let { session ->
                                 item(key = "continue_reading") {
                                     ContinueReadingCard(
@@ -258,7 +274,11 @@ fun ChaptersScreen(
                                 items(state.remoteNavigation, key = { "nav_${it.type}_${it.key}" }) { result ->
                                     SearchNavResultRow(
                                         result = result,
-                                        enabled = result.type == "surah" && result.chapterNumber != null,
+                                        enabled = when (result.type) {
+                                            "surah" -> result.chapterNumber != null
+                                            "juz" -> result.key.toIntOrNull() != null
+                                            else -> false
+                                        },
                                         onClick = { openNavResult(result) },
                                     )
                                 }
@@ -302,19 +322,66 @@ fun ChaptersScreen(
                                     QuranSearchEmptyState(query = activeQuery)
                                 }
                             }
-                        } else {
-                            items(state.chapters, key = { it.id }) { chapter ->
-                                ChapterRow(
-                                    chapter = chapter,
-                                    onClick = { onOpenChapter(chapter, null) },
-                                    modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                                )
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-                                )
+                        } else when (state.browseMode) {
+                            QuranBrowseMode.SURAH -> {
+                                items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
+                                    ChapterRow(
+                                        chapter = chapter,
+                                        onClick = { onOpenChapter(chapter, null) },
+                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                    )
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                    )
+                                }
+                            }
+                            QuranBrowseMode.JUZ -> when {
+                                state.juzsLoading && state.juzs.isEmpty() -> {
+                                    items(10, key = { "juz_skeleton_$it" }) { index ->
+                                        ChapterRowSkeleton(
+                                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                        )
+                                        if (index < 9) {
+                                            HorizontalDivider(
+                                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                            )
+                                        }
+                                    }
+                                }
+                                state.juzsError != null && state.juzs.isEmpty() -> {
+                                    item(key = "juz_error") {
+                                        val juzErrorDisplay = state.juzsError.rememberErrorDisplay(R.string.juz_load_failed)
+                                        if (juzErrorDisplay != null) {
+                                            AlKhatibErrorState(
+                                                display = juzErrorDisplay,
+                                                onRetry = { vm.loadAll(force = true) },
+                                                modifier = Modifier.padding(
+                                                    horizontal = AlKhatibSpacing.screenHorizontal,
+                                                    vertical = 24.dp
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                                else -> {
+                                    items(state.juzs, key = { "juz_${it.juzNumber}_${it.id}" }) { juz ->
+                                        JuzRow(
+                                            juz = juz,
+                                            chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
+                                            onClick = { onOpenJuz(juz.juzNumber, null) },
+                                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                        )
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                        )
+                                    }
+                                }
                             }
                         }
+                    }
                     }
                 }
             }
@@ -336,6 +403,9 @@ private fun QuranListHeader(
     onClearSearch: () -> Unit,
     searchEnabled: Boolean,
     isSearching: Boolean,
+    browseMode: QuranBrowseMode,
+    onBrowseModeChange: (QuranBrowseMode) -> Unit,
+    showBrowseTabs: Boolean,
     showSuggestions: Boolean,
     onSuggestionClick: (String) -> Unit,
     resultCount: Int?,
@@ -366,7 +436,10 @@ private fun QuranListHeader(
                 fontWeight = FontWeight.Bold
             )
         }
-        val defaultSubtitle = stringResource(R.string.quran_subtitle)
+        val defaultSubtitle = when (browseMode) {
+            QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
+            QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
+        }
         val noMatchesSubtitle = stringResource(R.string.no_matches)
         val oneSurahSubtitle = stringResource(R.string.one_surah_found)
         val subtitle = when (resultCount) {
@@ -396,6 +469,25 @@ private fun QuranListHeader(
                 )
         )
         Spacer(Modifier.height(AlKhatibSpacing.md))
+        if (showBrowseTabs) {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = browseMode == QuranBrowseMode.SURAH,
+                    onClick = { onBrowseModeChange(QuranBrowseMode.SURAH) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                ) {
+                    Text(stringResource(R.string.quran_tab_surah))
+                }
+                SegmentedButton(
+                    selected = browseMode == QuranBrowseMode.JUZ,
+                    onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                ) {
+                    Text(stringResource(R.string.quran_tab_juz))
+                }
+            }
+            Spacer(Modifier.height(AlKhatibSpacing.sm))
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -564,6 +656,65 @@ private fun ChapterRow(
                         .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f))
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun JuzRow(
+    juz: QuranJuz,
+    chapter: QuranChapter?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val start = juz.startChapterAndAyah()
+    val startLabel = start?.let { (chapterNumber, ayah) ->
+        val surahName = chapter?.displayComplexName
+            ?: stringResource(R.string.surah_number, chapterNumber)
+        "$surahName · ${stringResource(R.string.ayah_number, ayah)}"
+    }
+    Surface(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
+        color = Color.Transparent,
+        shape = RoundedCornerShape(0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ChapterNumberBadge(number = juz.juzNumber)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.juz_number, juz.juzNumber),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                startLabel?.let { label ->
+                    Text(
+                        text = stringResource(R.string.juz_starts_at, label),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+                juz.versesCount?.let { count ->
+                    Text(
+                        text = stringResource(R.string.juz_verses_count, count),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
         }
     }

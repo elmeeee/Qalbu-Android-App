@@ -194,6 +194,12 @@
     <!-- Quran -->
     <string name="quran_title">Quran</string>
     <string name="quran_subtitle">114 Surahs · The Noble Quran</string>
+    <string name="quran_subtitle_juz">30 Juz · The Noble Quran</string>
+    <string name="quran_tab_surah">Surah</string>
+    <string name="quran_tab_juz">Juz</string>
+    <string name="juz_load_failed">Couldn\'t load juz list</string>
+    <string name="juz_verses_count">%1$d ayahs</string>
+    <string name="juz_starts_at">Starts at %1$s</string>
     <string name="one_surah_found">1 surah found</string>
     <string name="surahs_found">%1$d surahs found</string>
     <string name="continue_reading">Continue reading</string>
@@ -288,10 +294,16 @@
     <string name="prayer_calendar">Prayer calendar</string>
     <string name="prayer_calendar_load_failed">Could not load prayer calendar</string>
     <string name="prayer_widget_title">Prayer times</string>
-    <string name="prayer_widget_description">Next prayer countdown for your location</string>
+    <string name="prayer_widget_description">Full daily prayer schedule with countdown</string>
     <string name="prayer_widget_empty">Open Qalbu to load prayer times</string>
     <string name="prayer_widget_next">Next: %1$s at %2$s</string>
     <string name="prayer_widget_grace">%1$s started recently</string>
+    <string name="prayer_widget_next_label">Next prayer</string>
+    <string name="prayer_widget_in_progress">Now</string>
+    <string name="prayer_widget_at_time">Adhan at %1$s</string>
+    <string name="prayer_calendar_open">Monthly calendar</string>
+    <string name="prayer_calendar_title">Prayer calendar</string>
+    <string name="prayer_calendar_hint">Tap a day to see all prayer times for that date.</string>
     <string name="onboarding_welcome_title">Welcome to Qalbu</string>
     <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
     <string name="onboarding_location_title">Where do you pray?</string>

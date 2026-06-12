@@ -1,6 +1,8 @@
 package app.kamy.qalbuApp.infrastructure.network.api
 
 import app.kamy.qalbuApp.domain.model.ChaptersResponse
+import app.kamy.qalbuApp.domain.model.JuzsResponse
+import app.kamy.qalbuApp.domain.model.SingleJuzResponse
 import app.kamy.qalbuApp.domain.model.HadithsByAyahResponse
 import app.kamy.qalbuApp.domain.model.RandomAyahResponse
 import app.kamy.qalbuApp.domain.model.RecitationsResponse
@@ -19,6 +21,17 @@ interface ContentApiService {
         @Query("language") language: String = "en"
     ): ChaptersResponse
 
+    @GET("juzs")
+    suspend fun getJuzs(
+        @Query("mushaf") mushaf: Int? = null
+    ): JuzsResponse
+
+    @GET("juzs/{id}")
+    suspend fun getJuzById(
+        @Path("id") juzNumber: Int,
+        @Query("mushaf") mushaf: Int? = null
+    ): SingleJuzResponse
+
     @GET("verses/random")
     suspend fun getRandomVerse(
         @Query("language") language: String = "en",
@@ -27,6 +40,19 @@ interface ContentApiService {
         @Query("fields") fields: String = "text_uthmani",
         @Query("translation_fields") translationFields: String = "resource_name"
     ): RandomAyahResponse
+
+    @GET("verses/by_juz/{juz_number}")
+    suspend fun getVersesByJuz(
+        @Path("juz_number") juzNumber: Int,
+        @Query("language") language: String = "en",
+        @Query("translations") translations: String = "22",
+        @Query("audio") audio: Int = 6,
+        @Query("fields") fields: String = "text_uthmani",
+        @Query("translation_fields") translationFields: String = "resource_name",
+        @Query("words") words: String = "false",
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 50
+    ): VersesByChapterResponse
 
     @GET("verses/by_chapter/{chapter}")
     suspend fun getVersesByChapter(

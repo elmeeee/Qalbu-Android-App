@@ -16,10 +16,11 @@ object PrayerNotificationCoordinator {
         context: Context,
         bundle: PrayerScheduleBundle,
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        meta: PrayerScheduleCache.WidgetMeta? = null
     ) {
         val appContext = context.applicationContext
-        PrayerScheduleCache.save(appContext, bundle, latitude, longitude)
+        PrayerScheduleCache.save(appContext, bundle, latitude, longitude, meta)
         PrayerWidgetUpdater.updateAll(appContext)
         scheduleAsync(appContext)
     }

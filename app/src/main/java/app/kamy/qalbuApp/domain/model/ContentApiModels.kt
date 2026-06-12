@@ -14,6 +14,7 @@ data class SingleVerseResponse(val verse: RandomAyahPayload? = null)
 @Serializable
 data class RandomAyahPayload(
     val id: Int? = null,
+    @SerialName("chapter_id") val chapterId: Int? = null,
     val verseNumber: Int? = null,
     val verseKey: String? = null,
     val textIndopak: String? = null,
@@ -47,11 +48,12 @@ data class RandomAyahPayload(
         }
 
     val chapterNumber: Int?
-        get() = verseKey
-            ?.substringBefore(':', missingDelimiterValue = "")
-            ?.trim()
-            ?.toIntOrNull()
-            ?.takeIf { it > 0 }
+        get() = chapterId?.takeIf { it > 0 }
+            ?: verseKey
+                ?.substringBefore(':', missingDelimiterValue = "")
+                ?.trim()
+                ?.toIntOrNull()
+                ?.takeIf { it > 0 }
 
     fun referenceLabel(chapterDisplayName: String?): String? {
         val ayah = resolvedVerseNumber
@@ -146,6 +148,35 @@ data class RecitationPayload(
 
 @Serializable
 data class RecitationTranslatedName(val name: String? = null)
+
+// ---- Juz ----
+
+@Serializable
+data class JuzsResponse(val juzs: List<QuranJuz> = emptyList())
+
+@Serializable
+data class SingleJuzResponse(val juz: QuranJuz? = null)
+
+@Serializable
+data class QuranJuz(
+    val id: Int = 0,
+    @SerialName("juz_number") val juzNumber: Int = 0,
+    @SerialName("verse_mapping") val verseMapping: Map<String, String> = emptyMap(),
+    @SerialName("first_verse_id") val firstVerseId: Int? = null,
+    @SerialName("last_verse_id") val lastVerseId: Int? = null,
+    @SerialName("verses_count") val versesCount: Int? = null
+) {
+    fun startChapterAndAyah(): Pair<Int, Int>? {
+        if (verseMapping.isEmpty()) return null
+        val chapter = verseMapping.keys.mapNotNull { it.toIntOrNull() }.minOrNull() ?: return null
+        val range = verseMapping[chapter.toString()] ?: return null
+        val ayah = range.substringBefore('-').trim().toIntOrNull()?.takeIf { it > 0 } ?: 1
+        return chapter to ayah
+    }
+
+    fun firstChapterNumber(): Int? =
+        verseMapping.keys.mapNotNull { it.toIntOrNull() }.minOrNull()
+}
 
 // ---- Chapters ----
 

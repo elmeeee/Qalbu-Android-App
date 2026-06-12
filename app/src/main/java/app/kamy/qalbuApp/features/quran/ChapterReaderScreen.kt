@@ -97,6 +97,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 fun ChapterReaderScreen(
     audioPlayer: AudioPlayerController,
     initialVerseNumber: Int? = null,
+    initialVerseKey: String? = null,
     audioBarVisible: Boolean = false,
     onBack: () -> Unit
 ) {
@@ -114,7 +115,15 @@ fun ChapterReaderScreen(
     val currentVerse by remember {
         derivedStateOf { state.verses.getOrNull(pagerState.currentPage.coerceIn(0, (verseCount - 1).coerceAtLeast(0))) }
     }
-    val surahTitle = state.chapterDisplayName ?: stringResource(R.string.surah_number, state.chapterNumber)
+    val surahTitle = when {
+        state.juzNumber != null -> {
+            val chapterNum = currentVerse?.chapterNumber
+            state.chapterLookup[chapterNum]
+                ?: chapterNum?.let { stringResource(R.string.surah_number, it) }
+                ?: state.chapterDisplayName.orEmpty()
+        }
+        else -> state.chapterDisplayName ?: stringResource(R.string.surah_number, state.chapterNumber)
+    }
     val loadErrorDisplay = state.error.rememberErrorDisplay(R.string.verses_load_failed)
 
     LaunchedEffect(pagerState) {
@@ -134,9 +143,15 @@ fun ChapterReaderScreen(
         }
     }
 
-    LaunchedEffect(verseCount, initialVerseNumber) {
-        if (verseCount == 0 || initialVerseNumber == null) return@LaunchedEffect
-        val idx = state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
+    LaunchedEffect(verseCount, initialVerseNumber, initialVerseKey) {
+        if (verseCount == 0) return@LaunchedEffect
+        val idx = when {
+            !initialVerseKey.isNullOrBlank() ->
+                state.verses.indexOfFirst { it.verseKey == initialVerseKey }
+            initialVerseNumber != null ->
+                state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
+            else -> -1
+        }
         if (idx >= 0 && pagerState.currentPage != idx) {
             pagerState.scrollToPage(idx)
         }

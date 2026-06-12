@@ -4,6 +4,7 @@ import app.kamy.qalbuApp.core.error.qfCall
 import app.kamy.qalbuApp.domain.model.HadithsByAyahResponse
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.model.QuranChapter
+import app.kamy.qalbuApp.domain.model.QuranJuz
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
@@ -29,6 +30,10 @@ class ContentRepository @Inject constructor(
     private var chaptersCachedAt: Long = 0L
     private var chaptersCachedLanguage: String? = null
     private val chaptersMutex = Mutex()
+    private val juzsTtlMs = 24 * 60 * 60 * 1000L
+    private var cachedJuzs: List<QuranJuz>? = null
+    private var juzsCachedAt: Long = 0L
+    private val juzsMutex = Mutex()
 
     suspend fun getChapters(force: Boolean = false): List<QuranChapter> = chaptersMutex.withLock {
         val now = System.currentTimeMillis()
@@ -43,6 +48,25 @@ class ContentRepository @Inject constructor(
         chaptersCachedAt = now
         chaptersCachedLanguage = language
         response.chapters
+    }
+
+    suspend fun getJuzs(force: Boolean = false): List<QuranJuz> = juzsMutex.withLock {
+        val now = System.currentTimeMillis()
+        if (!force) {
+            cachedJuzs?.let {
+                if (now - juzsCachedAt < juzsTtlMs) return it
+            }
+        }
+        val response = qfCall { api.getJuzs() }
+        val sorted = response.juzs.sortedBy { it.juzNumber }
+        cachedJuzs = sorted
+        juzsCachedAt = now
+        sorted
+    }
+
+    suspend fun getJuz(juzNumber: Int): QuranJuz? {
+        cachedJuzs?.find { it.juzNumber == juzNumber }?.let { return it }
+        return qfCall { api.getJuzById(juzNumber) }.juz
     }
 
     suspend fun getRandomAyah(
@@ -65,6 +89,23 @@ class ContentRepository @Inject constructor(
     ): VersesByChapterResponse = qfCall {
         api.getVersesByChapter(
             chapterNumber = chapterNumber,
+            page = page,
+            perPage = perPage,
+            language = apiLanguage(),
+            translations = translationId.toString(),
+            audio = audioRecitationId
+        )
+    }
+
+    suspend fun getVersesByJuz(
+        juzNumber: Int,
+        page: Int = 1,
+        perPage: Int = 50,
+        translationId: Int = selectedTranslationId(),
+        audioRecitationId: Int = translationStore.currentRecitationId()
+    ): VersesByChapterResponse = qfCall {
+        api.getVersesByJuz(
+            juzNumber = juzNumber,
             page = page,
             perPage = perPage,
             language = apiLanguage(),
@@ -109,6 +150,8 @@ class ContentRepository @Inject constructor(
         cachedChapters = null
         chaptersCachedAt = 0L
         chaptersCachedLanguage = null
+        cachedJuzs = null
+        juzsCachedAt = 0L
     }
 
     fun currentApiLanguage(): String = apiLanguage()

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.domain.model.QuranChapter
+import app.kamy.qalbuApp.domain.model.QuranJuz
 import app.kamy.qalbuApp.domain.model.ReadingSession
 import app.kamy.qalbuApp.domain.model.SearchNavResult
 import app.kamy.qalbuApp.domain.model.SearchVerseResult
@@ -25,9 +26,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class QuranBrowseMode { SURAH, JUZ }
+
 data class ChaptersUiState(
     val isLoading: Boolean = false,
+    val browseMode: QuranBrowseMode = QuranBrowseMode.SURAH,
     val chapters: List<QuranChapter> = emptyList(),
+    val juzs: List<QuranJuz> = emptyList(),
+    val juzsLoading: Boolean = false,
+    val juzsError: AppError? = null,
     val continueReading: ReadingSession? = null,
     val error: AppError? = null,
     val searchQuery: String = "",
@@ -67,15 +74,21 @@ class ChaptersViewModel @Inject constructor(
         try {
             coroutineScope {
                 val chaptersDeferred = async { contentRepository.getChapters(force) }
+                val juzsDeferred = async { runCatching { contentRepository.getJuzs(force) } }
                 val continueDeferred = async {
                     if (userSession.isSignedIn.value) {
                         runCatching { readingSessions.fetchMostRecent() }.getOrNull()
                     } else null
                 }
+                _state.update { it.copy(juzsLoading = true, juzsError = null) }
+                val juzsResult = juzsDeferred.await()
                 _state.update {
                     it.copy(
                         isLoading = false,
                         chapters = chaptersDeferred.await(),
+                        juzs = juzsResult.getOrDefault(emptyList()),
+                        juzsLoading = false,
+                        juzsError = juzsResult.exceptionOrNull()?.toAppError(),
                         continueReading = continueDeferred.await()
                     )
                 }
@@ -154,6 +167,17 @@ class ChaptersViewModel @Inject constructor(
             }
             return
         }
+        if (!userSession.isSignedIn.value) {
+            _state.update {
+                it.copy(
+                    remoteNavigation = emptyList(),
+                    remoteVerses = emptyList(),
+                    searchLoading = false,
+                    searchError = null
+                )
+            }
+            return
+        }
         searchJob = viewModelScope.launch {
             delay(SEARCH_DEBOUNCE_MS)
             _state.update { it.copy(searchLoading = true, searchError = null) }
@@ -197,6 +221,43 @@ class ChaptersViewModel @Inject constructor(
 
     fun chapterForNumber(number: Int): QuranChapter? =
         _state.value.chapters.firstOrNull { it.id == number }
+
+    fun setBrowseMode(mode: QuranBrowseMode) {
+        _state.update { it.copy(browseMode = mode) }
+        if (mode == QuranBrowseMode.JUZ &&
+            _state.value.juzs.isEmpty() &&
+            !_state.value.juzsLoading &&
+            _state.value.juzsError == null
+        ) {
+            viewModelScope.launch { loadJuzs() }
+        }
+    }
+
+    private suspend fun loadJuzs() {
+        _state.update { it.copy(juzsLoading = true, juzsError = null) }
+        val result = runCatching { contentRepository.getJuzs(force = false) }
+        _state.update {
+            it.copy(
+                juzs = result.getOrDefault(emptyList()),
+                juzsLoading = false,
+                juzsError = result.exceptionOrNull()?.toAppError()
+            )
+        }
+    }
+
+    suspend fun resolveJuzStart(juzNumber: Int): Pair<Int, Int>? {
+        val cached = _state.value.juzs.find { it.juzNumber == juzNumber }
+        cached?.startChapterAndAyah()?.let { return it }
+        return contentRepository.getJuz(juzNumber)?.startChapterAndAyah()
+    }
+
+    fun openJuz(juzNumber: Int, onOpen: (juzNumber: Int, verseKey: String?) -> Unit) {
+        viewModelScope.launch {
+            val verseKey = resolveJuzStart(juzNumber)?.let { (chapter, ayah) -> "$chapter:$ayah" }
+            onOpen(juzNumber, verseKey)
+            clearSearch()
+        }
+    }
 
     companion object {
         private const val SEARCH_DEBOUNCE_MS = 300L

@@ -33,7 +33,9 @@ data class PrayerCalendarDay(
     val gregorianLabel: String,
     val hijriLabel: String?,
     val fajr: String,
+    val sunrise: String,
     val dhuhr: String,
+    val asr: String,
     val maghrib: String,
     val isha: String
 )
@@ -146,7 +148,9 @@ class AlAdhanRepository @Inject constructor(
                     .joinToString(" "),
                 hijriLabel = hijriLabel,
                 fajr = formatRawTime(timings["Fajr"]),
+                sunrise = formatRawTime(timings["Sunrise"]),
                 dhuhr = formatRawTime(timings["Dhuhr"]),
+                asr = formatRawTime(timings["Asr"]),
                 maghrib = formatRawTime(timings["Maghrib"]),
                 isha = formatRawTime(timings["Isha"])
             )

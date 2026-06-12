@@ -12,15 +12,37 @@ object PrayerScheduleCache {
     private const val KEY_JSON = "bundle_json"
     private const val KEY_LAT = "latitude"
     private const val KEY_LON = "longitude"
+    private const val KEY_META = "widget_meta_json"
     private val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
-    fun save(context: Context, bundle: PrayerScheduleBundle, latitude: Double, longitude: Double) {
+    data class WidgetMeta(
+        val cityLabel: String,
+        val hijriLabel: String?,
+        val gregorianLabel: String?,
+        val timings: Map<String, String>
+    )
+
+    fun save(
+        context: Context,
+        bundle: PrayerScheduleBundle,
+        latitude: Double,
+        longitude: Double,
+        meta: WidgetMeta? = null
+    ) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_JSON, bundle.toJson().toString())
             .putFloat(KEY_LAT, latitude.toFloat())
             .putFloat(KEY_LON, longitude.toFloat())
+            .putString(KEY_META, meta?.toJson()?.toString())
             .apply()
+    }
+
+    fun loadMeta(context: Context): WidgetMeta? {
+        val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getString(KEY_META, null)
+            ?: return null
+        return runCatching { parseMeta(JSONObject(raw)) }.getOrNull()
     }
 
     fun load(context: Context): PrayerScheduleBundle? {
@@ -97,4 +119,26 @@ object PrayerScheduleCache {
     private fun NightDivisionItem.toJson(): JSONObject = JSONObject()
         .put("kind", kind.name)
         .put("fireAt", fireAtMillis)
+
+    private fun WidgetMeta.toJson(): JSONObject = JSONObject().apply {
+        put("cityLabel", cityLabel)
+        put("hijriLabel", hijriLabel)
+        put("gregorianLabel", gregorianLabel)
+        put("timings", JSONObject().apply {
+            timings.forEach { (key, value) -> put(key, value) }
+        })
+    }
+
+    private fun parseMeta(o: JSONObject): WidgetMeta {
+        val timings = buildMap {
+            val obj = o.optJSONObject("timings") ?: return@buildMap
+            obj.keys().forEach { key -> put(key, obj.getString(key)) }
+        }
+        return WidgetMeta(
+            cityLabel = o.getString("cityLabel"),
+            hijriLabel = o.optString("hijriLabel").takeIf { it.isNotBlank() },
+            gregorianLabel = o.optString("gregorianLabel").takeIf { it.isNotBlank() },
+            timings = timings
+        )
+    }
 }

@@ -46,10 +46,13 @@ object AppConfig {
 
     object Content {
         const val chapters = "chapters"
+        const val juzs = "juzs"
+        fun juzById(id: Int) = "juzs/$id"
         const val versesRandom = "verses/random"
         const val resourcesRecitations = "resources/recitations"
         const val resourcesTranslations = "resources/translations"
         fun versesByChapter(chapterNumber: Int) = "verses/by_chapter/$chapterNumber"
+        fun versesByJuz(juzNumber: Int) = "verses/by_juz/$juzNumber"
         fun verseByKey(key: String) = "verses/by_key/$key"
         fun hadithsByAyah(ayahKey: String) = "hadith_references/by_ayah/$ayahKey/hadiths"
         fun tafsirByAyah(resourceId: String, ayahKey: String) =

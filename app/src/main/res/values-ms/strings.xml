@@ -179,6 +179,12 @@
 
     <string name="quran_title">Al-Quran</string>
     <string name="quran_subtitle">114 Surah · Al-Quran</string>
+    <string name="quran_subtitle_juz">30 Juz · Al-Quran</string>
+    <string name="quran_tab_surah">Surah</string>
+    <string name="quran_tab_juz">Juz</string>
+    <string name="juz_load_failed">Gagal memuat senarai juz</string>
+    <string name="juz_verses_count">%1$d ayat</string>
+    <string name="juz_starts_at">Bermula pada %1$s</string>
     <string name="one_surah_found">1 surah dijumpai</string>
     <string name="surahs_found">%1$d surah dijumpai</string>
     <string name="continue_reading">Teruskan bacaan</string>
@@ -207,10 +213,16 @@
     <string name="prayer_calendar">Kalendar solat</string>
     <string name="prayer_calendar_load_failed">Gagal memuatkan kalendar solat</string>
     <string name="prayer_widget_title">Waktu solat</string>
-    <string name="prayer_widget_description">Kira detik solat seterusnya</string>
+    <string name="prayer_widget_description">Jadual solat penuh dengan kira detik</string>
     <string name="prayer_widget_empty">Buka Qalbu untuk memuatkan waktu solat</string>
     <string name="prayer_widget_next">Seterusnya: %1$s pada %2$s</string>
     <string name="prayer_widget_grace">%1$s baru bermula</string>
+    <string name="prayer_widget_next_label">Solat seterusnya</string>
+    <string name="prayer_widget_in_progress">Sekarang</string>
+    <string name="prayer_widget_at_time">Azan pada %1$s</string>
+    <string name="prayer_calendar_open">Kalendar bulanan</string>
+    <string name="prayer_calendar_title">Kalendar solat</string>
+    <string name="prayer_calendar_hint">Ketik hari untuk lihat semua waktu solat pada tarikh tersebut.</string>
     <string name="onboarding_welcome_title">Selamat datang ke Qalbu</string>
     <string name="onboarding_welcome_body">Teman Quran harian anda — waktu solat, refleksi, dan komuniti dalam satu aplikasi.</string>
     <string name="onboarding_location_title">Di mana anda solat?</string>
