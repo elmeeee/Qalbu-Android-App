@@ -1,6 +1,9 @@
 package app.kamy.qalbuApp.features.quran
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,9 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -470,22 +470,11 @@ private fun QuranListHeader(
         )
         Spacer(Modifier.height(AlKhatibSpacing.md))
         if (showBrowseTabs) {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    selected = browseMode == QuranBrowseMode.SURAH,
-                    onClick = { onBrowseModeChange(QuranBrowseMode.SURAH) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                ) {
-                    Text(stringResource(R.string.quran_tab_surah))
-                }
-                SegmentedButton(
-                    selected = browseMode == QuranBrowseMode.JUZ,
-                    onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                ) {
-                    Text(stringResource(R.string.quran_tab_juz))
-                }
-            }
+            QuranBrowseTabs(
+                browseMode = browseMode,
+                onBrowseModeChange = onBrowseModeChange,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(Modifier.height(AlKhatibSpacing.sm))
         }
         Row(
@@ -517,6 +506,90 @@ private fun QuranListHeader(
             Spacer(Modifier.height(AlKhatibSpacing.sm))
             QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
         }
+    }
+}
+
+@Composable
+private fun QuranBrowseTabs(
+    browseMode: QuranBrowseMode,
+    onBrowseModeChange: (QuranBrowseMode) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val surahLabel = stringResource(R.string.quran_tab_surah)
+    val juzLabel = stringResource(R.string.quran_tab_juz)
+    val tabShape = RoundedCornerShape(24.dp)
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(28.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                        AlKhatibColors.SageMist.copy(alpha = 0.5f)
+                    )
+                )
+            )
+            .padding(4.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            QuranBrowseTab(
+                label = surahLabel,
+                selected = browseMode == QuranBrowseMode.SURAH,
+                onClick = { onBrowseModeChange(QuranBrowseMode.SURAH) },
+                modifier = Modifier.weight(1f),
+                shape = tabShape
+            )
+            QuranBrowseTab(
+                label = juzLabel,
+                selected = browseMode == QuranBrowseMode.JUZ,
+                onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
+                modifier = Modifier.weight(1f),
+                shape = tabShape
+            )
+        }
+    }
+}
+
+@Composable
+private fun QuranBrowseTab(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    shape: RoundedCornerShape = RoundedCornerShape(24.dp)
+) {
+    val textColor by animateColorAsState(
+        targetValue = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(200),
+        label = "tabText"
+    )
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .then(
+                if (selected) {
+                    Modifier.background(
+                        Brush.linearGradient(
+                            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
+                        )
+                    )
+                } else {
+                    Modifier
+                }
+            )
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+            color = textColor
+        )
     }
 }
 

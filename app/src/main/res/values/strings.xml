@@ -113,6 +113,8 @@
     <string name="channel_prayer_desc">Adhan and night prayer reminders</string>
     <string name="channel_sunnah">Sunnah reading</string>
     <string name="channel_sunnah_desc">Weekly surah reading reminders</string>
+    <string name="channel_adhan_alert">Adhan alert</string>
+    <string name="channel_adhan_alert_desc">Plays adhan when full playback cannot start</string>
 
     <!-- Push notifications -->
     <string name="prayer_notif_title">It\'s time for %1$s · %2$s</string>
@@ -307,6 +309,7 @@
     <string name="prayer_calendar_open">Monthly calendar</string>
     <string name="prayer_calendar_title">Prayer calendar</string>
     <string name="prayer_calendar_hint">Tap a day to see all prayer times for that date.</string>
+    <string name="prayer_calendar_loading_day">Loading prayer times…</string>
     <string name="onboarding_welcome_title">Welcome to Qalbu</string>
     <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
     <string name="onboarding_location_title">Where do you pray?</string>

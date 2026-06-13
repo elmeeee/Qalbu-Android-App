@@ -22,7 +22,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         val playAdhan = intent.getBooleanExtra(EXTRA_PLAY_ADHAN, false)
         val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
         val kind = intent.getStringExtra(EXTRA_KIND)
-        val fireAt = System.currentTimeMillis()
+        val fireAt = intent.getLongExtra(EXTRA_FIRE_AT, System.currentTimeMillis())
         val title = AppNotificationCopy.resolveTitle(appContext, kind, prayerName, fireAt)
             .ifBlank { intent.getStringExtra(EXTRA_TITLE).orEmpty() }
         val body = AppNotificationCopy.resolveBody(appContext, kind, prayerName)
@@ -44,17 +44,27 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         }
 
         if (title.isNotEmpty()) {
-            PrayerNotificationScheduler.showNotification(
-                context = appContext,
-                notificationId = notificationId,
-                channelId = channelId,
-                title = title,
-                body = body,
-                // Foreground service plays full adhan; fall back to notification sound if it cannot start.
-                silent = playAdhan && adhanPlaying,
-                showStopAdhan = playAdhan && adhanPlaying,
-                adhanSoundRes = if (playAdhan && !adhanPlaying) adhanRawRes else null
-            )
+            if (playAdhan && adhanPlaying) {
+                // Foreground service already shows the adhan notification with stop action.
+            } else {
+                val alertChannel = if (playAdhan && adhanRawRes != null) {
+                    NotificationChannels.ensureAdhanAlert(appContext, adhanRawRes)
+                    NotificationChannels.ADHAN_ALERT
+                } else {
+                    channelId
+                }
+                PrayerNotificationScheduler.showNotification(
+                    context = appContext,
+                    notificationId = notificationId,
+                    channelId = alertChannel,
+                    title = title,
+                    body = body,
+                    silent = false,
+                    showStopAdhan = playAdhan && adhanRawRes != null,
+                    adhanSoundRes = if (playAdhan && adhanRawRes != null) adhanRawRes else null,
+                    kind = kind
+                )
+            }
         }
 
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
@@ -75,5 +85,6 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         const val EXTRA_KIND = "kind"
         const val EXTRA_PLAY_ADHAN = "play_adhan"
         const val EXTRA_PRAYER_NAME = "prayer_name"
+        const val EXTRA_FIRE_AT = "fire_at"
     }
 }

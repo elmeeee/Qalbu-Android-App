@@ -24,6 +24,7 @@ object PrayerNotificationScheduler {
     private const val MIDNIGHT_REFRESH_REQUEST = 11_000
     private const val NOTIFICATION_ID_BASE = 8_000
     private const val DAYS_TO_SCHEDULE = 7
+    private const val SUNNAH_WEEKS_TO_SCHEDULE = 8
 
     fun reschedule(
         context: Context,
@@ -135,39 +136,45 @@ object PrayerNotificationScheduler {
         val now = System.currentTimeMillis()
 
         if (options.yasinReminderEnabled) {
-            val fire = nextWeekdayTime(
+            val firstFire = nextWeekdayTime(
                 weekday = Calendar.THURSDAY,
                 hour = 20,
                 minute = 0,
                 from = now
             )
-            scheduleOneShot(
-                context = context,
-                requestCode = SUNNAH_YASIN_REQUEST,
-                fireAt = fire,
-                channelId = NotificationChannels.SUNNAH,
-                title = "📖 Read Surah Yasin",
-                body = "Thursday night — a blessed time to read Surah Yasin before Jumu'ah.",
-                kind = "sunnah_yasin"
-            )
+            upcomingWeeklyOccurrences(firstFire, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
+                scheduleOneShot(
+                    context = context,
+                    requestCode = SUNNAH_YASIN_REQUEST + offset,
+                    fireAt = fireAt,
+                    channelId = NotificationChannels.SUNNAH,
+                    title = "📖 Read Surah Yasin",
+                    body = "Thursday night — a blessed time to read Surah Yasin before Jumu'ah.",
+                    kind = "sunnah_yasin",
+                    notificationId = SUNNAH_YASIN_REQUEST + offset
+                )
+            }
         }
 
         if (options.kahfReminderEnabled) {
-            val fire = nextWeekdayTime(
+            val firstFire = nextWeekdayTime(
                 weekday = Calendar.FRIDAY,
                 hour = 9,
                 minute = 0,
                 from = now
             )
-            scheduleOneShot(
-                context = context,
-                requestCode = SUNNAH_KAHF_REQUEST,
-                fireAt = fire,
-                channelId = NotificationChannels.SUNNAH,
-                title = "📖 Read Surah Al-Kahf",
-                body = "It's Friday — read Surah Al-Kahf for light between this Friday and the next.",
-                kind = "sunnah_kahf"
-            )
+            upcomingWeeklyOccurrences(firstFire, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
+                scheduleOneShot(
+                    context = context,
+                    requestCode = SUNNAH_KAHF_REQUEST + offset,
+                    fireAt = fireAt,
+                    channelId = NotificationChannels.SUNNAH,
+                    title = "📖 Read Surah Al-Kahf",
+                    body = "It's Friday — read Surah Al-Kahf for light between this Friday and the next.",
+                    kind = "sunnah_kahf",
+                    notificationId = SUNNAH_KAHF_REQUEST + offset
+                )
+            }
         }
     }
 
@@ -194,10 +201,14 @@ object PrayerNotificationScheduler {
 
     private fun cancelSunnah(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.cancel(pendingAlarm(context, SUNNAH_YASIN_REQUEST))
-        alarmManager.cancel(pendingAlarm(context, SUNNAH_KAHF_REQUEST))
-        NotificationManagerCompat.from(context).cancel(SUNNAH_YASIN_REQUEST)
-        NotificationManagerCompat.from(context).cancel(SUNNAH_KAHF_REQUEST)
+        (SUNNAH_YASIN_REQUEST until SUNNAH_YASIN_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
+            alarmManager.cancel(pendingAlarm(context, code))
+            NotificationManagerCompat.from(context).cancel(code)
+        }
+        (SUNNAH_KAHF_REQUEST until SUNNAH_KAHF_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
+            alarmManager.cancel(pendingAlarm(context, code))
+            NotificationManagerCompat.from(context).cancel(code)
+        }
     }
 
     fun showNotification(
@@ -208,7 +219,8 @@ object PrayerNotificationScheduler {
         body: String,
         silent: Boolean = false,
         showStopAdhan: Boolean = false,
-        @RawRes adhanSoundRes: Int? = null
+        @RawRes adhanSoundRes: Int? = null,
+        kind: String? = null
     ) {
         NotificationChannels.ensureAll(context)
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
@@ -229,9 +241,18 @@ object PrayerNotificationScheduler {
             .setContentIntent(pending)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        when {
+            kind?.startsWith("prayer_") == true || kind == "imsak" || adhanSoundRes != null ->
+                builder.setCategory(NotificationCompat.CATEGORY_ALARM)
+            kind?.startsWith("night_") == true ->
+                builder.setCategory(NotificationCompat.CATEGORY_REMINDER)
+            kind?.startsWith("sunnah_") == true ->
+                builder.setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+        }
         if (silent) {
             builder.setSilent(true)
-        } else if (adhanSoundRes != null) {
+        } else if (adhanSoundRes != null && channelId != NotificationChannels.ADHAN_ALERT) {
             val soundUri = Uri.parse("android.resource://${context.packageName}/$adhanSoundRes")
             builder.setSound(soundUri)
             builder.setCategory(NotificationCompat.CATEGORY_ALARM)
@@ -279,6 +300,7 @@ object PrayerNotificationScheduler {
                 putExtra(PrayerNotificationReceiver.EXTRA_KIND, kind)
                 putExtra(PrayerNotificationReceiver.EXTRA_PLAY_ADHAN, playAdhan)
                 putExtra(PrayerNotificationReceiver.EXTRA_PRAYER_NAME, prayerName)
+                putExtra(PrayerNotificationReceiver.EXTRA_FIRE_AT, fireAt)
             }
             val pending = PendingIntent.getBroadcast(
                 context,
@@ -326,6 +348,19 @@ object PrayerNotificationScheduler {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis
+    }
+
+    private fun upcomingWeeklyOccurrences(firstFireAt: Long, now: Long, count: Int): List<Long> {
+        if (count <= 0) return emptyList()
+        val cal = Calendar.getInstance().apply { timeInMillis = firstFireAt }
+        return buildList {
+            repeat(count) {
+                if (cal.timeInMillis > now + 2_000L) {
+                    add(cal.timeInMillis)
+                }
+                cal.add(Calendar.WEEK_OF_YEAR, 1)
+            }
+        }
     }
 
     private fun prayerTitle(name: String, fireAtMillis: Long): String {

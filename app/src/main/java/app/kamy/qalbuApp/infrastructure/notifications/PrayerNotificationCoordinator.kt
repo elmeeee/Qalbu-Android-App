@@ -22,20 +22,26 @@ object PrayerNotificationCoordinator {
         val appContext = context.applicationContext
         PrayerScheduleCache.save(appContext, bundle, latitude, longitude, meta)
         PrayerWidgetUpdater.updateAll(appContext)
-        scheduleAsync(appContext)
+        scheduleAsync(appContext, refreshIfStale = false)
     }
 
     fun rescheduleFromCache(context: Context) {
-        scheduleAsync(context.applicationContext)
+        scheduleAsync(context.applicationContext, refreshIfStale = true)
     }
 
-    private fun scheduleAsync(appContext: Context) {
+    private fun scheduleAsync(appContext: Context, refreshIfStale: Boolean) {
         scope.launch {
-            runCatching { rescheduleBlocking(appContext) }
+            runCatching { rescheduleBlocking(appContext, refreshIfStale) }
         }
     }
 
-    private fun rescheduleBlocking(appContext: Context) {
+    private suspend fun rescheduleBlocking(appContext: Context, refreshIfStale: Boolean) {
+        if (refreshIfStale &&
+            PrayerScheduleCache.isStale(appContext) &&
+            PrayerScheduleCache.loadCoordinates(appContext) != null
+        ) {
+            PrayerScheduleRefresher.refresh(appContext)
+        }
         val bundle = PrayerScheduleCache.load(appContext)
         val options = PrayerNotificationPreferencesStore.from(appContext).scheduleOptions()
         PrayerNotificationScheduler.reschedule(appContext, bundle, options)

@@ -14,6 +14,7 @@ import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.qalbuApp.infrastructure.repository.PrayerCalendarDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,13 +26,17 @@ import javax.inject.Inject
 data class PrayerCalendarUiState(
     val isLoading: Boolean = false,
     val days: List<PrayerCalendarDay> = emptyList(),
+    val loadedYear: Int? = null,
+    val loadedMonth: Int? = null,
     val error: AppError? = null,
     val year: Int = Calendar.getInstance().get(Calendar.YEAR),
     val month: Int = Calendar.getInstance().get(Calendar.MONTH) + 1,
     val selectedDay: Int = Calendar.getInstance().get(Calendar.DAY_OF_MONTH),
     val cityName: String? = null,
     val needsLocation: Boolean = false
-)
+) {
+    val daysReady: Boolean get() = loadedYear == year && loadedMonth == month
+}
 
 @HiltViewModel
 class PrayerCalendarViewModel @Inject constructor(
@@ -47,9 +52,11 @@ class PrayerCalendarViewModel @Inject constructor(
 
     private var latitude: Double? = null
     private var longitude: Double? = null
+    private var loadJob: Job? = null
+    private var loadGeneration = 0
 
     init {
-        viewModelScope.launch { loadCurrentMonth() }
+        loadJob = viewModelScope.launch { loadCurrentMonth() }
     }
 
     fun selectDay(day: Int) {
@@ -70,12 +77,25 @@ class PrayerCalendarViewModel @Inject constructor(
         } else {
             1
         }
-        _state.update { it.copy(year = year, month = month, selectedDay = selectedDay) }
-        viewModelScope.launch { loadMonth(year, month) }
+        loadJob?.cancel()
+        _state.update {
+            it.copy(
+                year = year,
+                month = month,
+                selectedDay = selectedDay,
+                days = emptyList(),
+                loadedYear = null,
+                loadedMonth = null,
+                isLoading = true,
+                error = null
+            )
+        }
+        loadJob = viewModelScope.launch { loadMonth(year, month) }
     }
 
     fun retry() {
-        viewModelScope.launch { loadMonth(_state.value.year, _state.value.month) }
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch { loadMonth(_state.value.year, _state.value.month) }
     }
 
     private suspend fun loadCurrentMonth() {
@@ -84,10 +104,18 @@ class PrayerCalendarViewModel @Inject constructor(
     }
 
     private suspend fun loadMonth(year: Int, month: Int) {
-        if (!resolveLocation()) return
+        val generation = ++loadGeneration
+        if (!resolveLocation()) {
+            if (generation == loadGeneration) {
+                _state.update { it.copy(isLoading = false) }
+            }
+            return
+        }
         val lat = latitude ?: return
         val lon = longitude ?: return
-        _state.update { it.copy(isLoading = true, error = null) }
+        if (generation == loadGeneration) {
+            _state.update { it.copy(isLoading = true, error = null) }
+        }
         try {
             val days = repository.fetchMonthCalendar(
                 year = year,
@@ -96,15 +124,19 @@ class PrayerCalendarViewModel @Inject constructor(
                 longitude = lon,
                 method = prayerMethodStore.current()
             )
+            if (generation != loadGeneration) return
             _state.update {
                 it.copy(
                     isLoading = false,
                     days = days,
+                    loadedYear = year,
+                    loadedMonth = month,
                     error = null,
                     selectedDay = it.selectedDay.coerceIn(1, days.size.coerceAtLeast(1))
                 )
             }
         } catch (t: Throwable) {
+            if (generation != loadGeneration) return
             _state.update { it.copy(isLoading = false, error = t.toAppError()) }
         }
     }

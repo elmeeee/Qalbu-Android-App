@@ -17,9 +17,12 @@ class PrayerAlarmRescheduleReceiver : BroadcastReceiver() {
         val pending = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
             try {
-                PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+                if (PrayerScheduleCache.loadCoordinates(appContext) != null) {
+                    runCatching { PrayerScheduleRefresher.refresh(appContext) }
+                } else {
+                    PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+                }
                 runCatching { DailyVerseNotificationScheduler.reschedule(appContext) }
-                runCatching { PrayerScheduleRefresher.refresh(appContext) }
             } finally {
                 pending.finish()
             }

@@ -429,59 +429,63 @@ fun QuranChapterSearchBar(
         animationSpec = tween(200),
         label = "searchElevation"
     )
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            !enabled -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-            isFocused -> MaterialTheme.colorScheme.tertiary
-            else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-        },
-        animationSpec = tween(200),
-        label = "searchBorder"
-    )
-    val fieldShape = RoundedCornerShape(16.dp)
+    val fieldShape = RoundedCornerShape(50)
 
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .height(52.dp)
             .graphicsLayer { shadowElevation = elevation }
             .shadow(
-                elevation = if (isFocused) 8.dp else 2.dp,
+                elevation = if (isFocused) 12.dp else 4.dp,
                 shape = fieldShape,
-                ambientColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.12f),
-                spotColor = AlKhatibColors.Teal.copy(alpha = 0.18f)
+                ambientColor = AlKhatibColors.DeepEmerald.copy(alpha = if (isFocused) 0.18f else 0.08f),
+                spotColor = AlKhatibColors.Teal.copy(alpha = if (isFocused) 0.22f else 0.1f)
             )
             .clip(fieldShape)
             .background(
                 if (isFocused) {
-                    Brush.linearGradient(
+                    Brush.horizontalGradient(
                         listOf(
                             MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.12f)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.18f),
+                            MaterialTheme.colorScheme.surface
                         )
                     )
                 } else {
-                    Brush.linearGradient(
+                    Brush.horizontalGradient(
                         listOf(
                             MaterialTheme.colorScheme.surface,
-                            AlKhatibColors.SageMist.copy(alpha = 0.65f)
+                            AlKhatibColors.SageMist.copy(alpha = 0.45f),
+                            MaterialTheme.colorScheme.surface
                         )
                     )
                 }
             )
-            .border(
-                width = if (isFocused) 1.5.dp else 1.dp,
-                color = borderColor,
-                shape = fieldShape
+            .then(
+                if (isFocused) {
+                    Modifier.border(
+                        width = 1.5.dp,
+                        brush = Brush.horizontalGradient(
+                            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Gold.copy(alpha = 0.6f))
+                        ),
+                        shape = fieldShape
+                    )
+                } else {
+                    Modifier
+                }
             )
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .padding(horizontal = 6.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 4.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
@@ -494,7 +498,7 @@ fun QuranChapterSearchBar(
                     imageVector = Icons.Filled.Search,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
             Spacer(Modifier.width(10.dp))

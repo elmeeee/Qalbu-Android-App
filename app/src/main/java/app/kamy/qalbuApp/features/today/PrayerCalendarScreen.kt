@@ -70,7 +70,12 @@ fun PrayerCalendarScreen(
         today.get(Calendar.MONTH) + 1 == state.month
     val todayDay = today.get(Calendar.DAY_OF_MONTH)
     val gridCells = remember(state.year, state.month) { buildMonthGrid(state.year, state.month) }
-    val selectedDayData = state.days.firstOrNull { it.day == state.selectedDay }
+    val selectedDayData = if (state.daysReady) {
+        state.days.firstOrNull { it.day == state.selectedDay }
+    } else {
+        null
+    }
+    val showInitialLoading = state.isLoading && state.loadedYear == null && state.days.isEmpty()
     val errorDisplay = state.error.rememberErrorDisplay(R.string.prayer_calendar_load_failed)
 
     Scaffold(
@@ -140,7 +145,7 @@ fun PrayerCalendarScreen(
         }
     ) { padding ->
         when {
-            state.isLoading && state.days.isEmpty() -> {
+            showInitialLoading -> {
                 Box(
                     Modifier
                         .fillMaxSize()
@@ -181,11 +186,18 @@ fun PrayerCalendarScreen(
                             .padding(horizontal = AlKhatibSpacing.screenHorizontal)
                     )
 
-                    selectedDayData?.let { day ->
-                        SelectedDayPrayerCard(
-                            day = day,
-                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                        )
+                    when {
+                        selectedDayData != null -> {
+                            SelectedDayPrayerCard(
+                                day = selectedDayData,
+                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                            )
+                        }
+                        state.isLoading -> {
+                            SelectedDayLoadingCard(
+                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                            )
+                        }
                     }
                 }
             }
@@ -313,6 +325,34 @@ private fun CalendarDayCell(
             fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
             color = textColor
         )
+    }
+}
+
+@Composable
+private fun SelectedDayLoadingCard(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = AlKhatibColors.LightGrey
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(
+                color = AlKhatibColors.DeepEmerald,
+                modifier = Modifier.size(28.dp),
+                strokeWidth = 2.5.dp
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.prayer_calendar_loading_day),
+                style = MaterialTheme.typography.bodySmall,
+                color = AlKhatibColors.Slate500
+            )
+        }
     }
 }
 

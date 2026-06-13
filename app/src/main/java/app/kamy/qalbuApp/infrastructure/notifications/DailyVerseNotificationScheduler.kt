@@ -8,7 +8,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.kamy.qalbuApp.MainActivity
 import app.kamy.qalbuApp.R
-import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseNotificationStore
+import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseNotificationStoreReader
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshot
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshotStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
@@ -39,19 +39,12 @@ object DailyVerseNotificationScheduler {
     }
 
     fun reschedule(context: Context) {
-        val prefs = context.getSharedPreferences("qalbu_notification_prefs", Context.MODE_PRIVATE)
-        val enabled = if (!prefs.contains("dailyVerseNotificationsEnabled")) {
-            true
-        } else {
-            prefs.getBoolean("dailyVerseNotificationsEnabled", true)
-        }
-        if (!enabled) {
+        val store = dailyVersePrefs(context)
+        if (!store.isEnabled()) {
             cancel(context)
             return
         }
-        val hour = prefs.getInt("dailyVerseNotificationHour", DailyVerseNotificationStore.DEFAULT_HOUR)
-        val minute = prefs.getInt("dailyVerseNotificationMinute", DailyVerseNotificationStore.DEFAULT_MINUTE)
-        scheduleAt(context, hour, minute)
+        scheduleAt(context, store.morningHour(), store.morningMinute())
     }
 
     fun cancel(context: Context) {
@@ -74,20 +67,15 @@ object DailyVerseNotificationScheduler {
     }
 
     fun scheduleNext(context: Context) {
-        val prefs = context.getSharedPreferences("qalbu_notification_prefs", Context.MODE_PRIVATE)
-        val enabled = if (!prefs.contains("dailyVerseNotificationsEnabled")) {
-            true
-        } else {
-            prefs.getBoolean("dailyVerseNotificationsEnabled", true)
-        }
-        if (!enabled) {
+        val store = dailyVersePrefs(context)
+        if (!store.isEnabled()) {
             cancel(context)
             return
         }
-        val hour = prefs.getInt("dailyVerseNotificationHour", DailyVerseNotificationStore.DEFAULT_HOUR)
-        val minute = prefs.getInt("dailyVerseNotificationMinute", DailyVerseNotificationStore.DEFAULT_MINUTE)
-        scheduleAt(context, hour, minute)
+        scheduleAt(context, store.morningHour(), store.morningMinute())
     }
+
+    private fun dailyVersePrefs(context: Context) = DailyVerseNotificationStoreReader(context)
 
     suspend fun resolveSnapshot(context: Context): DailyVerseSnapshot? {
         DailyVerseSnapshotStore.loadForToday(context)?.let { return it }
@@ -134,6 +122,8 @@ object DailyVerseNotificationScheduler {
             .setContentIntent(pending)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
     }

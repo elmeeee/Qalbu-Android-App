@@ -14,10 +14,14 @@ class DailyVerseNotificationReceiver : BroadcastReceiver() {
         val appContext = context.applicationContext
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             try {
-                val snapshot = DailyVerseNotificationScheduler.resolveSnapshot(appContext)
-                DailyVerseNotificationScheduler.showNotification(appContext, snapshot)
-                DailyVerseNotificationScheduler.scheduleNext(appContext)
+                val snapshot = runCatching {
+                    DailyVerseNotificationScheduler.resolveSnapshot(appContext)
+                }.getOrNull()
+                runCatching {
+                    DailyVerseNotificationScheduler.showNotification(appContext, snapshot)
+                }
             } finally {
+                runCatching { DailyVerseNotificationScheduler.scheduleNext(appContext) }
                 pendingResult.finish()
             }
         }
