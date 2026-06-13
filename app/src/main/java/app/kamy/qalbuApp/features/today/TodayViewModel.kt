@@ -11,6 +11,8 @@ import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.infrastructure.cache.toVersePayload
+import app.kamy.qalbuApp.infrastructure.network.NetworkMonitor
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshotStore
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
@@ -56,7 +58,8 @@ data class TodayUiState(
     val aiShareLoading: Boolean = false,
     val aiShareDraft: String = "",
     val aiShareError: AppError? = null,
-    val showReciterSheet: Boolean = false
+    val showReciterSheet: Boolean = false,
+    val isOfflineData: Boolean = false
 )
 
 @HiltViewModel
@@ -150,14 +153,32 @@ class TodayViewModel @Inject constructor(
                         verse = verse,
                         verseReferenceLabel = verse.referenceLabel(chapterName),
                         recitations = recitations,
-                        error = null
+                        error = null,
+                        isOfflineData = false
                     )
                 }
                 DailyVerseSnapshotStore.save(appContext, verse, chapterName)
                 shareComposer.prefetchShareTextIfNeeded(verse, _state.value.verseReferenceLabel)
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.toAppError()) }
+            val offline = !NetworkMonitor.isOnline(appContext)
+            if (offline) {
+                val snapshot = DailyVerseSnapshotStore.load(appContext)
+                if (snapshot != null) {
+                    val verse = snapshot.toVersePayload()
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            verse = verse,
+                            verseReferenceLabel = "${snapshot.surahName} - ${snapshot.ayahNumber}",
+                            error = null,
+                            isOfflineData = true
+                        )
+                    }
+                    return
+                }
+            }
+            _state.update { it.copy(isLoading = false, error = t.toAppError(), isOfflineData = false) }
         }
     }
 

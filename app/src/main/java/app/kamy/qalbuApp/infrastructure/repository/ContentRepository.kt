@@ -1,5 +1,6 @@
 package app.kamy.qalbuApp.infrastructure.repository
 
+import app.kamy.qalbuApp.core.error.QFError
 import app.kamy.qalbuApp.core.error.qfCall
 import app.kamy.qalbuApp.domain.model.HadithsByAyahResponse
 import app.kamy.qalbuApp.domain.model.QFTranslation
@@ -9,6 +10,7 @@ import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
 import app.kamy.qalbuApp.domain.model.VersesByChapterResponse
+import app.kamy.qalbuApp.infrastructure.cache.ContentDiskCache
 import app.kamy.qalbuApp.infrastructure.network.api.ContentApiService
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
@@ -21,7 +23,8 @@ import javax.inject.Singleton
 class ContentRepository @Inject constructor(
     private val api: ContentApiService,
     private val translationStore: TranslationPreferencesStore,
-    private val appLanguageStore: AppLanguageStore
+    private val appLanguageStore: AppLanguageStore,
+    private val diskCache: ContentDiskCache
 ) {
     private fun selectedTranslationId(): Int = translationStore.currentTranslationId()
     private fun apiLanguage(): String = appLanguageStore.current().apiCode
@@ -42,12 +45,32 @@ class ContentRepository @Inject constructor(
             cachedChapters?.let {
                 if (chaptersCachedLanguage == language && now - chaptersCachedAt < chaptersTtlMs) return it
             }
+            diskCache.loadChapters(language)?.let {
+                cachedChapters = it
+                chaptersCachedAt = now
+                chaptersCachedLanguage = language
+                return it
+            }
         }
-        val response = qfCall { api.getChapters(language = language) }
-        cachedChapters = response.chapters
-        chaptersCachedAt = now
-        chaptersCachedLanguage = language
-        response.chapters
+        try {
+            val response = qfCall { api.getChapters(language = language) }
+            cachedChapters = response.chapters
+            chaptersCachedAt = now
+            chaptersCachedLanguage = language
+            diskCache.saveChapters(language, response.chapters)
+            response.chapters
+        } catch (e: QFError.Network) {
+            loadChaptersFallback(language) ?: throw e
+        }
+    }
+
+    private fun loadChaptersFallback(language: String): List<QuranChapter>? {
+        cachedChapters?.takeIf { chaptersCachedLanguage == language }?.let { return it }
+        return diskCache.loadChapters(language)?.also {
+            cachedChapters = it
+            chaptersCachedLanguage = language
+            chaptersCachedAt = System.currentTimeMillis()
+        }
     }
 
     suspend fun getJuzs(force: Boolean = false): List<QuranJuz> = juzsMutex.withLock {
@@ -56,17 +79,43 @@ class ContentRepository @Inject constructor(
             cachedJuzs?.let {
                 if (now - juzsCachedAt < juzsTtlMs) return normalizeJuzs(it)
             }
+            diskCache.loadJuzs()?.let {
+                val normalized = normalizeJuzs(it)
+                cachedJuzs = normalized
+                juzsCachedAt = now
+                return normalized
+            }
         }
-        val response = qfCall { api.getJuzs(mushaf = DEFAULT_MUSHAF_ID) }
-        val normalized = normalizeJuzs(response.juzs)
-        cachedJuzs = normalized
-        juzsCachedAt = now
-        normalized
+        try {
+            val response = qfCall { api.getJuzs(mushaf = DEFAULT_MUSHAF_ID) }
+            val normalized = normalizeJuzs(response.juzs)
+            cachedJuzs = normalized
+            juzsCachedAt = now
+            diskCache.saveJuzs(normalized)
+            normalized
+        } catch (e: QFError.Network) {
+            loadJuzsFallback() ?: throw e
+        }
+    }
+
+    private fun loadJuzsFallback(): List<QuranJuz>? {
+        cachedJuzs?.let { return normalizeJuzs(it) }
+        return diskCache.loadJuzs()?.also {
+            cachedJuzs = normalizeJuzs(it)
+            juzsCachedAt = System.currentTimeMillis()
+        }?.let(::normalizeJuzs)
     }
 
     suspend fun getJuz(juzNumber: Int): QuranJuz? {
         cachedJuzs?.find { it.juzNumber == juzNumber }?.let { return it }
-        return qfCall { api.getJuzById(juzNumber, mushaf = DEFAULT_MUSHAF_ID) }.juz
+        diskCache.loadJuz(juzNumber)?.let { return it }
+        return try {
+            qfCall { api.getJuzById(juzNumber, mushaf = DEFAULT_MUSHAF_ID) }.juz?.also {
+                diskCache.saveJuz(it)
+            }
+        } catch (e: QFError.Network) {
+            diskCache.loadJuz(juzNumber)
+        }
     }
 
     suspend fun getRandomAyah(
@@ -86,15 +135,23 @@ class ContentRepository @Inject constructor(
         perPage: Int = 50,
         translationId: Int = selectedTranslationId(),
         audioRecitationId: Int = translationStore.currentRecitationId()
-    ): VersesByChapterResponse = qfCall {
-        api.getVersesByChapter(
-            chapterNumber = chapterNumber,
-            page = page,
-            perPage = perPage,
-            language = apiLanguage(),
-            translations = translationId.toString(),
-            audio = audioRecitationId
-        )
+    ): VersesByChapterResponse {
+        val language = apiLanguage()
+        val cacheKey = diskCache.verseCacheKey("chapter", chapterNumber, page, translationId, language)
+        return try {
+            qfCall {
+                api.getVersesByChapter(
+                    chapterNumber = chapterNumber,
+                    page = page,
+                    perPage = perPage,
+                    language = language,
+                    translations = translationId.toString(),
+                    audio = audioRecitationId
+                )
+            }.also { diskCache.saveVerses(cacheKey, it) }
+        } catch (e: QFError.Network) {
+            diskCache.loadVerses(cacheKey) ?: throw e
+        }
     }
 
     suspend fun getVersesByJuz(
@@ -103,15 +160,23 @@ class ContentRepository @Inject constructor(
         perPage: Int = 50,
         translationId: Int = selectedTranslationId(),
         audioRecitationId: Int = translationStore.currentRecitationId()
-    ): VersesByChapterResponse = qfCall {
-        api.getVersesByJuz(
-            juzNumber = juzNumber,
-            page = page,
-            perPage = perPage,
-            language = apiLanguage(),
-            translations = translationId.toString(),
-            audio = audioRecitationId
-        )
+    ): VersesByChapterResponse {
+        val language = apiLanguage()
+        val cacheKey = diskCache.verseCacheKey("juz", juzNumber, page, translationId, language)
+        return try {
+            qfCall {
+                api.getVersesByJuz(
+                    juzNumber = juzNumber,
+                    page = page,
+                    perPage = perPage,
+                    language = language,
+                    translations = translationId.toString(),
+                    audio = audioRecitationId
+                )
+            }.also { diskCache.saveVerses(cacheKey, it) }
+        } catch (e: QFError.Network) {
+            diskCache.loadVerses(cacheKey) ?: throw e
+        }
     }
 
     suspend fun getVerseByKey(
@@ -152,6 +217,7 @@ class ContentRepository @Inject constructor(
         chaptersCachedLanguage = null
         cachedJuzs = null
         juzsCachedAt = 0L
+        diskCache.clearAll()
     }
 
     fun currentApiLanguage(): String = apiLanguage()

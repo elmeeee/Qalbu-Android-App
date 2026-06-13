@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
+import app.kamy.qalbuApp.design.components.OfflineBanner
 import app.kamy.qalbuApp.ui.permissions.areAppNotificationsEnabled
 import app.kamy.qalbuApp.ui.permissions.canScheduleExactAlarms
 import app.kamy.qalbuApp.ui.permissions.hasAggressiveOemBatteryManagement
@@ -272,6 +273,18 @@ fun TodayScreen(
                         .weight(1f),
                     contentPadding = PaddingValues(bottom = listBottomPadding)
                 ) {
+                    if (prayerState.isOfflineData || todayState.isOfflineData) {
+                        item(key = "offline_banner") {
+                            OfflineBanner(
+                                message = if (prayerState.isOfflineData) {
+                                    stringResource(R.string.offline_banner_prayer)
+                                } else {
+                                    stringResource(R.string.offline_banner_message)
+                                },
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
                     item(key = "prayer_card") {
                         Spacer(Modifier.height(8.dp))
                         TodayPrayerMascotSection(

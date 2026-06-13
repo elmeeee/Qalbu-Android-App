@@ -16,6 +16,9 @@ import app.kamy.qalbuApp.infrastructure.preferences.LocationMode
 import app.kamy.qalbuApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.SavedManualLocation
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
+import app.kamy.qalbuApp.core.error.QFError
+import app.kamy.qalbuApp.infrastructure.cache.PrayerDayCache
+import app.kamy.qalbuApp.infrastructure.network.NetworkMonitor
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleCache
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
@@ -57,7 +60,8 @@ data class PrayerUiState(
     val showLocationSheet: Boolean = false,
     val locationQuery: String = "",
     val locationSaving: Boolean = false,
-    val locationSaveError: String? = null
+    val locationSaveError: String? = null,
+    val isOfflineData: Boolean = false
 )
 
 private data class ResolvedPrayerLocation(
@@ -161,9 +165,11 @@ class PrayerDashboardViewModel @Inject constructor(
                     gregorianLabel = result.gregorianLabel,
                     needsPermission = false,
                     isManualLocation = location.isManual,
-                    error = null
+                    error = null,
+                    isOfflineData = false
                 )
             }
+            PrayerDayCache.save(appContext, result)
             scheduleDayKey = dayKey()
             recomputeActiveAndCountdown()
             result.scheduleBundle?.let { bundle ->
@@ -181,7 +187,30 @@ class PrayerDashboardViewModel @Inject constructor(
                 )
             }
         } catch (t: Throwable) {
-            _state.update { it.copy(isLoading = false, error = t.toAppError()) }
+            val cached = if (t is QFError.Network || !NetworkMonitor.isOnline(appContext)) {
+                PrayerDayCache.load(appContext)
+            } else {
+                null
+            }
+            if (cached != null && cached.timings.isNotEmpty()) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        timings = cached.timings,
+                        cityName = cached.cityName ?: location.cityLabel,
+                        hijriLabel = cached.hijriLabel,
+                        gregorianLabel = cached.gregorianLabel,
+                        needsPermission = false,
+                        isManualLocation = location.isManual,
+                        error = null,
+                        isOfflineData = true
+                    )
+                }
+                scheduleDayKey = dayKey()
+                recomputeActiveAndCountdown()
+            } else {
+                _state.update { it.copy(isLoading = false, error = t.toAppError(), isOfflineData = false) }
+            }
         }
     }
 

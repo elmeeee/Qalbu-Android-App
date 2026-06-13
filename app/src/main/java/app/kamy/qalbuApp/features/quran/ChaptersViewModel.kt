@@ -1,5 +1,6 @@
 package app.kamy.qalbuApp.features.quran
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.core.error.AppError
@@ -11,10 +12,12 @@ import app.kamy.qalbuApp.domain.model.SearchNavResult
 import app.kamy.qalbuApp.domain.model.SearchVerseResult
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
+import app.kamy.qalbuApp.infrastructure.network.NetworkMonitor
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReadingSessionRepository
 import app.kamy.qalbuApp.infrastructure.repository.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,11 +45,13 @@ data class ChaptersUiState(
     val remoteVerses: List<SearchVerseResult> = emptyList(),
     val verseRef: VerseReference? = null,
     val searchLoading: Boolean = false,
-    val searchError: AppError? = null
+    val searchError: AppError? = null,
+    val isOfflineData: Boolean = false
 )
 
 @HiltViewModel
 class ChaptersViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val contentRepository: ContentRepository,
     private val searchRepository: SearchRepository,
     private val translationStore: TranslationPreferencesStore,
@@ -79,7 +84,8 @@ class ChaptersViewModel @Inject constructor(
                     isLoading = false,
                     chapters = chapters,
                     continueReading = continueReading,
-                    error = null
+                    error = null,
+                    isOfflineData = !NetworkMonitor.isOnline(appContext)
                 )
             }
             recomputeLocalSearch()
@@ -233,7 +239,8 @@ class ChaptersViewModel @Inject constructor(
             it.copy(
                 juzs = result.getOrDefault(emptyList()),
                 juzsLoading = false,
-                juzsError = result.exceptionOrNull()?.toAppError()
+                juzsError = result.exceptionOrNull()?.toAppError(),
+                isOfflineData = result.isSuccess && !NetworkMonitor.isOnline(appContext)
             )
         }
     }

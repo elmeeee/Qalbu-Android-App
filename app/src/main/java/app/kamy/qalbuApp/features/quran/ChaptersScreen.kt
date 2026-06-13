@@ -55,6 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.design.components.AlKhatibErrorState
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
+import app.kamy.qalbuApp.design.components.OfflineBanner
 import app.kamy.qalbuApp.design.components.ChapterRowSkeleton
 import app.kamy.qalbuApp.design.components.AlKhatibRevelationChip
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
@@ -207,6 +208,14 @@ fun ChaptersScreen(
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
                     )
+                    if (state.isOfflineData) {
+                        OfflineBanner(
+                            modifier = Modifier.padding(
+                                horizontal = AlKhatibSpacing.screenHorizontal,
+                                vertical = AlKhatibSpacing.sm
+                            )
+                        )
+                    }
                     key(state.browseMode) {
                     LazyColumn(
                         modifier = Modifier
