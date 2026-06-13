@@ -52,6 +52,7 @@ data class ChaptersUiState(
     val remoteNavigation: List<SearchNavResult> = emptyList(),
     val remoteVerses: List<SearchVerseResult> = emptyList(),
     val verseRef: VerseReference? = null,
+    val mushafPageRef: Int? = null,
     val searchLoading: Boolean = false,
     val searchError: AppError? = null,
     val isOfflineData: Boolean = false,
@@ -62,7 +63,7 @@ data class ChaptersUiState(
 
 @HiltViewModel
 class ChaptersViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val contentRepository: ContentRepository,
     private val searchRepository: SearchRepository,
     private val translationStore: TranslationPreferencesStore,
@@ -167,6 +168,7 @@ class ChaptersViewModel @Inject constructor(
                     remoteNavigation = emptyList(),
                     remoteVerses = emptyList(),
                     verseRef = null,
+                    mushafPageRef = null,
                     searchLoading = false,
                     searchError = null
                 )
@@ -189,7 +191,8 @@ class ChaptersViewModel @Inject constructor(
             _state.update {
                 it.copy(
                     localSearchChapters = emptyList(),
-                    verseRef = null
+                    verseRef = null,
+                    mushafPageRef = null
                 )
             }
             return
@@ -197,7 +200,8 @@ class ChaptersViewModel @Inject constructor(
         _state.update {
             it.copy(
                 localSearchChapters = s.chapters.searchChapters(query),
-                verseRef = parseVerseReference(query)
+                verseRef = parseVerseReference(query),
+                mushafPageRef = parseMushafPageQuery(query).takeIf { parseVerseReference(query) == null }
             )
         }
     }
@@ -207,7 +211,7 @@ class ChaptersViewModel @Inject constructor(
         searchJob?.cancel()
         if (!s.isSearchActive) return
         val query = s.searchQuery.normalizedSearchQuery()
-        if (query.length < 2 || s.verseRef != null) {
+        if (query.length < 2 || s.verseRef != null || s.mushafPageRef != null) {
             _state.update {
                 it.copy(
                     remoteNavigation = emptyList(),

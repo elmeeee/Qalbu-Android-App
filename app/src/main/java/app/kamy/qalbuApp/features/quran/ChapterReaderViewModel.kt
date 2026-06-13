@@ -85,7 +85,7 @@ enum class AyahPlaybackMode {
 
 @HiltViewModel
 class ChapterReaderViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val audioPlayer: AudioPlayerController,
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,

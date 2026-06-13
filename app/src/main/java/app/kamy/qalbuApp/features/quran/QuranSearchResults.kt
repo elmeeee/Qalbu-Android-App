@@ -184,6 +184,34 @@ fun VerseReferenceResultRow(
 }
 
 @Composable
+fun MushafPageResultRow(
+    page: Int,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onOpen,
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.mushaf_open_page_result, page),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            Text(
+                text = stringResource(R.string.mushaf_open_page_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = AlKhatibColors.Slate500
+            )
+        }
+    }
+}
+
+@Composable
 fun QuranSearchEmptyState(
     query: String,
     modifier: Modifier = Modifier

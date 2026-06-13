@@ -91,6 +91,7 @@ fun ChaptersScreen(
     val isSearching = state.isSearchActive && state.searchQuery.isNotBlank()
     val activeQuery = state.searchQuery.normalizedSearchQuery()
     val hasSearchResults = state.verseRef != null ||
+        state.mushafPageRef != null ||
         state.localSearchChapters.isNotEmpty() ||
         state.remoteNavigation.isNotEmpty() ||
         state.remoteVerses.isNotEmpty()
@@ -124,6 +125,12 @@ fun ChaptersScreen(
         if (state.mushafOpenFailed) {
             snackbarHostState.showSnackbar(mushafOpenFailedMsg)
             vm.clearMushafOpenFailed()
+        }
+    }
+
+    LaunchedEffect(state.browseMode) {
+        if (state.browseMode == QuranBrowseMode.MUSHAF) {
+            vm.onMushafVisible()
         }
     }
 
@@ -262,6 +269,22 @@ fun ChaptersScreen(
                                         reference = ref,
                                         chapter = vm.chapterForNumber(ref.chapter),
                                         onOpen = { chapter, ayah -> openVerse(chapter.id, ayah) },
+                                        modifier = Modifier.padding(
+                                            horizontal = AlKhatibSpacing.screenHorizontal,
+                                            vertical = 4.dp
+                                        )
+                                    )
+                                }
+                            }
+
+                            state.mushafPageRef?.let { page ->
+                                item(key = "mushaf_page_$page") {
+                                    MushafPageResultRow(
+                                        page = page,
+                                        onOpen = {
+                                            onOpenMushaf(page)
+                                            vm.clearSearch()
+                                        },
                                         modifier = Modifier.padding(
                                             horizontal = AlKhatibSpacing.screenHorizontal,
                                             vertical = 4.dp

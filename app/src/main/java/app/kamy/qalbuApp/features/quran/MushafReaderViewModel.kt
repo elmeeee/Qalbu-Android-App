@@ -43,7 +43,7 @@ data class MushafReaderUiState(
 
 @HiltViewModel
 class MushafReaderViewModel @Inject constructor(
-    @ApplicationContext private val appContext: Context,
+    @param:ApplicationContext private val appContext: Context,
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,
     private val translationStore: TranslationPreferencesStore,
@@ -83,14 +83,14 @@ class MushafReaderViewModel @Inject constructor(
 
     fun onPageChanged(page: Int) {
         val safe = page.coerceIn(1, MushafReadingStore.totalPages)
-        val alreadyOnPage = _state.value.currentPage == safe
+        if (safe == _state.value.currentPage && _state.value.pages[safe]?.lines?.isNotEmpty() == true) {
+            return
+        }
         if (_state.value.showSwipeHint) {
             dismissSwipeHint()
         }
-        if (!alreadyOnPage) {
-            _state.update { it.copy(currentPage = safe) }
-            MushafReadingStore.saveLastPage(appContext, safe)
-        }
+        _state.update { it.copy(currentPage = safe) }
+        MushafReadingStore.saveLastPage(appContext, safe)
         loadPage(safe)
     }
 
@@ -105,7 +105,20 @@ class MushafReaderViewModel @Inject constructor(
         _state.update { it.copy(showTranslation = next) }
     }
 
-    fun goToPage(page: Int) = onPageChanged(page)
+    fun retryPage(page: Int) {
+        val safe = page.coerceIn(1, MushafReadingStore.totalPages)
+        viewModelScope.launch {
+            loadMutex.withLock { pagesInFlight.remove(safe) }
+            _state.update { state ->
+                val existing = state.pages[safe]
+                if (existing?.lines?.isNotEmpty() == true) return@update state
+                state.copy(
+                    pages = state.pages + (safe to MushafPageState(isLoading = true, error = null))
+                )
+            }
+            loadPage(safe)
+        }
+    }
 
     private suspend fun resolveCloudOrLocalPage(): Int {
         val local = MushafReadingStore.lastPage(appContext)
@@ -153,12 +166,16 @@ class MushafReaderViewModel @Inject constructor(
                         }
                     )
                 }
-                logReadingPosition(verses)
+                if (_state.value.currentPage == page) {
+                    logReadingPosition(verses)
+                }
                 prefetchAdjacent(page)
             } catch (t: Throwable) {
-                _state.update {
-                    it.copy(
-                        pages = it.pages + (page to MushafPageState(
+                _state.update { state ->
+                    val existing = state.pages[page]
+                    if (existing?.lines?.isNotEmpty() == true) return@update state
+                    state.copy(
+                        pages = state.pages + (page to MushafPageState(
                             isLoading = false,
                             error = t.toAppError()
                         ))
