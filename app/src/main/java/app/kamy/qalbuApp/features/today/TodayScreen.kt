@@ -53,6 +53,7 @@ import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayHeader
 import app.kamy.qalbuApp.features.today.components.TodayPrayerMascotSection
 import app.kamy.qalbuApp.features.today.components.PrayerLocationSheet
+import app.kamy.qalbuApp.features.today.components.PrayerTrackerCard
 import app.kamy.qalbuApp.features.today.components.TodayReciterSheet
 import app.kamy.qalbuApp.features.today.components.TodayVerseOfDaySection
 import app.kamy.qalbuApp.infrastructure.preferences.LocationMode
@@ -73,8 +74,10 @@ fun TodayScreen(
 ) {
     val todayVm: TodayViewModel = hiltViewModel()
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
+    val trackerVm: PrayerTrackerViewModel = hiltViewModel()
     val todayState by todayVm.state.collectAsState()
     val prayerState by prayerVm.state.collectAsState()
+    val trackerState by trackerVm.state.collectAsState()
     val audioState by audioPlayer.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -157,7 +160,7 @@ fun TodayScreen(
         if (!onboardingComplete || locationPrompted) return@LaunchedEffect
         locationPrompted = true
         if (hasManualLocation) {
-            scope.launch { prayerVm.refresh() }
+            scope.launch { prayerVm.refresh(force = true) }
             requestNotificationsIfNeeded()
             return@LaunchedEffect
         }
@@ -174,14 +177,6 @@ fun TodayScreen(
         }
     }
 
-    LaunchedEffect(locationPermissions.allPermissionsGranted) {
-        if (!locationPrompted) return@LaunchedEffect
-        if (locationPermissions.allPermissionsGranted) {
-            prayerVm.onPermissionGranted()
-        }
-    }
-
-    // Exact alarms: API 33+ uses USE_EXACT_ALARM (auto-granted). API 31–32 may need one-time consent.
     LaunchedEffect(prayerState.timings.isNotEmpty(), exactAlarmPrompted) {
         if (exactAlarmPrompted || prayerState.timings.isEmpty()) return@LaunchedEffect
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return@LaunchedEffect
@@ -233,7 +228,7 @@ fun TodayScreen(
                     isPullRefreshing = true
                     runCatching {
                         coroutineScope {
-                            launch { prayerVm.refresh() }
+                            launch { prayerVm.refresh(force = true) }
                             launch { todayVm.refreshContent() }
                         }
                     }
@@ -289,10 +284,18 @@ fun TodayScreen(
                         Spacer(Modifier.height(8.dp))
                         TodayPrayerMascotSection(
                             state = prayerState,
-                            onRetry = { scope.launch { prayerVm.refresh() } },
+                            onRetry = { scope.launch { prayerVm.refresh(force = true) } },
                             onOpenCalendar = onOpenPrayerCalendar,
                             onOpenLocation = prayerVm::openLocationSheet,
                             modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+                    }
+
+                    item(key = "prayer_tracker") {
+                        PrayerTrackerCard(
+                            state = trackerState,
+                            onTogglePrayer = trackerVm::togglePrayer,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                         )
                     }
 

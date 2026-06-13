@@ -30,7 +30,8 @@ data class RandomAyahPayload(
     @SerialName("page_number") val pageNumber: Int? = null,
     @SerialName("juz_number") val juzNumber: Int? = null,
     val audio: AudioPayload? = null,
-    val translations: List<InlineTranslation>? = null
+    val translations: List<InlineTranslation>? = null,
+    val words: List<QuranWord>? = null
 ) {
     val resolvedVerseNumber: Int?
         get() {
@@ -87,6 +88,88 @@ data class InlineTranslation(
     val text: String? = null,
     val resourceName: String? = null
 )
+
+@Serializable
+data class QuranWord(
+    val id: Int? = null,
+    val position: Int? = null,
+    @SerialName("char_type_name") val charTypeName: String? = null,
+    @SerialName("line_number") val lineNumber: Int? = null,
+    @SerialName("page_number") val pageNumber: Int? = null,
+    @SerialName("text_uthmani") val textUthmani: String? = null,
+    @SerialName("text_uthmani_tajweed") val textUthmaniTajweed: String? = null,
+    @SerialName("code_v1") val codeV1: String? = null,
+    @SerialName("code_v2") val codeV2: String? = null,
+    val translation: WordTranslation? = null,
+    @SerialName("verse_key") val verseKey: String? = null
+) {
+    val displayText: String
+        get() = textUthmaniTajweed ?: textUthmani.orEmpty()
+
+    val isEndMarker: Boolean
+        get() = charTypeName == "end"
+}
+
+@Serializable
+data class WordTranslation(
+    val text: String? = null,
+    @SerialName("language_name") val languageName: String? = null
+)
+
+// ---- Mushaf pages ----
+
+@Serializable
+data class PagesLookupResponse(
+    @SerialName("lookup_range") val lookupRange: LookupRange? = null,
+    val pages: Map<String, PageInfo>? = null,
+    @SerialName("total_page") val totalPage: Int? = null
+)
+
+@Serializable
+data class LookupRange(
+    val from: String,
+    val to: String
+)
+
+@Serializable
+data class PageInfo(
+    val from: String,
+    val to: String,
+    @SerialName("first_verse_key") val firstVerseKey: String? = null,
+    @SerialName("last_verse_key") val lastVerseKey: String? = null
+)
+
+data class MushafLine(
+    val lineNumber: Int,
+    val words: List<QuranWord>
+)
+
+fun List<RandomAyahPayload>.groupIntoMushafLines(): List<MushafLine> {
+    val allWords = flatMap { verse ->
+        verse.words.orEmpty().map { word -> word }
+    }
+    if (allWords.isEmpty()) {
+        return mapIndexed { index, verse ->
+            MushafLine(
+                lineNumber = index + 1,
+                words = listOf(
+                    QuranWord(
+                        textUthmani = verse.textUthmaniTajweed ?: verse.textUthmani,
+                        textUthmaniTajweed = verse.textUthmaniTajweed,
+                        charTypeName = "word",
+                        verseKey = verse.verseKey
+                    )
+                )
+            )
+        }
+    }
+    return allWords
+        .groupBy { it.lineNumber ?: 0 }
+        .toSortedMap()
+        .map { (lineNum, words) ->
+            MushafLine(lineNumber = lineNum, words = words)
+        }
+}
 
 // ---- Tafsir ----
 

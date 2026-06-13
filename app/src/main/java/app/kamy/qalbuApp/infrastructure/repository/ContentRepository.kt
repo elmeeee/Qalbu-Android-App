@@ -3,6 +3,7 @@ package app.kamy.qalbuApp.infrastructure.repository
 import app.kamy.qalbuApp.core.error.QFError
 import app.kamy.qalbuApp.core.error.qfCall
 import app.kamy.qalbuApp.domain.model.HadithsByAyahResponse
+import app.kamy.qalbuApp.domain.model.PagesLookupResponse
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import app.kamy.qalbuApp.domain.model.QuranJuz
@@ -179,6 +180,72 @@ class ContentRepository @Inject constructor(
         }
     }
 
+    suspend fun getVersesByMushafPage(
+        mushafPage: Int,
+        apiPage: Int = 1,
+        perPage: Int = 50,
+        translationId: Int = selectedTranslationId(),
+        audioRecitationId: Int = translationStore.currentRecitationId(),
+        mushafId: Int = DEFAULT_MUSHAF_ID
+    ): VersesByChapterResponse {
+        val language = apiLanguage()
+        val cacheKey = diskCache.verseCacheKey("mushaf", mushafPage, apiPage, translationId, language)
+        return try {
+            qfCall {
+                api.getVersesByPage(
+                    pageNumber = mushafPage,
+                    language = language,
+                    mushaf = mushafId,
+                    translations = translationId.toString(),
+                    audio = audioRecitationId,
+                    page = apiPage,
+                    perPage = perPage
+                )
+            }.also { diskCache.saveVerses(cacheKey, it) }
+        } catch (e: QFError.Network) {
+            diskCache.loadVerses(cacheKey) ?: throw e
+        }
+    }
+
+    suspend fun getPagesLookup(
+        mushafId: Int = DEFAULT_MUSHAF_ID,
+        chapterNumber: Int? = null,
+        juzNumber: Int? = null,
+        pageNumber: Int? = null,
+        fromVerse: String? = null,
+        toVerse: String? = null
+    ): PagesLookupResponse = qfCall {
+        api.getPagesLookup(
+            mushaf = mushafId,
+            chapterNumber = chapterNumber,
+            juzNumber = juzNumber,
+            pageNumber = pageNumber,
+            from = fromVerse,
+            to = toVerse
+        )
+    }
+
+    suspend fun firstMushafPageForJuz(juzNumber: Int, mushafId: Int = DEFAULT_MUSHAF_ID): Int? {
+        val lookup = getPagesLookup(mushafId = mushafId, juzNumber = juzNumber)
+        return lookup.pages?.keys?.mapNotNull { it.toIntOrNull() }?.minOrNull()
+    }
+
+    suspend fun firstMushafPageForChapter(chapterNumber: Int, mushafId: Int = DEFAULT_MUSHAF_ID): Int? {
+        val lookup = getPagesLookup(mushafId = mushafId, chapterNumber = chapterNumber)
+        return lookup.pages?.keys?.mapNotNull { it.toIntOrNull() }?.minOrNull()
+    }
+
+    suspend fun mushafPageForVerse(
+        chapterNumber: Int,
+        verseNumber: Int,
+        mushafId: Int = DEFAULT_MUSHAF_ID
+    ): Int? = mushafPageForVerseKey("$chapterNumber:$verseNumber", mushafId)
+
+    suspend fun mushafPageForVerseKey(verseKey: String, mushafId: Int = DEFAULT_MUSHAF_ID): Int? {
+        val lookup = getPagesLookup(mushafId = mushafId, fromVerse = verseKey, toVerse = verseKey)
+        return lookup.pages?.keys?.mapNotNull { it.toIntOrNull() }?.minOrNull()
+    }
+
     suspend fun getVerseByKey(
         verseKey: String,
         translationId: Int = selectedTranslationId(),
@@ -208,7 +275,13 @@ class ContentRepository @Inject constructor(
         page: Int = 1,
         limit: Int = 5
     ): HadithsByAyahResponse = qfCall {
-        api.getHadithsByAyah(ayahKey, language = apiLanguage(), page = page, limit = limit)
+        val encodedKey = java.net.URLEncoder.encode(ayahKey, Charsets.UTF_8.name())
+        api.getHadithsByAyah(
+            ayahKey = encodedKey,
+            language = apiLanguage(),
+            page = page,
+            limit = limit
+        )
     }
 
     fun clearCache() {

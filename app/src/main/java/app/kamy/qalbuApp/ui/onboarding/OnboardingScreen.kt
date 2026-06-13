@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,10 +16,12 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -119,7 +123,13 @@ fun OnboardingScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !state.savingLocation
+                enabled = !state.savingLocation,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AlKhatibColors.GoldBright,
+                    contentColor = AlKhatibColors.DeepEmerald,
+                    disabledContainerColor = AlKhatibColors.GoldBright.copy(alpha = 0.4f),
+                    disabledContentColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.5f)
+                )
             ) {
                 Text(
                     when (state.step) {
@@ -131,7 +141,7 @@ fun OnboardingScreen(
                 )
             }
             if (state.step != OnboardingStep.WELCOME) {
-                OutlinedButton(
+                OnboardingSecondaryButton(
                     onClick = {
                         if (state.step == OnboardingStep.NOTIFICATIONS) {
                             vm.nextStep()
@@ -141,15 +151,15 @@ fun OnboardingScreen(
                             vm.nextStep()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    labelColor = AlKhatibColors.GoldBright
                 ) {
                     Text(
                         when (state.step) {
                             OnboardingStep.LOCATION -> stringResource(R.string.onboarding_skip_location)
                             OnboardingStep.NOTIFICATIONS -> stringResource(R.string.onboarding_skip_notifications)
                             else -> stringResource(R.string.onboarding_skip)
-                        },
-                        color = AlKhatibColors.GoldBright
+                        }
                     )
                 }
             }
@@ -207,11 +217,57 @@ private fun LocationStep(
         label = { Text(stringResource(R.string.location_city_hint)) },
         singleLine = true,
         isError = error != null,
-        supportingText = error?.let { { Text(it) } }
+        supportingText = error?.let { { Text(it, color = Color.White.copy(alpha = 0.85f)) } },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = Color.White,
+            unfocusedTextColor = Color.White,
+            focusedBorderColor = AlKhatibColors.GoldBright,
+            unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
+            focusedLabelColor = AlKhatibColors.GoldBright,
+            unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+            cursorColor = AlKhatibColors.GoldBright,
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            errorLabelColor = MaterialTheme.colorScheme.error,
+            errorSupportingTextColor = Color.White.copy(alpha = 0.9f)
+        )
     )
     Spacer(Modifier.height(8.dp))
-    OutlinedButton(onClick = onUseGps, modifier = Modifier.fillMaxWidth(), enabled = !saving) {
-        Text(stringResource(R.string.location_use_gps))
+    OnboardingSecondaryButton(
+        onClick = onUseGps,
+        modifier = Modifier.fillMaxWidth(),
+        enabled = !saving
+    ) {
+        if (saving) {
+            CircularProgressIndicator(
+                modifier = Modifier.height(20.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Text(stringResource(R.string.location_use_gps))
+        }
+    }
+}
+
+@Composable
+private fun OnboardingSecondaryButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    labelColor: Color = Color.White,
+    content: @Composable () -> Unit
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        border = BorderStroke(1.dp, labelColor.copy(alpha = if (enabled) 0.65f else 0.35f)),
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = labelColor,
+            disabledContentColor = labelColor.copy(alpha = 0.38f)
+        )
+    ) {
+        content()
     }
 }
 

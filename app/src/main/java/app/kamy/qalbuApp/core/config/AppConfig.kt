@@ -53,8 +53,10 @@ object AppConfig {
         const val resourcesTranslations = "resources/translations"
         fun versesByChapter(chapterNumber: Int) = "verses/by_chapter/$chapterNumber"
         fun versesByJuz(juzNumber: Int) = "verses/by_juz/$juzNumber"
+        fun versesByPage(pageNumber: Int) = "verses/by_page/$pageNumber"
+        const val pagesLookup = "pages/lookup"
         fun verseByKey(key: String) = "verses/by_key/$key"
-        fun hadithsByAyah(ayahKey: String) = "hadith_references/by_ayah/$ayahKey/hadiths"
+        fun hadithsByAyah(ayahKey: String) = "hadith-references/by-ayah/$ayahKey/hadiths"
         fun tafsirByAyah(resourceId: String, ayahKey: String) =
             "tafsirs/$resourceId/by_ayah/$ayahKey"
     }

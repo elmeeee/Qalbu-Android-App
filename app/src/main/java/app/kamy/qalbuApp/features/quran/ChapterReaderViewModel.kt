@@ -383,12 +383,6 @@ class ChapterReaderViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            _state.value.verses.find { it.verseKey == ayahKey }?.let { verse ->
-                shareComposer.prefetchShareTextIfNeeded(
-                    verse,
-                    verse.referenceLabel(chapterDisplayNameFor(verse))
-                )
-            }
             loadTafsir(ayahKey)
         }
     }

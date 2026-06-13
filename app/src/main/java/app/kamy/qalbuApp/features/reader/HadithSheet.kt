@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import app.kamy.qalbuApp.R
 import androidx.compose.ui.graphics.Color
@@ -68,7 +69,7 @@ fun HadithSheet(
                 icon = Icons.Filled.Forum,
                 subtitle = when {
                     isLoading -> null
-                    items.isNotEmpty() -> stringResource(R.plurals.hadith_count, items.size, items.size)
+                    items.isNotEmpty() -> pluralStringResource(R.plurals.hadith_count, items.size, items.size)
                     else -> null
                 }
             )

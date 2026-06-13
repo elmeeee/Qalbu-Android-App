@@ -12,6 +12,7 @@ import app.kamy.qalbuApp.domain.model.SearchNavResult
 import app.kamy.qalbuApp.domain.model.SearchVerseResult
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
+import app.kamy.qalbuApp.infrastructure.preferences.MushafReadingStore
 import app.kamy.qalbuApp.infrastructure.network.NetworkMonitor
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReadingSessionRepository
@@ -27,7 +28,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class QuranBrowseMode { SURAH, JUZ }
+enum class QuranBrowseMode { SURAH, JUZ, MUSHAF }
+
+data class MushafBrowseState(
+    val lastPage: Int = 1,
+    val pagesRead: Int = 0,
+    val progressFraction: Float = 0f,
+    val isCloudSynced: Boolean = false
+)
 
 data class ChaptersUiState(
     val isLoading: Boolean = false,
@@ -46,7 +54,10 @@ data class ChaptersUiState(
     val verseRef: VerseReference? = null,
     val searchLoading: Boolean = false,
     val searchError: AppError? = null,
-    val isOfflineData: Boolean = false
+    val isOfflineData: Boolean = false,
+    val mushafBrowse: MushafBrowseState = MushafBrowseState(),
+    val openingMushafJuz: Int? = null,
+    val mushafOpenFailed: Boolean = false
 )
 
 @HiltViewModel
@@ -66,6 +77,39 @@ class ChaptersViewModel @Inject constructor(
 
     init {
         loadAll()
+        refreshMushafBrowse()
+        viewModelScope.launch {
+            userSession.isSignedIn.collect { signedIn ->
+                if (signedIn) {
+                    syncCloudReadingToMushaf()
+                }
+                refresh(force = false)
+            }
+        }
+    }
+
+    private fun refreshMushafBrowse(isCloudSynced: Boolean = _state.value.mushafBrowse.isCloudSynced) {
+        _state.update {
+            it.copy(
+                mushafBrowse = MushafBrowseState(
+                    lastPage = MushafReadingStore.lastPage(appContext),
+                    pagesRead = MushafReadingStore.pagesReadCount(appContext),
+                    progressFraction = MushafReadingStore.progressFraction(appContext),
+                    isCloudSynced = isCloudSynced
+                )
+            )
+        }
+    }
+
+    private suspend fun syncCloudReadingToMushaf() {
+        val session = runCatching { readingSessions.fetchMostRecent() }.getOrNull() ?: return
+        val page = contentRepository.mushafPageForVerse(session.chapterNumber, session.verseNumber) ?: return
+        MushafReadingStore.saveLastPage(appContext, page, markRead = false)
+        refreshMushafBrowse(isCloudSynced = true)
+    }
+
+    fun onMushafVisible() {
+        refreshMushafBrowse()
     }
 
     fun loadAll(force: Boolean = false) {
@@ -79,6 +123,11 @@ class ChaptersViewModel @Inject constructor(
             val continueReading = if (userSession.isSignedIn.value) {
                 runCatching { readingSessions.fetchMostRecent() }.getOrNull()
             } else null
+            if (continueReading != null) {
+                syncCloudReadingToMushaf()
+            } else {
+                refreshMushafBrowse(isCloudSynced = false)
+            }
             _state.update {
                 it.copy(
                     isLoading = false,
@@ -219,13 +268,51 @@ class ChaptersViewModel @Inject constructor(
 
     fun setBrowseMode(mode: QuranBrowseMode) {
         _state.update { it.copy(browseMode = mode) }
-        if (mode == QuranBrowseMode.JUZ &&
-            _state.value.juzs.isEmpty() &&
-            !_state.value.juzsLoading &&
-            _state.value.juzsError == null
-        ) {
-            viewModelScope.launch { loadJuzs() }
+        when (mode) {
+            QuranBrowseMode.JUZ -> if (_state.value.juzs.isEmpty() && !_state.value.juzsLoading && _state.value.juzsError == null) {
+                viewModelScope.launch { loadJuzs() }
+            }
+            QuranBrowseMode.MUSHAF -> {
+                refreshMushafBrowse()
+                if (_state.value.juzs.isEmpty() && !_state.value.juzsLoading) {
+                    viewModelScope.launch { loadJuzs() }
+                }
+            }
+            QuranBrowseMode.SURAH -> Unit
         }
+    }
+
+    suspend fun resolveMushafPageForJuz(juzNumber: Int): Int? {
+        contentRepository.firstMushafPageForJuz(juzNumber)?.let { return it }
+        val start = resolveJuzStart(juzNumber) ?: return null
+        return contentRepository.mushafPageForVerse(start.first, start.second)
+    }
+
+    fun openMushafAtJuz(juzNumber: Int, onOpen: (Int) -> Unit) {
+        viewModelScope.launch {
+            _state.update { it.copy(openingMushafJuz = juzNumber, mushafOpenFailed = false) }
+            val page = runCatching { resolveMushafPageForJuz(juzNumber) }.getOrNull()
+            _state.update { it.copy(openingMushafJuz = null) }
+            if (page != null) {
+                onOpen(page)
+                clearSearch()
+            } else {
+                _state.update { it.copy(mushafOpenFailed = true) }
+            }
+        }
+    }
+
+    fun clearMushafOpenFailed() {
+        _state.update { it.copy(mushafOpenFailed = false) }
+    }
+
+    fun parseMushafPageQuery(query: String): Int? {
+        val trimmed = query.trim()
+        trimmed.toIntOrNull()?.let { return it.coerceIn(1, MushafReadingStore.totalPages) }
+        Regex("""(?:page|halaman|p)\s*(\d+)""", RegexOption.IGNORE_CASE)
+            .find(trimmed)?.groupValues?.getOrNull(1)?.toIntOrNull()
+            ?.let { return it.coerceIn(1, MushafReadingStore.totalPages) }
+        return null
     }
 
     fun reloadJuzs() {

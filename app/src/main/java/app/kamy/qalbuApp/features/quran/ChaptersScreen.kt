@@ -33,6 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -45,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -74,7 +76,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChaptersScreen(
     onOpenChapter: (chapter: QuranChapter, initialVerse: Int?) -> Unit,
-    onOpenJuz: (juzNumber: Int, verseKey: String?) -> Unit
+    onOpenJuz: (juzNumber: Int, verseKey: String?) -> Unit,
+    onOpenMushaf: (page: Int) -> Unit = {}
 ) {
     val vm: ChaptersViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
@@ -84,6 +87,7 @@ fun ChaptersScreen(
     val listBottomPadding = floatingNavBottomPadding()
     val errorDisplay = state.error.rememberErrorDisplay(R.string.chapters_load_failed)
     val snackbarHostState = remember { SnackbarHostState() }
+    val mushafOpenFailedMsg = stringResource(R.string.mushaf_open_juz_failed)
     val isSearching = state.isSearchActive && state.searchQuery.isNotBlank()
     val activeQuery = state.searchQuery.normalizedSearchQuery()
     val hasSearchResults = state.verseRef != null ||
@@ -104,13 +108,23 @@ fun ChaptersScreen(
             "juz" -> result.key.toIntOrNull()?.let { juzNumber ->
                 vm.openJuz(juzNumber, onOpenJuz)
             }
-            "page" -> Unit
+            "page" -> result.key.toIntOrNull()?.let { page ->
+                onOpenMushaf(page.coerceIn(1, app.kamy.qalbuApp.infrastructure.preferences.MushafReadingStore.totalPages))
+                vm.clearSearch()
+            }
             else -> result.chapterNumber?.let { openVerse(it, ayah = 1) }
         }
     }
 
     fun openVerseResult(result: SearchVerseResult) {
         openVerse(result.chapterNumber, result.ayahNumber)
+    }
+
+    LaunchedEffect(state.mushafOpenFailed) {
+        if (state.mushafOpenFailed) {
+            snackbarHostState.showSnackbar(mushafOpenFailedMsg)
+            vm.clearMushafOpenFailed()
+        }
     }
 
     Box(
@@ -286,6 +300,7 @@ fun ChaptersScreen(
                                         enabled = when (result.type) {
                                             "surah" -> result.chapterNumber != null
                                             "juz" -> result.key.toIntOrNull() != null
+                                            "page" -> result.key.toIntOrNull() != null
                                             else -> false
                                         },
                                         onClick = { openNavResult(result) },
@@ -389,6 +404,47 @@ fun ChaptersScreen(
                                     }
                                 }
                             }
+                            QuranBrowseMode.MUSHAF -> {
+                                item(key = "mushaf_hero") {
+                                    MushafHeroCard(
+                                        browse = state.mushafBrowse,
+                                        onContinue = { onOpenMushaf(state.mushafBrowse.lastPage) },
+                                        modifier = Modifier.padding(
+                                            horizontal = AlKhatibSpacing.screenHorizontal,
+                                            vertical = AlKhatibSpacing.sm
+                                        )
+                                    )
+                                }
+                                item(key = "mushaf_juz_label") {
+                                    Text(
+                                        text = stringResource(R.string.mushaf_juz_section_title),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(
+                                            horizontal = AlKhatibSpacing.screenHorizontal,
+                                            vertical = 8.dp
+                                        )
+                                    )
+                                }
+                                val mushafJuzs = if (state.juzs.isNotEmpty()) {
+                                    state.juzs
+                                } else {
+                                    (1..30).map { n -> QuranJuz(juzNumber = n, verseMapping = emptyMap()) }
+                                }
+                                items(mushafJuzs, key = { "mushaf_juz_${it.juzNumber}" }) { juz ->
+                                    MushafJuzShortcutRow(
+                                        juzNumber = juz.juzNumber,
+                                        isLoading = state.openingMushafJuz == juz.juzNumber,
+                                        onClick = { vm.openMushafAtJuz(juz.juzNumber, onOpenMushaf) },
+                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                    )
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                    )
+                                }
+                            }
                         }
                     }
                     }
@@ -448,6 +504,7 @@ private fun QuranListHeader(
         val defaultSubtitle = when (browseMode) {
             QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
             QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
+            QuranBrowseMode.MUSHAF -> stringResource(R.string.quran_subtitle_mushaf)
         }
         val noMatchesSubtitle = stringResource(R.string.no_matches)
         val oneSurahSubtitle = stringResource(R.string.one_surah_found)
@@ -526,7 +583,8 @@ private fun QuranBrowseTabs(
 ) {
     val surahLabel = stringResource(R.string.quran_tab_surah)
     val juzLabel = stringResource(R.string.quran_tab_juz)
-    val tabShape = RoundedCornerShape(24.dp)
+    val mushafLabel = stringResource(R.string.quran_tab_mushaf)
+    val tabShape = RoundedCornerShape(20.dp)
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(28.dp))
@@ -555,6 +613,13 @@ private fun QuranBrowseTabs(
                 label = juzLabel,
                 selected = browseMode == QuranBrowseMode.JUZ,
                 onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
+                modifier = Modifier.weight(1f),
+                shape = tabShape
+            )
+            QuranBrowseTab(
+                label = mushafLabel,
+                selected = browseMode == QuranBrowseMode.MUSHAF,
+                onClick = { onBrowseModeChange(QuranBrowseMode.MUSHAF) },
                 modifier = Modifier.weight(1f),
                 shape = tabShape
             )
@@ -590,12 +655,12 @@ private fun QuranBrowseTab(
                 }
             )
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
+            .padding(vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
             color = textColor
         )
@@ -718,7 +783,7 @@ private fun ChapterRow(
                     }
                     chapter.versesCount?.let { count ->
                         Text(
-                            text = stringResource(R.plurals.chapter_verse_count, count, count),
+                            text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -791,7 +856,7 @@ private fun JuzRow(
                 }
                 juz.versesCount?.let { count ->
                     Text(
-                        text = stringResource(R.plurals.juz_verse_count, count, count),
+                        text = pluralStringResource(R.plurals.juz_verse_count, count, count),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)

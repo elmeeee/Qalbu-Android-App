@@ -158,7 +158,6 @@ class TodayViewModel @Inject constructor(
                     )
                 }
                 DailyVerseSnapshotStore.save(appContext, verse, chapterName)
-                shareComposer.prefetchShareTextIfNeeded(verse, _state.value.verseReferenceLabel)
             }
         } catch (t: Throwable) {
             val offline = !NetworkMonitor.isOnline(appContext)
@@ -207,7 +206,6 @@ class TodayViewModel @Inject constructor(
             it.copy(showTafsir = true, tafsirLoading = true, tafsir = null, tafsirError = null)
         }
         viewModelScope.launch {
-            shareComposer.prefetchShareTextIfNeeded(verse, _state.value.verseReferenceLabel)
             loadTafsir(verseKey)
         }
     }

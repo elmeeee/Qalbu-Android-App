@@ -32,13 +32,6 @@ class VerseShareTextComposer @Inject constructor(
         shareHadithCache.clear()
     }
 
-    suspend fun prefetchShareTextIfNeeded(verse: RandomAyahPayload, referenceLabel: String?) {
-        val cacheKey = shareCacheKey(verse) ?: return
-        if (shareTextCache.containsKey(cacheKey)) return
-        shareTextCache[cacheKey] = prepareShareText(verse, referenceLabel)
-        trimCachesIfNeeded()
-    }
-
     fun cachedShareText(verse: RandomAyahPayload, referenceLabel: String?): String? =
         shareCacheKey(verse)?.let { shareTextCache[it]?.trim()?.takeIf { t -> t.isNotEmpty() } }
 

@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -93,6 +95,8 @@ class PrayerDashboardViewModel @Inject constructor(
     private var scheduleDayKey: String? = null
     private var dayRefreshInFlight = false
     private var lastResolvedLocation: ResolvedPrayerLocation? = null
+    private val refreshMutex = Mutex()
+    private var lastRefreshAtMs: Long = 0L
 
     init {
         viewModelScope.launch { refresh() }
@@ -112,7 +116,24 @@ class PrayerDashboardViewModel @Inject constructor(
         }
     }
 
-    suspend fun refresh() {
+    suspend fun refresh(force: Boolean = false) {
+        if (!force) {
+            val now = System.currentTimeMillis()
+            if (now - lastRefreshAtMs < REFRESH_COALESCE_MS) return
+        }
+        refreshMutex.withLock {
+            if (!force) {
+                val now = System.currentTimeMillis()
+                if (now - lastRefreshAtMs < REFRESH_COALESCE_MS) return
+                lastRefreshAtMs = now
+            } else {
+                lastRefreshAtMs = System.currentTimeMillis()
+            }
+            refreshInternal()
+        }
+    }
+
+    private suspend fun refreshInternal() {
         _state.update { it.copy(isLoading = true, error = null) }
         when (val resolved = resolveLocation()) {
             LocationResolveResult.NeedsPermission -> {
@@ -248,6 +269,7 @@ class PrayerDashboardViewModel @Inject constructor(
 
     fun onPermissionGranted() {
         locationPrefs.setMode(LocationMode.GPS)
+        if (_state.value.timings.isNotEmpty() && !_state.value.needsPermission) return
         viewModelScope.launch { refresh() }
     }
 
@@ -417,4 +439,8 @@ class PrayerDashboardViewModel @Inject constructor(
     }
 
     fun formatPrayerTime(date: Date): String = timeFormatter.format(date)
+
+    private companion object {
+        private const val REFRESH_COALESCE_MS = 8_000L
+    }
 }
