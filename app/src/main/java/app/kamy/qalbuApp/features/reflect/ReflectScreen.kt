@@ -65,9 +65,10 @@ import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.design.components.ReflectPostSkeleton
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
+import app.kamy.qalbuApp.domain.model.ReflectFeedPost
 import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
-import app.kamy.qalbuApp.domain.model.ReflectFeedPost
+import app.kamy.qalbuApp.ui.common.stripHtmlTags
 import coil.compose.AsyncImage
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import kotlinx.coroutines.launch
@@ -150,7 +151,7 @@ fun ReflectScreen(
                 reflectCommunity = reflectCommunity,
                 shareLabel = shareLabel,
                 onSharePost = { post ->
-                    val body = (post.body ?: "").replace(Regex("<[^>]+>"), "").trim()
+                    val body = (post.body ?: "").stripHtmlTags()
                     val verseKey = post.references?.firstOrNull()?.verseKey
                     val text = buildString {
                         append(body)
@@ -403,7 +404,7 @@ private fun ReelPostCard(
 
         // Body
         Text(
-            text = (post.body ?: "").replace(Regex("<[^>]+>"), "").trim(),
+            text = (post.body ?: "").stripHtmlTags(),
             color = Color.White,
             style = MaterialTheme.typography.bodyLarge
         )

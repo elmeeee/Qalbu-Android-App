@@ -8,6 +8,10 @@ import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.infrastructure.ai.AiReflectionRepository
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
+import app.kamy.qalbuApp.ui.common.sanitizeTajweedArabicHtml
+import app.kamy.qalbuApp.ui.common.stripHtmlTags
+import app.kamy.qalbuApp.ui.common.toReaderPlainText
+import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Calendar
 import java.util.Date
@@ -107,7 +111,7 @@ class VerseShareTextComposer @Inject constructor(
             runCatching {
                 contentRepository.getTafsirByAyah(resourceId = TAFSIR_RESOURCE_ID, ayahKey = ayahKey)
                     ?.text
-                    ?.stripHtml()
+                    ?.stripHtmlTags()
             }.getOrNull()
         }
         shareTafsirCache[ayahKey] = value.orEmpty()
@@ -147,7 +151,7 @@ class VerseShareTextComposer @Inject constructor(
         val languageRule = language.aiLanguageRule
         val duaOpener = strings.getString(R.string.share_dua_opener)
         val verseLabel = humanLabel(verse.verseKey, referenceLabel)
-        val translationText = translation.stripHtml()
+        val translationText = translation.orEmpty().toVerseTranslationPlainText()
         val arabicText = arabic?.trim().orEmpty()
         val tafsirText = tafsir?.replace("\n", " ")?.trim().orEmpty()
         val hadithText = hadith?.replace("\n", " ")?.trim().orEmpty()
@@ -212,7 +216,7 @@ class VerseShareTextComposer @Inject constructor(
             Then 1–2 short sentences (max 28 words). No headings or markdown.
 
             Verse: $verseLabel
-            Translation: ${translation.stripHtml().ifBlank { "N/A" }}
+            Translation: ${translation.orEmpty().toVerseTranslationPlainText().ifBlank { "N/A" }}
         """.trimIndent()
         return aiReflection.complete(system = system, user = user, temperature = 0.58)
             ?.let { humanizeAiOutput(it, language) }
@@ -227,7 +231,7 @@ class VerseShareTextComposer @Inject constructor(
         tafsir: String?,
         aiReflection: String?
     ): String? {
-        val cleanedTranslation = translation.stripHtml()
+        val cleanedTranslation = translation.orEmpty().toVerseTranslationPlainText()
         val cleanedArabic = arabic?.trim().orEmpty()
         val verseLabel = humanLabel(verseKey, referenceLabel)
         val aiBody = aiReflection?.trim().orEmpty()
@@ -245,7 +249,7 @@ class VerseShareTextComposer @Inject constructor(
         hadith: String?
     ): String {
         val verseLabel = humanLabel(verseKey, referenceLabel)
-        val cleanedTranslation = translation.stripHtml()
+        val cleanedTranslation = translation.orEmpty().toVerseTranslationPlainText()
         val cleanedArabic = arabic?.trim().orEmpty()
         val tafsirLine = tafsir?.trim().orEmpty()
         val reflectionBody = buildString {
@@ -550,15 +554,7 @@ class VerseShareTextComposer @Inject constructor(
                 .orEmpty()
         }
 
-        private fun String.toPlainArabic(): String = trim()
-            .replace(Regex("<[^>]+>"), "")
-            .replace(Regex("<p\\b[^>]*>", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("</p>", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("<div\\b[^>]*>", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("</div>", RegexOption.IGNORE_CASE), "")
-            .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), " ")
-            .replace(Regex("\\s+"), " ")
-            .trim()
+        private fun String.toPlainArabic(): String = sanitizeTajweedArabicHtml().stripHtmlTags()
 
         private fun formatHadithForPrompt(hadith: HadithReference, preferredLang: String): String {
             val body = hadith.hadith
@@ -571,18 +567,12 @@ class VerseShareTextComposer @Inject constructor(
                 hadith.hadithNumber?.takeIf { it.isNotBlank() }
             ).joinToString(" ")
             return buildString {
-                if (!body.isNullOrBlank()) append(body.stripHtml().take(350))
+                if (!body.isNullOrBlank()) append(body.toReaderPlainText().take(350))
                 if (citation.isNotBlank()) {
                     if (isNotEmpty()) append(" ")
                     append("($citation)")
                 }
             }.trim()
         }
-
-        private fun String?.stripHtml(): String =
-            this?.replace(Regex("<[^>]+>"), " ")
-                ?.replace(Regex("\\s+"), " ")
-                ?.trim()
-                .orEmpty()
     }
 }

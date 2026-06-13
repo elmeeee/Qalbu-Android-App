@@ -33,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,6 +56,7 @@ import kotlinx.coroutines.delay
 import java.util.Calendar
 
 private const val DATE_ALTERNATE_MS = 4_000L
+private const val DAY_ALTERNATE_MS = 4_000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +72,7 @@ fun TodayHeader(
     modifier: Modifier = Modifier
 ) {
     val greeting = rememberGreeting()
+    val dayName = rememberRotatingDayName()
     val canAlternate = !hijriLabel.isNullOrBlank() && !gregorianLabel.isNullOrBlank()
     var showHijri by remember(hijriLabel, gregorianLabel) { mutableStateOf(false) }
 
@@ -207,14 +210,23 @@ fun TodayHeader(
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 Spacer(Modifier.width(3.dp))
-                Text(
-                    text = stringResource(R.string.today_label),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    maxLines = 1,
-                    softWrap = false
-                )
+                AnimatedContent(
+                    targetState = dayName,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(280)) togetherWith
+                            fadeOut(animationSpec = tween(220))
+                    },
+                    label = "headerDay"
+                ) { name ->
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
             }
         }
 
@@ -274,6 +286,32 @@ private fun HeaderAvatar(
             }
         }
     }
+}
+
+@Composable
+private fun rememberRotatingDayName(): String {
+    val names = remember { weekdayNames(Calendar.getInstance()) }
+    var index by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(DAY_ALTERNATE_MS)
+            index = (index + 1) % names.size
+        }
+    }
+
+    return names[index]
+}
+
+private fun weekdayNames(calendar: Calendar): List<String> = when (calendar.get(Calendar.DAY_OF_WEEK)) {
+    Calendar.SUNDAY -> listOf("Minggu", "Ahad", "Sunday", "Al-Ahad")
+    Calendar.MONDAY -> listOf("Senin", "Isnin", "Monday", "Al-Itnayn")
+    Calendar.TUESDAY -> listOf("Selasa", "Selasa", "Tuesday", "Al-Thulatha")
+    Calendar.WEDNESDAY -> listOf("Rabu", "Rabu", "Wednesday", "Al-Arba")
+    Calendar.THURSDAY -> listOf("Kamis", "Khamis", "Thursday", "Al-Khamis")
+    Calendar.FRIDAY -> listOf("Jumat", "Jumaat", "Friday", "Al-Jumuah")
+    Calendar.SATURDAY -> listOf("Sabtu", "Sabtu", "Saturday", "Al-Sabt")
+    else -> listOf("Hari", "Hari", "Day", "Al-Yawm")
 }
 
 @Composable

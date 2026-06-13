@@ -1,6 +1,7 @@
 package app.kamy.qalbuApp.domain.share
 
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 
 data class VerseShareInput(
     val arabic: String,
@@ -17,8 +18,7 @@ object VerseShareText {
     ): VerseShareInput = VerseShareInput(
         arabic = verse.textUthmani?.trim().orEmpty(),
         translation = verse.translations?.firstOrNull()?.text
-            ?.replace(Regex("<[^>]+>"), "")
-            ?.trim()
+            ?.toVerseTranslationPlainText()
             .orEmpty(),
         reference = referenceLabel
             ?: verse.referenceLabel(null)

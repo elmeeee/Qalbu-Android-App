@@ -1,22 +1,5 @@
 package app.kamy.qalbuApp.ui.common
 
-import androidx.core.text.HtmlCompat
-
-fun String.toVerseTranslationPlainText(): String {
-    val trimmed = trim()
-    if (trimmed.isEmpty()) return ""
-    val decoded = if (looksLikeHtml()) {
-        HtmlCompat.fromHtml(trimmed, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
-    } else {
-        trimmed
-    }
-    return decoded
-        .replace('\u00A0', ' ')
-        .replace(Regex("[ \t]+"), " ")
-        .replace(Regex(" *\n+ *"), " ")
-        .trim()
-}
-
 fun String.sanitizeTajweedArabicHtml(): String {
     if (isBlank()) return ""
     return trim()

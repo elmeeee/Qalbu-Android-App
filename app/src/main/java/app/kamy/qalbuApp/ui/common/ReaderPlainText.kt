@@ -2,21 +2,30 @@ package app.kamy.qalbuApp.ui.common
 
 import androidx.core.text.HtmlCompat
 
-fun String.toReaderPlainText(): String {
+/** Decode API HTML (translations, tafsir, hadith, reflect posts) to plain text. */
+fun String.decodeHtmlEntities(): String {
     val trimmed = trim()
     if (trimmed.isEmpty()) return ""
-    val decoded = if (looksLikeHtml()) {
+    return if (looksLikeHtml()) {
         HtmlCompat.fromHtml(trimmed, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
     } else {
         trimmed
     }
-    return decoded
-        .replace('\u00A0', ' ')
-        .replace(Regex("[ \t]+"), " ")
-        .replace(Regex(" *\n *"), "\n")
-        .replace(Regex("\n{3,}"), "\n\n")
-        .trim()
 }
+
+fun String.toReaderPlainText(): String = decodeHtmlEntities()
+    .replace('\u00A0', ' ')
+    .replace(Regex("[ \t]+"), " ")
+    .replace(Regex(" *\n *"), "\n")
+    .replace(Regex("\n{3,}"), "\n\n")
+    .trim()
+
+/** Single-line plain text for verse translations in cards and readers. */
+fun String.toVerseTranslationPlainText(): String = decodeHtmlEntities()
+    .replace('\u00A0', ' ')
+    .replace(Regex("[ \t]+"), " ")
+    .replace(Regex(" *\n+ *"), " ")
+    .trim()
 
 fun String.stripHtmlTags(): String = toReaderPlainText()
 
