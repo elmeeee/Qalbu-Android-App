@@ -227,7 +227,7 @@
     <string name="prayer_calendar">Kalender sholat</string>
     <string name="prayer_calendar_load_failed">Gagal memuat kalender sholat</string>
     <string name="prayer_widget_title">Jadwal sholat</string>
-    <string name="prayer_widget_description">Jadwal sholat lengkap dengan hitung mundur</string>
+    <string name="prayer_widget_description">Strip jadwal sholat ringkas dengan hitung mundur</string>
     <string name="prayer_widget_empty">Buka Qalbu untuk memuat jadwal sholat</string>
     <string name="prayer_widget_next">Berikutnya: %1$s pukul %2$s</string>
     <string name="prayer_widget_grace">%1$s baru saja dimulai</string>

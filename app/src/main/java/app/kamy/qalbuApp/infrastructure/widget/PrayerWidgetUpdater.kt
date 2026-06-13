@@ -10,6 +10,11 @@ import app.kamy.qalbuApp.domain.model.PrayerType
 
 object PrayerWidgetUpdater {
 
+    private const val COLOR_ACTIVE = 0xFFD4AF37.toInt()
+    private const val COLOR_ACTIVE_LABEL = 0xFFE8D5A3.toInt()
+    private const val COLOR_INACTIVE = 0xFFFFFFFF.toInt()
+    private const val COLOR_INACTIVE_LABEL = 0xC7FFFFFF.toInt()
+
     fun updateAll(context: Context) {
         val appContext = context.applicationContext
         val manager = AppWidgetManager.getInstance(appContext)
@@ -25,31 +30,21 @@ object PrayerWidgetUpdater {
     internal fun buildViews(context: Context, snapshot: PrayerWidgetSnapshot?): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.prayer_times_widget)
         if (snapshot == null) {
-            views.setTextViewText(R.id.widget_brand, context.getString(R.string.app_name))
-            views.setTextViewText(R.id.widget_city, context.getString(R.string.prayer_schedule))
-            views.setTextViewText(R.id.widget_date_chip, "")
-            views.setTextViewText(R.id.widget_hijri, context.getString(R.string.prayer_widget_empty))
-            views.setTextViewText(R.id.widget_next_label, "")
-            views.setTextViewText(R.id.widget_next_name, "--")
-            views.setTextViewText(R.id.widget_countdown, "--:--:--")
-            views.setTextViewText(R.id.widget_next_time, "")
+            views.setTextViewText(R.id.widget_city, context.getString(R.string.app_name))
+            views.setTextViewText(R.id.widget_next_line, context.getString(R.string.prayer_widget_empty))
+            views.setTextViewText(R.id.widget_countdown, "--:--")
             bindSlot(views, PrayerType.FAJR, context.getString(R.string.prayer_fajr), "--:--", false)
             bindSlot(views, PrayerType.DHUHR, context.getString(R.string.prayer_dhuhr), "--:--", false)
             bindSlot(views, PrayerType.ASR, context.getString(R.string.prayer_asr), "--:--", false)
             bindSlot(views, PrayerType.MAGHRIB, context.getString(R.string.prayer_maghrib), "--:--", false)
             bindSlot(views, PrayerType.ISHA, context.getString(R.string.prayer_isha), "--:--", false)
         } else {
-            views.setTextViewText(R.id.widget_brand, snapshot.brandLabel)
             views.setTextViewText(R.id.widget_city, snapshot.cityLabel)
             views.setTextViewText(
-                R.id.widget_date_chip,
-                snapshot.gregorianLabel?.substringBefore("·")?.trim().orEmpty()
+                R.id.widget_next_line,
+                "${snapshot.nextPrayerName} · ${snapshot.nextPrayerTime}"
             )
-            views.setTextViewText(R.id.widget_hijri, snapshot.hijriLabel.orEmpty())
-            views.setTextViewText(R.id.widget_next_label, snapshot.nextPrayerLabel)
-            views.setTextViewText(R.id.widget_next_name, snapshot.nextPrayerName)
-            views.setTextViewText(R.id.widget_countdown, snapshot.countdown)
-            views.setTextViewText(R.id.widget_next_time, snapshot.nextPrayerTime)
+            views.setTextViewText(R.id.widget_countdown, snapshot.countdownCompact)
             snapshot.slots.forEach { slot ->
                 bindSlot(views, slot.type, slot.label, slot.time, slot.isActive)
             }
@@ -75,14 +70,11 @@ object PrayerWidgetUpdater {
         time: String,
         active: Boolean
     ) {
-        val (containerId, labelId, timeId) = slotIds(type)
+        val (_, labelId, timeId) = slotIds(type)
         views.setTextViewText(labelId, label)
         views.setTextViewText(timeId, time)
-        views.setInt(
-            containerId,
-            "setBackgroundResource",
-            if (active) R.drawable.widget_slot_active_background else R.drawable.widget_slot_background
-        )
+        views.setTextColor(labelId, if (active) COLOR_ACTIVE_LABEL else COLOR_INACTIVE_LABEL)
+        views.setTextColor(timeId, if (active) COLOR_ACTIVE else COLOR_INACTIVE)
     }
 
     private fun slotIds(type: PrayerType): Triple<Int, Int, Int> = when (type) {

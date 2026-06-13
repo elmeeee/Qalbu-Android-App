@@ -13,10 +13,12 @@ class PrayerTimesWidgetProvider : AppWidgetProvider() {
     ) {
         val snapshot = PrayerWidgetRenderer.snapshot(context)
         appWidgetIds.forEach { id ->
-            appWidgetManager.updateAppWidget(
-                id,
-                PrayerWidgetUpdater.buildViews(context, snapshot)
-            )
+            runCatching {
+                appWidgetManager.updateAppWidget(
+                    id,
+                    PrayerWidgetUpdater.buildViews(context, snapshot)
+                )
+            }
         }
     }
 

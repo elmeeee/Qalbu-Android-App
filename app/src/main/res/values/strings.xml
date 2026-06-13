@@ -315,7 +315,7 @@
     <string name="prayer_calendar">Prayer calendar</string>
     <string name="prayer_calendar_load_failed">Could not load prayer calendar</string>
     <string name="prayer_widget_title">Prayer times</string>
-    <string name="prayer_widget_description">Full daily prayer schedule with countdown</string>
+    <string name="prayer_widget_description">Compact prayer times strip with countdown</string>
     <string name="prayer_widget_empty">Open Qalbu to load prayer times</string>
     <string name="prayer_widget_next">Next: %1$s at %2$s</string>
     <string name="prayer_widget_grace">%1$s started recently</string>

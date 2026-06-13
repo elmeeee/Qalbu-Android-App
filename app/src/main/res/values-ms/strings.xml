@@ -227,7 +227,7 @@
     <string name="prayer_calendar">Kalendar solat</string>
     <string name="prayer_calendar_load_failed">Gagal memuatkan kalendar solat</string>
     <string name="prayer_widget_title">Waktu solat</string>
-    <string name="prayer_widget_description">Jadual solat penuh dengan kira detik</string>
+    <string name="prayer_widget_description">Strip waktu solat padat dengan kira detik</string>
     <string name="prayer_widget_empty">Buka Qalbu untuk memuatkan waktu solat</string>
     <string name="prayer_widget_next">Seterusnya: %1$s pada %2$s</string>
     <string name="prayer_widget_grace">%1$s baru bermula</string>

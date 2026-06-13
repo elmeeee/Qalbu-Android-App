@@ -24,6 +24,7 @@ data class PrayerWidgetSnapshot(
     val nextPrayerLabel: String,
     val nextPrayerName: String,
     val countdown: String,
+    val countdownCompact: String,
     val nextPrayerTime: String,
     val slots: List<PrayerWidgetSlot>
 )
@@ -49,6 +50,7 @@ object PrayerWidgetRenderer {
 
         val deltaMs = (next.fireAtMillis - now).coerceAtLeast(0L)
         val countdown = formatDuration(deltaMs)
+        val countdownCompact = formatDurationCompact(deltaMs)
         val timeLabel = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(next.fireAtMillis))
         val nextType = PrayerType.fromAladhanKey(next.name)
         val nextName = nextType?.let { prayerLabel(context, it) } ?: next.name
@@ -59,7 +61,7 @@ object PrayerWidgetRenderer {
             context.getString(R.string.prayer_widget_next_label)
         }
 
-        val nextPrayerTime = context.getString(R.string.prayer_widget_at_time, timeLabel)
+        val nextPrayerTime = timeLabel
 
         val slots = buildSlots(context, meta, nextType)
 
@@ -71,6 +73,7 @@ object PrayerWidgetRenderer {
             nextPrayerLabel = nextPrayerLabel,
             nextPrayerName = nextName,
             countdown = countdown,
+            countdownCompact = countdownCompact,
             nextPrayerTime = nextPrayerTime,
             slots = slots
         )
@@ -108,5 +111,17 @@ object PrayerWidgetRenderer {
         val minutes = (totalSeconds / 60) % 60
         val hours = totalSeconds / 3600
         return "%02d:%02d:%02d".format(hours, minutes, seconds)
+    }
+
+    private fun formatDurationCompact(durationMs: Long): String {
+        val totalSeconds = (durationMs / 1000L).coerceAtLeast(0L)
+        val seconds = totalSeconds % 60
+        val minutes = (totalSeconds / 60) % 60
+        val hours = totalSeconds / 3600
+        return if (hours > 0) {
+            "%d:%02d".format(hours, minutes)
+        } else {
+            "%02d:%02d".format(minutes, seconds)
+        }
     }
 }
