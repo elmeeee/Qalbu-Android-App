@@ -1,5 +1,6 @@
 package app.kamy.qalbuApp.infrastructure.network.api
 
+import app.kamy.qalbuApp.core.config.MushafConfig
 import app.kamy.qalbuApp.domain.model.ChaptersResponse
 import app.kamy.qalbuApp.domain.model.JuzsResponse
 import app.kamy.qalbuApp.domain.model.PagesLookupResponse
@@ -71,20 +72,20 @@ interface ContentApiService {
     suspend fun getVersesByPage(
         @Path("page_number") pageNumber: Int,
         @Query("language") language: String = "en",
-        @Query("mushaf") mushaf: Int = 1,
+        @Query("mushaf") mushaf: Int = MushafConfig.MUSHAF_ID,
         @Query("translations") translations: String = "22",
-        @Query("audio") audio: Int = 6,
-        @Query("fields") fields: String = "text_uthmani,text_uthmani_tajweed",
+        @Query("audio") audio: Int? = null,
+        @Query("fields") fields: String = MushafConfig.VERSE_FIELDS,
         @Query("translation_fields") translationFields: String = "resource_name",
         @Query("words") words: String = "true",
-        @Query("word_fields") wordFields: String = "text_uthmani,text_uthmani_tajweed,line_number,page_number,char_type_name",
+        @Query("word_fields") wordFields: String = MushafConfig.WORD_FIELDS,
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int = 50
     ): VersesByChapterResponse
 
     @GET("pages/lookup")
     suspend fun getPagesLookup(
-        @Query("mushaf") mushaf: Int = 1,
+        @Query("mushaf") mushaf: Int = MushafConfig.MUSHAF_ID,
         @Query("chapter_number") chapterNumber: Int? = null,
         @Query("juz_number") juzNumber: Int? = null,
         @Query("page_number") pageNumber: Int? = null,

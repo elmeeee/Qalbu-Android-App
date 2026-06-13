@@ -144,9 +144,12 @@ data class MushafLine(
     val words: List<QuranWord>
 )
 
-fun List<RandomAyahPayload>.groupIntoMushafLines(): List<MushafLine> {
+fun List<RandomAyahPayload>.groupIntoMushafLines(mushafPage: Int): List<MushafLine> {
     val allWords = flatMap { verse ->
-        verse.words.orEmpty().map { word -> word }
+        verse.words.orEmpty()
+            .filter { word ->
+                word.pageNumber == null || word.pageNumber == mushafPage
+            }
     }
     if (allWords.isEmpty()) {
         return mapIndexed { index, verse ->
@@ -157,7 +160,8 @@ fun List<RandomAyahPayload>.groupIntoMushafLines(): List<MushafLine> {
                         textUthmani = verse.textUthmaniTajweed ?: verse.textUthmani,
                         textUthmaniTajweed = verse.textUthmaniTajweed,
                         charTypeName = "word",
-                        verseKey = verse.verseKey
+                        verseKey = verse.verseKey,
+                        pageNumber = mushafPage
                     )
                 )
             )

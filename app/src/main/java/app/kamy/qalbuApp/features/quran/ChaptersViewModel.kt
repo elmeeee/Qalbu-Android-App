@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection")
+
 package app.kamy.qalbuApp.features.quran
 
 import android.content.Context

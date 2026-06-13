@@ -15,6 +15,7 @@ import app.kamy.qalbuApp.infrastructure.cache.ContentDiskCache
 import app.kamy.qalbuApp.infrastructure.network.api.ContentApiService
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
+import app.kamy.qalbuApp.core.config.MushafConfig
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
@@ -94,7 +95,7 @@ class ContentRepository @Inject constructor(
             }
         }
         try {
-            val response = qfCall { api.getJuzs(mushaf = DEFAULT_MUSHAF_ID) }
+            val response = qfCall { api.getJuzs(mushaf = MushafConfig.MUSHAF_ID) }
             val normalized = normalizeJuzs(response.juzs)
             cachedJuzs = normalized
             juzsCachedAt = now
@@ -117,7 +118,7 @@ class ContentRepository @Inject constructor(
         cachedJuzs?.find { it.juzNumber == juzNumber }?.let { return it }
         diskCache.loadJuz(juzNumber)?.let { return it }
         return try {
-            qfCall { api.getJuzById(juzNumber, mushaf = DEFAULT_MUSHAF_ID) }.juz?.also {
+            qfCall { api.getJuzById(juzNumber, mushaf = MushafConfig.MUSHAF_ID) }.juz?.also {
                 diskCache.saveJuz(it)
             }
         } catch (e: QFError.Network) {
@@ -188,15 +189,18 @@ class ContentRepository @Inject constructor(
 
     suspend fun getVersesByMushafPage(
         mushafPage: Int,
-        apiPage: Int = 1,
         perPage: Int = 50,
         translationId: Int = selectedTranslationId(),
-        audioRecitationId: Int = translationStore.currentRecitationId(),
-        mushafId: Int = DEFAULT_MUSHAF_ID,
+        mushafId: Int = MushafConfig.MUSHAF_ID,
         forceRefresh: Boolean = false
     ): VersesByChapterResponse {
         val language = apiLanguage()
-        val cacheKey = diskCache.verseCacheKey("mushaf", mushafPage, apiPage, translationId, language)
+        val cacheKey = diskCache.mushafVerseCacheKey(
+            mushafPage = mushafPage,
+            translationId = translationId,
+            language = language,
+            mushafId = mushafId
+        )
         if (!forceRefresh) {
             mushafVersesMemoryCache[cacheKey]?.let { return it }
             diskCache.loadVerses(cacheKey)?.let { cached ->
@@ -205,17 +209,13 @@ class ContentRepository @Inject constructor(
             }
         }
         return try {
-            qfCall {
-                api.getVersesByPage(
-                    pageNumber = mushafPage,
-                    language = language,
-                    mushaf = mushafId,
-                    translations = translationId.toString(),
-                    audio = audioRecitationId,
-                    page = apiPage,
-                    perPage = perPage
-                )
-            }.also { response ->
+            fetchMushafPageVerses(
+                mushafPage = mushafPage,
+                language = language,
+                translationId = translationId,
+                perPage = perPage,
+                preferredMushafId = mushafId
+            ).also { response ->
                 rememberMushafVerses(cacheKey, response)
                 diskCache.saveVerses(cacheKey, response)
             }
@@ -224,6 +224,75 @@ class ContentRepository @Inject constructor(
                 ?: diskCache.loadVerses(cacheKey)
                 ?: throw e
         }
+    }
+
+    private suspend fun fetchMushafPageVerses(
+        mushafPage: Int,
+        language: String,
+        translationId: Int,
+        perPage: Int,
+        preferredMushafId: Int
+    ): VersesByChapterResponse {
+        val mushafIds = buildList {
+            add(preferredMushafId)
+            MushafConfig.mushafFallbackIds.filter { it != preferredMushafId }.forEach(::add)
+        }
+        var lastError: QFError? = null
+        for (candidateMushafId in mushafIds) {
+            try {
+                return fetchMushafPageVersesForMushaf(
+                    mushafPage = mushafPage,
+                    language = language,
+                    translationId = translationId,
+                    perPage = perPage,
+                    mushafId = candidateMushafId
+                )
+            } catch (e: QFError.HttpStatus) {
+                if (e.code == 404 || e.code == 422) {
+                    lastError = e
+                    continue
+                }
+                throw e
+            }
+        }
+        throw lastError ?: QFError.Parsing("Unable to load mushaf page $mushafPage")
+    }
+
+    private suspend fun fetchMushafPageVersesForMushaf(
+        mushafPage: Int,
+        language: String,
+        translationId: Int,
+        perPage: Int,
+        mushafId: Int
+    ): VersesByChapterResponse {
+        val allVerses = mutableListOf<RandomAyahPayload>()
+        var apiPage = 1
+        var lastResponse: VersesByChapterResponse? = null
+        while (true) {
+            val response = qfCall {
+                api.getVersesByPage(
+                    pageNumber = mushafPage,
+                    language = language,
+                    mushaf = mushafId,
+                    translations = translationId.toString(),
+                    audio = null,
+                    page = apiPage,
+                    perPage = perPage
+                )
+            }
+            allVerses.addAll(response.verses)
+            lastResponse = response
+            val nextApiPage = response.pagination?.nextPage
+            if (nextApiPage == null || nextApiPage <= apiPage) break
+            apiPage = nextApiPage
+        }
+        if (allVerses.isEmpty()) {
+            throw QFError.Parsing("Mushaf page $mushafPage returned no verses (mushaf=$mushafId)")
+        }
+        return VersesByChapterResponse(
+            verses = allVerses,
+            pagination = lastResponse?.pagination
+        )
     }
 
     private fun rememberMushafVerses(cacheKey: String, response: VersesByChapterResponse) {
@@ -237,7 +306,7 @@ class ContentRepository @Inject constructor(
     }
 
     suspend fun getPagesLookup(
-        mushafId: Int = DEFAULT_MUSHAF_ID,
+        mushafId: Int = MushafConfig.MUSHAF_ID,
         chapterNumber: Int? = null,
         juzNumber: Int? = null,
         pageNumber: Int? = null,
@@ -260,7 +329,7 @@ class ContentRepository @Inject constructor(
         response
     }
 
-    suspend fun firstMushafPageForJuz(juzNumber: Int, mushafId: Int = DEFAULT_MUSHAF_ID): Int? {
+    suspend fun firstMushafPageForJuz(juzNumber: Int, mushafId: Int = MushafConfig.MUSHAF_ID): Int? {
         juzFirstPageCache[juzNumber]?.let { return it }
         resolveFirstPageFromJuzMapping(juzNumber)?.let { page ->
             juzFirstPageCache[juzNumber] = page
@@ -275,7 +344,7 @@ class ContentRepository @Inject constructor(
         return page
     }
 
-    suspend fun firstMushafPageForChapter(chapterNumber: Int, mushafId: Int = DEFAULT_MUSHAF_ID): Int? {
+    suspend fun firstMushafPageForChapter(chapterNumber: Int, mushafId: Int = MushafConfig.MUSHAF_ID): Int? {
         getChapters().find { it.id == chapterNumber }?.pages?.firstOrNull()?.let { return it }
         return getPagesLookup(mushafId = mushafId, chapterNumber = chapterNumber)
             .pages
@@ -287,10 +356,10 @@ class ContentRepository @Inject constructor(
     suspend fun mushafPageForVerse(
         chapterNumber: Int,
         verseNumber: Int,
-        mushafId: Int = DEFAULT_MUSHAF_ID
+        mushafId: Int = MushafConfig.MUSHAF_ID
     ): Int? = mushafPageForVerseKey("$chapterNumber:$verseNumber", mushafId)
 
-    suspend fun mushafPageForVerseKey(verseKey: String, mushafId: Int = DEFAULT_MUSHAF_ID): Int? =
+    suspend fun mushafPageForVerseKey(verseKey: String, mushafId: Int = MushafConfig.MUSHAF_ID): Int? =
         getPagesLookup(mushafId = mushafId, fromVerse = verseKey, toVerse = verseKey)
             .pages
             ?.keys
@@ -374,11 +443,6 @@ class ContentRepository @Inject constructor(
     }
 
     fun currentApiLanguage(): String = apiLanguage()
-
-    companion object {
-        /** QCF V2 (Uthmani) — avoids duplicate juz rows when the API returns multiple mushaf editions. */
-        private const val DEFAULT_MUSHAF_ID = 1
-    }
 }
 
 /** API may return one row per mushaf; keep a single entry per juz number (1–30). */

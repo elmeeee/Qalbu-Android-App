@@ -10,8 +10,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.core.text.HtmlCompat
 import app.kamy.qalbuApp.domain.model.QuranWord
 
-private val tajweedSpanRegex = Regex(
-    """<span\b[^>]*\bclass\s*=\s*['"]([^'"]+)['"][^>]*>([\s\S]*?)</span>|([^<]+)""",
+private val tajweedTagRegex = Regex(
+    """<(?:span|tajweed)\b[^>]*?\bclass\s*=\s*['"]?([^'">\s]+)['"]?[^>]*>([\s\S]*?)</(?:span|tajweed)>|([^<]+)""",
     RegexOption.IGNORE_CASE
 )
 
@@ -91,7 +91,7 @@ private fun AnnotatedString.Builder.appendTajweedHtml(html: String, baseColor: C
         .trim()
     if (normalized.isEmpty()) return
 
-    val matches = tajweedSpanRegex.findAll(normalized).toList()
+    val matches = tajweedTagRegex.findAll(normalized).toList()
     val hasColoredSpans = matches.any { it.groupValues[1].isNotEmpty() }
     if (!hasColoredSpans && normalized.looksLikeHtml()) {
         append(normalized.stripHtmlTags())
@@ -169,7 +169,7 @@ private fun easternArabicIndicDigits(value: Int): String {
 private fun tajweedColor(className: String, baseColor: Color): Color {
     val key = className.trim().lowercase().split("\\s+".toRegex()).firstOrNull().orEmpty()
     return when (key) {
-        "ham_wasl", "silent", "laam_shamsiya" -> Color(0xFFAAAAAA)
+        "ham_wasl", "silent", "laam_shamsiya", "laam_shamsiyah" -> Color(0xFFAAAAAA)
         "madda_normal" -> Color(0xFF537FFF)
         "madda_permissible" -> Color(0xFF4050FF)
         "madda_necessary" -> Color(0xFF000EBC)

@@ -200,9 +200,10 @@
     <string name="quran_tab_surah">Surah</string>
     <string name="quran_tab_juz">Juz</string>
     <string name="quran_tab_mushaf">Mushaf</string>
-    <string name="quran_subtitle_mushaf">604-page Medina mushaf — swipe to read</string>
+    <string name="quran_subtitle_mushaf">Madani mushaf with Tajweed colors — swipe to read</string>
     <string name="mushaf_page_label">Page %1$d of %2$d</string>
     <string name="mushaf_reader_title">Mushaf</string>
+    <string name="mushaf_tajweed_label">Madani · Tajweed</string>
     <string name="mushaf_open_page_result">Open mushaf page %1$d</string>
     <string name="mushaf_open_page_hint">Jump directly to this page in the mushaf reader</string>
     <string name="mushaf_load_failed">Could not load mushaf page</string>

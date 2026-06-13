@@ -233,6 +233,12 @@ private fun MushafReaderTopBar(
         }
         Column(Modifier.weight(1f)) {
             Text(
+                text = stringResource(R.string.mushaf_tajweed_label),
+                style = MaterialTheme.typography.labelSmall,
+                color = AlKhatibColors.GoldBright.copy(alpha = 0.75f),
+                fontWeight = FontWeight.Medium
+            )
+            Text(
                 text = stringResource(R.string.mushaf_reader_title),
                 style = MaterialTheme.typography.labelMedium,
                 color = AlKhatibColors.GoldBright.copy(alpha = 0.85f),

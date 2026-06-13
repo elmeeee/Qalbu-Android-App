@@ -2,20 +2,22 @@ package app.kamy.qalbuApp.infrastructure.preferences
 
 import android.content.Context
 
+import app.kamy.qalbuApp.core.config.MushafConfig
+
 object MushafReadingStore {
     private const val PREFS = "qalbu_mushaf_reading"
     private const val KEY_LAST_PAGE = "last_page"
     private const val KEY_PAGES_READ = "pages_read"
     private const val KEY_SWIPE_HINT_SEEN = "swipe_hint_seen"
-    private const val TOTAL_MUSHAF_PAGES = 604
+    private val totalMushafPages = MushafConfig.TOTAL_PAGES
 
     fun lastPage(context: Context): Int =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getInt(KEY_LAST_PAGE, 1)
-            .coerceIn(1, TOTAL_MUSHAF_PAGES)
+            .coerceIn(1, totalMushafPages)
 
     fun saveLastPage(context: Context, page: Int, markRead: Boolean = true) {
-        val safe = page.coerceIn(1, TOTAL_MUSHAF_PAGES)
+        val safe = page.coerceIn(1, totalMushafPages)
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putInt(KEY_LAST_PAGE, safe)
@@ -35,7 +37,7 @@ object MushafReadingStore {
             ?.size ?: 0
 
     fun progressFraction(context: Context): Float =
-        pagesReadCount(context).toFloat() / TOTAL_MUSHAF_PAGES.toFloat()
+        pagesReadCount(context).toFloat() / totalMushafPages.toFloat()
 
     fun hasSeenSwipeHint(context: Context): Boolean =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -48,5 +50,5 @@ object MushafReadingStore {
             .apply()
     }
 
-    const val totalPages: Int = TOTAL_MUSHAF_PAGES
+    const val totalPages: Int = MushafConfig.TOTAL_PAGES
 }

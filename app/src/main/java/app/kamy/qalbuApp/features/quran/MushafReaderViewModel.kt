@@ -116,7 +116,7 @@ class MushafReaderViewModel @Inject constructor(
                     pages = state.pages + (safe to MushafPageState(isLoading = true, error = null))
                 )
             }
-            loadPage(safe)
+            loadPage(safe, forceRefresh = true)
         }
     }
 
@@ -127,9 +127,9 @@ class MushafReaderViewModel @Inject constructor(
         return cloudPage ?: local
     }
 
-    private fun loadPage(page: Int) {
+    private fun loadPage(page: Int, forceRefresh: Boolean = false) {
         val cached = _state.value.pages[page]
-        if (cached?.lines?.isNotEmpty() == true) {
+        if (!forceRefresh && cached?.lines?.isNotEmpty() == true) {
             updatePageInfoLabel(page, cached.verses)
             prefetchAdjacent(page)
             return
@@ -137,7 +137,9 @@ class MushafReaderViewModel @Inject constructor(
         viewModelScope.launch {
             val shouldFetch = loadMutex.withLock {
                 if (page in pagesInFlight) return@withLock false
-                if (_state.value.pages[page]?.lines?.isNotEmpty() == true) return@withLock false
+                if (!forceRefresh && _state.value.pages[page]?.lines?.isNotEmpty() == true) {
+                    return@withLock false
+                }
                 pagesInFlight.add(page)
                 true
             }
@@ -148,9 +150,12 @@ class MushafReaderViewModel @Inject constructor(
                 it.copy(pages = it.pages + (page to existing.copy(isLoading = true, error = null)))
             }
             try {
-                val response = contentRepository.getVersesByMushafPage(mushafPage = page)
+                val response = contentRepository.getVersesByMushafPage(
+                    mushafPage = page,
+                    forceRefresh = forceRefresh
+                )
                 val verses = response.verses
-                val lines = verses.groupIntoMushafLines()
+                val lines = verses.groupIntoMushafLines(mushafPage = page)
                 _state.update {
                     it.copy(
                         pages = it.pages + (page to MushafPageState(

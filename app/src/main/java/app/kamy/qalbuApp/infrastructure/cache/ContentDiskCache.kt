@@ -1,6 +1,7 @@
 package app.kamy.qalbuApp.infrastructure.cache
 
 import android.content.Context
+import app.kamy.qalbuApp.core.config.MushafConfig
 import app.kamy.qalbuApp.domain.model.QuranChapter
 import app.kamy.qalbuApp.domain.model.QuranJuz
 import app.kamy.qalbuApp.domain.model.VersesByChapterResponse
@@ -54,6 +55,14 @@ class ContentDiskCache @Inject constructor(
 
     fun loadVerses(key: String): VersesByChapterResponse? =
         read<VersesByChapterResponse>(file("verses_$key.json"))
+
+    fun mushafVerseCacheKey(
+        mushafPage: Int,
+        translationId: Int,
+        language: String,
+        mushafId: Int
+    ): String =
+        "mushaf_v${MushafConfig.CACHE_VERSION}_m${mushafId}_${mushafPage}_t${translationId}_$language"
 
     fun verseCacheKey(
         scope: String,
