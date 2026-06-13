@@ -54,19 +54,19 @@ class ContentRepository @Inject constructor(
         val now = System.currentTimeMillis()
         if (!force) {
             cachedJuzs?.let {
-                if (now - juzsCachedAt < juzsTtlMs) return it
+                if (now - juzsCachedAt < juzsTtlMs) return normalizeJuzs(it)
             }
         }
-        val response = qfCall { api.getJuzs() }
-        val sorted = response.juzs.sortedBy { it.juzNumber }
-        cachedJuzs = sorted
+        val response = qfCall { api.getJuzs(mushaf = DEFAULT_MUSHAF_ID) }
+        val normalized = normalizeJuzs(response.juzs)
+        cachedJuzs = normalized
         juzsCachedAt = now
-        sorted
+        normalized
     }
 
     suspend fun getJuz(juzNumber: Int): QuranJuz? {
         cachedJuzs?.find { it.juzNumber == juzNumber }?.let { return it }
-        return qfCall { api.getJuzById(juzNumber) }.juz
+        return qfCall { api.getJuzById(juzNumber, mushaf = DEFAULT_MUSHAF_ID) }.juz
     }
 
     suspend fun getRandomAyah(
@@ -155,4 +155,18 @@ class ContentRepository @Inject constructor(
     }
 
     fun currentApiLanguage(): String = apiLanguage()
+
+    companion object {
+        /** QCF V2 (Uthmani) — avoids duplicate juz rows when the API returns multiple mushaf editions. */
+        private const val DEFAULT_MUSHAF_ID = 1
+    }
 }
+
+/** API may return one row per mushaf; keep a single entry per juz number (1–30). */
+private fun normalizeJuzs(juzs: List<QuranJuz>): List<QuranJuz> =
+    juzs
+        .asSequence()
+        .filter { it.juzNumber in 1..30 }
+        .groupBy { it.juzNumber }
+        .map { (_, group) -> group.maxByOrNull { it.verseMapping.size } ?: group.first() }
+        .sortedBy { it.juzNumber }

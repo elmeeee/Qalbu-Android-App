@@ -187,8 +187,8 @@ dependencies {
     implementation(libs.coil.compose)
 
     // Debug network inspector — ProwlKit (debug builds only)
-    // debugImplementation(libs.prowl)
-    // debugImplementation(libs.prowl.grpc)
+    debugImplementation(libs.prowl)
+    debugImplementation(libs.prowl.grpc)
 
     // Test
     testImplementation(libs.junit)

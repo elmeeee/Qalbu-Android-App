@@ -61,6 +61,10 @@ class ContentTokenManager @Inject constructor(
         oauthClient.newCall(req).execute().use { resp ->
             val body = resp.body?.string().orEmpty()
             if (!resp.isSuccessful) {
+                storage.remove(
+                    SecureTokenStorage.Keys.CONTENT_ACCESS_TOKEN,
+                    SecureTokenStorage.Keys.CONTENT_ACCESS_EXPIRY
+                )
                 throw QFError.HttpStatus(resp.code, body)
             }
             val token = try {

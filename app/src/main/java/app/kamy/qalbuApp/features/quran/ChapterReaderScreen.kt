@@ -57,7 +57,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -112,9 +111,8 @@ fun ChapterReaderScreen(
     // Pager requires pageCount > 0; verses may be empty while the first page is loading.
     val verseCount = state.verses.size
     val pagerState = rememberPagerState(initialPage = 0) { verseCount.coerceAtLeast(1) }
-    val currentVerse by remember {
-        derivedStateOf { state.verses.getOrNull(pagerState.currentPage.coerceIn(0, (verseCount - 1).coerceAtLeast(0))) }
-    }
+    val pageIndex = pagerState.currentPage.coerceIn(0, (verseCount - 1).coerceAtLeast(0))
+    val currentVerse = state.verses.getOrNull(pageIndex)
     val surahTitle = when {
         state.juzNumber != null -> {
             val chapterNum = currentVerse?.chapterNumber
@@ -323,13 +321,25 @@ fun ChapterReaderScreen(
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(6.dp))
-                val ayahNo = verse.resolvedVerseNumber
-                val juzNo = verse.juzNumber
-                val ayahLabel = ayahNo?.let { stringResource(R.string.ayah_number, it) }
-                    ?: stringResource(R.string.ayah_label, "—")
-                val juzLabel = juzNo?.let { stringResource(R.string.juz_number, it) }
+                val subtitle = if (state.juzNumber != null) {
+                    val verseLabel = currentVerse?.displayVerseReference?.let { ref ->
+                        stringResource(R.string.verse_key_label, ref)
+                    } ?: currentVerse?.resolvedVerseNumber?.let { num ->
+                        stringResource(R.string.verse_number, num)
+                    } ?: stringResource(R.string.verse_label, "—")
+                    listOfNotNull(
+                        verseLabel,
+                        state.juzNumber?.let { stringResource(R.string.juz_number, it) }
+                    ).joinToString(" · ")
+                } else {
+                    currentVerse?.resolvedVerseNumber?.let { num ->
+                        stringResource(R.string.verse_number, num)
+                    } ?: currentVerse?.displayVerseReference?.let { ref ->
+                        stringResource(R.string.verse_key_label, ref)
+                    } ?: stringResource(R.string.verse_label, "—")
+                }
                 Text(
-                    text = listOfNotNull(ayahLabel, juzLabel).joinToString(" · "),
+                    text = subtitle,
                     style = MaterialTheme.typography.labelLarge,
                     color = AlKhatibColors.Slate500,
                     maxLines = 1,

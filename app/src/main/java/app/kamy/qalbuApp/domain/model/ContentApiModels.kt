@@ -15,8 +15,8 @@ data class SingleVerseResponse(val verse: RandomAyahPayload? = null)
 data class RandomAyahPayload(
     val id: Int? = null,
     @SerialName("chapter_id") val chapterId: Int? = null,
-    val verseNumber: Int? = null,
-    val verseKey: String? = null,
+    @SerialName("verse_number") val verseNumber: Int? = null,
+    @SerialName("verse_key") val verseKey: String? = null,
     val textIndopak: String? = null,
     val textImlaeiSimple: String? = null,
     val textImlaei: String? = null,
@@ -27,17 +27,27 @@ data class RandomAyahPayload(
     val textQpcNastaleeqHafs: String? = null,
     val textQpcNastaleeq: String? = null,
     val textIndopakNastaleeq: String? = null,
-    val pageNumber: Int? = null,
-    val juzNumber: Int? = null,
+    @SerialName("page_number") val pageNumber: Int? = null,
+    @SerialName("juz_number") val juzNumber: Int? = null,
     val audio: AudioPayload? = null,
     val translations: List<InlineTranslation>? = null
 ) {
     val resolvedVerseNumber: Int?
         get() {
-            verseNumber?.let { if (it > 0) return it }
-            val tail = verseKey?.substringAfterLast(':', missingDelimiterValue = "") ?: return null
-            return tail.toIntOrNull()?.takeIf { it > 0 }
+            verseKey?.substringAfterLast(':', missingDelimiterValue = "")
+                ?.trim()
+                ?.toIntOrNull()
+                ?.takeIf { it > 0 }
+                ?.let { return it }
+            return verseNumber?.takeIf { it > 0 }
         }
+
+    /** Surah-local reference, e.g. "1:2" — stable across juz boundaries. */
+    val displayVerseReference: String?
+        get() = verseKey?.takeIf { it.isNotBlank() }
+            ?: chapterNumber?.let { chapter ->
+                resolvedVerseNumber?.let { verse -> "$chapter:$verse" }
+            }
 
     val listIdentity: String
         get() = when {
@@ -205,9 +215,6 @@ data class QuranChapter(
 
     val displayTitle: String
         get() = displayTranslatedName.takeIf { it.isNotEmpty() } ?: displayComplexName
-
-    val versesCountLabel: String?
-        get() = versesCount?.let { if (it == 1) "1 ayah" else "$it ayahs" }
 
     val revelationLabel: String
         get() {

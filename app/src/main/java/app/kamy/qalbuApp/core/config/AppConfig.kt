@@ -17,8 +17,8 @@ object AppConfig {
         BuildConfig.QF_OAUTH_CLIENT_SECRET.ifBlank { null }
     val qfOauthScopes: String = BuildConfig.QF_OAUTH_SCOPES
 
-    // ---- Client-credentials token (content + search APIs) ----
-    const val qfClientCredentialsScopes = "content search"
+    // Client-credentials token for Content API (chapters, verses, juz, etc.)
+    const val qfClientCredentialsScopes = "content"
 
     // ---- Content settings ----
     val defaultTranslationId: Int = BuildConfig.QF_DEFAULT_TRANSLATION_ID

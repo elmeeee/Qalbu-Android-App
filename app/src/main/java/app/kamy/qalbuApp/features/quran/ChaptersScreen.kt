@@ -356,7 +356,7 @@ fun ChaptersScreen(
                                         if (juzErrorDisplay != null) {
                                             AlKhatibErrorState(
                                                 display = juzErrorDisplay,
-                                                onRetry = { vm.loadAll(force = true) },
+                                                onRetry = { vm.reloadJuzs() },
                                                 modifier = Modifier.padding(
                                                     horizontal = AlKhatibSpacing.screenHorizontal,
                                                     vertical = 24.dp
@@ -366,7 +366,7 @@ fun ChaptersScreen(
                                     }
                                 }
                                 else -> {
-                                    items(state.juzs, key = { "juz_${it.juzNumber}_${it.id}" }) { juz ->
+                                    items(state.juzs, key = { "juz_${it.juzNumber}" }) { juz ->
                                         JuzRow(
                                             juz = juz,
                                             chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
@@ -569,7 +569,7 @@ private fun ContinueReadingCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = stringResource(R.string.ayah_number, session.verseNumber),
+                    text = stringResource(R.string.verse_number, session.verseNumber),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -634,9 +634,9 @@ private fun ChapterRow(
                             isMeccan = chapter.isMeccan
                         )
                     }
-                    chapter.versesCountLabel?.let {
+                    chapter.versesCount?.let { count ->
                         Text(
-                            text = it,
+                            text = stringResource(R.plurals.chapter_verse_count, count, count),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -672,7 +672,7 @@ private fun JuzRow(
     val startLabel = start?.let { (chapterNumber, ayah) ->
         val surahName = chapter?.displayComplexName
             ?: stringResource(R.string.surah_number, chapterNumber)
-        "$surahName · ${stringResource(R.string.ayah_number, ayah)}"
+        "$surahName · ${stringResource(R.string.verse_number, ayah)}"
     }
     Surface(
         onClick = onClick,
@@ -709,7 +709,7 @@ private fun JuzRow(
                 }
                 juz.versesCount?.let { count ->
                     Text(
-                        text = stringResource(R.string.juz_verses_count, count),
+                        text = stringResource(R.plurals.juz_verse_count, count, count),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)

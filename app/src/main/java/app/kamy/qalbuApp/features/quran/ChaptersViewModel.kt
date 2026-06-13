@@ -16,8 +16,6 @@ import app.kamy.qalbuApp.infrastructure.repository.ReadingSessionRepository
 import app.kamy.qalbuApp.infrastructure.repository.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -72,28 +70,19 @@ class ChaptersViewModel @Inject constructor(
     suspend fun refresh(force: Boolean = true) {
         _state.update { it.copy(isLoading = true, error = null) }
         try {
-            coroutineScope {
-                val chaptersDeferred = async { contentRepository.getChapters(force) }
-                val juzsDeferred = async { runCatching { contentRepository.getJuzs(force) } }
-                val continueDeferred = async {
-                    if (userSession.isSignedIn.value) {
-                        runCatching { readingSessions.fetchMostRecent() }.getOrNull()
-                    } else null
-                }
-                _state.update { it.copy(juzsLoading = true, juzsError = null) }
-                val juzsResult = juzsDeferred.await()
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        chapters = chaptersDeferred.await(),
-                        juzs = juzsResult.getOrDefault(emptyList()),
-                        juzsLoading = false,
-                        juzsError = juzsResult.exceptionOrNull()?.toAppError(),
-                        continueReading = continueDeferred.await()
-                    )
-                }
-                recomputeLocalSearch()
+            val chapters = contentRepository.getChapters(force)
+            val continueReading = if (userSession.isSignedIn.value) {
+                runCatching { readingSessions.fetchMostRecent() }.getOrNull()
+            } else null
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    chapters = chapters,
+                    continueReading = continueReading,
+                    error = null
+                )
             }
+            recomputeLocalSearch()
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.toAppError()) }
         }
@@ -233,9 +222,13 @@ class ChaptersViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadJuzs() {
+    fun reloadJuzs() {
+        viewModelScope.launch { loadJuzs(force = true) }
+    }
+
+    private suspend fun loadJuzs(force: Boolean = false) {
         _state.update { it.copy(juzsLoading = true, juzsError = null) }
-        val result = runCatching { contentRepository.getJuzs(force = false) }
+        val result = runCatching { contentRepository.getJuzs(force) }
         _state.update {
             it.copy(
                 juzs = result.getOrDefault(emptyList()),

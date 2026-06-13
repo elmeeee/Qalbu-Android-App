@@ -198,16 +198,19 @@
     <string name="quran_tab_surah">Surah</string>
     <string name="quran_tab_juz">Juz</string>
     <string name="juz_load_failed">Couldn\'t load juz list</string>
-    <string name="juz_verses_count">%1$d ayahs</string>
+    <string name="juz_verses_count">%1$d verses</string>
     <string name="juz_starts_at">Starts at %1$s</string>
     <string name="one_surah_found">1 surah found</string>
     <string name="surahs_found">%1$d surahs found</string>
     <string name="continue_reading">Continue reading</string>
     <string name="surah_number">Surah %1$d</string>
-    <string name="ayah_number">Ayah %1$d</string>
-    <string name="ayah_label">Ayah %1$s</string>
+    <string name="verse_number">Verse %1$d</string>
+    <string name="verse_key_label">Verse %1$s</string>
+    <string name="verse_label">Verse %1$s</string>
+    <string name="ayah_number">Verse %1$d</string>
+    <string name="ayah_label">Verse %1$s</string>
     <string name="no_matches">No matches</string>
-    <string name="search_surah_placeholder">Search surah, ayah, or keyword…</string>
+    <string name="search_surah_placeholder">Search surah, verse, or keyword…</string>
     <string name="search_section_surahs">Surahs</string>
     <string name="search_section_navigation">Go to</string>
     <string name="search_section_verses">Verses</string>
@@ -216,7 +219,7 @@
     <string name="search_result_juz">Juz</string>
     <string name="search_results_found">%1$d results</string>
     <string name="quran_search_failed">Search failed</string>
-    <string name="verse_reference_result">Surah %1$d · Ayah %2$d</string>
+    <string name="verse_reference_result">Surah %1$d · Verse %2$d</string>
     <string name="verse_reference_unavailable">Chapter not loaded yet</string>
     <string name="search_empty_message">Nothing matches “%1$s”. Try a surah number, Arabic name, or “Makkah” / “Madinah”.</string>
     <string name="reading_settings">Reading settings</string>
@@ -336,7 +339,7 @@
     <string name="this_verse">This verse</string>
     <string name="commentary">Commentary</string>
     <string name="tafsir_empty_detail">This verse doesn\'t include tafsir text for this source yet.</string>
-    <string name="hadith_empty_detail">No hadith references are linked to this ayah yet.</string>
+    <string name="hadith_empty_detail">No hadith references are linked to this verse yet.</string>
     <string name="hadith_book_number">Book %1$s</string>
     <string name="juz_number">Juz %1$d</string>
     <string name="ai_label">AI</string>
@@ -359,7 +362,7 @@
     <!-- AI share draft -->
     <string name="share_allah_says">قَالَ اللَّهُ تَعَالَى</string>
     <string name="share_verse_ref">(%1$s)</string>
-    <string name="share_fallback_reflection">This ayah reminds me to slow down and check my heart before I speak or act.</string>
+    <string name="share_fallback_reflection">This verse reminds me to slow down and check my heart before I speak or act.</string>
     <string name="share_guaranteed_intro">This verse stayed with me today.</string>
     <string name="share_dua_opener">🤲 Ya Allah,</string>
     <string name="share_hashtags">#QuranReminder #ReadReflectShare</string>
@@ -367,5 +370,15 @@
     <plurals name="hadith_count">
         <item quantity="one">%d hadith</item>
         <item quantity="other">%d hadiths</item>
+    </plurals>
+
+    <plurals name="chapter_verse_count">
+        <item quantity="one">1 verse</item>
+        <item quantity="other">%d verses</item>
+    </plurals>
+
+    <plurals name="juz_verse_count">
+        <item quantity="one">1 verse</item>
+        <item quantity="other">%d verses</item>
     </plurals>
 </resources>

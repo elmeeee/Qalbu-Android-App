@@ -117,34 +117,44 @@ class TodayViewModel @Inject constructor(
         _state.update { it.copy(isLoading = true, error = null) }
         try {
             coroutineScope {
-                val verseDeferred = async { runCatching { contentRepository.getRandomAyah() }.getOrNull() }
-                val chaptersDeferred = async { runCatching { contentRepository.getChapters() }.getOrDefault(emptyList()) }
+                val verseDeferred = async { contentRepository.getRandomAyah() }
+                val chaptersDeferred = async { contentRepository.getChapters() }
                 val recitationsDeferred = async {
                     if (_state.value.recitations.isEmpty()) {
-                        runCatching { contentRepository.getRecitations() }.getOrDefault(emptyList())
+                        contentRepository.getRecitations()
                     } else {
                         _state.value.recitations
                     }
                 }
                 val verse = verseDeferred.await()
                 val chapters = chaptersDeferred.await()
-                val chapterName = verse?.chapterNumber?.let { num ->
+                val recitations = recitationsDeferred.await()
+                if (verse == null) {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            verse = null,
+                            verseReferenceLabel = null,
+                            recitations = recitations,
+                            error = AppError(AppErrorKind.NotFound)
+                        )
+                    }
+                    return@coroutineScope
+                }
+                val chapterName = verse.chapterNumber?.let { num ->
                     chapters.find { it.id == num }?.displayComplexName
                 }
-                val recitations = recitationsDeferred.await()
                 _state.update {
                     it.copy(
                         isLoading = false,
                         verse = verse,
-                        verseReferenceLabel = verse?.referenceLabel(chapterName),
+                        verseReferenceLabel = verse.referenceLabel(chapterName),
                         recitations = recitations,
-                        error = if (verse == null) AppError(AppErrorKind.NotFound) else null
+                        error = null
                     )
                 }
-                verse?.let { v ->
-                    DailyVerseSnapshotStore.save(appContext, v, chapterName)
-                    shareComposer.prefetchShareTextIfNeeded(v, _state.value.verseReferenceLabel)
-                }
+                DailyVerseSnapshotStore.save(appContext, verse, chapterName)
+                shareComposer.prefetchShareTextIfNeeded(verse, _state.value.verseReferenceLabel)
             }
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.toAppError()) }

@@ -19,5 +19,6 @@ RELEASE_KEY_ALIAS=qalbu
 RELEASE_KEY_PASSWORD=
 
 # Note: User OAuth scopes (build.gradle QF_OAUTH_SCOPES) must include `reading_session` for continue-reading.
-# Client-credentials scopes (AppConfig.qfClientCredentialsScopes) must include `search` for the Search API.
+# Client-credentials scopes (AppConfig.qfClientCredentialsScopes) must include `content` for chapters/verses.
+# Search API uses the same content token — do not add `search` to client_credentials unless enabled on QF dashboard.
 # After changing scopes on the QF dashboard, sign out + sign in again so a new refresh_token is issued.
