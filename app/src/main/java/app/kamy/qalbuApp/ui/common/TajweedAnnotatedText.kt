@@ -11,7 +11,7 @@ import androidx.core.text.HtmlCompat
 import app.kamy.qalbuApp.domain.model.QuranWord
 
 private val tajweedSpanRegex = Regex(
-    """<span\s+class=['"]([^'"]+)['"][^>]*>([\s\S]*?)</span>|([^<]+)""",
+    """<span\b[^>]*\bclass\s*=\s*['"]([^'"]+)['"][^>]*>([\s\S]*?)</span>|([^<]+)""",
     RegexOption.IGNORE_CASE
 )
 
@@ -26,27 +26,34 @@ fun buildMushafLineAnnotatedString(
     baseColor: Color = Color(0xFF0F172A),
     markerFontSize: TextUnit = TextUnit.Unspecified,
     markerFontFamily: FontFamily? = null
-): AnnotatedString = buildAnnotatedString {
-    words.forEach { word ->
-        when {
-            word.isEndMarker -> {
-                val ayah = word.verseKey
-                    ?.substringAfterLast(':', missingDelimiterValue = "")
-                    ?.trim()
-                    ?.toIntOrNull()
-                    ?.takeIf { it > 0 }
-                if (ayah != null) {
-                    appendAyahEndMarker(ayah, markerFontSize, markerFontFamily)
+): AnnotatedString {
+    val built = buildAnnotatedString {
+        words.forEach { word ->
+            when {
+                word.isEndMarker -> {
+                    val ayah = word.verseKey
+                        ?.substringAfterLast(':', missingDelimiterValue = "")
+                        ?.trim()
+                        ?.toIntOrNull()
+                        ?.takeIf { it > 0 }
+                    if (ayah != null) {
+                        appendAyahEndMarker(ayah, markerFontSize, markerFontFamily)
+                    }
                 }
-            }
-            else -> {
-                val html = word.displayText.sanitizeTajweedArabicHtml()
-                if (html.isNotEmpty()) {
-                    if (length > 0) append(' ')
-                    appendTajweedHtml(html, baseColor)
+                else -> {
+                    val html = word.displayText.sanitizeTajweedArabicHtml()
+                    if (html.isNotEmpty()) {
+                        if (length > 0) append(' ')
+                        appendTajweedHtml(html, baseColor)
+                    }
                 }
             }
         }
+    }
+    return if (built.text.contains('<')) {
+        AnnotatedString(built.text.stripHtmlTags())
+    } else {
+        built
     }
 }
 
@@ -60,11 +67,16 @@ fun buildTajweedAnnotatedString(
     val body = textUthmani?.sanitizeTajweedArabicHtml().orEmpty()
     if (body.isEmpty()) return AnnotatedString("")
     val cleaned = stripInlineAyahEndMarkers(body, ayahNumber).ifEmpty { body }
-    return buildAnnotatedString {
+    val built = buildAnnotatedString {
         appendTajweedHtml(cleaned, baseColor)
         ayahNumber?.takeIf { it > 0 }?.let {
             appendAyahEndMarker(it, markerFontSize, markerFontFamily)
         }
+    }
+    return if (built.text.contains('<')) {
+        AnnotatedString(built.text.stripHtmlTags())
+    } else {
+        built
     }
 }
 
@@ -73,10 +85,20 @@ private fun AnnotatedString.Builder.appendTajweedHtml(html: String, baseColor: C
         .replace(ayahEndSymbolRegex, "")
         .replace(Regex("<div\\b[^>]*>", RegexOption.IGNORE_CASE), "")
         .replace(Regex("</div>", RegexOption.IGNORE_CASE), "")
+        .replace(Regex("<p\\b[^>]*>", RegexOption.IGNORE_CASE), "")
+        .replace(Regex("</p>", RegexOption.IGNORE_CASE), "")
+        .replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), " ")
         .trim()
     if (normalized.isEmpty()) return
 
-    tajweedSpanRegex.findAll(normalized).forEach { match ->
+    val matches = tajweedSpanRegex.findAll(normalized).toList()
+    val hasColoredSpans = matches.any { it.groupValues[1].isNotEmpty() }
+    if (!hasColoredSpans && normalized.looksLikeHtml()) {
+        append(normalized.stripHtmlTags())
+        return
+    }
+
+    matches.forEach { match ->
         val className = match.groupValues[1]
         val spanText = match.groupValues[2]
         val plainText = match.groupValues[3]

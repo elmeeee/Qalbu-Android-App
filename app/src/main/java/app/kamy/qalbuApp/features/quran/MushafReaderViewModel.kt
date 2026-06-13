@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 
 data class MushafPageState(
@@ -51,6 +53,9 @@ class MushafReaderViewModel @Inject constructor(
     private val routePage = savedStateHandle.get<Int>("page")
         ?.coerceIn(1, MushafReadingStore.totalPages)
 
+    private val pagesInFlight = mutableSetOf<Int>()
+    private val loadMutex = Mutex()
+
     private val _state = MutableStateFlow(
         MushafReaderUiState(
             currentPage = routePage ?: MushafReadingStore.lastPage(appContext),
@@ -64,22 +69,29 @@ class MushafReaderViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val startPage = routePage ?: resolveCloudOrLocalPage()
-            _state.update { it.copy(currentPage = startPage, isResolvingStartPage = false) }
+            _state.update {
+                it.copy(
+                    currentPage = startPage,
+                    isResolvingStartPage = false,
+                    pageInfoLabel = pageInfoFromVerses(it.pages[startPage]?.verses.orEmpty())
+                )
+            }
             MushafReadingStore.saveLastPage(appContext, startPage, markRead = false)
             loadPage(startPage)
-            refreshPageInfo(startPage)
         }
     }
 
     fun onPageChanged(page: Int) {
         val safe = page.coerceIn(1, MushafReadingStore.totalPages)
+        val alreadyOnPage = _state.value.currentPage == safe
         if (_state.value.showSwipeHint) {
             dismissSwipeHint()
         }
-        _state.update { it.copy(currentPage = safe) }
-        MushafReadingStore.saveLastPage(appContext, safe)
+        if (!alreadyOnPage) {
+            _state.update { it.copy(currentPage = safe) }
+            MushafReadingStore.saveLastPage(appContext, safe)
+        }
         loadPage(safe)
-        refreshPageInfo(safe)
     }
 
     fun dismissSwipeHint() {
@@ -103,12 +115,25 @@ class MushafReaderViewModel @Inject constructor(
     }
 
     private fun loadPage(page: Int) {
-        if (_state.value.pages[page]?.lines?.isNotEmpty() == true) return
-        _state.update {
-            val existing = it.pages[page] ?: MushafPageState()
-            it.copy(pages = it.pages + (page to existing.copy(isLoading = true, error = null)))
+        val cached = _state.value.pages[page]
+        if (cached?.lines?.isNotEmpty() == true) {
+            updatePageInfoLabel(page, cached.verses)
+            prefetchAdjacent(page)
+            return
         }
         viewModelScope.launch {
+            val shouldFetch = loadMutex.withLock {
+                if (page in pagesInFlight) return@withLock false
+                if (_state.value.pages[page]?.lines?.isNotEmpty() == true) return@withLock false
+                pagesInFlight.add(page)
+                true
+            }
+            if (!shouldFetch) return@launch
+
+            _state.update {
+                val existing = it.pages[page] ?: MushafPageState()
+                it.copy(pages = it.pages + (page to existing.copy(isLoading = true, error = null)))
+            }
             try {
                 val response = contentRepository.getVersesByMushafPage(mushafPage = page)
                 val verses = response.verses
@@ -120,7 +145,12 @@ class MushafReaderViewModel @Inject constructor(
                             verses = verses,
                             isLoading = false,
                             error = null
-                        ))
+                        )),
+                        pageInfoLabel = if (it.currentPage == page) {
+                            pageInfoFromVerses(verses) ?: it.pageInfoLabel
+                        } else {
+                            it.pageInfoLabel
+                        }
                     )
                 }
                 logReadingPosition(verses)
@@ -134,8 +164,24 @@ class MushafReaderViewModel @Inject constructor(
                         ))
                     )
                 }
+            } finally {
+                loadMutex.withLock { pagesInFlight.remove(page) }
             }
         }
+    }
+
+    private fun updatePageInfoLabel(page: Int, verses: List<RandomAyahPayload>) {
+        if (_state.value.currentPage != page) return
+        pageInfoFromVerses(verses)?.let { label ->
+            _state.update { it.copy(pageInfoLabel = label) }
+        }
+    }
+
+    private fun pageInfoFromVerses(verses: List<RandomAyahPayload>): String? {
+        if (verses.isEmpty()) return null
+        val first = verses.first().displayVerseReference ?: return null
+        val last = verses.last().displayVerseReference ?: return null
+        return if (first == last) first else "$first – $last"
     }
 
     private fun logReadingPosition(verses: List<RandomAyahPayload>) {
@@ -151,18 +197,6 @@ class MushafReaderViewModel @Inject constructor(
         listOf(page - 1, page + 1).forEach { adjacent ->
             if (adjacent in 1..MushafReadingStore.totalPages) {
                 loadPage(adjacent)
-            }
-        }
-    }
-
-    private fun refreshPageInfo(page: Int) {
-        viewModelScope.launch {
-            runCatching {
-                contentRepository.getPagesLookup(pageNumber = page)
-            }.onSuccess { lookup ->
-                val info = lookup.pages?.get(page.toString())
-                val label = info?.let { "${it.from} – ${it.to}" }
-                _state.update { it.copy(pageInfoLabel = label) }
             }
         }
     }

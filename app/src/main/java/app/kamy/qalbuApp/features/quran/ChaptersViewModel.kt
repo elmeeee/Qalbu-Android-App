@@ -24,6 +24,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -74,17 +75,23 @@ class ChaptersViewModel @Inject constructor(
     val state: StateFlow<ChaptersUiState> = _state.asStateFlow()
 
     private var searchJob: Job? = null
+    private var lastCloudSyncKey: String? = null
 
     init {
         loadAll()
         refreshMushafBrowse()
         viewModelScope.launch {
-            userSession.isSignedIn.collect { signedIn ->
-                if (signedIn) {
-                    syncCloudReadingToMushaf()
+            userSession.isSignedIn
+                .distinctUntilChanged()
+                .collect { signedIn ->
+                    if (signedIn) {
+                        syncCloudReadingToMushaf()
+                    } else {
+                        lastCloudSyncKey = null
+                        refreshMushafBrowse(isCloudSynced = false)
+                    }
+                    refresh(force = false)
                 }
-                refresh(force = false)
-            }
         }
     }
 
@@ -103,7 +110,10 @@ class ChaptersViewModel @Inject constructor(
 
     private suspend fun syncCloudReadingToMushaf() {
         val session = runCatching { readingSessions.fetchMostRecent() }.getOrNull() ?: return
+        val syncKey = "${session.chapterNumber}:${session.verseNumber}"
+        if (syncKey == lastCloudSyncKey) return
         val page = contentRepository.mushafPageForVerse(session.chapterNumber, session.verseNumber) ?: return
+        lastCloudSyncKey = syncKey
         MushafReadingStore.saveLastPage(appContext, page, markRead = false)
         refreshMushafBrowse(isCloudSynced = true)
     }
@@ -282,11 +292,11 @@ class ChaptersViewModel @Inject constructor(
         }
     }
 
-    suspend fun resolveMushafPageForJuz(juzNumber: Int): Int? {
-        contentRepository.firstMushafPageForJuz(juzNumber)?.let { return it }
-        val start = resolveJuzStart(juzNumber) ?: return null
-        return contentRepository.mushafPageForVerse(start.first, start.second)
-    }
+    suspend fun resolveMushafPageForJuz(juzNumber: Int): Int? =
+        contentRepository.firstMushafPageForJuz(juzNumber)
+            ?: resolveJuzStart(juzNumber)?.let { (chapter, ayah) ->
+                contentRepository.mushafPageForVerse(chapter, ayah)
+            }
 
     fun openMushafAtJuz(juzNumber: Int, onOpen: (Int) -> Unit) {
         viewModelScope.launch {

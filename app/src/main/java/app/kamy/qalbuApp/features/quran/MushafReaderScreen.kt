@@ -43,7 +43,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,11 +86,21 @@ fun MushafReaderScreen(
         pageCount = { MushafReadingStore.totalPages }
     )
 
+    var suppressPagerSync by remember { mutableStateOf(true) }
+
     LaunchedEffect(state.currentPage, state.isResolvingStartPage) {
         if (state.isResolvingStartPage) return@LaunchedEffect
         val target = (state.currentPage - 1).coerceIn(0, MushafReadingStore.totalPages - 1)
         if (pagerState.currentPage != target) {
+            suppressPagerSync = true
             pagerState.scrollToPage(target)
+            suppressPagerSync = false
+        }
+    }
+
+    LaunchedEffect(state.isResolvingStartPage) {
+        if (!state.isResolvingStartPage) {
+            suppressPagerSync = false
         }
     }
 
@@ -97,6 +109,7 @@ fun MushafReaderScreen(
         snapshotFlow { pagerState.currentPage }
             .distinctUntilChanged()
             .collect { pageIndex ->
+                if (suppressPagerSync) return@collect
                 vm.onPageChanged(pageIndex + 1)
             }
     }

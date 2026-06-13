@@ -38,6 +38,12 @@ class ContentRepository @Inject constructor(
     private var cachedJuzs: List<QuranJuz>? = null
     private var juzsCachedAt: Long = 0L
     private val juzsMutex = Mutex()
+    private val lookupMutex = Mutex()
+    private val lookupCache = mutableMapOf<String, PagesLookupResponse>()
+    private val juzFirstPageCache = mutableMapOf<Int, Int>()
+    private val mushafVersesMemoryCache = mutableMapOf<String, VersesByChapterResponse>()
+    private val mushafVersesMemoryOrder = ArrayDeque<String>()
+    private val maxMushafMemoryEntries = 48
 
     suspend fun getChapters(force: Boolean = false): List<QuranChapter> = chaptersMutex.withLock {
         val now = System.currentTimeMillis()
@@ -186,10 +192,18 @@ class ContentRepository @Inject constructor(
         perPage: Int = 50,
         translationId: Int = selectedTranslationId(),
         audioRecitationId: Int = translationStore.currentRecitationId(),
-        mushafId: Int = DEFAULT_MUSHAF_ID
+        mushafId: Int = DEFAULT_MUSHAF_ID,
+        forceRefresh: Boolean = false
     ): VersesByChapterResponse {
         val language = apiLanguage()
         val cacheKey = diskCache.verseCacheKey("mushaf", mushafPage, apiPage, translationId, language)
+        if (!forceRefresh) {
+            mushafVersesMemoryCache[cacheKey]?.let { return it }
+            diskCache.loadVerses(cacheKey)?.let { cached ->
+                rememberMushafVerses(cacheKey, cached)
+                return cached
+            }
+        }
         return try {
             qfCall {
                 api.getVersesByPage(
@@ -201,9 +215,24 @@ class ContentRepository @Inject constructor(
                     page = apiPage,
                     perPage = perPage
                 )
-            }.also { diskCache.saveVerses(cacheKey, it) }
+            }.also { response ->
+                rememberMushafVerses(cacheKey, response)
+                diskCache.saveVerses(cacheKey, response)
+            }
         } catch (e: QFError.Network) {
-            diskCache.loadVerses(cacheKey) ?: throw e
+            mushafVersesMemoryCache[cacheKey]
+                ?: diskCache.loadVerses(cacheKey)
+                ?: throw e
+        }
+    }
+
+    private fun rememberMushafVerses(cacheKey: String, response: VersesByChapterResponse) {
+        if (mushafVersesMemoryCache.containsKey(cacheKey)) return
+        mushafVersesMemoryCache[cacheKey] = response
+        mushafVersesMemoryOrder.addLast(cacheKey)
+        while (mushafVersesMemoryOrder.size > maxMushafMemoryEntries) {
+            val evicted = mushafVersesMemoryOrder.removeFirst()
+            mushafVersesMemoryCache.remove(evicted)
         }
     }
 
@@ -214,25 +243,45 @@ class ContentRepository @Inject constructor(
         pageNumber: Int? = null,
         fromVerse: String? = null,
         toVerse: String? = null
-    ): PagesLookupResponse = qfCall {
-        api.getPagesLookup(
-            mushaf = mushafId,
-            chapterNumber = chapterNumber,
-            juzNumber = juzNumber,
-            pageNumber = pageNumber,
-            from = fromVerse,
-            to = toVerse
-        )
+    ): PagesLookupResponse = lookupMutex.withLock {
+        val cacheKey = lookupCacheKey(mushafId, chapterNumber, juzNumber, pageNumber, fromVerse, toVerse)
+        lookupCache[cacheKey]?.let { return it }
+        val response = qfCall {
+            api.getPagesLookup(
+                mushaf = mushafId,
+                chapterNumber = chapterNumber,
+                juzNumber = juzNumber,
+                pageNumber = pageNumber,
+                from = fromVerse,
+                to = toVerse
+            )
+        }
+        lookupCache[cacheKey] = response
+        response
     }
 
     suspend fun firstMushafPageForJuz(juzNumber: Int, mushafId: Int = DEFAULT_MUSHAF_ID): Int? {
-        val lookup = getPagesLookup(mushafId = mushafId, juzNumber = juzNumber)
-        return lookup.pages?.keys?.mapNotNull { it.toIntOrNull() }?.minOrNull()
+        juzFirstPageCache[juzNumber]?.let { return it }
+        resolveFirstPageFromJuzMapping(juzNumber)?.let { page ->
+            juzFirstPageCache[juzNumber] = page
+            return page
+        }
+        val page = getPagesLookup(mushafId = mushafId, juzNumber = juzNumber)
+            .pages
+            ?.keys
+            ?.mapNotNull { it.toIntOrNull() }
+            ?.minOrNull()
+        page?.let { juzFirstPageCache[juzNumber] = it }
+        return page
     }
 
     suspend fun firstMushafPageForChapter(chapterNumber: Int, mushafId: Int = DEFAULT_MUSHAF_ID): Int? {
-        val lookup = getPagesLookup(mushafId = mushafId, chapterNumber = chapterNumber)
-        return lookup.pages?.keys?.mapNotNull { it.toIntOrNull() }?.minOrNull()
+        getChapters().find { it.id == chapterNumber }?.pages?.firstOrNull()?.let { return it }
+        return getPagesLookup(mushafId = mushafId, chapterNumber = chapterNumber)
+            .pages
+            ?.keys
+            ?.mapNotNull { it.toIntOrNull() }
+            ?.minOrNull()
     }
 
     suspend fun mushafPageForVerse(
@@ -241,9 +290,36 @@ class ContentRepository @Inject constructor(
         mushafId: Int = DEFAULT_MUSHAF_ID
     ): Int? = mushafPageForVerseKey("$chapterNumber:$verseNumber", mushafId)
 
-    suspend fun mushafPageForVerseKey(verseKey: String, mushafId: Int = DEFAULT_MUSHAF_ID): Int? {
-        val lookup = getPagesLookup(mushafId = mushafId, fromVerse = verseKey, toVerse = verseKey)
-        return lookup.pages?.keys?.mapNotNull { it.toIntOrNull() }?.minOrNull()
+    suspend fun mushafPageForVerseKey(verseKey: String, mushafId: Int = DEFAULT_MUSHAF_ID): Int? =
+        getPagesLookup(mushafId = mushafId, fromVerse = verseKey, toVerse = verseKey)
+            .pages
+            ?.keys
+            ?.mapNotNull { it.toIntOrNull() }
+            ?.minOrNull()
+
+    private suspend fun resolveFirstPageFromJuzMapping(juzNumber: Int): Int? {
+        val start = getJuz(juzNumber)?.startChapterAndAyah() ?: return null
+        val (chapter, ayah) = start
+        if (ayah == 1) {
+            getChapters().find { it.id == chapter }?.pages?.firstOrNull()?.let { return it }
+        }
+        return null
+    }
+
+    private fun lookupCacheKey(
+        mushafId: Int,
+        chapterNumber: Int? = null,
+        juzNumber: Int? = null,
+        pageNumber: Int? = null,
+        fromVerse: String? = null,
+        toVerse: String? = null
+    ): String = buildString {
+        append("m$mushafId")
+        chapterNumber?.let { append("|c$it") }
+        juzNumber?.let { append("|j$it") }
+        pageNumber?.let { append("|p$it") }
+        fromVerse?.let { append("|f$it") }
+        toVerse?.let { append("|t$it") }
     }
 
     suspend fun getVerseByKey(
@@ -290,6 +366,10 @@ class ContentRepository @Inject constructor(
         chaptersCachedLanguage = null
         cachedJuzs = null
         juzsCachedAt = 0L
+        lookupCache.clear()
+        juzFirstPageCache.clear()
+        mushafVersesMemoryCache.clear()
+        mushafVersesMemoryOrder.clear()
         diskCache.clearAll()
     }
 
