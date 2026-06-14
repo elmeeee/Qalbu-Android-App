@@ -17,6 +17,9 @@ object NotificationChannels {
     const val ADHAN_ALERT = "adhan_alert"
     const val MEDIA_PLAYBACK = "media_playback"
 
+    const val PRAYER_TRACKER = "prayer_tracker"
+    const val QURAN_READING = "quran_reading"
+
     fun ensureAll(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -45,6 +48,26 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = context.getString(R.string.channel_sunnah_desc)
+                enableVibration(true)
+            }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(
+                PRAYER_TRACKER,
+                context.getString(R.string.channel_prayer_tracker),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = context.getString(R.string.channel_prayer_tracker_desc)
+                enableVibration(true)
+            }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(
+                QURAN_READING,
+                context.getString(R.string.channel_quran_reading),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = context.getString(R.string.channel_quran_reading_desc)
                 enableVibration(true)
             }
         )

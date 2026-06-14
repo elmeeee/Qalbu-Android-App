@@ -9,6 +9,7 @@ import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.domain.model.MushafLine
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.groupIntoMushafLines
+import app.kamy.qalbuApp.infrastructure.preferences.KhatamProgressStore
 import app.kamy.qalbuApp.infrastructure.preferences.MushafReadingStore
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
@@ -83,14 +84,16 @@ class MushafReaderViewModel @Inject constructor(
 
     fun onPageChanged(page: Int) {
         val safe = page.coerceIn(1, MushafReadingStore.totalPages)
-        if (safe == _state.value.currentPage && _state.value.pages[safe]?.lines?.isNotEmpty() == true) {
-            return
+        if (safe == _state.value.currentPage) {
+            val cached = _state.value.pages[safe]
+            if (cached?.lines?.isNotEmpty() == true || cached?.isLoading == true) return
         }
         if (_state.value.showSwipeHint) {
             dismissSwipeHint()
         }
         _state.update { it.copy(currentPage = safe) }
         MushafReadingStore.saveLastPage(appContext, safe)
+        KhatamProgressStore.recordPageRead(appContext, safe)
         loadPage(safe)
     }
 
@@ -157,13 +160,17 @@ class MushafReaderViewModel @Inject constructor(
                 val verses = response.verses
                 val lines = verses.groupIntoMushafLines(mushafPage = page)
                 _state.update {
-                    it.copy(
-                        pages = it.pages + (page to MushafPageState(
+                    val updatedPages = trimPagesCache(
+                        it.pages + (page to MushafPageState(
                             lines = lines,
                             verses = verses,
                             isLoading = false,
                             error = null
                         )),
+                        currentPage = page
+                    )
+                    it.copy(
+                        pages = updatedPages,
                         pageInfoLabel = if (it.currentPage == page) {
                             pageInfoFromVerses(verses) ?: it.pageInfoLabel
                         } else {
@@ -221,5 +228,15 @@ class MushafReaderViewModel @Inject constructor(
                 loadPage(adjacent)
             }
         }
+    }
+
+    private fun trimPagesCache(
+        pages: Map<Int, MushafPageState>,
+        currentPage: Int,
+        maxEntries: Int = 12
+    ): Map<Int, MushafPageState> {
+        if (pages.size <= maxEntries) return pages
+        val keep = pages.keys.sortedBy { kotlin.math.abs(it - currentPage) }.take(maxEntries).toSet()
+        return pages.filterKeys { it in keep }
     }
 }

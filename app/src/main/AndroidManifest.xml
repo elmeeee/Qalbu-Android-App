@@ -17,7 +17,7 @@
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".QalbuApplication"
@@ -41,6 +41,22 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="qalbu" android:host="quran" />
+                <data android:scheme="qalbu" android:host="mushaf" />
+                <data android:scheme="qalbu" android:host="today" />
+                <data android:scheme="qalbu" android:host="reflect" />
+                <data android:scheme="qalbu" android:host="bookmarks" />
+                <data android:scheme="qalbu" android:host="qibla" />
+                <data android:scheme="qalbu" android:host="dhikr" />
+                <data android:scheme="qalbu" android:host="zakat" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <!--
@@ -90,6 +106,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".infrastructure.notifications.PrayerCheckReminderReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".infrastructure.audio.AdhanStopReceiver"
             android:exported="false" />
 
@@ -97,6 +117,22 @@
             android:name=".infrastructure.audio.AdhanPlaybackService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+
+        <receiver
+            android:name=".infrastructure.notifications.QuranReadingReminderReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".infrastructure.widget.DailyVerseWidgetProvider"
+            android:exported="true"
+            android:label="@string/daily_verse_widget_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/daily_verse_widget_info" />
+        </receiver>
 
         <receiver
             android:name=".infrastructure.widget.PrayerTimesWidgetProvider"

@@ -101,7 +101,11 @@ import net.openid.appauth.AuthorizationService
 fun AccountScreen(
     oauthService: OAuthService,
     authService: AuthorizationService,
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
+    onOpenQibla: () -> Unit = {},
+    onOpenDhikr: () -> Unit = {},
+    onOpenZakat: () -> Unit = {},
+    onOpenQiyam: () -> Unit = {}
 ) {
     val vm: AccountViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
@@ -149,7 +153,11 @@ fun AccountScreen(
             onSignIn = {
                 val intent = oauthService.buildAuthorizationIntent(authService)
                 signInLauncher.launch(intent)
-            }
+            },
+            onOpenQibla = onOpenQibla,
+            onOpenDhikr = onOpenDhikr,
+            onOpenZakat = onOpenZakat,
+            onOpenQiyam = onOpenQiyam
         )
     }
 
@@ -239,7 +247,11 @@ private fun AccountSettingsContent(
     vm: AccountViewModel,
     onBack: (() -> Unit)?,
     onOpenNotifications: () -> Unit,
-    onSignIn: () -> Unit
+    onSignIn: () -> Unit,
+    onOpenQibla: () -> Unit,
+    onOpenDhikr: () -> Unit,
+    onOpenZakat: () -> Unit,
+    onOpenQiyam: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -313,6 +325,19 @@ private fun AccountSettingsContent(
                 subtitle = state.selectedTranslationName.ifBlank { stringResource(R.string.translator_hint) },
                 onClick = { vm.openTranslator() }
             )
+        }
+
+        SettingsSectionLabel(stringResource(R.string.spiritual_tools_title))
+        AccountToolsSection(
+            onOpenQibla = onOpenQibla,
+            onOpenDhikr = onOpenDhikr,
+            onOpenZakat = onOpenZakat,
+            onOpenQiyam = onOpenQiyam
+        )
+
+        SettingsSectionLabel(stringResource(R.string.section_quran))
+        AlKhatibSettingsGroup {
+            OfflineQuranDownloadRow()
         }
 
         SettingsSectionLabel(stringResource(R.string.notifications))

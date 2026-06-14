@@ -58,6 +58,9 @@ object DailyVerseSnapshotStore {
             .putString(KEY_TRANSLATION, translation)
             .putString(KEY_VERSE_KEY, verse.verseKey)
             .apply()
+        runCatching {
+            app.kamy.qalbuApp.infrastructure.widget.DailyVerseWidgetUpdater.updateAll(context)
+        }
     }
 
     fun load(context: Context): DailyVerseSnapshot? {

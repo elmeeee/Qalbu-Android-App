@@ -13,7 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.kamy.qalbuApp.design.theme.AlKhatibTheme
 import app.kamy.qalbuApp.core.locale.AppLocale
-import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
+import app.kamy.qalbuApp.ui.navigation.DeepLinkRoutes
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.ui.permissions.ExactAlarmPermissionGate
 import app.kamy.qalbuApp.infrastructure.preferences.OnboardingStore
@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        deepLinkRoute.value = intent.toQuranDeepLinkRoute()
+        deepLinkRoute.value = DeepLinkRoutes.fromIntent(intent)
         enableEdgeToEdge()
         val needsOnboarding = !onboardingStore.isComplete()
         setContent {
@@ -65,17 +65,6 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        deepLinkRoute.value = intent.toQuranDeepLinkRoute()
-    }
-
-    private fun Intent.toQuranDeepLinkRoute(): String? {
-        val chapter = getIntExtra(DailyVerseNotificationScheduler.EXTRA_CHAPTER, -1)
-        if (chapter <= 0) return null
-        val ayah = getIntExtra(DailyVerseNotificationScheduler.EXTRA_AYAH, -1)
-        return if (ayah > 0) {
-            "quran/reader/$chapter?ayah=$ayah"
-        } else {
-            "quran/reader/$chapter?ayah=-1"
-        }
+        deepLinkRoute.value = DeepLinkRoutes.fromIntent(intent)
     }
 }

@@ -130,10 +130,8 @@ class ChaptersViewModel @Inject constructor(
         _state.update { it.copy(isLoading = true, error = null) }
         try {
             val chapters = contentRepository.getChapters(force)
-            val continueReading = if (userSession.isSignedIn.value) {
-                runCatching { readingSessions.fetchMostRecent() }.getOrNull()
-            } else null
-            if (continueReading != null) {
+            val continueReading = runCatching { readingSessions.fetchMostRecent() }.getOrNull()
+            if (continueReading != null && userSession.isSignedIn.value) {
                 syncCloudReadingToMushaf()
             } else {
                 refreshMushafBrowse(isCloudSynced = false)
@@ -200,10 +198,13 @@ class ChaptersViewModel @Inject constructor(
             return
         }
         _state.update {
+            val verseRef = parseVerseReference(query)
             it.copy(
-                localSearchChapters = s.chapters.searchChapters(query),
-                verseRef = parseVerseReference(query),
-                mushafPageRef = parseMushafPageQuery(query).takeIf { parseVerseReference(query) == null }
+                localSearchChapters = s.chapters.searchChapters(query).filter { chapter ->
+                    verseRef == null || chapter.id != verseRef.chapter
+                },
+                verseRef = verseRef,
+                mushafPageRef = parseMushafPageQuery(query).takeIf { verseRef == null }
             )
         }
     }

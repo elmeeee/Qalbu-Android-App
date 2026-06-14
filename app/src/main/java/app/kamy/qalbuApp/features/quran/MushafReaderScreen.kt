@@ -49,9 +49,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -99,12 +100,19 @@ fun MushafReaderScreen(
 ) {
     val state by vm.state.collectAsState()
     val totalPages = MushafReadingStore.totalPages
-    val latestPage by rememberUpdatedState(state.currentPage)
+    var anchorPage by remember { mutableIntStateOf(state.currentPage) }
+    var isRecentering by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(
         initialPage = VIRTUAL_CENTER_INDEX,
         pageCount = { VIRTUAL_PAGE_COUNT }
     )
     var pagerReady by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.isResolvingStartPage, state.currentPage) {
+        if (!state.isResolvingStartPage) {
+            anchorPage = state.currentPage
+        }
+    }
 
     LaunchedEffect(state.isResolvingStartPage) {
         if (!state.isResolvingStartPage && !pagerReady) {
@@ -115,16 +123,30 @@ fun MushafReaderScreen(
 
     LaunchedEffect(pagerState, pagerReady, state.isResolvingStartPage) {
         if (!pagerReady || state.isResolvingStartPage) return@LaunchedEffect
-        snapshotFlow { pagerState.settledPage }
+        snapshotFlow { pagerState.isScrollInProgress to pagerState.settledPage }
             .distinctUntilChanged()
-            .collect { settled ->
-                if (settled == VIRTUAL_CENTER_INDEX) return@collect
-                val page = latestPage
-                when (settled) {
-                    0 -> if (page > 1) vm.onPageChanged(page - 1)
-                    2 -> if (page < totalPages) vm.onPageChanged(page + 1)
+            .collect { (inProgress, settled) ->
+                if (inProgress || isRecentering || settled == VIRTUAL_CENTER_INDEX) return@collect
+                while (pagerState.isScrollInProgress) {
+                    kotlinx.coroutines.yield()
                 }
-                pagerState.scrollToPage(VIRTUAL_CENTER_INDEX)
+                val targetPage = when (settled) {
+                    0 -> anchorPage - 1
+                    2 -> anchorPage + 1
+                    else -> return@collect
+                }
+                isRecentering = true
+                try {
+                    if (targetPage !in 1..totalPages) {
+                        pagerState.scrollToPage(VIRTUAL_CENTER_INDEX)
+                        return@collect
+                    }
+                    anchorPage = targetPage
+                    vm.onPageChanged(targetPage)
+                    pagerState.scrollToPage(VIRTUAL_CENTER_INDEX)
+                } finally {
+                    isRecentering = false
+                }
             }
     }
 
@@ -158,9 +180,9 @@ fun MushafReaderScreen(
                     .fillMaxWidth()
                     .navigationBarsPadding(),
                 beyondViewportPageCount = 1,
-                userScrollEnabled = !state.isResolvingStartPage
+                userScrollEnabled = !state.isResolvingStartPage && !isRecentering
             ) { index ->
-                val pageNumber = state.currentPage + (index - VIRTUAL_CENTER_INDEX)
+                val pageNumber = anchorPage + (index - VIRTUAL_CENTER_INDEX)
                 if (pageNumber !in 1..totalPages) {
                     MushafBlankPage(modifier = Modifier.mushafPageTurnEffect(pagerState, index))
                 } else {
@@ -189,13 +211,14 @@ fun MushafReaderScreen(
 
 private fun Modifier.mushafPageTurnEffect(pagerState: PagerState, pageIndex: Int): Modifier =
     graphicsLayer {
+        if (pagerState.isScrollInProgress && size.width <= 0f) return@graphicsLayer
         val pageOffset = (pagerState.currentPage - pageIndex) + pagerState.currentPageOffsetFraction
+        if (size.width <= 0f || size.height <= 0f) return@graphicsLayer
         val absOffset = pageOffset.absoluteValue.coerceIn(0f, 1f)
         cameraDistance = 14f * density
         rotationY = lerp(0f, -28f, pageOffset.coerceIn(-1f, 1f))
         translationX = size.width * 0.08f * pageOffset
         alpha = lerp(1f, 0.88f, absOffset)
-        shadowElevation = lerp(18f, 6f, absOffset)
     }
 
 @Composable
@@ -335,42 +358,44 @@ private fun MushafBookPage(
                     )
                 }
                 else -> {
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 20.dp, vertical = 18.dp)
-                    ) {
-                        HorizontalDivider(
-                            color = AlKhatibColors.Gold.copy(alpha = 0.35f),
-                            thickness = 1.dp
-                        )
-                        Spacer(Modifier.height(14.dp))
-
-                        pageState.lines.forEach { line ->
-                            MushafLineView(line = line, modifier = Modifier.fillMaxWidth())
-                            Spacer(Modifier.height(4.dp))
-                        }
-
-                        if (showTranslation && pageState.verses.isNotEmpty()) {
-                            Spacer(Modifier.height(20.dp))
-                            HorizontalDivider(color = MushafPaperEdge)
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = stringResource(R.string.mushaf_translation_header),
-                                style = MaterialTheme.typography.labelLarge,
-                                color = AlKhatibColors.DeepEmerald,
-                                fontWeight = FontWeight.SemiBold
+                    key(pageNumber) {
+                        Column(
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 20.dp, vertical = 18.dp)
+                        ) {
+                            HorizontalDivider(
+                                color = AlKhatibColors.Gold.copy(alpha = 0.35f),
+                                thickness = 1.dp
                             )
-                            Spacer(Modifier.height(8.dp))
-                            pageState.verses.forEach { verse ->
-                                MushafVerseTranslation(verse = verse)
-                            }
-                        }
+                            Spacer(Modifier.height(14.dp))
 
-                        Spacer(Modifier.height(28.dp))
-                        MushafPageNumberBadge(pageNumber = pageNumber)
-                        Spacer(Modifier.height(8.dp))
+                            pageState.lines.forEach { line ->
+                                MushafLineView(line = line, modifier = Modifier.fillMaxWidth())
+                                Spacer(Modifier.height(4.dp))
+                            }
+
+                            if (showTranslation && pageState.verses.isNotEmpty()) {
+                                Spacer(Modifier.height(20.dp))
+                                HorizontalDivider(color = MushafPaperEdge)
+                                Spacer(Modifier.height(12.dp))
+                                Text(
+                                    text = stringResource(R.string.mushaf_translation_header),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = AlKhatibColors.DeepEmerald,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(Modifier.height(8.dp))
+                                pageState.verses.forEach { verse ->
+                                    MushafVerseTranslation(verse = verse)
+                                }
+                            }
+
+                            Spacer(Modifier.height(28.dp))
+                            MushafPageNumberBadge(pageNumber = pageNumber)
+                            Spacer(Modifier.height(8.dp))
+                        }
                     }
                 }
             }

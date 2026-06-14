@@ -5,6 +5,8 @@ import android.content.Context
 import app.kamy.qalbuApp.core.locale.AppLocale
 import app.kamy.qalbuApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.qalbuApp.infrastructure.notifications.NotificationChannels
+import app.kamy.qalbuApp.infrastructure.notifications.QuranReadingReminderScheduler
+import app.kamy.qalbuApp.infrastructure.notifications.PrayerCheckReminderScheduler
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordinator
 import app.kamy.qalbuApp.infrastructure.network.NetworkDebugger
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
@@ -24,5 +26,7 @@ class QalbuApplication : Application() {
         NetworkDebugger.install(this)
         runCatching { DailyVerseNotificationScheduler.reschedule(this) }
         runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
+        runCatching { PrayerCheckReminderScheduler.reschedule(this) }
+        runCatching { QuranReadingReminderScheduler.reschedule(this) }
     }
 }

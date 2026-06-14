@@ -24,9 +24,15 @@ import androidx.navigation.navArgument
 import app.kamy.qalbuApp.features.account.AccountScreen
 import app.kamy.qalbuApp.features.quran.ChapterReaderScreen
 import app.kamy.qalbuApp.features.quran.ChaptersScreen
+import app.kamy.qalbuApp.features.tools.DhikrScreen
+import app.kamy.qalbuApp.features.tools.QiblaScreen
+import app.kamy.qalbuApp.features.tools.QiyamScreen
+import app.kamy.qalbuApp.features.tools.ZakatCalculatorScreen
+import app.kamy.qalbuApp.features.quran.QuranBookmarksScreen
 import app.kamy.qalbuApp.features.quran.MushafReaderScreen
 import app.kamy.qalbuApp.features.reflect.ReflectScreen
 import app.kamy.qalbuApp.features.today.PrayerCalendarScreen
+import app.kamy.qalbuApp.features.today.PrayerTrackerCalendarScreen
 import app.kamy.qalbuApp.features.today.TodayScreen
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.infrastructure.preferences.MushafReadingStore
@@ -78,8 +84,12 @@ fun RootScreen(
     val isReaderRoute = currentRoute?.startsWith("quran/reader") == true ||
         currentRoute?.startsWith("quran/juz") == true ||
         currentRoute?.startsWith("quran/mushaf") == true
-    val isPrayerCalendarRoute = currentRoute == "prayer/calendar"
-    val showBottomBar = !isReaderRoute && !isPrayerCalendarRoute && currentRoute != RootTab.Account.route
+    val isPrayerCalendarRoute = currentRoute == "prayer/calendar" ||
+        currentRoute == "prayer/tracker/calendar"
+    val isToolRoute = currentRoute?.startsWith("tools/") == true
+    val isBookmarksRoute = currentRoute == "quran/bookmarks"
+    val showBottomBar = !isReaderRoute && !isPrayerCalendarRoute && !isToolRoute &&
+        !isBookmarksRoute && currentRoute != RootTab.Account.route
     val showAudioBar = audioState.currentUrl != null
     val audioBarBottomPadding = if (showBottomBar) {
         floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
@@ -102,11 +112,17 @@ fun RootScreen(
                     onAccountNavigate = { navController.navigate(RootTab.Account.route) },
                     onOpenPrayerCalendar = {
                         navController.navigate("prayer/calendar") { launchSingleTop = true }
+                    },
+                    onOpenTrackerCalendar = {
+                        navController.navigate("prayer/tracker/calendar") { launchSingleTop = true }
                     }
                 )
             }
             composable("prayer/calendar") {
                 PrayerCalendarScreen(onBack = { navController.popBackStack() })
+            }
+            composable("prayer/tracker/calendar") {
+                PrayerTrackerCalendarScreen(onBack = { navController.popBackStack() })
             }
             composable(RootTab.Reflect.route) {
                 ReflectScreen(
@@ -133,8 +149,31 @@ fun RootScreen(
                             popUpTo(RootTab.Quran.route) { saveState = true }
                             launchSingleTop = true
                         }
+                    },
+                    onOpenBookmarks = {
+                        navController.navigate("quran/bookmarks") { launchSingleTop = true }
                     }
                 )
+            }
+            composable("quran/bookmarks") {
+                QuranBookmarksScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenVerse = { chapter, ayah ->
+                        navController.navigate("quran/reader/$chapter?ayah=$ayah") { launchSingleTop = true }
+                    }
+                )
+            }
+            composable("tools/qibla") {
+                QiblaScreen(onBack = { navController.popBackStack() })
+            }
+            composable("tools/dhikr") {
+                DhikrScreen(onBack = { navController.popBackStack() })
+            }
+            composable("tools/zakat") {
+                ZakatCalculatorScreen(onBack = { navController.popBackStack() })
+            }
+            composable("tools/qiyam") {
+                QiyamScreen(onBack = { navController.popBackStack() })
             }
             composable(
                 route = "quran/reader/{chapter}?ayah={ayah}",
@@ -183,7 +222,11 @@ fun RootScreen(
                 AccountScreen(
                     oauthService = oauthService,
                     authService = authService,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onOpenQibla = { navController.navigate("tools/qibla") { launchSingleTop = true } },
+                    onOpenDhikr = { navController.navigate("tools/dhikr") { launchSingleTop = true } },
+                    onOpenZakat = { navController.navigate("tools/zakat") { launchSingleTop = true } },
+                    onOpenQiyam = { navController.navigate("tools/qiyam") { launchSingleTop = true } }
                 )
             }
         }

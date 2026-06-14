@@ -36,7 +36,10 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
@@ -77,6 +80,8 @@ import androidx.compose.ui.res.stringResource
 import app.kamy.qalbuApp.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.features.share.AiShareSheet
+import androidx.compose.material.icons.filled.Forum
+import app.kamy.qalbuApp.domain.model.HifzStatus
 import app.kamy.qalbuApp.design.components.AlKhatibErrorState
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
@@ -215,7 +220,8 @@ fun ChapterReaderScreen(
                 QalbuAyahPage(
                     verse = verse,
                     fontScale = state.fontScale,
-                    showTranslation = state.showTranslation,
+                    showTranslation = state.showTranslation && !state.hifzModeEnabled,
+                    hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
                     onPlay = { vm.onTapAyah(pageIndex) }
                 )
@@ -272,10 +278,24 @@ fun ChapterReaderScreen(
             ReaderVerseActionsMenu(
                 expanded = verseMenuExpanded,
                 onToggle = { verseMenuExpanded = !verseMenuExpanded },
+                bookmarked = state.currentVerseBookmarked,
+                hifzStatus = state.currentVerseHifzStatus,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
                     .padding(end = 10.dp, bottom = readerActionsBottom),
+                onBookmark = {
+                    verseMenuExpanded = false
+                    vm.toggleBookmark(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                },
+                onNote = {
+                    verseMenuExpanded = false
+                    vm.openNote(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                },
+                onHifz = {
+                    verseMenuExpanded = false
+                    vm.cycleHifzStatus(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                },
                 onAiShare = {
                     verseMenuExpanded = false
                     vm.openAiShare(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
@@ -363,7 +383,17 @@ fun ChapterReaderScreen(
             onFontScaleChange = vm::setFontScale,
             onToggleTranslation = vm::toggleTranslation,
             onSelectRecitation = vm::selectRecitation,
-            onSetPlaybackMode = vm::setPlaybackMode
+            onSetPlaybackMode = vm::setPlaybackMode,
+            onToggleHifzMode = vm::toggleHifzMode
+        )
+    }
+
+    if (state.noteVisible) {
+        VerseNoteSheet(
+            draft = state.noteDraft,
+            onDraftChange = vm::updateNoteDraft,
+            onDismiss = vm::dismissNote,
+            onSave = vm::saveNote
         )
     }
 
@@ -422,18 +452,28 @@ private fun QalbuAyahPage(
     verse: RandomAyahPayload,
     fontScale: Float,
     showTranslation: Boolean,
+    hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
     onPlay: () -> Unit
 ) {
     val contentTopPadding = 56.dp
     val contentBottomPadding = if (audioBarVisible) 188.dp else 148.dp
     val scrollState = rememberScrollState()
+    var hifzRevealed by androidx.compose.runtime.remember(verse.listIdentity) {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .pointerInput(verse.listIdentity) {
-                detectTapGestures(onTap = { onPlay() })
+                detectTapGestures(onTap = {
+                    if (hifzModeEnabled && !hifzRevealed) {
+                        hifzRevealed = true
+                    } else {
+                        onPlay()
+                    }
+                })
             },
         contentAlignment = Alignment.Center
     ) {
@@ -449,14 +489,30 @@ private fun QalbuAyahPage(
                 ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            TajweedHtmlView(
-                textUthmani = verse.textUthmani,
-                ayahNumber = verse.resolvedVerseNumber,
-                fontSizeSp = (30 * fontScale).toInt(),
-                compact = true,
-                textAlign = TajweedTextAlign.Justify,
-                modifier = Modifier.fillMaxWidth()
-            )
+            if (hifzModeEnabled && !hifzRevealed) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .background(AlKhatibColors.SoftGrey.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.hifz_tap_to_reveal),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = AlKhatibColors.Slate500
+                    )
+                }
+            } else {
+                TajweedHtmlView(
+                    textUthmani = verse.textUthmani,
+                    ayahNumber = verse.resolvedVerseNumber,
+                    fontSizeSp = (30 * fontScale).toInt(),
+                    compact = true,
+                    textAlign = TajweedTextAlign.Justify,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             if (showTranslation) {
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.toVerseTranslationPlainText()
@@ -482,6 +538,11 @@ private fun QalbuAyahPage(
 private fun ReaderVerseActionsMenu(
     expanded: Boolean,
     onToggle: () -> Unit,
+    bookmarked: Boolean,
+    hifzStatus: HifzStatus,
+    onBookmark: () -> Unit,
+    onNote: () -> Unit,
+    onHifz: () -> Unit,
     onAiShare: () -> Unit,
     onTafsir: () -> Unit,
     onHadith: () -> Unit,
@@ -501,6 +562,42 @@ private fun ReaderVerseActionsMenu(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                ReaderCompactMenuItem(
+                    icon = {
+                        Icon(
+                            if (bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                            contentDescription = null,
+                            tint = AlKhatibColors.GoldDeep,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    label = stringResource(R.string.bookmark),
+                    onClick = onBookmark
+                )
+                ReaderCompactMenuItem(
+                    icon = {
+                        Icon(
+                            Icons.Filled.EditNote,
+                            contentDescription = null,
+                            tint = AlKhatibColors.Slate800,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    label = stringResource(R.string.verse_note),
+                    onClick = onNote
+                )
+                ReaderCompactMenuItem(
+                    icon = {
+                        Icon(
+                            Icons.Filled.Psychology,
+                            contentDescription = null,
+                            tint = hifzStatusColor(hifzStatus),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    },
+                    label = hifzStatusLabel(hifzStatus),
+                    onClick = onHifz
+                )
                 ReaderCompactMenuItem(
                     icon = {
                         Icon(
@@ -599,7 +696,8 @@ private fun ReaderSettingsSheet(
     onFontScaleChange: (Float) -> Unit,
     onToggleTranslation: (Boolean) -> Unit,
     onSelectRecitation: (Int) -> Unit,
-    onSetPlaybackMode: (AyahPlaybackMode) -> Unit
+    onSetPlaybackMode: (AyahPlaybackMode) -> Unit,
+    onToggleHifzMode: (Boolean) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -626,6 +724,10 @@ private fun ReaderSettingsSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.show_translation), modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
                 Switch(checked = state.showTranslation, onCheckedChange = onToggleTranslation)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.hifz_mode), modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
+                Switch(checked = state.hifzModeEnabled, onCheckedChange = onToggleHifzMode)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -703,5 +805,67 @@ private fun ReciterRow(
                 .height(1.dp)
                 .background(AlKhatibColors.SoftGrey)
         )
+    }
+}
+
+@Composable
+private fun hifzStatusLabel(status: HifzStatus): String = when (status) {
+    HifzStatus.NONE -> stringResource(R.string.hifz_mark)
+    HifzStatus.LEARNING -> stringResource(R.string.hifz_learning)
+    HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized)
+    HifzStatus.NEEDS_REVIEW -> stringResource(R.string.hifz_review)
+}
+
+private fun hifzStatusColor(status: HifzStatus): Color = when (status) {
+    HifzStatus.NONE -> AlKhatibColors.Slate500
+    HifzStatus.LEARNING -> AlKhatibColors.IndigoAccent
+    HifzStatus.MEMORIZED -> AlKhatibColors.DeepEmerald
+    HifzStatus.NEEDS_REVIEW -> AlKhatibColors.GoldDeep
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun VerseNoteSheet(
+    draft: String,
+    onDraftChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.verse_note),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            androidx.compose.material3.OutlinedTextField(
+                value = draft,
+                onValueChange = onDraftChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp),
+                placeholder = { Text(stringResource(R.string.verse_note_hint)) }
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.back))
+                }
+                androidx.compose.material3.TextButton(onClick = onSave) {
+                    Text(stringResource(R.string.done))
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
     }
 }

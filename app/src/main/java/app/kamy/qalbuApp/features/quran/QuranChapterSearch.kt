@@ -4,7 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -424,84 +424,20 @@ fun QuranChapterSearchBar(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val activeQuery = query.normalizedSearchQuery()
 
-    val elevation by animateFloatAsState(
-        targetValue = if (isFocused) 6f else 1f,
-        animationSpec = tween(200),
-        label = "searchElevation"
-    )
-    val fieldShape = RoundedCornerShape(50)
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(52.dp)
-            .graphicsLayer { shadowElevation = elevation }
-            .shadow(
-                elevation = if (isFocused) 12.dp else 4.dp,
-                shape = fieldShape,
-                ambientColor = AlKhatibColors.DeepEmerald.copy(alpha = if (isFocused) 0.18f else 0.08f),
-                spotColor = AlKhatibColors.Teal.copy(alpha = if (isFocused) 0.22f else 0.1f)
-            )
-            .clip(fieldShape)
-            .background(
-                if (isFocused) {
-                    Brush.horizontalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.18f),
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                } else {
-                    Brush.horizontalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.surface,
-                            AlKhatibColors.SageMist.copy(alpha = 0.45f),
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                }
-            )
-            .then(
-                if (isFocused) {
-                    Modifier.border(
-                        width = 1.5.dp,
-                        brush = Brush.horizontalGradient(
-                            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Gold.copy(alpha = 0.6f))
-                        ),
-                        shape = fieldShape
-                    )
-                } else {
-                    Modifier
-                }
-            )
-            .padding(horizontal = 6.dp)
-    ) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = 4.dp)
+                .padding(vertical = 4.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(Modifier.width(10.dp))
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
+                tint = if (isFocused) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(Modifier.width(12.dp))
             BasicTextField(
                 value = query,
                 onValueChange = onQueryChange,
@@ -512,25 +448,21 @@ fun QuranChapterSearchBar(
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                     fontWeight = FontWeight.Medium
                 ),
-                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                cursorBrush = SolidColor(AlKhatibColors.DeepEmerald),
                 interactionSource = interactionSource,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(
-                    onSearch = { onDismiss() }
-                ),
+                keyboardActions = KeyboardActions(onSearch = { onDismiss() }),
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester)
-                    .onFocusChanged { focusState ->
-                        onFocusChange(focusState.isFocused)
-                    },
+                    .onFocusChanged { focusState -> onFocusChange(focusState.isFocused) },
                 decorationBox = { inner ->
                     Box(contentAlignment = Alignment.CenterStart) {
                         if (activeQuery.isEmpty()) {
                             Text(
                                 text = resolvedPlaceholder,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                                color = AlKhatibColors.Slate500.copy(alpha = 0.85f),
                                 maxLines = 1
                             )
                         }
@@ -539,19 +471,35 @@ fun QuranChapterSearchBar(
                 }
             )
             if (activeQuery.isNotEmpty() && enabled) {
-                IconButton(
-                    onClick = onClear,
-                    modifier = Modifier.size(32.dp)
-                ) {
+                IconButton(onClick = onClear, modifier = Modifier.size(32.dp)) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.clear_search_a11y),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = AlKhatibColors.Slate500,
                         modifier = Modifier.size(18.dp)
                     )
                 }
             }
         }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(if (isFocused) 2.dp else 1.dp)
+                .background(
+                    if (isFocused) {
+                        Brush.horizontalGradient(
+                            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                        )
+                    } else {
+                        Brush.horizontalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                            )
+                        )
+                    }
+                )
+        )
     }
 }
 
@@ -561,36 +509,24 @@ fun QuranSearchSuggestionChips(
     modifier: Modifier = Modifier
 ) {
     val suggestions = remember {
-        listOf(
-            "Yasin",
-            "Al-Fatihah",
-            "Al-Kahf",
-            "Al-Mulk",
-            "Makkah",
-            "Madinah",
-            "36",
-            "67"
-        )
+        listOf("2:255", "Yasin", "Al-Mulk", "36", "Makkah")
     }
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(suggestions) { label ->
-            Surface(
-                onClick = { onSuggestionClick(label) },
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
-                tonalElevation = 0.dp
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
-            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = AlKhatibColors.DeepEmerald,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(20.dp))
+                    .clickable { onSuggestionClick(label) }
+                    .padding(horizontal = 4.dp, vertical = 6.dp)
+            )
         }
     }
 }

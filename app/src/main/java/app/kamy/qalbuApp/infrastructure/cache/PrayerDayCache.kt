@@ -29,6 +29,7 @@ object PrayerDayCache {
             cityName = result.cityName,
             hijriLabel = result.hijriLabel,
             gregorianLabel = result.gregorianLabel,
+            hijriDay = result.hijriDay,
             entries = result.timings.map {
                 CachedPrayerEntry(
                     typeKey = it.type.aladhanKey,
@@ -63,6 +64,7 @@ object PrayerDayCache {
             cityName = entry.cityName,
             hijriLabel = entry.hijriLabel,
             gregorianLabel = entry.gregorianLabel,
+            hijriDay = entry.hijriDay,
             scheduleBundle = null
         )
     }
@@ -91,6 +93,7 @@ object PrayerDayCache {
         val cityName: String?,
         val hijriLabel: String?,
         val gregorianLabel: String?,
+        val hijriDay: Int? = null,
         val entries: List<CachedPrayerEntry>,
         val savedAt: Long
     )

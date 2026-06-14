@@ -105,6 +105,26 @@ fun NotificationSettingsScreen(
                     onClick = { vm.toggleNotifTimeSheet(true) }
                 )
             }
+            val quranReminderEnabled = androidx.compose.runtime.remember {
+                androidx.compose.runtime.mutableStateOf(
+                    app.kamy.qalbuApp.infrastructure.preferences.QuranReadingReminderStore.isEnabled(context)
+                )
+            }
+            AlKhatibSettingsToggleRow(
+                icon = Icons.AutoMirrored.Filled.MenuBook,
+                title = stringResource(R.string.quran_reading_reminder_setting),
+                subtitle = stringResource(R.string.quran_reading_reminder_subtitle),
+                checked = quranReminderEnabled.value,
+                onCheckedChange = { enabled ->
+                    quranReminderEnabled.value = enabled
+                    app.kamy.qalbuApp.infrastructure.preferences.QuranReadingReminderStore.setEnabled(context, enabled)
+                    if (enabled) {
+                        app.kamy.qalbuApp.infrastructure.notifications.QuranReadingReminderScheduler.reschedule(context)
+                    } else {
+                        app.kamy.qalbuApp.infrastructure.notifications.QuranReadingReminderScheduler.cancel(context)
+                    }
+                }
+            )
         }
 
         NotificationSectionLabel(stringResource(R.string.section_prayer))

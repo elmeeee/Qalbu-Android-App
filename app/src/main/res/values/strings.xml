@@ -219,6 +219,28 @@
     <string name="mushaf_cloud_synced">Synced to your account</string>
     <string name="prayer_tracker_title">Today\'s prayers</string>
     <string name="prayer_tracker_subtitle">%1$d of %2$d completed</string>
+    <string name="prayer_challenge_progress">Challenge: %1$d / %2$d day streak</string>
+    <string name="prayer_streak_current">Current streak</string>
+    <string name="prayer_streak_best">Best streak</string>
+    <string name="prayer_streak_best_short">Best: %1$d</string>
+    <string name="prayer_optional_title">Optional sunnah</string>
+    <string name="optional_qiyam">Qiyamul lail</string>
+    <string name="optional_mon_thu_fast">Mon &amp; Thu fast</string>
+    <string name="optional_ayyamul_bidh">Ayyamul bidh sahur</string>
+    <string name="prayer_tracker_month_title">This month</string>
+    <string name="prayer_tracker_open_calendar">Calendar</string>
+    <string name="prayer_tracker_calendar_title">Prayer challenge</string>
+    <string name="prayer_tracker_calendar_subtitle">Track your daily salah streak</string>
+    <string name="prayer_check_reminders">Check-in reminders</string>
+    <string name="prayer_check_reminders_hint">Notify if a prayer is not marked</string>
+    <string name="prayer_check_notif_title">Did you pray %1$s?</string>
+    <string name="prayer_check_notif_body">Tap to mark today\'s prayers and keep your streak.</string>
+    <string name="prayer_wrapup_notif_title">Complete today\'s prayers</string>
+    <string name="prayer_wrapup_notif_body">%1$d prayers still unchecked. Finish strong before the day ends.</string>
+    <string name="channel_prayer_tracker">Prayer check-in</string>
+    <string name="channel_prayer_tracker_desc">Reminders to mark completed prayers</string>
+    <string name="previous_month">Previous month</string>
+    <string name="next_month">Next month</string>
     <string name="juz_load_failed">Couldn\'t load juz list</string>
     <string name="juz_verses_count">%1$d verses</string>
     <string name="juz_starts_at">Starts at %1$s</string>
@@ -406,4 +428,98 @@
         <item quantity="one">1 verse</item>
         <item quantity="other">%d verses</item>
     </plurals>
+
+    <!-- Quran personal -->
+    <string name="bookmark">Bookmark</string>
+    <string name="bookmarks_title">Saved verses</string>
+    <string name="bookmarks_empty">No saved verses yet. Bookmark ayat while reading.</string>
+    <string name="verse_note">Personal note</string>
+    <string name="verse_note_hint">What does this ayah mean to you today?</string>
+    <string name="hifz_mode">Hifz mode</string>
+    <string name="hifz_tap_to_reveal">Tap to reveal ayah</string>
+    <string name="hifz_mark">Mark hifz</string>
+    <string name="hifz_learning">Learning</string>
+    <string name="hifz_memorized">Memorized</string>
+    <string name="hifz_review">Review</string>
+
+    <!-- Khatam -->
+    <string name="khatam_title">Khatam Quran</string>
+    <string name="khatam_today">Today</string>
+    <string name="khatam_overall">Overall mushaf</string>
+    <string name="khatam_streak">%1$d day streak</string>
+    <string name="khatam_pages_today">%1$d / %2$d pages</string>
+    <string name="khatam_overall_pages">%1$d / %2$d pages</string>
+
+    <!-- Spiritual tools -->
+    <string name="spiritual_tools_title">Spiritual tools</string>
+    <string name="qibla_title">Qibla</string>
+    <string name="qibla_location_required">Set your location in Today to find Qibla direction.</string>
+    <string name="qibla_bearing">%1$d° to Kaaba</string>
+    <string name="qibla_distance">~%1$d km away</string>
+    <string name="qibla_hint_compass">Hold your phone flat and rotate until the needle points up.</string>
+    <string name="qibla_hint_no_compass">Compass sensor unavailable — bearing shown only.</string>
+    <string name="dhikr_title">Dhikr</string>
+    <string name="dhikr_subhanallah">SubhanAllah</string>
+    <string name="dhikr_alhamdulillah">Alhamdulillah</string>
+    <string name="dhikr_allahuakbar">Allahu Akbar</string>
+    <string name="dhikr_istighfar">Istighfar</string>
+    <string name="dhikr_salawat">Salawat</string>
+    <string name="dhikr_of_target">of %1$d</string>
+    <string name="dhikr_reset">Reset session</string>
+    <string name="dhikr_total">Lifetime: %1$d</string>
+    <string name="zakat_title">Zakat calculator</string>
+    <string name="zakat_intro">Enter your assets and local gold price per gram (approx. nisab 85g gold).</string>
+    <string name="zakat_cash">Cash &amp; savings</string>
+    <string name="zakat_gold_grams">Gold (grams)</string>
+    <string name="zakat_silver_grams">Silver (grams)</string>
+    <string name="zakat_investments">Investments</string>
+    <string name="zakat_debts">Debts due now</string>
+    <string name="zakat_gold_price">Gold price / gram</string>
+    <string name="zakat_net_wealth">Net zakatable wealth</string>
+    <string name="zakat_nisab">Nisab threshold</string>
+    <string name="zakat_due">Zakat due (2.5%)</string>
+    <string name="zakat_below_nisab">Below nisab — no zakat due on this estimate.</string>
+    <string name="qiyam_title">Qiyam / Tahajud</string>
+    <string name="qiyam_stats">%1$d nights this month · %2$d day streak</string>
+    <string name="qiyam_explain">Qiyam is voluntary night prayer — often called tahajud when prayed after sleep.</string>
+    <string name="qiyam_explain_detail">The last third of the night is a blessed time for dua and extra rakah. Log here when you stand for qiyam tonight.</string>
+    <string name="qiyam_tonight_label">Prayed qiyam tonight</string>
+    <string name="qiyam_tonight_hint">Private tracker — not tied to dhikr</string>
+    <string name="qiyam_account_subtitle">Log tahajud / night prayer</string>
+    <string name="dhikr_account_subtitle">Digital tasbih with bead counter</string>
+    <string name="qibla_account_subtitle">AR camera or 3D compass to Kaaba</string>
+    <string name="qibla_mode_ar">AR camera</string>
+    <string name="qibla_mode_3d">3D compass</string>
+    <string name="zakat_account_subtitle">Live gold price · 2.5% nisab rules</string>
+    <string name="zakat_intro_sharia">Zakat maal: 2.5% when wealth reaches nisab (85g gold or 595g silver) for one lunar year.</string>
+    <string name="zakat_live_gold_price">Gold: %1$s / gram (live)</string>
+    <string name="zakat_price_error">Could not load live gold price</string>
+    <string name="zakat_haul_note">Ensure wealth has been held for one full hijri year (haul) before zakat is due.</string>
+    <string name="zakat_nisab_gold">Nisab gold (%1$dg)</string>
+    <string name="zakat_nisab_silver">Nisab silver (%1$dg)</string>
+
+    <!-- Ramadan -->
+    <string name="ramadan_mode_title">Ramadan mode</string>
+    <string name="ramadan_mode_body">Track tarawih and stay mindful this blessed month.</string>
+    <string name="ramadan_tarawih">Tarawih done tonight</string>
+
+    <!-- Notifications -->
+    <string name="channel_quran_reading">Quran reading</string>
+    <string name="channel_quran_reading_desc">Daily Quran reading reminder</string>
+    <string name="quran_reading_reminder_title">Time to read Quran</string>
+    <string name="quran_reading_reminder_body">Even a few ayat today nourish the heart.</string>
+    <string name="quran_reading_reminder_setting">Daily Quran reading</string>
+    <string name="quran_reading_reminder_subtitle">Gentle nudge to open the mushaf</string>
+    <string name="offline_quran_title">Offline Quran</string>
+    <string name="offline_quran_subtitle">Download all surahs for reading without internet</string>
+    <string name="offline_quran_download">Download</string>
+    <string name="offline_quran_downloading">Downloading… %1$d / %2$d surahs</string>
+    <string name="offline_quran_complete">All surahs saved offline</string>
+
+    <!-- Widgets & shortcuts -->
+    <string name="daily_verse_widget_title">Verse of the day</string>
+    <string name="daily_verse_widget_desc">Today\'s ayah on your home screen</string>
+    <string name="daily_verse_widget_empty">Open Qalbu to load today\'s verse</string>
+    <string name="shortcut_continue_quran">Continue Quran</string>
+    <string name="shortcut_prayer_today">Prayer times</string>
 </resources>

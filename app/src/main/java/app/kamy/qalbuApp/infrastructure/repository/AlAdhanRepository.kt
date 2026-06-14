@@ -25,6 +25,7 @@ data class PrayerDayResult(
     val cityName: String? = null,
     val hijriLabel: String? = null,
     val gregorianLabel: String? = null,
+    val hijriDay: Int? = null,
     val scheduleBundle: PrayerScheduleBundle? = null
 )
 
@@ -105,12 +106,14 @@ class AlAdhanRepository @Inject constructor(
         }.sortedBy { it.date }
 
         val (hijriLabel, gregorianLabel) = AlAdhanDateLabels.fromApiDate(data.date)
+        val hijriDay = data.date?.hijri?.day?.trim()?.toIntOrNull()
         val scheduleBundle = PrayerScheduleBuilder.fromTimings(timings, baseDate)
         return PrayerDayResult(
             timings = entries,
             cityName = cityName,
             hijriLabel = hijriLabel,
             gregorianLabel = gregorianLabel,
+            hijriDay = hijriDay,
             scheduleBundle = scheduleBundle
         )
     }

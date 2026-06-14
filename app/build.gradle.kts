@@ -185,6 +185,9 @@ dependencies {
 
     // Image loading
     implementation(libs.coil.compose)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
 
     // Debug network inspector — ProwlKit (debug builds only)
     // debugImplementation(libs.prowl)

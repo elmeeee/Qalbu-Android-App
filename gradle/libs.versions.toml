@@ -37,6 +37,7 @@ appauth = "0.11.1"
 
 # Media
 media3 = "1.4.1"
+cameraX = "1.4.1"
 
 # Images
 coil = "2.7.0"
@@ -103,6 +104,9 @@ androidx-media3-session = { group = "androidx.media3", name = "media3-session", 
 
 # Image loading
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 
 # Debugging
 prowl = { group = "io.github.prowllabs", name = "prowl", version.ref = "prowl" }

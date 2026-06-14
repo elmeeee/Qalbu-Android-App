@@ -23,6 +23,7 @@ class PrayerAlarmRescheduleReceiver : BroadcastReceiver() {
                     PrayerNotificationCoordinator.rescheduleFromCache(appContext)
                 }
                 runCatching { DailyVerseNotificationScheduler.reschedule(appContext) }
+                runCatching { PrayerCheckReminderScheduler.reschedule(appContext) }
             } finally {
                 pending.finish()
             }

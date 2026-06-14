@@ -77,7 +77,8 @@ import kotlinx.coroutines.launch
 fun ChaptersScreen(
     onOpenChapter: (chapter: QuranChapter, initialVerse: Int?) -> Unit,
     onOpenJuz: (juzNumber: Int, verseKey: String?) -> Unit,
-    onOpenMushaf: (page: Int) -> Unit = {}
+    onOpenMushaf: (page: Int) -> Unit = {},
+    onOpenBookmarks: () -> Unit = {}
 ) {
     val vm: ChaptersViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
@@ -104,8 +105,12 @@ fun ChaptersScreen(
     }
 
     fun openNavResult(result: SearchNavResult) {
+        val verseRef = state.verseRef
         when (result.type) {
-            "surah" -> result.chapterNumber?.let { openVerse(it, ayah = 1) }
+            "surah" -> result.chapterNumber?.let { chapterNum ->
+                val ayah = verseRef?.takeIf { it.chapter == chapterNum }?.ayah ?: 1
+                openVerse(chapterNum, ayah)
+            }
             "juz" -> result.key.toIntOrNull()?.let { juzNumber ->
                 vm.openJuz(juzNumber, onOpenJuz)
             }
@@ -113,7 +118,10 @@ fun ChaptersScreen(
                 onOpenMushaf(page.coerceIn(1, app.kamy.qalbuApp.infrastructure.preferences.MushafReadingStore.totalPages))
                 vm.clearSearch()
             }
-            else -> result.chapterNumber?.let { openVerse(it, ayah = 1) }
+            else -> result.chapterNumber?.let { chapterNum ->
+                val ayah = verseRef?.takeIf { it.chapter == chapterNum }?.ayah ?: 1
+                openVerse(chapterNum, ayah)
+            }
         }
     }
 
@@ -245,6 +253,24 @@ fun ChaptersScreen(
                         contentPadding = PaddingValues(bottom = listBottomPadding)
                     ) {
                         if (!isSearching && state.browseMode == QuranBrowseMode.SURAH) {
+                            item(key = "khatam_progress") {
+                                KhatamProgressCard(
+                                    modifier = Modifier.padding(
+                                        horizontal = AlKhatibSpacing.screenHorizontal,
+                                        vertical = AlKhatibSpacing.sm
+                                    )
+                                )
+                            }
+                            item(key = "bookmarks_link") {
+                                TextButton(
+                                    onClick = onOpenBookmarks,
+                                    modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                ) {
+                                    Icon(Icons.Filled.Bookmark, contentDescription = null, tint = AlKhatibColors.GoldDeep)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(stringResource(R.string.bookmarks_title))
+                                }
+                            }
                             state.continueReading?.let { session ->
                                 item(key = "continue_reading") {
                                     ContinueReadingCard(
@@ -269,11 +295,9 @@ fun ChaptersScreen(
                                         reference = ref,
                                         chapter = vm.chapterForNumber(ref.chapter),
                                         onOpen = { chapter, ayah -> openVerse(chapter.id, ayah) },
-                                        modifier = Modifier.padding(
-                                            horizontal = AlKhatibSpacing.screenHorizontal,
-                                            vertical = 4.dp
-                                        )
+                                        modifier = Modifier.fillMaxWidth()
                                     )
+                                    QuranSearchResultDivider()
                                 }
                             }
 
@@ -285,11 +309,9 @@ fun ChaptersScreen(
                                             onOpenMushaf(page)
                                             vm.clearSearch()
                                         },
-                                        modifier = Modifier.padding(
-                                            horizontal = AlKhatibSpacing.screenHorizontal,
-                                            vertical = 4.dp
-                                        )
+                                        modifier = Modifier.fillMaxWidth()
                                     )
+                                    QuranSearchResultDivider()
                                 }
                             }
 
@@ -301,7 +323,10 @@ fun ChaptersScreen(
                                     ChapterRow(
                                         chapter = chapter,
                                         onClick = {
-                                            onOpenChapter(chapter, null)
+                                            val ayah = state.verseRef
+                                                ?.takeIf { it.chapter == chapter.id }
+                                                ?.ayah
+                                            onOpenChapter(chapter, ayah)
                                             vm.clearSearch()
                                         },
                                         modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)

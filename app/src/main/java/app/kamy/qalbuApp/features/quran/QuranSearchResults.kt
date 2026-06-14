@@ -1,22 +1,28 @@
 package app.kamy.qalbuApp.features.quran
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.R
@@ -35,11 +41,14 @@ fun QuranSearchSectionLabel(
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = title,
-        modifier = modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
-        style = MaterialTheme.typography.labelLarge,
+        text = title.uppercase(),
+        modifier = modifier.padding(
+            horizontal = AlKhatibSpacing.screenHorizontal,
+            vertical = 10.dp
+        ),
+        style = MaterialTheme.typography.labelSmall,
         fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.primary
+        color = AlKhatibColors.Slate500
     )
 }
 
@@ -47,8 +56,8 @@ fun QuranSearchSectionLabel(
 fun QuranSearchLoadingRow(modifier: Modifier = Modifier) {
     CircularProgressIndicator(
         modifier = modifier
-            .padding(vertical = 16.dp)
-            .size(28.dp),
+            .padding(vertical = 20.dp)
+            .size(24.dp),
         color = AlKhatibColors.DeepEmerald,
         strokeWidth = 2.dp
     )
@@ -83,7 +92,7 @@ fun SearchNavResultRow(
         "juz" -> stringResource(R.string.search_result_juz)
         else -> result.type.replaceFirstChar { it.uppercase() }
     }
-    SearchResultRow(
+    QuranSearchResultRow(
         title = result.name,
         subtitle = typeLabel,
         enabled = enabled,
@@ -99,51 +108,13 @@ fun SearchVerseResultRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    SearchResultRow(
+    QuranSearchResultRow(
         title = result.verseKey,
         subtitle = result.name,
         enabled = enabled,
         onClick = onClick,
         modifier = modifier
     )
-}
-
-@Composable
-private fun SearchResultRow(
-    title: String,
-    subtitle: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 4.dp),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-        Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.DeepEmerald,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
 }
 
 @Composable
@@ -154,33 +125,14 @@ fun VerseReferenceResultRow(
     modifier: Modifier = Modifier
 ) {
     val label = stringResource(R.string.verse_reference_result, reference.chapter, reference.ayah)
-    Surface(
-        onClick = { chapter?.let { onOpen(it, reference.ayah) } },
+    QuranSearchResultRow(
+        title = label,
+        subtitle = chapter?.displayComplexName ?: stringResource(R.string.verse_reference_unavailable),
         enabled = chapter != null,
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.DeepEmerald
-            )
-            chapter?.let {
-                Text(
-                    text = it.displayComplexName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate500
-                )
-            } ?: Text(
-                text = stringResource(R.string.verse_reference_unavailable),
-                style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500
-            )
-        }
-    }
+        onClick = { chapter?.let { onOpen(it, reference.ayah) } },
+        modifier = modifier,
+        emphasized = true
+    )
 }
 
 @Composable
@@ -189,23 +141,64 @@ fun MushafPageResultRow(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    QuranSearchResultRow(
+        title = stringResource(R.string.mushaf_open_page_result, page),
+        subtitle = stringResource(R.string.mushaf_open_page_hint),
+        enabled = true,
         onClick = onOpen,
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+        modifier = modifier,
+        emphasized = true
+    )
+}
+
+@Composable
+private fun QuranSearchResultRow(
+    title: String,
+    subtitle: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    emphasized: Boolean = false
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(
+                horizontal = AlKhatibSpacing.screenHorizontal,
+                vertical = 14.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.mushaf_open_page_result, page),
+                text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.DeepEmerald
+                color = if (enabled) {
+                    if (emphasized) AlKhatibColors.DeepEmerald else MaterialTheme.colorScheme.onSurface
+                } else {
+                    AlKhatibColors.Slate500
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+            Spacer(Modifier.height(3.dp))
             Text(
-                text = stringResource(R.string.mushaf_open_page_hint),
+                text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500
+                color = AlKhatibColors.Slate500,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        if (enabled) {
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = if (emphasized) AlKhatibColors.Teal else AlKhatibColors.Slate500,
+                modifier = Modifier.size(18.dp)
             )
         }
     }
@@ -219,16 +212,16 @@ fun QuranSearchEmptyState(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 48.dp),
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
+            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 56.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.MenuBook,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(30.dp)
+            tint = AlKhatibColors.Teal.copy(alpha = 0.7f),
+            modifier = Modifier.size(28.dp)
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(14.dp))
         Text(
             text = stringResource(R.string.no_matches),
             style = MaterialTheme.typography.titleMedium,
@@ -240,8 +233,16 @@ fun QuranSearchEmptyState(
             text = stringResource(R.string.search_empty_message, query.normalizedSearchQuery()),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 12.dp)
         )
     }
+}
+
+@Composable
+fun QuranSearchResultDivider(modifier: Modifier = Modifier) {
+    HorizontalDivider(
+        modifier = modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+    )
 }

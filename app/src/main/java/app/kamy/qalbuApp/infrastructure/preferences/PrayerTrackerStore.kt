@@ -1,6 +1,7 @@
 package app.kamy.qalbuApp.infrastructure.preferences
 
 import android.content.Context
+import app.kamy.qalbuApp.domain.model.OptionalWorshipHabit
 import app.kamy.qalbuApp.domain.model.PrayerType
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -10,18 +11,24 @@ import java.util.Locale
 data class PrayerDayProgress(
     val dayKey: String,
     val completedCount: Int,
-    val totalCount: Int = PrayerType.ADZAN_NOTIFICATION_PRAYERS.size
+    val totalCount: Int = PrayerType.ADZAN_NOTIFICATION_PRAYERS.size,
+    val optionalCompletedCount: Int = 0,
+    val optionalTotalCount: Int = 0
 ) {
     val fraction: Float get() = completedCount.toFloat() / totalCount.coerceAtLeast(1)
+    val isPerfectDay: Boolean get() = completedCount >= totalCount
 }
 
 object PrayerTrackerStore {
     private const val PREFS = "qalbu_prayer_tracker"
+    private const val KEY_BEST_STREAK = "best_streak"
     private val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     val TRACKED_PRAYERS = PrayerType.ADZAN_NOTIFICATION_PRAYERS
 
     fun todayKey(): String = dayKeyFormat.format(Date())
+
+    fun dayKeyFor(calendar: Calendar): String = dayKeyFormat.format(calendar.time)
 
     fun isCompleted(context: Context, prayer: PrayerType, dayKey: String = todayKey()): Boolean {
         val key = prefKey(prayer, dayKey)
@@ -38,11 +45,43 @@ object PrayerTrackerStore {
             .edit()
             .putBoolean(prefKey(prayer, dayKey), completed)
             .apply()
+        updateBestStreakIfNeeded(context)
     }
 
     fun toggle(context: Context, prayer: PrayerType, dayKey: String = todayKey()): Boolean {
         val next = !isCompleted(context, prayer, dayKey)
         setCompleted(context, prayer, next, dayKey)
+        return next
+    }
+
+    fun isOptionalCompleted(
+        context: Context,
+        habit: OptionalWorshipHabit,
+        dayKey: String = todayKey()
+    ): Boolean {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(optionalPrefKey(habit, dayKey), false)
+    }
+
+    fun setOptionalCompleted(
+        context: Context,
+        habit: OptionalWorshipHabit,
+        completed: Boolean,
+        dayKey: String = todayKey()
+    ) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(optionalPrefKey(habit, dayKey), completed)
+            .apply()
+    }
+
+    fun toggleOptional(
+        context: Context,
+        habit: OptionalWorshipHabit,
+        dayKey: String = todayKey()
+    ): Boolean {
+        val next = !isOptionalCompleted(context, habit, dayKey)
+        setOptionalCompleted(context, habit, next, dayKey)
         return next
     }
 
@@ -60,8 +99,20 @@ object PrayerTrackerStore {
         return (6 downTo 0).map { offset ->
             cal.time = Date()
             cal.add(Calendar.DAY_OF_YEAR, -offset)
-            val key = dayKeyFormat.format(cal.time)
-            dayProgress(context, key)
+            dayProgress(context, dayKeyFormat.format(cal.time))
+        }
+    }
+
+    fun monthProgress(context: Context, year: Int, month: Int): List<PrayerDayProgress> {
+        val cal = Calendar.getInstance().apply {
+            set(Calendar.YEAR, year)
+            set(Calendar.MONTH, month - 1)
+            set(Calendar.DAY_OF_MONTH, 1)
+        }
+        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        return (1..daysInMonth).map { day ->
+            cal.set(Calendar.DAY_OF_MONTH, day)
+            dayProgress(context, dayKeyFormat.format(cal.time))
         }
     }
 
@@ -75,7 +126,6 @@ object PrayerTrackerStore {
                 streak++
                 cal.add(Calendar.DAY_OF_YEAR, -1)
             } else if (streak == 0 && key == todayKey() && count > 0) {
-                // Today in progress — keep checking from yesterday
                 cal.add(Calendar.DAY_OF_YEAR, -1)
             } else {
                 return streak
@@ -84,6 +134,30 @@ object PrayerTrackerStore {
         return streak
     }
 
+    fun bestStreak(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_BEST_STREAK, 0).coerceAtLeast(currentStreak(context))
+    }
+
+    fun challengeTargetDays(streak: Int): Int = when {
+        streak < 7 -> 7
+        streak < 30 -> 30
+        streak < 40 -> 40
+        else -> ((streak / 10) + 1) * 10
+    }
+
+    private fun updateBestStreakIfNeeded(context: Context) {
+        val current = currentStreak(context)
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val best = prefs.getInt(KEY_BEST_STREAK, 0)
+        if (current > best) {
+            prefs.edit().putInt(KEY_BEST_STREAK, current).apply()
+        }
+    }
+
     private fun prefKey(prayer: PrayerType, dayKey: String): String =
         "${dayKey}_${prayer.name.lowercase()}"
+
+    private fun optionalPrefKey(habit: OptionalWorshipHabit, dayKey: String): String =
+        "${dayKey}_opt_${habit.prefKey}"
 }

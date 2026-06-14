@@ -9,22 +9,29 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,7 +46,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.domain.model.OptionalWorshipHabit
 import app.kamy.qalbuApp.domain.model.PrayerType
+import app.kamy.qalbuApp.features.today.OptionalHabitUiItem
 import app.kamy.qalbuApp.features.today.PrayerTrackerUiState
 import app.kamy.qalbuApp.infrastructure.notifications.AppNotificationCopy
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerDayProgress
@@ -47,13 +56,23 @@ import app.kamy.qalbuApp.infrastructure.preferences.PrayerTrackerStore
 import java.util.Calendar
 import java.util.Locale
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PrayerTrackerCard(
     state: PrayerTrackerUiState,
     onTogglePrayer: (PrayerType) -> Unit,
+    onToggleOptional: (OptionalWorshipHabit) -> Unit,
+    onToggleReminders: (Boolean) -> Unit,
+    onOpenCalendar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val challengeProgress = if (state.challengeTarget > 0) {
+        (state.streak.toFloat() / state.challengeTarget.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -86,10 +105,48 @@ fun PrayerTrackerCard(
                         color = AlKhatibColors.Slate500
                     )
                 }
-                if (state.streak > 0) {
-                    StreakBadge(streak = state.streak)
-                }
+                ChallengeBadge(
+                    streak = state.streak,
+                    best = state.bestStreak
+                )
             }
+
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.LocalFireDepartment,
+                    contentDescription = null,
+                    tint = AlKhatibColors.GoldDeep,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = stringResource(
+                        R.string.prayer_challenge_progress,
+                        state.streak,
+                        state.challengeTarget
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AlKhatibColors.GoldDeep,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(
+                progress = { challengeProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = AlKhatibColors.GoldBright,
+                trackColor = AlKhatibColors.AmberWash,
+                strokeCap = StrokeCap.Round
+            )
 
             Spacer(Modifier.height(16.dp))
 
@@ -120,35 +177,197 @@ fun PrayerTrackerCard(
                 }
             }
 
+            if (state.optionalHabits.isNotEmpty()) {
+                Spacer(Modifier.height(18.dp))
+                Text(
+                    text = stringResource(R.string.prayer_optional_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AlKhatibColors.DeepEmerald
+                )
+                Spacer(Modifier.height(10.dp))
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    state.optionalHabits.forEach { item ->
+                        OptionalHabitChip(
+                            item = item,
+                            onClick = { onToggleOptional(item.habit) }
+                        )
+                    }
+                }
+            }
+
             Spacer(Modifier.height(18.dp))
 
+            MonthMiniCalendarRow(
+                monthProgress = state.monthPreview,
+                onOpenCalendar = onOpenCalendar
+            )
+
+            Spacer(Modifier.height(14.dp))
+
             WeekProgressRow(weekProgress = state.weekProgress)
+
+            Spacer(Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.NotificationsActive,
+                    contentDescription = null,
+                    tint = AlKhatibColors.Slate500,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.prayer_check_reminders),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = AlKhatibColors.Slate800
+                    )
+                    Text(
+                        text = stringResource(R.string.prayer_check_reminders_hint),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AlKhatibColors.Slate500
+                    )
+                }
+                Switch(
+                    checked = state.checkRemindersEnabled,
+                    onCheckedChange = onToggleReminders
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun StreakBadge(streak: Int) {
+private fun ChallengeBadge(streak: Int, best: Int) {
+    Column(horizontalAlignment = Alignment.End) {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .background(AlKhatibColors.AmberWash)
+                .padding(horizontal = 10.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Filled.LocalFireDepartment,
+                contentDescription = null,
+                tint = AlKhatibColors.GoldDeep,
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = streak.toString(),
+                modifier = Modifier.padding(start = 4.dp),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.GoldDeep
+            )
+        }
+        if (best > 0) {
+            Text(
+                text = stringResource(R.string.prayer_streak_best_short, best),
+                style = MaterialTheme.typography.labelSmall,
+                color = AlKhatibColors.Slate500,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun OptionalHabitChip(
+    item: OptionalHabitUiItem,
+    onClick: () -> Unit
+) {
+    val bg = if (item.completed) AlKhatibColors.DeepEmerald.copy(alpha = 0.12f) else AlKhatibColors.LightGrey
+    val border = if (item.completed) AlKhatibColors.DeepEmerald else AlKhatibColors.SoftGrey
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(AlKhatibColors.AmberWash)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .background(bg)
+            .border(1.dp, border, RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            Icons.Filled.LocalFireDepartment,
-            contentDescription = null,
-            tint = AlKhatibColors.GoldDeep,
-            modifier = Modifier.size(18.dp)
-        )
+        if (item.completed) {
+            Icon(
+                Icons.Filled.Check,
+                contentDescription = null,
+                tint = AlKhatibColors.DeepEmerald,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(Modifier.width(6.dp))
+        }
         Text(
-            text = streak.toString(),
-            modifier = Modifier.padding(start = 4.dp),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.GoldDeep
+            text = stringResource(item.labelRes),
+            style = MaterialTheme.typography.labelMedium,
+            color = if (item.completed) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
+            fontWeight = if (item.completed) FontWeight.SemiBold else FontWeight.Normal
         )
+    }
+}
+
+@Composable
+private fun MonthMiniCalendarRow(
+    monthProgress: List<PrayerDayProgress>,
+    onOpenCalendar: () -> Unit
+) {
+    val today = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.prayer_tracker_month_title),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                monthProgress.take(31).forEachIndexed { index, day ->
+                    val dayNum = index + 1
+                    val isToday = dayNum == today
+                    Box(
+                        modifier = Modifier
+                            .size(if (isToday) 10.dp else 8.dp)
+                            .clip(CircleShape)
+                            .background(
+                                when {
+                                    day.isPerfectDay -> AlKhatibColors.DeepEmerald
+                                    day.completedCount > 0 -> AlKhatibColors.Teal.copy(alpha = 0.55f)
+                                    else -> AlKhatibColors.LightGrey
+                                }
+                            )
+                            .then(
+                                if (isToday) Modifier.border(1.dp, AlKhatibColors.GoldBright, CircleShape)
+                                else Modifier
+                            )
+                    )
+                }
+            }
+        }
+        TextButton(onClick = onOpenCalendar) {
+            Text(
+                text = stringResource(R.string.prayer_tracker_open_calendar),
+                color = AlKhatibColors.Teal,
+                fontWeight = FontWeight.SemiBold
+            )
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = AlKhatibColors.Teal,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }
 
@@ -226,7 +445,7 @@ private fun WeekProgressRow(
                         .clip(CircleShape)
                         .background(
                             when {
-                                day.completedCount >= day.totalCount ->
+                                day.isPerfectDay ->
                                     Brush.linearGradient(
                                         listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
                                     )
@@ -243,15 +462,14 @@ private fun WeekProgressRow(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (day.completedCount >= day.totalCount) {
-                        Icon(
+                    when {
+                        day.isPerfectDay -> Icon(
                             Icons.Filled.Check,
                             contentDescription = null,
                             tint = Color.White,
                             modifier = Modifier.size(14.dp)
                         )
-                    } else if (day.completedCount > 0) {
-                        Text(
+                        day.completedCount > 0 -> Text(
                             text = day.completedCount.toString(),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,

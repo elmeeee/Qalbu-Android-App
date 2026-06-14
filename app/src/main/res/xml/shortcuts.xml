@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="continue_quran"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_continue_quran"
+        android:shortcutLongLabel="@string/shortcut_continue_quran">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="qalbu://quran"
+            android:targetPackage="app.kamy.qalbuApp"
+            android:targetClass="app.kamy.qalbuApp.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="prayer_today"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_prayer_today"
+        android:shortcutLongLabel="@string/shortcut_prayer_today">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="qalbu://today"
+            android:targetPackage="app.kamy.qalbuApp"
+            android:targetClass="app.kamy.qalbuApp.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="qibla"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/qibla_title"
+        android:shortcutLongLabel="@string/qibla_title">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="qalbu://qibla"
+            android:targetPackage="app.kamy.qalbuApp"
+            android:targetClass="app.kamy.qalbuApp.MainActivity" />
+    </shortcut>
+</shortcuts>

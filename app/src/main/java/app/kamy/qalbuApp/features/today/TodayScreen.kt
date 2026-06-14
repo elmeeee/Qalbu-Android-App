@@ -70,7 +70,8 @@ import kotlinx.coroutines.launch
 fun TodayScreen(
     audioPlayer: AudioPlayerController,
     onAccountNavigate: () -> Unit = {},
-    onOpenPrayerCalendar: () -> Unit = {}
+    onOpenPrayerCalendar: () -> Unit = {},
+    onOpenTrackerCalendar: () -> Unit = {}
 ) {
     val todayVm: TodayViewModel = hiltViewModel()
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
@@ -295,6 +296,9 @@ fun TodayScreen(
                         PrayerTrackerCard(
                             state = trackerState,
                             onTogglePrayer = trackerVm::togglePrayer,
+                            onToggleOptional = trackerVm::toggleOptionalHabit,
+                            onToggleReminders = trackerVm::setCheckRemindersEnabled,
+                            onOpenCalendar = onOpenTrackerCalendar,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                         )
                     }
