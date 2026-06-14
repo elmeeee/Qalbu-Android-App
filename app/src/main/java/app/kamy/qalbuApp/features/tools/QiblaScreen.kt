@@ -37,7 +37,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.kamy.qalbuApp.ui.feedback.performConfirmHaptic
+import app.kamy.qalbuApp.ui.feedback.rememberConfirmHaptic
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -158,7 +158,8 @@ fun QiblaScreen(onBack: () -> Unit) {
             return@Column
         }
 
-        val needleRotation = bearing - deviceAzimuth
+        val performConfirmHaptic = rememberConfirmHaptic()
+    val needleRotation = bearing - deviceAzimuth
     val aligned = remember(needleRotation) {
         val normalized = ((needleRotation % 360f) + 360f) % 360f
         normalized <= 8f || normalized >= 352f
@@ -167,7 +168,7 @@ fun QiblaScreen(onBack: () -> Unit) {
 
     LaunchedEffect(aligned) {
         if (aligned && !alignedHapticSent) {
-            context.performConfirmHaptic()
+            performConfirmHaptic()
             alignedHapticSent = true
         } else if (!aligned) {
             alignedHapticSent = false

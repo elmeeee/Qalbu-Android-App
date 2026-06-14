@@ -1,45 +1,38 @@
 package app.kamy.qalbuApp.ui.feedback
 
-import android.content.Context
 import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.view.HapticFeedbackConstants
 import android.view.View
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalView
 
-fun View.performClickHaptic() {
-    performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+/** Returns a crash-safe haptic callback for light taps (prayer check, toggles). */
+@Composable
+fun rememberTapHaptic(): () -> Unit {
+    val view = LocalView.current
+    return remember(view) { { view.performTapHaptic() } }
 }
 
-fun Context.performSuccessHaptic() {
-    val vibrator = vibratorOrNull() ?: return
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-    } else {
-        @Suppress("DEPRECATION")
-        vibrator.vibrate(20L)
+/** Returns a crash-safe haptic callback for confirmation (qibla aligned). */
+@Composable
+fun rememberConfirmHaptic(): () -> Unit {
+    val view = LocalView.current
+    return remember(view) { { view.performConfirmHaptic() } }
+}
+
+private fun View.performTapHaptic() {
+    runCatching {
+        performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
     }
 }
 
-fun Context.performConfirmHaptic() {
-    val vibrator = vibratorOrNull() ?: return
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK))
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
-    } else {
-        @Suppress("DEPRECATION")
-        vibrator.vibrate(35L)
+private fun View.performConfirmHaptic() {
+    runCatching {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+        } else {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        }
     }
-}
-
-private fun Context.vibratorOrNull(): Vibrator? {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val manager = getSystemService(VibratorManager::class.java)
-        manager?.defaultVibrator
-    } else {
-        @Suppress("DEPRECATION")
-        getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-    }?.takeIf { it.hasVibrator() }
 }

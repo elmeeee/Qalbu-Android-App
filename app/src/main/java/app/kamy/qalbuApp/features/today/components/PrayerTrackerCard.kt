@@ -53,7 +53,7 @@ import app.kamy.qalbuApp.features.today.PrayerTrackerUiState
 import app.kamy.qalbuApp.infrastructure.notifications.AppNotificationCopy
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerDayProgress
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerTrackerStore
-import app.kamy.qalbuApp.ui.feedback.performSuccessHaptic
+import app.kamy.qalbuApp.ui.feedback.rememberTapHaptic
 import java.util.Calendar
 import java.util.Locale
 
@@ -378,7 +378,7 @@ private fun PrayerCheckChip(
     completed: Boolean,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
+    val performTapHaptic = rememberTapHaptic()
     val bg by animateColorAsState(
         targetValue = if (completed) AlKhatibColors.DeepEmerald else Color.Transparent,
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
@@ -393,7 +393,7 @@ private fun PrayerCheckChip(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
             .clickable {
-                context.performSuccessHaptic()
+                performTapHaptic()
                 onClick()
             }
             .padding(4.dp)
