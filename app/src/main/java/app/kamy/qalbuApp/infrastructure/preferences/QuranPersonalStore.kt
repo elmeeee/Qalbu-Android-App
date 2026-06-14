@@ -121,27 +121,59 @@ object QuranPersonalStore {
         chapterNumber: Int,
         verseNumber: Int
     ): HifzStatus {
+        val current = hifzStatus(context, verseKey)
+        return setHifzStatus(context, verseKey, chapterNumber, verseNumber, current.nextOnTap())
+    }
+
+    fun setHifzStatus(
+        context: Context,
+        verseKey: String,
+        chapterNumber: Int,
+        verseNumber: Int,
+        status: HifzStatus
+    ): HifzStatus {
         val current = hifzEntries(context).toMutableList()
-        val index = current.indexOfFirst { it.verseKey == verseKey }
-        val previous = if (index >= 0) {
-            runCatching { HifzStatus.valueOf(current[index].status) }.getOrDefault(HifzStatus.NONE)
-        } else {
-            HifzStatus.NONE
-        }
-        val next = previous.nextOnTap()
-        if (index >= 0) current.removeAt(index)
-        if (next != HifzStatus.NONE) {
+        current.removeAll { it.verseKey == verseKey }
+        if (status != HifzStatus.NONE) {
             current.add(
                 HifzEntry(
                     verseKey = verseKey,
                     chapterNumber = chapterNumber,
                     verseNumber = verseNumber,
-                    status = next.name
+                    status = status.name
                 )
             )
         }
         saveList(context, KEY_HIFZ, HifzList(current))
-        return next
+        return status
+    }
+
+    fun deleteNote(context: Context, verseKey: String) {
+        val filtered = notes(context).filterNot { it.verseKey == verseKey }
+        saveList(context, KEY_NOTES, NoteList(filtered))
+    }
+
+    data class HifzSummary(
+        val learning: Int,
+        val memorized: Int,
+        val needsReview: Int
+    ) {
+        val total: Int get() = learning + memorized + needsReview
+    }
+
+    fun hifzSummary(context: Context): HifzSummary {
+        var learning = 0
+        var memorized = 0
+        var review = 0
+        hifzEntries(context).forEach { entry ->
+            when (runCatching { HifzStatus.valueOf(entry.status) }.getOrDefault(HifzStatus.NONE)) {
+                HifzStatus.LEARNING -> learning++
+                HifzStatus.MEMORIZED -> memorized++
+                HifzStatus.NEEDS_REVIEW -> review++
+                HifzStatus.NONE -> Unit
+            }
+        }
+        return HifzSummary(learning, memorized, review)
     }
 
     private inline fun <reified T> loadList(context: Context, key: String, fallback: T): T {

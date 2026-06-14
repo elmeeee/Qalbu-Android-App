@@ -40,7 +40,7 @@ interface ReflectApiService {
     suspend fun createPost(
         @Body request: PostCreateRequest,
         @Header("Idempotency-Key") idempotencyKey: String? = null
-    ): PostCreateEnvelope
+    ): retrofit2.Response<PostCreateEnvelope>
 
     @POST("posts/{postId}/toggle-like")
     suspend fun togglePostLike(@Path("postId") postId: String): ReflectToggleLikeResponse

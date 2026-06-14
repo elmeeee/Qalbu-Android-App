@@ -80,9 +80,11 @@ data class ChapterReaderUiState(
     val publishMessage: String? = null,
     val hifzModeEnabled: Boolean = false,
     val currentVerseBookmarked: Boolean = false,
+    val currentVerseHasNote: Boolean = false,
     val currentVerseHifzStatus: HifzStatus = HifzStatus.NONE,
     val noteVisible: Boolean = false,
-    val noteDraft: String = ""
+    val noteDraft: String = "",
+    val hifzPickerVisible: Boolean = false
 )
 
 enum class AyahPlaybackMode {
@@ -118,6 +120,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     private var lastStartedVerseKey: String? = null
     private var wasPlaying: Boolean = false
+    private var lastLoggedReadingKey: String? = null
     private var pendingScrollVerseKey: String? =
         savedStateHandle.get<String>("verseKey")?.takeIf { it.isNotBlank() }
             ?: savedStateHandle.get<Int>("ayah")
@@ -226,6 +229,8 @@ class ChapterReaderViewModel @Inject constructor(
                     )
                 }
                 tryScrollToPendingVerse()
+                logCurrentVerseReading(force = true)
+                refreshPersonalVerseState(0)
             }.onFailure { t ->
                 _state.update { it.copy(isLoading = false, error = t.toAppError()) }
             }
@@ -345,6 +350,15 @@ class ChapterReaderViewModel @Inject constructor(
         refreshPersonalVerseState(index)
         val chapterNum = page.chapterNumber ?: s.chapterNumber
         page.resolvedVerseNumber?.let { logScrollPosition(chapterNum, it) }
+    }
+
+    private fun logCurrentVerseReading(force: Boolean = false) {
+        val s = _state.value
+        val index = s.currentVerseIndex.coerceIn(0, (s.verses.size - 1).coerceAtLeast(0))
+        val page = s.verses.getOrNull(index) ?: return
+        val chapterNum = page.chapterNumber ?: s.chapterNumber
+        val ayah = page.resolvedVerseNumber ?: return
+        logScrollPosition(chapterNum, ayah, force = force)
     }
 
     fun onTapAyah(index: Int) {
@@ -613,7 +627,11 @@ class ChapterReaderViewModel @Inject constructor(
         )
     }
 
-    fun logScrollPosition(chapterNumber: Int, verseNumber: Int) {
+    fun logScrollPosition(chapterNumber: Int, verseNumber: Int, force: Boolean = false) {
+        if (chapterNumber <= 0 || verseNumber <= 0) return
+        val key = "$chapterNumber:$verseNumber"
+        if (!force && key == lastLoggedReadingKey) return
+        lastLoggedReadingKey = key
         viewModelScope.launch {
             runCatching { readingSessions.logReadingSession(chapterNumber, verseNumber) }
         }
@@ -621,12 +639,12 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun refreshPersonalVerseState(index: Int = _state.value.currentVerseIndex) {
         val verse = _state.value.verses.getOrNull(index) ?: return
-        val key = verse.verseKey.orEmpty()
-        if (key.isBlank()) return
+        val key = versePersonalKey(verse, _state.value.chapterNumber) ?: return
         _state.update {
             it.copy(
                 hifzModeEnabled = QuranPersonalStore.isHifzModeEnabled(appContext),
                 currentVerseBookmarked = QuranPersonalStore.isBookmarked(appContext, key),
+                currentVerseHasNote = QuranPersonalStore.noteFor(appContext, key) != null,
                 currentVerseHifzStatus = QuranPersonalStore.hifzStatus(appContext, key),
                 noteDraft = QuranPersonalStore.noteFor(appContext, key)?.text.orEmpty()
             )
@@ -635,21 +653,52 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun toggleBookmark(index: Int = _state.value.currentVerseIndex) {
         val verse = _state.value.verses.getOrNull(index) ?: return
-        val key = verse.verseKey ?: return
+        val key = versePersonalKey(verse, _state.value.chapterNumber) ?: return
         val chapter = verse.chapterNumber ?: _state.value.chapterNumber
         val ayah = verse.resolvedVerseNumber ?: return
         val surah = _state.value.chapterDisplayName
-        QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
+        val added = QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
         refreshPersonalVerseState(index)
+        _state.update {
+            it.copy(
+                publishMessage = appContext.getString(
+                    if (added) R.string.bookmark_added else R.string.bookmark_removed
+                )
+            )
+        }
+    }
+
+    fun openHifzPicker(index: Int = _state.value.currentVerseIndex) {
+        refreshPersonalVerseState(index)
+        _state.update { it.copy(hifzPickerVisible = true) }
+    }
+
+    fun dismissHifzPicker() {
+        _state.update { it.copy(hifzPickerVisible = false) }
+    }
+
+    fun setHifzStatus(status: HifzStatus, index: Int = _state.value.currentVerseIndex) {
+        val verse = _state.value.verses.getOrNull(index) ?: return
+        val key = versePersonalKey(verse, _state.value.chapterNumber) ?: return
+        val chapter = verse.chapterNumber ?: _state.value.chapterNumber
+        val ayah = verse.resolvedVerseNumber ?: return
+        QuranPersonalStore.setHifzStatus(appContext, key, chapter, ayah, status)
+        refreshPersonalVerseState(index)
+        _state.update {
+            it.copy(
+                hifzPickerVisible = false,
+                publishMessage = when (status) {
+                    HifzStatus.NONE -> appContext.getString(R.string.hifz_cleared)
+                    HifzStatus.LEARNING -> appContext.getString(R.string.hifz_marked_learning)
+                    HifzStatus.MEMORIZED -> appContext.getString(R.string.hifz_marked_memorized)
+                    HifzStatus.NEEDS_REVIEW -> appContext.getString(R.string.hifz_marked_review)
+                }
+            )
+        }
     }
 
     fun cycleHifzStatus(index: Int = _state.value.currentVerseIndex) {
-        val verse = _state.value.verses.getOrNull(index) ?: return
-        val key = verse.verseKey ?: return
-        val chapter = verse.chapterNumber ?: _state.value.chapterNumber
-        val ayah = verse.resolvedVerseNumber ?: return
-        QuranPersonalStore.cycleHifzStatus(appContext, key, chapter, ayah)
-        refreshPersonalVerseState(index)
+        openHifzPicker(index)
     }
 
     fun toggleHifzMode(enabled: Boolean) {
@@ -672,12 +721,45 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun saveNote(index: Int = _state.value.currentVerseIndex) {
         val verse = _state.value.verses.getOrNull(index) ?: return
-        val key = verse.verseKey ?: return
+        val key = versePersonalKey(verse, _state.value.chapterNumber) ?: return
         val chapter = verse.chapterNumber ?: _state.value.chapterNumber
         val ayah = verse.resolvedVerseNumber ?: return
-        QuranPersonalStore.saveNote(appContext, key, chapter, ayah, _state.value.noteDraft)
-        _state.update { it.copy(noteVisible = false) }
+        val draft = _state.value.noteDraft
+        QuranPersonalStore.saveNote(appContext, key, chapter, ayah, draft)
+        refreshPersonalVerseState(index)
+        _state.update {
+            it.copy(
+                noteVisible = false,
+                publishMessage = if (draft.isBlank()) {
+                    appContext.getString(R.string.note_deleted)
+                } else {
+                    appContext.getString(R.string.note_saved)
+                }
+            )
+        }
     }
+
+    fun deleteNote(index: Int = _state.value.currentVerseIndex) {
+        val verse = _state.value.verses.getOrNull(index) ?: return
+        val key = versePersonalKey(verse, _state.value.chapterNumber) ?: return
+        QuranPersonalStore.deleteNote(appContext, key)
+        refreshPersonalVerseState(index)
+        _state.update {
+            it.copy(
+                noteVisible = false,
+                noteDraft = "",
+                publishMessage = appContext.getString(R.string.note_deleted)
+            )
+        }
+    }
+
+    private fun versePersonalKey(verse: RandomAyahPayload, chapterFallback: Int): String? =
+        verse.verseKey?.takeIf { it.isNotBlank() }
+            ?: verse.displayVerseReference
+            ?: verse.resolvedVerseNumber?.let { ayah ->
+                val chapter = verse.chapterNumber ?: chapterFallback
+                "$chapter:$ayah"
+            }
 }
 
 sealed interface ReaderEvent {

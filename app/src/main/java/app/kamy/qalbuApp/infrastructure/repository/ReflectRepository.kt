@@ -7,7 +7,6 @@ import app.kamy.qalbuApp.domain.model.PostCreateReference
 import app.kamy.qalbuApp.domain.model.PostCreateRequest
 import app.kamy.qalbuApp.domain.model.ReflectFeedEnvelope
 import app.kamy.qalbuApp.domain.model.ReflectFeedPost
-import app.kamy.qalbuApp.domain.model.UserPost
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.infrastructure.network.api.ReflectApiService
 import java.text.SimpleDateFormat
@@ -37,7 +36,7 @@ class ReflectRepository @Inject constructor(
         verseKey: String,
         authorId: String,
         idempotencyKey: String? = null
-    ): UserPost? {
+    ): ReflectFeedPost? {
         val (chapter, verse) = parseVerseKey(verseKey)
             ?: throw IllegalArgumentException("invalid verseKey '$verseKey'")
         val now = Date()
@@ -56,8 +55,11 @@ class ReflectRepository @Inject constructor(
             publishedAt = isoFmt.format(now)
         )
 
-        val envelope = qfCall {
+        val response = qfCall {
             api.createPost(PostCreateRequest(payload), idempotencyKey = idempotencyKey)
+        }
+        if (!response.isSuccessful) {
+            throw IllegalStateException("create post failed: HTTP ${response.code()}")
         }
 
         runCatching {
@@ -73,7 +75,7 @@ class ReflectRepository @Inject constructor(
             }
         }
 
-        return envelope.createdPost
+        return response.body()?.createdPost
     }
 
     private fun parseVerseKey(key: String): Pair<Int, Int>? {

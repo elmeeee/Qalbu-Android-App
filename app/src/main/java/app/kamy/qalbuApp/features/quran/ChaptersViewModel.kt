@@ -84,15 +84,20 @@ class ChaptersViewModel @Inject constructor(
         refreshMushafBrowse()
         viewModelScope.launch {
             userSession.isSignedIn.collect { signedIn ->
-                    if (signedIn) {
-                        syncCloudReadingToMushaf()
-                    } else {
-                        lastCloudSyncKey = null
-                        refreshMushafBrowse(isCloudSynced = false)
-                    }
-                    refresh(force = false)
+                if (signedIn) {
+                    readingSessions.syncAfterSignIn()
+                    syncCloudReadingToMushaf()
+                } else {
+                    lastCloudSyncKey = null
+                    refreshMushafBrowse(isCloudSynced = false)
                 }
+                refresh(force = false)
+            }
         }
+    }
+
+    fun onScreenVisible() {
+        viewModelScope.launch { refresh(force = false) }
     }
 
     private fun refreshMushafBrowse(isCloudSynced: Boolean = _state.value.mushafBrowse.isCloudSynced) {

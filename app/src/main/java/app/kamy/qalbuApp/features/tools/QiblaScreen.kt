@@ -30,12 +30,14 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import app.kamy.qalbuApp.ui.feedback.performConfirmHaptic
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -157,6 +159,20 @@ fun QiblaScreen(onBack: () -> Unit) {
         }
 
         val needleRotation = bearing - deviceAzimuth
+    val aligned = remember(needleRotation) {
+        val normalized = ((needleRotation % 360f) + 360f) % 360f
+        normalized <= 8f || normalized >= 352f
+    }
+    var alignedHapticSent by remember { mutableStateOf(false) }
+
+    LaunchedEffect(aligned) {
+        if (aligned && !alignedHapticSent) {
+            context.performConfirmHaptic()
+            alignedHapticSent = true
+        } else if (!aligned) {
+            alignedHapticSent = false
+        }
+    }
 
         Box(
             modifier = Modifier
@@ -185,8 +201,12 @@ fun QiblaScreen(onBack: () -> Unit) {
         }
 
         Text(
-            text = stringResource(R.string.qibla_bearing, bearing.roundToInt()),
-            color = AlKhatibColors.GoldBright,
+            text = if (aligned) {
+                stringResource(R.string.qibla_aligned)
+            } else {
+                stringResource(R.string.qibla_bearing, bearing.roundToInt())
+            },
+            color = if (aligned) AlKhatibColors.GoldBright else AlKhatibColors.GoldBright,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier

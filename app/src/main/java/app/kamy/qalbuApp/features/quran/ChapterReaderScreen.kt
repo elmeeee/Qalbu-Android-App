@@ -55,6 +55,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,6 +64,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -279,6 +281,7 @@ fun ChapterReaderScreen(
                 expanded = verseMenuExpanded,
                 onToggle = { verseMenuExpanded = !verseMenuExpanded },
                 bookmarked = state.currentVerseBookmarked,
+                hasNote = state.currentVerseHasNote,
                 hifzStatus = state.currentVerseHifzStatus,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -391,9 +394,19 @@ fun ChapterReaderScreen(
     if (state.noteVisible) {
         VerseNoteSheet(
             draft = state.noteDraft,
+            hasExistingNote = state.currentVerseHasNote,
             onDraftChange = vm::updateNoteDraft,
             onDismiss = vm::dismissNote,
-            onSave = vm::saveNote
+            onSave = vm::saveNote,
+            onDelete = vm::deleteNote
+        )
+    }
+
+    if (state.hifzPickerVisible) {
+        HifzPickerSheet(
+            currentStatus = state.currentVerseHifzStatus,
+            onDismiss = vm::dismissHifzPicker,
+            onSelect = vm::setHifzStatus
         )
     }
 
@@ -459,17 +472,21 @@ private fun QalbuAyahPage(
     val contentTopPadding = 56.dp
     val contentBottomPadding = if (audioBarVisible) 188.dp else 148.dp
     val scrollState = rememberScrollState()
-    var hifzRevealed by androidx.compose.runtime.remember(verse.listIdentity) {
-        androidx.compose.runtime.mutableStateOf(false)
+    var hifzRevealStage by remember(verse.listIdentity) {
+        mutableIntStateOf(0)
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(verse.listIdentity) {
+            .pointerInput(verse.listIdentity, hifzModeEnabled, hifzRevealStage) {
                 detectTapGestures(onTap = {
-                    if (hifzModeEnabled && !hifzRevealed) {
-                        hifzRevealed = true
+                    if (hifzModeEnabled) {
+                        when (hifzRevealStage) {
+                            0 -> hifzRevealStage = 1
+                            1 -> if (showTranslation) hifzRevealStage = 2 else onPlay()
+                            else -> onPlay()
+                        }
                     } else {
                         onPlay()
                     }
@@ -489,31 +506,45 @@ private fun QalbuAyahPage(
                 ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (hifzModeEnabled && !hifzRevealed) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .background(AlKhatibColors.SoftGrey.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.hifz_tap_to_reveal),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = AlKhatibColors.Slate500
+            when {
+                hifzModeEnabled && hifzRevealStage == 0 -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .background(AlKhatibColors.SoftGrey.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = stringResource(R.string.hifz_recall_prompt),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = AlKhatibColors.Slate800,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                text = stringResource(R.string.hifz_tap_to_reveal),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = AlKhatibColors.Slate500,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+                else -> {
+                    TajweedHtmlView(
+                        textUthmani = verse.textUthmani,
+                        ayahNumber = verse.resolvedVerseNumber,
+                        fontSizeSp = (30 * fontScale).toInt(),
+                        compact = true,
+                        textAlign = TajweedTextAlign.Justify,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
-            } else {
-                TajweedHtmlView(
-                    textUthmani = verse.textUthmani,
-                    ayahNumber = verse.resolvedVerseNumber,
-                    fontSizeSp = (30 * fontScale).toInt(),
-                    compact = true,
-                    textAlign = TajweedTextAlign.Justify,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
-            if (showTranslation) {
+            if (showTranslation && (!hifzModeEnabled || hifzRevealStage >= 2)) {
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.toVerseTranslationPlainText()
                     if (clean.isNotEmpty()) {
@@ -539,6 +570,7 @@ private fun ReaderVerseActionsMenu(
     expanded: Boolean,
     onToggle: () -> Unit,
     bookmarked: Boolean,
+    hasNote: Boolean,
     hifzStatus: HifzStatus,
     onBookmark: () -> Unit,
     onNote: () -> Unit,
@@ -571,7 +603,9 @@ private fun ReaderVerseActionsMenu(
                             modifier = Modifier.size(16.dp)
                         )
                     },
-                    label = stringResource(R.string.bookmark),
+                    label = stringResource(
+                        if (bookmarked) R.string.remove_bookmark else R.string.bookmark
+                    ),
                     onClick = onBookmark
                 )
                 ReaderCompactMenuItem(
@@ -579,11 +613,13 @@ private fun ReaderVerseActionsMenu(
                         Icon(
                             Icons.Filled.EditNote,
                             contentDescription = null,
-                            tint = AlKhatibColors.Slate800,
+                            tint = if (hasNote) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
                             modifier = Modifier.size(16.dp)
                         )
                     },
-                    label = stringResource(R.string.verse_note),
+                    label = stringResource(
+                        if (hasNote) R.string.verse_note_edit else R.string.verse_note
+                    ),
                     onClick = onNote
                 )
                 ReaderCompactMenuItem(
@@ -825,11 +861,98 @@ private fun hifzStatusColor(status: HifzStatus): Color = when (status) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+private fun HifzPickerSheet(
+    currentStatus: HifzStatus,
+    onDismiss: () -> Unit,
+    onSelect: (HifzStatus) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.hifz_picker_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            Text(
+                text = stringResource(R.string.hifz_picker_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate500
+            )
+            HifzPickerOption(
+                title = stringResource(R.string.hifz_learning),
+                subtitle = stringResource(R.string.hifz_learning_desc),
+                selected = currentStatus == HifzStatus.LEARNING,
+                color = AlKhatibColors.IndigoAccent,
+                onClick = { onSelect(HifzStatus.LEARNING) }
+            )
+            HifzPickerOption(
+                title = stringResource(R.string.hifz_memorized),
+                subtitle = stringResource(R.string.hifz_memorized_desc),
+                selected = currentStatus == HifzStatus.MEMORIZED,
+                color = AlKhatibColors.DeepEmerald,
+                onClick = { onSelect(HifzStatus.MEMORIZED) }
+            )
+            HifzPickerOption(
+                title = stringResource(R.string.hifz_review),
+                subtitle = stringResource(R.string.hifz_review_desc),
+                selected = currentStatus == HifzStatus.NEEDS_REVIEW,
+                color = AlKhatibColors.GoldDeep,
+                onClick = { onSelect(HifzStatus.NEEDS_REVIEW) }
+            )
+            if (currentStatus != HifzStatus.NONE) {
+                TextButton(onClick = { onSelect(HifzStatus.NONE) }) {
+                    Text(stringResource(R.string.hifz_clear), color = AlKhatibColors.Danger)
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun HifzPickerOption(
+    title: String,
+    subtitle: String,
+    selected: Boolean,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (selected) color.copy(alpha = 0.12f) else AlKhatibColors.SoftGrey.copy(alpha = 0.25f))
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.Slate900)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.Slate500)
+        }
+        if (selected) {
+            Text("✓", color = color, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 private fun VerseNoteSheet(
     draft: String,
+    hasExistingNote: Boolean,
     onDraftChange: (String) -> Unit,
     onDismiss: () -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -856,13 +979,23 @@ private fun VerseNoteSheet(
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                androidx.compose.material3.TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.back))
+                if (hasExistingNote) {
+                    androidx.compose.material3.TextButton(onClick = onDelete) {
+                        Text(stringResource(R.string.delete_note), color = AlKhatibColors.Danger)
+                    }
+                } else {
+                    Spacer(Modifier.width(1.dp))
                 }
-                androidx.compose.material3.TextButton(onClick = onSave) {
-                    Text(stringResource(R.string.done))
+                Row {
+                    androidx.compose.material3.TextButton(onClick = onDismiss) {
+                        Text(stringResource(R.string.back))
+                    }
+                    androidx.compose.material3.TextButton(onClick = onSave) {
+                        Text(stringResource(R.string.done))
+                    }
                 }
             }
             Spacer(Modifier.height(8.dp))

@@ -85,9 +85,6 @@ import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-private const val VIRTUAL_CENTER_INDEX = 1
-private const val VIRTUAL_PAGE_COUNT = 3
-
 private val MushafPaper = Color(0xFFFAF6EE)
 private val MushafPaperEdge = Color(0xFFE8DFD0)
 private val MushafDesk = Color(0xFF1A1208)
@@ -100,54 +97,21 @@ fun MushafReaderScreen(
 ) {
     val state by vm.state.collectAsState()
     val totalPages = MushafReadingStore.totalPages
-    var anchorPage by remember { mutableIntStateOf(state.currentPage) }
-    var isRecentering by remember { mutableStateOf(false) }
-    val pagerState = rememberPagerState(
-        initialPage = VIRTUAL_CENTER_INDEX,
-        pageCount = { VIRTUAL_PAGE_COUNT }
-    )
-    var pagerReady by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.isResolvingStartPage, state.currentPage) {
-        if (!state.isResolvingStartPage) {
-            anchorPage = state.currentPage
+    if (state.isResolvingStartPage) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MushafDesk),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = AlKhatibColors.GoldBright)
         }
+        return
     }
 
-    LaunchedEffect(state.isResolvingStartPage) {
-        if (!state.isResolvingStartPage && !pagerReady) {
-            pagerState.scrollToPage(VIRTUAL_CENTER_INDEX)
-            pagerReady = true
-        }
-    }
-
-    LaunchedEffect(pagerState, pagerReady, state.isResolvingStartPage) {
-        if (!pagerReady || state.isResolvingStartPage) return@LaunchedEffect
-        snapshotFlow { pagerState.isScrollInProgress to pagerState.settledPage }
-            .distinctUntilChanged()
-            .collect { (inProgress, settled) ->
-                if (inProgress || isRecentering || settled == VIRTUAL_CENTER_INDEX) return@collect
-                while (pagerState.isScrollInProgress) {
-                    kotlinx.coroutines.yield()
-                }
-                val targetPage = when (settled) {
-                    0 -> anchorPage - 1
-                    2 -> anchorPage + 1
-                    else -> return@collect
-                }
-                isRecentering = true
-                try {
-                    if (targetPage !in 1..totalPages) {
-                        pagerState.scrollToPage(VIRTUAL_CENTER_INDEX)
-                        return@collect
-                    }
-                    anchorPage = targetPage
-                    vm.onPageChanged(targetPage)
-                    pagerState.scrollToPage(VIRTUAL_CENTER_INDEX)
-                } finally {
-                    isRecentering = false
-                }
-            }
+    var anchorPage by remember(state.currentPage) {
+        mutableIntStateOf(state.currentPage.coerceIn(1, totalPages))
     }
 
     Box(
@@ -165,7 +129,7 @@ fun MushafReaderScreen(
                 .statusBarsPadding()
         ) {
             MushafReaderTopBar(
-                currentPage = state.currentPage,
+                currentPage = anchorPage,
                 totalPages = state.totalPages,
                 pageInfo = state.pageInfoLabel,
                 showTranslation = state.showTranslation,
@@ -173,28 +137,22 @@ fun MushafReaderScreen(
                 onToggleTranslation = vm::toggleTranslation
             )
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .navigationBarsPadding(),
-                beyondViewportPageCount = 1,
-                userScrollEnabled = !state.isResolvingStartPage && !isRecentering
-            ) { index ->
-                val pageNumber = anchorPage + (index - VIRTUAL_CENTER_INDEX)
-                if (pageNumber !in 1..totalPages) {
-                    MushafBlankPage(modifier = Modifier.mushafPageTurnEffect(pagerState, index))
-                } else {
-                    val pageState = state.pages[pageNumber] ?: MushafPageState(isLoading = true)
-                    MushafBookPage(
-                        pageNumber = pageNumber,
-                        pageState = pageState,
-                        showTranslation = state.showTranslation,
-                        onRetry = { vm.retryPage(pageNumber) },
-                        modifier = Modifier.mushafPageTurnEffect(pagerState, index)
-                    )
-                }
+            key(anchorPage) {
+                MushafSwipePager(
+                    anchorPage = anchorPage,
+                    totalPages = totalPages,
+                    pages = state.pages,
+                    showTranslation = state.showTranslation,
+                    onPageTurn = { page ->
+                        anchorPage = page
+                        vm.onPageChanged(page)
+                    },
+                    onRetry = vm::retryPage,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                )
             }
         }
 
@@ -209,17 +167,65 @@ fun MushafReaderScreen(
     }
 }
 
-private fun Modifier.mushafPageTurnEffect(pagerState: PagerState, pageIndex: Int): Modifier =
-    graphicsLayer {
-        if (pagerState.isScrollInProgress && size.width <= 0f) return@graphicsLayer
-        val pageOffset = (pagerState.currentPage - pageIndex) + pagerState.currentPageOffsetFraction
-        if (size.width <= 0f || size.height <= 0f) return@graphicsLayer
-        val absOffset = pageOffset.absoluteValue.coerceIn(0f, 1f)
-        cameraDistance = 14f * density
-        rotationY = lerp(0f, -28f, pageOffset.coerceIn(-1f, 1f))
-        translationX = size.width * 0.08f * pageOffset
-        alpha = lerp(1f, 0.88f, absOffset)
+@Composable
+private fun MushafSwipePager(
+    anchorPage: Int,
+    totalPages: Int,
+    pages: Map<Int, MushafPageState>,
+    showTranslation: Boolean,
+    onPageTurn: (Int) -> Unit,
+    onRetry: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val pagerState = rememberPagerState(initialPage = 1, pageCount = { 3 })
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage to pagerState.isScrollInProgress }
+            .distinctUntilChanged()
+            .collect { (settled, inProgress) ->
+                if (inProgress || settled == 1) return@collect
+                when (settled) {
+                    0 -> {
+                        val target = anchorPage - 1
+                        if (target >= 1) {
+                            onPageTurn(target)
+                        } else {
+                            pagerState.animateScrollToPage(1)
+                        }
+                    }
+                    2 -> {
+                        val target = anchorPage + 1
+                        if (target <= totalPages) {
+                            onPageTurn(target)
+                        } else {
+                            pagerState.animateScrollToPage(1)
+                        }
+                    }
+                }
+            }
     }
+
+    HorizontalPager(
+        state = pagerState,
+        modifier = modifier,
+        beyondViewportPageCount = 0,
+        userScrollEnabled = true
+    ) { index ->
+        val pageNumber = anchorPage + (index - 1)
+        if (pageNumber !in 1..totalPages) {
+            MushafBlankPage(modifier = Modifier.fillMaxSize())
+        } else {
+            val pageState = pages[pageNumber] ?: MushafPageState(isLoading = true)
+            MushafBookPage(
+                pageNumber = pageNumber,
+                pageState = pageState,
+                showTranslation = showTranslation,
+                onRetry = { onRetry(pageNumber) },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
 
 @Composable
 private fun MushafBlankPage(modifier: Modifier = Modifier) {

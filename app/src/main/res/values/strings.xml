@@ -434,16 +434,39 @@
 
     <!-- Quran personal -->
     <string name="bookmark">Bookmark</string>
-    <string name="bookmarks_title">Saved verses</string>
+    <string name="remove_bookmark">Remove bookmark</string>
+    <string name="bookmark_added">Verse bookmarked</string>
+    <string name="bookmark_removed">Bookmark removed</string>
+    <string name="bookmarks_title">Bookmarks</string>
     <string name="bookmarks_empty">No saved verses yet. Bookmark ayat while reading.</string>
+    <string name="quran_library_title">My Quran</string>
+    <string name="notes_title">Notes</string>
+    <string name="notes_empty">No personal notes yet. Add a note from the verse menu while reading.</string>
+    <string name="note_saved">Note saved</string>
+    <string name="note_deleted">Note deleted</string>
+    <string name="delete_note">Delete note</string>
     <string name="verse_note">Personal note</string>
+    <string name="verse_note_edit">Edit note</string>
     <string name="verse_note_hint">What does this ayah mean to you today?</string>
+    <string name="hifz_title">Hifz</string>
+    <string name="hifz_empty">No ayat marked for memorization yet.</string>
     <string name="hifz_mode">Hifz mode</string>
-    <string name="hifz_tap_to_reveal">Tap to reveal ayah</string>
+    <string name="hifz_recall_prompt">Try to recall this ayah</string>
+    <string name="hifz_tap_to_reveal">Tap to reveal Arabic, tap again for translation</string>
     <string name="hifz_mark">Mark hifz</string>
+    <string name="hifz_picker_title">Memorization status</string>
+    <string name="hifz_picker_subtitle">Track where you are in learning this ayah</string>
     <string name="hifz_learning">Learning</string>
+    <string name="hifz_learning_desc">Still memorizing — review often</string>
     <string name="hifz_memorized">Memorized</string>
+    <string name="hifz_memorized_desc">Can recite confidently from memory</string>
     <string name="hifz_review">Review</string>
+    <string name="hifz_review_desc">Needs revision before it fades</string>
+    <string name="hifz_clear">Clear mark</string>
+    <string name="hifz_cleared">Hifz mark cleared</string>
+    <string name="hifz_marked_learning">Marked as learning</string>
+    <string name="hifz_marked_memorized">Marked as memorized</string>
+    <string name="hifz_marked_review">Marked for review</string>
 
     <!-- Khatam -->
     <string name="khatam_title">Khatam Quran</string>
@@ -458,6 +481,7 @@
     <string name="qibla_title">Qibla</string>
     <string name="qibla_location_required">Set your location in Today to find Qibla direction.</string>
     <string name="qibla_bearing">%1$d° to Kaaba</string>
+    <string name="qibla_aligned">Facing Qibla — you\'re aligned</string>
     <string name="qibla_distance">~%1$d km away</string>
     <string name="qibla_hint_compass">Hold your phone flat and rotate until the needle points up.</string>
     <string name="qibla_hint_no_compass">Compass sensor unavailable — bearing shown only.</string>
@@ -514,9 +538,19 @@
     <string name="quran_reading_reminder_setting">Daily Quran reading</string>
     <string name="quran_reading_reminder_subtitle">Gentle nudge to open the mushaf</string>
     <string name="offline_quran_title">Offline Quran</string>
-    <string name="offline_quran_subtitle">Download all surahs for reading without internet</string>
+    <string name="offline_quran_subtitle">Choose surahs to save for reading without internet</string>
+    <string name="offline_quran_picker_subtitle">%1$d of 114 surahs saved offline</string>
+    <string name="offline_quran_partial">%1$d / %2$d surahs saved offline</string>
+    <string name="offline_quran_mode_all">All 114 surahs</string>
+    <string name="offline_quran_mode_pick">Pick surahs</string>
+    <string name="offline_quran_select_all">Select all</string>
+    <string name="offline_quran_clear_all">Clear all</string>
+    <string name="offline_quran_include_translations">Include translations</string>
+    <string name="offline_quran_pick_empty">Select at least one surah</string>
     <string name="offline_quran_download">Download</string>
+    <string name="offline_quran_downloading_short">Downloading…</string>
     <string name="offline_quran_downloading">Downloading… %1$d / %2$d surahs</string>
+    <string name="offline_quran_downloading_detail">Batch %1$d / %2$d · %3$d surahs saved total</string>
     <string name="offline_quran_complete">All surahs saved offline</string>
 
     <!-- Widgets & shortcuts -->

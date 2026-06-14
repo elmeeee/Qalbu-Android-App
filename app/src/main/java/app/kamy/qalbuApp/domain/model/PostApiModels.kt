@@ -34,10 +34,10 @@ data class PostCreateReference(
 @Serializable
 data class PostCreateEnvelope(
     val success: Boolean? = null,
-    val data: UserPost? = null,
-    val post: UserPost? = null
+    private val data: ReflectFeedPost? = null,
+    private val post: ReflectFeedPost? = null
 ) {
-    val createdPost: UserPost? get() = data ?: post
+    val createdPost: ReflectFeedPost? get() = data ?: post
 }
 
 @Serializable

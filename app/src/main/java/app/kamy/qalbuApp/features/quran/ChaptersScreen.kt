@@ -142,6 +142,10 @@ fun ChaptersScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        vm.onScreenVisible()
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -268,7 +272,7 @@ fun ChaptersScreen(
                                 ) {
                                     Icon(Icons.Filled.Bookmark, contentDescription = null, tint = AlKhatibColors.GoldDeep)
                                     Spacer(Modifier.width(8.dp))
-                                    Text(stringResource(R.string.bookmarks_title))
+                                    Text(stringResource(R.string.quran_library_title))
                                 }
                             }
                             state.continueReading?.let { session ->
