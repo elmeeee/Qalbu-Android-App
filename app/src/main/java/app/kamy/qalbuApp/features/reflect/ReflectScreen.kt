@@ -1,14 +1,17 @@
 package app.kamy.qalbuApp.features.reflect
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,24 +24,20 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,29 +48,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import android.content.Intent
-import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.design.components.AlKhatibErrorStateDark
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
 import app.kamy.qalbuApp.design.components.ReflectPostSkeleton
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.domain.model.ReflectFeedPost
+import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
+import app.kamy.qalbuApp.ui.common.stripHtmlTags
 import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
-import app.kamy.qalbuApp.ui.common.stripHtmlTags
 import coil.compose.AsyncImage
-import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
+
+private val ReflectPaper = Color(0xFFFAF6EE)
+private val ReflectPaperMuted = Color(0xFF6B6358)
+private val ReflectPaperInk = Color(0xFF1E1A14)
 
 @Composable
 fun ReflectScreen(
@@ -95,7 +102,7 @@ fun ReflectScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Brush.linearGradient(
+                Brush.verticalGradient(
                     listOf(
                         AlKhatibColors.ForestDark,
                         AlKhatibColors.DeepEmerald,
@@ -106,44 +113,29 @@ fun ReflectScreen(
     ) {
         when {
             !state.isAuthenticated -> SignInGate(onSignIn, signInTitle, signInSubtitle)
-            state.isLoading && state.posts.isEmpty() ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 8.dp)
-                ) {
+            state.isLoading && state.posts.isEmpty() -> ReflectLoadingState(
+                segment = state.segment,
+                onSelectSegment = vm::switchSegment,
+                reflectTitle = reflectTitle,
+                reflectCommunity = reflectCommunity
+            )
+            state.error != null && state.posts.isEmpty() && errorDisplay != null ->
+                Column(Modifier.fillMaxSize()) {
                     ReflectStickyHeader(
                         segment = state.segment,
                         onSelectSegment = vm::switchSegment,
                         reflectTitle = reflectTitle,
-                        reflectCommunity = reflectCommunity,
-                        modifier = Modifier.background(
-                            Brush.linearGradient(
-                                listOf(
-                                    AlKhatibColors.ForestDark,
-                                    AlKhatibColors.DeepEmerald
-                                )
-                            )
-                        )
+                        reflectCommunity = reflectCommunity
                     )
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        repeat(4) {
-                            ReflectPostSkeleton()
-                        }
-                    }
+                    AlKhatibErrorStateDark(
+                        display = errorDisplay,
+                        onRetry = { vm.loadPosts(reset = true) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                    )
                 }
-            state.error != null && state.posts.isEmpty() && errorDisplay != null ->
-                AlKhatibErrorStateDark(
-                    display = errorDisplay,
-                    onRetry = { vm.loadPosts(reset = true) },
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                )
-            else -> ReelFeed(
+            else -> ReflectFeed(
                 state = state,
                 vm = vm,
                 onOpenVerse = onOpenVerse,
@@ -159,7 +151,7 @@ fun ReflectScreen(
                             if (isNotEmpty()) append("\n\n")
                             append("— $verseKey")
                         }
-                    }.ifBlank { return@ReelFeed }
+                    }.ifBlank { return@ReflectFeed }
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_TEXT, text)
@@ -173,9 +165,36 @@ fun ReflectScreen(
     }
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-private fun ReelFeed(
+private fun ReflectLoadingState(
+    segment: ReflectSegment,
+    onSelectSegment: (ReflectSegment) -> Unit,
+    reflectTitle: String,
+    reflectCommunity: String
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 8.dp)
+    ) {
+        ReflectStickyHeader(
+            segment = segment,
+            onSelectSegment = onSelectSegment,
+            reflectTitle = reflectTitle,
+            reflectCommunity = reflectCommunity
+        )
+        Column(
+            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            repeat(3) { ReflectPostSkeleton() }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReflectFeed(
     state: ReflectUiState,
     vm: ReflectViewModel,
     onOpenVerse: (String) -> Unit,
@@ -192,6 +211,10 @@ private fun ReelFeed(
 
     val listBottomPadding = floatingNavBottomPadding()
     val scope = rememberCoroutineScope()
+    val emptyMessage = stringResource(
+        if (state.segment == ReflectSegment.MINE) R.string.reflect_empty_mine
+        else R.string.reflect_empty_all
+    )
 
     AlKhatibPullToRefresh(
         isRefreshing = state.isLoading && state.posts.isNotEmpty(),
@@ -203,43 +226,53 @@ private fun ReelFeed(
                 segment = state.segment,
                 onSelectSegment = vm::switchSegment,
                 reflectTitle = reflectTitle,
-                reflectCommunity = reflectCommunity,
-                modifier = Modifier.background(
-                    Brush.linearGradient(
-                        listOf(
-                            AlKhatibColors.ForestDark,
-                            AlKhatibColors.DeepEmerald
-                        )
-                    )
-                )
+                reflectCommunity = reflectCommunity
             )
             LazyColumn(
                 state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                contentPadding = PaddingValues(bottom = listBottomPadding),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(
+                    start = AlKhatibSpacing.screenHorizontal,
+                    end = AlKhatibSpacing.screenHorizontal,
+                    bottom = listBottomPadding
+                ),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-            itemsIndexed(state.posts, key = { _, p -> p.id }) { _, post ->
-            ReelPostCard(
-                post = post,
-                togglingLike = post.id in state.togglingLikePostIds,
-                onLike = { vm.toggleLike(post.id) },
-                onOpenVerse = { post.references?.firstOrNull()?.verseKey?.let(onOpenVerse) },
-                contributorLabel = contributorLabel,
-                verifiedLabel = verifiedLabel,
-                shareLabel = shareLabel,
-                onShare = { onSharePost(post) }
-            )
-        }
-        if (state.isLoadingMore) {
-            item {
-                Box(Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Color.White)
+                if (state.posts.isEmpty() && !state.isLoading) {
+                    item(key = "empty") {
+                        ReflectEmptyState(message = emptyMessage)
+                    }
                 }
-            }
-        }
+                itemsIndexed(state.posts, key = { _, p -> p.id }) { _, post ->
+                    ReflectPostCard(
+                        post = post,
+                        togglingLike = post.id in state.togglingLikePostIds,
+                        onLike = { vm.toggleLike(post.id) },
+                        onOpenVerse = { post.references?.firstOrNull()?.verseKey?.let(onOpenVerse) },
+                        contributorLabel = contributorLabel,
+                        verifiedLabel = verifiedLabel,
+                        shareLabel = shareLabel,
+                        onShare = { onSharePost(post) }
+                    )
+                }
+                if (state.isLoadingMore) {
+                    item(key = "loading_more") {
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = AlKhatibColors.GoldBright,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -262,26 +295,17 @@ private fun ReflectStickyHeader(
                 vertical = AlKhatibSpacing.md
             )
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "✦",
-                style = MaterialTheme.typography.labelMedium,
-                color = AlKhatibColors.GoldBright,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.width(AlKhatibSpacing.sm))
-            Text(
-                text = reflectTitle,
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        Text(
+            text = reflectTitle,
+            style = MaterialTheme.typography.headlineSmall,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(4.dp))
         Text(
             text = reflectCommunity,
-            style = MaterialTheme.typography.bodySmall,
-            color = Color.White.copy(alpha = 0.65f),
-            modifier = Modifier.padding(start = 18.dp, top = 4.dp)
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White.copy(alpha = 0.72f)
         )
         Spacer(Modifier.height(AlKhatibSpacing.md))
         SegmentSwitcher(
@@ -292,7 +316,7 @@ private fun ReflectStickyHeader(
     }
 }
 
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SegmentSwitcher(
     segment: ReflectSegment,
@@ -305,7 +329,7 @@ private fun SegmentSwitcher(
             onClick = { onSelect(ReflectSegment.ALL) },
             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
             colors = SegmentedButtonDefaults.colors(
-                activeContainerColor = Color.White.copy(alpha = 0.22f),
+                activeContainerColor = Color.White.copy(alpha = 0.18f),
                 activeContentColor = Color.White,
                 inactiveContainerColor = Color.Transparent,
                 inactiveContentColor = Color.White.copy(alpha = 0.55f)
@@ -316,7 +340,7 @@ private fun SegmentSwitcher(
             onClick = { onSelect(ReflectSegment.MINE) },
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
             colors = SegmentedButtonDefaults.colors(
-                activeContainerColor = Color.White.copy(alpha = 0.22f),
+                activeContainerColor = Color.White.copy(alpha = 0.18f),
                 activeContentColor = Color.White,
                 inactiveContainerColor = Color.Transparent,
                 inactiveContentColor = Color.White.copy(alpha = 0.55f)
@@ -325,8 +349,9 @@ private fun SegmentSwitcher(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ReelPostCard(
+private fun ReflectPostCard(
     post: ReflectFeedPost,
     togglingLike: Boolean,
     onLike: () -> Unit,
@@ -336,146 +361,234 @@ private fun ReelPostCard(
     shareLabel: String,
     onShare: () -> Unit
 ) {
-    Card(
+    val bodyText = (post.body ?: "").stripHtmlTags()
+    val verseKey = post.references?.firstOrNull()?.verseKey
+    val recentCommentLabel = stringResource(R.string.reflect_recent_comment)
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 18.dp),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.1f),
-            contentColor = Color.White
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(ReflectPaper)
+            .padding(16.dp)
     ) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Header
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = post.author?.avatarUrl,
                 contentDescription = post.author?.displayName,
-                modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.1f))
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(ReflectPaperMuted.copy(alpha = 0.15f))
             )
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = post.author?.displayName ?: contributorLabel,
-                        color = Color.White,
+                        color = ReflectPaperInk,
                         fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     if (post.author?.verified == true) {
-                        Spacer(Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Filled.Bookmark,
-                            contentDescription = verifiedLabel,
-                            tint = AlKhatibColors.Gold,
-                            modifier = Modifier.size(14.dp)
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "✓",
+                            color = AlKhatibColors.Gold,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
-                post.createdAt?.let {
+                Text(
+                    text = formatReflectTime(post.createdAt),
+                    color = ReflectPaperMuted,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+
+        if (!verseKey.isNullOrBlank()) {
+            Spacer(Modifier.height(14.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.12f))
+                    .border(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
+                    .clickable(onClick = onOpenVerse)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.MenuBook,
+                    contentDescription = null,
+                    tint = AlKhatibColors.DeepEmerald,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = verseKey,
+                    color = AlKhatibColors.DeepEmerald,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
+
+        if (bodyText.isNotBlank()) {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = bodyText,
+                color = ReflectPaperInk,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
+            )
+        }
+
+        post.tags?.mapNotNull { it.name?.takeIf(String::isNotBlank) }?.takeIf { it.isNotEmpty() }?.let { tags ->
+            Spacer(Modifier.height(12.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                tags.take(4).forEach { tag ->
                     Text(
-                        text = it.take(10),
-                        color = Color.White.copy(alpha = 0.55f),
+                        text = "#$tag",
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(ReflectPaperMuted.copy(alpha = 0.12f))
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
+                        color = ReflectPaperMuted,
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
             }
-            post.references?.firstOrNull()?.verseKey?.let { vk ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(AlKhatibColors.Gold.copy(alpha = 0.18f))
-                        .border(1.dp, AlKhatibColors.Gold.copy(alpha = 0.45f), RoundedCornerShape(50))
-                        .clickable(onClick = onOpenVerse)
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.MenuBook, null, tint = AlKhatibColors.GoldBright, modifier = Modifier.size(14.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text(text = vk, color = AlKhatibColors.GoldBright, style = MaterialTheme.typography.labelSmall)
-                }
+        }
+
+        post.recentComment?.body?.stripHtmlTags()?.takeIf { it.isNotBlank() }?.let { commentBody ->
+            Spacer(Modifier.height(14.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(ReflectPaperMuted.copy(alpha = 0.08f))
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = recentCommentLabel,
+                    color = ReflectPaperMuted,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = commentBody,
+                    color = ReflectPaperInk.copy(alpha = 0.85f),
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
-        Spacer(Modifier.height(12.dp))
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(alpha = 0.08f)))
-        Spacer(Modifier.height(12.dp))
-
-        // Body
-        Text(
-            text = (post.body ?: "").stripHtmlTags(),
-            color = Color.White,
-            style = MaterialTheme.typography.bodyLarge
-        )
 
         Spacer(Modifier.height(16.dp))
-
-        // Action rail
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            ActionRailButton(
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ReflectActionChip(
                 icon = if (post.isLiked == true) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                tint = if (post.isLiked == true) AlKhatibColors.Danger else Color.White,
+                tint = if (post.isLiked == true) AlKhatibColors.Danger else ReflectPaperMuted,
                 label = (post.likesCount ?: 0).toString(),
                 loading = togglingLike,
                 onClick = onLike
             )
-            ActionRailButton(
-                icon = Icons.Filled.Forum,
-                tint = Color.White.copy(alpha = 0.6f),
-                label = (post.commentsCount ?: 0).toString(),
-                onClick = { /* comments hidden until API supports */ }
-            )
-            ActionRailButton(
+            ReflectActionChip(
                 icon = Icons.Filled.Share,
-                tint = Color.White.copy(alpha = 0.8f),
+                tint = ReflectPaperMuted,
                 label = shareLabel,
                 onClick = onShare
             )
         }
     }
-    }
 }
 
 @Composable
-private fun ActionRailButton(
+private fun ReflectActionChip(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     tint: Color,
     label: String,
     loading: Boolean = false,
     onClick: () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .clickable(enabled = !loading, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
         if (loading) {
-            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-            }
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                color = tint,
+                strokeWidth = 2.dp
+            )
         } else {
-            FilledIconButton(
-                onClick = onClick,
-                modifier = Modifier.size(40.dp),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = Color.White.copy(alpha = 0.12f),
-                    contentColor = tint
-                )
-            ) {
-                Icon(icon, contentDescription = label, modifier = Modifier.size(20.dp))
-            }
+            Icon(icon, contentDescription = label, tint = tint, modifier = Modifier.size(20.dp))
         }
         Spacer(Modifier.width(6.dp))
-        Text(label, color = Color.White, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelMedium)
+        Text(
+            text = label,
+            color = ReflectPaperInk,
+            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.labelLarge
+        )
+    }
+}
+
+@Composable
+private fun ReflectEmptyState(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 48.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = message,
+            color = Color.White.copy(alpha = 0.75f),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
     }
 }
 
 @Composable
 private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(32.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null, tint = AlKhatibColors.GoldBright, modifier = Modifier.size(56.dp))
-        Spacer(Modifier.height(16.dp))
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.Login,
+                contentDescription = null,
+                tint = AlKhatibColors.GoldBright,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+        Spacer(Modifier.height(20.dp))
         Text(
             text = title,
             color = Color.White,
@@ -483,13 +596,42 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(10.dp))
         Text(
             text = subtitle,
-            color = Color.White.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
+            color = Color.White.copy(alpha = 0.72f),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
         )
-        Spacer(Modifier.height(20.dp))
-        Button(onClick = onSignIn) { Text(stringResource(R.string.sign_in_qf)) }
+        Spacer(Modifier.height(24.dp))
+        Button(
+            onClick = onSignIn,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AlKhatibColors.GoldBright,
+                contentColor = ReflectPaperInk
+            )
+        ) {
+            Text(stringResource(R.string.sign_in_qf), fontWeight = FontWeight.SemiBold)
+        }
     }
+}
+
+private fun formatReflectTime(iso: String?): String {
+    if (iso.isNullOrBlank()) return ""
+    return runCatching {
+        val instant = Instant.parse(iso)
+        val now = Instant.now()
+        val duration = Duration.between(instant, now)
+        when {
+            duration.toMinutes() < 1 -> "Just now"
+            duration.toHours() < 1 -> "${duration.toMinutes()}m ago"
+            duration.toDays() < 1 -> "${duration.toHours()}h ago"
+            duration.toDays() == 1L -> "Yesterday"
+            duration.toDays() < 7 -> "${duration.toDays()}d ago"
+            else -> DateTimeFormatter.ofPattern("MMM d")
+                .withZone(ZoneId.systemDefault())
+                .format(instant)
+        }
+    }.getOrDefault(iso.take(10))
 }

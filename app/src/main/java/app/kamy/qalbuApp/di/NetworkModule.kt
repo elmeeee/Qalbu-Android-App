@@ -14,6 +14,7 @@ import app.kamy.qalbuApp.infrastructure.network.ContentApi
 import app.kamy.qalbuApp.infrastructure.network.ContentAuthInterceptor
 import app.kamy.qalbuApp.infrastructure.network.HostFallbackInterceptor
 import app.kamy.qalbuApp.infrastructure.network.ReflectApi
+import app.kamy.qalbuApp.infrastructure.network.ReflectJson
 import app.kamy.qalbuApp.infrastructure.network.SearchApi
 import app.kamy.qalbuApp.infrastructure.network.UserAuthInterceptor
 import app.kamy.qalbuApp.infrastructure.network.NetworkDebugger
@@ -36,6 +37,15 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
+    @Provides
+    @Singleton
+    @ReflectJson
+    fun provideReflectJson(): Json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+        explicitNulls = false
+    }
 
     @Provides
     @Singleton
@@ -172,7 +182,7 @@ object NetworkModule {
     @ReflectApi
     fun provideReflectRetrofit(
         @Named("user") okHttp: OkHttpClient,
-        json: Json
+        @ReflectJson json: Json
     ): Retrofit = buildRetrofit(
         baseUrl = AppConfig.qfApiBaseUrl,
         prefix = AppConfig.Prefix.quranReflect,

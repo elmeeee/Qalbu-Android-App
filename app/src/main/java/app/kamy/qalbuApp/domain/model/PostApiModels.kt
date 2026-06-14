@@ -87,7 +87,9 @@ data class ReflectFeedPost(
     val id: String,
     val body: String? = null,
     val author: ReflectFeedAuthor? = null,
+    @Serializable(with = FlexibleReflectReferencesSerializer::class)
     val references: List<ReflectFeedReference>? = null,
+    @Serializable(with = FlexibleReflectTagsSerializer::class)
     val tags: List<ReflectFeedTag>? = null,
     val recentComment: ReflectFeedComment? = null,
     var isLiked: Boolean? = null,
@@ -138,6 +140,7 @@ data class ReflectFeedAuthor(
 
 @Serializable
 data class ReflectFeedReference(
+    @Serializable(with = NullableStringFromAnyScalarSerializer::class)
     val id: String? = null,
     val from: Int? = null,
     val to: Int? = null,

@@ -98,12 +98,18 @@ class ReflectViewModel @Inject constructor(
             val newPosts = envelope.items
             _state.update {
                 val combined = if (reset) newPosts else it.posts + newPosts
+                val page = envelope.currentPage ?: targetPage
+                val totalPages = envelope.pages
+                val pageLimit = envelope.limit ?: 20
                 it.copy(
                     isLoading = false,
                     isLoadingMore = false,
                     posts = combined,
-                    currentPage = envelope.currentPage ?: targetPage,
-                    hasMore = (envelope.currentPage ?: targetPage) < (envelope.pages ?: targetPage)
+                    currentPage = page,
+                    hasMore = when {
+                        totalPages != null -> page < totalPages
+                        else -> newPosts.size >= pageLimit
+                    }
                 )
             }
         } catch (t: Throwable) {
