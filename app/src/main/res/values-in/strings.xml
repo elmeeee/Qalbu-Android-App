@@ -238,13 +238,22 @@
     <string name="ayah_number">Ayat %1$d</string>
     <string name="ayah_label">Ayat %1$s</string>
     <string name="no_matches">Tidak ada hasil</string>
-    <string name="search_surah_placeholder">Cari surah, ayat, atau kata kunci…</string>
+    <string name="search_quran_placeholder">Nama surah, nomor, ayat (2:255), atau juz…</string>
+    <string name="search_surah_placeholder">Nama surah, nomor, ayat (2:255), atau juz…</string>
     <string name="search_section_surahs">Surah</string>
-    <string name="search_section_navigation">Menuju</string>
-    <string name="search_section_verses">Ayat</string>
-    <string name="search_result_surah">Surah</string>
-    <string name="search_result_page">Halaman</string>
-    <string name="search_result_juz">Juz</string>
+    <string name="search_section_verses">Ayat cocok</string>
+    <string name="search_verse_result_title">%1$s · Ayat %2$d</string>
+    <string name="search_verse_goto">Buka %1$s, ayat %2$d</string>
+    <string name="search_verse_goto_hint">Buka ayat ini di pembaca</string>
+    <string name="search_juz_goto">Buka Juz %1$d</string>
+    <string name="search_juz_goto_hint">Buka awal juz ini</string>
+    <string-array name="quran_search_suggestions">
+        <item>2:255</item>
+        <item>Yasin</item>
+        <item>Al-Mulk</item>
+        <item>Al-Fatihah</item>
+        <item>Juz 30</item>
+    </string-array>
     <string name="search_results_found">%1$d hasil</string>
     <string name="quran_search_failed">Pencarian gagal</string>
     <string name="verse_reference_result">Surah %1$d · Ayat %2$d</string>
@@ -284,7 +293,7 @@
     <string name="onboarding_skip">Lewati</string>
     <string name="onboarding_skip_location">Lewati dulu</string>
     <string name="onboarding_skip_notifications">Nanti saja</string>
-    <string name="search_empty_message">Tidak ada yang cocok dengan “%1$s”. Coba nomor surah, nama Arab, atau “Makkah” / “Madinah”.</string>
+    <string name="search_empty_message">Tidak ada hasil untuk “%1$s”. Coba nama surah (Yasin), nomor (36), ayat (2:255), atau juz (Juz 30).</string>
     <string name="reading_settings">Pengaturan baca</string>
     <string name="text_size">Ukuran teks</string>
     <string name="continuous_play">Putar berkelanjutan</string>

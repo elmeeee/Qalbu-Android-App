@@ -31,7 +31,6 @@ import app.kamy.saatApp.design.components.AlKhatibInlineError
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.domain.model.QuranChapter
-import app.kamy.saatApp.domain.model.SearchNavResult
 import app.kamy.saatApp.domain.model.SearchVerseResult
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
 
@@ -80,36 +79,22 @@ fun QuranSearchErrorRow(
 }
 
 @Composable
-fun SearchNavResultRow(
-    result: SearchNavResult,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val typeLabel = when (result.type) {
-        "surah" -> stringResource(R.string.search_result_surah)
-        "page" -> stringResource(R.string.search_result_page)
-        "juz" -> stringResource(R.string.search_result_juz)
-        else -> result.type.replaceFirstChar { it.uppercase() }
-    }
-    QuranSearchResultRow(
-        title = result.name,
-        subtitle = typeLabel,
-        enabled = enabled,
-        onClick = onClick,
-        modifier = modifier
-    )
-}
-
-@Composable
 fun SearchVerseResultRow(
     result: SearchVerseResult,
+    chapter: QuranChapter?,
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val surahLabel = chapter?.displayComplexName
+        ?: stringResource(R.string.surah_number, result.chapterNumber)
+    val title = stringResource(
+        R.string.search_verse_result_title,
+        surahLabel,
+        result.ayahNumber
+    )
     QuranSearchResultRow(
-        title = result.verseKey,
+        title = title,
         subtitle = result.name,
         enabled = enabled,
         onClick = onClick,
@@ -124,10 +109,12 @@ fun VerseReferenceResultRow(
     onOpen: (QuranChapter, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val label = stringResource(R.string.verse_reference_result, reference.chapter, reference.ayah)
+    val surahLabel = chapter?.displayComplexName
+        ?: stringResource(R.string.surah_number, reference.chapter)
+    val label = stringResource(R.string.search_verse_goto, surahLabel, reference.ayah)
     QuranSearchResultRow(
         title = label,
-        subtitle = chapter?.displayComplexName ?: stringResource(R.string.verse_reference_unavailable),
+        subtitle = stringResource(R.string.search_verse_goto_hint),
         enabled = chapter != null,
         onClick = { chapter?.let { onOpen(it, reference.ayah) } },
         modifier = modifier,
@@ -136,14 +123,14 @@ fun VerseReferenceResultRow(
 }
 
 @Composable
-fun MushafPageResultRow(
-    page: Int,
+fun JuzReferenceResultRow(
+    juzNumber: Int,
     onOpen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     QuranSearchResultRow(
-        title = stringResource(R.string.mushaf_open_page_result, page),
-        subtitle = stringResource(R.string.mushaf_open_page_hint),
+        title = stringResource(R.string.search_juz_goto, juzNumber),
+        subtitle = stringResource(R.string.search_juz_goto_hint),
         enabled = true,
         onClick = onOpen,
         modifier = modifier,
@@ -180,7 +167,7 @@ private fun QuranSearchResultRow(
                 } else {
                     AlKhatibColors.Slate500
                 },
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(Modifier.height(3.dp))
@@ -188,7 +175,7 @@ private fun QuranSearchResultRow(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = AlKhatibColors.Slate500,
-                maxLines = 2,
+                maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
         }

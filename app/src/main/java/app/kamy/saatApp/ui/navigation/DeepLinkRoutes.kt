@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import app.kamy.saatApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.saatApp.infrastructure.notifications.QuranReadingReminderScheduler
-import app.kamy.saatApp.infrastructure.preferences.MushafReadingStore
 
 object DeepLinkRoutes {
     fun fromIntent(intent: Intent?): String? {
@@ -34,10 +33,7 @@ object DeepLinkRoutes {
                 if (ayah != null && ayah > 0) "quran/reader/$chapter?ayah=$ayah"
                 else "quran/reader/$chapter?ayah=-1"
             }
-            "mushaf" -> {
-                val page = uri.lastPathSegment?.toIntOrNull()?.coerceIn(1, MushafReadingStore.totalPages) ?: 1
-                "quran/mushaf/$page"
-            }
+            "mushaf" -> RootTab.Quran.route
             "today" -> RootTab.Today.route
             "reflect" -> RootTab.Reflect.route
             "bookmarks" -> "quran/bookmarks"

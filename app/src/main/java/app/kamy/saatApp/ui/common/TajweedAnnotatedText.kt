@@ -8,7 +8,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.text.HtmlCompat
-import app.kamy.saatApp.domain.model.QuranWord
 
 private val tajweedTagRegex = Regex(
     """<(?:span|tajweed)\b[^>]*?\bclass\s*=\s*['"]?([^'">\s]+)['"]?[^>]*>([\s\S]*?)</(?:span|tajweed)>|([^<]+)""",
@@ -20,42 +19,6 @@ private val endSpanRegex =
 
 private val ayahEndSymbolRegex =
     Regex("<span\\b[^>]*\\bclass\\s*=\\s*['\"]?\\s*ayah-end-symbol\\s*['\"]?[^>]*>[\\s\\S]*?</span>", RegexOption.IGNORE_CASE)
-
-fun buildMushafLineAnnotatedString(
-    words: List<QuranWord>,
-    baseColor: Color = Color(0xFF0F172A),
-    markerFontSize: TextUnit = TextUnit.Unspecified,
-    markerFontFamily: FontFamily? = null
-): AnnotatedString {
-    val built = buildAnnotatedString {
-        words.forEach { word ->
-            when {
-                word.isEndMarker -> {
-                    val ayah = word.verseKey
-                        ?.substringAfterLast(':', missingDelimiterValue = "")
-                        ?.trim()
-                        ?.toIntOrNull()
-                        ?.takeIf { it > 0 }
-                    if (ayah != null) {
-                        appendAyahEndMarker(ayah, markerFontSize, markerFontFamily)
-                    }
-                }
-                else -> {
-                    val html = word.displayText.sanitizeTajweedArabicHtml()
-                    if (html.isNotEmpty()) {
-                        if (length > 0) append(' ')
-                        appendTajweedHtml(html, baseColor)
-                    }
-                }
-            }
-        }
-    }
-    return if (built.text.contains('<')) {
-        AnnotatedString(built.text.stripHtmlTags())
-    } else {
-        built
-    }
-}
 
 fun buildTajweedAnnotatedString(
     textUthmani: String?,

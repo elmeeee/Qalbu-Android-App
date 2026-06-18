@@ -23,3 +23,14 @@ fun parseVerseReference(query: String): VerseReference? {
     }
     return null
 }
+
+private val juzRefPattern = Regex(
+    """^(?:juz|jus|para)\s*(\d{1,2})$""",
+    RegexOption.IGNORE_CASE
+)
+
+fun parseJuzReference(query: String): Int? {
+    val q = query.trim()
+    if (q.isEmpty()) return null
+    return juzRefPattern.matchEntire(q)?.groupValues?.getOrNull(1)?.toIntOrNull()?.takeIf { it in 1..30 }
+}

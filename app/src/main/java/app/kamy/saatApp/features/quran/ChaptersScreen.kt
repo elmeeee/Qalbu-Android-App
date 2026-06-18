@@ -64,7 +64,6 @@ import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.QuranJuz
 import app.kamy.saatApp.domain.model.ReadingSession
-import app.kamy.saatApp.domain.model.SearchNavResult
 import app.kamy.saatApp.domain.model.SearchVerseResult
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
@@ -76,7 +75,6 @@ import kotlinx.coroutines.launch
 fun ChaptersScreen(
     onOpenChapter: (chapter: QuranChapter, initialVerse: Int?) -> Unit,
     onOpenJuz: (juzNumber: Int, verseKey: String?) -> Unit,
-    onOpenMushaf: (page: Int) -> Unit = {},
     onOpenBookmarks: () -> Unit = {}
 ) {
     val vm: ChaptersViewModel = hiltViewModel()
@@ -88,13 +86,11 @@ fun ChaptersScreen(
     val errorDisplay = state.error.rememberErrorDisplay(R.string.chapters_load_failed)
     val snackbarHostState = remember { SnackbarHostState() }
     val chaptersRefreshFailed = stringResource(R.string.chapters_refresh_failed)
-    val mushafOpenFailedMsg = stringResource(R.string.mushaf_open_juz_failed)
     val isSearching = state.isSearchActive && state.searchQuery.isNotBlank()
     val activeQuery = state.searchQuery.normalizedSearchQuery()
     val hasSearchResults = state.verseRef != null ||
-        state.mushafPageRef != null ||
+        state.juzRef != null ||
         state.localSearchChapters.isNotEmpty() ||
-        state.remoteNavigation.isNotEmpty() ||
         state.remoteVerses.isNotEmpty()
 
     fun openVerse(chapterNumber: Int, ayah: Int) {
@@ -104,42 +100,8 @@ fun ChaptersScreen(
         }
     }
 
-    fun openNavResult(result: SearchNavResult) {
-        val verseRef = state.verseRef
-        when (result.type) {
-            "surah" -> result.chapterNumber?.let { chapterNum ->
-                val ayah = verseRef?.takeIf { it.chapter == chapterNum }?.ayah ?: 1
-                openVerse(chapterNum, ayah)
-            }
-            "juz" -> result.key.toIntOrNull()?.let { juzNumber ->
-                vm.openJuz(juzNumber, onOpenJuz)
-            }
-            "page" -> result.key.toIntOrNull()?.let { page ->
-                onOpenMushaf(page.coerceIn(1, app.kamy.saatApp.infrastructure.preferences.MushafReadingStore.totalPages))
-                vm.clearSearch()
-            }
-            else -> result.chapterNumber?.let { chapterNum ->
-                val ayah = verseRef?.takeIf { it.chapter == chapterNum }?.ayah ?: 1
-                openVerse(chapterNum, ayah)
-            }
-        }
-    }
-
     fun openVerseResult(result: SearchVerseResult) {
         openVerse(result.chapterNumber, result.ayahNumber)
-    }
-
-    LaunchedEffect(state.mushafOpenFailed) {
-        if (state.mushafOpenFailed) {
-            snackbarHostState.showSnackbar(mushafOpenFailedMsg)
-            vm.clearMushafOpenFailed()
-        }
-    }
-
-    LaunchedEffect(state.browseMode) {
-        if (state.browseMode == QuranBrowseMode.MUSHAF) {
-            vm.onMushafVisible()
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -231,9 +193,9 @@ fun ChaptersScreen(
                         },
                         resultCount = if (isSearching) {
                             state.localSearchChapters.size +
-                                state.remoteNavigation.size +
                                 state.remoteVerses.size +
-                                if (state.verseRef != null) 1 else 0
+                                (if (state.verseRef != null) 1 else 0) +
+                                (if (state.juzRef != null) 1 else 0)
                         } else null,
                         searchFocusRequester = searchFocusRequester,
                         onSearchFocusChange = vm::onSearchActiveChange,
@@ -289,14 +251,11 @@ fun ChaptersScreen(
                                 }
                             }
 
-                            state.mushafPageRef?.let { page ->
-                                item(key = "mushaf_page_$page") {
-                                    MushafPageResultRow(
-                                        page = page,
-                                        onOpen = {
-                                            onOpenMushaf(page)
-                                            vm.clearSearch()
-                                        },
+                            state.juzRef?.let { juzNumber ->
+                                item(key = "juz_ref_$juzNumber") {
+                                    JuzReferenceResultRow(
+                                        juzNumber = juzNumber,
+                                        onOpen = { vm.openJuz(juzNumber, onOpenJuz) },
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                     QuranSearchResultDivider()
@@ -326,24 +285,6 @@ fun ChaptersScreen(
                                 }
                             }
 
-                            if (state.remoteNavigation.isNotEmpty()) {
-                                item(key = "label_remote_nav") {
-                                    QuranSearchSectionLabel(stringResource(R.string.search_section_navigation))
-                                }
-                                items(state.remoteNavigation, key = { "nav_${it.type}_${it.key}" }) { result ->
-                                    SearchNavResultRow(
-                                        result = result,
-                                        enabled = when (result.type) {
-                                            "surah" -> result.chapterNumber != null
-                                            "juz" -> result.key.toIntOrNull() != null
-                                            "page" -> result.key.toIntOrNull() != null
-                                            else -> false
-                                        },
-                                        onClick = { openNavResult(result) },
-                                    )
-                                }
-                            }
-
                             if (state.remoteVerses.isNotEmpty()) {
                                 item(key = "label_remote_verses") {
                                     QuranSearchSectionLabel(stringResource(R.string.search_section_verses))
@@ -351,6 +292,7 @@ fun ChaptersScreen(
                                 items(state.remoteVerses, key = { "verse_${it.verseKey}" }) { result ->
                                     SearchVerseResultRow(
                                         result = result,
+                                        chapter = vm.chapterForNumber(result.chapterNumber),
                                         enabled = vm.chapterForNumber(result.chapterNumber) != null,
                                         onClick = { openVerseResult(result) }
                                     )
@@ -440,7 +382,6 @@ fun ChaptersScreen(
                                     }
                                 }
                             }
-                            QuranBrowseMode.MUSHAF -> Unit
                         }
                     }
                     }
@@ -500,7 +441,6 @@ private fun QuranListHeader(
         val defaultSubtitle = when (browseMode) {
             QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
             QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
-            QuranBrowseMode.MUSHAF -> stringResource(R.string.quran_subtitle)
         }
         val noMatchesSubtitle = stringResource(R.string.no_matches)
         val oneSurahSubtitle = stringResource(R.string.one_surah_found)
@@ -551,7 +491,7 @@ private fun QuranListHeader(
                 onDismiss = onClearSearch,
                 enabled = searchEnabled,
                 focusRequester = searchFocusRequester,
-                placeholder = stringResource(R.string.search_surah_placeholder),
+                placeholder = stringResource(R.string.search_quran_placeholder),
                 modifier = Modifier.weight(1f)
             )
             if (isSearching && searchEnabled) {

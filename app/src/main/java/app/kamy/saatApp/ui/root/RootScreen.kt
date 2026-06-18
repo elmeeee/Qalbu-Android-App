@@ -37,13 +37,11 @@ import app.kamy.saatApp.features.tools.SpiritualToolsScreen
 import app.kamy.saatApp.features.tools.ZakatCalculatorScreen
 import app.kamy.saatApp.features.tools.faraidh.FaraidhCalculatorScreen
 import app.kamy.saatApp.features.quran.QuranBookmarksScreen
-import app.kamy.saatApp.features.quran.MushafReaderScreen
 import app.kamy.saatApp.features.reflect.ReflectScreen
 import app.kamy.saatApp.features.today.PrayerCalendarScreen
 import app.kamy.saatApp.features.today.PrayerTrackerCalendarScreen
 import app.kamy.saatApp.features.today.TodayScreen
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
-import app.kamy.saatApp.infrastructure.preferences.MushafReadingStore
 import app.kamy.saatApp.infrastructure.audio.parseVerseKey
 import app.kamy.saatApp.infrastructure.auth.OAuthService
 import app.kamy.saatApp.ui.components.FloatingAudioBar
@@ -90,8 +88,7 @@ fun RootScreen(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val isReaderRoute = currentRoute?.startsWith("quran/reader") == true ||
-        currentRoute?.startsWith("quran/juz") == true ||
-        currentRoute?.startsWith("quran/mushaf") == true
+        currentRoute?.startsWith("quran/juz") == true
     val isPrayerCalendarRoute = currentRoute == "prayer/calendar" ||
         currentRoute == "prayer/tracker/calendar"
     val isToolRoute = currentRoute?.startsWith("tools/") == true
@@ -168,12 +165,6 @@ fun RootScreen(
                     onOpenJuz = { juzNumber, verseKey ->
                         val keyArg = verseKey?.let { java.net.URLEncoder.encode(it, Charsets.UTF_8.name()) }.orEmpty()
                         navController.navigate("quran/juz/$juzNumber?verseKey=$keyArg")
-                    },
-                    onOpenMushaf = { page ->
-                        navController.navigate("quran/mushaf/$page") {
-                            popUpTo(RootTab.Quran.route) { saveState = true }
-                            launchSingleTop = true
-                        }
                     },
                     onOpenBookmarks = {
                         navController.navigate("quran/bookmarks") { launchSingleTop = true }
@@ -260,17 +251,6 @@ fun RootScreen(
                     audioBarVisible = showAudioBar,
                     onBack = { navController.popBackStack() }
                 )
-            }
-            composable(
-                route = "quran/mushaf/{page}",
-                arguments = listOf(
-                    navArgument("page") { type = NavType.IntType; defaultValue = 1 }
-                )
-            ) { entry ->
-                val page = entry.arguments?.getInt("page")?.coerceIn(1, MushafReadingStore.totalPages) ?: 1
-                key(page) {
-                    MushafReaderScreen(onBack = { navController.popBackStack() })
-                }
             }
             composable(
                 route = RootTab.Account.route,

@@ -15,7 +15,6 @@ import app.kamy.saatApp.infrastructure.network.ContentAuthInterceptor
 import app.kamy.saatApp.infrastructure.network.HostFallbackInterceptor
 import app.kamy.saatApp.infrastructure.network.ReflectApi
 import app.kamy.saatApp.infrastructure.network.ReflectJson
-import app.kamy.saatApp.infrastructure.network.SearchApi
 import app.kamy.saatApp.infrastructure.network.UserAuthInterceptor
 import app.kamy.saatApp.infrastructure.network.NetworkDebugger
 import app.kamy.saatApp.infrastructure.network.buildRetrofit
@@ -160,19 +159,6 @@ object NetworkModule {
     ): Retrofit = buildRetrofit(
         baseUrl = AppConfig.qfApiBaseUrl,
         prefix = AppConfig.Prefix.contentAPI,
-        okHttpClient = okHttp,
-        json = json
-    )
-
-    @Provides
-    @Singleton
-    @SearchApi
-    fun provideSearchRetrofit(
-        @ContentApi okHttp: OkHttpClient,
-        json: Json
-    ): Retrofit = buildRetrofit(
-        baseUrl = AppConfig.qfApiBaseUrl,
-        prefix = AppConfig.Prefix.searchAPI,
         okHttpClient = okHttp,
         json = json
     )

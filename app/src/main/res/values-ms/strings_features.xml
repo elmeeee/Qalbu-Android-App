@@ -120,7 +120,7 @@
     <string name="qiyam_explain_detail">Sepertiga malam terakhir ialah waktu mulia untuk doa dan solat tambahan. Log di sini apabila anda qiyam malam ini.</string>
     <string name="qiyam_stats">%1$d malam bulan ini · streak %2$d hari</string>
     <string name="qiyam_title">Qiyam / Tahajud</string>
-    <string name="qiyam_tonight_hint">Penjejak peribadi — berasingan daripada zikir</string>
+    <string name="qiyam_tonight_hint">Penjejak peribadi</string>
     <string name="qiyam_tonight_label">Sudah qiyam malam ini</string>
     <string name="qiyam_premium_subtitle">Penjejak &amp; panduan solat malam</string>
     <string name="qiyam_tab_tracker">Penjejak</string>

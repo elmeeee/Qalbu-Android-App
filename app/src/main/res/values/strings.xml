@@ -261,18 +261,27 @@
     <string name="ayah_number">Verse %1$d</string>
     <string name="ayah_label">Verse %1$s</string>
     <string name="no_matches">No matches</string>
-    <string name="search_surah_placeholder">Search surah, verse, or keyword…</string>
+    <string name="search_quran_placeholder">Surah name, number, verse (2:255), or juz…</string>
+    <string name="search_surah_placeholder">Surah name, number, verse (2:255), or juz…</string>
     <string name="search_section_surahs">Surahs</string>
-    <string name="search_section_navigation">Go to</string>
-    <string name="search_section_verses">Verses</string>
-    <string name="search_result_surah">Surah</string>
-    <string name="search_result_page">Page</string>
-    <string name="search_result_juz">Juz</string>
+    <string name="search_section_verses">Matching verses</string>
+    <string name="search_verse_result_title">%1$s · Ayah %2$d</string>
+    <string name="search_verse_goto">Go to %1$s, ayah %2$d</string>
+    <string name="search_verse_goto_hint">Open this verse in the reader</string>
+    <string name="search_juz_goto">Go to Juz %1$d</string>
+    <string name="search_juz_goto_hint">Open the start of this juz</string>
+    <string-array name="quran_search_suggestions">
+        <item>2:255</item>
+        <item>Yasin</item>
+        <item>Al-Mulk</item>
+        <item>Al-Fatihah</item>
+        <item>Juz 30</item>
+    </string-array>
     <string name="search_results_found">%1$d results</string>
     <string name="quran_search_failed">Search failed</string>
     <string name="verse_reference_result">Surah %1$d · Verse %2$d</string>
     <string name="verse_reference_unavailable">Chapter not loaded yet</string>
-    <string name="search_empty_message">Nothing matches “%1$s”. Try a surah number, Arabic name, or “Makkah” / “Madinah”.</string>
+    <string name="search_empty_message">No results for “%1$s”. Try a surah name (Yasin), number (36), verse (2:255), or juz (Juz 30).</string>
     <string name="reading_settings">Reading settings</string>
     <string name="text_size">Text size</string>
     <string name="continuous_play">Continuous play</string>
@@ -543,7 +552,7 @@
     <string name="qiyam_explain">Qiyam is voluntary night prayer — often called tahajud when prayed after sleep.</string>
     <string name="qiyam_explain_detail">The last third of the night is a blessed time for dua and extra rakah. Log here when you stand for qiyam tonight.</string>
     <string name="qiyam_tonight_label">Prayed qiyam tonight</string>
-    <string name="qiyam_tonight_hint">Private tracker — not tied to dhikr</string>
+    <string name="qiyam_tonight_hint">Private tracker</string>
     <string name="qiyam_premium_subtitle">Night prayer tracker &amp; guide</string>
     <string name="qiyam_tab_tracker">Tracker</string>
     <string name="qiyam_tab_guide">Readings</string>

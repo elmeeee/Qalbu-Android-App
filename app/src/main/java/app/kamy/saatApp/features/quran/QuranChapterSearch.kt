@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
 import androidx.compose.ui.draw.clip
@@ -419,7 +420,7 @@ fun QuranChapterSearchBar(
     focusRequester: FocusRequester = remember { FocusRequester() },
     placeholder: String? = null,
 ) {
-    val resolvedPlaceholder = placeholder ?: stringResource(R.string.search_surah_placeholder)
+    val resolvedPlaceholder = placeholder ?: stringResource(R.string.search_quran_placeholder)
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val activeQuery = query.normalizedSearchQuery()
@@ -508,9 +509,7 @@ fun QuranSearchSuggestionChips(
     onSuggestionClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val suggestions = remember {
-        listOf("2:255", "Yasin", "Al-Mulk", "36", "Makkah")
-    }
+    val suggestions = stringArrayResource(R.array.quran_search_suggestions)
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 2.dp),

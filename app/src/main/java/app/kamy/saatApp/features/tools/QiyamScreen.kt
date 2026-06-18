@@ -36,6 +36,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +52,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
@@ -69,6 +73,17 @@ fun QiyamScreen(onBack: () -> Unit) {
     var loggedTonight by remember { mutableStateOf(QiyamTrackerStore.isLogged(context)) }
     val snapshot = remember(loggedTonight) { QiyamTrackerStore.snapshot(context) }
     val weekLog = remember(loggedTonight) { QiyamTrackerStore.last7Days(context) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                loggedTonight = QiyamTrackerStore.isLogged(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     Column(
         modifier = Modifier

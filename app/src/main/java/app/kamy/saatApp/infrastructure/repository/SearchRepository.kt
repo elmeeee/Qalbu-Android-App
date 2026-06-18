@@ -17,13 +17,11 @@ class SearchRepository @Inject constructor(
     suspend fun quickSearch(
         query: String,
         translationId: Int,
-        navigationalLimit: Int = 5,
         versesLimit: Int = 10
     ): QuickSearchResult {
         val normalizedId = LocalQuranConfig.normalizeTranslationId(translationId)
         val verses = local.searchVerses(query.trim(), normalizedId, versesLimit)
         return QuickSearchResult(
-            navigation = emptyList(),
             verses = verses.mapNotNull { verse ->
                 val key = verse.verseKey ?: return@mapNotNull null
                 val chapter = verse.chapterNumber ?: return@mapNotNull null
