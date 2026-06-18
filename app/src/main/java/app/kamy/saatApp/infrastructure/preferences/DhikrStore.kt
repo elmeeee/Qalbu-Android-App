@@ -6,6 +6,8 @@ data class DhikrPreset(
     val id: String,
     val labelResKey: String,
     val arabic: String,
+    val transliterationResKey: String,
+    val meaningResKey: String,
     val target: Int
 )
 
@@ -15,11 +17,26 @@ object DhikrStore {
     private const val KEY_TOTAL_PREFIX = "total_"
 
     val presets: List<DhikrPreset> = listOf(
-        DhikrPreset("subhanallah", "dhikr_subhanallah", "سُبْحَانَ اللَّهِ", 33),
-        DhikrPreset("alhamdulillah", "dhikr_alhamdulillah", "الْحَمْدُ لِلَّهِ", 33),
-        DhikrPreset("allahuakbar", "dhikr_allahuakbar", "اللَّهُ أَكْبَرُ", 34),
-        DhikrPreset("istighfar", "dhikr_istighfar", "أَسْتَغْفِرُ اللَّهَ", 100),
-        DhikrPreset("salawat", "dhikr_salawat", "اللَّهُمَّ صَلِّ عَلَى مُحَمَّد", 100)
+        DhikrPreset(
+            "subhanallah", "dhikr_subhanallah", "سُبْحَانَ اللَّهِ",
+            "dhikr_translit_subhanallah", "dhikr_meaning_subhanallah", 33
+        ),
+        DhikrPreset(
+            "alhamdulillah", "dhikr_alhamdulillah", "الْحَمْدُ لِلَّهِ",
+            "dhikr_translit_alhamdulillah", "dhikr_meaning_alhamdulillah", 33
+        ),
+        DhikrPreset(
+            "allahuakbar", "dhikr_allahuakbar", "اللَّهُ أَكْبَرُ",
+            "dhikr_translit_allahuakbar", "dhikr_meaning_allahuakbar", 34
+        ),
+        DhikrPreset(
+            "istighfar", "dhikr_istighfar", "أَسْتَغْفِرُ اللَّهَ",
+            "dhikr_translit_istighfar", "dhikr_meaning_istighfar", 100
+        ),
+        DhikrPreset(
+            "salawat", "dhikr_salawat", "اللَّهُمَّ صَلِّ عَلَى مُحَمَّد",
+            "dhikr_translit_salawat", "dhikr_meaning_salawat", 100
+        )
     )
 
     fun sessionCount(context: Context, presetId: String): Int =

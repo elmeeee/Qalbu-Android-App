@@ -1,43 +1,48 @@
 package app.kamy.saatApp.features.tools
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,32 +51,40 @@ import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.features.tools.dhikr.PremiumTasbihCounter
 import app.kamy.saatApp.infrastructure.preferences.DhikrPreset
 import app.kamy.saatApp.infrastructure.preferences.DhikrStore
+import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
+import app.kamy.saatApp.ui.feedback.rememberTapHaptic
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Composable
 fun DhikrScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val tapHaptic = rememberTapHaptic()
+    val confirmHaptic = rememberConfirmHaptic()
     var selectedIndex by remember { mutableIntStateOf(0) }
     val preset = DhikrStore.presets[selectedIndex.coerceIn(DhikrStore.presets.indices)]
     var count by remember(preset.id) { mutableIntStateOf(DhikrStore.sessionCount(context, preset.id)) }
     var pulseKey by remember { mutableIntStateOf(0) }
-    val scale by animateFloatAsState(
-        targetValue = if (pulseKey == 0) 1f else 0.94f,
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 600f),
-        finishedListener = { pulseKey = 0 },
-        label = "tasbih_pulse"
-    )
+
+    LaunchedEffect(pulseKey) {
+        if (pulseKey > 0) {
+            kotlinx.coroutines.delay(120)
+            pulseKey = 0
+        }
+    }
+
+    LaunchedEffect(count, preset.target) {
+        if (count > 0 && count % preset.target == 0) confirmHaptic()
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(AlKhatibColors.ScreenBackground, AlKhatibColors.SageMist)
+                    listOf(AlKhatibColors.ScreenBackground, AlKhatibColors.SageMist, AlKhatibColors.PrayerMint)
                 )
             )
             .tabContentStatusBarInset()
@@ -85,149 +98,191 @@ fun DhikrScreen(onBack: () -> Unit) {
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
             }
-            Text(
-                text = stringResource(R.string.dhikr_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            DhikrStore.presets.forEachIndexed { index, item ->
+            Column(Modifier.weight(1f)) {
                 Text(
-                    text = dhikrLabel(context, item),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = if (index == selectedIndex) FontWeight.Bold else FontWeight.Medium,
-                    color = if (index == selectedIndex) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
-                    modifier = Modifier
-                        .clickable {
-                            selectedIndex = index
-                            count = DhikrStore.sessionCount(context, item.id)
-                        }
-                        .padding(vertical = 8.dp)
+                    text = stringResource(R.string.dhikr_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.dhikr_premium_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate500
                 )
             }
         }
 
-        Text(
-            text = preset.arabic,
-            style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp, lineHeight = 40.sp),
-            color = AlKhatibColors.DeepEmerald,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 12.dp)
-        )
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            itemsIndexed(DhikrStore.presets) { index, item ->
+                FilterChip(
+                    selected = index == selectedIndex,
+                    onClick = {
+                        selectedIndex = index
+                        count = DhikrStore.sessionCount(context, item.id)
+                    },
+                    label = { Text(dhikrLabel(context, item)) },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = AlKhatibColors.DeepEmerald,
+                        selectedLabelColor = AlKhatibColors.PureWhite
+                    )
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        AnimatedContent(
+            targetState = preset.id,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = "dhikr_card"
+        ) { presetId ->
+            val active = DhikrStore.presets.first { it.id == presetId }
+            DhikrReadingCard(preset = active)
+        }
 
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .scale(scale)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
                 ) {
                     count = DhikrStore.increment(context, preset.id)
                     pulseKey++
+                    tapHaptic()
                 },
             contentAlignment = Alignment.Center
         ) {
-            TasbihRosary(
+            PremiumTasbihCounter(
                 count = count,
                 target = preset.target,
-                modifier = Modifier.fillMaxWidth()
+                pulseKey = pulseKey,
+                subtitle = stringResource(R.string.dhikr_of_target, preset.target)
             )
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = count.toString(),
-                    style = MaterialTheme.typography.displayLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate900
-                )
-                Text(
-                    text = stringResource(R.string.dhikr_of_target, preset.target),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = AlKhatibColors.Slate500
-                )
-            }
+            Text(
+                text = stringResource(R.string.dhikr_tap_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = AlKhatibColors.Slate500.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 8.dp)
+            )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            TextButton(onClick = {
+        DhikrStatsRow(
+            count = count,
+            target = preset.target,
+            lifetime = DhikrStore.totalCount(context, preset.id),
+            onReset = {
                 DhikrStore.resetSession(context, preset.id)
                 count = 0
-            }) {
-                Text(stringResource(R.string.dhikr_reset))
             }
+        )
+    }
+}
+
+@Composable
+private fun DhikrReadingCard(preset: DhikrPreset) {
+    val context = LocalContext.current
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = AlKhatibColors.PureWhite,
+        shadowElevation = 4.dp,
+        border = BorderStroke(
+            1.dp,
+            Brush.linearGradient(listOf(AlKhatibColors.Teal.copy(0.25f), AlKhatibColors.Gold.copy(0.2f)))
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Text(
-                text = stringResource(R.string.dhikr_total, DhikrStore.totalCount(context, preset.id)),
+                text = preset.arabic,
+                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp, lineHeight = 44.sp),
+                color = AlKhatibColors.DeepEmerald,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = dhikrString(context, preset.transliterationResKey),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Teal,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = dhikrString(context, preset.meaningResKey),
                 style = MaterialTheme.typography.bodySmall,
                 color = AlKhatibColors.Slate500,
-                modifier = Modifier.padding(top = 14.dp, start = 12.dp)
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
 @Composable
-private fun TasbihRosary(
+private fun DhikrStatsRow(
     count: Int,
     target: Int,
-    modifier: Modifier = Modifier
+    lifetime: Int,
+    onReset: () -> Unit
 ) {
-    val beadCount = target.coerceIn(11, 99)
-    val activeIndex = (count - 1).coerceAtLeast(-1) % beadCount
-    val density = LocalDensity.current
-
-    Canvas(modifier = modifier.height(240.dp)) {
-        val centerX = size.width / 2f
-        val centerY = size.height * 0.82f
-        val radius = size.width * 0.38f
-        val beadRadius = with(density) { 7.dp.toPx() }
-
-        for (i in 0 until beadCount) {
-            val angle = Math.PI + (Math.PI * i / (beadCount - 1).coerceAtLeast(1))
-            val x = centerX + radius * cos(angle).toFloat()
-            val y = centerY + radius * sin(angle).toFloat()
-            val filled = i <= activeIndex
-            drawCircle(
-                color = if (filled) Color(0xFFD97706) else Color(0xFFCBD5E1),
-                radius = if (i == activeIndex) beadRadius * 1.35f else beadRadius,
-                center = Offset(x, y)
+    val progress = if (target > 0) (count * 100 / target).coerceIn(0, 100) else 0
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
+            Text(
+                text = stringResource(R.string.dhikr_session_progress, progress),
+                style = MaterialTheme.typography.labelMedium,
+                color = AlKhatibColors.DeepEmerald,
+                fontWeight = FontWeight.SemiBold
             )
-            if (i == activeIndex) {
-                drawCircle(
-                    color = Color(0x55D97706),
-                    radius = beadRadius * 2.2f,
-                    center = Offset(x, y)
-                )
-            }
+            Text(
+                text = stringResource(R.string.dhikr_total, lifetime),
+                style = MaterialTheme.typography.bodySmall,
+                color = AlKhatibColors.Slate500
+            )
         }
-        drawCircle(
-            color = Color(0xFF064E3B),
-            radius = beadRadius * 1.6f,
-            center = Offset(centerX, centerY + beadRadius)
-        )
+        TextButton(onClick = onReset) {
+            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.width(18.dp))
+            Spacer(Modifier.width(4.dp))
+            Text(stringResource(R.string.dhikr_reset))
+        }
     }
 }
 
 private fun dhikrLabel(context: android.content.Context, preset: DhikrPreset): String =
-    when (preset.labelResKey) {
+    dhikrString(context, preset.labelResKey)
+
+private fun dhikrString(context: android.content.Context, key: String): String =
+    when (key) {
         "dhikr_subhanallah" -> context.getString(R.string.dhikr_subhanallah)
         "dhikr_alhamdulillah" -> context.getString(R.string.dhikr_alhamdulillah)
         "dhikr_allahuakbar" -> context.getString(R.string.dhikr_allahuakbar)
         "dhikr_istighfar" -> context.getString(R.string.dhikr_istighfar)
         "dhikr_salawat" -> context.getString(R.string.dhikr_salawat)
-        else -> preset.id
+        "dhikr_translit_subhanallah" -> context.getString(R.string.dhikr_translit_subhanallah)
+        "dhikr_translit_alhamdulillah" -> context.getString(R.string.dhikr_translit_alhamdulillah)
+        "dhikr_translit_allahuakbar" -> context.getString(R.string.dhikr_translit_allahuakbar)
+        "dhikr_translit_istighfar" -> context.getString(R.string.dhikr_translit_istighfar)
+        "dhikr_translit_salawat" -> context.getString(R.string.dhikr_translit_salawat)
+        "dhikr_meaning_subhanallah" -> context.getString(R.string.dhikr_meaning_subhanallah)
+        "dhikr_meaning_alhamdulillah" -> context.getString(R.string.dhikr_meaning_alhamdulillah)
+        "dhikr_meaning_allahuakbar" -> context.getString(R.string.dhikr_meaning_allahuakbar)
+        "dhikr_meaning_istighfar" -> context.getString(R.string.dhikr_meaning_istighfar)
+        "dhikr_meaning_salawat" -> context.getString(R.string.dhikr_meaning_salawat)
+        else -> key
     }

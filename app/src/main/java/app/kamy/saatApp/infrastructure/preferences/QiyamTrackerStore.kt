@@ -13,6 +13,13 @@ data class QiyamMonthSnapshot(
     val isLoggedTonight: Boolean
 )
 
+data class QiyamDayLog(
+    val dayKey: String,
+    val weekdayShort: String,
+    val logged: Boolean,
+    val isToday: Boolean
+)
+
 object QiyamTrackerStore {
     private const val PREFS = "saat_qiyam_tracker"
     private const val KEY_NIGHTS_PREFIX = "night_"
@@ -82,6 +89,23 @@ object QiyamTrackerStore {
             streak = prefs.getInt(KEY_STREAK, 0),
             isLoggedTonight = isLogged(context, today)
         )
+    }
+
+    fun last7Days(context: Context): List<QiyamDayLog> {
+        val today = todayKey()
+        val weekdayFormat = SimpleDateFormat("EEE", Locale.getDefault())
+        val cal = Calendar.getInstance()
+        return (6 downTo 0).map { offset ->
+            val c = cal.clone() as Calendar
+            c.add(Calendar.DAY_OF_YEAR, -offset)
+            val key = dayKeyFormat.format(c.time)
+            QiyamDayLog(
+                dayKey = key,
+                weekdayShort = weekdayFormat.format(c.time),
+                logged = isLogged(context, key),
+                isToday = key == today
+            )
+        }
     }
 
     private fun isWithinLastDays(dayKey: String, days: Int): Boolean = runCatching {
