@@ -149,6 +149,8 @@
 
     <string name="recitation_notification_channel">Quran recitation</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
+    <string name="exact_alarm_rationale_title">Prayer reminders on time</string>
+    <string name="action_later">Later</string>
     <string name="battery_opt_snackbar_message">On some phones, allow unrestricted battery so adhan works when the app is closed.</string>
     <string name="battery_opt_snackbar_oem_message">On %1$s phones: set SĀAT to Unrestricted and enable autostart so adhan works in the background.</string>
     <string name="battery_opt_settings_title">Background &amp; battery</string>
@@ -735,4 +737,12 @@
     <string name="faraidh_glossary_intro">Key Islamic inheritance terms used in this calculator:</string>
     <string name="faraidh_radd_applied_hanafi">Radd applied — surplus redistributed among all eligible heirs including spouses (Hanafi).</string>
     <string name="faraidh_madhhab_applied">Madhhab: %1$s</string>
+    <string name="faraidh_save_scenario">Save scenario</string>
+    <string name="faraidh_saved_scenarios">Saved scenarios</string>
+    <string name="faraidh_scenario_saved">Scenario saved</string>
+    <string name="faraidh_scenario_loaded">Scenario loaded</string>
+    <string name="faraidh_scenario_name_hint">Scenario name</string>
+    <string name="faraidh_scenario_empty">No saved scenarios yet</string>
+    <string name="faraidh_reset">Reset calculation</string>
+    <string name="onboarding_step_progress">Step %1$d of %2$d</string>
 </resources>

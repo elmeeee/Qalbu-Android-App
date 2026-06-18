@@ -32,9 +32,9 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import kotlinx.coroutines.delay
 
-private const val SPLASH_VISIBLE_MS = 2_400L
-private const val FADE_IN_MS = 900
-private const val FADE_OUT_MS = 450
+private const val SPLASH_VISIBLE_MS = 700L
+private const val FADE_IN_MS = 350
+private const val FADE_OUT_MS = 250
 private val SplashBackground = Color(0xFFF4F5F0)
 
 @Composable
@@ -59,7 +59,7 @@ fun AppSplashScreen(onFinished: () -> Unit) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painter = painterResource(R.drawable.splash_icon_display),
-                contentDescription = null,
+                contentDescription = stringResource(R.string.app_name),
                 modifier = Modifier
                     .width(300.dp)
                     .height(302.dp),

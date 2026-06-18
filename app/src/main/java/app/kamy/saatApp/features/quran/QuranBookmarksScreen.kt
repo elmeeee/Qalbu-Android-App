@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
+import app.kamy.saatApp.design.components.AlKhatibEmptyState
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.domain.model.HifzEntry
@@ -198,17 +199,11 @@ private fun LibraryList(
     content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit
 ) {
     if (isEmpty) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(emptyIcon, contentDescription = null, tint = AlKhatibColors.Gold.copy(alpha = 0.5f))
-            Spacer(Modifier.height(12.dp))
-            Text(emptyMessage, style = MaterialTheme.typography.bodyLarge, color = AlKhatibColors.Slate500)
-        }
+        AlKhatibEmptyState(
+            icon = emptyIcon,
+            title = emptyMessage,
+            body = ""
+        )
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),

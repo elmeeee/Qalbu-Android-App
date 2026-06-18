@@ -19,6 +19,9 @@ import app.kamy.saatApp.domain.faraidh.HeirInput
 import app.kamy.saatApp.domain.faraidh.resizeNameList
 import app.kamy.saatApp.infrastructure.faraidh.FaraidhReferenceRepository
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioData
+import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioMeta
+import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.math.BigDecimal
@@ -57,14 +60,17 @@ data class FaraidhUiState(
     val glossary: List<FaraidhGlossaryItem> = emptyList(),
     val pdfExporting: Boolean = false,
     val pdfUri: Uri? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val savedScenarios: List<FaraidhScenarioMeta> = emptyList(),
+    val scenarioMessage: String? = null
 )
 
 @HiltViewModel
 class FaraidhViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val referenceRepository: FaraidhReferenceRepository,
-    private val languageStore: AppLanguageStore
+    private val languageStore: AppLanguageStore,
+    private val scenarioStore: FaraidhScenarioStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FaraidhUiState())
@@ -72,8 +78,99 @@ class FaraidhViewModel @Inject constructor(
 
     init {
         loadGlossary()
+        loadSavedScenarios()
+        restoreAutoDraft()
         recompute()
     }
+
+    private fun loadSavedScenarios() {
+        _state.update { it.copy(savedScenarios = scenarioStore.listScenarios()) }
+    }
+
+    private fun restoreAutoDraft() {
+        val draft = scenarioStore.loadAutoDraft() ?: return
+        _state.update { applyScenarioData(it, draft) }
+    }
+
+    fun saveScenario(title: String) {
+        val trimmed = title.trim().ifBlank {
+            _state.value.names.deceasedName.trim().ifBlank { "Faraidh" }
+        }
+        val id = System.currentTimeMillis().toString()
+        val data = toScenarioData(_state.value)
+        scenarioStore.saveScenario(id, trimmed, data)
+        scenarioStore.saveAutoDraft(data)
+        _state.update { it.copy(savedScenarios = scenarioStore.listScenarios(), scenarioMessage = "saved") }
+    }
+
+    fun loadScenario(id: String) {
+        val data = scenarioStore.loadScenario(id) ?: return
+        _state.update { applyScenarioData(it, data) }
+        recompute()
+        _state.update { it.copy(scenarioMessage = "loaded") }
+    }
+
+    fun deleteScenario(id: String) {
+        scenarioStore.deleteScenario(id)
+        _state.update { it.copy(savedScenarios = scenarioStore.listScenarios()) }
+    }
+
+    fun clearScenarioMessage() {
+        _state.update { it.copy(scenarioMessage = null) }
+    }
+
+    fun resetCalculation() {
+        scenarioStore.clearAutoDraft()
+        _state.value = FaraidhUiState(glossary = _state.value.glossary, savedScenarios = scenarioStore.listScenarios())
+        recompute()
+    }
+
+    private fun persistDraft() {
+        scenarioStore.saveAutoDraft(toScenarioData(_state.value))
+    }
+
+    private fun toScenarioData(state: FaraidhUiState): FaraidhScenarioData = FaraidhScenarioData(
+        gender = state.gender.name,
+        madhhab = state.madhhab.name,
+        estate = state.estate,
+        names = state.names,
+        husbandCount = state.husbandCount,
+        wifeCount = state.wifeCount,
+        fatherCount = state.fatherCount,
+        motherCount = state.motherCount,
+        sonCount = state.sonCount,
+        daughterCount = state.daughterCount,
+        grandsonCount = state.grandsonCount,
+        granddaughterCount = state.granddaughterCount,
+        fullBrotherCount = state.fullBrotherCount,
+        fullSisterCount = state.fullSisterCount,
+        paternalBrotherCount = state.paternalBrotherCount,
+        paternalSisterCount = state.paternalSisterCount,
+        maternalBrotherCount = state.maternalBrotherCount,
+        maternalSisterCount = state.maternalSisterCount
+    )
+
+    private fun applyScenarioData(state: FaraidhUiState, data: FaraidhScenarioData): FaraidhUiState =
+        state.copy(
+            gender = runCatching { DeceasedGender.valueOf(data.gender) }.getOrDefault(DeceasedGender.MALE),
+            madhhab = runCatching { FaraidhMadhhab.valueOf(data.madhhab) }.getOrDefault(FaraidhMadhhab.SHAFII),
+            estate = data.estate,
+            names = data.names,
+            husbandCount = data.husbandCount,
+            wifeCount = data.wifeCount,
+            fatherCount = data.fatherCount,
+            motherCount = data.motherCount,
+            sonCount = data.sonCount,
+            daughterCount = data.daughterCount,
+            grandsonCount = data.grandsonCount,
+            granddaughterCount = data.granddaughterCount,
+            fullBrotherCount = data.fullBrotherCount,
+            fullSisterCount = data.fullSisterCount,
+            paternalBrotherCount = data.paternalBrotherCount,
+            paternalSisterCount = data.paternalSisterCount,
+            maternalBrotherCount = data.maternalBrotherCount,
+            maternalSisterCount = data.maternalSisterCount
+        )
 
     private fun loadGlossary() {
         viewModelScope.launch {
@@ -318,6 +415,7 @@ class FaraidhViewModel @Inject constructor(
                         }
                     )
                 }
+                persistDraft()
             }.onFailure {
                 _state.update {
                     it.copy(
@@ -327,6 +425,7 @@ class FaraidhViewModel @Inject constructor(
                         netEstate = estateCalc.netEstate.stripTrailingZeros().toPlainString()
                     )
                 }
+                persistDraft()
             }
         }
     }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -71,6 +72,26 @@ fun OnboardingScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val stepIndex = when (state.step) {
+                OnboardingStep.WELCOME -> 1
+                OnboardingStep.LOCATION -> 2
+                OnboardingStep.NOTIFICATIONS -> 3
+                OnboardingStep.WIDGET -> 4
+            }
+            Text(
+                stringResource(R.string.onboarding_step_progress, stepIndex, 4),
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.75f),
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            LinearProgressIndicator(
+                progress = { stepIndex / 4f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 20.dp),
+                color = AlKhatibColors.GoldBright,
+                trackColor = Color.White.copy(alpha = 0.2f)
+            )
             when (state.step) {
                 OnboardingStep.WELCOME -> WelcomeStep()
                 OnboardingStep.LOCATION -> LocationStep(
@@ -144,7 +165,7 @@ fun OnboardingScreen(
                 OnboardingSecondaryButton(
                     onClick = {
                         if (state.step == OnboardingStep.NOTIFICATIONS) {
-                            vm.nextStep()
+                            vm.skipNotifications()
                         } else if (state.step == OnboardingStep.LOCATION) {
                             vm.skipLocation()
                         } else {

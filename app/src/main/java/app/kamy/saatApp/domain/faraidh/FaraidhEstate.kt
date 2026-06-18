@@ -1,5 +1,6 @@
 package app.kamy.saatApp.domain.faraidh
 
+import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -13,6 +14,7 @@ enum class FaraidhMadhhab {
     fun raddIncludesSpouses(): Boolean = this == HANAFI
 }
 
+@Serializable
 data class EstateAssetInput(
     val cashSavings: String = "",
     val goldJewelry: String = "",

@@ -109,6 +109,7 @@ fun TodayScreen(
     val profileStillLoading = stringResource(R.string.profile_still_loading)
     val verseOfDayTitle = stringResource(R.string.verse_of_day)
     val onboardingComplete = remember { OnboardingStore.from(context).isComplete() }
+    val permissionsHandledInOnboarding = remember { OnboardingStore.from(context).permissionsHandledInOnboarding() }
     val hasManualLocation = remember {
         LocationPreferencesStore.from(context).mode() == LocationMode.MANUAL
     }
@@ -134,6 +135,7 @@ fun TodayScreen(
     }
 
     fun requestNotificationsIfNeeded() {
+        if (permissionsHandledInOnboarding) return
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             if (!context.areAppNotificationsEnabled()) {
                 scope.launch { showNotificationSettingsSnackbar() }
@@ -157,8 +159,8 @@ fun TodayScreen(
         requestNotificationsIfNeeded()
     }
 
-    // First open after onboarding: location dialog, then notification dialog.
-    LaunchedEffect(onboardingComplete) {
+    // After onboarding: still request location if needed, but skip duplicate notification prompts.
+    LaunchedEffect(onboardingComplete, permissionsHandledInOnboarding) {
         if (!onboardingComplete || locationPrompted) return@LaunchedEffect
         locationPrompted = true
         if (hasManualLocation) {

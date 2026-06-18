@@ -1,5 +1,8 @@
 package app.kamy.saatApp.domain.faraidh
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class FaraidhParticipantNames(
     val deceasedName: String = "",
     val husbandName: String = "",

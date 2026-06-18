@@ -53,6 +53,6 @@ enum class RootTab(
     companion object {
         val Default = Today
 
-        val mainTabs: List<RootTab> = listOf(Today, Quran, Tools, Reflect)
+        val mainTabs: List<RootTab> = listOf(Today, Quran, Tools, Reflect, Account)
     }
 }

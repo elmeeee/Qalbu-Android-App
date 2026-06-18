@@ -22,8 +22,9 @@ import app.kamy.saatApp.design.theme.AlKhatibColors
 @Composable
 fun AlKhatibPartialBottomSheet(
     onDismiss: () -> Unit,
-    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
+    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     maxHeightFraction: Float = 0.62f,
+    scrollContent: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val maxHeight = LocalConfiguration.current.screenHeightDp.dp * maxHeightFraction
@@ -38,8 +39,13 @@ fun AlKhatibPartialBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = maxHeight)
-                .verticalScroll(rememberScrollState())
+                .then(
+                    if (scrollContent) {
+                        Modifier.heightIn(max = maxHeight).verticalScroll(rememberScrollState())
+                    } else {
+                        Modifier.heightIn(max = maxHeight)
+                    }
+                )
         ) {
             content()
         }

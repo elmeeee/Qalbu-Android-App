@@ -22,7 +22,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -88,6 +93,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
+import app.kamy.saatApp.design.components.AlKhatibEmptyState
 import app.kamy.saatApp.design.components.AlKhatibPartialBottomSheet
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
@@ -124,6 +130,10 @@ fun FaraidhCalculatorScreen(
     val state by vm.state.collectAsState()
     val context = LocalContext.current
     var showTooltip by remember { mutableStateOf(false) }
+    var showSaveDialog by remember { mutableStateOf(false) }
+    var showScenarioList by remember { mutableStateOf(false) }
+    var scenarioTitle by remember { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() }
     val currency = remember {
         NumberFormat.getNumberInstance(Locale.getDefault()).apply {
             minimumFractionDigits = 0
@@ -132,6 +142,72 @@ fun FaraidhCalculatorScreen(
     }
     val hasResult = state.result?.activeShares?.isNotEmpty() == true
     val heirCount = remember(state) { countActiveHeirs(state) }
+
+    val scenarioSavedMsg = stringResource(R.string.faraidh_scenario_saved)
+    val scenarioLoadedMsg = stringResource(R.string.faraidh_scenario_loaded)
+
+    LaunchedEffect(state.scenarioMessage) {
+        when (state.scenarioMessage) {
+            "saved" -> snackbarHostState.showSnackbar(scenarioSavedMsg)
+            "loaded" -> snackbarHostState.showSnackbar(scenarioLoadedMsg)
+        }
+        if (state.scenarioMessage != null) vm.clearScenarioMessage()
+    }
+
+    if (showSaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showSaveDialog = false },
+            title = { Text(stringResource(R.string.faraidh_save_scenario)) },
+            text = {
+                OutlinedTextField(
+                    value = scenarioTitle,
+                    onValueChange = { scenarioTitle = it },
+                    label = { Text(stringResource(R.string.faraidh_scenario_name_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    vm.saveScenario(scenarioTitle)
+                    showSaveDialog = false
+                    scenarioTitle = ""
+                }) { Text(stringResource(R.string.faraidh_save_scenario)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSaveDialog = false }) { Text(stringResource(R.string.close)) }
+            }
+        )
+    }
+
+    if (showScenarioList) {
+        AlertDialog(
+            onDismissRequest = { showScenarioList = false },
+            title = { Text(stringResource(R.string.faraidh_saved_scenarios)) },
+            text = {
+                if (state.savedScenarios.isEmpty()) {
+                    Text(stringResource(R.string.faraidh_scenario_empty))
+                } else {
+                    Column {
+                        state.savedScenarios.forEach { scenario ->
+                            TextButton(
+                                onClick = {
+                                    vm.loadScenario(scenario.id)
+                                    showScenarioList = false
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(scenario.title, modifier = Modifier.fillMaxWidth())
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showScenarioList = false }) { Text(stringResource(R.string.close)) }
+            }
+        )
+    }
 
     if (showTooltip) {
         AlertDialog(
@@ -149,7 +225,8 @@ fun FaraidhCalculatorScreen(
     if (state.showInputSheet) {
         AlKhatibPartialBottomSheet(
             onDismiss = { vm.toggleInputSheet(false) },
-            maxHeightFraction = 0.92f
+            maxHeightFraction = 0.92f,
+            scrollContent = false
         ) {
             FaraidhInputSheetContent(
                 state = state,
@@ -171,6 +248,7 @@ fun FaraidhCalculatorScreen(
             .background(AlKhatibColors.ScreenBackground)
             .tabContentStatusBarInset(),
         containerColor = AlKhatibColors.ScreenBackground,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (hasResult) {
                 Surface(
@@ -223,7 +301,12 @@ fun FaraidhCalculatorScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            FaraidhHeader(onBack = onBack, onInfo = { showTooltip = true })
+            FaraidhHeader(
+                onBack = onBack,
+                onInfo = { showTooltip = true },
+                onSave = { showSaveDialog = true },
+                onScenarios = { showScenarioList = true }
+            )
 
             FaraidhStatusStrip(
                 netEstate = state.netEstate,
@@ -269,7 +352,12 @@ fun FaraidhCalculatorScreen(
 }
 
 @Composable
-private fun FaraidhHeader(onBack: () -> Unit, onInfo: () -> Unit) {
+private fun FaraidhHeader(
+    onBack: () -> Unit,
+    onInfo: () -> Unit,
+    onSave: () -> Unit,
+    onScenarios: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -306,6 +394,12 @@ private fun FaraidhHeader(onBack: () -> Unit, onInfo: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = AlKhatibColors.Slate500
                 )
+            }
+            IconButton(onClick = onScenarios) {
+                Icon(Icons.Filled.FolderOpen, contentDescription = stringResource(R.string.faraidh_saved_scenarios), tint = AlKhatibColors.Teal)
+            }
+            IconButton(onClick = onSave) {
+                Icon(Icons.Filled.Save, contentDescription = stringResource(R.string.faraidh_save_scenario), tint = AlKhatibColors.Teal)
             }
             IconButton(onClick = onInfo) {
                 Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.faraidh_tooltip_title), tint = AlKhatibColors.Teal)
@@ -1145,36 +1239,13 @@ private fun EmptyState(
     cta: String,
     onCta: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .background(AlKhatibColors.MintWash, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(icon, contentDescription = null, tint = AlKhatibColors.DeepEmerald, modifier = Modifier.size(36.dp))
-        }
-        Spacer(Modifier.height(16.dp))
-        Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = AlKhatibColors.Slate900, textAlign = TextAlign.Center)
-        Spacer(Modifier.height(8.dp))
-        Text(body, style = MaterialTheme.typography.bodyMedium, color = AlKhatibColors.Slate500, textAlign = TextAlign.Center)
-        Spacer(Modifier.height(20.dp))
-        Button(
-            onClick = onCta,
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AlKhatibColors.DeepEmerald)
-        ) {
-            Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(cta, fontWeight = FontWeight.SemiBold)
-        }
-    }
+    AlKhatibEmptyState(
+        icon = icon,
+        title = title,
+        body = body,
+        cta = cta,
+        onCta = onCta
+    )
 }
 
 private fun countActiveHeirs(state: FaraidhUiState): Int = listOf(

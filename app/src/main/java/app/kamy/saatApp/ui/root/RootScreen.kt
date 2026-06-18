@@ -1,5 +1,10 @@
 package app.kamy.saatApp.ui.root
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -92,7 +97,7 @@ fun RootScreen(
     val isToolRoute = currentRoute?.startsWith("tools/") == true
     val isBookmarksRoute = currentRoute == "quran/bookmarks"
     val showBottomBar = !isReaderRoute && !isPrayerCalendarRoute && !isToolRoute &&
-        !isBookmarksRoute && currentRoute != RootTab.Account.route
+        !isBookmarksRoute
     val showAudioBar = audioState.currentUrl != null
     val audioBarBottomPadding = if (showBottomBar) {
         floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
@@ -109,7 +114,13 @@ fun RootScreen(
             startDestination = RootTab.Default.route,
             modifier = Modifier.fillMaxSize()
         ) {
-            composable(RootTab.Today.route) {
+            composable(
+                route = RootTab.Today.route,
+                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
+                exitTransition = { fadeOut(tween(180)) },
+                popEnterTransition = { fadeIn(tween(220)) },
+                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+            ) {
                 TodayScreen(
                     audioPlayer = audioPlayer,
                     onAccountNavigate = { navController.navigate(RootTab.Account.route) },
@@ -127,7 +138,13 @@ fun RootScreen(
             composable("prayer/tracker/calendar") {
                 PrayerTrackerCalendarScreen(onBack = { navController.popBackStack() })
             }
-            composable(RootTab.Reflect.route) {
+            composable(
+                route = RootTab.Reflect.route,
+                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
+                exitTransition = { fadeOut(tween(180)) },
+                popEnterTransition = { fadeIn(tween(220)) },
+                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+            ) {
                 ReflectScreen(
                     onSignIn = { navController.navigate(RootTab.Account.route) },
                     onOpenVerse = { verseKey ->
@@ -138,7 +155,13 @@ fun RootScreen(
                     }
                 )
             }
-            composable(RootTab.Quran.route) {
+            composable(
+                route = RootTab.Quran.route,
+                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
+                exitTransition = { fadeOut(tween(180)) },
+                popEnterTransition = { fadeIn(tween(220)) },
+                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+            ) {
                 ChaptersScreen(
                     onOpenChapter = { chapter, initialVerse ->
                         navController.navigate("quran/reader/${chapter.id}?ayah=${initialVerse ?: -1}")
@@ -166,7 +189,13 @@ fun RootScreen(
                     }
                 )
             }
-            composable(RootTab.Tools.route) {
+            composable(
+                route = RootTab.Tools.route,
+                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
+                exitTransition = { fadeOut(tween(180)) },
+                popEnterTransition = { fadeIn(tween(220)) },
+                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+            ) {
                 SpiritualToolsScreen(
                     onOpenTool = { tool ->
                         navController.navigate("tools/$tool") { launchSingleTop = true }
@@ -188,7 +217,12 @@ fun RootScreen(
             composable("tools/qiyam") {
                 QiyamScreen(onBack = { navController.popBackStack() })
             }
-            composable("tools/faraidh") {
+            composable("tools/faraidh",
+                enterTransition = { slideInHorizontally(tween(280)) { it } + fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(180)) },
+                popEnterTransition = { fadeIn(tween(200)) },
+                popExitTransition = { slideOutHorizontally(tween(280)) { it } + fadeOut(tween(180)) }
+            ) {
                 FaraidhCalculatorScreen(
                     onBack = { navController.popBackStack() },
                     onOpenVerse = { surah, ayah ->
@@ -239,11 +273,17 @@ fun RootScreen(
                     MushafReaderScreen(onBack = { navController.popBackStack() })
                 }
             }
-            composable(RootTab.Account.route) {
+            composable(
+                route = RootTab.Account.route,
+                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
+                exitTransition = { fadeOut(tween(180)) },
+                popEnterTransition = { fadeIn(tween(220)) },
+                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+            ) {
                 AccountScreen(
                     oauthService = oauthService,
                     authService = authService,
-                    onBack = { navController.popBackStack() }
+                    onBack = null
                 )
             }
         }

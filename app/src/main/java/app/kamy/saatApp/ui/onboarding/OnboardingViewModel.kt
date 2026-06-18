@@ -116,7 +116,13 @@ class OnboardingViewModel @Inject constructor(
     }
 
     fun onNotificationPermissionResult() {
+        onboardingStore.markNotificationsHandled()
         DailyVerseNotificationScheduler.reschedule(appContext)
+        nextStep()
+    }
+
+    fun skipNotifications() {
+        onboardingStore.markNotificationsHandled()
         nextStep()
     }
 
