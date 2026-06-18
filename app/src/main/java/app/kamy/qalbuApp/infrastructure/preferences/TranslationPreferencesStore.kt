@@ -25,6 +25,9 @@ class TranslationPreferencesStore @Inject constructor(
     private val _showTranslation = MutableStateFlow(prefs.getBoolean(KEY_SHOW, true))
     val showTranslation: StateFlow<Boolean> = _showTranslation.asStateFlow()
 
+    private val _showTransliteration = MutableStateFlow(prefs.getBoolean(KEY_SHOW_LATIN, false))
+    val showTransliteration: StateFlow<Boolean> = _showTransliteration.asStateFlow()
+
     private val _recitationId = MutableStateFlow(loadRecitationId())
     val recitationId: StateFlow<Int> = _recitationId.asStateFlow()
 
@@ -44,6 +47,11 @@ class TranslationPreferencesStore @Inject constructor(
     fun setShowTranslation(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_SHOW, enabled).apply()
         _showTranslation.value = enabled
+    }
+
+    fun setShowTransliteration(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_LATIN, enabled).apply()
+        _showTransliteration.value = enabled
     }
 
     fun setRecitation(id: Int) {
@@ -70,6 +78,7 @@ class TranslationPreferencesStore @Inject constructor(
         private const val KEY_ID = "chapterReaderTranslationId"
         private const val KEY_NAME = "chapterReaderTranslationName"
         private const val KEY_SHOW = "chapterReaderShowTranslation"
+        private const val KEY_SHOW_LATIN = "chapterReaderShowTransliteration"
         private const val KEY_RECITATION_ID = "chapterReaderRecitationId"
     }
 }

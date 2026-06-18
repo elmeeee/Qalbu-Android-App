@@ -61,7 +61,9 @@ import app.kamy.qalbuApp.infrastructure.preferences.OnboardingStore
 import app.kamy.qalbuApp.features.share.AiShareSheet
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.layout.floatingNavAndAudioBottomPadding
+import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
@@ -217,6 +219,12 @@ fun TodayScreen(
         trackerVm.refresh()
     }
 
+    LaunchedEffect(Unit) {
+        trackerVm.toastMessage.collectLatest { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
+
     LaunchedEffect(todayState.publishToast) {
         todayState.publishToast?.let {
             snackbarHostState.showSnackbar(it)
@@ -305,6 +313,8 @@ fun TodayScreen(
                             verse = todayState.verse,
                             referenceLabel = todayState.verseReferenceLabel,
                             translationId = todayState.translationId,
+                            showTranslation = todayState.showTranslation,
+                            showTransliteration = todayState.showTransliteration,
                             isLoading = todayState.isLoading,
                             error = todayState.error,
                             isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
@@ -344,7 +354,9 @@ fun TodayScreen(
 
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = floatingNavBottomPadding() + 8.dp)
         )
     }
 

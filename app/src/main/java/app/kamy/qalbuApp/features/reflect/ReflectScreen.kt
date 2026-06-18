@@ -74,6 +74,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlinx.coroutines.launch
 
 private val ReflectPaper = Color(0xFFFAF6EE)
@@ -617,19 +618,21 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
     }
 }
 
+@Composable
 private fun formatReflectTime(iso: String?): String {
     if (iso.isNullOrBlank()) return ""
+    val justNow = stringResource(R.string.time_just_now)
     return runCatching {
         val instant = Instant.parse(iso)
         val now = Instant.now()
         val duration = Duration.between(instant, now)
         when {
-            duration.toMinutes() < 1 -> "Just now"
-            duration.toHours() < 1 -> "${duration.toMinutes()}m ago"
-            duration.toDays() < 1 -> "${duration.toHours()}h ago"
-            duration.toDays() == 1L -> "Yesterday"
-            duration.toDays() < 7 -> "${duration.toDays()}d ago"
-            else -> DateTimeFormatter.ofPattern("MMM d")
+            duration.toMinutes() < 1 -> justNow
+            duration.toHours() < 1 -> stringResource(R.string.time_minutes_ago, duration.toMinutes())
+            duration.toDays() < 1 -> stringResource(R.string.time_hours_ago, duration.toHours())
+            duration.toDays() == 1L -> stringResource(R.string.time_yesterday)
+            duration.toDays() < 7 -> stringResource(R.string.time_days_ago, duration.toDays())
+            else -> DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
                 .withZone(ZoneId.systemDefault())
                 .format(instant)
         }

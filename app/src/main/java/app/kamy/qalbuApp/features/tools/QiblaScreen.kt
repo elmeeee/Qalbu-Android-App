@@ -282,7 +282,11 @@ private fun QiblaNeedleOverlay(
                 .background(Color.White.copy(alpha = 0.15f))
                 .padding(horizontal = 14.dp, vertical = 6.dp)
         ) {
-            Text("🕋 ${bearing.roundToInt()}°", color = Color.White, fontWeight = FontWeight.Bold)
+            Text(
+                text = stringResource(R.string.qibla_bearing_compass, bearing.roundToInt()),
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

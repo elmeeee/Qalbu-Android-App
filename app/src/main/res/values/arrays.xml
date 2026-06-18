@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="weekday_names">
+        <item>Sunday</item>
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+    </string-array>
+    <string-array name="weekday_names_ar">
+        <item>Al-Ahad</item>
+        <item>Al-Itnayn</item>
+        <item>Al-Thulatha</item>
+        <item>Al-Arba</item>
+        <item>Al-Khamis</item>
+        <item>Al-Jumuah</item>
+        <item>Al-Sabt</item>
+    </string-array>
+</resources>

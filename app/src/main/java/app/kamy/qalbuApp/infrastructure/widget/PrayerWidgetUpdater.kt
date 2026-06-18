@@ -31,6 +31,7 @@ object PrayerWidgetUpdater {
         val views = RemoteViews(context.packageName, R.layout.prayer_times_widget)
         if (snapshot == null) {
             views.setTextViewText(R.id.widget_city, context.getString(R.string.app_name))
+            views.setTextViewText(R.id.widget_hijri, "")
             views.setTextViewText(R.id.widget_next_line, context.getString(R.string.prayer_widget_empty))
             views.setTextViewText(R.id.widget_countdown, "--:--")
             bindSlot(views, PrayerType.FAJR, context.getString(R.string.prayer_fajr), "--:--", false)
@@ -40,8 +41,14 @@ object PrayerWidgetUpdater {
             bindSlot(views, PrayerType.ISHA, context.getString(R.string.prayer_isha), "--:--", false)
         } else {
             views.setTextViewText(R.id.widget_city, snapshot.cityLabel)
+            views.setTextViewText(
+                R.id.widget_hijri,
+                listOfNotNull(snapshot.hijriLabel, snapshot.gregorianLabel)
+                    .filter { it.isNotBlank() }
+                    .joinToString(" · ")
+            )
             val subtitle = snapshot.khgtEventTitle?.takeIf { it.isNotBlank() }
-                ?: "${snapshot.nextPrayerName} · ${snapshot.nextPrayerTime}"
+                ?: snapshot.nextPrayerLabel
             views.setTextViewText(R.id.widget_next_line, subtitle)
             views.setTextViewText(R.id.widget_countdown, snapshot.countdownCompact)
             snapshot.slots.forEach { slot ->
@@ -69,7 +76,12 @@ object PrayerWidgetUpdater {
         time: String,
         active: Boolean
     ) {
-        val (_, labelId, timeId) = slotIds(type)
+        val (slotId, labelId, timeId) = slotIds(type)
+        views.setInt(
+            slotId,
+            "setBackgroundResource",
+            if (active) R.drawable.widget_slot_active_background else R.drawable.widget_slot_background
+        )
         views.setTextViewText(labelId, label)
         views.setTextViewText(timeId, time)
         views.setTextColor(labelId, if (active) COLOR_ACTIVE_LABEL else COLOR_INACTIVE_LABEL)

@@ -58,6 +58,7 @@
     <string name="prayer_calculation_method">Prayer calculation method</string>
     <string name="adhan_voice">Adhan voice</string>
     <string name="show_translation">Show translation</string>
+    <string name="show_transliteration">Show Latin transliteration</string>
     <string name="translator">Translator</string>
     <string name="translator_hint">Tap to choose translation source</string>
     <string name="notifications">Notifications</string>
@@ -219,6 +220,7 @@
     <string name="mushaf_swipe_hint_action">Got it</string>
     <string name="mushaf_cloud_synced">Synced to your account</string>
     <string name="prayer_tracker_title">Prayers</string>
+    <string name="prayer_marked_success">%1$s marked ✓</string>
     <string name="prayer_tracker_subtitle">%1$d of %2$d completed</string>
     <string name="prayer_challenge_progress">Challenge: %1$d / %2$d day streak</string>
     <string name="prayer_streak_current">Current streak</string>
@@ -482,6 +484,7 @@
     <string name="qibla_title">Qibla</string>
     <string name="qibla_location_required">Set your location in Today to find Qibla direction.</string>
     <string name="qibla_bearing">%1$d° to Kaaba</string>
+    <string name="qibla_bearing_compass">🕋 %1$d°</string>
     <string name="qibla_aligned">Facing Qibla — you\'re aligned</string>
     <string name="qibla_distance">~%1$d km away</string>
     <string name="qibla_hint_compass">Hold your phone flat and rotate until the needle points up.</string>
@@ -573,10 +576,22 @@
     <string name="reader_scroll_hint">Scroll for transliteration &amp; translation</string>
     <string name="translator_sync_subtitle">Synced with app language</string>
 
+    <!-- Relative time -->
+    <string name="time_just_now">Just now</string>
+    <string name="time_minutes_ago">%1$dm ago</string>
+    <string name="time_hours_ago">%1$dh ago</string>
+    <string name="time_yesterday">Yesterday</string>
+    <string name="time_days_ago">%1$dd ago</string>
+    <string name="chapters_refresh_failed">Couldn\'t refresh chapters</string>
+
     <!-- Widgets & shortcuts -->
     <string name="daily_verse_widget_title">Verse of the day</string>
     <string name="daily_verse_widget_desc">Today\'s ayah on your home screen</string>
     <string name="daily_verse_widget_empty">Open Qalbu to load today\'s verse</string>
+    <string name="prayer_widget_next_title">Next prayer</string>
+    <string name="prayer_widget_next_desc">Countdown to the next adhan</string>
+    <string name="prayer_widget_schedule_title">Prayer schedule</string>
+    <string name="prayer_widget_schedule_desc">Today\'s five prayer times at a glance</string>
     <string name="shortcut_continue_quran">Continue Quran</string>
     <string name="shortcut_prayer_today">Prayer times</string>
 </resources>

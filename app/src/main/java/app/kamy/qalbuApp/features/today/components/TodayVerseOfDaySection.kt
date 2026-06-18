@@ -54,6 +54,8 @@ fun TodayVerseOfDaySection(
     verse: RandomAyahPayload?,
     referenceLabel: String?,
     translationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
+    showTranslation: Boolean = true,
+    showTransliteration: Boolean = false,
     isLoading: Boolean,
     error: AppError? = null,
     isPlaying: Boolean,
@@ -119,7 +121,7 @@ fun TodayVerseOfDaySection(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    verse.displayTransliteration(translationId)?.let { latin ->
+                    verse.displayTransliteration(translationId)?.takeIf { showTransliteration }?.let { latin ->
                         TransliterationView(
                             text = latin,
                             useHtml = verse.transliterationUsesHtml(translationId),
@@ -128,20 +130,22 @@ fun TodayVerseOfDaySection(
                         )
                     }
 
-                    verse.translations?.firstOrNull()?.text?.let { translation ->
-                        val clean = translation.toVerseTranslationPlainText()
-                        if (clean.isNotEmpty()) {
-                            Text(
-                                text = "“$clean”",
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.bodyMedium,
-                                lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.15f,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(bottom = 4.dp),
-                                softWrap = true
-                            )
+                    if (showTranslation) {
+                        verse.translations?.firstOrNull()?.text?.let { translation ->
+                            val clean = translation.toVerseTranslationPlainText()
+                            if (clean.isNotEmpty()) {
+                                Text(
+                                    text = "“$clean”",
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.15f,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 4.dp),
+                                    softWrap = true
+                                )
+                            }
                         }
                     }
                 }

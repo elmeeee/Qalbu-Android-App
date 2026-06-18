@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -85,6 +86,7 @@ import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.core.locale.AppLanguage
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
+import app.kamy.qalbuApp.ui.layout.floatingNavBottomPadding
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import app.kamy.qalbuApp.domain.adhan.AdhanVoice
 import app.kamy.qalbuApp.domain.adhan.AdhanVoiceCatalog
@@ -248,15 +250,7 @@ private fun AccountSettingsContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        AlKhatibColors.Teal.copy(alpha = 0.06f),
-                        MaterialTheme.colorScheme.background
-                    )
-                )
-            )
+            .background(AlKhatibColors.ScreenBackground)
             .tabContentStatusBarInset()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
@@ -313,11 +307,21 @@ private fun AccountSettingsContent(
                 subtitle = state.selectedAdhanVoice.displayName,
                 onClick = { vm.openAdhanSheet() }
             )
+        }
+
+        SettingsSectionLabel(stringResource(R.string.reading_settings))
+        AlKhatibSettingsGroup {
             AlKhatibSettingsToggleRow(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
                 title = stringResource(R.string.show_translation),
                 checked = state.showTranslation,
                 onCheckedChange = vm::setShowTranslation
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.TextFields,
+                title = stringResource(R.string.show_transliteration),
+                checked = state.showTransliteration,
+                onCheckedChange = vm::setShowTransliteration
             )
             AlKhatibSettingsNavigationRow(
                 icon = Icons.Filled.Translate,
@@ -351,7 +355,7 @@ private fun AccountSettingsContent(
                 Text(stringResource(R.string.sign_out))
             }
         }
-        Spacer(Modifier.height(AlKhatibSpacing.xl))
+        Spacer(Modifier.height(floatingNavBottomPadding()))
     }
 }
 
@@ -374,17 +378,33 @@ private fun ProfileHeader(
         ?: sessionDisplayName
         ?: if (isLoading) loadingLabel else null
     val username = profile?.username ?: sessionUsername
-    AlKhatibCard(
-        modifier = Modifier.fillMaxWidth(),
-        style = AlKhatibCardStyle.Filled,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-    ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(4.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(AlKhatibColors.PureWhite)
+            .border(
+                width = 1.dp,
+                color = AlKhatibColors.SoftGrey.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(20.dp)
+            )
     ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(3.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                    )
+                )
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+        ) {
         Box(
             modifier = Modifier
                 .size(72.dp)
@@ -462,26 +482,23 @@ private fun ProfileHeader(
 
 @Composable
 private fun SettingsSectionLabel(text: String) {
-    Box(
-        modifier = Modifier
-            .padding(start = AlKhatibSpacing.xs, bottom = 4.dp)
-            .clip(RoundedCornerShape(50))
-            .background(
-                Brush.horizontalGradient(
-                    listOf(
-                        AlKhatibColors.DeepEmerald.copy(alpha = 0.14f),
-                        AlKhatibColors.Gold.copy(alpha = 0.08f)
-                    )
-                )
-            )
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+    Row(
+        modifier = Modifier.padding(start = 2.dp, bottom = 8.dp, top = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        Box(
+            modifier = Modifier
+                .width(3.dp)
+                .height(16.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(AlKhatibColors.DeepEmerald)
+        )
+        Spacer(Modifier.width(10.dp))
         Text(
-            text = text.uppercase(),
-            style = MaterialTheme.typography.labelLarge,
-            color = AlKhatibColors.DeepEmerald,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.sp
+            text = text,
+            style = MaterialTheme.typography.titleSmall,
+            color = AlKhatibColors.Slate800,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }

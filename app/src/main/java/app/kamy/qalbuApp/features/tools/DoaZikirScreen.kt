@@ -19,6 +19,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -95,6 +98,7 @@ fun DoaZikirScreen(
                         } else {
                             stringResource(R.string.doa_zikir_kind_doa)
                         },
+                        isDhikr = entry.kind == DoaCatalogKind.DHIKR,
                         onClick = { viewModel.selectCategory(entry.slug) }
                     )
                 }
@@ -190,39 +194,69 @@ private fun DoaZikirTopBar(
 private fun CatalogRow(
     title: String,
     kindLabel: String,
+    isDhikr: Boolean,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(AlKhatibColors.PureWhite)
+            .clip(RoundedCornerShape(18.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(AlKhatibColors.PureWhite, AlKhatibColors.MintWash.copy(alpha = 0.45f))
+                )
+            )
             .border(
                 width = 1.dp,
-                color = AlKhatibColors.SoftGrey.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(16.dp)
+                brush = Brush.linearGradient(
+                    listOf(
+                        AlKhatibColors.Teal.copy(alpha = 0.35f),
+                        AlKhatibColors.SoftGrey.copy(alpha = 0.55f)
+                    )
+                ),
+                shape = RoundedCornerShape(18.dp)
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Medium,
-            color = AlKhatibColors.Slate800,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(Modifier.width(12.dp))
-        Text(
-            text = kindLabel,
-            style = MaterialTheme.typography.labelSmall,
-            color = AlKhatibColors.TealDark,
+        Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(999.dp))
-                .background(AlKhatibColors.MintWash)
-                .padding(horizontal = 10.dp, vertical = 4.dp)
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(
+                    if (isDhikr) AlKhatibColors.DeepEmerald.copy(alpha = 0.12f)
+                    else AlKhatibColors.AmberWash
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = if (isDhikr) Icons.Filled.Favorite else Icons.Filled.AutoStories,
+                contentDescription = null,
+                tint = if (isDhikr) AlKhatibColors.DeepEmerald else AlKhatibColors.GoldDeep,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = AlKhatibColors.Slate800
+            )
+            Text(
+                text = kindLabel,
+                style = MaterialTheme.typography.labelSmall,
+                color = AlKhatibColors.Slate500,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = AlKhatibColors.Teal,
+            modifier = Modifier.size(22.dp)
         )
     }
 }
@@ -238,30 +272,25 @@ private fun PremiumDoaCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(AlKhatibColors.PureWhite)
             .border(
                 width = 1.dp,
-                brush = Brush.linearGradient(
-                    listOf(
-                        AlKhatibColors.Teal.copy(alpha = 0.35f),
-                        AlKhatibColors.SoftGrey.copy(alpha = 0.5f)
-                    )
-                ),
-                shape = RoundedCornerShape(18.dp)
+                color = AlKhatibColors.SoftGrey.copy(alpha = 0.75f),
+                shape = RoundedCornerShape(20.dp)
             )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(4.dp)
+                .height(3.dp)
                 .background(
                     Brush.horizontalGradient(
-                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal, AlKhatibColors.Gold.copy(alpha = 0.6f))
                     )
                 )
         )
-        Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp)) {
             if (title.isNotBlank()) {
                 Text(
                     text = title,
@@ -269,46 +298,60 @@ private fun PremiumDoaCard(
                     fontWeight = FontWeight.SemiBold,
                     color = AlKhatibColors.DeepEmerald
                 )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(14.dp))
             }
             if (arabic.isNotBlank()) {
-                Text(
-                    text = arabic,
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        lineHeight = 36.sp,
-                        fontSize = 26.sp
-                    ),
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.fillMaxWidth(),
-                    color = AlKhatibColors.Slate900
-                )
-                Spacer(Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.05f))
+                        .padding(horizontal = 14.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = arabic,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            lineHeight = 38.sp,
+                            fontSize = 26.sp
+                        ),
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth(),
+                        color = AlKhatibColors.Slate900
+                    )
+                }
             }
             if (latin.isNotBlank()) {
+                Spacer(Modifier.height(12.dp))
                 Text(
                     text = latin.replace("\r\n", "\n"),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                    ),
                     color = AlKhatibColors.Slate500,
-                    lineHeight = 22.sp
+                    lineHeight = 24.sp
                 )
-                Spacer(Modifier.height(8.dp))
             }
             if (translation.isNotBlank()) {
+                Spacer(Modifier.height(12.dp))
                 Text(
                     text = translation.replace("\r\n", "\n"),
                     style = MaterialTheme.typography.bodyLarge,
                     color = AlKhatibColors.Slate800,
-                    lineHeight = 24.sp
+                    lineHeight = 26.sp
                 )
             }
             reference?.let {
-                Spacer(Modifier.height(12.dp))
-                HorizontalDivider(color = AlKhatibColors.SoftGrey.copy(alpha = 0.8f))
-                Spacer(Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.Top) {
+                Spacer(Modifier.height(14.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(AlKhatibColors.LightGrey.copy(alpha = 0.55f))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
-                            .padding(top = 5.dp)
                             .size(6.dp)
                             .clip(RoundedCornerShape(3.dp))
                             .background(AlKhatibColors.Teal)

@@ -59,7 +59,9 @@ data class TodayUiState(
     val aiShareDraft: String = "",
     val aiShareError: AppError? = null,
     val showReciterSheet: Boolean = false,
-    val isOfflineData: Boolean = false
+    val isOfflineData: Boolean = false,
+    val showTransliteration: Boolean = false,
+    val showTranslation: Boolean = true
 )
 
 @HiltViewModel
@@ -79,7 +81,9 @@ class TodayViewModel @Inject constructor(
         _state.update {
             it.copy(
                 translationId = translationStore.currentTranslationId(),
-                selectedRecitationId = translationStore.currentRecitationId()
+                selectedRecitationId = translationStore.currentRecitationId(),
+                showTranslation = translationStore.showTranslation.value,
+                showTransliteration = translationStore.showTransliteration.value
             )
         }
         loadDailyAyahWithRecitations()
@@ -94,6 +98,16 @@ class TodayViewModel @Inject constructor(
                 _state.update { it.copy(translationId = translationStore.currentTranslationId()) }
                 shareComposer.clearCaches()
                 loadDailyAyahWithRecitations()
+            }
+        }
+        viewModelScope.launch {
+            translationStore.showTranslation.collect { enabled ->
+                _state.update { it.copy(showTranslation = enabled) }
+            }
+        }
+        viewModelScope.launch {
+            translationStore.showTransliteration.collect { enabled ->
+                _state.update { it.copy(showTransliteration = enabled) }
             }
         }
     }

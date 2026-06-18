@@ -50,6 +50,7 @@
     <string name="prayer_calculation_method">Kaedah pengiraan solat</string>
     <string name="adhan_voice">Suara azan</string>
     <string name="show_translation">Tunjuk terjemahan</string>
+    <string name="show_transliteration">Tunjuk latin</string>
     <string name="translator">Penterjemah</string>
     <string name="translator_hint">Ketik untuk pilih sumber terjemahan</string>
     <string name="translator_sync_subtitle">Disegerakkan dengan bahasa app</string>
@@ -203,6 +204,7 @@
     <string name="mushaf_swipe_hint_action">Faham</string>
     <string name="mushaf_cloud_synced">Diselaraskan ke akaun anda</string>
     <string name="prayer_tracker_title">Solat</string>
+    <string name="prayer_marked_success">%1$s ditanda ✓</string>
     <string name="prayer_tracker_subtitle">%1$d daripada %2$d selesai</string>
     <string name="prayer_challenge_progress">Cabaran: streak %1$d / %2$d hari</string>
     <string name="prayer_streak_current">Streak semasa</string>

@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -87,6 +88,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.design.components.AlKhatibPartialBottomSheet
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.features.share.AiShareSheet
 import androidx.compose.material.icons.filled.Forum
@@ -243,6 +245,7 @@ fun ChapterReaderScreen(
                     verse = verse,
                     fontScale = state.fontScale,
                     showTranslation = state.showTranslation && !state.hifzModeEnabled,
+                    showTransliteration = state.showTransliteration && !state.hifzModeEnabled,
                     translationId = state.selectedTranslationId,
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
@@ -418,6 +421,7 @@ fun ChapterReaderScreen(
             onDismiss = { settingsVisible = false },
             onFontScaleChange = vm::setFontScale,
             onToggleTranslation = vm::toggleTranslation,
+            onToggleTransliteration = vm::toggleTransliteration,
             onSelectRecitation = vm::selectRecitation,
             onSetPlaybackMode = vm::setPlaybackMode,
             onToggleHifzMode = vm::toggleHifzMode
@@ -498,6 +502,7 @@ private fun QalbuAyahPage(
     verse: RandomAyahPayload,
     fontScale: Float,
     showTranslation: Boolean,
+    showTransliteration: Boolean,
     translationId: Int,
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
@@ -587,24 +592,16 @@ private fun QalbuAyahPage(
                     )
                 }
             }
-            val showLatin = !hifzModeEnabled || hifzRevealStage >= 1
+            val showLatin = showTransliteration && (!hifzModeEnabled || hifzRevealStage >= 1)
             val showMeaning = showTranslation && (!hifzModeEnabled || hifzRevealStage >= 2)
             if (showLatin) {
                 verse.displayTransliteration(translationId)?.let { transliteration ->
-                    Text(
-                        text = stringResource(R.string.transliteration_label),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = AlKhatibColors.Teal,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        textAlign = TextAlign.Center
-                    )
                     TransliterationView(
                         text = transliteration,
                         useHtml = verse.transliterationUsesHtml(translationId),
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -653,110 +650,139 @@ private fun ReaderVerseActionsMenu(
     ) {
         AnimatedVisibility(
             visible = expanded,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom)
         ) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = AlKhatibColors.PureWhite,
+                shadowElevation = 12.dp,
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .border(
+                        width = 1.dp,
+                        brush = Brush.linearGradient(
+                            listOf(
+                                AlKhatibColors.DeepEmerald.copy(alpha = 0.35f),
+                                AlKhatibColors.Gold.copy(alpha = 0.25f)
+                            )
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    )
             ) {
-                ReaderCompactMenuItem(
-                    icon = {
-                        Icon(
-                            if (bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                            contentDescription = null,
-                            tint = AlKhatibColors.GoldDeep,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    label = stringResource(
-                        if (bookmarked) R.string.remove_bookmark else R.string.bookmark
-                    ),
-                    onClick = onBookmark
-                )
-                ReaderCompactMenuItem(
-                    icon = {
-                        Icon(
-                            Icons.Filled.EditNote,
-                            contentDescription = null,
-                            tint = if (hasNote) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    label = stringResource(
-                        if (hasNote) R.string.verse_note_edit else R.string.verse_note
-                    ),
-                    onClick = onNote
-                )
-                ReaderCompactMenuItem(
-                    icon = {
-                        Icon(
-                            Icons.Filled.Psychology,
-                            contentDescription = null,
-                            tint = hifzStatusColor(hifzStatus),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    label = hifzStatusLabel(hifzStatus),
-                    onClick = onHifz
-                )
-                ReaderCompactMenuItem(
-                    icon = {
-                        Icon(
-                            Icons.Filled.AutoAwesome,
-                            contentDescription = null,
-                            tint = AlKhatibColors.Gold,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    label = stringResource(R.string.ai_label),
-                    onClick = onAiShare
-                )
-                if (showTafsir) {
-                    ReaderCompactMenuItem(
+                Column(modifier = Modifier.padding(vertical = 6.dp)) {
+                    ReaderPremiumMenuItem(
                         icon = {
                             Icon(
-                                Icons.AutoMirrored.Filled.MenuBook,
+                                if (bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
                                 contentDescription = null,
-                                tint = AlKhatibColors.IndigoAccent,
-                                modifier = Modifier.size(16.dp)
+                                tint = AlKhatibColors.GoldDeep,
+                                modifier = Modifier.size(18.dp)
                             )
                         },
-                        label = stringResource(R.string.tafsir),
-                        onClick = onTafsir
+                        label = stringResource(
+                            if (bookmarked) R.string.remove_bookmark else R.string.bookmark
+                        ),
+                        onClick = onBookmark
+                    )
+                    ReaderPremiumMenuItem(
+                        icon = {
+                            Icon(
+                                Icons.Filled.EditNote,
+                                contentDescription = null,
+                                tint = if (hasNote) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        label = stringResource(
+                            if (hasNote) R.string.verse_note_edit else R.string.verse_note
+                        ),
+                        onClick = onNote
+                    )
+                    ReaderPremiumMenuItem(
+                        icon = {
+                            Icon(
+                                Icons.Filled.Psychology,
+                                contentDescription = null,
+                                tint = hifzStatusColor(hifzStatus),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        label = hifzStatusLabel(hifzStatus),
+                        onClick = onHifz
+                    )
+                    ReaderPremiumMenuItem(
+                        icon = {
+                            Icon(
+                                Icons.Filled.AutoAwesome,
+                                contentDescription = null,
+                                tint = AlKhatibColors.Gold,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        label = stringResource(R.string.ai_label),
+                        onClick = onAiShare
+                    )
+                    if (showTafsir) {
+                        ReaderPremiumMenuItem(
+                            icon = {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.MenuBook,
+                                    contentDescription = null,
+                                    tint = AlKhatibColors.IndigoAccent,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            },
+                            label = stringResource(R.string.tafsir),
+                            onClick = onTafsir
+                        )
+                    }
+                    ReaderPremiumMenuItem(
+                        icon = {
+                            Icon(
+                                Icons.Filled.Forum,
+                                contentDescription = null,
+                                tint = AlKhatibColors.Teal,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        label = stringResource(R.string.hadith),
+                        onClick = onHadith,
+                        showDivider = false
                     )
                 }
-                ReaderCompactMenuItem(
-                    icon = {
-                        Icon(
-                            Icons.Filled.Forum,
-                            contentDescription = null,
-                            tint = AlKhatibColors.Gold,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    label = stringResource(R.string.hadith),
-                    onClick = onHadith
-                )
             }
         }
 
-        Surface(
-            onClick = onToggle,
-            shape = CircleShape,
-            color = Color.White.copy(alpha = 0.96f),
-            shadowElevation = 4.dp,
-            modifier = Modifier.size(40.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                val closeActionsLabel = stringResource(R.string.close_verse_actions)
-                val studyToolsLabel = stringResource(R.string.study_tools)
-                Icon(
-                    imageVector = if (expanded) Icons.Filled.Close else Icons.Filled.AutoStories,
-                    contentDescription = if (expanded) closeActionsLabel else studyToolsLabel,
-                    tint = if (expanded) AlKhatibColors.Slate800 else AlKhatibColors.DeepEmerald,
-                    modifier = Modifier.size(20.dp)
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.linearGradient(
+                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                    )
                 )
+                .clickable(onClick = onToggle)
+                .padding(2.dp)
+        ) {
+            Surface(
+                onClick = onToggle,
+                shape = CircleShape,
+                color = AlKhatibColors.PureWhite,
+                shadowElevation = if (expanded) 2.dp else 8.dp,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    val closeActionsLabel = stringResource(R.string.close_verse_actions)
+                    val studyToolsLabel = stringResource(R.string.study_tools)
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.Close else Icons.Filled.AutoStories,
+                        contentDescription = if (expanded) closeActionsLabel else studyToolsLabel,
+                        tint = if (expanded) AlKhatibColors.Slate800 else AlKhatibColors.DeepEmerald,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
         }
     }
@@ -764,29 +790,42 @@ private fun ReaderVerseActionsMenu(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ReaderCompactMenuItem(
+private fun ReaderPremiumMenuItem(
     icon: @Composable () -> Unit,
     label: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    showDivider: Boolean = true
 ) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = Color.White.copy(alpha = 0.96f),
-        shadowElevation = 3.dp
-    ) {
+    Column {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            icon()
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(AlKhatibColors.LightGrey.copy(alpha = 0.7f)),
+                contentAlignment = Alignment.Center
+            ) {
+                icon()
+            }
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Slate800
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = AlKhatibColors.Slate800,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        if (showDivider) {
+            androidx.compose.material3.HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 14.dp),
+                color = AlKhatibColors.SoftGrey.copy(alpha = 0.6f)
             )
         }
     }
@@ -799,68 +838,99 @@ private fun ReaderSettingsSheet(
     onDismiss: () -> Unit,
     onFontScaleChange: (Float) -> Unit,
     onToggleTranslation: (Boolean) -> Unit,
+    onToggleTransliteration: (Boolean) -> Unit,
     onSelectRecitation: (Int) -> Unit,
     onSetPlaybackMode: (AyahPlaybackMode) -> Unit,
     onToggleHifzMode: (Boolean) -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    AlKhatibPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.58f) {
         Column(
             Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                stringResource(R.string.reading_settings),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
-            )
-            Text(stringResource(R.string.text_size), style = MaterialTheme.typography.labelLarge, color = AlKhatibColors.Slate500)
-            Slider(
-                value = state.fontScale,
-                onValueChange = onFontScaleChange,
-                valueRange = 0.85f..1.35f,
-                steps = 9
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.show_translation), modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
-                Switch(checked = state.showTranslation, onCheckedChange = onToggleTranslation)
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.hifz_mode), modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
-                Switch(checked = state.hifzModeEnabled, onCheckedChange = onToggleHifzMode)
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.continuous_play),
-                    modifier = Modifier.weight(1f),
-                    color = AlKhatibColors.Slate900
-                )
-                Switch(
-                    checked = state.playbackMode == AyahPlaybackMode.CONTINUOUS,
-                    onCheckedChange = { enabled ->
-                        onSetPlaybackMode(
-                            if (enabled) AyahPlaybackMode.CONTINUOUS else AyahPlaybackMode.SINGLE
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.linearGradient(
+                            listOf(
+                                AlKhatibColors.DeepEmerald.copy(alpha = 0.14f),
+                                AlKhatibColors.Teal.copy(alpha = 0.07f)
+                            )
                         )
-                    }
+                    )
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
+            ) {
+                Text(
+                    stringResource(R.string.reading_settings),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.DeepEmerald
+                )
+                Text(
+                    stringResource(R.string.font_size_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate500,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
-            Text(stringResource(R.string.reciter), style = MaterialTheme.typography.labelLarge, color = AlKhatibColors.Slate500)
+            ReaderSettingToggleRow(
+                title = stringResource(R.string.text_size),
+                content = {
+                    Slider(
+                        value = state.fontScale,
+                        onValueChange = onFontScaleChange,
+                        valueRange = 0.85f..1.35f,
+                        steps = 9,
+                        colors = androidx.compose.material3.SliderDefaults.colors(
+                            thumbColor = AlKhatibColors.Teal,
+                            activeTrackColor = AlKhatibColors.DeepEmerald
+                        )
+                    )
+                }
+            )
+            ReaderSettingToggleRow(
+                title = stringResource(R.string.show_translation),
+                checked = state.showTranslation,
+                onCheckedChange = onToggleTranslation
+            )
+            ReaderSettingToggleRow(
+                title = stringResource(R.string.show_transliteration),
+                checked = state.showTransliteration,
+                onCheckedChange = onToggleTransliteration
+            )
+            ReaderSettingToggleRow(
+                title = stringResource(R.string.hifz_mode),
+                checked = state.hifzModeEnabled,
+                onCheckedChange = onToggleHifzMode
+            )
+            ReaderSettingToggleRow(
+                title = stringResource(R.string.continuous_play),
+                checked = state.playbackMode == AyahPlaybackMode.CONTINUOUS,
+                onCheckedChange = { enabled ->
+                    onSetPlaybackMode(
+                        if (enabled) AyahPlaybackMode.CONTINUOUS else AyahPlaybackMode.SINGLE
+                    )
+                }
+            )
+            Text(
+                stringResource(R.string.reciter),
+                style = MaterialTheme.typography.labelLarge,
+                color = AlKhatibColors.Slate500,
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+            )
             if (state.recitations.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     color = AlKhatibColors.DeepEmerald
                 )
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
-                ) {
-                    items(state.recitations.size, key = { state.recitations[it].identifiableId }) { index ->
-                        val recitation = state.recitations[index]
+                Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                    state.recitations.forEach { recitation ->
                         ReciterRow(
                             recitation = recitation,
                             selected = recitation.identifiableId == state.selectedRecitationId,
@@ -869,7 +939,33 @@ private fun ReaderSettingsSheet(
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun ReaderSettingToggleRow(
+    title: String,
+    checked: Boolean? = null,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+    content: (@Composable () -> Unit)? = null
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(AlKhatibColors.LightGrey.copy(alpha = 0.55f))
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        if (content != null) {
+            Text(title, color = AlKhatibColors.Slate900, fontWeight = FontWeight.Medium)
+            content()
+        } else if (checked != null && onCheckedChange != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(title, modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
+                Switch(checked = checked, onCheckedChange = onCheckedChange)
+            }
         }
     }
 }

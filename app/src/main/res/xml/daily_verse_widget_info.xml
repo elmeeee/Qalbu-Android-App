@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="180dp"
-    android:minHeight="110dp"
-    android:updatePeriodMillis="3600000"
+    android:description="@string/daily_verse_widget_desc"
     android:initialLayout="@layout/daily_verse_widget"
+    android:minWidth="180dp"
+    android:minHeight="120dp"
+    android:minResizeWidth="160dp"
+    android:minResizeHeight="110dp"
+    android:previewLayout="@layout/daily_verse_widget"
     android:resizeMode="horizontal|vertical"
-    android:widgetCategory="home_screen"
-    android:description="@string/daily_verse_widget_desc" />
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="3600000"
+    android:widgetCategory="home_screen" />

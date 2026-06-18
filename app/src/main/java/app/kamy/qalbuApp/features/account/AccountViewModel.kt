@@ -30,6 +30,7 @@ import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.domain.share.VerseShareTextComposer
+import app.kamy.qalbuApp.infrastructure.widget.WidgetCoordinator
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import app.kamy.qalbuApp.infrastructure.repository.ReflectRepository
@@ -64,6 +65,7 @@ data class AccountUiState(
     val selectedTranslationName: String = "",
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
+    val showTransliteration: Boolean = false,
     val prayerMethod: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
     val prayerMethods: List<PrayerMethodOption> = emptyList(),
     val prayerMethodsLoading: Boolean = false,
@@ -163,6 +165,11 @@ class AccountViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            translationStore.showTransliteration.collect { show ->
+                _state.update { it.copy(showTransliteration = show) }
+            }
+        }
+        viewModelScope.launch {
             notificationStore.enabled.collect { enabled ->
                 _state.update { it.copy(dailyVerseEnabled = enabled) }
             }
@@ -231,6 +238,7 @@ class AccountViewModel @Inject constructor(
                 selectedTranslationId = translationStore.currentTranslationId(),
                 selectedTranslationName = translationStore.translationName.value,
                 showTranslation = translationStore.showTranslation.value,
+                showTransliteration = translationStore.showTransliteration.value,
                 dailyVerseEnabled = notificationStore.isEnabled(),
                 reminderHour = notificationStore.morningHour(),
                 reminderMinute = notificationStore.morningMinute(),
@@ -260,6 +268,7 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             PrayerNotificationCoordinator.rescheduleFromCache(appContext)
             DailyVerseNotificationScheduler.reschedule(appContext)
+            WidgetCoordinator.refreshAll(appContext)
         }
         _state.update {
             it.copy(
@@ -431,6 +440,10 @@ class AccountViewModel @Inject constructor(
 
     fun setShowTranslation(enabled: Boolean) {
         translationStore.setShowTranslation(enabled)
+    }
+
+    fun setShowTransliteration(enabled: Boolean) {
+        translationStore.setShowTransliteration(enabled)
     }
 
     fun setDailyVerseEnabled(enabled: Boolean) {

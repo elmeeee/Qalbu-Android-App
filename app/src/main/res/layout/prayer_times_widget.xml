@@ -28,15 +28,26 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/widget_next_line"
+            android:id="@+id/widget_hijri"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
-            android:alpha="0.82"
+            android:alpha="0.75"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="#FFFFFF"
-            android:textSize="10sp" />
+            android:textSize="9sp" />
+
+        <TextView
+            android:id="@+id/widget_next_line"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:alpha="0.82"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#E8D5A3"
+            android:textSize="9sp" />
     </LinearLayout>
 
     <LinearLayout
@@ -51,10 +62,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/widget_slot_background"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingHorizontal="2dp"
-            android:paddingVertical="2dp">
+            android:paddingVertical="3dp">
 
             <TextView
                 android:id="@+id/widget_fajr_label"
@@ -82,10 +94,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/widget_slot_background"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingHorizontal="2dp"
-            android:paddingVertical="2dp">
+            android:paddingVertical="3dp">
 
             <TextView
                 android:id="@+id/widget_dhuhr_label"
@@ -113,10 +126,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/widget_slot_background"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingHorizontal="2dp"
-            android:paddingVertical="2dp">
+            android:paddingVertical="3dp">
 
             <TextView
                 android:id="@+id/widget_asr_label"
@@ -144,10 +158,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/widget_slot_background"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingHorizontal="2dp"
-            android:paddingVertical="2dp">
+            android:paddingVertical="3dp">
 
             <TextView
                 android:id="@+id/widget_maghrib_label"
@@ -175,10 +190,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/widget_slot_background"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingHorizontal="2dp"
-            android:paddingVertical="2dp">
+            android:paddingVertical="3dp">
 
             <TextView
                 android:id="@+id/widget_isha_label"
@@ -210,7 +226,7 @@
         android:fontFamily="monospace"
         android:gravity="end"
         android:minWidth="68dp"
-        android:textColor="#FFFFFF"
+        android:textColor="#D4AF37"
         android:textSize="13sp"
         android:textStyle="bold" />
 

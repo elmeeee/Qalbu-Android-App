@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.RemoteViews
 import app.kamy.qalbuApp.MainActivity
 import app.kamy.qalbuApp.R
@@ -29,10 +30,18 @@ object DailyVerseWidgetUpdater {
         if (snapshot == null) {
             views.setTextViewText(R.id.verse_widget_label, context.getString(R.string.verse_of_day))
             views.setTextViewText(R.id.verse_widget_reference, context.getString(R.string.app_name))
+            views.setTextViewText(R.id.verse_widget_arabic, "")
+            views.setViewVisibility(R.id.verse_widget_arabic, View.GONE)
             views.setTextViewText(R.id.verse_widget_excerpt, context.getString(R.string.daily_verse_widget_empty))
         } else {
             views.setTextViewText(R.id.verse_widget_label, snapshot.label)
             views.setTextViewText(R.id.verse_widget_reference, snapshot.reference)
+            if (snapshot.arabic.isNotBlank()) {
+                views.setTextViewText(R.id.verse_widget_arabic, snapshot.arabic)
+                views.setViewVisibility(R.id.verse_widget_arabic, View.VISIBLE)
+            } else {
+                views.setViewVisibility(R.id.verse_widget_arabic, View.GONE)
+            }
             views.setTextViewText(R.id.verse_widget_excerpt, snapshot.excerpt)
         }
         val launch = Intent(context, MainActivity::class.java).apply {

@@ -87,6 +87,7 @@ fun ChaptersScreen(
     val listBottomPadding = floatingNavBottomPadding()
     val errorDisplay = state.error.rememberErrorDisplay(R.string.chapters_load_failed)
     val snackbarHostState = remember { SnackbarHostState() }
+    val chaptersRefreshFailed = stringResource(R.string.chapters_refresh_failed)
     val mushafOpenFailedMsg = stringResource(R.string.mushaf_open_juz_failed)
     val isSearching = state.isSearchActive && state.searchQuery.isNotBlank()
     val activeQuery = state.searchQuery.normalizedSearchQuery()
@@ -204,7 +205,7 @@ fun ChaptersScreen(
                             .onFailure { t ->
                                 val msg = state.error?.apiMessage
                                     ?: t.message
-                                    ?: "Couldn't refresh chapters"
+                                    ?: chaptersRefreshFailed
                                 snackbarHostState.showSnackbar(msg)
                             }
                         isPullRefreshing = false

@@ -2,10 +2,13 @@ package app.kamy.qalbuApp.features.today
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.domain.model.OptionalWorshipHabit
 import app.kamy.qalbuApp.domain.model.PrayerType
+import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.domain.prayer.HijriDayHelper
 import app.kamy.qalbuApp.domain.prayer.PrayerTrackerAvailability
+import app.kamy.qalbuApp.infrastructure.notifications.AppNotificationCopy
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerCheckReminderScheduler
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerDayProgress
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerTrackerPreferencesStore
@@ -15,7 +18,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -48,6 +55,9 @@ class PrayerTrackerViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(PrayerTrackerUiState())
     val state: StateFlow<PrayerTrackerUiState> = _state.asStateFlow()
+
+    private val _toastMessage = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val toastMessage: SharedFlow<String> = _toastMessage.asSharedFlow()
 
     init {
         refresh()
@@ -85,8 +95,15 @@ class PrayerTrackerViewModel @Inject constructor(
         val completed = _state.value.completedPrayers.contains(prayer)
         if (!PrayerTrackerAvailability.canToggle(appContext, prayer, completed)) return
         PrayerTrackerStore.toggle(appContext, prayer)
-        if (PrayerTrackerStore.isCompleted(appContext, prayer)) {
+        val nowCompleted = PrayerTrackerStore.isCompleted(appContext, prayer)
+        if (nowCompleted) {
             PrayerCheckReminderScheduler.onPrayerMarked(appContext, prayer)
+            val label = AppNotificationCopy.prayerDisplayName(appContext, prayer.aladhanKey)
+            viewModelScope.launch {
+                _toastMessage.emit(
+                    appContext.getString(R.string.prayer_marked_success, label)
+                )
+            }
         } else {
             PrayerCheckReminderScheduler.reschedule(appContext)
         }

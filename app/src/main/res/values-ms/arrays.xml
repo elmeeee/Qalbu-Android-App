@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="weekday_names">
+        <item>Ahad</item>
+        <item>Isnin</item>
+        <item>Selasa</item>
+        <item>Rabu</item>
+        <item>Khamis</item>
+        <item>Jumaat</item>
+        <item>Sabtu</item>
+    </string-array>
+    <string-array name="weekday_names_ar">
+        <item>Al-Ahad</item>
+        <item>Al-Itnayn</item>
+        <item>Al-Thulatha</item>
+        <item>Al-Arba</item>
+        <item>Al-Khamis</item>
+        <item>Al-Jumuah</item>
+        <item>Al-Sabt</item>
+    </string-array>
+</resources>

@@ -2,6 +2,7 @@ package app.kamy.qalbuApp.infrastructure.preferences
 
 import android.content.Context
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.infrastructure.widget.WidgetCoordinator
 import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -12,6 +13,7 @@ data class DailyVerseSnapshot(
     val chapterNumber: Int,
     val ayahNumber: Int,
     val surahName: String,
+    val arabic: String,
     val translation: String,
     val verseKey: String?
 ) {
@@ -38,6 +40,7 @@ object DailyVerseSnapshotStore {
     private const val KEY_CHAPTER = "chapter"
     private const val KEY_AYAH = "ayah"
     private const val KEY_SURAH = "surah_name"
+    private const val KEY_ARABIC = "arabic"
     private const val KEY_TRANSLATION = "translation"
     private const val KEY_VERSE_KEY = "verse_key"
 
@@ -49,17 +52,19 @@ object DailyVerseSnapshotStore {
         val ayah = verse.resolvedVerseNumber ?: return
         val name = surahName?.trim().orEmpty().ifBlank { "Surah $chapter" }
         val translation = verse.translations?.firstOrNull()?.text?.toVerseTranslationPlainText().orEmpty()
+        val arabic = verse.textUthmani ?: verse.textUthmaniSimple ?: verse.textImlaei.orEmpty()
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_DAY, todayKey())
             .putInt(KEY_CHAPTER, chapter)
             .putInt(KEY_AYAH, ayah)
             .putString(KEY_SURAH, name)
+            .putString(KEY_ARABIC, arabic)
             .putString(KEY_TRANSLATION, translation)
             .putString(KEY_VERSE_KEY, verse.verseKey)
             .apply()
         runCatching {
-            app.kamy.qalbuApp.infrastructure.widget.DailyVerseWidgetUpdater.updateAll(context)
+            WidgetCoordinator.refreshAll(context)
         }
     }
 
@@ -75,6 +80,7 @@ object DailyVerseSnapshotStore {
             chapterNumber = chapter,
             ayahNumber = ayah,
             surahName = surah,
+            arabic = prefs.getString(KEY_ARABIC, "").orEmpty(),
             translation = prefs.getString(KEY_TRANSLATION, "").orEmpty(),
             verseKey = prefs.getString(KEY_VERSE_KEY, null)
         )

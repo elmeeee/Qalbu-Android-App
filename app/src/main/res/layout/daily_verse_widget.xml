@@ -6,38 +6,57 @@
     android:background="@drawable/widget_prayer_background"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="14dp">
+
+    <View
+        android:layout_width="36dp"
+        android:layout_height="3dp"
+        android:background="@drawable/widget_accent_bar" />
 
     <TextView
         android:id="@+id/verse_widget_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#E8D5A3"
-        android:textSize="11sp"
-        android:textStyle="bold"
+        android:layout_marginTop="10dp"
         android:letterSpacing="0.08"
-        android:textAllCaps="true" />
+        android:textAllCaps="true"
+        android:textColor="#E8D5A3"
+        android:textSize="10sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/verse_widget_reference"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/verse_widget_arabic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:gravity="end"
+        android:maxLines="2"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
-        android:textStyle="bold"
-        android:maxLines="1"
-        android:ellipsize="end" />
+        android:textDirection="rtl" />
 
     <TextView
         android:id="@+id/verse_widget_excerpt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:textColor="#D9FFFFFF"
-        android:textSize="13sp"
-        android:maxLines="3"
+        android:alpha="0.9"
         android:ellipsize="end"
-        android:lineSpacingExtra="2dp" />
+        android:lineSpacingExtra="2dp"
+        android:maxLines="3"
+        android:textColor="#D9FFFFFF"
+        android:textSize="12sp" />
 
 </LinearLayout>

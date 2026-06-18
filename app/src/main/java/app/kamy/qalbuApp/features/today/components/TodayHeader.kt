@@ -39,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import app.kamy.qalbuApp.R
 import androidx.compose.ui.draw.clip
@@ -290,7 +291,10 @@ private fun HeaderAvatar(
 
 @Composable
 private fun rememberRotatingDayName(): String {
-    val names = remember { weekdayNames(Calendar.getInstance()) }
+    val weekdays = stringArrayResource(R.array.weekday_names)
+    val weekdaysAr = stringArrayResource(R.array.weekday_names_ar)
+    val dayIndex = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) + 5) % 7
+    val names = listOf(weekdays[dayIndex], weekdaysAr[dayIndex])
     var index by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
@@ -301,17 +305,6 @@ private fun rememberRotatingDayName(): String {
     }
 
     return names[index]
-}
-
-private fun weekdayNames(calendar: Calendar): List<String> = when (calendar.get(Calendar.DAY_OF_WEEK)) {
-    Calendar.SUNDAY -> listOf("Minggu", "Ahad", "Sunday", "Al-Ahad")
-    Calendar.MONDAY -> listOf("Senin", "Isnin", "Monday", "Al-Itnayn")
-    Calendar.TUESDAY -> listOf("Selasa", "Selasa", "Tuesday", "Al-Thulatha")
-    Calendar.WEDNESDAY -> listOf("Rabu", "Rabu", "Wednesday", "Al-Arba")
-    Calendar.THURSDAY -> listOf("Kamis", "Khamis", "Thursday", "Al-Khamis")
-    Calendar.FRIDAY -> listOf("Jumat", "Jumaat", "Friday", "Al-Jumuah")
-    Calendar.SATURDAY -> listOf("Sabtu", "Sabtu", "Saturday", "Al-Sabt")
-    else -> listOf("Hari", "Hari", "Day", "Al-Yawm")
 }
 
 @Composable

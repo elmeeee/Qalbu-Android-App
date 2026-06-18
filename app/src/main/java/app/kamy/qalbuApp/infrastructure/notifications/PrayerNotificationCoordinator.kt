@@ -2,7 +2,7 @@ package app.kamy.qalbuApp.infrastructure.notifications
 
 import android.content.Context
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
-import app.kamy.qalbuApp.infrastructure.widget.PrayerWidgetUpdater
+import app.kamy.qalbuApp.infrastructure.widget.WidgetCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,7 +21,7 @@ object PrayerNotificationCoordinator {
     ) {
         val appContext = context.applicationContext
         PrayerScheduleCache.save(appContext, bundle, latitude, longitude, meta)
-        PrayerWidgetUpdater.updateAll(appContext)
+        WidgetCoordinator.refreshAll(appContext)
         scheduleAsync(appContext, refreshIfStale = false)
     }
 

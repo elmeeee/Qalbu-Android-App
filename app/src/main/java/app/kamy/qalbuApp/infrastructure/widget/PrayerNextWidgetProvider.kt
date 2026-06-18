@@ -4,7 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 
-class PrayerTimesWidgetProvider : AppWidgetProvider() {
+class PrayerNextWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
@@ -16,7 +16,7 @@ class PrayerTimesWidgetProvider : AppWidgetProvider() {
             runCatching {
                 appWidgetManager.updateAppWidget(
                     id,
-                    PrayerWidgetUpdater.buildViews(context, snapshot)
+                    PrayerNextWidgetUpdater.buildViews(context, snapshot)
                 )
             }
         }

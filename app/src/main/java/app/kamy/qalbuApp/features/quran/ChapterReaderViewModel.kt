@@ -53,6 +53,7 @@ data class ChapterReaderUiState(
     val playbackMode: AyahPlaybackMode = AyahPlaybackMode.CONTINUOUS,
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
+    val showTransliteration: Boolean = false,
     val selectedTranslationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
     val currentVerseIndex: Int = 0,
     val loadedApiPage: Int = 0,
@@ -133,9 +134,11 @@ class ChapterReaderViewModel @Inject constructor(
                 }
 
     init {
+        val isJuzMode = juzNumber != null
         _state.update {
             it.copy(
-                showTranslation = translationStore.showTranslation.value,
+                showTranslation = if (isJuzMode) false else translationStore.showTranslation.value,
+                showTransliteration = if (isJuzMode) false else translationStore.showTransliteration.value,
                 selectedRecitationId = translationStore.currentRecitationId(),
                 selectedTranslationId = LocalQuranConfig.normalizeTranslationId(
                     translationStore.currentTranslationId()
@@ -156,7 +159,16 @@ class ChapterReaderViewModel @Inject constructor(
         }
         viewModelScope.launch {
             translationStore.showTranslation.collect { enabled ->
-                _state.update { it.copy(showTranslation = enabled) }
+                if (juzNumber == null) {
+                    _state.update { it.copy(showTranslation = enabled) }
+                }
+            }
+        }
+        viewModelScope.launch {
+            translationStore.showTransliteration.collect { enabled ->
+                if (juzNumber == null) {
+                    _state.update { it.copy(showTransliteration = enabled) }
+                }
             }
         }
 
@@ -350,6 +362,10 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun toggleTranslation(enabled: Boolean) {
         translationStore.setShowTranslation(enabled)
+    }
+
+    fun toggleTransliteration(enabled: Boolean) {
+        translationStore.setShowTransliteration(enabled)
     }
 
     fun onPageChanged(index: Int) {

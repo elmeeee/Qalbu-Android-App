@@ -12,6 +12,8 @@ import app.kamy.qalbuApp.infrastructure.notifications.PrayerNotificationCoordina
 import app.kamy.qalbuApp.infrastructure.notifications.QuranReadingReminderScheduler
 import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.preferences.OfflineDownloadStore
+import app.kamy.qalbuApp.infrastructure.widget.WidgetCoordinator
+import app.kamy.qalbuApp.infrastructure.widget.WidgetRefreshScheduler
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.Executors
@@ -32,6 +34,12 @@ class QalbuApplication : Application() {
         runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
         runCatching { PrayerCheckReminderScheduler.reschedule(this) }
         runCatching { QuranReadingReminderScheduler.reschedule(this) }
+        runCatching {
+            WidgetCoordinator.refreshAll(this)
+            if (WidgetCoordinator.hasAnyWidgets(this)) {
+                WidgetRefreshScheduler.schedule(this)
+            }
+        }
         markBundledQuranAvailable()
         warmUpLocalQuranDatabase()
     }
