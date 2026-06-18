@@ -18,13 +18,18 @@ object FaraidhEngine {
         val proofKeys: MutableList<String> = mutableListOf()
     )
 
-    fun calculate(profile: DeceasedProfile, input: HeirInput): FaraidhResult {
+    fun calculate(
+        profile: DeceasedProfile,
+        input: HeirInput,
+        names: FaraidhParticipantNames = FaraidhParticipantNames(),
+        madhhab: FaraidhMadhhab = profile.madhhab
+    ): FaraidhResult {
         val estate = profile.netEstate.max(BigDecimal.ZERO)
         val blocked = mutableListOf<BlockedHeir>()
         val ctx = analyze(input, profile.gender)
 
         if (!input.hasAnyHeir()) {
-            return emptyResult(profile, input, estate)
+            return emptyResult(profile, input, estate, names)
         }
 
         resolveBlocking(input, ctx, blocked)
@@ -45,9 +50,14 @@ object FaraidhEngine {
             }
         } else if (fixedTotal.numerator < fixedTotal.denominator && slots.none { it.isAsabah && it.fraction.numerator > BigInteger.ZERO }) {
             adjustment = FaraidhAdjustment.RADD
-            adjustmentNoteKey = "faraidh_radd_note"
+            adjustmentNoteKey = if (madhhab.raddIncludesSpouses()) "faraidh_radd_note_hanafi" else "faraidh_radd_note"
             val withFlag = slots.map { Triple(it.type, it.fraction, it.isAsabah) }
-            val radd = FaraidhFraction.applyRadd(withFlag)
+            val spouseTypes = if (madhhab.raddIncludesSpouses()) {
+                emptySet()
+            } else {
+                setOf(HeirType.HUSBAND, HeirType.WIFE)
+            }
+            val radd = FaraidhFraction.applyRadd(withFlag, spouseTypes)
             radd.forEachIndexed { index, (_, frac) ->
                 slots[index] = slots[index].copy(fraction = frac)
             }
@@ -60,14 +70,14 @@ object FaraidhEngine {
                     type = slot.type,
                     headCount = slot.heads,
                     fraction = slot.fraction,
-                    percentage = slot.fraction.toPercentage(),
+                    percentage = slot.fraction.toPercentage(scale = 1),
                     cashAmount = slot.fraction.toCashAmount(estate),
                     isAsabah = slot.isAsabah,
                     proofKeys = slot.proofKeys.distinct()
                 )
             }
 
-        val silsilah = FaraidhSilsilahBuilder.build(profile, input, activeShares, blocked)
+        val silsilah = FaraidhSilsilahBuilder.build(profile, input, activeShares, blocked, names)
         val proofKeys = activeShares.flatMap { it.proofKeys }.distinct() +
             listOfNotNull(adjustmentNoteKey?.let { "proof_awl_radd" })
 
@@ -88,8 +98,17 @@ object FaraidhEngine {
             adjustmentNoteKey = adjustmentNoteKey,
             proofKeys = proofKeys.distinct(),
             totalDistributed = totalDistributed,
-            remainderFraction = remainder
+            remainderFraction = remainder,
+            madhhab = madhhab,
+            madhhabNoteKey = madhhabNoteKey(madhhab)
         )
+    }
+
+    private fun madhhabNoteKey(madhhab: FaraidhMadhhab): String = when (madhhab) {
+        FaraidhMadhhab.HANAFI -> "madhhab_hanafi"
+        FaraidhMadhhab.MALIKI -> "madhhab_maliki"
+        FaraidhMadhhab.SHAFII -> "madhhab_shafii"
+        FaraidhMadhhab.HANBALI -> "madhhab_hanbali"
     }
 
     private data class Context(
@@ -389,17 +408,24 @@ object FaraidhEngine {
         }
     }
 
-    private fun emptyResult(profile: DeceasedProfile, input: HeirInput, estate: BigDecimal): FaraidhResult =
+    private fun emptyResult(
+        profile: DeceasedProfile,
+        input: HeirInput,
+        estate: BigDecimal,
+        names: FaraidhParticipantNames
+    ): FaraidhResult =
         FaraidhResult(
             deceased = profile,
             input = input,
             activeShares = emptyList(),
             blockedHeirs = emptyList(),
-            silsilah = FaraidhSilsilahBuilder.build(profile, input, emptyList(), emptyList()),
+            silsilah = FaraidhSilsilahBuilder.build(profile, input, emptyList(), emptyList(), names),
             adjustment = FaraidhAdjustment.NONE,
             adjustmentNoteKey = null,
             proofKeys = emptyList(),
             totalDistributed = BigDecimal.ZERO.setScale(2),
-            remainderFraction = FaraidhFraction.ONE
+            remainderFraction = FaraidhFraction.ONE,
+            madhhab = profile.madhhab,
+            madhhabNoteKey = madhhabNoteKey(profile.madhhab)
         )
 }

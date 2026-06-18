@@ -6,7 +6,10 @@ enum class DeceasedGender { MALE, FEMALE }
 
 data class DeceasedProfile(
     val gender: DeceasedGender,
-    val netEstate: BigDecimal
+    val netEstate: BigDecimal,
+    val name: String = "",
+    val estate: EstateComputation? = null,
+    val madhhab: FaraidhMadhhab = FaraidhMadhhab.SHAFII
 )
 
 data class HeirInput(
@@ -90,7 +93,8 @@ data class SilsilahNode(
     val headCount: Int,
     val inherits: Boolean,
     val blocked: Boolean,
-    val blockReason: BlockingReasonKey?
+    val blockReason: BlockingReasonKey?,
+    val displayName: String = ""
 )
 
 data class FaraidhResult(
@@ -103,5 +107,7 @@ data class FaraidhResult(
     val adjustmentNoteKey: String?,
     val proofKeys: List<String>,
     val totalDistributed: BigDecimal,
-    val remainderFraction: FaraidhFraction
+    val remainderFraction: FaraidhFraction,
+    val madhhab: FaraidhMadhhab = FaraidhMadhhab.SHAFII,
+    val madhhabNoteKey: String? = null
 )

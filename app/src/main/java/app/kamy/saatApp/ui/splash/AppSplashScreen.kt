@@ -2,11 +2,16 @@ package app.kamy.saatApp.ui.splash
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +35,7 @@ import kotlinx.coroutines.delay
 private const val SPLASH_VISIBLE_MS = 2_400L
 private const val FADE_IN_MS = 900
 private const val FADE_OUT_MS = 450
+private val SplashBackground = Color(0xFFF4F5F0)
 
 @Composable
 fun AppSplashScreen(onFinished: () -> Unit) {
@@ -43,29 +51,32 @@ fun AppSplashScreen(onFinished: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        AlKhatibColors.OffWhite,
-                        AlKhatibColors.SageMist,
-                        AlKhatibColors.MintWash.copy(alpha = 0.6f)
-                    )
-                )
-            )
+            .background(SplashBackground)
             .statusBarsPadding()
             .alpha(opacity.value),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = stringResource(R.string.splash_greeting_arabic),
-            modifier = Modifier.padding(horizontal = 32.dp),
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontSize = 28.sp,
-                lineHeight = 44.sp,
-                fontWeight = FontWeight.Medium
-            ),
-            color = AlKhatibColors.DeepEmerald,
-            textAlign = TextAlign.Center
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = painterResource(R.drawable.splash_icon_display),
+                contentDescription = null,
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(302.dp),
+                contentScale = ContentScale.Fit
+            )
+            Spacer(Modifier.height(28.dp))
+            Text(
+                text = stringResource(R.string.splash_greeting_arabic),
+                modifier = Modifier.padding(horizontal = 32.dp),
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontSize = 28.sp,
+                    lineHeight = 44.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = AlKhatibColors.DeepEmerald,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }

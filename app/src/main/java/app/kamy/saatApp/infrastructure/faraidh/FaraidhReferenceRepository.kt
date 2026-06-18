@@ -2,6 +2,10 @@ package app.kamy.saatApp.infrastructure.faraidh
 
 import android.content.Context
 import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryBundle
+import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryItem
+import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryTerm
+import app.kamy.saatApp.domain.faraidh.FaraidhMadhhab
 import app.kamy.saatApp.domain.faraidh.FaraidhProofItem
 import app.kamy.saatApp.domain.faraidh.FaraidhProofKind
 import app.kamy.saatApp.domain.faraidh.FaraidhReferenceBundle
@@ -23,6 +27,7 @@ class FaraidhReferenceRepository @Inject constructor(
     }
 
     private var cached: FaraidhReferenceBundle? = null
+    private var glossaryCached: FaraidhGlossaryBundle? = null
 
     suspend fun loadBundle(): FaraidhReferenceBundle = withContext(Dispatchers.IO) {
         cached ?: run {
@@ -31,12 +36,104 @@ class FaraidhReferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun loadGlossary(): FaraidhGlossaryBundle = withContext(Dispatchers.IO) {
+        glossaryCached ?: run {
+            val text = context.assets.open("faraidh/glossary.json").bufferedReader().use { it.readText() }
+            assetJson.decodeFromString(FaraidhGlossaryBundle.serializer(), text).also { glossaryCached = it }
+        }
+    }
+
+    suspend fun glossaryItems(language: AppLanguage): List<FaraidhGlossaryItem> =
+        loadGlossary().terms.map { it.toItem(language) }
+
+    private fun FaraidhGlossaryTerm.toItem(language: AppLanguage): FaraidhGlossaryItem =
+        FaraidhGlossaryItem(
+            id = id,
+            title = when (language) {
+                AppLanguage.INDONESIAN -> titleId
+                AppLanguage.MALAY -> titleMs
+                AppLanguage.ENGLISH -> titleEn
+            },
+            body = when (language) {
+                AppLanguage.INDONESIAN -> bodyId
+                AppLanguage.MALAY -> bodyMs
+                AppLanguage.ENGLISH -> bodyEn
+            },
+            arabic = arabic
+        )
+
+    fun madhhabLabel(madhhab: FaraidhMadhhab, language: AppLanguage): String = when (madhhab) {
+        FaraidhMadhhab.HANAFI -> when (language) {
+            AppLanguage.INDONESIAN -> "Hanafi"
+            AppLanguage.MALAY -> "Hanafi"
+            AppLanguage.ENGLISH -> "Hanafi"
+        }
+        FaraidhMadhhab.MALIKI -> when (language) {
+            AppLanguage.INDONESIAN -> "Maliki"
+            AppLanguage.MALAY -> "Maliki"
+            AppLanguage.ENGLISH -> "Maliki"
+        }
+        FaraidhMadhhab.SHAFII -> when (language) {
+            AppLanguage.INDONESIAN -> "Syafi'i"
+            AppLanguage.MALAY -> "Syafi'i"
+            AppLanguage.ENGLISH -> "Shafi'i"
+        }
+        FaraidhMadhhab.HANBALI -> when (language) {
+            AppLanguage.INDONESIAN -> "Hanbali"
+            AppLanguage.MALAY -> "Hanbali"
+            AppLanguage.ENGLISH -> "Hanbali"
+        }
+    }
+
+    fun madhhabNote(madhhab: FaraidhMadhhab, language: AppLanguage): String = when (madhhab) {
+        FaraidhMadhhab.HANAFI -> when (language) {
+            AppLanguage.INDONESIAN -> "Mazhab Hanafi: radd mencakup pasangan (suami/istri); saudara perempuan dapat asabah bil-ghayr bersama anak perempuan; beberapa kasus kakek dan saudara berbeda dari jumhur."
+            AppLanguage.MALAY -> "Mazhab Hanafi: radd merangkumi pasangan; saudara perempuan boleh asabah bil-ghayr bersama anak perempuan; beberapa kes datuk dan saudara berbeza daripada jumhur."
+            AppLanguage.ENGLISH -> "Hanafi madhhab: radd includes spouses; full sister may be asabah bil-ghayr with daughter; grandfather/sibling cases differ from jumhur in some scenarios."
+        }
+        FaraidhMadhhab.MALIKI -> when (language) {
+            AppLanguage.INDONESIAN -> "Mazhab Maliki: radd mengecualikan pasangan (seperti Syafi'i/Hanbali); beberapa aturan residu dan kalalah mengikuti riwayat Malik."
+            AppLanguage.MALAY -> "Mazhab Maliki: radd mengecualikan pasangan; beberapa peraturan residu dan kalalah mengikut riwayat Malik."
+            AppLanguage.ENGLISH -> "Maliki madhhab: radd excludes spouses; certain residue and kalalah rules follow Malik's transmission."
+        }
+        FaraidhMadhhab.SHAFII -> when (language) {
+            AppLanguage.INDONESIAN -> "Mazhab Syafi'i: radd mengecualikan pasangan; pembagian furud dan asabah mengikuti kitab Syafi'i yang digunakan di Nusantara."
+            AppLanguage.MALAY -> "Mazhab Syafi'i: radd mengecualikan pasangan; pembahagian furud dan asabah mengikut kitab Syafi'i yang digunakan di rantau ini."
+            AppLanguage.ENGLISH -> "Shafi'i madhhab: radd excludes spouses; furud and asabah follow the Shafi'i manuals widely used in Southeast Asia."
+        }
+        FaraidhMadhhab.HANBALI -> when (language) {
+            AppLanguage.INDONESIAN -> "Mazhab Hanbali: radd mengecualikan pasangan; aturan hajb dan asabah mengikuti pandangan Ahmad bin Hanbal dan murid-muridnya."
+            AppLanguage.MALAY -> "Mazhab Hanbali: radd mengecualikan pasangan; peraturan hajb dan asabah mengikut pandangan Ahmad bin Hanbal."
+            AppLanguage.ENGLISH -> "Hanbali madhhab: radd excludes spouses; blocking and asabah rules follow Ahmad ibn Hanbal's school."
+        }
+    }
+
     suspend fun proofsForKeys(keys: List<String>, language: AppLanguage): List<FaraidhProofItem> {
         val bundle = loadBundle()
         val refIds = keys.flatMap { bundle.proofMappings[it].orEmpty() }.distinct()
         val items = mutableListOf<FaraidhProofItem>()
         keys.forEach { key ->
-            if (key == "faraidh_awl_note" || key == "faraidh_radd_note") {
+            if (key.startsWith("madhhab_")) {
+                val madhhab = when (key) {
+                    "madhhab_hanafi" -> FaraidhMadhhab.HANAFI
+                    "madhhab_maliki" -> FaraidhMadhhab.MALIKI
+                    "madhhab_shafii" -> FaraidhMadhhab.SHAFII
+                    else -> FaraidhMadhhab.HANBALI
+                }
+                items += FaraidhProofItem(
+                    id = key,
+                    kind = FaraidhProofKind.NOTE,
+                    title = when (language) {
+                        AppLanguage.INDONESIAN -> "Catatan mazhab ${madhhabLabel(madhhab, language)}"
+                        AppLanguage.MALAY -> "Nota mazhab ${madhhabLabel(madhhab, language)}"
+                        AppLanguage.ENGLISH -> "${madhhabLabel(madhhab, language)} madhhab note"
+                    },
+                    body = madhhabNote(madhhab, language),
+                    arabic = null,
+                    externalUrl = null
+                )
+            }
+            if (key == "faraidh_awl_note" || key == "faraidh_radd_note" || key == "faraidh_radd_note_hanafi") {
                 items += FaraidhProofItem(
                     id = key,
                     kind = FaraidhProofKind.NOTE,
@@ -107,10 +204,15 @@ class FaraidhReferenceRepository @Inject constructor(
             AppLanguage.MALAY -> "Jika jumlah bahagian tetap melebihi harta, semua bahagian dikurangkan secara proporsional dengan menaikkan penyebut."
             AppLanguage.ENGLISH -> "When fixed shares exceed the estate, all portions are reduced proportionally by increasing the common denominator."
         }
+        "faraidh_radd_note_hanafi" -> when (language) {
+            AppLanguage.INDONESIAN -> "Kelebihan harta dikembalikan (radd) kepada semua ahli waris yang berhak secara proporsional—termasuk suami/istri menurut mazhab Hanafi."
+            AppLanguage.MALAY -> "Lebihan harta dikembalikan (radd) kepada semua waris yang layak secara proporsional—termasuk pasangan mengikut mazhab Hanafi."
+            AppLanguage.ENGLISH -> "Surplus is redistributed (radd) proportionally among all eligible heirs—including spouses per the Hanafi madhhab."
+        }
         else -> when (language) {
-            AppLanguage.INDONESIAN -> "Jika sisa harta belum terdistribusi dan tidak ada asabah, kelebihan dikembalikan (radd) kepada ahli waris nasab secara proporsional—istri/suami dikecualikan menurut mazhab mayoritas."
-            AppLanguage.MALAY -> "Jika baki harta belum diagihkan dan tiada asabah, lebihan dikembalikan (radd) kepada waris nasab secara proporsional—pasangan dikecualikan mengikut mazhab majoriti."
-            AppLanguage.ENGLISH -> "When residue remains and no asabah exists, the surplus is redistributed (radd) proportionally among blood heirs—spouses excluded per majority opinion."
+            AppLanguage.INDONESIAN -> "Kelebihan harta dikembalikan (radd) kepada ahli waris nasab secara proporsional—suami/istri dikecualikan menurut Maliki, Syafi'i, dan Hanbali."
+            AppLanguage.MALAY -> "Lebihan harta dikembalikan (radd) kepada waris nasab secara proporsional—pasangan dikecualikan mengikut Maliki, Syafi'i, dan Hanbali."
+            AppLanguage.ENGLISH -> "Surplus is redistributed (radd) proportionally among blood heirs—spouses excluded per Maliki, Shafi'i, and Hanbali."
         }
     }
 }

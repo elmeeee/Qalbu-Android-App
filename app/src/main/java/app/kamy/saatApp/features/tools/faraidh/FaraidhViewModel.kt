@@ -4,14 +4,21 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+import app.kamy.saatApp.domain.faraidh.EstateAssetInput
+import app.kamy.saatApp.domain.faraidh.EstateComputation
+import app.kamy.saatApp.domain.faraidh.FaraidhEstateCalculator
+import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryItem
+import app.kamy.saatApp.domain.faraidh.FaraidhMadhhab
 import app.kamy.saatApp.domain.faraidh.DeceasedGender
 import app.kamy.saatApp.domain.faraidh.DeceasedProfile
 import app.kamy.saatApp.domain.faraidh.FaraidhEngine
+import app.kamy.saatApp.domain.faraidh.FaraidhParticipantNames
 import app.kamy.saatApp.domain.faraidh.FaraidhProofItem
 import app.kamy.saatApp.domain.faraidh.FaraidhResult
 import app.kamy.saatApp.domain.faraidh.HeirInput
+import app.kamy.saatApp.domain.faraidh.resizeNameList
 import app.kamy.saatApp.infrastructure.faraidh.FaraidhReferenceRepository
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.math.BigDecimal
@@ -24,7 +31,11 @@ import kotlinx.coroutines.launch
 
 data class FaraidhUiState(
     val gender: DeceasedGender = DeceasedGender.MALE,
+    val madhhab: FaraidhMadhhab = FaraidhMadhhab.SHAFII,
+    val estate: EstateAssetInput = EstateAssetInput(),
+    val estateComputation: EstateComputation? = null,
     val netEstate: String = "",
+    val names: FaraidhParticipantNames = FaraidhParticipantNames(),
     val husbandCount: Int = 0,
     val wifeCount: Int = 0,
     val fatherCount: Int = 0,
@@ -40,9 +51,10 @@ data class FaraidhUiState(
     val maternalBrotherCount: Int = 0,
     val maternalSisterCount: Int = 0,
     val selectedTab: Int = 0,
-    val showInputSheet: Boolean = true,
+    val showInputSheet: Boolean = false,
     val result: FaraidhResult? = null,
     val proofs: List<FaraidhProofItem> = emptyList(),
+    val glossary: List<FaraidhGlossaryItem> = emptyList(),
     val pdfExporting: Boolean = false,
     val pdfUri: Uri? = null,
     val errorMessage: String? = null
@@ -59,11 +71,48 @@ class FaraidhViewModel @Inject constructor(
     val state: StateFlow<FaraidhUiState> = _state.asStateFlow()
 
     init {
+        loadGlossary()
+        recompute()
+    }
+
+    private fun loadGlossary() {
+        viewModelScope.launch {
+            runCatching {
+                referenceRepository.glossaryItems(languageStore.current())
+            }.onSuccess { items ->
+                _state.update { it.copy(glossary = items) }
+            }
+        }
+    }
+
+    fun setMadhhab(madhhab: FaraidhMadhhab) {
+        _state.update { it.copy(madhhab = madhhab) }
+        recompute()
+    }
+
+    fun setEstateField(update: EstateAssetInput.() -> EstateAssetInput) {
+        _state.update { it.copy(estate = it.estate.update()) }
+        recompute()
+    }
+
+    fun setDeceasedName(value: String) {
+        _state.update { it.copy(names = it.names.copy(deceasedName = value)) }
         recompute()
     }
 
     fun setGender(gender: DeceasedGender) {
-        _state.update { it.copy(gender = gender) }
+        _state.update { current ->
+            val names = when (gender) {
+                DeceasedGender.MALE -> current.names.copy(husbandName = "")
+                DeceasedGender.FEMALE -> current.names.copy(wifeNames = emptyList())
+            }
+            current.copy(
+                gender = gender,
+                husbandCount = if (gender == DeceasedGender.MALE) 0 else current.husbandCount,
+                wifeCount = if (gender == DeceasedGender.FEMALE) 0 else current.wifeCount,
+                names = names
+            )
+        }
         recompute()
     }
 
@@ -72,28 +121,122 @@ class FaraidhViewModel @Inject constructor(
         recompute()
     }
 
-    fun setHeirCount(field: HeirCountField, count: Int) {
-        val safe = count.coerceAtLeast(0)
-        _state.update {
-            when (field) {
-                HeirCountField.HUSBAND -> it.copy(husbandCount = safe.coerceAtMost(1))
-                HeirCountField.WIFE -> it.copy(wifeCount = safe.coerceIn(0, 4))
-                HeirCountField.FATHER -> it.copy(fatherCount = safe.coerceAtMost(1))
-                HeirCountField.MOTHER -> it.copy(motherCount = safe.coerceAtMost(1))
-                HeirCountField.SON -> it.copy(sonCount = safe)
-                HeirCountField.DAUGHTER -> it.copy(daughterCount = safe)
-                HeirCountField.GRANDSON -> it.copy(grandsonCount = safe)
-                HeirCountField.GRANDDAUGHTER -> it.copy(granddaughterCount = safe)
-                HeirCountField.FULL_BROTHER -> it.copy(fullBrotherCount = safe)
-                HeirCountField.FULL_SISTER -> it.copy(fullSisterCount = safe)
-                HeirCountField.PATERNAL_BROTHER -> it.copy(paternalBrotherCount = safe)
-                HeirCountField.PATERNAL_SISTER -> it.copy(paternalSisterCount = safe)
-                HeirCountField.MATERNAL_BROTHER -> it.copy(maternalBrotherCount = safe)
-                HeirCountField.MATERNAL_SISTER -> it.copy(maternalSisterCount = safe)
+    fun setHeirName(field: HeirNameField, index: Int, value: String) {
+        _state.update { state ->
+            val names = when (field) {
+                HeirNameField.DECEASED -> state.names.copy(deceasedName = value)
+                HeirNameField.HUSBAND -> state.names.copy(husbandName = value)
+                HeirNameField.WIFE -> state.names.copy(
+                    wifeNames = state.names.wifeNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.FATHER -> state.names.copy(fatherName = value)
+                HeirNameField.MOTHER -> state.names.copy(motherName = value)
+                HeirNameField.SON -> state.names.copy(
+                    sonNames = state.names.sonNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.DAUGHTER -> state.names.copy(
+                    daughterNames = state.names.daughterNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.GRANDSON -> state.names.copy(
+                    grandsonNames = state.names.grandsonNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.GRANDDAUGHTER -> state.names.copy(
+                    granddaughterNames = state.names.granddaughterNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.FULL_BROTHER -> state.names.copy(
+                    fullBrotherNames = state.names.fullBrotherNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.FULL_SISTER -> state.names.copy(
+                    fullSisterNames = state.names.fullSisterNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.PATERNAL_BROTHER -> state.names.copy(
+                    paternalBrotherNames = state.names.paternalBrotherNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.PATERNAL_SISTER -> state.names.copy(
+                    paternalSisterNames = state.names.paternalSisterNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.MATERNAL_BROTHER -> state.names.copy(
+                    maternalBrotherNames = state.names.maternalBrotherNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
+                HeirNameField.MATERNAL_SISTER -> state.names.copy(
+                    maternalSisterNames = state.names.maternalSisterNames.toMutableList().apply {
+                        while (size <= index) add("")
+                        this[index] = value
+                    }
+                )
             }
+            state.copy(names = names)
         }
         recompute()
     }
+
+    fun setHeirCount(field: HeirCountField, count: Int) {
+        val safe = count.coerceAtLeast(0)
+        _state.update { state ->
+            val updated = when (field) {
+                HeirCountField.HUSBAND -> state.copy(husbandCount = safe.coerceAtMost(1))
+                HeirCountField.WIFE -> state.copy(wifeCount = safe.coerceIn(0, 4))
+                HeirCountField.FATHER -> state.copy(fatherCount = safe.coerceAtMost(1))
+                HeirCountField.MOTHER -> state.copy(motherCount = safe.coerceAtMost(1))
+                HeirCountField.SON -> state.copy(sonCount = safe)
+                HeirCountField.DAUGHTER -> state.copy(daughterCount = safe)
+                HeirCountField.GRANDSON -> state.copy(grandsonCount = safe)
+                HeirCountField.GRANDDAUGHTER -> state.copy(granddaughterCount = safe)
+                HeirCountField.FULL_BROTHER -> state.copy(fullBrotherCount = safe)
+                HeirCountField.FULL_SISTER -> state.copy(fullSisterCount = safe)
+                HeirCountField.PATERNAL_BROTHER -> state.copy(paternalBrotherCount = safe)
+                HeirCountField.PATERNAL_SISTER -> state.copy(paternalSisterCount = safe)
+                HeirCountField.MATERNAL_BROTHER -> state.copy(maternalBrotherCount = safe)
+                HeirCountField.MATERNAL_SISTER -> state.copy(maternalSisterCount = safe)
+            }
+            updated.copy(names = syncNamesToCounts(updated))
+        }
+        recompute()
+    }
+
+    private fun syncNamesToCounts(state: FaraidhUiState): FaraidhParticipantNames = state.names.copy(
+        wifeNames = resizeNameList(state.names.wifeNames, state.wifeCount),
+        sonNames = resizeNameList(state.names.sonNames, state.sonCount),
+        daughterNames = resizeNameList(state.names.daughterNames, state.daughterCount),
+        grandsonNames = resizeNameList(state.names.grandsonNames, state.grandsonCount),
+        granddaughterNames = resizeNameList(state.names.granddaughterNames, state.granddaughterCount),
+        fullBrotherNames = resizeNameList(state.names.fullBrotherNames, state.fullBrotherCount),
+        fullSisterNames = resizeNameList(state.names.fullSisterNames, state.fullSisterCount),
+        paternalBrotherNames = resizeNameList(state.names.paternalBrotherNames, state.paternalBrotherCount),
+        paternalSisterNames = resizeNameList(state.names.paternalSisterNames, state.paternalSisterCount),
+        maternalBrotherNames = resizeNameList(state.names.maternalBrotherNames, state.maternalBrotherCount),
+        maternalSisterNames = resizeNameList(state.names.maternalSisterNames, state.maternalSisterCount)
+    )
 
     fun selectTab(index: Int) {
         _state.update { it.copy(selectedTab = index) }
@@ -108,13 +251,21 @@ class FaraidhViewModel @Inject constructor(
     }
 
     fun exportPdf(onReady: (Uri) -> Unit) {
-        val result = _state.value.result ?: return
+        val state = _state.value
+        val result = state.result ?: return
         viewModelScope.launch {
             _state.update { it.copy(pdfExporting = true, errorMessage = null) }
             runCatching {
                 val language = languageStore.current()
                 val proofs = referenceRepository.proofsForKeys(result.proofKeys, language)
-                val uri = FaraidhPdfExporter.export(context, result, proofs, language)
+                val uri = FaraidhPdfExporter.export(
+                    context = context,
+                    result = result,
+                    names = state.names,
+                    proofs = proofs,
+                    glossary = state.glossary,
+                    language = language
+                )
                 _state.update { it.copy(pdfExporting = false, pdfUri = uri) }
                 onReady(uri)
             }.onFailure { e ->
@@ -125,10 +276,11 @@ class FaraidhViewModel @Inject constructor(
 
     private fun recompute() {
         val s = _state.value
-        val estate = s.netEstate.replace(",", "").toBigDecimalOrNull() ?: BigDecimal.ZERO
+        val estateCalc = FaraidhEstateCalculator.compute(s.estate)
+        val estate = estateCalc.netEstate
         val input = HeirInput(
-            husbandCount = s.husbandCount,
-            wifeCount = s.wifeCount,
+            husbandCount = if (s.gender == DeceasedGender.FEMALE) s.husbandCount else 0,
+            wifeCount = if (s.gender == DeceasedGender.MALE) s.wifeCount else 0,
             fatherCount = s.fatherCount,
             motherCount = s.motherCount,
             sonCount = s.sonCount,
@@ -142,15 +294,39 @@ class FaraidhViewModel @Inject constructor(
             maternalBrotherCount = s.maternalBrotherCount,
             maternalSisterCount = s.maternalSisterCount
         )
-        val profile = DeceasedProfile(s.gender, estate)
-        val result = FaraidhEngine.calculate(profile, input)
+        val profile = DeceasedProfile(
+            gender = s.gender,
+            netEstate = estate,
+            name = s.names.deceasedName.trim(),
+            estate = estateCalc,
+            madhhab = s.madhhab
+        )
+        val result = FaraidhEngine.calculate(profile, input, s.names, s.madhhab)
         viewModelScope.launch {
             runCatching {
                 referenceRepository.proofsForKeys(result.proofKeys, languageStore.current())
             }.onSuccess { proofs ->
-                _state.update { it.copy(result = result, proofs = proofs) }
+                _state.update {
+                    it.copy(
+                        result = result,
+                        proofs = proofs,
+                        estateComputation = estateCalc,
+                        netEstate = if (estateCalc.netEstate > BigDecimal.ZERO) {
+                            estateCalc.netEstate.stripTrailingZeros().toPlainString()
+                        } else {
+                            it.netEstate
+                        }
+                    )
+                }
             }.onFailure {
-                _state.update { it.copy(result = result, proofs = emptyList()) }
+                _state.update {
+                    it.copy(
+                        result = result,
+                        proofs = emptyList(),
+                        estateComputation = estateCalc,
+                        netEstate = estateCalc.netEstate.stripTrailingZeros().toPlainString()
+                    )
+                }
             }
         }
     }
@@ -158,6 +334,14 @@ class FaraidhViewModel @Inject constructor(
 
 enum class HeirCountField {
     HUSBAND, WIFE, FATHER, MOTHER, SON, DAUGHTER,
+    GRANDSON, GRANDDAUGHTER,
+    FULL_BROTHER, FULL_SISTER,
+    PATERNAL_BROTHER, PATERNAL_SISTER,
+    MATERNAL_BROTHER, MATERNAL_SISTER
+}
+
+enum class HeirNameField {
+    DECEASED, HUSBAND, WIFE, FATHER, MOTHER, SON, DAUGHTER,
     GRANDSON, GRANDDAUGHTER,
     FULL_BROTHER, FULL_SISTER,
     PATERNAL_BROTHER, PATERNAL_SISTER,
