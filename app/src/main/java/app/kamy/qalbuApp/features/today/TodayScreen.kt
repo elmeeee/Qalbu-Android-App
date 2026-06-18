@@ -270,9 +270,7 @@ fun TodayScreen(
                     isProfileLoading = todayState.profileLoading,
                     onAccountClick = onAccountNavigate,
                     onLocationClick = prayerVm::openLocationSheet,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 LazyColumn(
@@ -293,7 +291,6 @@ fun TodayScreen(
                             state = prayerState,
                             onRetry = { scope.launch { prayerVm.refresh(force = true) } },
                             onOpenCalendar = onOpenPrayerCalendar,
-                            onOpenLocation = prayerVm::openLocationSheet,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
                         )
                     }

@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,8 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.WbSunny
-import app.kamy.qalbuApp.design.components.AlKhatibSkeletonCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -39,17 +35,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import app.kamy.qalbuApp.R
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import app.kamy.qalbuApp.design.theme.AlKhatibColors
+import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.design.components.AlKhatibSkeletonCircle
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.ui.layout.tabContentStatusBarInset
 import coil.compose.AsyncImage
@@ -59,7 +54,6 @@ import java.util.Calendar
 private const val DATE_ALTERNATE_MS = 4_000L
 private const val DAY_ALTERNATE_MS = 4_000L
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodayHeader(
     cityName: String?,
@@ -99,6 +93,7 @@ fun TodayHeader(
     }
 
     val dateSwitchA11y = stringResource(R.string.date_switch_a11y)
+    val locationText = cityName ?: locationStatus ?: stringResource(R.string.locating)
 
     Column(
         modifier = modifier
@@ -110,11 +105,8 @@ fun TodayHeader(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    horizontal = AlKhatibSpacing.screenHorizontal,
-                    vertical = AlKhatibSpacing.md
-                ),
-            horizontalArrangement = Arrangement.spacedBy(AlKhatibSpacing.md)
+                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             HeaderAvatar(
                 avatarUrl = avatarUrl,
@@ -124,25 +116,15 @@ fun TodayHeader(
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.WbSunny,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Text(
-                        text = greeting,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                Text(
+                    text = greeting,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
                 AnimatedContent(
                     targetState = displayDate,
@@ -157,88 +139,70 @@ fun TodayHeader(
                             }
                         },
                     transitionSpec = {
-                        fadeIn(animationSpec = tween(280)) togetherWith
-                            fadeOut(animationSpec = tween(220))
+                        fadeIn(animationSpec = tween(220)) togetherWith
+                            fadeOut(animationSpec = tween(180))
                     },
                     label = "headerDate"
                 ) { date ->
                     Text(
                         text = date,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onBackground,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(3.dp),
                     modifier = Modifier
-                        .clip(MaterialTheme.shapes.small)
                         .clickable(onClick = onLocationClick)
-                        .padding(end = 4.dp)
+                        .padding(top = 1.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.LocationOn,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(14.dp)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(12.dp)
                     )
                     Text(
-                        text = cityName ?: locationStatus ?: stringResource(R.string.locating),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.primary,
+                        text = locationText,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.small)
-                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f))
-                    .padding(horizontal = 8.dp, vertical = 5.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            AnimatedContent(
+                targetState = dayName,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180))
+                },
+                label = "headerDay"
+            ) { name ->
                 Text(
-                    text = "✦",
+                    text = name,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.tertiary
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
                 )
-                Spacer(Modifier.width(3.dp))
-                AnimatedContent(
-                    targetState = dayName,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(280)) togetherWith
-                            fadeOut(animationSpec = tween(220))
-                    },
-                    label = "headerDay"
-                ) { name ->
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                }
             }
         }
 
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HeaderAvatar(
     avatarUrl: String?,
@@ -248,41 +212,26 @@ private fun HeaderAvatar(
     Surface(
         onClick = onAccountClick,
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerLowest,
-        tonalElevation = 1.dp,
-        shadowElevation = 2.dp,
-        modifier = Modifier.size(42.dp)
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        modifier = Modifier.size(34.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .border(
-                    width = 1.5.dp,
-                    brush = Brush.linearGradient(
-                        listOf(
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.4f),
-                            AlKhatibColors.Gold.copy(alpha = 0.3f)
-                        )
-                    ),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
+        Box(contentAlignment = Alignment.Center) {
             when {
-                isProfileLoading -> AlKhatibSkeletonCircle(size = 36.dp)
+                isProfileLoading -> AlKhatibSkeletonCircle(size = 28.dp)
                 !avatarUrl.isNullOrBlank() -> AsyncImage(
                     model = avatarUrl,
                     contentDescription = stringResource(R.string.account),
                     modifier = Modifier
-                        .size(42.dp)
+                        .size(34.dp)
                         .clip(CircleShape)
                 )
                 else -> Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = stringResource(R.string.account),
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(22.dp)
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -293,7 +242,7 @@ private fun HeaderAvatar(
 private fun rememberRotatingDayName(): String {
     val weekdays = stringArrayResource(R.array.weekday_names)
     val weekdaysAr = stringArrayResource(R.array.weekday_names_ar)
-    val dayIndex = (Calendar.getInstance().get(Calendar.DAY_OF_WEEK) + 5) % 7
+    val dayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
     val names = listOf(weekdays[dayIndex], weekdaysAr[dayIndex])
     var index by remember { mutableIntStateOf(0) }
 

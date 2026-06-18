@@ -63,7 +63,6 @@ fun PrayerDashboardCard(
     state: PrayerUiState,
     onRetry: () -> Unit = {},
     onOpenCalendar: () -> Unit = {},
-    onOpenLocation: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val fetchErrorDisplay = state.error
@@ -90,7 +89,7 @@ fun PrayerDashboardCard(
         color = Color.Transparent,
         tonalElevation = 6.dp,
         shadowElevation = 4.dp,
-        onClick = onOpenLocation
+        onClick = onOpenCalendar
     ) {
         Box(
             modifier = Modifier
