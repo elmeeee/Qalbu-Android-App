@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Qalbu-Android"
+rootProject.name = "Saat-Android"
 include(":app")

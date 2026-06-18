@@ -1,0 +1,68 @@
+package app.kamy.saatApp.infrastructure.local
+
+import android.content.Context
+import app.kamy.saatApp.domain.model.HadithReference
+import app.kamy.saatApp.domain.model.HadithsByAyahResponse
+import app.kamy.saatApp.infrastructure.network.api.ContentApiService
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+
+@Singleton
+class LocalHadithDataSource @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val contentApi: ContentApiService,
+    private val json: Json
+) {
+    private val cacheDir = File(context.filesDir, "hadith_cache").apply { mkdirs() }
+
+    suspend fun getHadithsByAyah(
+        ayahKey: String,
+        page: Int = 1,
+        limit: Int = 5,
+        language: String = "en"
+    ): HadithsByAyahResponse = withContext(Dispatchers.IO) {
+        loadFromCache(ayahKey, page)?.let { return@withContext it }
+        runCatching {
+            val response = contentApi.getHadithsByAyah(
+                ayahKey = ayahKey,
+                language = language,
+                page = page,
+                limit = limit
+            )
+            saveToCache(ayahKey, page, response)
+            response
+        }.getOrElse {
+            HadithsByAyahResponse(
+                hadiths = emptyList(),
+                page = page,
+                limit = limit,
+                hasMore = false
+            )
+        }
+    }
+
+    private fun cacheFile(ayahKey: String, page: Int): File {
+        val safeKey = ayahKey.replace(':', '_')
+        return File(cacheDir, "${safeKey}_p$page.json")
+    }
+
+    private fun loadFromCache(ayahKey: String, page: Int): HadithsByAyahResponse? {
+        val file = cacheFile(ayahKey, page)
+        if (!file.exists()) return null
+        return runCatching {
+            json.decodeFromString(HadithsByAyahResponse.serializer(), file.readText())
+        }.getOrNull()
+    }
+
+    private fun saveToCache(ayahKey: String, page: Int, response: HadithsByAyahResponse) {
+        if (response.hadiths.isNullOrEmpty()) return
+        runCatching {
+            cacheFile(ayahKey, page).writeText(json.encodeToString(HadithsByAyahResponse.serializer(), response))
+        }
+    }
+}

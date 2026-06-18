@@ -25,11 +25,11 @@ val hasReleaseSigning = releaseStoreFile.isNotBlank() &&
     secret("RELEASE_KEY_PASSWORD").isNotBlank()
 
 android {
-    namespace = "app.kamy.qalbuApp"
+    namespace = "app.kamy.saatApp"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "app.kamy.qalbuApp"
+        applicationId = "app.kamy.saatApp"
         minSdk = 26
         targetSdk = 36
         versionCode = 1

@@ -1,4 +1,4 @@
-# Local secrets for Al-Khatib / Qalbu Android.
+# Local secrets for Al-Khatib / SĀAT Android.
 # Copy this file to local.properties and fill in. local.properties is gitignored.
 #
 
@@ -12,10 +12,10 @@ API_KEY_GROQ=
 AI_MODEL=qwen/qwen3-32b
 
 # Release signing (Play Store upload). Paths are relative to project root.
-# Generate with: keytool -genkeypair -v -keystore keystore/qalbu-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias qalbu
-RELEASE_STORE_FILE=keystore/qalbu-release.jks
+# Generate with: keytool -genkeypair -v -keystore keystore/saat-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias saat
+RELEASE_STORE_FILE=keystore/saat-release.jks
 RELEASE_STORE_PASSWORD=
-RELEASE_KEY_ALIAS=qalbu
+RELEASE_KEY_ALIAS=saat
 RELEASE_KEY_PASSWORD=
 
 # Note: User OAuth scopes (build.gradle QF_OAUTH_SCOPES) must include `reading_session` for continue-reading.

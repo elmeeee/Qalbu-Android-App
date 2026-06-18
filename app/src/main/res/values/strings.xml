@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Qalbu</string>
+    <string name="app_name">SĀAT</string>
 
     <string name="splash_greeting_arabic">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</string>
 
@@ -138,7 +138,7 @@
     <string name="sunnah_kahf_title">📖 Read Surah Al-Kahf</string>
     <string name="sunnah_kahf_body">It\'s Friday — read Surah Al-Kahf for light between this Friday and the next.</string>
     <string name="daily_verse_notif_title">Your verse for today</string>
-    <string name="daily_verse_notif_fallback">Open Qalbu for today\'s verse.</string>
+    <string name="daily_verse_notif_fallback">Open SĀAT for today\'s verse.</string>
 
     <!-- Adhan -->
     <string name="adhan_playback_title">Adhan</string>
@@ -150,7 +150,7 @@
     <string name="recitation_notification_channel">Quran recitation</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
     <string name="battery_opt_snackbar_message">On some phones, allow unrestricted battery so adhan works when the app is closed.</string>
-    <string name="battery_opt_snackbar_oem_message">On %1$s phones: set Qalbu to Unrestricted and enable autostart so adhan works in the background.</string>
+    <string name="battery_opt_snackbar_oem_message">On %1$s phones: set SĀAT to Unrestricted and enable autostart so adhan works in the background.</string>
     <string name="battery_opt_settings_title">Background &amp; battery</string>
     <string name="battery_opt_settings_subtitle">Unrestricted — recommended on this phone brand</string>
     <string name="battery_opt_settings_subtitle_ok">Unrestricted — background reminders enabled</string>
@@ -358,7 +358,7 @@
     <string name="prayer_calendar_load_failed">Could not load prayer calendar</string>
     <string name="prayer_widget_title">Prayer times</string>
     <string name="prayer_widget_description">Compact prayer times strip with countdown</string>
-    <string name="prayer_widget_empty">Open Qalbu to load prayer times</string>
+    <string name="prayer_widget_empty">Open SĀAT to load prayer times</string>
     <string name="prayer_widget_next">Next: %1$s at %2$s</string>
     <string name="prayer_widget_grace">%1$s started recently</string>
     <string name="prayer_widget_next_label">Next prayer</string>
@@ -370,7 +370,7 @@
     <string name="prayer_calendar_loading_day">Loading prayer times…</string>
     <string name="offline_banner_message">Offline — showing saved data</string>
     <string name="offline_banner_prayer">Offline — prayer times from last sync</string>
-    <string name="onboarding_welcome_title">Welcome to Qalbu</string>
+    <string name="onboarding_welcome_title">Welcome to SĀAT</string>
     <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
     <string name="onboarding_location_title">Where do you pray?</string>
     <string name="onboarding_location_body">We use your location for accurate prayer times. Search a city or allow GPS.</string>
@@ -378,7 +378,7 @@
     <string name="onboarding_notifications_title">Stay on time</string>
     <string name="onboarding_notifications_body">Enable notifications for adhan reminders and your daily verse.</string>
     <string name="onboarding_widget_title">Add a home widget</string>
-    <string name="onboarding_widget_body">Long-press your home screen → Widgets → Qalbu to pin prayer times at a glance.</string>
+    <string name="onboarding_widget_body">Long-press your home screen → Widgets → SĀAT to pin prayer times at a glance.</string>
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_enable_notifications">Enable notifications</string>
@@ -597,11 +597,72 @@
     <!-- Widgets & shortcuts -->
     <string name="daily_verse_widget_title">Verse of the day</string>
     <string name="daily_verse_widget_desc">Today\'s ayah on your home screen</string>
-    <string name="daily_verse_widget_empty">Open Qalbu to load today\'s verse</string>
+    <string name="daily_verse_widget_empty">Open SĀAT to load today\'s verse</string>
     <string name="prayer_widget_next_title">Next prayer</string>
     <string name="prayer_widget_next_desc">Countdown to the next adhan</string>
     <string name="prayer_widget_schedule_title">Prayer schedule</string>
     <string name="prayer_widget_schedule_desc">Today\'s five prayer times at a glance</string>
     <string name="shortcut_continue_quran">Continue Quran</string>
     <string name="shortcut_prayer_today">Prayer times</string>
+
+    <!-- Faraidh calculator -->
+    <string name="faraidh_title">Faraidh calculator</string>
+    <string name="faraidh_subtitle">Offline Islamic inheritance · BigDecimal precision</string>
+    <string name="faraidh_account_subtitle">Hajb, ashab al-furud, asabah, awl &amp; radd</string>
+    <string name="faraidh_tooltip_title">What is Faraidh?</string>
+    <string name="faraidh_tooltip_body">Faraidh is the Islamic science of inheritance distribution after death. This tool calculates each heir\'s Quranic share (furud), residue (asabah), blocking rules (hajb), and special adjustments (ʿawl when shares exceed the estate, radd when surplus remains). Use it for planning and education—always consult a qualified scholar for binding legal rulings.</string>
+    <string name="faraidh_tab_breakdown">Breakdown</string>
+    <string name="faraidh_tab_silsilah">Silsilah</string>
+    <string name="faraidh_tab_dalil">Dalil</string>
+    <string name="faraidh_input_title">Estate &amp; heirs</string>
+    <string name="faraidh_expand">Edit heirs</string>
+    <string name="faraidh_collapse">Collapse</string>
+    <string name="faraidh_net_estate">Net estate (after debts &amp; funeral)</string>
+    <string name="faraidh_deceased_gender">Deceased gender</string>
+    <string name="faraidh_gender_male">Male</string>
+    <string name="faraidh_gender_female">Female</string>
+    <string name="faraidh_heirs_section">Living heirs</string>
+    <string name="faraidh_heir_husband">Husband</string>
+    <string name="faraidh_heir_wife">Wife</string>
+    <string name="faraidh_heir_father">Father</string>
+    <string name="faraidh_heir_mother">Mother</string>
+    <string name="faraidh_heir_son">Son</string>
+    <string name="faraidh_heir_daughter">Daughter</string>
+    <string name="faraidh_heir_grandson">Grandson</string>
+    <string name="faraidh_heir_granddaughter">Granddaughter</string>
+    <string name="faraidh_heir_full_brother">Full brother</string>
+    <string name="faraidh_heir_full_sister">Full sister</string>
+    <string name="faraidh_heir_paternal_brother">Paternal half-brother</string>
+    <string name="faraidh_heir_paternal_sister">Paternal half-sister</string>
+    <string name="faraidh_heir_maternal_brother">Maternal brother</string>
+    <string name="faraidh_heir_maternal_sister">Maternal sister</string>
+    <string name="faraidh_heir_maternal_sibling">Maternal sibling</string>
+    <string name="faraidh_node_deceased">Deceased</string>
+    <string name="faraidh_active_heirs">Active heirs</string>
+    <string name="faraidh_blocked_heirs">Blocked heirs (hajb)</string>
+    <string name="faraidh_fraction">Share</string>
+    <string name="faraidh_percent">Percent</string>
+    <string name="faraidh_amount">Amount</string>
+    <string name="faraidh_heads">%1$d head(s)</string>
+    <string name="faraidh_distributed">Distributed: %1$s</string>
+    <string name="faraidh_awl_applied">ʿAwl applied — shares scaled proportionally because fixed portions exceeded the estate.</string>
+    <string name="faraidh_radd_applied">Radd applied — surplus redistributed among blood heirs (spouses excluded).</string>
+    <string name="faraidh_block_by_son">Blocked by son (hajb)</string>
+    <string name="faraidh_block_by_children">Blocked by children (hajb)</string>
+    <string name="faraidh_block_by_father">Blocked by father (hajb)</string>
+    <string name="faraidh_block_by_grandchild">Substituted by closer heirs</string>
+    <string name="faraidh_block_gender">Not applicable for deceased gender</string>
+    <string name="faraidh_block_no_share">No remaining share</string>
+    <string name="faraidh_gen_parents">Parents</string>
+    <string name="faraidh_gen_same">Spouse &amp; siblings</string>
+    <string name="faraidh_gen_descendants">Descendants</string>
+    <string name="faraidh_status_blocked">Blocked</string>
+    <string name="faraidh_status_inherits">Inherits</string>
+    <string name="faraidh_status_absent">Not inheriting</string>
+    <string name="faraidh_empty_result">Enter net estate and heirs to calculate shares.</string>
+    <string name="faraidh_empty_silsilah">Add heirs to view the family lineage map.</string>
+    <string name="faraidh_empty_dalil">Run a calculation to see relevant Quranic verses and hadith.</string>
+    <string name="faraidh_export_pdf">Export PDF report</string>
+    <string name="faraidh_open_quran">Open in Quran reader</string>
+    <string name="faraidh_open_external">Open reference</string>
 </resources>

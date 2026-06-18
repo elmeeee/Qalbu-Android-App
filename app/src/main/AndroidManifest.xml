@@ -20,7 +20,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:name=".QalbuApplication"
+        android:name=".SaatApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -45,14 +45,14 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="qalbu" android:host="quran" />
-                <data android:scheme="qalbu" android:host="mushaf" />
-                <data android:scheme="qalbu" android:host="today" />
-                <data android:scheme="qalbu" android:host="reflect" />
-                <data android:scheme="qalbu" android:host="bookmarks" />
-                <data android:scheme="qalbu" android:host="qibla" />
-                <data android:scheme="qalbu" android:host="dhikr" />
-                <data android:scheme="qalbu" android:host="zakat" />
+                <data android:scheme="saat" android:host="quran" />
+                <data android:scheme="saat" android:host="mushaf" />
+                <data android:scheme="saat" android:host="today" />
+                <data android:scheme="saat" android:host="reflect" />
+                <data android:scheme="saat" android:host="bookmarks" />
+                <data android:scheme="saat" android:host="qibla" />
+                <data android:scheme="saat" android:host="dhikr" />
+                <data android:scheme="saat" android:host="zakat" />
             </intent-filter>
             <meta-data
                 android:name="android.app.shortcuts"
@@ -171,6 +171,16 @@
                 <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

@@ -8,9 +8,9 @@
         android:shortcutLongLabel="@string/shortcut_continue_quran">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="qalbu://quran"
-            android:targetPackage="app.kamy.qalbuApp"
-            android:targetClass="app.kamy.qalbuApp.MainActivity" />
+            android:data="saat://quran"
+            android:targetPackage="app.kamy.saatApp"
+            android:targetClass="app.kamy.saatApp.MainActivity" />
     </shortcut>
     <shortcut
         android:shortcutId="prayer_today"
@@ -20,9 +20,9 @@
         android:shortcutLongLabel="@string/shortcut_prayer_today">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="qalbu://today"
-            android:targetPackage="app.kamy.qalbuApp"
-            android:targetClass="app.kamy.qalbuApp.MainActivity" />
+            android:data="saat://today"
+            android:targetPackage="app.kamy.saatApp"
+            android:targetClass="app.kamy.saatApp.MainActivity" />
     </shortcut>
     <shortcut
         android:shortcutId="qibla"
@@ -32,8 +32,8 @@
         android:shortcutLongLabel="@string/qibla_title">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="qalbu://qibla"
-            android:targetPackage="app.kamy.qalbuApp"
-            android:targetClass="app.kamy.qalbuApp.MainActivity" />
+            android:data="saat://qibla"
+            android:targetPackage="app.kamy.saatApp"
+            android:targetClass="app.kamy.saatApp.MainActivity" />
     </shortcut>
 </shortcuts>

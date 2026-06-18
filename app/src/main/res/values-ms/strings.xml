@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Qalbu</string>
+    <string name="app_name">SĀAT</string>
 
     <string name="splash_greeting_arabic">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</string>
 
@@ -126,7 +126,7 @@
     <string name="sunnah_kahf_title">📖 Baca Surah Al-Kahf</string>
     <string name="sunnah_kahf_body">Hari Jumaat — baca Surah Al-Kahf untuk cahaya sehingga Jumaat akan datang.</string>
     <string name="daily_verse_notif_title">Ayat anda hari ini</string>
-    <string name="daily_verse_notif_fallback">Buka Qalbu untuk ayat hari ini.</string>
+    <string name="daily_verse_notif_fallback">Buka SĀAT untuk ayat hari ini.</string>
 
     <string name="adhan_playback_title">Azan</string>
     <string name="adhan_playback_body">Memainkan panggilan solat</string>
@@ -137,7 +137,7 @@
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Benarkan penggera tepat supaya azan dan peringatan solat sampai tepat masa.</string>
     <string name="battery_opt_snackbar_message">Pada sesetengah telefon, benarkan bateri tanpa had supaya azan berfungsi apabila aplikasi ditutup.</string>
-    <string name="battery_opt_snackbar_oem_message">Pada telefon %1$s: set Qalbu ke Tanpa had dan dayakan autostart supaya azan berfungsi di latar belakang.</string>
+    <string name="battery_opt_snackbar_oem_message">Pada telefon %1$s: set SĀAT ke Tanpa had dan dayakan autostart supaya azan berfungsi di latar belakang.</string>
     <string name="battery_opt_settings_title">Latar belakang &amp; bateri</string>
     <string name="battery_opt_settings_subtitle">Tanpa had — disyorkan untuk jenama telefon ini</string>
     <string name="battery_opt_settings_subtitle_ok">Tanpa had — peringatan latar belakang dihidupkan</string>
@@ -260,7 +260,7 @@
     <string name="prayer_calendar_load_failed">Gagal memuatkan kalendar solat</string>
     <string name="prayer_widget_title">Waktu solat</string>
     <string name="prayer_widget_description">Strip waktu solat padat dengan kira detik</string>
-    <string name="prayer_widget_empty">Buka Qalbu untuk memuatkan waktu solat</string>
+    <string name="prayer_widget_empty">Buka SĀAT untuk memuatkan waktu solat</string>
     <string name="prayer_widget_next">Seterusnya: %1$s pada %2$s</string>
     <string name="prayer_widget_grace">%1$s baru bermula</string>
     <string name="prayer_widget_next_label">Solat seterusnya</string>
@@ -269,7 +269,7 @@
     <string name="prayer_calendar_open">Kalendar bulanan</string>
     <string name="prayer_calendar_title">Kalendar solat</string>
     <string name="prayer_calendar_hint">Ketik hari untuk lihat semua waktu solat pada tarikh tersebut.</string>
-    <string name="onboarding_welcome_title">Selamat datang ke Qalbu</string>
+    <string name="onboarding_welcome_title">Selamat datang ke SĀAT</string>
     <string name="onboarding_welcome_body">Teman Quran harian anda — waktu solat, refleksi, dan komuniti dalam satu aplikasi.</string>
     <string name="onboarding_location_title">Di mana anda solat?</string>
     <string name="onboarding_location_body">Lokasi digunakan untuk waktu solat yang tepat. Cari bandar atau benarkan GPS.</string>
@@ -277,7 +277,7 @@
     <string name="onboarding_notifications_title">Kekal tepat pada masa</string>
     <string name="onboarding_notifications_body">Hidupkan pemberitahuan untuk azan dan ayat harian.</string>
     <string name="onboarding_widget_title">Tambah widget</string>
-    <string name="onboarding_widget_body">Tekan lama skrin utama → Widget → Qalbu untuk pin waktu solat.</string>
+    <string name="onboarding_widget_body">Tekan lama skrin utama → Widget → SĀAT untuk pin waktu solat.</string>
     <string name="onboarding_continue">Teruskan</string>
     <string name="onboarding_get_started">Mula</string>
     <string name="onboarding_enable_notifications">Hidupkan pemberitahuan</string>

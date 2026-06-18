@@ -1,4 +1,4 @@
-package app.kamy.qalbuApp.infrastructure.network
+package app.kamy.saatApp.infrastructure.network
 
 import android.app.Application
 // import com.prowllabs.prowl.Prowl
