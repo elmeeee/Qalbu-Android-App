@@ -13,6 +13,7 @@
     <!-- Bottom navigation -->
     <string name="nav_today">Today</string>
     <string name="nav_reflect">Reflect</string>
+    <string name="nav_tools">Tools</string>
     <string name="nav_quran">Quran</string>
     <string name="nav_account">Account</string>
 
@@ -552,6 +553,23 @@
     <string name="offline_quran_downloading">Downloading… %1$d / %2$d surahs</string>
     <string name="offline_quran_downloading_detail">Batch %1$d / %2$d · %3$d surahs saved total</string>
     <string name="offline_quran_complete">All surahs saved offline</string>
+    <string name="offline_murottal_title">Offline Murottal</string>
+    <string name="offline_murottal_subtitle">%1$d of 6236 ayah audio saved</string>
+    <string name="offline_murottal_subtitle_short">Download recitation audio for offline listening</string>
+    <string name="offline_murottal_partial">%1$d / %2$d ayah audio saved</string>
+    <string name="offline_murottal_downloading">Downloading… %1$d / %2$d ayah</string>
+    <string name="offline_murottal_downloading_detail">Batch %1$d / %2$d · %3$d ayah saved total</string>
+    <string name="offline_murottal_complete">Full murottal saved offline</string>
+    <string name="offline_murottal_reciter">Reciter</string>
+    <string name="doa_zikir_title">Doa &amp; Zikir</string>
+    <string name="doa_zikir_account_subtitle">Daily doa and dhikr from MASA</string>
+    <string name="doa_zikir_kind_doa">Doa</string>
+    <string name="doa_zikir_kind_dhikr">Zikir</string>
+    <string name="khgt_important_day">Important day</string>
+    <string name="khgt_pasaran_label">Pasaran: %1$s</string>
+    <string name="prayer_last_sync">Prayer times from last sync · %1$s</string>
+    <string name="spiritual_tools_tab_subtitle">Qibla, doa, zikir, and more</string>
+    <string name="transliteration_label">Latin</string>
 
     <!-- Widgets & shortcuts -->
     <string name="daily_verse_widget_title">Verse of the day</string>

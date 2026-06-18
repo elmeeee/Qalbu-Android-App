@@ -11,14 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -38,10 +36,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.QuranChapter
-import app.kamy.qalbuApp.infrastructure.offline.OfflineDownloadProgress
-import app.kamy.qalbuApp.infrastructure.preferences.OfflineDownloadStore
+import app.kamy.qalbuApp.domain.model.RecitationPayload
+import app.kamy.qalbuApp.infrastructure.offline.MurottalDownloadProgress
+import app.kamy.qalbuApp.infrastructure.offline.MurottalDownloader
+import app.kamy.qalbuApp.infrastructure.offline.MurottalOfflineStore
 import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -56,7 +57,7 @@ private enum class OfflineDownloadMode { ALL, PICK }
 @EntryPoint
 @InstallIn(SingletonComponent::class)
 interface OfflineDownloadEntryPoint {
-    fun offlineQuranDownloader(): app.kamy.qalbuApp.infrastructure.offline.OfflineQuranDownloader
+    fun murottalDownloader(): MurottalDownloader
     fun contentRepository(): ContentRepository
 }
 
@@ -69,31 +70,44 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
     val entryPoint = remember {
         EntryPointAccessors.fromApplication(context.applicationContext, OfflineDownloadEntryPoint::class.java)
     }
-    val downloader = remember { entryPoint.offlineQuranDownloader() }
+    val downloader = remember { entryPoint.murottalDownloader() }
     val contentRepository = remember { entryPoint.contentRepository() }
 
     var chapters by remember { mutableStateOf<List<QuranChapter>>(emptyList()) }
+    var recitations by remember { mutableStateOf<List<RecitationPayload>>(emptyList()) }
+    var selectedRecitationId by remember {
+        mutableIntStateOf(MurottalOfflineStore.activeReciter(context))
+    }
     var loadingChapters by remember { mutableStateOf(true) }
-    var mode by remember { mutableStateOf(OfflineDownloadMode.PICK) }
-    var includeTranslations by remember { mutableStateOf(true) }
+    var mode by remember { mutableStateOf(OfflineDownloadMode.ALL) }
     val selectedChapters = remember { mutableStateListOf<Int>() }
     var downloading by remember { mutableStateOf(false) }
-    var progress by remember { mutableStateOf<OfflineDownloadProgress?>(null) }
+    var progress by remember { mutableStateOf<MurottalDownloadProgress?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var overallDownloaded by remember { mutableIntStateOf(OfflineDownloadStore.downloadedChapterCount(context)) }
+    var overallDownloaded by remember {
+        mutableIntStateOf(MurottalOfflineStore.downloadedCount(context, selectedRecitationId))
+    }
 
     LaunchedEffect(Unit) {
-        OfflineDownloadStore.recoverStaleProgress(context)
-        downloading = OfflineDownloadStore.isInProgress(context)
-        overallDownloaded = OfflineDownloadStore.downloadedChapterCount(context)
+        MurottalOfflineStore.recoverStaleProgress(context)
+        downloading = MurottalOfflineStore.isInProgress(context)
         loadingChapters = true
-        chapters = runCatching {
-            withContext(Dispatchers.IO) { contentRepository.getChapters(force = false) }
-        }.getOrDefault(emptyList()).sortedBy { it.id }
+        val loaded = runCatching {
+            withContext(Dispatchers.IO) {
+                contentRepository.getChapters(force = false) to contentRepository.getRecitations()
+            }
+        }.getOrNull()
+        chapters = loaded?.first.orEmpty().sortedBy { it.id }
+        recitations = loaded?.second.orEmpty().ifEmpty { LocalQuranConfig.recitations }
+        overallDownloaded = MurottalOfflineStore.downloadedCount(context, selectedRecitationId)
         loadingChapters = false
         if (selectedChapters.isEmpty()) {
             selectedChapters.addAll(chapters.map { it.id })
         }
+    }
+
+    LaunchedEffect(selectedRecitationId) {
+        overallDownloaded = MurottalOfflineStore.downloadedCount(context, selectedRecitationId)
     }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
@@ -104,19 +118,47 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                 .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
             Text(
-                text = stringResource(R.string.offline_quran_title),
+                text = stringResource(R.string.offline_murottal_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = AlKhatibColors.DeepEmerald
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = stringResource(R.string.offline_quran_picker_subtitle, overallDownloaded),
+                text = stringResource(R.string.offline_murottal_subtitle, overallDownloaded),
                 style = MaterialTheme.typography.bodyMedium,
                 color = AlKhatibColors.Slate500
             )
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
+            Text(
+                text = stringResource(R.string.offline_murottal_reciter),
+                style = MaterialTheme.typography.labelMedium,
+                color = AlKhatibColors.Slate500
+            )
+            Spacer(Modifier.height(6.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+            ) {
+                items(recitations, key = { it.identifiableId }) { recitation ->
+                    val selected = recitation.identifiableId == selectedRecitationId
+                    TextButton(
+                        onClick = { selectedRecitationId = recitation.identifiableId },
+                        enabled = !downloading,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = recitation.displayName,
+                            color = if (selected) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -162,7 +204,7 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(220.dp)
+                            .height(180.dp)
                     ) {
                         items(chapters, key = { it.id }) { chapter ->
                             val checked = chapter.id in selectedChapters
@@ -172,7 +214,7 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                                     .padding(vertical = 2.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Checkbox(
+                                androidx.compose.material3.Checkbox(
                                     checked = checked,
                                     onCheckedChange = { isChecked ->
                                         if (isChecked) selectedChapters.add(chapter.id)
@@ -190,20 +232,6 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(stringResource(R.string.offline_quran_include_translations))
-                Switch(
-                    checked = includeTranslations,
-                    onCheckedChange = { includeTranslations = it },
-                    enabled = !downloading
-                )
-            }
-
             progress?.let { p ->
                 if (p.totalInBatch > 0) {
                     Spacer(Modifier.height(12.dp))
@@ -214,7 +242,7 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                     Spacer(Modifier.height(6.dp))
                     Text(
                         text = stringResource(
-                            R.string.offline_quran_downloading_detail,
+                            R.string.offline_murottal_downloading_detail,
                             p.completedInBatch,
                             p.totalInBatch,
                             p.overallDownloaded
@@ -237,9 +265,7 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
             ) {
                 if (downloading) {
                     OutlinedButton(
-                        onClick = {
-                            downloader.requestCancel()
-                        },
+                        onClick = { downloader.requestCancel() },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(stringResource(R.string.cancel))
@@ -267,19 +293,20 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                         downloading = true
                         scope.launch {
                             val result = downloader.downloadChapters(
-                                chapterIds = ids,
-                                includeTranslations = includeTranslations
+                                recitationId = selectedRecitationId,
+                                chapterIds = ids
                             ) { p ->
                                 progress = p
                                 overallDownloaded = p.overallDownloaded
                             }
-                            downloading = OfflineDownloadStore.isInProgress(context)
-                            overallDownloaded = OfflineDownloadStore.downloadedChapterCount(context)
+                            downloading = MurottalOfflineStore.isInProgress(context)
+                            overallDownloaded = MurottalOfflineStore.downloadedCount(
+                                context,
+                                selectedRecitationId
+                            )
                             if (result.isFailure) {
                                 val msg = result.exceptionOrNull()?.message
-                                errorMessage = msg ?: OfflineDownloadStore.lastError(context)
-                            } else if (OfflineDownloadStore.isFullyDownloaded(context)) {
-                                onDismiss()
+                                errorMessage = msg ?: MurottalOfflineStore.lastError(context)
                             }
                         }
                     },

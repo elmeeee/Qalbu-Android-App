@@ -1,11 +1,9 @@
 package app.kamy.qalbuApp.infrastructure.repository
 
-import app.kamy.qalbuApp.core.error.qfCall
-import app.kamy.qalbuApp.domain.model.PrayerType
+import app.kamy.qalbuApp.domain.prayer.LocalPrayerCalculator
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.domain.prayer.PrayerMethodOption
-import app.kamy.qalbuApp.infrastructure.network.api.AlAdhanApiService
-import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleBuilder
+import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleBundle
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -42,40 +40,10 @@ data class PrayerCalendarDay(
 )
 
 @Singleton
-class AlAdhanRepository @Inject constructor(
-    private val api: AlAdhanApiService
-) {
-    private val timeFormatPatterns = listOf("HH:mm (zzz)", "HH:mm")
+class AlAdhanRepository @Inject constructor() {
 
-    suspend fun fetchCalculationMethods(): List<PrayerMethodOption> {
-        val resp = qfCall { api.getMethods() }
-        val fromApi = resp.data.orEmpty()
-            .filterKeys { it != "CUSTOM" }
-            .map { (key, entry) ->
-                val method = PrayerCalculationMethod.fromAladhanId(entry.id)
-                PrayerMethodOption(
-                    aladhanId = entry.id,
-                    apiKey = key,
-                    name = entry.name?.takeIf { it.isNotBlank() } ?: method.displayName,
-                    method = method
-                )
-            }
-        val muhammadiyah = PrayerMethodOption(
-            aladhanId = PrayerCalculationMethod.MUHAMMADIYAH.aladhanMethodId,
-            apiKey = "MUHAMMADIYAH",
-            name = PrayerCalculationMethod.MUHAMMADIYAH.displayName,
-            method = PrayerCalculationMethod.MUHAMMADIYAH
-        )
-        val kemenag = fromApi.firstOrNull { it.aladhanId == 20 }
-        val rest = fromApi
-            .filter { it.aladhanId != 20 }
-            .sortedBy { it.name.lowercase() }
-        return buildList {
-            add(muhammadiyah)
-            if (kemenag != null) add(kemenag)
-            addAll(rest)
-        }
-    }
+    suspend fun fetchCalculationMethods(): List<PrayerMethodOption> =
+        LocalPrayerCalculator.calculationMethodOptions()
 
     suspend fun fetchTimings(
         latitude: Double,
@@ -83,40 +51,13 @@ class AlAdhanRepository @Inject constructor(
         cityName: String? = null,
         method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
         timestamp: Long = System.currentTimeMillis() / 1000L
-    ): PrayerDayResult {
-        val resp = qfCall {
-            api.getTimings(
-                timestamp = timestamp,
-                latitude = latitude,
-                longitude = longitude,
-                method = method.aladhanMethodId,
-                school = method.aladhanSchool,
-                tune = method.aladhanTune,
-                methodSettings = method.aladhanMethodSettings
-            )
-        }
-        val data = resp.data ?: return PrayerDayResult(emptyList(), cityName)
-        val timings = data.timings.orEmpty()
-        val baseDate = todayDate()
-
-        val entries = PrayerType.entries.mapNotNull { type ->
-            val raw = timings[type.aladhanKey] ?: return@mapNotNull null
-            val parsed = parseTime(raw, baseDate) ?: return@mapNotNull null
-            PrayerEntry(type = type, rawTime = raw, date = parsed)
-        }.sortedBy { it.date }
-
-        val (hijriLabel, gregorianLabel) = AlAdhanDateLabels.fromApiDate(data.date)
-        val hijriDay = data.date?.hijri?.day?.trim()?.toIntOrNull()
-        val scheduleBundle = PrayerScheduleBuilder.fromTimings(timings, baseDate)
-        return PrayerDayResult(
-            timings = entries,
-            cityName = cityName,
-            hijriLabel = hijriLabel,
-            gregorianLabel = gregorianLabel,
-            hijriDay = hijriDay,
-            scheduleBundle = scheduleBundle
-        )
-    }
+    ): PrayerDayResult = LocalPrayerCalculator.fetchTimings(
+        latitude = latitude,
+        longitude = longitude,
+        cityName = cityName,
+        method = method,
+        timestamp = timestamp
+    )
 
     suspend fun fetchMonthCalendar(
         year: Int,
@@ -124,67 +65,11 @@ class AlAdhanRepository @Inject constructor(
         latitude: Double,
         longitude: Double,
         method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod
-    ): List<PrayerCalendarDay> {
-        val resp = qfCall {
-            api.getCalendar(
-                year = year,
-                month = month,
-                latitude = latitude,
-                longitude = longitude,
-                method = method.aladhanMethodId,
-                school = method.aladhanSchool,
-                tune = method.aladhanTune,
-                methodSettings = method.aladhanMethodSettings
-            )
-        }
-        return resp.data.orEmpty().mapNotNull { day ->
-            val timings = day.timings.orEmpty()
-            val gregorian = day.date?.gregorian ?: return@mapNotNull null
-            val dayNumber = gregorian.day?.toIntOrNull() ?: return@mapNotNull null
-            val monthName = gregorian.month?.en.orEmpty()
-            val yearLabel = gregorian.year.orEmpty()
-            val (hijriLabel, _) = AlAdhanDateLabels.fromApiDate(day.date)
-            PrayerCalendarDay(
-                day = dayNumber,
-                gregorianLabel = listOf(dayNumber.toString(), monthName, yearLabel)
-                    .filter { it.isNotBlank() }
-                    .joinToString(" "),
-                hijriLabel = hijriLabel,
-                fajr = formatRawTime(timings["Fajr"]),
-                sunrise = formatRawTime(timings["Sunrise"]),
-                dhuhr = formatRawTime(timings["Dhuhr"]),
-                asr = formatRawTime(timings["Asr"]),
-                maghrib = formatRawTime(timings["Maghrib"]),
-                isha = formatRawTime(timings["Isha"])
-            )
-        }
-    }
-
-    private fun formatRawTime(raw: String?): String =
-        raw?.substringBefore(" ")?.trim().orEmpty().ifBlank { "--:--" }
-
-    private fun todayDate(): Date = Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, 0)
-        set(Calendar.MINUTE, 0)
-        set(Calendar.SECOND, 0)
-        set(Calendar.MILLISECOND, 0)
-    }.time
-
-    private fun parseTime(raw: String, dayBase: Date): Date? {
-        // Al-Adhan returns "05:30" or "05:30 (PST)". Try both.
-        for (pattern in timeFormatPatterns) {
-            try {
-                val formatter = SimpleDateFormat(pattern, Locale.US)
-                val parsed = formatter.parse(raw) ?: continue
-                val cal = Calendar.getInstance().apply { time = dayBase }
-                val parsedCal = Calendar.getInstance().apply { time = parsed }
-                cal.set(Calendar.HOUR_OF_DAY, parsedCal.get(Calendar.HOUR_OF_DAY))
-                cal.set(Calendar.MINUTE, parsedCal.get(Calendar.MINUTE))
-                return cal.time
-            } catch (_: Throwable) {
-                continue
-            }
-        }
-        return null
-    }
+    ): List<PrayerCalendarDay> = LocalPrayerCalculator.fetchMonthCalendar(
+        year = year,
+        month = month,
+        latitude = latitude,
+        longitude = longitude,
+        method = method
+    )
 }

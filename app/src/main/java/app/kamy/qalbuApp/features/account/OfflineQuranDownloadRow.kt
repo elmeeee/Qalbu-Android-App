@@ -10,35 +10,39 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.kamy.qalbuApp.R
+import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import app.kamy.qalbuApp.design.components.AlKhatibSettingsNavigationRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import app.kamy.qalbuApp.infrastructure.preferences.OfflineDownloadStore
+import app.kamy.qalbuApp.infrastructure.offline.MurottalOfflineStore
 
 @Composable
 fun OfflineQuranDownloadRow() {
     val context = LocalContext.current
     var sheetVisible by remember { mutableStateOf(false) }
-    var progress by remember { mutableIntStateOf(OfflineDownloadStore.downloadedChapterCount(context)) }
-    var downloading by remember { mutableStateOf(OfflineDownloadStore.isInProgress(context)) }
+    val recitationId = remember { MurottalOfflineStore.activeReciter(context) }
+    var progress by remember {
+        mutableIntStateOf(MurottalOfflineStore.downloadedCount(context, recitationId))
+    }
+    var downloading by remember { mutableStateOf(MurottalOfflineStore.isInProgress(context)) }
 
     LaunchedEffect(Unit) {
-        OfflineDownloadStore.recoverStaleProgress(context)
-        downloading = OfflineDownloadStore.isInProgress(context)
-        progress = OfflineDownloadStore.downloadedChapterCount(context)
+        MurottalOfflineStore.recoverStaleProgress(context)
+        downloading = MurottalOfflineStore.isInProgress(context)
+        progress = MurottalOfflineStore.downloadedCount(context, recitationId)
     }
 
-    val complete = OfflineDownloadStore.isFullyDownloaded(context)
+    val complete = progress >= 6236
     val subtitle = when {
-        complete -> stringResource(R.string.offline_quran_complete)
-        downloading -> stringResource(R.string.offline_quran_downloading, progress, 114)
-        progress > 0 -> stringResource(R.string.offline_quran_partial, progress, 114)
-        else -> stringResource(R.string.offline_quran_subtitle)
+        complete -> stringResource(R.string.offline_murottal_complete)
+        downloading -> stringResource(R.string.offline_murottal_downloading, progress, 6236)
+        progress > 0 -> stringResource(R.string.offline_murottal_partial, progress, 6236)
+        else -> stringResource(R.string.offline_murottal_subtitle_short)
     }
 
     AlKhatibSettingsNavigationRow(
         icon = Icons.AutoMirrored.Filled.MenuBook,
-        title = stringResource(R.string.offline_quran_title),
+        title = stringResource(R.string.offline_murottal_title),
         subtitle = subtitle,
         onClick = { sheetVisible = true }
     )
@@ -47,8 +51,9 @@ fun OfflineQuranDownloadRow() {
         OfflineQuranDownloadSheet(
             onDismiss = {
                 sheetVisible = false
-                downloading = OfflineDownloadStore.isInProgress(context)
-                progress = OfflineDownloadStore.downloadedChapterCount(context)
+                val active = MurottalOfflineStore.activeReciter(context)
+                downloading = MurottalOfflineStore.isInProgress(context)
+                progress = MurottalOfflineStore.downloadedCount(context, active)
             }
         )
     }

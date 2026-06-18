@@ -31,7 +31,10 @@ data class RandomAyahPayload(
     @SerialName("juz_number") val juzNumber: Int? = null,
     val audio: AudioPayload? = null,
     val translations: List<InlineTranslation>? = null,
-    val words: List<QuranWord>? = null
+    val words: List<QuranWord>? = null,
+    @SerialName("transliteration_id") val transliterationId: String? = null,
+    @SerialName("transliteration_en") val transliterationEn: String? = null,
+    val jalalayn: String? = null
 ) {
     val resolvedVerseNumber: Int?
         get() {

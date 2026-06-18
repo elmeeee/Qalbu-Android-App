@@ -40,10 +40,9 @@ object PrayerWidgetUpdater {
             bindSlot(views, PrayerType.ISHA, context.getString(R.string.prayer_isha), "--:--", false)
         } else {
             views.setTextViewText(R.id.widget_city, snapshot.cityLabel)
-            views.setTextViewText(
-                R.id.widget_next_line,
-                "${snapshot.nextPrayerName} · ${snapshot.nextPrayerTime}"
-            )
+            val subtitle = snapshot.khgtEventTitle?.takeIf { it.isNotBlank() }
+                ?: "${snapshot.nextPrayerName} · ${snapshot.nextPrayerTime}"
+            views.setTextViewText(R.id.widget_next_line, subtitle)
             views.setTextViewText(R.id.widget_countdown, snapshot.countdownCompact)
             snapshot.slots.forEach { slot ->
                 bindSlot(views, slot.type, slot.label, slot.time, slot.isActive)

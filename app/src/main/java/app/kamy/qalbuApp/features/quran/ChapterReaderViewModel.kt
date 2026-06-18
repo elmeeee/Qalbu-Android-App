@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.core.config.AppConfig
+import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
@@ -52,6 +53,7 @@ data class ChapterReaderUiState(
     val playbackMode: AyahPlaybackMode = AyahPlaybackMode.CONTINUOUS,
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
+    val selectedTranslationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
     val currentVerseIndex: Int = 0,
     val loadedApiPage: Int = 0,
     val hasMore: Boolean = true,
@@ -135,6 +137,9 @@ class ChapterReaderViewModel @Inject constructor(
             it.copy(
                 showTranslation = translationStore.showTranslation.value,
                 selectedRecitationId = translationStore.currentRecitationId(),
+                selectedTranslationId = LocalQuranConfig.normalizeTranslationId(
+                    translationStore.currentTranslationId()
+                ),
                 hifzModeEnabled = QuranPersonalStore.isHifzModeEnabled(appContext)
             )
         }
@@ -142,7 +147,12 @@ class ChapterReaderViewModel @Inject constructor(
         loadInitial()
         loadRecitations()
         viewModelScope.launch {
-            translationStore.translationId.drop(1).collect { loadInitial() }
+            translationStore.translationId.drop(1).collect { id ->
+                _state.update {
+                    it.copy(selectedTranslationId = LocalQuranConfig.normalizeTranslationId(id))
+                }
+                loadInitial()
+            }
         }
         viewModelScope.launch {
             translationStore.showTranslation.collect { enabled ->
@@ -424,7 +434,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     private suspend fun loadTafsir(ayahKey: String) {
         try {
-            val t = contentRepository.getTafsirByAyah("169", ayahKey)
+            val t = contentRepository.getTafsirByAyah(ayahKey)
             _state.update { it.copy(tafsir = t, tafsirLoading = false, tafsirError = null) }
         } catch (e: Throwable) {
             _state.update {

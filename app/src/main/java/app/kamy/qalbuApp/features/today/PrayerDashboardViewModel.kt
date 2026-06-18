@@ -8,6 +8,7 @@ import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.core.error.AppErrorKind
 import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.core.locale.AppStrings
+import app.kamy.qalbuApp.domain.model.KhgtTodayInfo
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.qalbuApp.infrastructure.location.LocationProvider
@@ -16,12 +17,12 @@ import app.kamy.qalbuApp.infrastructure.preferences.LocationMode
 import app.kamy.qalbuApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.SavedManualLocation
 import app.kamy.qalbuApp.infrastructure.repository.AlAdhanRepository
-import app.kamy.qalbuApp.core.error.QFError
+import app.kamy.qalbuApp.infrastructure.repository.KhgtCalendarRepository
 import app.kamy.qalbuApp.infrastructure.cache.PrayerDayCache
-import app.kamy.qalbuApp.infrastructure.network.NetworkMonitor
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleCache
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerCalculationStore
+import app.kamy.qalbuApp.infrastructure.preferences.KhgtWidgetCache
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -63,7 +64,9 @@ data class PrayerUiState(
     val locationQuery: String = "",
     val locationSaving: Boolean = false,
     val locationSaveError: String? = null,
-    val isOfflineData: Boolean = false
+    val isOfflineData: Boolean = false,
+    val khgtToday: KhgtTodayInfo? = null,
+    val prayerLastSyncAt: Long? = null
 )
 
 private data class ResolvedPrayerLocation(
@@ -79,6 +82,7 @@ class PrayerDashboardViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val strings: AppStrings,
     private val repository: AlAdhanRepository,
+    private val khgtCalendar: KhgtCalendarRepository,
     private val locationProvider: LocationProvider,
     private val locationPrefs: LocationPreferencesStore,
     private val prayerMethodStore: PrayerCalculationStore,
@@ -177,17 +181,30 @@ class PrayerDashboardViewModel @Inject constructor(
             )
             val cityName = result.cityName ?: location.cityLabel
             locationPrefs.saveActiveLabel(cityName)
+            val khgt = runCatching { khgtCalendar.todayInfo() }.getOrNull()
+            val hijriLabel = khgt?.hijriLabel ?: result.hijriLabel
+            val gregorianLabel = khgt?.gregorianLabel ?: result.gregorianLabel
+            khgt?.let {
+                KhgtWidgetCache.save(
+                    appContext,
+                    hijriLabel = it.hijriLabel,
+                    pasaran = it.pasaran,
+                    eventTitle = it.eventTitle
+                )
+            }
             _state.update {
                 it.copy(
                     isLoading = false,
                     timings = result.timings,
                     cityName = cityName,
-                    hijriLabel = result.hijriLabel,
-                    gregorianLabel = result.gregorianLabel,
+                    hijriLabel = hijriLabel,
+                    gregorianLabel = gregorianLabel,
                     needsPermission = false,
                     isManualLocation = location.isManual,
                     error = null,
-                    isOfflineData = false
+                    isOfflineData = true,
+                    khgtToday = khgt,
+                    prayerLastSyncAt = System.currentTimeMillis()
                 )
             }
             PrayerDayCache.save(appContext, result)
@@ -201,18 +218,14 @@ class PrayerDashboardViewModel @Inject constructor(
                     location.longitude,
                     meta = buildWidgetMeta(
                         cityName = cityName,
-                        hijriLabel = result.hijriLabel,
-                        gregorianLabel = result.gregorianLabel,
+                        hijriLabel = hijriLabel,
+                        gregorianLabel = gregorianLabel,
                         timings = result.timings
                     )
                 )
             }
         } catch (t: Throwable) {
-            val cached = if (t is QFError.Network || !NetworkMonitor.isOnline(appContext)) {
-                PrayerDayCache.load(appContext)
-            } else {
-                null
-            }
+            val cached = PrayerDayCache.load(appContext)
             if (cached != null && cached.timings.isNotEmpty()) {
                 _state.update {
                     it.copy(
@@ -224,7 +237,9 @@ class PrayerDashboardViewModel @Inject constructor(
                         needsPermission = false,
                         isManualLocation = location.isManual,
                         error = null,
-                        isOfflineData = true
+                        isOfflineData = true,
+                        khgtToday = runCatching { khgtCalendar.todayInfo() }.getOrNull(),
+                        prayerLastSyncAt = PrayerDayCache.lastSavedAt(appContext)
                     )
                 }
                 scheduleDayKey = dayKey()

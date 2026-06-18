@@ -57,6 +57,11 @@ android {
         buildConfig = true
     }
 
+    // Keep bundled SQLite/gzip assets readable without APK re-compression.
+    androidResources {
+        noCompress += listOf("gz", "db")
+    }
+
     buildTypes {
         debug {
             // Point debug at production APIs so behaviour matches release.
@@ -78,7 +83,7 @@ android {
             )
             buildConfigField("String", "QF_VERSES_WEB_BASE", "\"https://verses.quran.com\"")
             buildConfigField("String", "QF_ALADHAN_ROOT", "\"https://api.aladhan.com\"")
-            buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "22")
+            buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "1")
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
             buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "qwen/qwen3-32b")}\"")
         }
@@ -110,7 +115,7 @@ android {
             )
             buildConfigField("String", "QF_VERSES_WEB_BASE", "\"https://verses.quran.com\"")
             buildConfigField("String", "QF_ALADHAN_ROOT", "\"https://api.aladhan.com\"")
-            buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "22")
+            buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "1")
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
             buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "qwen/qwen3-32b")}\"")
         }
@@ -147,6 +152,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.play.services.location)
+    implementation(libs.adhan)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

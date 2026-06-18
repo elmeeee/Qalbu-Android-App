@@ -109,7 +109,7 @@ class VerseShareTextComposer @Inject constructor(
         shareTafsirCache[ayahKey]?.let { return it.ifBlank { null } }
         val value = withTimeoutOrNull(2_500L) {
             runCatching {
-                contentRepository.getTafsirByAyah(resourceId = TAFSIR_RESOURCE_ID, ayahKey = ayahKey)
+                contentRepository.getTafsirByAyah(ayahKey = ayahKey)
                     ?.text
                     ?.stripHtmlTags()
             }.getOrNull()

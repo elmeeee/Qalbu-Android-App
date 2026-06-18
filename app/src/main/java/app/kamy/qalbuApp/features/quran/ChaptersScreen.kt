@@ -57,7 +57,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.design.components.AlKhatibErrorState
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
-import app.kamy.qalbuApp.design.components.OfflineBanner
 import app.kamy.qalbuApp.design.components.ChapterRowSkeleton
 import app.kamy.qalbuApp.design.components.AlKhatibRevelationChip
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
@@ -241,14 +240,6 @@ fun ChaptersScreen(
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
                     )
-                    if (state.isOfflineData) {
-                        OfflineBanner(
-                            modifier = Modifier.padding(
-                                horizontal = AlKhatibSpacing.screenHorizontal,
-                                vertical = AlKhatibSpacing.sm
-                            )
-                        )
-                    }
                     key(state.browseMode) {
                     LazyColumn(
                         modifier = Modifier
@@ -257,14 +248,6 @@ fun ChaptersScreen(
                         contentPadding = PaddingValues(bottom = listBottomPadding)
                     ) {
                         if (!isSearching && state.browseMode == QuranBrowseMode.SURAH) {
-                            item(key = "khatam_progress") {
-                                KhatamProgressCard(
-                                    modifier = Modifier.padding(
-                                        horizontal = AlKhatibSpacing.screenHorizontal,
-                                        vertical = AlKhatibSpacing.sm
-                                    )
-                                )
-                            }
                             item(key = "bookmarks_link") {
                                 TextButton(
                                     onClick = onOpenBookmarks,
@@ -456,47 +439,7 @@ fun ChaptersScreen(
                                     }
                                 }
                             }
-                            QuranBrowseMode.MUSHAF -> {
-                                item(key = "mushaf_hero") {
-                                    MushafHeroCard(
-                                        browse = state.mushafBrowse,
-                                        onContinue = { onOpenMushaf(state.mushafBrowse.lastPage) },
-                                        modifier = Modifier.padding(
-                                            horizontal = AlKhatibSpacing.screenHorizontal,
-                                            vertical = AlKhatibSpacing.sm
-                                        )
-                                    )
-                                }
-                                item(key = "mushaf_juz_label") {
-                                    Text(
-                                        text = stringResource(R.string.mushaf_juz_section_title),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(
-                                            horizontal = AlKhatibSpacing.screenHorizontal,
-                                            vertical = 8.dp
-                                        )
-                                    )
-                                }
-                                val mushafJuzs = if (state.juzs.isNotEmpty()) {
-                                    state.juzs
-                                } else {
-                                    (1..30).map { n -> QuranJuz(juzNumber = n, verseMapping = emptyMap()) }
-                                }
-                                items(mushafJuzs, key = { "mushaf_juz_${it.juzNumber}" }) { juz ->
-                                    MushafJuzShortcutRow(
-                                        juzNumber = juz.juzNumber,
-                                        isLoading = state.openingMushafJuz == juz.juzNumber,
-                                        onClick = { vm.openMushafAtJuz(juz.juzNumber, onOpenMushaf) },
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                                    )
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-                                    )
-                                }
-                            }
+                            QuranBrowseMode.MUSHAF -> Unit
                         }
                     }
                     }
@@ -556,7 +499,7 @@ private fun QuranListHeader(
         val defaultSubtitle = when (browseMode) {
             QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
             QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
-            QuranBrowseMode.MUSHAF -> stringResource(R.string.quran_subtitle_mushaf)
+            QuranBrowseMode.MUSHAF -> stringResource(R.string.quran_subtitle)
         }
         val noMatchesSubtitle = stringResource(R.string.no_matches)
         val oneSurahSubtitle = stringResource(R.string.one_surah_found)
@@ -635,7 +578,6 @@ private fun QuranBrowseTabs(
 ) {
     val surahLabel = stringResource(R.string.quran_tab_surah)
     val juzLabel = stringResource(R.string.quran_tab_juz)
-    val mushafLabel = stringResource(R.string.quran_tab_mushaf)
     val tabShape = RoundedCornerShape(20.dp)
     Box(
         modifier = modifier
@@ -665,13 +607,6 @@ private fun QuranBrowseTabs(
                 label = juzLabel,
                 selected = browseMode == QuranBrowseMode.JUZ,
                 onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
-                modifier = Modifier.weight(1f),
-                shape = tabShape
-            )
-            QuranBrowseTab(
-                label = mushafLabel,
-                selected = browseMode == QuranBrowseMode.MUSHAF,
-                onClick = { onBrowseModeChange(QuranBrowseMode.MUSHAF) },
                 modifier = Modifier.weight(1f),
                 shape = tabShape
             )

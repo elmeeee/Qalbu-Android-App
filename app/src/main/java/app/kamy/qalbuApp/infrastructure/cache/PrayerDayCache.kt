@@ -42,6 +42,14 @@ object PrayerDayCache {
         runCatching { file.writeText(json.encodeToString(entry)) }
     }
 
+    fun lastSavedAt(context: Context): Long? {
+        val file = cacheFile(context)
+        if (!file.exists()) return null
+        return runCatching {
+            json.decodeFromString<CachedPrayerDay>(file.readText()).savedAt
+        }.getOrNull()
+    }
+
     fun load(context: Context): PrayerDayResult? {
         val file = cacheFile(context)
         if (!file.exists()) return null

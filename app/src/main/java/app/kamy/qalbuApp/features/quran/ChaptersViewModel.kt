@@ -147,7 +147,7 @@ class ChaptersViewModel @Inject constructor(
                     chapters = chapters,
                     continueReading = continueReading,
                     error = null,
-                    isOfflineData = !NetworkMonitor.isOnline(appContext)
+                    isOfflineData = true
                 )
             }
             recomputeLocalSearch()
@@ -230,17 +230,6 @@ class ChaptersViewModel @Inject constructor(
             }
             return
         }
-        if (!userSession.isSignedIn.value) {
-            _state.update {
-                it.copy(
-                    remoteNavigation = emptyList(),
-                    remoteVerses = emptyList(),
-                    searchLoading = false,
-                    searchError = null
-                )
-            }
-            return
-        }
         searchJob = viewModelScope.launch {
             delay(SEARCH_DEBOUNCE_MS)
             _state.update { it.copy(searchLoading = true, searchError = null) }
@@ -286,18 +275,14 @@ class ChaptersViewModel @Inject constructor(
         _state.value.chapters.firstOrNull { it.id == number }
 
     fun setBrowseMode(mode: QuranBrowseMode) {
-        _state.update { it.copy(browseMode = mode) }
-        when (mode) {
+        val resolved = if (mode == QuranBrowseMode.MUSHAF) QuranBrowseMode.SURAH else mode
+        _state.update { it.copy(browseMode = resolved) }
+        when (resolved) {
             QuranBrowseMode.JUZ -> if (_state.value.juzs.isEmpty() && !_state.value.juzsLoading && _state.value.juzsError == null) {
                 viewModelScope.launch { loadJuzs() }
             }
-            QuranBrowseMode.MUSHAF -> {
-                refreshMushafBrowse()
-                if (_state.value.juzs.isEmpty() && !_state.value.juzsLoading) {
-                    viewModelScope.launch { loadJuzs() }
-                }
-            }
             QuranBrowseMode.SURAH -> Unit
+            QuranBrowseMode.MUSHAF -> Unit
         }
     }
 

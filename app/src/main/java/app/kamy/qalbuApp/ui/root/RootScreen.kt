@@ -24,9 +24,11 @@ import androidx.navigation.navArgument
 import app.kamy.qalbuApp.features.account.AccountScreen
 import app.kamy.qalbuApp.features.quran.ChapterReaderScreen
 import app.kamy.qalbuApp.features.quran.ChaptersScreen
+import app.kamy.qalbuApp.features.tools.DoaZikirScreen
 import app.kamy.qalbuApp.features.tools.DhikrScreen
 import app.kamy.qalbuApp.features.tools.QiblaScreen
 import app.kamy.qalbuApp.features.tools.QiyamScreen
+import app.kamy.qalbuApp.features.tools.SpiritualToolsScreen
 import app.kamy.qalbuApp.features.tools.ZakatCalculatorScreen
 import app.kamy.qalbuApp.features.quran.QuranBookmarksScreen
 import app.kamy.qalbuApp.features.quran.MushafReaderScreen
@@ -163,11 +165,21 @@ fun RootScreen(
                     }
                 )
             }
+            composable(RootTab.Tools.route) {
+                SpiritualToolsScreen(
+                    onOpenTool = { tool ->
+                        navController.navigate("tools/$tool") { launchSingleTop = true }
+                    }
+                )
+            }
             composable("tools/qibla") {
                 QiblaScreen(onBack = { navController.popBackStack() })
             }
             composable("tools/dhikr") {
                 DhikrScreen(onBack = { navController.popBackStack() })
+            }
+            composable("tools/doa-zikir") {
+                DoaZikirScreen(onBack = { navController.popBackStack() })
             }
             composable("tools/zakat") {
                 ZakatCalculatorScreen(onBack = { navController.popBackStack() })
@@ -222,11 +234,7 @@ fun RootScreen(
                 AccountScreen(
                     oauthService = oauthService,
                     authService = authService,
-                    onBack = { navController.popBackStack() },
-                    onOpenQibla = { navController.navigate("tools/qibla") { launchSingleTop = true } },
-                    onOpenDhikr = { navController.navigate("tools/dhikr") { launchSingleTop = true } },
-                    onOpenZakat = { navController.navigate("tools/zakat") { launchSingleTop = true } },
-                    onOpenQiyam = { navController.navigate("tools/qiyam") { launchSingleTop = true } }
+                    onBack = { navController.popBackStack() }
                 )
             }
         }

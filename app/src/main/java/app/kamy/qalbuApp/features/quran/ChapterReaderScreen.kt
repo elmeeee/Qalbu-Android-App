@@ -85,9 +85,11 @@ import app.kamy.qalbuApp.features.share.AiShareSheet
 import androidx.compose.material.icons.filled.Forum
 import app.kamy.qalbuApp.domain.model.HifzStatus
 import app.kamy.qalbuApp.design.components.AlKhatibErrorState
+import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.domain.model.displayTransliteration
 import app.kamy.qalbuApp.features.reader.HadithSheet
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
@@ -223,6 +225,7 @@ fun ChapterReaderScreen(
                     verse = verse,
                     fontScale = state.fontScale,
                     showTranslation = state.showTranslation && !state.hifzModeEnabled,
+                    translationId = state.selectedTranslationId,
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
                     onPlay = { vm.onTapAyah(pageIndex) }
@@ -283,6 +286,7 @@ fun ChapterReaderScreen(
                 bookmarked = state.currentVerseBookmarked,
                 hasNote = state.currentVerseHasNote,
                 hifzStatus = state.currentVerseHifzStatus,
+                showTafsir = LocalQuranConfig.supportsTafsir(state.selectedTranslationId),
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
@@ -465,6 +469,7 @@ private fun QalbuAyahPage(
     verse: RandomAyahPayload,
     fontScale: Float,
     showTranslation: Boolean,
+    translationId: Int,
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
     onPlay: () -> Unit
@@ -545,6 +550,19 @@ private fun QalbuAyahPage(
                 }
             }
             if (showTranslation && (!hifzModeEnabled || hifzRevealStage >= 2)) {
+                verse.displayTransliteration(translationId)?.let { transliteration ->
+                    Text(
+                        text = transliteration,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3f
+                        ),
+                        color = AlKhatibColors.Slate500,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    )
+                }
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.toVerseTranslationPlainText()
                     if (clean.isNotEmpty()) {
@@ -572,6 +590,7 @@ private fun ReaderVerseActionsMenu(
     bookmarked: Boolean,
     hasNote: Boolean,
     hifzStatus: HifzStatus,
+    showTafsir: Boolean = true,
     onBookmark: () -> Unit,
     onNote: () -> Unit,
     onHifz: () -> Unit,
@@ -646,18 +665,20 @@ private fun ReaderVerseActionsMenu(
                     label = stringResource(R.string.ai_label),
                     onClick = onAiShare
                 )
-                ReaderCompactMenuItem(
-                    icon = {
-                        Icon(
-                            Icons.AutoMirrored.Filled.MenuBook,
-                            contentDescription = null,
-                            tint = AlKhatibColors.IndigoAccent,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    },
-                    label = stringResource(R.string.tafsir),
-                    onClick = onTafsir
-                )
+                if (showTafsir) {
+                    ReaderCompactMenuItem(
+                        icon = {
+                            Icon(
+                                Icons.AutoMirrored.Filled.MenuBook,
+                                contentDescription = null,
+                                tint = AlKhatibColors.IndigoAccent,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        label = stringResource(R.string.tafsir),
+                        onClick = onTafsir
+                    )
+                }
                 ReaderCompactMenuItem(
                     icon = {
                         Icon(

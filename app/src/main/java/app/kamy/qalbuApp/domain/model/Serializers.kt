@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package app.kamy.qalbuApp.domain.model
 
 import kotlinx.serialization.KSerializer
@@ -43,7 +45,6 @@ internal object NullableStringFromAnyScalarSerializer : KSerializer<String?> {
 
     override val descriptor: SerialDescriptor = delegate.descriptor
 
-    @OptIn(ExperimentalSerializationApi::class)
     override fun serialize(encoder: Encoder, value: String?) {
         if (value == null) encoder.encodeNull() else encoder.encodeString(value)
     }

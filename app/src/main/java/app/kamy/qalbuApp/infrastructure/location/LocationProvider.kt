@@ -9,6 +9,8 @@ import android.location.Geocoder
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.qualifiers.ApplicationContext
+import app.kamy.qalbuApp.infrastructure.local.LocalCityCatalog
+import app.kamy.qalbuApp.infrastructure.local.OfflineCity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
@@ -73,7 +75,24 @@ class LocationProvider @Inject constructor(
     suspend fun forwardGeocode(query: String): ReverseGeocodeResult? =
         withContext(Dispatchers.IO) {
             val trimmed = query.trim()
-            if (trimmed.isEmpty() || !Geocoder.isPresent()) return@withContext null
+            if (trimmed.isEmpty()) return@withContext null
+            LocalCityCatalog.findExact(trimmed)?.let { city ->
+                return@withContext ReverseGeocodeResult(
+                    cityName = city.displayLabel,
+                    countryCode = city.countryCode,
+                    latitude = city.latitude,
+                    longitude = city.longitude
+                )
+            }
+            LocalCityCatalog.search(trimmed, limit = 1).firstOrNull()?.let { city ->
+                return@withContext ReverseGeocodeResult(
+                    cityName = city.displayLabel,
+                    countryCode = city.countryCode,
+                    latitude = city.latitude,
+                    longitude = city.longitude
+                )
+            }
+            if (!Geocoder.isPresent()) return@withContext null
             try {
                 @Suppress("DEPRECATION")
                 val address = Geocoder(context, Locale.getDefault())
@@ -99,4 +118,7 @@ class LocationProvider @Inject constructor(
             PackageManager.PERMISSION_GRANTED ||
         ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
+
+    fun searchOfflineCities(query: String, limit: Int = 12): List<OfflineCity> =
+        LocalCityCatalog.search(query, limit)
 }

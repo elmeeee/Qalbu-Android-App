@@ -3,7 +3,7 @@ package app.kamy.qalbuApp.features.account
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -26,9 +26,9 @@ fun AccountToolsSection(
             onClick = onOpenQibla
         )
         AlKhatibSettingsNavigationRow(
-            icon = Icons.Filled.Favorite,
-            title = stringResource(R.string.dhikr_title),
-            subtitle = stringResource(R.string.dhikr_account_subtitle),
+            icon = Icons.Filled.AutoStories,
+            title = stringResource(R.string.doa_zikir_title),
+            subtitle = stringResource(R.string.doa_zikir_account_subtitle),
             onClick = onOpenDhikr
         )
         AlKhatibSettingsNavigationRow(

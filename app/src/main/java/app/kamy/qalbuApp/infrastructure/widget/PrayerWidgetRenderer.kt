@@ -4,6 +4,7 @@ import android.content.Context
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerScheduleCache
+import app.kamy.qalbuApp.infrastructure.preferences.KhgtWidgetCache
 import app.kamy.qalbuApp.infrastructure.preferences.LocationPreferencesStore
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -21,6 +22,7 @@ data class PrayerWidgetSnapshot(
     val cityLabel: String,
     val hijriLabel: String?,
     val gregorianLabel: String?,
+    val khgtEventTitle: String? = null,
     val nextPrayerLabel: String,
     val nextPrayerName: String,
     val countdown: String,
@@ -68,8 +70,9 @@ object PrayerWidgetRenderer {
         return PrayerWidgetSnapshot(
             brandLabel = context.getString(R.string.app_name),
             cityLabel = cityLabel,
-            hijriLabel = meta?.hijriLabel,
+            hijriLabel = meta?.hijriLabel ?: KhgtWidgetCache.hijriLabel(context),
             gregorianLabel = meta?.gregorianLabel,
+            khgtEventTitle = KhgtWidgetCache.eventTitle(context),
             nextPrayerLabel = nextPrayerLabel,
             nextPrayerName = nextName,
             countdown = countdown,

@@ -41,6 +41,8 @@ import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
+import app.kamy.qalbuApp.domain.model.displayTransliteration
+import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
 import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
@@ -49,6 +51,7 @@ import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
 fun TodayVerseOfDaySection(
     verse: RandomAyahPayload?,
     referenceLabel: String?,
+    translationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
     isLoading: Boolean,
     error: AppError? = null,
     isPlaying: Boolean,
@@ -98,21 +101,31 @@ fun TodayVerseOfDaySection(
         Spacer(Modifier.height(AlKhatibSpacing.md))
 
         AlKhatibCard(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            containerColor = AlKhatibColors.PureWhite
         ) {
             if (verse != null) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     TajweedHtmlView(
                         textUthmani = verse.textUthmani,
                         ayahNumber = verse.resolvedVerseNumber,
-                        fontSizeSp = 28,
+                        fontSizeSp = 30,
                         compact = true,
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    verse.displayTransliteration(translationId)?.let { latin ->
+                        Text(
+                            text = latin,
+                            color = AlKhatibColors.Slate500,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
 
                     verse.translations?.firstOrNull()?.text?.let { translation ->
                         val clean = translation.toVerseTranslationPlainText()
@@ -138,20 +151,26 @@ fun TodayVerseOfDaySection(
                 val audioLabel = stringResource(R.string.audio)
                 val tafsirLabel = stringResource(R.string.tafsir)
                 val aiLabel = stringResource(R.string.ai_label)
-                val actionPills = listOf(
-                    ActionPillData(
-                        if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        if (isPlaying) pauseLabel else audioLabel,
-                        AlKhatibColors.DeepEmerald
-                    ) { onPlayAudio() },
-                    ActionPillData(
-                        Icons.Filled.AutoAwesome,
-                        if (aiShareLoading) "…" else aiLabel,
-                        AlKhatibColors.Gold,
-                        onAiShare
-                    ),
-                    ActionPillData(Icons.Filled.AutoStories, tafsirLabel, AlKhatibColors.IndigoAccent, onTafsir)
-                )
+                val actionPills = buildList {
+                    add(
+                        ActionPillData(
+                            if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                            if (isPlaying) pauseLabel else audioLabel,
+                            AlKhatibColors.DeepEmerald
+                        ) { onPlayAudio() }
+                    )
+                    add(
+                        ActionPillData(
+                            Icons.Filled.AutoAwesome,
+                            if (aiShareLoading) "…" else aiLabel,
+                            AlKhatibColors.Gold,
+                            onAiShare
+                        )
+                    )
+                    if (LocalQuranConfig.supportsTafsir(translationId)) {
+                        add(ActionPillData(Icons.Filled.AutoStories, tafsirLabel, AlKhatibColors.IndigoAccent, onTafsir))
+                    }
+                }
                 reciterName?.takeIf { it.isNotBlank() }?.let { name ->
                     TextButton(
                         onClick = onReciterClick,

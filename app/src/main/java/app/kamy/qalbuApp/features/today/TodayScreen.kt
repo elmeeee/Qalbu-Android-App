@@ -39,7 +39,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import app.kamy.qalbuApp.design.components.AlKhatibPullToRefresh
-import app.kamy.qalbuApp.design.components.OfflineBanner
 import app.kamy.qalbuApp.ui.permissions.areAppNotificationsEnabled
 import app.kamy.qalbuApp.ui.permissions.canScheduleExactAlarms
 import app.kamy.qalbuApp.ui.permissions.hasAggressiveOemBatteryManagement
@@ -50,6 +49,7 @@ import app.kamy.qalbuApp.ui.permissions.openExactAlarmSettings
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
+import app.kamy.qalbuApp.features.today.components.TodayImportantDayBanner
 import app.kamy.qalbuApp.features.today.components.TodayHeader
 import app.kamy.qalbuApp.features.today.components.TodayPrayerMascotSection
 import app.kamy.qalbuApp.features.today.components.PrayerLocationSheet
@@ -267,22 +267,16 @@ fun TodayScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    contentPadding = PaddingValues(bottom = listBottomPadding)
+                    contentPadding = PaddingValues(bottom = listBottomPadding),
+                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
                 ) {
-                    if (prayerState.isOfflineData || todayState.isOfflineData) {
-                        item(key = "offline_banner") {
-                            OfflineBanner(
-                                message = if (prayerState.isOfflineData) {
-                                    stringResource(R.string.offline_banner_prayer)
-                                } else {
-                                    stringResource(R.string.offline_banner_message)
-                                },
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
-                        }
+                    item(key = "khgt_banner") {
+                        TodayImportantDayBanner(
+                            info = prayerState.khgtToday,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
                     }
                     item(key = "prayer_card") {
-                        Spacer(Modifier.height(8.dp))
                         TodayPrayerMascotSection(
                             state = prayerState,
                             onRetry = { scope.launch { prayerVm.refresh(force = true) } },
@@ -307,6 +301,7 @@ fun TodayScreen(
                         TodayVerseOfDaySection(
                             verse = todayState.verse,
                             referenceLabel = todayState.verseReferenceLabel,
+                            translationId = todayState.translationId,
                             isLoading = todayState.isLoading,
                             error = todayState.error,
                             isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),

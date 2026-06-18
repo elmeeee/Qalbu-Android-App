@@ -2,6 +2,7 @@ package app.kamy.qalbuApp.infrastructure.preferences
 
 import android.content.Context
 import app.kamy.qalbuApp.core.config.AppConfig
+import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,16 +54,18 @@ class TranslationPreferencesStore @Inject constructor(
 
     private fun loadTranslationId(): Int {
         val saved = prefs.getInt(KEY_ID, 0)
-        return if (saved > 0) saved else AppConfig.defaultTranslationId
+        val raw = if (saved > 0) saved else AppConfig.defaultTranslationId
+        return LocalQuranConfig.normalizeTranslationId(raw)
     }
 
     private fun loadRecitationId(): Int {
         val saved = prefs.getInt(KEY_RECITATION_ID, 0)
-        return if (saved > 0) saved else DEFAULT_RECITATION_ID
+        val raw = if (saved > 0) saved else DEFAULT_RECITATION_ID
+        return LocalQuranConfig.normalizeRecitationId(raw)
     }
 
     companion object {
-        const val DEFAULT_RECITATION_ID = 6
+        const val DEFAULT_RECITATION_ID = LocalQuranConfig.DEFAULT_RECITATION_ID
         private const val PREFS_NAME = "qalbu_reader_prefs"
         private const val KEY_ID = "chapterReaderTranslationId"
         private const val KEY_NAME = "chapterReaderTranslationName"

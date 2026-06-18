@@ -5,7 +5,9 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.WbSunny
@@ -35,6 +37,12 @@ enum class RootTab(
         selectedIcon = Icons.AutoMirrored.Filled.MenuBook,
         unselectedIcon = Icons.AutoMirrored.Outlined.MenuBook
     ),
+    Tools(
+        route = "tools",
+        labelRes = app.kamy.qalbuApp.R.string.nav_tools,
+        selectedIcon = Icons.Filled.GridView,
+        unselectedIcon = Icons.Outlined.GridView
+    ),
     Account(
         route = "account",
         labelRes = app.kamy.qalbuApp.R.string.nav_account,
@@ -45,6 +53,6 @@ enum class RootTab(
     companion object {
         val Default = Today
 
-        val mainTabs: List<RootTab> = listOf(Today, Reflect, Quran)
+        val mainTabs: List<RootTab> = listOf(Today, Quran, Tools, Reflect)
     }
 }

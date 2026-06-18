@@ -2,6 +2,9 @@ package app.kamy.qalbuApp.infrastructure.preferences
 
 import android.content.Context
 import app.kamy.qalbuApp.core.locale.AppLanguage
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class AppLanguageStore(context: Context) {
 
@@ -9,10 +12,15 @@ class AppLanguageStore(context: Context) {
     private val prefs = (context.applicationContext ?: context)
         .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    private val _currentFlow = MutableStateFlow(current())
+
+    val currentFlow: StateFlow<AppLanguage> = _currentFlow.asStateFlow()
+
     fun current(): AppLanguage = AppLanguage.fromTag(prefs.getString(KEY_LANGUAGE, null))
 
     fun set(language: AppLanguage) {
         prefs.edit().putString(KEY_LANGUAGE, language.tag).apply()
+        _currentFlow.value = language
     }
 
     companion object {

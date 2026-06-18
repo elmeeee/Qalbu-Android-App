@@ -120,7 +120,10 @@ class TodayViewModel @Inject constructor(
         _state.update { it.copy(isLoading = true, error = null) }
         try {
             coroutineScope {
-                val verseDeferred = async { contentRepository.getRandomAyah() }
+                val verseDeferred = async {
+                    contentRepository.getRandomAyah()
+                        ?: contentRepository.getDailyAyah()
+                }
                 val chaptersDeferred = async { contentRepository.getChapters() }
                 val recitationsDeferred = async {
                     if (_state.value.recitations.isEmpty()) {
@@ -154,28 +157,25 @@ class TodayViewModel @Inject constructor(
                         verseReferenceLabel = verse.referenceLabel(chapterName),
                         recitations = recitations,
                         error = null,
-                        isOfflineData = false
+                        isOfflineData = true
                     )
                 }
                 DailyVerseSnapshotStore.save(appContext, verse, chapterName)
             }
         } catch (t: Throwable) {
-            val offline = !NetworkMonitor.isOnline(appContext)
-            if (offline) {
-                val snapshot = DailyVerseSnapshotStore.load(appContext)
-                if (snapshot != null) {
-                    val verse = snapshot.toVersePayload()
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            verse = verse,
-                            verseReferenceLabel = "${snapshot.surahName} - ${snapshot.ayahNumber}",
-                            error = null,
-                            isOfflineData = true
-                        )
-                    }
-                    return
+            val snapshot = DailyVerseSnapshotStore.load(appContext)
+            if (snapshot != null) {
+                val verse = snapshot.toVersePayload()
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        verse = verse,
+                        verseReferenceLabel = "${snapshot.surahName} - ${snapshot.ayahNumber}",
+                        error = null,
+                        isOfflineData = true
+                    )
                 }
+                return
             }
             _state.update { it.copy(isLoading = false, error = t.toAppError(), isOfflineData = false) }
         }
@@ -218,7 +218,7 @@ class TodayViewModel @Inject constructor(
 
     private suspend fun loadTafsir(verseKey: String) {
         try {
-            val tafsir = contentRepository.getTafsirByAyah(resourceId = "169", ayahKey = verseKey)
+            val tafsir = contentRepository.getTafsirByAyah(ayahKey = verseKey)
             _state.update { it.copy(tafsir = tafsir, tafsirLoading = false, tafsirError = null) }
         } catch (t: Throwable) {
             _state.update {
