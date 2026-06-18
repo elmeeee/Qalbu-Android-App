@@ -466,6 +466,17 @@
     <string name="bookmarks_title">Bookmarks</string>
     <string name="bookmarks_empty">No saved verses yet. Bookmark ayat while reading.</string>
     <string name="quran_library_title">My Quran</string>
+    <string name="quran_library_subtitle">Bookmarks, personal notes, and hifz progress — saved on this device.</string>
+    <string name="quran_library_legend">What each mark means</string>
+    <string name="quran_library_intro_bookmarks">Bookmark — save ayat you want to return to quickly</string>
+    <string name="quran_library_intro_notes">Notes — your private reflections on an ayah</string>
+    <string name="quran_library_intro_hifz">Hifz — track learning, memorized, or needs review</string>
+    <string name="quran_library_empty_bookmarks_body">While reading, open the verse menu and tap Bookmark to save ayat here.</string>
+    <string name="quran_library_empty_notes_body">While reading, open the verse menu and add a personal note on any ayah.</string>
+    <string name="quran_library_empty_hifz_body">While reading, open the verse menu and mark hifz status to track memorization.</string>
+    <string name="quran_library_hifz_row_hint">Tap to open and continue memorizing</string>
+    <string name="verse_has_bookmark">Bookmarked</string>
+    <string name="verse_has_note">Has note</string>
     <string name="notes_title">Notes</string>
     <string name="notes_empty">No personal notes yet. Add a note from the verse menu while reading.</string>
     <string name="note_saved">Note saved</string>

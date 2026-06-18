@@ -250,6 +250,7 @@ fun ChapterReaderScreen(
                     translationId = state.selectedTranslationId,
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
+                    personalDataRevision = state.personalDataRevision,
                     onPlay = { vm.onTapAyah(pageIndex) },
                     onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null
                 )
@@ -507,6 +508,7 @@ private fun SaatAyahPage(
     translationId: Int,
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
+    personalDataRevision: Int,
     onPlay: () -> Unit,
     onContentScroll: (() -> Unit)? = null
 ) {
@@ -555,6 +557,11 @@ private fun SaatAyahPage(
                 ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            VersePersonalBadges(
+                verseKey = verse.verseKey,
+                personalDataRevision = personalDataRevision,
+                modifier = Modifier.padding(bottom = 2.dp)
+            )
             when {
                 hifzModeEnabled && hifzRevealStage == 0 -> {
                     Box(

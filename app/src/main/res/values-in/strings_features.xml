@@ -120,7 +120,7 @@
     <string name="qiyam_explain_detail">Sepertiga malam terakhir adalah waktu mulia untuk doa dan sholat tambahan. Catat di sini saat Anda qiyam malam ini.</string>
     <string name="qiyam_stats">%1$d malam bulan ini · streak %2$d hari</string>
     <string name="qiyam_title">Qiyam / Tahajud</string>
-    <string name="qiyam_tonight_hint">Pelacak pribadi — terpisah dari dzikir</string>
+    <string name="qiyam_tonight_hint">Pelacak pribadi</string>
     <string name="qiyam_tonight_label">Sudah qiyam malam ini</string>
     <string name="qiyam_premium_subtitle">Pelacak &amp; panduan sholat malam</string>
     <string name="qiyam_tab_tracker">Pelacak</string>
@@ -170,6 +170,17 @@
     <string name="tahajud_dua_title">Doa pribadi</string>
     <string name="tahajud_dua_body">Sepertiga malam terakhir adalah waktu Allah turun (dengan sifat-Nya) dan mengabulkan doa. Mohon ampun, petunjuk, keluarga, dan umat. Berdoa dari hati dalam bahasa apa pun.</string>
     <string name="quran_library_title">Quran Saya</string>
+    <string name="quran_library_subtitle">Bookmark, catatan pribadi, dan progres hafalan — tersimpan di perangkat ini.</string>
+    <string name="quran_library_legend">Arti setiap tanda</string>
+    <string name="quran_library_intro_bookmarks">Bookmark — simpan ayat yang ingin dibuka lagi dengan cepat</string>
+    <string name="quran_library_intro_notes">Catatan — refleksi pribadi kamu tentang suatu ayat</string>
+    <string name="quran_library_intro_hifz">Hafalan — lacak sedang dihafal, sudah hafal, atau perlu review</string>
+    <string name="quran_library_empty_bookmarks_body">Saat membaca, buka menu ayat lalu ketuk Bookmark untuk menyimpan ayat di sini.</string>
+    <string name="quran_library_empty_notes_body">Saat membaca, buka menu ayat lalu tambahkan catatan pribadi pada ayat mana pun.</string>
+    <string name="quran_library_empty_hifz_body">Saat membaca, buka menu ayat lalu tandai status hafalan untuk melacak progres.</string>
+    <string name="quran_library_hifz_row_hint">Ketuk untuk membuka dan lanjut menghafal</string>
+    <string name="verse_has_bookmark">Dibookmark</string>
+    <string name="verse_has_note">Ada catatan</string>
     <string name="quran_reading_reminder_body">Sedikit ayat hari ini menyuburkan hati.</string>
     <string name="quran_reading_reminder_setting">Bacaan Quran harian</string>
     <string name="quran_reading_reminder_subtitle">Pengingat lembut untuk membuka mushaf</string>

@@ -170,6 +170,17 @@
     <string name="tahajud_dua_title">Doa peribadi</string>
     <string name="tahajud_dua_body">Sepertiga malam terakhir ialah waktu Allah turun (dengan sifat-Nya) dan mengabulkan doa. Mohon keampunan, petunjuk, keluarga, dan umat. Berdoa dari hati dalam apa jua bahasa.</string>
     <string name="quran_library_title">Quran Saya</string>
+    <string name="quran_library_subtitle">Penanda, nota peribadi, dan kemajuan hafalan — disimpan pada peranti ini.</string>
+    <string name="quran_library_legend">Maksud setiap tanda</string>
+    <string name="quran_library_intro_bookmarks">Penanda — simpan ayat yang ingin dibuka semula dengan cepat</string>
+    <string name="quran_library_intro_notes">Nota — refleksi peribadi anda tentang sesuatu ayat</string>
+    <string name="quran_library_intro_hifz">Hafalan — jejaki sedang dihafal, sudah hafal, atau perlu ulangan</string>
+    <string name="quran_library_empty_bookmarks_body">Semasa membaca, buka menu ayat dan ketik Penanda untuk menyimpan ayat di sini.</string>
+    <string name="quran_library_empty_notes_body">Semasa membaca, buka menu ayat dan tambah nota peribadi pada mana-mana ayat.</string>
+    <string name="quran_library_empty_hifz_body">Semasa membaca, buka menu ayat dan tandakan status hafalan untuk jejaki kemajuan.</string>
+    <string name="quran_library_hifz_row_hint">Ketik untuk buka dan terus menghafal</string>
+    <string name="verse_has_bookmark">Ditanda</string>
+    <string name="verse_has_note">Ada nota</string>
     <string name="quran_reading_reminder_body">Sedikit ayat hari ini menyuburkan hati.</string>
     <string name="quran_reading_reminder_setting">Bacaan Quran harian</string>
     <string name="quran_reading_reminder_subtitle">Peringatan lembut untuk membuka mushaf</string>

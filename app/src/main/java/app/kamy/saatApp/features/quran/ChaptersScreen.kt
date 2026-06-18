@@ -212,14 +212,13 @@ fun ChaptersScreen(
                     ) {
                         if (!isSearching && state.browseMode == QuranBrowseMode.SURAH) {
                             item(key = "bookmarks_link") {
-                                TextButton(
+                                MyQuranLibraryCard(
                                     onClick = onOpenBookmarks,
-                                    modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                                ) {
-                                    Icon(Icons.Filled.Bookmark, contentDescription = null, tint = AlKhatibColors.GoldDeep)
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(stringResource(R.string.quran_library_title))
-                                }
+                                    modifier = Modifier.padding(
+                                        horizontal = AlKhatibSpacing.screenHorizontal,
+                                        vertical = AlKhatibSpacing.sm
+                                    )
+                                )
                             }
                             state.continueReading?.let { session ->
                                 item(key = "continue_reading") {

@@ -87,7 +87,8 @@ data class ChapterReaderUiState(
     val currentVerseHifzStatus: HifzStatus = HifzStatus.NONE,
     val noteVisible: Boolean = false,
     val noteDraft: String = "",
-    val hifzPickerVisible: Boolean = false
+    val hifzPickerVisible: Boolean = false,
+    val personalDataRevision: Int = 0
 )
 
 enum class AyahPlaybackMode {
@@ -672,7 +673,8 @@ class ChapterReaderViewModel @Inject constructor(
                 currentVerseBookmarked = QuranPersonalStore.isBookmarked(appContext, key),
                 currentVerseHasNote = QuranPersonalStore.noteFor(appContext, key) != null,
                 currentVerseHifzStatus = QuranPersonalStore.hifzStatus(appContext, key),
-                noteDraft = QuranPersonalStore.noteFor(appContext, key)?.text.orEmpty()
+                noteDraft = QuranPersonalStore.noteFor(appContext, key)?.text.orEmpty(),
+                personalDataRevision = it.personalDataRevision + 1
             )
         }
     }

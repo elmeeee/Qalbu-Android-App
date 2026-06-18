@@ -1,8 +1,8 @@
 package app.kamy.saatApp.features.quran
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,34 +10,41 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -52,10 +59,6 @@ import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.domain.model.VerseBookmark
 import app.kamy.saatApp.domain.model.VerseNote
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
-import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
-import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
-
-private enum class LibraryTab { BOOKMARKS, NOTES, HIFZ }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,268 +67,349 @@ fun QuranBookmarksScreen(
     onOpenVerse: (chapter: Int, ayah: Int) -> Unit
 ) {
     val context = LocalContext.current
-    var refreshKey by remember { mutableIntStateOf(0) }
-    var tab by remember { mutableStateOf(LibraryTab.BOOKMARKS) }
+    val counts = rememberQuranLibraryCounts()
+    var tab by remember { mutableIntStateOf(0) }
+    val bookmarks = remember(counts) { QuranPersonalStore.bookmarks(context) }
+    val notes = remember(counts) { QuranPersonalStore.notes(context) }
+    val hifz = remember(counts) { QuranPersonalStore.hifzEntries(context) }
+    val hifzSummary = remember(counts) { QuranPersonalStore.hifzSummary(context) }
 
-    val bookmarks = remember(refreshKey) { QuranPersonalStore.bookmarks(context) }
-    val notes = remember(refreshKey) { QuranPersonalStore.notes(context) }
-    val hifzEntries = remember(refreshKey) { QuranPersonalStore.hifzEntries(context) }
-    val hifzSummary = remember(refreshKey) { QuranPersonalStore.hifzSummary(context) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
-            .tabContentStatusBarInset()
-    ) {
-        Row(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.quran_library_title)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = AlKhatibColors.ScreenBackground
+                )
+            )
+        },
+        containerColor = AlKhatibColors.ScreenBackground
+    ) { padding ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(padding)
         ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    horizontal = AlKhatibSpacing.screenHorizontal,
+                    vertical = AlKhatibSpacing.sm
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item(key = "hero") {
+                    QuranLibraryHero(counts = counts)
+                }
+
+                item(key = "tabs") {
+                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                        SegmentedButton(
+                            selected = tab == 0,
+                            onClick = { tab = 0 },
+                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
+                            label = {
+                                LibraryTabLabel(
+                                    icon = Icons.Filled.Bookmark,
+                                    label = stringResource(R.string.bookmarks_title),
+                                    count = bookmarks.size
+                                )
+                            }
+                        )
+                        SegmentedButton(
+                            selected = tab == 1,
+                            onClick = { tab = 1 },
+                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
+                            label = {
+                                LibraryTabLabel(
+                                    icon = Icons.AutoMirrored.Filled.Notes,
+                                    label = stringResource(R.string.notes_title),
+                                    count = notes.size
+                                )
+                            }
+                        )
+                        SegmentedButton(
+                            selected = tab == 2,
+                            onClick = { tab = 2 },
+                            shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
+                            label = {
+                                LibraryTabLabel(
+                                    icon = Icons.Filled.Psychology,
+                                    label = stringResource(R.string.hifz_title),
+                                    count = hifzSummary.total
+                                )
+                            }
+                        )
+                    }
+                }
+
+                when (tab) {
+                    0 -> {
+                        if (bookmarks.isEmpty()) {
+                            item(key = "empty_bookmarks") {
+                                LibraryEmptyState(
+                                    icon = Icons.Filled.Bookmark,
+                                    title = stringResource(R.string.bookmarks_empty),
+                                    body = stringResource(R.string.quran_library_empty_bookmarks_body)
+                                )
+                            }
+                        } else {
+                            items(bookmarks, key = { "bm_${it.verseKey}" }) { bookmark ->
+                                BookmarkRow(
+                                    bookmark = bookmark,
+                                    onClick = { onOpenVerse(bookmark.chapterNumber, bookmark.verseNumber) }
+                                )
+                            }
+                        }
+                    }
+                    1 -> {
+                        if (notes.isEmpty()) {
+                            item(key = "empty_notes") {
+                                LibraryEmptyState(
+                                    icon = Icons.AutoMirrored.Filled.Notes,
+                                    title = stringResource(R.string.notes_empty),
+                                    body = stringResource(R.string.quran_library_empty_notes_body)
+                                )
+                            }
+                        } else {
+                            items(notes, key = { "note_${it.verseKey}" }) { note ->
+                                NoteRow(
+                                    note = note,
+                                    onClick = { onOpenVerse(note.chapterNumber, note.verseNumber) }
+                                )
+                            }
+                        }
+                    }
+                    else -> {
+                        if (hifz.isEmpty()) {
+                            item(key = "empty_hifz") {
+                                LibraryEmptyState(
+                                    icon = Icons.Filled.Psychology,
+                                    title = stringResource(R.string.hifz_empty),
+                                    body = stringResource(R.string.quran_library_empty_hifz_body)
+                                )
+                            }
+                        } else {
+                            if (hifzSummary.total > 0) {
+                                item(key = "hifz_stats") {
+                                    HifzStatsRow(summary = hifzSummary)
+                                }
+                            }
+                            items(hifz, key = { "hifz_${it.verseKey}" }) { entry ->
+                                HifzRow(
+                                    entry = entry,
+                                    onClick = { onOpenVerse(entry.chapterNumber, entry.verseNumber) }
+                                )
+                            }
+                        }
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun LibraryTabLabel(
+    icon: ImageVector,
+    label: String,
+    count: Int
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp))
+        Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        if (count > 0) {
             Text(
-                text = stringResource(R.string.quran_library_title),
-                style = MaterialTheme.typography.titleLarge,
+                text = count.toString(),
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold
             )
         }
-
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal)
-        ) {
-            SegmentedButton(
-                selected = tab == LibraryTab.BOOKMARKS,
-                onClick = { tab = LibraryTab.BOOKMARKS },
-                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3)
-            ) { Text(stringResource(R.string.bookmarks_title)) }
-            SegmentedButton(
-                selected = tab == LibraryTab.NOTES,
-                onClick = { tab = LibraryTab.NOTES },
-                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3)
-            ) { Text(stringResource(R.string.notes_title)) }
-            SegmentedButton(
-                selected = tab == LibraryTab.HIFZ,
-                onClick = { tab = LibraryTab.HIFZ },
-                shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3)
-            ) { Text(stringResource(R.string.hifz_title)) }
-        }
-
-        if (tab == LibraryTab.HIFZ && hifzSummary.total > 0) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                HifzStatChip(stringResource(R.string.hifz_learning), hifzSummary.learning, AlKhatibColors.IndigoAccent)
-                HifzStatChip(stringResource(R.string.hifz_memorized), hifzSummary.memorized, AlKhatibColors.DeepEmerald)
-                HifzStatChip(stringResource(R.string.hifz_review), hifzSummary.needsReview, AlKhatibColors.GoldDeep)
-            }
-        }
-
-        when (tab) {
-            LibraryTab.BOOKMARKS -> LibraryList(
-                emptyMessage = stringResource(R.string.bookmarks_empty),
-                emptyIcon = Icons.Filled.Bookmark,
-                isEmpty = bookmarks.isEmpty()
-            ) {
-                items(bookmarks, key = { it.verseKey }) { bookmark ->
-                    BookmarkRow(
-                        bookmark = bookmark,
-                        onOpen = { onOpenVerse(bookmark.chapterNumber, bookmark.verseNumber) },
-                        onDelete = {
-                            QuranPersonalStore.removeBookmark(context, bookmark.verseKey)
-                            refreshKey++
-                        }
-                    )
-                    LibraryDivider()
-                }
-            }
-            LibraryTab.NOTES -> LibraryList(
-                emptyMessage = stringResource(R.string.notes_empty),
-                emptyIcon = Icons.Filled.EditNote,
-                isEmpty = notes.isEmpty()
-            ) {
-                items(notes, key = { it.verseKey }) { note ->
-                    NoteRow(
-                        note = note,
-                        onOpen = { onOpenVerse(note.chapterNumber, note.verseNumber) },
-                        onDelete = {
-                            QuranPersonalStore.deleteNote(context, note.verseKey)
-                            refreshKey++
-                        }
-                    )
-                    LibraryDivider()
-                }
-            }
-            LibraryTab.HIFZ -> LibraryList(
-                emptyMessage = stringResource(R.string.hifz_empty),
-                emptyIcon = Icons.Filled.Psychology,
-                isEmpty = hifzEntries.isEmpty()
-            ) {
-                items(hifzEntries, key = { it.verseKey }) { entry ->
-                    HifzRow(
-                        entry = entry,
-                        onOpen = { onOpenVerse(entry.chapterNumber, entry.verseNumber) },
-                        onClear = {
-                            QuranPersonalStore.setHifzStatus(
-                                context,
-                                entry.verseKey,
-                                entry.chapterNumber,
-                                entry.verseNumber,
-                                HifzStatus.NONE
-                            )
-                            refreshKey++
-                        }
-                    )
-                    LibraryDivider()
-                }
-            }
-        }
     }
 }
 
 @Composable
-private fun LibraryList(
-    emptyMessage: String,
-    emptyIcon: androidx.compose.ui.graphics.vector.ImageVector,
-    isEmpty: Boolean,
-    content: androidx.compose.foundation.lazy.LazyListScope.() -> Unit
+private fun LibraryEmptyState(
+    icon: ImageVector,
+    title: String,
+    body: String
 ) {
-    if (isEmpty) {
-        AlKhatibEmptyState(
-            icon = emptyIcon,
-            title = emptyMessage,
-            body = ""
-        )
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = floatingNavBottomPadding())
-        ) {
-            content()
-        }
-    }
-}
-
-@Composable
-private fun LibraryDivider() {
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 20.dp),
-        color = AlKhatibColors.SoftGrey.copy(alpha = 0.6f)
-    )
-}
-
-@Composable
-private fun HifzStatChip(label: String, count: Int, color: androidx.compose.ui.graphics.Color) {
-    Text(
-        text = "$label · $count",
+    AlKhatibEmptyState(
+        icon = icon,
+        title = title,
+        body = body,
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(color.copy(alpha = 0.12f))
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        color = color,
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.SemiBold
+            .fillMaxWidth()
+            .height(280.dp)
     )
 }
 
 @Composable
 private fun BookmarkRow(
     bookmark: VerseBookmark,
-    onOpen: () -> Unit,
-    onDelete: () -> Unit
+    onClick: () -> Unit
 ) {
-    LibraryItemRow(
-        title = bookmark.surahLabel ?: stringResource(R.string.surah_number, bookmark.chapterNumber),
-        subtitle = stringResource(R.string.verse_number, bookmark.verseNumber),
-        onOpen = onOpen,
-        onDelete = onDelete,
-        deleteDescription = stringResource(R.string.remove_bookmark)
+    LibraryItemCard(
+        icon = Icons.Filled.Bookmark,
+        iconTint = AlKhatibColors.GoldDeep,
+        title = bookmark.surahLabel?.let { "$it ${bookmark.verseNumber}" }
+            ?: "${bookmark.chapterNumber}:${bookmark.verseNumber}",
+        subtitle = stringResource(R.string.verse_has_bookmark),
+        badge = null,
+        onClick = onClick
     )
 }
 
 @Composable
 private fun NoteRow(
     note: VerseNote,
-    onOpen: () -> Unit,
-    onDelete: () -> Unit
+    onClick: () -> Unit
 ) {
-    LibraryItemRow(
-        title = stringResource(R.string.surah_number, note.chapterNumber) + " · " +
-            stringResource(R.string.verse_number, note.verseNumber),
+    LibraryItemCard(
+        icon = Icons.Filled.EditNote,
+        iconTint = AlKhatibColors.DeepEmerald,
+        title = "${note.chapterNumber}:${note.verseNumber}",
         subtitle = note.text,
-        onOpen = onOpen,
-        onDelete = onDelete,
-        deleteDescription = stringResource(R.string.delete_note)
+        badge = stringResource(R.string.verse_has_note),
+        onClick = onClick
     )
 }
 
 @Composable
 private fun HifzRow(
     entry: HifzEntry,
-    onOpen: () -> Unit,
-    onClear: () -> Unit
+    onClick: () -> Unit
 ) {
     val status = runCatching { HifzStatus.valueOf(entry.status) }.getOrDefault(HifzStatus.NONE)
-    LibraryItemRow(
-        title = stringResource(R.string.surah_number, entry.chapterNumber) + " · " +
-            stringResource(R.string.verse_number, entry.verseNumber),
-        subtitle = hifzStatusText(status),
-        onOpen = onOpen,
-        onDelete = onClear,
-        deleteDescription = stringResource(R.string.hifz_clear)
+    val (badge, tint) = when (status) {
+        HifzStatus.LEARNING -> stringResource(R.string.hifz_learning) to AlKhatibColors.Gold
+        HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized) to AlKhatibColors.DeepEmerald
+        HifzStatus.NEEDS_REVIEW -> stringResource(R.string.hifz_review) to Color(0xFFC2410C)
+        HifzStatus.NONE -> "" to AlKhatibColors.Slate500
+    }
+    LibraryItemCard(
+        icon = Icons.Filled.Psychology,
+        iconTint = AlKhatibColors.IndigoDeep,
+        title = "${entry.chapterNumber}:${entry.verseNumber}",
+        subtitle = stringResource(R.string.quran_library_hifz_row_hint),
+        badge = badge,
+        badgeTint = tint,
+        onClick = onClick
     )
 }
 
 @Composable
-private fun hifzStatusText(status: HifzStatus): String = when (status) {
-    HifzStatus.LEARNING -> stringResource(R.string.hifz_learning)
-    HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized)
-    HifzStatus.NEEDS_REVIEW -> stringResource(R.string.hifz_review)
-    HifzStatus.NONE -> stringResource(R.string.hifz_mark)
+private fun LibraryItemCard(
+    icon: ImageVector,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    badge: String?,
+    onClick: () -> Unit,
+    badgeTint: Color = iconTint
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = AlKhatibColors.PureWhite,
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(iconTint.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AlKhatibColors.Slate900
+                    )
+                    badge?.takeIf { it.isNotBlank() }?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = badgeTint,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(999.dp))
+                                .background(badgeTint.copy(alpha = 0.12f))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate500,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Icon(
+                Icons.Filled.ChevronRight,
+                contentDescription = null,
+                tint = AlKhatibColors.Slate500,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
 }
 
 @Composable
-private fun LibraryItemRow(
-    title: String,
-    subtitle: String,
-    onOpen: () -> Unit,
-    onDelete: () -> Unit,
-    deleteDescription: String
-) {
+private fun HifzStatsRow(summary: QuranPersonalStore.HifzSummary) {
+  Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp)
+  ) {
+      HifzStatChip(stringResource(R.string.hifz_learning), summary.learning, AlKhatibColors.Gold)
+      HifzStatChip(stringResource(R.string.hifz_memorized), summary.memorized, AlKhatibColors.DeepEmerald)
+      HifzStatChip(stringResource(R.string.hifz_review), summary.needsReview, Color(0xFFC2410C))
+  }
+}
+
+@Composable
+private fun HifzStatChip(label: String, count: Int, color: Color) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onOpen)
-            .padding(horizontal = 20.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .clip(RoundedCornerShape(999.dp))
+            .background(color.copy(alpha = 0.12f))
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Slate900
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        IconButton(onClick = onDelete) {
-            Icon(Icons.Filled.Delete, contentDescription = deleteDescription, tint = AlKhatibColors.Danger)
-        }
-        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = AlKhatibColors.Slate500)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = color)
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
     }
 }
