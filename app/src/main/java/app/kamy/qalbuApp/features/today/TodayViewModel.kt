@@ -11,9 +11,9 @@ import app.kamy.qalbuApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.qalbuApp.core.error.isAuthenticationFailure
 import app.kamy.qalbuApp.core.error.toAppError
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
-import app.kamy.qalbuApp.infrastructure.cache.toVersePayload
 import app.kamy.qalbuApp.infrastructure.network.NetworkMonitor
-import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshotStore
+import app.kamy.qalbuApp.domain.quran.DailyVerseOccasion
+import app.kamy.qalbuApp.infrastructure.quran.DailyVerseLoader
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.TafsirPayload
@@ -61,7 +61,8 @@ data class TodayUiState(
     val showReciterSheet: Boolean = false,
     val isOfflineData: Boolean = false,
     val showTransliteration: Boolean = false,
-    val showTranslation: Boolean = true
+    val showTranslation: Boolean = true,
+    val verseOccasion: DailyVerseOccasion? = null
 )
 
 @HiltViewModel
@@ -71,7 +72,8 @@ class TodayViewModel @Inject constructor(
     private val reflectRepository: ReflectRepository,
     private val shareComposer: VerseShareTextComposer,
     private val userSession: UserSession,
-    private val translationStore: TranslationPreferencesStore
+    private val translationStore: TranslationPreferencesStore,
+    private val dailyVerseLoader: DailyVerseLoader
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TodayUiState())
@@ -97,7 +99,7 @@ class TodayViewModel @Inject constructor(
             translationStore.translationId.drop(1).collect {
                 _state.update { it.copy(translationId = translationStore.currentTranslationId()) }
                 shareComposer.clearCaches()
-                loadDailyAyahWithRecitations()
+                loadDailyAyahWithRecitations(refreshTranslation = true)
             }
         }
         viewModelScope.launch {
@@ -126,19 +128,16 @@ class TodayViewModel @Inject constructor(
         }
     }
 
-    fun loadDailyAyahWithRecitations() {
-        viewModelScope.launch { refreshContent() }
+    fun loadDailyAyahWithRecitations(refreshTranslation: Boolean = false) {
+        viewModelScope.launch { refreshContent(refreshTranslation) }
     }
 
-    suspend fun refreshContent() {
-        _state.update { it.copy(isLoading = true, error = null) }
+    suspend fun refreshContent(refreshTranslation: Boolean = false) {
+        val hasVerse = _state.value.verse != null
+        _state.update { it.copy(isLoading = !hasVerse, error = null) }
         try {
             coroutineScope {
-                val verseDeferred = async {
-                    contentRepository.getRandomAyah()
-                        ?: contentRepository.getDailyAyah()
-                }
-                val chaptersDeferred = async { contentRepository.getChapters() }
+                val verseDeferred = async { dailyVerseLoader.loadForToday(refreshTranslation) }
                 val recitationsDeferred = async {
                     if (_state.value.recitations.isEmpty()) {
                         contentRepository.getRecitations()
@@ -146,51 +145,34 @@ class TodayViewModel @Inject constructor(
                         _state.value.recitations
                     }
                 }
-                val verse = verseDeferred.await()
-                val chapters = chaptersDeferred.await()
+                val loaded = verseDeferred.await()
                 val recitations = recitationsDeferred.await()
-                if (verse == null) {
+                if (loaded == null) {
                     _state.update {
                         it.copy(
                             isLoading = false,
                             verse = null,
                             verseReferenceLabel = null,
+                            verseOccasion = null,
                             recitations = recitations,
                             error = AppError(AppErrorKind.NotFound)
                         )
                     }
                     return@coroutineScope
                 }
-                val chapterName = verse.chapterNumber?.let { num ->
-                    chapters.find { it.id == num }?.displayComplexName
-                }
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        verse = verse,
-                        verseReferenceLabel = verse.referenceLabel(chapterName),
+                        verse = loaded.verse,
+                        verseReferenceLabel = loaded.referenceLabel,
+                        verseOccasion = loaded.occasion,
                         recitations = recitations,
                         error = null,
                         isOfflineData = true
                     )
                 }
-                DailyVerseSnapshotStore.save(appContext, verse, chapterName)
             }
         } catch (t: Throwable) {
-            val snapshot = DailyVerseSnapshotStore.load(appContext)
-            if (snapshot != null) {
-                val verse = snapshot.toVersePayload()
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        verse = verse,
-                        verseReferenceLabel = "${snapshot.surahName} - ${snapshot.ayahNumber}",
-                        error = null,
-                        isOfflineData = true
-                    )
-                }
-                return
-            }
             _state.update { it.copy(isLoading = false, error = t.toAppError(), isOfflineData = false) }
         }
     }
@@ -210,7 +192,7 @@ class TodayViewModel @Inject constructor(
         }
         translationStore.setRecitation(id)
         _state.update { it.copy(selectedRecitationId = id, showReciterSheet = false) }
-        loadDailyAyahWithRecitations()
+        loadDailyAyahWithRecitations(refreshTranslation = true)
     }
 
     fun openTafsir() {

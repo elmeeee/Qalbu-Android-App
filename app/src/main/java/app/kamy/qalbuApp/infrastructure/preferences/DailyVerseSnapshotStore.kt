@@ -15,16 +15,18 @@ data class DailyVerseSnapshot(
     val surahName: String,
     val arabic: String,
     val translation: String,
-    val verseKey: String?
+    val transliterationId: String? = null,
+    val transliterationEn: String? = null,
+    val verseKey: String?,
+    val occasionKey: String? = null
 ) {
     fun notificationBody(): String {
         val reference = buildString {
-            append("Today — ")
             append(surahName)
             append(' ')
             append(ayahNumber)
         }
-        val excerpt = translation.take(180).trim()
+        val excerpt = translation.trim()
         return if (excerpt.isEmpty()) {
             reference
         } else {
@@ -41,13 +43,21 @@ object DailyVerseSnapshotStore {
     private const val KEY_AYAH = "ayah"
     private const val KEY_SURAH = "surah_name"
     private const val KEY_ARABIC = "arabic"
+    private const val KEY_TRANSLITERATION_ID = "transliteration_id"
+    private const val KEY_TRANSLITERATION_EN = "transliteration_en"
     private const val KEY_TRANSLATION = "translation"
     private const val KEY_VERSE_KEY = "verse_key"
+    private const val KEY_OCCASION = "occasion_key"
 
     fun todayKey(): String =
         SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 
-    fun save(context: Context, verse: RandomAyahPayload, surahName: String?) {
+    fun save(
+        context: Context,
+        verse: RandomAyahPayload,
+        surahName: String?,
+        occasionKey: String? = null
+    ) {
         val chapter = verse.chapterNumber ?: return
         val ayah = verse.resolvedVerseNumber ?: return
         val name = surahName?.trim().orEmpty().ifBlank { "Surah $chapter" }
@@ -60,8 +70,11 @@ object DailyVerseSnapshotStore {
             .putInt(KEY_AYAH, ayah)
             .putString(KEY_SURAH, name)
             .putString(KEY_ARABIC, arabic)
+            .putString(KEY_TRANSLITERATION_ID, verse.transliterationId)
+            .putString(KEY_TRANSLITERATION_EN, verse.transliterationEn)
             .putString(KEY_TRANSLATION, translation)
             .putString(KEY_VERSE_KEY, verse.verseKey)
+            .putString(KEY_OCCASION, occasionKey)
             .apply()
         runCatching {
             WidgetCoordinator.refreshAll(context)
@@ -82,7 +95,10 @@ object DailyVerseSnapshotStore {
             surahName = surah,
             arabic = prefs.getString(KEY_ARABIC, "").orEmpty(),
             translation = prefs.getString(KEY_TRANSLATION, "").orEmpty(),
-            verseKey = prefs.getString(KEY_VERSE_KEY, null)
+            transliterationId = prefs.getString(KEY_TRANSLITERATION_ID, null),
+            transliterationEn = prefs.getString(KEY_TRANSLITERATION_EN, null),
+            verseKey = prefs.getString(KEY_VERSE_KEY, null),
+            occasionKey = prefs.getString(KEY_OCCASION, null)
         )
     }
 

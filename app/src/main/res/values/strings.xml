@@ -279,6 +279,16 @@
 
     <!-- Today verse -->
     <string name="verse_of_day">Quran of the Day</string>
+    <string name="daily_verse_occasion_daily">Daily reflection</string>
+    <string name="daily_verse_occasion_ramadan">Ramadan</string>
+    <string name="daily_verse_occasion_eid_fitr">Eid al-Fitr</string>
+    <string name="daily_verse_occasion_eid_adha">Eid al-Adha</string>
+    <string name="daily_verse_occasion_hajj">Hajj season</string>
+    <string name="daily_verse_occasion_muharram">Muharram</string>
+    <string name="daily_verse_occasion_ashura">Ashura</string>
+    <string name="daily_verse_occasion_isra_miraj">Isra &amp; Mi\'raj</string>
+    <string name="daily_verse_occasion_lailatul_qadr">Laylat al-Qadr</string>
+    <string name="daily_verse_occasion_jumuah">Jumu\'ah</string>
     <string name="pause">Pause</string>
     <string name="audio">Audio</string>
     <string name="tafsir">Tafsir</string>

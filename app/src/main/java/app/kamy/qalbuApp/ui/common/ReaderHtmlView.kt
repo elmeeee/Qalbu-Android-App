@@ -35,9 +35,10 @@ fun ReaderHtmlView(
     var lastLoaded by remember(htmlBody) { mutableStateOf<String?>(null) }
     val wrapped = remember(htmlBody, wrapHtml) { wrapHtml(htmlBody) }
     val heightModifier = if (contentHeightPx > 0) {
-        Modifier.height(with(density) { contentHeightPx.toDp() })
+        val bufferPx = with(density) { 16.dp.roundToPx() }
+        Modifier.height(with(density) { (contentHeightPx + bufferPx).toDp() })
     } else {
-        Modifier.heightIn(min = 80.dp)
+        Modifier.heightIn(min = 48.dp)
     }
 
     AndroidView(
@@ -170,6 +171,8 @@ private class AutoHeightReaderWebView(
         evaluateJavascript(script, null)
         postDelayed({ evaluateJavascript(script, null) }, 120)
         postDelayed({ evaluateJavascript(script, null) }, 400)
+        postDelayed({ evaluateJavascript(script, null) }, 800)
+        postDelayed({ evaluateJavascript(script, null) }, 1200)
     }
 
     private inner class ReaderHeightBridge {

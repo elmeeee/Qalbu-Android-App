@@ -315,6 +315,7 @@ fun TodayScreen(
                             translationId = todayState.translationId,
                             showTranslation = todayState.showTranslation,
                             showTransliteration = todayState.showTransliteration,
+                            occasion = todayState.verseOccasion,
                             isLoading = todayState.isLoading,
                             error = todayState.error,
                             isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),

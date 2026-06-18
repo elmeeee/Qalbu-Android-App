@@ -11,7 +11,7 @@ import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseNotificationStoreReader
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshot
 import app.kamy.qalbuApp.infrastructure.preferences.DailyVerseSnapshotStore
-import app.kamy.qalbuApp.infrastructure.repository.ContentRepository
+import app.kamy.qalbuApp.infrastructure.quran.DailyVerseLoader
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -31,7 +31,19 @@ object DailyVerseNotificationScheduler {
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface DailyVerseEntryPoint {
-        fun contentRepository(): ContentRepository
+        fun dailyVerseLoader(): DailyVerseLoader
+    }
+
+    suspend fun resolveSnapshot(context: Context): DailyVerseSnapshot? {
+        DailyVerseSnapshotStore.loadForToday(context)?.let { return it }
+        return runCatching {
+            val loader = EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                DailyVerseEntryPoint::class.java
+            ).dailyVerseLoader()
+            loader.loadForToday()
+            DailyVerseSnapshotStore.loadForToday(context)
+        }.getOrNull()
     }
 
     fun ensureChannel(context: Context) {
@@ -76,22 +88,6 @@ object DailyVerseNotificationScheduler {
     }
 
     private fun dailyVersePrefs(context: Context) = DailyVerseNotificationStoreReader(context)
-
-    suspend fun resolveSnapshot(context: Context): DailyVerseSnapshot? {
-        DailyVerseSnapshotStore.loadForToday(context)?.let { return it }
-        return runCatching {
-            val repo = EntryPointAccessors.fromApplication(
-                context.applicationContext,
-                DailyVerseEntryPoint::class.java
-            ).contentRepository()
-            val verse = repo.getRandomAyah() ?: return null
-            val chapterName = verse.chapterNumber?.let { chapter ->
-                repo.getChapters().find { it.id == chapter }?.displayComplexName
-            }
-            DailyVerseSnapshotStore.save(context, verse, chapterName)
-            DailyVerseSnapshotStore.loadForToday(context)
-        }.getOrNull()
-    }
 
     fun showNotification(context: Context, snapshot: DailyVerseSnapshot? = null) {
         ensureChannel(context)

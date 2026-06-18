@@ -294,6 +294,16 @@
     <string name="share_reflection">Kongsi refleksi</string>
 
     <string name="verse_of_day">Al-Quran Hari Ini</string>
+    <string name="daily_verse_occasion_daily">Renungan harian</string>
+    <string name="daily_verse_occasion_ramadan">Ramadan</string>
+    <string name="daily_verse_occasion_eid_fitr">Hari Raya Aidilfitri</string>
+    <string name="daily_verse_occasion_eid_adha">Hari Raya Aidiladha</string>
+    <string name="daily_verse_occasion_hajj">Musim haji</string>
+    <string name="daily_verse_occasion_muharram">Muharram</string>
+    <string name="daily_verse_occasion_ashura">Asyura</string>
+    <string name="daily_verse_occasion_isra_miraj">Isra\' &amp; Mikraj</string>
+    <string name="daily_verse_occasion_lailatul_qadr">Lailatul Qadar</string>
+    <string name="daily_verse_occasion_jumuah">Jumaat</string>
     <string name="pause">Jeda</string>
     <string name="audio">Audio</string>
     <string name="tafsir">Tafsir</string>

@@ -8,5 +8,8 @@ fun DailyVerseSnapshot.toVersePayload(): RandomAyahPayload = RandomAyahPayload(
     chapterId = chapterNumber,
     verseNumber = ayahNumber,
     verseKey = verseKey ?: "$chapterNumber:$ayahNumber",
+    textUthmani = arabic.takeIf { it.isNotBlank() },
+    transliterationId = transliterationId,
+    transliterationEn = transliterationEn,
     translations = listOf(InlineTranslation(text = translation))
 )
