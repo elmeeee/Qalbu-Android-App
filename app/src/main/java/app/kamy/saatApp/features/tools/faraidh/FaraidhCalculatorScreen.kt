@@ -100,6 +100,7 @@ import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.ui.layout.ContentScale
 import app.kamy.saatApp.domain.faraidh.EstateAssetInput
+import app.kamy.saatApp.domain.faraidh.MoneyInputFormatter
 import app.kamy.saatApp.domain.faraidh.EstateComputation
 import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryItem
 import app.kamy.saatApp.domain.faraidh.FaraidhMadhhab
@@ -417,7 +418,7 @@ private fun FaraidhStatusStrip(
     currency: NumberFormat,
     onEdit: () -> Unit
 ) {
-    val estateValue = netEstate.replace(",", "").toBigDecimalOrNull() ?: BigDecimal.ZERO
+    val estateValue = MoneyInputFormatter.parseAmount(netEstate)
     Surface(
         modifier = Modifier
             .fillMaxWidth()

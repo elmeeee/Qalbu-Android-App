@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">SĀAT</string>
+    <!-- U+200C between letters stops launchers title-casing SĀAT → Sāat -->
+    <string name="app_name_launcher">S\u200cĀ\u200cA\u200cT</string>
 
     <string name="splash_greeting_arabic">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</string>
 

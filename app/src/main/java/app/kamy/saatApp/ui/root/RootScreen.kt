@@ -123,7 +123,6 @@ fun RootScreen(
             ) {
                 TodayScreen(
                     audioPlayer = audioPlayer,
-                    onAccountNavigate = { navController.navigate(RootTab.Account.route) },
                     onOpenPrayerCalendar = {
                         navController.navigate("prayer/calendar") { launchSingleTop = true }
                     },

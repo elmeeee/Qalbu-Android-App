@@ -8,23 +8,16 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -44,10 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibSkeletonCircle
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
-import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
 import java.util.Calendar
 
@@ -60,9 +50,6 @@ fun TodayHeader(
     locationStatus: String? = null,
     hijriLabel: String?,
     gregorianLabel: String?,
-    avatarUrl: String? = null,
-    isProfileLoading: Boolean = false,
-    onAccountClick: () -> Unit = {},
     onLocationClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -108,12 +95,6 @@ fun TodayHeader(
                 .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            HeaderAvatar(
-                avatarUrl = avatarUrl,
-                isProfileLoading = isProfileLoading,
-                onAccountClick = onAccountClick
-            )
-
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -199,42 +180,6 @@ fun TodayHeader(
             thickness = 0.5.dp,
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HeaderAvatar(
-    avatarUrl: String?,
-    isProfileLoading: Boolean,
-    onAccountClick: () -> Unit
-) {
-    Surface(
-        onClick = onAccountClick,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-        modifier = Modifier.size(34.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            when {
-                isProfileLoading -> AlKhatibSkeletonCircle(size = 28.dp)
-                !avatarUrl.isNullOrBlank() -> AsyncImage(
-                    model = avatarUrl,
-                    contentDescription = stringResource(R.string.account),
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                )
-                else -> Icon(
-                    imageVector = Icons.Filled.Person,
-                    contentDescription = stringResource(R.string.account),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
     }
 }
 

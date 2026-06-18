@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
 
 object FloatingNavBarMetrics {
-    val barHeight = 72.dp
+    val barHeight = 58.dp
     val outerVerticalPadding = 8.dp
     val extraScrollGap = 12.dp
 

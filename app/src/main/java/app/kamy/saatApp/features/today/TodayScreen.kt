@@ -70,7 +70,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun TodayScreen(
     audioPlayer: AudioPlayerController,
-    onAccountNavigate: () -> Unit = {},
     onOpenPrayerCalendar: () -> Unit = {},
     onOpenTrackerCalendar: () -> Unit = {}
 ) {
@@ -268,9 +267,6 @@ fun TodayScreen(
                     },
                     hijriLabel = prayerState.hijriLabel,
                     gregorianLabel = prayerState.gregorianLabel,
-                    avatarUrl = todayState.profile?.preferredAvatarUrl,
-                    isProfileLoading = todayState.profileLoading,
-                    onAccountClick = onAccountNavigate,
                     onLocationClick = prayerVm::openLocationSheet,
                     modifier = Modifier.fillMaxWidth()
                 )

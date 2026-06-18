@@ -51,8 +51,7 @@ data class EstateComputation(
 
 object FaraidhEstateCalculator {
 
-    fun parseAmount(raw: String): BigDecimal =
-        raw.replace(",", "").trim().toBigDecimalOrNull() ?: BigDecimal.ZERO
+    fun parseAmount(raw: String): BigDecimal = MoneyInputFormatter.parseAmount(raw)
 
     fun compute(input: EstateAssetInput): EstateComputation {
         val cash = parseAmount(input.cashSavings)

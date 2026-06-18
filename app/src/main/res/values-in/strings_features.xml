@@ -14,7 +14,7 @@
     <string name="daily_verse_widget_empty">Buka SĀAT untuk memuat ayat hari ini</string>
     <string name="daily_verse_widget_title">Ayat hari ini</string>
     <string name="delete_note">Hapus catatan</string>
-    <string name="dhikr_account_subtitle">Tasbih premium dengan 33 butir</string>
+    <string name="dhikr_account_subtitle">Tasbih dengan 33 butir</string>
     <string name="dhikr_alhamdulillah">Alhamdulillah</string>
     <string name="dhikr_allahuakbar">Allahu Akbar</string>
     <string name="dhikr_istighfar">Istighfar</string>
@@ -24,7 +24,7 @@
     <string name="dhikr_subhanallah">SubhanAllah</string>
     <string name="dhikr_title">Dzikir</string>
     <string name="dhikr_total">Total: %1$d</string>
-    <string name="dhikr_premium_subtitle">Tasbih digital premium</string>
+    <string name="dhikr_premium_subtitle">Tasbih digital</string>
     <string name="dhikr_tap_hint">Ketuk untuk menghitung</string>
     <string name="dhikr_session_progress">%1$d%% dari target</string>
     <string name="dhikr_translit_subhanallah">Subḥānallāh</string>

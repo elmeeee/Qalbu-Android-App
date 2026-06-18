@@ -1,25 +1,42 @@
 package app.kamy.saatApp.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.NavigationBarShape
 import app.kamy.saatApp.ui.layout.FloatingNavBarMetrics
 import app.kamy.saatApp.ui.navigation.RootTab
@@ -36,58 +53,101 @@ fun FloatingTabBar(
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(
-                horizontal = 20.dp,
+                horizontal = 18.dp,
                 vertical = FloatingNavBarMetrics.outerVerticalPadding
             )
             .shadow(
-                elevation = 12.dp,
+                elevation = 16.dp,
                 shape = NavigationBarShape,
                 clip = false,
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                ambientColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.12f),
+                spotColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
             )
-            .clip(NavigationBarShape),
+            .clip(NavigationBarShape)
+            .border(
+                width = 0.5.dp,
+                brush = Brush.verticalGradient(
+                    listOf(
+                        Color.White.copy(alpha = 0.9f),
+                        AlKhatibColors.Teal.copy(alpha = 0.12f)
+                    )
+                ),
+                shape = NavigationBarShape
+            ),
         shape = NavigationBarShape,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
-        NavigationBar(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(FloatingNavBarMetrics.barHeight),
-            containerColor = Color.Transparent,
-            tonalElevation = 0.dp
+                .height(FloatingNavBarMetrics.barHeight)
+                .padding(horizontal = 6.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             tabs.forEach { tab ->
                 val selected = selectedRoute == tab.route
-                NavigationBarItem(
+                FloatingTabItem(
+                    tab = tab,
                     selected = selected,
-                    onClick = { onTabSelected(tab) },
-                    icon = {
-                        Icon(
-                            imageVector = if (selected) tab.selectedIcon else tab.unselectedIcon,
-                            contentDescription = stringResource(tab.labelRes)
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = stringResource(tab.labelRes),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                            maxLines = 1,
-                            softWrap = false,
-                            overflow = TextOverflow.Clip
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        indicatorColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f)
-                    )
+                    onClick = { onTabSelected(tab) }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun FloatingTabItem(
+    tab: RootTab,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val iconTint by animateColorAsState(
+        targetValue = if (selected) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
+        animationSpec = spring(stiffness = 500f),
+        label = "tab_icon"
+    )
+    val labelTint by animateColorAsState(
+        targetValue = if (selected) AlKhatibColors.DeepEmerald else Color.Transparent,
+        animationSpec = spring(stiffness = 500f),
+        label = "tab_label"
+    )
+    val pillColor = if (selected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(pillColor)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(bounded = true, radius = 28.dp),
+                role = Role.Tab,
+                onClick = onClick
+            )
+            .padding(horizontal = if (selected) 10.dp else 8.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = if (selected) tab.selectedIcon else tab.unselectedIcon,
+            contentDescription = stringResource(tab.labelRes),
+            tint = iconTint,
+            modifier = Modifier.size(21.dp)
+        )
+        if (selected) {
+            Text(
+                text = stringResource(tab.labelRes),
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = labelTint,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 2.dp)
+            )
         }
     }
 }

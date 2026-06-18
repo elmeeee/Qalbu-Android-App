@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.domain.faraidh.EstateAssetInput
+import app.kamy.saatApp.domain.faraidh.MoneyInputFormatter
 import app.kamy.saatApp.domain.faraidh.EstateComputation
 import app.kamy.saatApp.domain.faraidh.FaraidhMadhhab
 import java.text.NumberFormat
@@ -202,14 +203,14 @@ private fun EstateSection(title: String, content: @Composable () -> Unit) {
 @Composable
 private fun MoneyField(label: String, value: String, onChange: (String) -> Unit) {
     OutlinedTextField(
-        value = value,
-        onValueChange = onChange,
+        value = MoneyInputFormatter.format(value),
+        onValueChange = { onChange(MoneyInputFormatter.format(it)) },
         label = { Text(label) },
         placeholder = { Text("0") },
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AlKhatibColors.Teal, focusedLabelColor = AlKhatibColors.DeepEmerald)
