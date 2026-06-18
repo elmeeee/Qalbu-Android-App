@@ -52,6 +52,8 @@
     <string name="show_translation">Tampilkan terjemahan</string>
     <string name="translator">Penerjemah</string>
     <string name="translator_hint">Ketuk untuk pilih sumber terjemahan</string>
+    <string name="translator_sync_subtitle">Diselaraskan dengan bahasa app</string>
+    <string name="reader_scroll_hint">Gulir untuk latin &amp; terjemahan</string>
     <string name="notifications">Notifikasi</string>
     <string name="reminders">Pengingat</string>
     <string name="sign_out">Keluar</string>
@@ -200,7 +202,7 @@
     <string name="mushaf_swipe_hint">Geser kiri/kanan untuk membalik halaman</string>
     <string name="mushaf_swipe_hint_action">Mengerti</string>
     <string name="mushaf_cloud_synced">Tersinkron ke akun Anda</string>
-    <string name="prayer_tracker_title">Sholat hari ini</string>
+    <string name="prayer_tracker_title">Sholat</string>
     <string name="prayer_tracker_subtitle">%1$d dari %2$d selesai</string>
     <string name="prayer_challenge_progress">Tantangan: streak %1$d / %2$d hari</string>
     <string name="prayer_streak_current">Streak saat ini</string>

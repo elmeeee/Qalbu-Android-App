@@ -5,6 +5,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import app.kamy.qalbuApp.core.config.MushafConfig
+import app.kamy.qalbuApp.core.locale.AppLanguage
 import app.kamy.qalbuApp.domain.model.AudioPayload
 import app.kamy.qalbuApp.domain.model.ContentPagination
 import app.kamy.qalbuApp.domain.model.InlineTranslation
@@ -43,11 +44,12 @@ class LocalQuranDataSource @Inject constructor(
     @Volatile
     private var tafsirByIndex: List<String>? = null
 
-    suspend fun getChapters(): List<QuranChapter> = withContext(Dispatchers.IO) {
+    suspend fun getChapters(language: AppLanguage = AppLanguage.INDONESIAN): List<QuranChapter> =
+        withContext(Dispatchers.IO) {
         val db = database.openReadable()
         db.rawQuery(
             """
-            SELECT "index", tname, ename, ayas, type, first_page, last_page, name
+            SELECT "index", tname, ename, ename_english, ayas, type, first_page, last_page, name
             FROM suras
             ORDER BY "index"
             """.trimIndent(),
@@ -55,7 +57,7 @@ class LocalQuranDataSource @Inject constructor(
         ).use { cursor ->
             buildList {
                 while (cursor.moveToNext()) {
-                    add(cursor.toChapter())
+                    add(cursor.toChapter(language))
                 }
             }
         }
@@ -481,10 +483,20 @@ class LocalQuranDataSource @Inject constructor(
         )
     }
 
-    private fun Cursor.toChapter(): QuranChapter {
+    private fun Cursor.toChapter(language: AppLanguage): QuranChapter {
         val id = getInt(getColumnIndexOrThrow("index"))
         val tname = getStringOrNull("tname").orEmpty()
-        val ename = getStringOrNull("ename").orEmpty()
+        val enameId = getStringOrNull("ename").orEmpty()
+        val enameEnglish = getStringOrNull("ename_english").orEmpty()
+        val meaning = when (language) {
+            AppLanguage.ENGLISH -> enameEnglish.ifBlank { enameId }
+            AppLanguage.MALAY, AppLanguage.INDONESIAN -> enameId.ifBlank { enameEnglish }
+        }
+        val meaningLanguage = when (language) {
+            AppLanguage.ENGLISH -> "english"
+            AppLanguage.MALAY -> "malay"
+            AppLanguage.INDONESIAN -> "indonesian"
+        }
         val ayas = getIntOrNull("ayas") ?: 0
         val type = getStringOrNull("type").orEmpty()
         val firstPage = getIntOrNull("first_page") ?: 1
@@ -502,7 +514,7 @@ class LocalQuranDataSource @Inject constructor(
             nameComplex = tname,
             nameArabic = getStringOrNull("name"),
             versesCount = ayas,
-            translatedName = ChapterTranslatedName(name = ename, languageName = "indonesian")
+            translatedName = ChapterTranslatedName(name = meaning, languageName = meaningLanguage)
         )
     }
 

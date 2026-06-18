@@ -8,3 +8,6 @@ fun RandomAyahPayload.displayTransliteration(translationId: Int): String? =
         transliterationId = transliterationId,
         transliterationEn = transliterationEn
     )
+
+fun RandomAyahPayload.transliterationUsesHtml(translationId: Int): Boolean =
+    LocalQuranConfig.transliterationUsesHtml(translationId)

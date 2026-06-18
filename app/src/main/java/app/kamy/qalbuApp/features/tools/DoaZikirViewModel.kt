@@ -21,6 +21,7 @@ data class DoaZikirUiState(
     val loading: Boolean = true,
     val catalog: List<DoaCatalogEntry> = emptyList(),
     val selectedSlug: String? = null,
+    val selectedTitle: String? = null,
     val doaItems: List<DoaItem> = emptyList(),
     val dhikrBundles: List<DhikrBundle> = emptyList()
 )
@@ -49,6 +50,7 @@ class DoaZikirViewModel @Inject constructor(
             it.copy(
                 loading = true,
                 selectedSlug = slug,
+                selectedTitle = entry.title,
                 doaItems = emptyList(),
                 dhikrBundles = emptyList()
             )
@@ -66,7 +68,7 @@ class DoaZikirViewModel @Inject constructor(
 
     fun clearSelection() {
         _state.update {
-            it.copy(selectedSlug = null, doaItems = emptyList(), dhikrBundles = emptyList())
+            it.copy(selectedSlug = null, selectedTitle = null, doaItems = emptyList(), dhikrBundles = emptyList())
         }
     }
 

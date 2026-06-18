@@ -13,6 +13,7 @@ import app.kamy.qalbuApp.domain.model.ReadingSession
 import app.kamy.qalbuApp.domain.model.SearchNavResult
 import app.kamy.qalbuApp.domain.model.SearchVerseResult
 import app.kamy.qalbuApp.infrastructure.auth.UserSession
+import app.kamy.qalbuApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.qalbuApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.qalbuApp.infrastructure.preferences.MushafReadingStore
 import app.kamy.qalbuApp.infrastructure.network.NetworkMonitor
@@ -26,6 +27,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -69,6 +71,7 @@ class ChaptersViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
     private val searchRepository: SearchRepository,
     private val translationStore: TranslationPreferencesStore,
+    private val appLanguageStore: AppLanguageStore,
     private val readingSessions: ReadingSessionRepository,
     private val userSession: UserSession
 ) : ViewModel() {
@@ -82,6 +85,12 @@ class ChaptersViewModel @Inject constructor(
     init {
         loadAll()
         refreshMushafBrowse()
+        viewModelScope.launch {
+            appLanguageStore.currentFlow.drop(1).collect {
+                contentRepository.clearCache()
+                refresh(force = true)
+            }
+        }
         viewModelScope.launch {
             userSession.isSignedIn.collect { signedIn ->
                 if (signedIn) {

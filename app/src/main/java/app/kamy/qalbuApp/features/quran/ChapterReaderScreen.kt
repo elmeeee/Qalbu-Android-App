@@ -76,6 +76,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -90,13 +97,16 @@ import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.displayTransliteration
+import app.kamy.qalbuApp.domain.model.transliterationUsesHtml
 import app.kamy.qalbuApp.features.reader.HadithSheet
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.infrastructure.audio.AudioPlayerController
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
 import app.kamy.qalbuApp.ui.common.TajweedTextAlign
+import app.kamy.qalbuApp.ui.common.TransliterationView
 import app.kamy.qalbuApp.ui.common.toVerseTranslationPlainText
+import app.kamy.qalbuApp.infrastructure.preferences.ReaderOnboardingStore
 import app.kamy.qalbuApp.ui.components.FloatingAudioBarMetrics
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -114,6 +124,14 @@ fun ChapterReaderScreen(
     val audioState by audioPlayer.state.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val onboardingStore = remember { ReaderOnboardingStore.from(context) }
+    var showScrollHint by remember { mutableStateOf(!onboardingStore.hasShownScrollHint()) }
+
+    fun dismissScrollHint() {
+        if (!showScrollHint) return
+        showScrollHint = false
+        onboardingStore.markScrollHintShown()
+    }
     var settingsVisible by remember { mutableStateOf(false) }
     var verseMenuExpanded by remember { mutableStateOf(false) }
 
@@ -228,7 +246,8 @@ fun ChapterReaderScreen(
                     translationId = state.selectedTranslationId,
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
-                    onPlay = { vm.onTapAyah(pageIndex) }
+                    onPlay = { vm.onTapAyah(pageIndex) },
+                    onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null
                 )
             }
         }
@@ -381,6 +400,16 @@ fun ChapterReaderScreen(
                 .align(Alignment.BottomCenter)
                 .padding(bottom = if (audioBarVisible) 100.dp else 24.dp)
         )
+
+        if (showScrollHint && state.verses.isNotEmpty()) {
+            ReaderScrollHint(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = if (audioBarVisible) 132.dp else 96.dp),
+                onDismiss = ::dismissScrollHint
+            )
+        }
     }
 
     if (settingsVisible) {
@@ -472,13 +501,22 @@ private fun QalbuAyahPage(
     translationId: Int,
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
-    onPlay: () -> Unit
+    onPlay: () -> Unit,
+    onContentScroll: (() -> Unit)? = null
 ) {
     val contentTopPadding = 56.dp
     val contentBottomPadding = if (audioBarVisible) 188.dp else 148.dp
     val scrollState = rememberScrollState()
     var hifzRevealStage by remember(verse.listIdentity) {
         mutableIntStateOf(0)
+    }
+
+    LaunchedEffect(scrollState, onContentScroll) {
+        if (onContentScroll == null) return@LaunchedEffect
+        snapshotFlow { scrollState.value }
+            .collect { offset ->
+                if (offset > 12) onContentScroll()
+            }
     }
 
     Box(
@@ -549,20 +587,29 @@ private fun QalbuAyahPage(
                     )
                 }
             }
-            if (showTranslation && (!hifzModeEnabled || hifzRevealStage >= 2)) {
+            val showLatin = !hifzModeEnabled || hifzRevealStage >= 1
+            val showMeaning = showTranslation && (!hifzModeEnabled || hifzRevealStage >= 2)
+            if (showLatin) {
                 verse.displayTransliteration(translationId)?.let { transliteration ->
                     Text(
-                        text = transliteration,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3f
-                        ),
-                        color = AlKhatibColors.Slate500,
-                        textAlign = TextAlign.Center,
+                        text = stringResource(R.string.transliteration_label),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AlKhatibColors.Teal,
+                        fontWeight = FontWeight.SemiBold,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp)
+                            .padding(top = 8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    TransliterationView(
+                        text = transliteration,
+                        useHtml = verse.transliterationUsesHtml(translationId),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
                     )
                 }
+            }
+            if (showMeaning) {
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.toVerseTranslationPlainText()
                     if (clean.isNotEmpty()) {
@@ -1021,5 +1068,39 @@ private fun VerseNoteSheet(
             }
             Spacer(Modifier.height(8.dp))
         }
+    }
+}
+
+@Composable
+private fun ReaderScrollHint(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val transition = rememberInfiniteTransition(label = "scrollHint")
+    val bounce by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 8f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "bounce"
+    )
+    Surface(
+        onClick = onDismiss,
+        modifier = modifier
+            .graphicsLayer { translationY = bounce },
+        shape = RoundedCornerShape(20.dp),
+        color = AlKhatibColors.DeepEmerald.copy(alpha = 0.94f),
+        shadowElevation = 8.dp
+    ) {
+        Text(
+            text = stringResource(R.string.reader_scroll_hint),
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White,
+            textAlign = TextAlign.Center
+        )
     }
 }

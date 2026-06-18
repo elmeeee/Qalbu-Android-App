@@ -174,7 +174,11 @@ fun AccountScreen(
             isLoading = state.translationsLoading,
             error = state.translationsError,
             onQueryChange = vm::setTranslatorQuery,
-            onPick = vm::selectTranslation,
+            onPick = { translation ->
+                if (vm.selectTranslation(translation)) {
+                    (context as? ComponentActivity)?.recreate()
+                }
+            },
             onDismiss = vm::closeTranslator,
             onRetry = vm::loadTranslations
         )
@@ -244,7 +248,15 @@ private fun AccountSettingsContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.background,
+                        AlKhatibColors.Teal.copy(alpha = 0.06f),
+                        MaterialTheme.colorScheme.background
+                    )
+                )
+            )
             .tabContentStatusBarInset()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
@@ -450,13 +462,64 @@ private fun ProfileHeader(
 
 @Composable
 private fun SettingsSectionLabel(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(start = AlKhatibSpacing.xs)
-    )
+    Box(
+        modifier = Modifier
+            .padding(start = AlKhatibSpacing.xs, bottom = 4.dp)
+            .clip(RoundedCornerShape(50))
+            .background(
+                Brush.horizontalGradient(
+                    listOf(
+                        AlKhatibColors.DeepEmerald.copy(alpha = 0.14f),
+                        AlKhatibColors.Gold.copy(alpha = 0.08f)
+                    )
+                )
+            )
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = text.uppercase(),
+            style = MaterialTheme.typography.labelLarge,
+            color = AlKhatibColors.DeepEmerald,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+    }
+}
+
+@Composable
+private fun PremiumSheetHeader(
+    title: String,
+    subtitle: String? = null
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        AlKhatibColors.DeepEmerald.copy(alpha = 0.16f),
+                        AlKhatibColors.Teal.copy(alpha = 0.08f)
+                    )
+                )
+            )
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = AlKhatibColors.DeepEmerald
+        )
+        subtitle?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodySmall,
+                color = AlKhatibColors.Slate500
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -492,11 +555,8 @@ private fun TranslatorSheet(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                stringResource(R.string.choose_translator),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+            PremiumSheetHeader(
+                title = stringResource(R.string.choose_translator)
             )
             OutlinedTextField(
                 value = query,
@@ -842,17 +902,9 @@ private fun LanguageSheet(
                 .padding(bottom = AlKhatibSpacing.xl),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Text(
-                text = stringResource(R.string.language_settings_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
-            )
-            Text(
-                text = stringResource(R.string.language_settings_subtitle),
-                style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500,
-                modifier = Modifier.padding(bottom = 8.dp)
+            PremiumSheetHeader(
+                title = stringResource(R.string.language_settings_title),
+                subtitle = stringResource(R.string.language_settings_subtitle)
             )
             AppLanguage.entries.forEach { language ->
                 val isSelected = language == selected

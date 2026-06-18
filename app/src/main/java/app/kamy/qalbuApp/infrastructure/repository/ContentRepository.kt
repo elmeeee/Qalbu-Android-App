@@ -35,7 +35,7 @@ class ContentRepository @Inject constructor(
         LocalQuranConfig.normalizeRecitationId(translationStore.currentRecitationId())
 
     suspend fun getChapters(force: Boolean = false): List<QuranChapter> =
-        local.getChapters()
+        local.getChapters(appLanguageStore.current())
 
     suspend fun getJuzs(force: Boolean = false): List<QuranJuz> =
         normalizeJuzs(local.getJuzs())

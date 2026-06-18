@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import app.kamy.qalbuApp.domain.model.OptionalWorshipHabit
 import app.kamy.qalbuApp.domain.model.PrayerType
 import app.kamy.qalbuApp.domain.prayer.HijriDayHelper
+import app.kamy.qalbuApp.domain.prayer.PrayerTrackerAvailability
 import app.kamy.qalbuApp.infrastructure.notifications.PrayerCheckReminderScheduler
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerDayProgress
 import app.kamy.qalbuApp.infrastructure.preferences.PrayerTrackerPreferencesStore
@@ -34,6 +35,7 @@ data class PrayerTrackerUiState(
     val challengeTarget: Int = 7,
     val completedPrayers: Set<PrayerType> = emptySet(),
     val optionalHabits: List<OptionalHabitUiItem> = emptyList(),
+    val availablePrayers: Set<PrayerType> = emptySet(),
     val checkRemindersEnabled: Boolean = true
 )
 
@@ -58,6 +60,7 @@ class PrayerTrackerViewModel @Inject constructor(
             .toSet()
         val streak = PrayerTrackerStore.currentStreak(appContext)
         val cal = Calendar.getInstance()
+        val available = PrayerTrackerAvailability.availablePrayers(appContext)
         _state.update {
             it.copy(
                 todayProgress = PrayerTrackerStore.dayProgress(appContext, today),
@@ -72,12 +75,15 @@ class PrayerTrackerViewModel @Inject constructor(
                 challengeTarget = PrayerTrackerStore.challengeTargetDays(streak),
                 completedPrayers = completed,
                 optionalHabits = buildOptionalHabits(today),
+                availablePrayers = available,
                 checkRemindersEnabled = prefs.checkRemindersEnabled()
             )
         }
     }
 
     fun togglePrayer(prayer: PrayerType) {
+        val completed = _state.value.completedPrayers.contains(prayer)
+        if (!PrayerTrackerAvailability.canToggle(appContext, prayer, completed)) return
         PrayerTrackerStore.toggle(appContext, prayer)
         if (PrayerTrackerStore.isCompleted(appContext, prayer)) {
             PrayerCheckReminderScheduler.onPrayerMarked(appContext, prayer)

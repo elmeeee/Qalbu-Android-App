@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.qalbuApp.domain.adhan.AdhanVoice
 import app.kamy.qalbuApp.domain.adhan.AdhanVoiceCatalog
+import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.model.UserProfilePayload
 import app.kamy.qalbuApp.domain.model.PrayerType
@@ -253,13 +254,48 @@ class AccountViewModel @Inject constructor(
             return
         }
         appLanguageStore.set(language)
+        syncTranslationForLanguage(language)
         contentRepository.clearCache()
         shareComposer.clearCaches()
         viewModelScope.launch {
             PrayerNotificationCoordinator.rescheduleFromCache(appContext)
             DailyVerseNotificationScheduler.reschedule(appContext)
         }
-        _state.update { it.copy(appLanguage = language, showLanguageSheet = false) }
+        _state.update {
+            it.copy(
+                appLanguage = language,
+                showLanguageSheet = false,
+                selectedTranslationId = translationStore.currentTranslationId(),
+                selectedTranslationName = translationStore.translationName.value
+            )
+        }
+    }
+
+    fun selectTranslation(translation: QFTranslation): Boolean {
+        val label = LocalQuranConfig.translationDisplayLabel(translation)
+        translationStore.setTranslation(translation.id, label)
+        val linkedLanguage = LocalQuranConfig.appLanguageForTranslationId(translation.id)
+        val languageChanged = linkedLanguage != null && linkedLanguage != appLanguageStore.current()
+        if (linkedLanguage != null && languageChanged) {
+            appLanguageStore.set(linkedLanguage)
+            contentRepository.clearCache()
+            shareComposer.clearCaches()
+        }
+        _state.update {
+            it.copy(
+                showTranslatorSheet = false,
+                appLanguage = appLanguageStore.current()
+            )
+        }
+        return languageChanged
+    }
+
+    private fun syncTranslationForLanguage(language: AppLanguage) {
+        val translation = LocalQuranConfig.translationForAppLanguage(language)
+        translationStore.setTranslation(
+            translation.id,
+            LocalQuranConfig.translationDisplayLabel(translation)
+        )
     }
 
     fun fetchProfile() {
@@ -341,12 +377,6 @@ class AccountViewModel @Inject constructor(
 
     fun closeTranslator() = _state.update { it.copy(showTranslatorSheet = false) }
     fun setTranslatorQuery(q: String) = _state.update { it.copy(translatorQuery = q) }
-
-    fun selectTranslation(translation: QFTranslation) {
-        val label = translation.authorName.ifBlank { translation.name }
-        translationStore.setTranslation(translation.id, label)
-        _state.update { it.copy(showTranslatorSheet = false) }
-    }
 
     fun loadTranslations() {
         _state.update { it.copy(translationsLoading = true, translationsError = null) }

@@ -1,44 +1,59 @@
 package app.kamy.qalbuApp.features.today.components
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.kamy.qalbuApp.R
 import app.kamy.qalbuApp.design.components.AlKhatibErrorStateDark
 import app.kamy.qalbuApp.design.components.AlKhatibSkeletonOnDark
+import app.kamy.qalbuApp.design.theme.AlKhatibColors
 import app.kamy.qalbuApp.domain.model.PrayerType
+import app.kamy.qalbuApp.features.today.PrayerTheme
 import app.kamy.qalbuApp.features.today.PrayerUiState
 import app.kamy.qalbuApp.infrastructure.repository.PrayerEntry
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import java.text.SimpleDateFormat
 import java.util.Locale
+
+private val WidgetGold = Color(0xFFD4AF37)
+private val WidgetGoldLabel = Color(0xFFE8D5A3)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,12 +67,25 @@ fun PrayerDashboardCard(
     val fetchErrorDisplay = state.error
         ?.takeIf { !state.needsPermission }
         ?.rememberErrorDisplay(R.string.error_prayer_fetch_title)
-    val nextPrayer = state.nextPrayer ?: state.activePrayer
-    val background = masaPrayerBackground(nextPrayer)
+    val background = when (state.theme) {
+        PrayerTheme.DAYLIGHT -> Brush.linearGradient(
+            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
+        )
+        PrayerTheme.NIGHT -> Brush.linearGradient(
+            listOf(AlKhatibColors.EmeraldNight, AlKhatibColors.DeepEmerald)
+        )
+    }
+    val slots = remember(state.timings) {
+        PrayerType.ADZAN_NOTIFICATION_PRAYERS.mapNotNull { type ->
+            state.timings.find { it.type == type }
+        }
+    }
+    val nextLine = rememberNextLine(state)
+    val compactCountdown = remember(state.countdown) { formatCountdownCompact(state.countdown) }
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         color = Color.Transparent,
         tonalElevation = 4.dp,
         shadowElevation = 3.dp,
@@ -66,62 +94,98 @@ fun PrayerDashboardCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(background)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 12.dp)
-            ) {
-                PrayerCardHeader(
-                    cityName = state.cityName,
-                    gregorianLabel = state.gregorianLabel,
-                    needsPermission = state.needsPermission
+                .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        listOf(Color.White.copy(alpha = 0.22f), Color.White.copy(alpha = 0.06f))
+                    ),
+                    shape = RoundedCornerShape(16.dp)
                 )
-                Spacer(Modifier.height(8.dp))
-
-                if (state.isLoading && state.timings.isEmpty()) {
-                    PrayerCardLoading()
-                } else if (fetchErrorDisplay != null && state.timings.isEmpty()) {
-                    AlKhatibErrorStateDark(
-                        display = fetchErrorDisplay,
-                        onRetry = onRetry,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                } else {
-                    PrayerCountdownRow(
-                        countdown = state.countdown,
-                        subtitle = when {
-                            state.needsPermission -> stringResource(R.string.prayer_allow_location)
-                            state.timings.isEmpty() -> stringResource(R.string.prayer_schedule)
-                            else -> state.countdownSubtitle
-                        }
-                    )
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color.Black.copy(alpha = 0.3f))
-                        .padding(vertical = 8.dp, horizontal = 2.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                .padding(horizontal = 10.dp, vertical = 10.dp)
+        ) {
+            when {
+                state.isLoading && state.timings.isEmpty() -> PrayerWidgetLoading()
+                fetchErrorDisplay != null && state.timings.isEmpty() -> AlKhatibErrorStateDark(
+                    display = fetchErrorDisplay,
+                    onRetry = onRetry,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                else -> Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (state.isLoading || state.timings.isEmpty()) {
-                        repeat(6) {
-                            PrayerColumnSkeleton(modifier = Modifier.weight(1f))
+                    Column(
+                        modifier = Modifier
+                            .weight(1.15f)
+                            .padding(end = 6.dp)
+                    ) {
+                        Text(
+                            text = when {
+                                state.needsPermission -> stringResource(R.string.prayer_allow_location)
+                                state.isGracePeriod -> stringResource(R.string.prayer_widget_in_progress)
+                                else -> stringResource(R.string.prayer_widget_next_label)
+                            },
+                            color = Color.White.copy(alpha = 0.82f),
+                            fontSize = 10.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = nextLine,
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 1.dp)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.weight(2.2f),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        if (slots.isEmpty()) {
+                            repeat(5) {
+                                PrayerSlotSkeleton(modifier = Modifier.weight(1f))
+                            }
+                        } else {
+                            slots.forEach { entry ->
+                                WidgetPrayerSlot(
+                                    entry = entry,
+                                    isActive = entry.type == state.activePrayer,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
                         }
-                    } else {
-                        state.timings.forEach { entry ->
-                            PrayerTimeColumn(
-                                entry = entry,
-                                isActive = entry.type == state.activePrayer,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
+                    }
+
+                    AnimatedContent(
+                        targetState = compactCountdown,
+                        modifier = Modifier
+                            .padding(start = 6.dp)
+                            .widthIn(min = 68.dp),
+                        transitionSpec = {
+                            (fadeIn(spring(stiffness = Spring.StiffnessMedium)) +
+                                scaleIn(initialScale = 0.92f, animationSpec = spring(stiffness = Spring.StiffnessMedium)))
+                                .togetherWith(
+                                    fadeOut(spring(stiffness = Spring.StiffnessMedium)) +
+                                        scaleOut(targetScale = 0.92f, animationSpec = spring(stiffness = Spring.StiffnessMedium))
+                                )
+                        },
+                        label = "widgetCountdown"
+                    ) { value ->
+                        Text(
+                            text = value,
+                            color = Color.White,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -130,158 +194,154 @@ fun PrayerDashboardCard(
 }
 
 @Composable
-private fun PrayerCardHeader(
-    cityName: String?,
-    gregorianLabel: String?,
-    needsPermission: Boolean
-) {
-    val locating = stringResource(R.string.locating)
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+private fun rememberNextLine(state: PrayerUiState): String {
+    val scheduleFallback = stringResource(R.string.prayer_schedule)
+    val fajr = stringResource(R.string.prayer_fajr)
+    val dhuhr = stringResource(R.string.prayer_dhuhr)
+    val asr = stringResource(R.string.prayer_asr)
+    val maghrib = stringResource(R.string.prayer_maghrib)
+    val isha = stringResource(R.string.prayer_isha)
+    fun name(type: PrayerType) = when (type) {
+        PrayerType.FAJR -> fajr
+        PrayerType.DHUHR -> dhuhr
+        PrayerType.ASR -> asr
+        PrayerType.MAGHRIB -> maghrib
+        PrayerType.ISHA -> isha
+        PrayerType.SUNRISE -> ""
+    }
+    return remember(
+        state.isGracePeriod,
+        state.activePrayer,
+        state.nextPrayer,
+        state.countdownSubtitle,
+        state.timings,
+        state.needsPermission,
+        state.khgtToday?.eventTitle,
+        scheduleFallback,
+        fajr,
+        dhuhr,
+        asr,
+        maghrib,
+        isha
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = when {
-                    needsPermission -> stringResource(R.string.prayer_allow_location)
-                    !cityName.isNullOrBlank() -> cityName
-                    else -> locating
-                },
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                maxLines = 1
-            )
-            if (!gregorianLabel.isNullOrBlank()) {
-                Text(
-                    text = gregorianLabel,
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    maxLines = 1
-                )
+        when {
+            state.needsPermission -> scheduleFallback
+            state.khgtToday?.eventTitle?.isNotBlank() == true -> state.khgtToday!!.eventTitle!!
+            state.isGracePeriod && state.activePrayer != null -> name(state.activePrayer!!)
+            state.nextPrayer != null -> {
+                val prayerName = name(state.nextPrayer!!)
+                val time = state.timings.find { it.type == state.nextPrayer }?.date?.let {
+                    SimpleDateFormat("HH:mm", Locale.getDefault()).format(it)
+                } ?: "--:--"
+                "$prayerName · $time"
             }
+            else -> state.countdownSubtitle
         }
     }
 }
 
 @Composable
-private fun PrayerCountdownRow(
-    countdown: String,
-    subtitle: String
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = countdown,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = subtitle,
-                color = Color.White.copy(alpha = 0.9f),
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-        Image(
-            painter = painterResource(R.drawable.today_mascot),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.size(52.dp)
-        )
-    }
-}
-
-@Composable
-private fun PrayerCardLoading() {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        AlKhatibSkeletonOnDark(
-            modifier = Modifier
-                .fillMaxWidth(0.45f)
-                .height(28.dp),
-            shape = RoundedCornerShape(8.dp)
-        )
-        Spacer(Modifier.height(6.dp))
-        AlKhatibSkeletonOnDark(
-            modifier = Modifier
-                .fillMaxWidth(0.7f)
-                .height(12.dp)
-        )
-    }
-}
-
-@Composable
-private fun PrayerTimeColumn(
+private fun WidgetPrayerSlot(
     entry: PrayerEntry,
     isActive: Boolean,
     modifier: Modifier = Modifier
 ) {
     val timeText = remember(entry.date) {
-        SimpleDateFormat("HH:mm", Locale.US).format(entry.date)
+        SimpleDateFormat("HH:mm", Locale.getDefault()).format(entry.date)
     }
+    val scale by animateFloatAsState(
+        targetValue = if (isActive) 1.06f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "slotScale"
+    )
+    val labelColor by animateColorAsState(
+        targetValue = if (isActive) WidgetGoldLabel else Color.White.copy(alpha = 0.78f),
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "slotLabel"
+    )
+    val timeColor by animateColorAsState(
+        targetValue = if (isActive) WidgetGold else Color.White,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "slotTime"
+    )
     Column(
         modifier = modifier
+            .scale(scale)
             .clip(RoundedCornerShape(8.dp))
-            .background(if (isActive) Color.White.copy(alpha = 0.15f) else Color.Transparent)
-            .padding(vertical = 6.dp, horizontal = 2.dp),
+            .then(
+                if (isActive) {
+                    Modifier.background(Color.White.copy(alpha = 0.12f))
+                } else {
+                    Modifier
+                }
+            )
+            .padding(horizontal = 2.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            text = prayerDisplayShort(entry.type),
+            color = labelColor,
+            fontSize = 8.sp,
+            maxLines = 1,
+            textAlign = TextAlign.Center,
+            overflow = TextOverflow.Ellipsis
+        )
         Text(
             text = timeText,
-            color = Color.White,
-            fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
-            fontSize = 11.sp,
+            color = timeColor,
+            fontSize = 10.sp,
+            fontWeight = if (isActive) FontWeight.Bold else FontWeight.SemiBold,
+            maxLines = 1,
             textAlign = TextAlign.Center
         )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = prayerDisplay(entry.type),
-            color = if (isActive) Color.White else Color.White.copy(alpha = 0.65f),
-            fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal,
-            fontSize = 10.sp,
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
     }
 }
 
 @Composable
-private fun PrayerColumnSkeleton(modifier: Modifier = Modifier) {
+private fun PrayerWidgetLoading() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1.15f)) {
+            AlKhatibSkeletonOnDark(Modifier.fillMaxWidth(0.7f).padding(vertical = 4.dp))
+            AlKhatibSkeletonOnDark(Modifier.fillMaxWidth(0.9f).padding(top = 4.dp))
+        }
+        repeat(5) {
+            PrayerSlotSkeleton(Modifier.weight(1f))
+        }
+        AlKhatibSkeletonOnDark(Modifier.widthIn(min = 56.dp))
+    }
+}
+
+@Composable
+private fun PrayerSlotSkeleton(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.padding(vertical = 6.dp, horizontal = 2.dp),
+        modifier = modifier.padding(horizontal = 2.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AlKhatibSkeletonOnDark(
-            modifier = Modifier
-                .width(28.dp)
-                .height(10.dp)
-        )
-        Spacer(Modifier.height(4.dp))
-        AlKhatibSkeletonOnDark(
-            modifier = Modifier
-                .width(24.dp)
-                .height(8.dp)
-        )
+        AlKhatibSkeletonOnDark(Modifier.padding(vertical = 2.dp))
+        AlKhatibSkeletonOnDark(Modifier.padding(top = 4.dp))
     }
 }
 
 @Composable
-private fun prayerDisplay(type: PrayerType): String {
-    val fajr = stringResource(R.string.prayer_fajr)
-    val sunrise = stringResource(R.string.prayer_sunrise)
-    val dhuhr = stringResource(R.string.prayer_dhuhr)
-    val asr = stringResource(R.string.prayer_asr)
-    val maghrib = stringResource(R.string.prayer_maghrib)
-    val isha = stringResource(R.string.prayer_isha)
-    return when (type) {
-        PrayerType.FAJR -> fajr
-        PrayerType.SUNRISE -> sunrise
-        PrayerType.DHUHR -> dhuhr
-        PrayerType.ASR -> asr
-        PrayerType.MAGHRIB -> maghrib
-        PrayerType.ISHA -> isha
+private fun prayerDisplayShort(type: PrayerType): String = when (type) {
+    PrayerType.FAJR -> stringResource(R.string.prayer_fajr)
+    PrayerType.DHUHR -> stringResource(R.string.prayer_dhuhr)
+    PrayerType.ASR -> stringResource(R.string.prayer_asr)
+    PrayerType.MAGHRIB -> stringResource(R.string.prayer_maghrib)
+    PrayerType.ISHA -> stringResource(R.string.prayer_isha)
+    PrayerType.SUNRISE -> ""
+}
+
+private fun formatCountdownCompact(raw: String): String {
+    val parts = raw.split(":").mapNotNull { it.toIntOrNull() }
+    if (parts.size != 3) return raw
+    val (hours, minutes, seconds) = parts
+    return if (hours > 0) {
+        "%d:%02d".format(hours, minutes)
+    } else {
+        "%02d:%02d".format(minutes, seconds)
     }
 }

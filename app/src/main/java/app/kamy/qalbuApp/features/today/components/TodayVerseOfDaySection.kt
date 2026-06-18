@@ -42,6 +42,8 @@ import app.kamy.qalbuApp.design.theme.AlKhatibSpacing
 import app.kamy.qalbuApp.core.error.AppError
 import app.kamy.qalbuApp.domain.model.RandomAyahPayload
 import app.kamy.qalbuApp.domain.model.displayTransliteration
+import app.kamy.qalbuApp.domain.model.transliterationUsesHtml
+import app.kamy.qalbuApp.ui.common.TransliterationView
 import app.kamy.qalbuApp.core.config.LocalQuranConfig
 import app.kamy.qalbuApp.ui.common.rememberErrorDisplay
 import app.kamy.qalbuApp.ui.common.TajweedHtmlView
@@ -118,12 +120,11 @@ fun TodayVerseOfDaySection(
                     )
 
                     verse.displayTransliteration(translationId)?.let { latin ->
-                        Text(
+                        TransliterationView(
                             text = latin,
-                            color = AlKhatibColors.Slate500,
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            useHtml = verse.transliterationUsesHtml(translationId),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
                         )
                     }
 

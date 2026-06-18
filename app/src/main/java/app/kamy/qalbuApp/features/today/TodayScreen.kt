@@ -47,11 +47,10 @@ import app.kamy.qalbuApp.ui.permissions.openAppNotificationSettings
 import app.kamy.qalbuApp.ui.permissions.openBackgroundReliabilitySettings
 import app.kamy.qalbuApp.ui.permissions.openExactAlarmSettings
 import app.kamy.qalbuApp.R
-import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.TafsirSheet
 import app.kamy.qalbuApp.features.today.components.TodayImportantDayBanner
 import app.kamy.qalbuApp.features.today.components.TodayHeader
-import app.kamy.qalbuApp.features.today.components.TodayPrayerMascotSection
+import app.kamy.qalbuApp.features.today.components.PrayerDashboardCard
 import app.kamy.qalbuApp.features.today.components.PrayerLocationSheet
 import app.kamy.qalbuApp.features.today.components.PrayerTrackerCard
 import app.kamy.qalbuApp.features.today.components.TodayReciterSheet
@@ -214,6 +213,10 @@ fun TodayScreen(
         }
     }
 
+    LaunchedEffect(prayerState.activePrayer, prayerState.nextPrayer) {
+        trackerVm.refresh()
+    }
+
     LaunchedEffect(todayState.publishToast) {
         todayState.publishToast?.let {
             snackbarHostState.showSnackbar(it)
@@ -231,6 +234,7 @@ fun TodayScreen(
                         coroutineScope {
                             launch { prayerVm.refresh(force = true) }
                             launch { todayVm.refreshContent() }
+                            launch { trackerVm.refresh() }
                         }
                     }
                     isPullRefreshing = false
@@ -277,12 +281,12 @@ fun TodayScreen(
                         )
                     }
                     item(key = "prayer_card") {
-                        TodayPrayerMascotSection(
+                        PrayerDashboardCard(
                             state = prayerState,
                             onRetry = { scope.launch { prayerVm.refresh(force = true) } },
                             onOpenCalendar = onOpenPrayerCalendar,
                             onOpenLocation = prayerVm::openLocationSheet,
-                            modifier = Modifier.padding(horizontal = 20.dp)
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
                         )
                     }
 
@@ -291,7 +295,6 @@ fun TodayScreen(
                             state = trackerState,
                             onTogglePrayer = trackerVm::togglePrayer,
                             onToggleOptional = trackerVm::toggleOptionalHabit,
-                            onToggleReminders = trackerVm::setCheckRemindersEnabled,
                             onOpenCalendar = onOpenTrackerCalendar,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                         )

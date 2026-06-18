@@ -27,12 +27,13 @@ import app.kamy.qalbuApp.design.theme.AlKhatibColors
 @Composable
 fun ReaderHtmlView(
     htmlBody: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    wrapHtml: (String) -> String = ::wrapReaderProseHtml
 ) {
     val density = LocalDensity.current
     var contentHeightPx by remember(htmlBody) { mutableIntStateOf(0) }
     var lastLoaded by remember(htmlBody) { mutableStateOf<String?>(null) }
-    val wrapped = remember(htmlBody) { wrapReaderProseHtml(htmlBody) }
+    val wrapped = remember(htmlBody, wrapHtml) { wrapHtml(htmlBody) }
     val heightModifier = if (contentHeightPx > 0) {
         Modifier.height(with(density) { contentHeightPx.toDp() })
     } else {

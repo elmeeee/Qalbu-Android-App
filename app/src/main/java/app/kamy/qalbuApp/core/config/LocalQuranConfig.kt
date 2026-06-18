@@ -1,5 +1,6 @@
 package app.kamy.qalbuApp.core.config
 
+import app.kamy.qalbuApp.core.locale.AppLanguage
 import app.kamy.qalbuApp.domain.model.QFTranslation
 import app.kamy.qalbuApp.domain.model.RecitationPayload
 import app.kamy.qalbuApp.domain.model.RecitationTranslatedName
@@ -42,11 +43,11 @@ object LocalQuranConfig {
         ),
         QFTranslation(
             id = TRANSLATION_ENGLISH,
-            name = "English",
+            name = "Sahih International",
             authorName = "Sahih International",
             slug = "en",
             languageName = "english",
-            translatedName = TranslatedSubName("English", "english")
+            translatedName = TranslatedSubName("Sahih International", "english")
         ),
         QFTranslation(
             id = TRANSLATION_MALAY,
@@ -111,6 +112,27 @@ object LocalQuranConfig {
         }
         return text?.trim()?.takeIf { it.isNotBlank() }
     }
+
+    fun transliterationUsesHtml(translationId: Int): Boolean =
+        translationId == TRANSLATION_ENGLISH
+
+    fun translationForAppLanguage(language: AppLanguage): QFTranslation =
+        when (language) {
+            AppLanguage.ENGLISH -> translations.first { it.id == TRANSLATION_ENGLISH }
+            AppLanguage.MALAY -> translations.first { it.id == TRANSLATION_MALAY }
+            AppLanguage.INDONESIAN -> translations.first { it.id == TRANSLATION_INDONESIAN }
+        }
+
+    fun appLanguageForTranslationId(translationId: Int): AppLanguage? =
+        when (normalizeTranslationId(translationId)) {
+            TRANSLATION_ENGLISH -> AppLanguage.ENGLISH
+            TRANSLATION_MALAY -> AppLanguage.MALAY
+            TRANSLATION_INDONESIAN, TRANSLATION_KEMENAG -> AppLanguage.INDONESIAN
+            else -> null
+        }
+
+    fun translationDisplayLabel(translation: QFTranslation): String =
+        translation.authorName.ifBlank { translation.name }
 
     fun supportsTafsir(translationId: Int): Boolean =
         translationId == TRANSLATION_INDONESIAN || translationId == TRANSLATION_KEMENAG

@@ -218,7 +218,7 @@
     <string name="mushaf_swipe_hint">Swipe left or right to turn pages</string>
     <string name="mushaf_swipe_hint_action">Got it</string>
     <string name="mushaf_cloud_synced">Synced to your account</string>
-    <string name="prayer_tracker_title">Today\'s prayers</string>
+    <string name="prayer_tracker_title">Prayers</string>
     <string name="prayer_tracker_subtitle">%1$d of %2$d completed</string>
     <string name="prayer_challenge_progress">Challenge: %1$d / %2$d day streak</string>
     <string name="prayer_streak_current">Current streak</string>
@@ -562,7 +562,7 @@
     <string name="offline_murottal_complete">Full murottal saved offline</string>
     <string name="offline_murottal_reciter">Reciter</string>
     <string name="doa_zikir_title">Doa &amp; Zikir</string>
-    <string name="doa_zikir_account_subtitle">Daily doa and dhikr from MASA</string>
+    <string name="doa_zikir_account_subtitle">Daily doa and dhikr</string>
     <string name="doa_zikir_kind_doa">Doa</string>
     <string name="doa_zikir_kind_dhikr">Zikir</string>
     <string name="khgt_important_day">Important day</string>
@@ -570,6 +570,8 @@
     <string name="prayer_last_sync">Prayer times from last sync · %1$s</string>
     <string name="spiritual_tools_tab_subtitle">Qibla, doa, zikir, and more</string>
     <string name="transliteration_label">Latin</string>
+    <string name="reader_scroll_hint">Scroll for transliteration &amp; translation</string>
+    <string name="translator_sync_subtitle">Synced with app language</string>
 
     <!-- Widgets & shortcuts -->
     <string name="daily_verse_widget_title">Verse of the day</string>
