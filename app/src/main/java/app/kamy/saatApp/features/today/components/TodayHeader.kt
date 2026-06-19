@@ -6,6 +6,8 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
@@ -124,9 +126,10 @@ fun TodayHeader(
                             }
                         },
                     transitionSpec = {
-                        (fadeIn(animationSpec = tween(220)) togetherWith
-                            fadeOut(animationSpec = tween(180)))
-                            .using(SizeTransform(clip = false) { _, _ -> snap() })
+                        (slideInVertically(animationSpec = tween(260)) { height -> height } +
+                            fadeIn(animationSpec = tween(220))) togetherWith
+                            (slideOutVertically(animationSpec = tween(200)) { height -> -height } +
+                                fadeOut(animationSpec = tween(180)))
                     },
                     label = "headerDate"
                 ) { date ->
@@ -170,9 +173,10 @@ fun TodayHeader(
                 AnimatedContent(
                     targetState = dayName,
                     transitionSpec = {
-                        (fadeIn(animationSpec = tween(220)) togetherWith
-                            fadeOut(animationSpec = tween(180)))
-                            .using(SizeTransform(clip = false) { _, _ -> snap() })
+                        (slideInVertically(animationSpec = tween(260)) { height -> height } +
+                            fadeIn(animationSpec = tween(220))) togetherWith
+                            (slideOutVertically(animationSpec = tween(200)) { height -> -height } +
+                                fadeOut(animationSpec = tween(180)))
                     },
                     label = "headerDay"
                 ) { name ->
