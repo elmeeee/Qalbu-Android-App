@@ -22,6 +22,9 @@ import app.kamy.saatApp.domain.faraidh.FaraidhProofKind
 import app.kamy.saatApp.domain.faraidh.FaraidhResult
 import app.kamy.saatApp.domain.faraidh.HeirType
 import app.kamy.saatApp.domain.faraidh.SilsilahNode
+import app.kamy.saatApp.domain.faraidh.EstateAssetInput
+import app.kamy.saatApp.domain.faraidh.EstateComputation
+import app.kamy.saatApp.domain.faraidh.FaraidhEstateCalculator
 import java.io.File
 import java.io.FileOutputStream
 import java.math.BigDecimal
@@ -41,6 +44,7 @@ object FaraidhPdfExporter {
     fun export(
         context: Context,
         result: FaraidhResult,
+        estateInput: EstateAssetInput,
         names: FaraidhParticipantNames,
         proofs: List<FaraidhProofItem>,
         glossary: List<FaraidhGlossaryItem>,
@@ -96,41 +100,15 @@ object FaraidhPdfExporter {
 
         result.deceased.estate?.let { estate ->
             y = drawLine(canvas, y, paints.section, t(language, "Perhitungan harta (tarikah)", "Pengiraan harta (tarikah)", "Estate calculation (tarikah)"))
-            y += 10f
-            y = drawLine(canvas, y, paints.body, "${t(language, "Tunai & tabungan", "Tunai & simpanan", "Cash & savings")}: ${currency.format(estate.cashComponent)}")
-            y += 3f
-            y = drawLine(canvas, y, paints.body, "${t(language, "Emas & perhiasan", "Emas & barang kemas", "Gold & jewelry")}: ${currency.format(estate.goldComponent)}")
-            y += 3f
-            y = drawLine(canvas, y, paints.body, "${t(language, "Properti & tanah", "Hartanah & tanah", "Property & land")}: ${currency.format(estate.propertyComponent)}")
-            y += 3f
-            y = drawLine(canvas, y, paints.body, "${t(language, "Aset usaha", "Aset perniagaan", "Business assets")}: ${currency.format(estate.businessComponent)}")
-            y += 3f
-            y = drawLine(canvas, y, paints.body, "${t(language, "Aset lainnya", "Aset lain", "Other assets")}: ${currency.format(estate.otherComponent)}")
-            y += 3f
-            y = drawLine(canvas, y, paints.bodyBold, "${t(language, "Total aset kotor", "Jumlah aset kasar", "Gross assets")}: ${currency.format(estate.grossAssets)}")
-            y += 6f
-            if (estate.funeralCosts > BigDecimal.ZERO) {
-                y = drawLine(canvas, y, paints.body, "− ${t(language, "Biaya jenazah", "Kos jenazah", "Funeral costs")}: ${currency.format(estate.funeralCosts)}")
-                y += 3f
-            }
-            if (estate.debts > BigDecimal.ZERO) {
-                y = drawLine(canvas, y, paints.body, "− ${t(language, "Hutang", "Hutang", "Debts")}: ${currency.format(estate.debts)}")
-                y += 3f
-            }
-            if (estate.unpaidZakat > BigDecimal.ZERO) {
-                y = drawLine(canvas, y, paints.body, "− ${t(language, "Zakat tertunda", "Zakat tertunggak", "Unpaid zakat")}: ${currency.format(estate.unpaidZakat)}")
-                y += 3f
-            }
-            if (estate.wasiatApplied > BigDecimal.ZERO) {
-                y = drawLine(canvas, y, paints.body, "− ${t(language, "Wasiat (maks ⅓)", "Wasiat (maks ⅓)", "Wasiat (max ⅓)")}: ${currency.format(estate.wasiatApplied)}")
-                y += 3f
-            }
+            y += 8f
+            y = drawEstateTable(canvas, y, paints, estate, estateInput, currency, language, ::ensure)
+            y += 8f
             if (estate.hasResidentialProperty) {
+                ensure(14f)
                 val note = estate.propertyNotes.ifBlank { t(language, "Rumah tinggal", "Rumah kediaman", "Residential house") }
-                y = drawLine(canvas, y, paints.small, "${t(language, "Properti", "Hartanah", "Property")}: $note")
-                y += 3f
+                y = drawLine(canvas, y, paints.small, "${t(language, "Catatan kediaman", "Nota kediaman", "Residential note")}: $note")
+                y += 6f
             }
-            y = drawLine(canvas, y, paints.bodyBold, "${t(language, "Tarikah untuk faraidh", "Tarikah untuk faraidh", "Tarikah for faraidh")}: ${currency.format(estate.netEstate)}")
             y += 12f
         }
 
@@ -157,33 +135,9 @@ object FaraidhPdfExporter {
 
         // --- Breakdown table ---
         y = drawLine(canvas, y, paints.section, t(language, "Rincian pembagian waris", "Perincian pembahagian", "Inheritance breakdown"))
-        y += 10f
-        y = drawTableHeader(canvas, y, paints, language)
-        result.activeShares.forEach { share ->
-            ensure(52f)
-            val role = heirLabel(share.type, language)
-            val persons = FaraidhNameLabels.displayList(share.type, role, names, share.headCount)
-            val perHead = if (share.headCount > 1) {
-                share.cashAmount.divide(BigDecimal(share.headCount), 2, RoundingMode.HALF_UP)
-            } else null
-            y = drawLine(canvas, y, paints.bodyBold, role)
-            y += 2f
-            persons.forEachIndexed { index, person ->
-                ensure(14f)
-                val shareLine = buildString {
-                    append("  • $person")
-                    append(" | ${share.fraction.toDisplayString()}")
-                    append(" | ${formatPercent(share.percentage, language)}")
-                    if (perHead != null && share.headCount > 1) {
-                        append(" | ${currency.format(perHead)} ${t(language, "per orang", "setiap orang", "each")}")
-                    }
-                }
-                y = drawLine(canvas, y, paints.small, shareLine)
-            }
-            ensure(16f)
-            y = drawLine(canvas, y, paints.body, "  ${t(language, "Jumlah kelompok", "Jumlah kumpulan", "Group total")}: ${currency.format(share.cashAmount)} (${if (share.isAsabah) "Asabah" else "Furud"})")
-            y += 8f
-        }
+        y += 8f
+        y = drawInheritanceTable(canvas, y, paints, result, names, currency, language, ::ensure)
+        y += 14f
 
         if (result.blockedHeirs.isNotEmpty()) {
             ensure(24f)
@@ -307,9 +261,110 @@ object FaraidhPdfExporter {
         return y
     }
 
-    private fun drawTableHeader(canvas: android.graphics.Canvas, y: Float, paints: PdfPaints, language: AppLanguage): Float {
-        val header = "${t(language, "Waris", "Waris", "Heir")} | ${t(language, "Bagian", "Bahagian", "Share")} | % | ${t(language, "Nominal", "Amaun", "Amount")}"
-        return drawLine(canvas, y, paints.small, header)
+    private fun drawInheritanceTable(
+        canvas: android.graphics.Canvas,
+        startY: Float,
+        paints: PdfPaints,
+        result: FaraidhResult,
+        names: FaraidhParticipantNames,
+        currency: NumberFormat,
+        language: AppLanguage,
+        ensure: (Float) -> Unit
+    ): Float {
+        var y = startY
+        ensure(30f)
+
+        val colWidths = floatArrayOf(197f, 80f, 80f, 150f)
+        val colXs = FloatArray(4).apply {
+            this[0] = MARGIN
+            this[1] = MARGIN + colWidths[0]
+            this[2] = MARGIN + colWidths[0] + colWidths[1]
+            this[3] = MARGIN + colWidths[0] + colWidths[1] + colWidths[2]
+        }
+
+        val headerHeight = 24f
+        val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF064E3B.toInt()
+            style = Paint.Style.FILL
+        }
+        val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFCBD5E1.toInt()
+            style = Paint.Style.STROKE
+            strokeWidth = 1f
+        }
+        val headerTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.WHITE
+            textSize = 9.5f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+
+        canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + headerHeight, headerPaint)
+        
+        val headers = arrayOf(
+            t(language, "Ahli Waris", "Waris", "Heir"),
+            t(language, "Bagian", "Bahagian", "Share"),
+            t(language, "Persen", "Peratus", "Percentage"),
+            t(language, "Nilai Waris", "Amaun", "Amount")
+        )
+        for (i in 0..3) {
+            canvas.drawText(headers[i], colXs[i] + 8f, y + 16f, headerTextPaint)
+        }
+        
+        canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + headerHeight, borderPaint)
+        for (i in 1..3) {
+            canvas.drawLine(colXs[i], y, colXs[i], y + headerHeight, borderPaint)
+        }
+
+        y += headerHeight
+
+        val rowHeight = 22f
+        val bgPaintEven = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.WHITE
+            style = Paint.Style.FILL
+        }
+        val bgPaintOdd = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFF8FAFC.toInt()
+            style = Paint.Style.FILL
+        }
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF334155.toInt()
+            textSize = 9f
+        }
+        val textPaintBold = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF1E293B.toInt()
+            textSize = 9f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+
+        var rowIndex = 0
+        result.activeShares.forEach { share ->
+            val role = heirLabel(share.type, language)
+            val persons = FaraidhNameLabels.displayList(share.type, role, names, share.headCount)
+            val indivFrac = share.fraction.divideAmongHeads(share.headCount)
+            val indivPercent = share.percentage.divide(BigDecimal(share.headCount), 1, RoundingMode.HALF_UP)
+            val indivCash = share.cashAmount.divide(BigDecimal(share.headCount), 2, RoundingMode.HALF_UP)
+
+            persons.forEach { person ->
+                ensure(rowHeight)
+                
+                val bgPaint = if (rowIndex % 2 == 0) bgPaintEven else bgPaintOdd
+                canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + rowHeight, bgPaint)
+                
+                canvas.drawText(person, colXs[0] + 8f, y + 15f, textPaintBold)
+                canvas.drawText(indivFrac.toDisplayString(), colXs[1] + 8f, y + 15f, textPaint)
+                canvas.drawText(formatPercent(indivPercent, language), colXs[2] + 8f, y + 15f, textPaint)
+                canvas.drawText(currency.format(indivCash), colXs[3] + 8f, y + 15f, textPaint)
+                
+                canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + rowHeight, borderPaint)
+                for (i in 1..3) {
+                    canvas.drawLine(colXs[i], y, colXs[i], y + rowHeight, borderPaint)
+                }
+
+                y += rowHeight
+                rowIndex++
+            }
+        }
+        return y
     }
 
     private fun startPage(document: PdfDocument, number: Int): PdfDocument.Page {
@@ -390,6 +445,7 @@ object FaraidhPdfExporter {
         BlockingReasonKey.BY_GRANDCHILDREN_SUBSTITUTE -> t(language, "Digantikan waris lebih dekat", "Diganti waris lebih dekat", "Substituted by closer heirs")
         BlockingReasonKey.GENDER_MISMATCH -> t(language, "Tidak berlaku", "Tidak terpakai", "Not applicable")
         BlockingReasonKey.NO_SHARE_REMAINDER -> t(language, "Tidak ada sisa bagian", "Tiada baki bahagian", "No remaining share")
+        BlockingReasonKey.OUT_OF_WEDLOCK -> t(language, "Tidak ada nasab bapak", "Tiada nasab bapa", "No paternal lineage (born out of wedlock)")
     }
 
     private fun madhhabLabel(madhhab: FaraidhMadhhab, language: AppLanguage): String = when (madhhab) {
@@ -416,6 +472,282 @@ object FaraidhPdfExporter {
         HeirType.PATERNAL_BROTHER -> t(language, "Saudara sebapak", "Saudara sebapa", "Paternal half-brother")
         HeirType.PATERNAL_SISTER -> t(language, "Saudari sebapak", "Saudari sebapa", "Paternal half-sister")
         HeirType.MATERNAL_SIBLING -> t(language, "Saudara seibu", "Saudara seibu", "Maternal sibling")
+    }
+ 
+    private class EstateRow(
+        val category: String,
+        val detail: String,
+        val amount: BigDecimal,
+        val isDeduction: Boolean = false,
+        val isHeader: Boolean = false,
+        val isTotal: Boolean = false
+    )
+
+    private fun drawEstateTable(
+        canvas: android.graphics.Canvas,
+        startY: Float,
+        paints: PdfPaints,
+        estate: EstateComputation,
+        estateInput: EstateAssetInput,
+        currency: NumberFormat,
+        language: AppLanguage,
+        ensure: (Float) -> Unit
+    ): Float {
+        var y = startY
+        ensure(30f)
+
+        val colWidths = floatArrayOf(200f, 187f, 120f)
+        val colXs = FloatArray(3).apply {
+            this[0] = MARGIN
+            this[1] = MARGIN + colWidths[0]
+            this[2] = MARGIN + colWidths[0] + colWidths[1]
+        }
+
+        val headerHeight = 24f
+        val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF064E3B.toInt()
+            style = Paint.Style.FILL
+        }
+        val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFCBD5E1.toInt()
+            style = Paint.Style.STROKE
+            strokeWidth = 1f
+        }
+        val headerTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.WHITE
+            textSize = 9.5f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+
+        canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + headerHeight, headerPaint)
+        
+        val headers = arrayOf(
+            t(language, "Item / Kategori", "Item / Kategori", "Item / Category"),
+            t(language, "Keterangan", "Butiran", "Details"),
+            t(language, "Nilai", "Nilai", "Value")
+        )
+        for (i in 0..2) {
+            canvas.drawText(headers[i], colXs[i] + 8f, y + 16f, headerTextPaint)
+        }
+        
+        canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + headerHeight, borderPaint)
+        for (i in 1..2) {
+            canvas.drawLine(colXs[i], y, colXs[i], y + headerHeight, borderPaint)
+        }
+
+        y += headerHeight
+
+        val rows = mutableListOf<EstateRow>()
+        
+        // Cash component
+        if (estate.cashComponent > BigDecimal.ZERO) {
+            rows.add(
+                EstateRow(
+                    category = t(language, "Tunai & tabungan", "Tunai & simpanan", "Cash & savings"),
+                    detail = "",
+                    amount = estate.cashComponent
+                )
+            )
+        }
+        
+        // Gold component
+        if (estate.goldComponent > BigDecimal.ZERO) {
+            val detailText = if (estateInput.inputGoldByGrams) {
+                val weight = estateInput.goldWeightGrams.replace(',', '.')
+                val price = FaraidhEstateCalculator.parseAmount(estateInput.goldPricePerGram)
+                "$weight g × ${currency.format(price)}"
+            } else {
+                ""
+            }
+            rows.add(
+                EstateRow(
+                    category = t(language, "Emas & perhiasan", "Emas & barang kemas", "Gold & jewelry"),
+                    detail = detailText,
+                    amount = estate.goldComponent
+                )
+            )
+        }
+        
+        // Property component
+        if (estate.propertyComponent > BigDecimal.ZERO) {
+            if (estateInput.inputPropertyDetailed && estateInput.properties.isNotEmpty()) {
+                estateInput.properties.forEach { item ->
+                    val sizeDetail = if (item.sizeSqm.isNotBlank()) "${item.sizeSqm} m²" else ""
+                    rows.add(
+                        EstateRow(
+                            category = "${t(language, "Properti", "Hartanah", "Property")}: ${item.name}",
+                            detail = sizeDetail,
+                            amount = FaraidhEstateCalculator.parseAmount(item.value)
+                        )
+                    )
+                }
+            } else {
+                rows.add(
+                    EstateRow(
+                        category = t(language, "Properti & tanah", "Hartanah & tanah", "Property & land"),
+                        detail = estate.propertyNotes,
+                        amount = estate.propertyComponent
+                    )
+                )
+            }
+        }
+        
+        // Business component
+        if (estate.businessComponent > BigDecimal.ZERO) {
+            rows.add(
+                EstateRow(
+                    category = t(language, "Aset usaha", "Aset perniagaan", "Business assets"),
+                    detail = "",
+                    amount = estate.businessComponent
+                )
+            )
+        }
+        
+        // Other component
+        if (estate.otherComponent > BigDecimal.ZERO) {
+            rows.add(
+                EstateRow(
+                    category = t(language, "Aset lainnya", "Aset lain", "Other assets"),
+                    detail = "",
+                    amount = estate.otherComponent
+                )
+            )
+        }
+        
+        // Subtotal: Gross Assets
+        rows.add(
+            EstateRow(
+                category = t(language, "Total Aset Kotor", "Jumlah Aset Kasar", "Gross Assets"),
+                detail = "",
+                amount = estate.grossAssets,
+                isTotal = true
+            )
+        )
+        
+        // Deductions
+        if (estate.funeralCosts > BigDecimal.ZERO) {
+            rows.add(
+                EstateRow(
+                    category = t(language, "Biaya jenazah", "Kos jenazah", "Funeral costs"),
+                    detail = "",
+                    amount = estate.funeralCosts,
+                    isDeduction = true
+                )
+            )
+        }
+        if (estate.debts > BigDecimal.ZERO) {
+            rows.add(
+                EstateRow(
+                    category = t(language, "Hutang", "Hutang", "Debts"),
+                    detail = "",
+                    amount = estate.debts,
+                    isDeduction = true
+                )
+            )
+        }
+        if (estate.unpaidZakat > BigDecimal.ZERO) {
+            rows.add(
+                EstateRow(
+                    category = t(language, "Zakat tertunda", "Zakat tertunggak", "Unpaid zakat"),
+                    detail = "",
+                    amount = estate.unpaidZakat,
+                    isDeduction = true
+                )
+            )
+        }
+        if (estate.wasiatApplied > BigDecimal.ZERO) {
+            val wasiatDetail = if (FaraidhEstateCalculator.parseAmount(estateInput.bequestWasiat) > estate.maxWasiat) {
+                t(language, "Dibatasi maks ⅓", "Dihadkan maks ⅓", "Capped at max ⅓")
+            } else {
+                ""
+            }
+            rows.add(
+                EstateRow(
+                    category = t(language, "Wasiat", "Wasiat", "Wasiat/Bequest"),
+                    detail = wasiatDetail,
+                    amount = estate.wasiatApplied,
+                    isDeduction = true
+                )
+            )
+        }
+        
+        // Final Total: Net Estate
+        rows.add(
+            EstateRow(
+                category = t(language, "Tarikah Bersih (untuk Faraidh)", "Tarikah Bersih (untuk Faraidh)", "Net Estate (for Faraidh)"),
+                detail = "",
+                amount = estate.netEstate,
+                isTotal = true
+            )
+        )
+
+        val rowHeight = 22f
+        val bgPaintEven = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.WHITE
+            style = Paint.Style.FILL
+        }
+        val bgPaintOdd = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFF8FAFC.toInt()
+            style = Paint.Style.FILL
+        }
+        val bgPaintGross = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFF1F5F9.toInt() // light grey
+            style = Paint.Style.FILL
+        }
+        val bgPaintNet = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFECFDF5.toInt() // light green
+            style = Paint.Style.FILL
+        }
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF334155.toInt()
+            textSize = 9f
+        }
+        val textPaintBold = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF1E293B.toInt()
+            textSize = 9f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+        val textPaintRed = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF991B1B.toInt() // dark red
+            textSize = 9f
+        }
+
+        rows.forEachIndexed { index, row ->
+            ensure(rowHeight)
+            val bgPaint = when {
+                row.isTotal && row.category.contains("Tarikah") -> bgPaintNet
+                row.isTotal -> bgPaintGross
+                index % 2 == 0 -> bgPaintEven
+                else -> bgPaintOdd
+            }
+            canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + rowHeight, bgPaint)
+            
+            // Draw category
+            val catPaint = if (row.isTotal) textPaintBold else textPaint
+            canvas.drawText(row.category, colXs[0] + 8f, y + 15f, catPaint)
+            
+            // Draw details
+            canvas.drawText(row.detail, colXs[1] + 8f, y + 15f, textPaint)
+            
+            // Draw value
+            val prefix = if (row.isDeduction) "− " else ""
+            val valStr = "$prefix${currency.format(row.amount)}"
+            val valPaint = when {
+                row.isDeduction -> textPaintRed
+                row.isTotal -> textPaintBold
+                else -> textPaint
+            }
+            canvas.drawText(valStr, colXs[2] + 8f, y + 15f, valPaint)
+            
+            // Draw borders
+            canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + rowHeight, borderPaint)
+            for (i in 1..2) {
+                canvas.drawLine(colXs[i], y, colXs[i], y + rowHeight, borderPaint)
+            }
+            y += rowHeight
+        }
+
+        return y
     }
 
     private class PdfPaints {

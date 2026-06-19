@@ -21,6 +21,7 @@ data class FaraidhScenarioMeta(
 data class FaraidhScenarioData(
     val gender: String = "MALE",
     val madhhab: String = "SHAFII",
+    val deceasedBornOutOfWedlock: Boolean = false,
     val estate: EstateAssetInput = EstateAssetInput(),
     val names: FaraidhParticipantNames = FaraidhParticipantNames(),
     val husbandCount: Int = 0,

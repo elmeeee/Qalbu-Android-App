@@ -24,14 +24,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.domain.faraidh.SilsilahNode
+import java.text.NumberFormat
 
 @Composable
 fun FaraidhFamilyTree(
     nodes: List<SilsilahNode>,
     nodeTitle: @Composable (SilsilahNode) -> String,
     nodeSubtitle: @Composable (SilsilahNode) -> String,
+    currency: NumberFormat,
     modifier: Modifier = Modifier
 ) {
     val parents = nodes.filter { it.generationLevel == -1 }
@@ -59,22 +62,22 @@ fun FaraidhFamilyTree(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (parents.isNotEmpty()) {
-            TreeLevelRow(parents, nodeTitle, nodeSubtitle)
+            TreeLevelRow(parents, nodeTitle, nodeSubtitle, currency)
             VerticalConnector()
         }
 
         if (centerRow.isNotEmpty()) {
-            TreeLevelRow(centerRow, nodeTitle, nodeSubtitle, highlightDeceased = true)
+            TreeLevelRow(centerRow, nodeTitle, nodeSubtitle, currency, highlightDeceased = true)
         }
 
         if (children.isNotEmpty()) {
             VerticalConnector()
-            TreeLevelRow(children, nodeTitle, nodeSubtitle)
+            TreeLevelRow(children, nodeTitle, nodeSubtitle, currency)
         }
 
         if (grandchildren.isNotEmpty()) {
             VerticalConnector()
-            TreeLevelRow(grandchildren, nodeTitle, nodeSubtitle)
+            TreeLevelRow(grandchildren, nodeTitle, nodeSubtitle, currency)
         }
     }
 }
@@ -84,6 +87,7 @@ private fun TreeLevelRow(
     nodes: List<SilsilahNode>,
     nodeTitle: @Composable (SilsilahNode) -> String,
     nodeSubtitle: @Composable (SilsilahNode) -> String,
+    currency: NumberFormat,
     highlightDeceased: Boolean = false
 ) {
     Row(
@@ -97,6 +101,7 @@ private fun TreeLevelRow(
                 node = node,
                 nodeTitle = nodeTitle,
                 nodeSubtitle = nodeSubtitle,
+                currency = currency,
                 isDeceased = isDeceased,
                 compact = !isDeceased && nodes.size > 4
             )
@@ -109,10 +114,11 @@ private fun VerticalConnector() {
     val color = AlKhatibColors.Teal.copy(alpha = 0.4f)
     Canvas(
         modifier = Modifier
-            .width(2.dp)
-            .height(24.dp)
+            .width(16.dp)
+            .height(30.dp)
     ) {
         drawLine(color, Offset(size.width / 2, 0f), Offset(size.width / 2, size.height), strokeWidth = 2f)
+        drawCircle(color, radius = 4f, center = Offset(size.width / 2, size.height / 2))
     }
 }
 
@@ -121,6 +127,7 @@ private fun TreeNodeCard(
     node: SilsilahNode,
     nodeTitle: @Composable (SilsilahNode) -> String,
     nodeSubtitle: @Composable (SilsilahNode) -> String,
+    currency: NumberFormat,
     isDeceased: Boolean = false,
     compact: Boolean = false
 ) {
@@ -140,34 +147,116 @@ private fun TreeNodeCard(
     val subColor = if (isDeceased) Color.White.copy(alpha = 0.85f) else AlKhatibColors.Slate500
 
     Surface(
-        modifier = Modifier.width(if (isDeceased) 148.dp else if (compact) 104.dp else 118.dp),
-        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.width(if (isDeceased) 160.dp else if (compact) 120.dp else 140.dp),
+        shape = RoundedCornerShape(16.dp),
         color = bg,
-        shadowElevation = if (isDeceased || node.inherits) 3.dp else 0.dp,
+        shadowElevation = if (isDeceased || node.inherits) 4.dp else 1.dp,
         border = androidx.compose.foundation.BorderStroke(if (isDeceased) 2.dp else 1.dp, border)
     ) {
         Column(
-            Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+            Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (!isDeceased) {
+                val capsuleBg = when {
+                    node.blocked -> AlKhatibColors.Danger.copy(alpha = 0.1f)
+                    node.inherits -> AlKhatibColors.Teal.copy(alpha = 0.1f)
+                    else -> AlKhatibColors.SoftGrey.copy(alpha = 0.5f)
+                }
+                val capsuleFg = when {
+                    node.blocked -> AlKhatibColors.Danger
+                    node.inherits -> AlKhatibColors.Teal
+                    else -> AlKhatibColors.Slate500
+                }
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = capsuleBg,
+                    modifier = Modifier.padding(bottom = 6.dp)
+                ) {
+                    Text(
+                        text = nodeSubtitle(node).split(" · ").firstOrNull().orEmpty(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = capsuleFg,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            } else {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = AlKhatibColors.Gold.copy(alpha = 0.2f),
+                    modifier = Modifier.padding(bottom = 6.dp)
+                ) {
+                    Text(
+                        text = "PEWARIS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.GoldBright,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
             Text(
                 nodeTitle(node),
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = titleColor,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                nodeSubtitle(node),
-                style = MaterialTheme.typography.labelSmall,
-                color = subColor,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 2.dp)
-            )
+
+            if (node.inherits && node.shareFraction != null) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = node.shareFraction,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = AlKhatibColors.Teal,
+                    textAlign = TextAlign.Center
+                )
+                node.sharePercentage?.let { pct ->
+                    Text(
+                        text = pct,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AlKhatibColors.Slate500
+                    )
+                }
+                node.shareAmount?.let { amt ->
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = currency.format(amt),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.DeepEmerald,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            } else if (node.blocked) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "Dihijab",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.Danger
+                )
+            } else if (!isDeceased) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "Non-waris",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AlKhatibColors.Slate500
+                )
+            }
         }
     }
 }

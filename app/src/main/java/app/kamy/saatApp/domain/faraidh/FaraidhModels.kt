@@ -9,7 +9,8 @@ data class DeceasedProfile(
     val netEstate: BigDecimal,
     val name: String = "",
     val estate: EstateComputation? = null,
-    val madhhab: FaraidhMadhhab = FaraidhMadhhab.SHAFII
+    val madhhab: FaraidhMadhhab = FaraidhMadhhab.SHAFII,
+    val bornOutOfWedlock: Boolean = false
 )
 
 data class HeirInput(
@@ -59,7 +60,8 @@ enum class BlockingReasonKey {
     BY_FATHER,
     BY_GRANDCHILDREN_SUBSTITUTE,
     GENDER_MISMATCH,
-    NO_SHARE_REMAINDER
+    NO_SHARE_REMAINDER,
+    OUT_OF_WEDLOCK
 }
 
 enum class FaraidhAdjustment {
@@ -94,7 +96,10 @@ data class SilsilahNode(
     val inherits: Boolean,
     val blocked: Boolean,
     val blockReason: BlockingReasonKey?,
-    val displayName: String = ""
+    val displayName: String = "",
+    val shareFraction: String? = null,
+    val sharePercentage: String? = null,
+    val shareAmount: BigDecimal? = null
 )
 
 data class FaraidhResult(

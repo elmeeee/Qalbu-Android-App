@@ -71,6 +71,17 @@
       "textMs": "Rasulullah ﷺ menetapkan bahagian seorang anak perempuan separuh, dua orang anak perempuan dua pertiga, dan selebihnya untuk waris lelaki.",
       "externalUrl": "https://sunnah.com/muslim:1615",
       "topicKeys": ["children", "daughters"]
+    },
+    {
+      "id": "hadith_bukhari_2053",
+      "collection": "Sahih al-Bukhari",
+      "number": 2053,
+      "arabic": "الْوَلَدُ لِلْفِرَاشِ وَلِلْعَاهِرِ الْحَجَرُ",
+      "textEn": "The Messenger of Allah (ﷺ) said: 'The child belongs to the bed (i.e. marriage), and for the adulterer is the stone (deprivation).'",
+      "textId": "Rasulullah ﷺ bersabda: 'Anak itu bagi pemilik tempat tidur (suami dari pernikahan yang sah), dan bagi pelaku zina adalah batu (terhalang dari nasab dan waris).'",
+      "textMs": "Rasulullah ﷺ bersabda: 'Anak itu bagi pemilik tempat tidur (suami), dan bagi penzina mendapat kerugian (batu - terhalang dari nasab dan waris).'",
+      "externalUrl": "https://sunnah.com/bukhari:2053",
+      "topicKeys": ["out_of_wedlock"]
     }
   ],
   "proofMappings": {
@@ -87,6 +98,7 @@
     "proof_maternal_siblings": ["quran_4_176"],
     "proof_sisters_fixed": ["quran_4_176"],
     "proof_asabah": ["quran_4_11", "quran_4_7"],
-    "proof_awl_radd": ["quran_4_7", "hadith_bukhari_6732"]
+    "proof_awl_radd": ["quran_4_7", "hadith_bukhari_6732"],
+    "proof_out_of_wedlock": ["hadith_bukhari_2053"]
   }
 }

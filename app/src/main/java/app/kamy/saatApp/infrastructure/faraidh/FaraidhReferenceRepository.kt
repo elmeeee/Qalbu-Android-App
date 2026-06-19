@@ -133,7 +133,7 @@ class FaraidhReferenceRepository @Inject constructor(
                     externalUrl = null
                 )
             }
-            if (key == "faraidh_awl_note" || key == "faraidh_radd_note" || key == "faraidh_radd_note_hanafi") {
+            if (key == "faraidh_awl_note" || key == "faraidh_radd_note" || key == "faraidh_radd_note_hanafi" || key == "proof_out_of_wedlock_note") {
                 items += FaraidhProofItem(
                     id = key,
                     kind = FaraidhProofKind.NOTE,
@@ -191,6 +191,11 @@ class FaraidhReferenceRepository @Inject constructor(
             AppLanguage.MALAY -> "Aul (kekurangan bahagian)"
             AppLanguage.ENGLISH -> "ʿAwl (deficit adjustment)"
         }
+        "proof_out_of_wedlock_note" -> when (language) {
+            AppLanguage.INDONESIAN -> "Nasab & Waris Anak luar nikah / Anak li'an"
+            AppLanguage.MALAY -> "Nasab & Waris Anak luar nikah / Anak li'an"
+            AppLanguage.ENGLISH -> "Lineage & Inheritance of Illegitimate/Li'an Children"
+        }
         else -> when (language) {
             AppLanguage.INDONESIAN -> "Radd (surplus pembagian)"
             AppLanguage.MALAY -> "Radd (lebihan bahagian)"
@@ -203,6 +208,11 @@ class FaraidhReferenceRepository @Inject constructor(
             AppLanguage.INDONESIAN -> "Jika jumlah bagian tetap melebihi harta, semua porsi dikurangi proporsional dengan menaikkan penyebut (qismah musytarakah)."
             AppLanguage.MALAY -> "Jika jumlah bahagian tetap melebihi harta, semua bahagian dikurangkan secara proporsional dengan menaikkan penyebut."
             AppLanguage.ENGLISH -> "When fixed shares exceed the estate, all portions are reduced proportionally by increasing the common denominator."
+        }
+        "proof_out_of_wedlock_note" -> when (language) {
+            AppLanguage.INDONESIAN -> "Berdasarkan syariat Islam, anak yang lahir di luar pernikahan yang sah atau anak li'an hanya dinasabkan kepada ibu kandungnya. Oleh karena itu, ia tidak mewarisi dari ayah biologis atau kerabat ayahnya, dan sebaliknya. Hubungan waris hanya berlaku dengan ibu dan kerabat ibunya."
+            AppLanguage.MALAY -> "Berdasarkan syariat Islam, anak yang lahir di luar pernikahan yang sah atau anak li'an hanya dinasabkan kepada ibu kandungnya. Oleh itu, dia tidak mewarisi daripada bapa biologi atau kerabat bapanya, dan sebaliknya. Hubungan waris hanya terpakai dengan ibu dan kerabat ibunya."
+            AppLanguage.ENGLISH -> "Under Islamic Shariah, a child born out of wedlock or a child of li'an is legally attributed only to the biological mother. Therefore, there is no mutual inheritance between the child and the biological father or his paternal relatives. Inheritance relations exist solely with the mother and her relatives."
         }
         "faraidh_radd_note_hanafi" -> when (language) {
             AppLanguage.INDONESIAN -> "Kelebihan harta dikembalikan (radd) kepada semua ahli waris yang berhak secara proporsional—termasuk suami/istri menurut mazhab Hanafi."

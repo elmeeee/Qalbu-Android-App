@@ -22,6 +22,7 @@ import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioData
 import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioMeta
 import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioStore
+import app.kamy.saatApp.infrastructure.repository.GoldPriceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.math.BigDecimal
@@ -35,6 +36,7 @@ import kotlinx.coroutines.launch
 data class FaraidhUiState(
     val gender: DeceasedGender = DeceasedGender.MALE,
     val madhhab: FaraidhMadhhab = FaraidhMadhhab.SHAFII,
+    val deceasedBornOutOfWedlock: Boolean = false,
     val estate: EstateAssetInput = EstateAssetInput(),
     val estateComputation: EstateComputation? = null,
     val netEstate: String = "",
@@ -62,7 +64,8 @@ data class FaraidhUiState(
     val pdfUri: Uri? = null,
     val errorMessage: String? = null,
     val savedScenarios: List<FaraidhScenarioMeta> = emptyList(),
-    val scenarioMessage: String? = null
+    val scenarioMessage: String? = null,
+    val liveGoldPrice: String? = null
 )
 
 @HiltViewModel
@@ -70,7 +73,8 @@ class FaraidhViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val referenceRepository: FaraidhReferenceRepository,
     private val languageStore: AppLanguageStore,
-    private val scenarioStore: FaraidhScenarioStore
+    private val scenarioStore: FaraidhScenarioStore,
+    private val goldPriceRepository: GoldPriceRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(FaraidhUiState())
@@ -80,7 +84,20 @@ class FaraidhViewModel @Inject constructor(
         loadGlossary()
         loadSavedScenarios()
         restoreAutoDraft()
+        fetchLiveGoldPrice()
         recompute()
+    }
+
+    private fun fetchLiveGoldPrice() {
+        viewModelScope.launch {
+            runCatching {
+                goldPriceRepository.fetchQuote("IDR")
+            }.onSuccess { quote ->
+                if (quote != null) {
+                    _state.update { it.copy(liveGoldPrice = quote.goldPerGramIdr.toLong().toString()) }
+                }
+            }
+        }
     }
 
     private fun loadSavedScenarios() {
@@ -132,6 +149,7 @@ class FaraidhViewModel @Inject constructor(
     private fun toScenarioData(state: FaraidhUiState): FaraidhScenarioData = FaraidhScenarioData(
         gender = state.gender.name,
         madhhab = state.madhhab.name,
+        deceasedBornOutOfWedlock = state.deceasedBornOutOfWedlock,
         estate = state.estate,
         names = state.names,
         husbandCount = state.husbandCount,
@@ -154,6 +172,7 @@ class FaraidhViewModel @Inject constructor(
         state.copy(
             gender = runCatching { DeceasedGender.valueOf(data.gender) }.getOrDefault(DeceasedGender.MALE),
             madhhab = runCatching { FaraidhMadhhab.valueOf(data.madhhab) }.getOrDefault(FaraidhMadhhab.SHAFII),
+            deceasedBornOutOfWedlock = data.deceasedBornOutOfWedlock,
             estate = data.estate,
             names = data.names,
             husbandCount = data.husbandCount,
@@ -194,6 +213,11 @@ class FaraidhViewModel @Inject constructor(
 
     fun setDeceasedName(value: String) {
         _state.update { it.copy(names = it.names.copy(deceasedName = value)) }
+        recompute()
+    }
+
+    fun setDeceasedBornOutOfWedlock(value: Boolean) {
+        _state.update { it.copy(deceasedBornOutOfWedlock = value) }
         recompute()
     }
 
@@ -358,6 +382,7 @@ class FaraidhViewModel @Inject constructor(
                 val uri = FaraidhPdfExporter.export(
                     context = context,
                     result = result,
+                    estateInput = state.estate,
                     names = state.names,
                     proofs = proofs,
                     glossary = state.glossary,
@@ -396,7 +421,8 @@ class FaraidhViewModel @Inject constructor(
             netEstate = estate,
             name = s.names.deceasedName.trim(),
             estate = estateCalc,
-            madhhab = s.madhhab
+            madhhab = s.madhhab,
+            bornOutOfWedlock = s.deceasedBornOutOfWedlock
         )
         val result = FaraidhEngine.calculate(profile, input, s.names, s.madhhab)
         viewModelScope.launch {

@@ -15,10 +15,23 @@ enum class FaraidhMadhhab {
 }
 
 @Serializable
+data class FaraidhPropertyItem(
+    val id: String,
+    val name: String,
+    val sizeSqm: String = "",
+    val value: String = ""
+)
+
+@Serializable
 data class EstateAssetInput(
     val cashSavings: String = "",
     val goldJewelry: String = "",
+    val goldWeightGrams: String = "",
+    val goldPricePerGram: String = "",
+    val inputGoldByGrams: Boolean = false,
     val propertyValue: String = "",
+    val properties: List<FaraidhPropertyItem> = emptyList(),
+    val inputPropertyDetailed: Boolean = false,
     val businessAssets: String = "",
     val otherAssets: String = "",
     val hasResidentialProperty: Boolean = false,
@@ -55,8 +68,20 @@ object FaraidhEstateCalculator {
 
     fun compute(input: EstateAssetInput): EstateComputation {
         val cash = parseAmount(input.cashSavings)
-        val gold = parseAmount(input.goldJewelry)
-        val property = parseAmount(input.propertyValue)
+        val gold = if (input.inputGoldByGrams) {
+            val weight = input.goldWeightGrams.replace(',', '.').toBigDecimalOrNull() ?: BigDecimal.ZERO
+            val price = parseAmount(input.goldPricePerGram)
+            weight.multiply(price).setScale(2, RoundingMode.HALF_UP)
+        } else {
+            parseAmount(input.goldJewelry)
+        }
+        val property = if (input.inputPropertyDetailed && input.properties.isNotEmpty()) {
+            input.properties.fold(BigDecimal.ZERO) { acc, item ->
+                acc.add(parseAmount(item.value))
+            }
+        } else {
+            parseAmount(input.propertyValue)
+        }
         val business = parseAmount(input.businessAssets)
         val other = parseAmount(input.otherAssets)
         val funeral = parseAmount(input.funeralCosts).max(BigDecimal.ZERO)

@@ -8,8 +8,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import app.kamy.saatApp.domain.faraidh.FaraidhPropertyItem
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
@@ -20,7 +32,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +53,7 @@ import app.kamy.saatApp.domain.faraidh.MoneyInputFormatter
 import app.kamy.saatApp.domain.faraidh.EstateComputation
 import app.kamy.saatApp.domain.faraidh.FaraidhMadhhab
 import java.text.NumberFormat
+import java.math.BigDecimal
 
 @Composable
 fun FaraidhMadhhabPicker(selected: FaraidhMadhhab, onSelect: (FaraidhMadhhab) -> Unit) {
@@ -106,23 +124,258 @@ private fun MadhhabChip(label: String, selected: Boolean, onClick: () -> Unit, m
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FaraidhEstateInputSection(
     estate: EstateAssetInput,
     computation: EstateComputation?,
     currency: NumberFormat,
+    liveGoldPrice: String?,
     onFieldChange: (EstateAssetInput.() -> EstateAssetInput) -> Unit
 ) {
     EstateSection(title = stringResource(R.string.faraidh_section_assets)) {
         MoneyField(stringResource(R.string.faraidh_asset_cash), estate.cashSavings) {
             onFieldChange { copy(cashSavings = it) }
         }
-        MoneyField(stringResource(R.string.faraidh_asset_gold), estate.goldJewelry) {
-            onFieldChange { copy(goldJewelry = it) }
+
+        // Gold & jewelry detailed input section
+        Column(modifier = Modifier.padding(bottom = 12.dp)) {
+            Text(
+                text = stringResource(R.string.faraidh_asset_gold),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = AlKhatibColors.Slate800,
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                SegmentedButton(
+                    selected = !estate.inputGoldByGrams,
+                    onClick = { onFieldChange { copy(inputGoldByGrams = false) } },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = Color.White)
+                ) { Text(stringResource(R.string.faraidh_gold_mode_value)) }
+                SegmentedButton(
+                    selected = estate.inputGoldByGrams,
+                    onClick = { onFieldChange { copy(inputGoldByGrams = true) } },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = Color.White)
+                ) { Text(stringResource(R.string.faraidh_gold_mode_grams)) }
+            }
+            if (!estate.inputGoldByGrams) {
+                MoneyField("", estate.goldJewelry) {
+                    onFieldChange { copy(goldJewelry = it) }
+                }
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedTextField(
+                        value = estate.goldWeightGrams,
+                        onValueChange = { onFieldChange { copy(goldWeightGrams = it) } },
+                        label = { Text(stringResource(R.string.faraidh_gold_weight)) },
+                        placeholder = { Text("0.0") },
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AlKhatibColors.Teal)
+                    )
+                    Column(modifier = Modifier.weight(1.2f)) {
+                        OutlinedTextField(
+                            value = MoneyInputFormatter.format(estate.goldPricePerGram),
+                            onValueChange = { onFieldChange { copy(goldPricePerGram = MoneyInputFormatter.format(it)) } },
+                            label = { Text(stringResource(R.string.faraidh_gold_price)) },
+                            placeholder = { Text("0") },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AlKhatibColors.Teal)
+                        )
+                        if (liveGoldPrice != null) {
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.faraidh_gold_price_live_btn) + ": " + currency.format(liveGoldPrice.toBigDecimalOrNull() ?: BigDecimal.ZERO),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = AlKhatibColors.Teal,
+                                modifier = Modifier
+                                    .clickable { onFieldChange { copy(goldPricePerGram = MoneyInputFormatter.format(liveGoldPrice)) } }
+                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                }
+            }
         }
-        MoneyField(stringResource(R.string.faraidh_asset_property), estate.propertyValue) {
-            onFieldChange { copy(propertyValue = it) }
+
+        // Property & Land detailed input section
+        Column(modifier = Modifier.padding(bottom = 12.dp)) {
+            Text(
+                text = stringResource(R.string.faraidh_asset_property),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = AlKhatibColors.Slate800,
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                SegmentedButton(
+                    selected = !estate.inputPropertyDetailed,
+                    onClick = { onFieldChange { copy(inputPropertyDetailed = false) } },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = Color.White)
+                ) { Text(stringResource(R.string.faraidh_property_mode_value)) }
+                SegmentedButton(
+                    selected = estate.inputPropertyDetailed,
+                    onClick = { onFieldChange { copy(inputPropertyDetailed = true) } },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = Color.White)
+                ) { Text(stringResource(R.string.faraidh_property_mode_detailed)) }
+            }
+            if (!estate.inputPropertyDetailed) {
+                MoneyField("", estate.propertyValue) {
+                    onFieldChange { copy(propertyValue = it) }
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.faraidh_property_list_title),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = AlKhatibColors.Slate500
+                    )
+                    estate.properties.forEach { prop ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(1.dp, AlKhatibColors.SoftGrey, RoundedCornerShape(12.dp))
+                                .background(AlKhatibColors.PureWhite)
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = prop.name.ifBlank { "Properti" },
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = AlKhatibColors.Slate800
+                                )
+                                if (prop.sizeSqm.isNotBlank()) {
+                                    Text(
+                                        text = "${prop.sizeSqm} m²",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = AlKhatibColors.Slate500
+                                    )
+                                }
+                                Text(
+                                    text = currency.format(MoneyInputFormatter.parseAmount(prop.value)),
+                                    fontWeight = FontWeight.SemiBold,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = AlKhatibColors.DeepEmerald
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    onFieldChange {
+                                        copy(properties = properties.filterNot { it.id == prop.id })
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Delete",
+                                    tint = AlKhatibColors.Danger
+                                )
+                            }
+                        }
+                    }
+
+                    // Section to add a new property item
+                    var newPropName by remember { mutableStateOf("") }
+                    var newPropSize by remember { mutableStateOf("") }
+                    var newPropVal by remember { mutableStateOf("") }
+
+                    Surface(
+                         shape = RoundedCornerShape(14.dp),
+                         color = AlKhatibColors.LightGrey.copy(alpha = 0.5f),
+                         modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+                    ) {
+                         Column(modifier = Modifier.padding(10.dp)) {
+                             OutlinedTextField(
+                                 value = newPropName,
+                                 onValueChange = { newPropName = it },
+                                 label = { Text(stringResource(R.string.faraidh_property_name_label)) },
+                                 placeholder = { Text(stringResource(R.string.faraidh_property_name_hint)) },
+                                 modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+                                 singleLine = true,
+                                 shape = RoundedCornerShape(10.dp),
+                                 colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AlKhatibColors.Teal)
+                             )
+                             Row(
+                                 modifier = Modifier.fillMaxWidth(),
+                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
+                             ) {
+                                 OutlinedTextField(
+                                     value = newPropSize,
+                                     onValueChange = { newPropSize = it },
+                                     label = { Text(stringResource(R.string.faraidh_property_size_label)) },
+                                     placeholder = { Text(stringResource(R.string.faraidh_property_size_hint)) },
+                                     modifier = Modifier.weight(1f),
+                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                     singleLine = true,
+                                     shape = RoundedCornerShape(10.dp),
+                                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AlKhatibColors.Teal)
+                                 )
+                                 OutlinedTextField(
+                                     value = MoneyInputFormatter.format(newPropVal),
+                                     onValueChange = { newPropVal = MoneyInputFormatter.format(it) },
+                                     label = { Text(stringResource(R.string.faraidh_property_value_label)) },
+                                     placeholder = { Text("0") },
+                                     modifier = Modifier.weight(1.2f),
+                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                     singleLine = true,
+                                     shape = RoundedCornerShape(10.dp),
+                                     colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AlKhatibColors.Teal)
+                                 )
+                             }
+                             Spacer(Modifier.height(8.dp))
+                             OutlinedButton(
+                                 onClick = {
+                                     if (newPropName.isNotBlank() && newPropVal.isNotBlank()) {
+                                         val newItem = FaraidhPropertyItem(
+                                             id = System.currentTimeMillis().toString(),
+                                             name = newPropName.trim(),
+                                             sizeSqm = newPropSize.trim(),
+                                             value = newPropVal
+                                         )
+                                         onFieldChange {
+                                             copy(properties = properties + newItem)
+                                         }
+                                         newPropName = ""
+                                         newPropSize = ""
+                                         newPropVal = ""
+                                     }
+                                 },
+                                 modifier = Modifier.fillMaxWidth(),
+                                 shape = RoundedCornerShape(10.dp),
+                                 border = androidx.compose.foundation.BorderStroke(1.dp, AlKhatibColors.Teal)
+                             ) {
+                                 Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = AlKhatibColors.Teal)
+                                 Spacer(Modifier.width(4.dp))
+                                 Text(stringResource(R.string.faraidh_property_add_btn), color = AlKhatibColors.Teal, style = MaterialTheme.typography.labelMedium)
+                             }
+                         }
+                    }
+                }
+            }
         }
+
         Row(
             Modifier.fillMaxWidth().padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,

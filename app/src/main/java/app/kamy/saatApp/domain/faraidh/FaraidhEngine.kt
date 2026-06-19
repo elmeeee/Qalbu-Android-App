@@ -26,13 +26,13 @@ object FaraidhEngine {
     ): FaraidhResult {
         val estate = profile.netEstate.max(BigDecimal.ZERO)
         val blocked = mutableListOf<BlockedHeir>()
-        val ctx = analyze(input, profile.gender)
+        val ctx = analyze(input, profile.gender, profile.bornOutOfWedlock)
 
         if (!input.hasAnyHeir()) {
             return emptyResult(profile, input, estate, names)
         }
 
-        resolveBlocking(input, ctx, blocked)
+        resolveBlocking(input, ctx, blocked, profile.bornOutOfWedlock)
         val slots = mutableListOf<Slot>()
         assignFixedShares(input, profile, ctx, slots, blocked)
         assignAsabahResidue(input, ctx, slots, blocked)
@@ -78,8 +78,13 @@ object FaraidhEngine {
             }
 
         val silsilah = FaraidhSilsilahBuilder.build(profile, input, activeShares, blocked, names)
+        val extraProofKeys = if (profile.bornOutOfWedlock) {
+            listOf("proof_out_of_wedlock", "proof_out_of_wedlock_note")
+        } else {
+            emptyList()
+        }
         val proofKeys = activeShares.flatMap { it.proofKeys }.distinct() +
-            listOfNotNull(adjustmentNoteKey?.let { "proof_awl_radd" })
+            listOfNotNull(adjustmentNoteKey?.let { "proof_awl_radd" }) + extraProofKeys
 
         val totalDistributed = activeShares.fold(BigDecimal.ZERO) { acc, s -> acc.add(s.cashAmount) }
         val remainder = FaraidhFraction.ONE.add(
@@ -126,17 +131,25 @@ object FaraidhEngine {
         val grandchildrenBlocked: Boolean
     )
 
-    private fun analyze(input: HeirInput, gender: DeceasedGender): Context {
+    private fun analyze(input: HeirInput, gender: DeceasedGender, bornOutOfWedlock: Boolean): Context {
         val hasSon = input.sonCount > 0
         val hasDaughter = input.daughterCount > 0
         val hasChild = hasSon || hasDaughter
         val grandchildrenBlocked = hasChild
         val hasGrandson = input.grandsonCount > 0 && !grandchildrenBlocked
         val hasGranddaughter = input.granddaughterCount > 0 && !grandchildrenBlocked
-        val siblingHeads = input.fullBrotherCount + input.fullSisterCount +
-            input.paternalBrotherCount + input.paternalSisterCount +
-            input.maternalBrotherCount + input.maternalSisterCount
-        val hasFather = input.fatherCount > 0
+        
+        val effectiveFatherCount = if (bornOutOfWedlock) 0 else input.fatherCount
+        val hasFather = effectiveFatherCount > 0
+        
+        val siblingHeads = if (bornOutOfWedlock) {
+            input.maternalBrotherCount + input.maternalSisterCount + input.fullBrotherCount + input.fullSisterCount
+        } else {
+            input.fullBrotherCount + input.fullSisterCount +
+                input.paternalBrotherCount + input.paternalSisterCount +
+                input.maternalBrotherCount + input.maternalSisterCount
+        }
+        
         val siblingsBlocked = hasChild || hasFather
         return Context(
             hasSon = hasSon,
@@ -154,17 +167,41 @@ object FaraidhEngine {
         )
     }
 
-    private fun resolveBlocking(input: HeirInput, ctx: Context, blocked: MutableList<BlockedHeir>) {
+    private fun resolveBlocking(
+        input: HeirInput,
+        ctx: Context,
+        blocked: MutableList<BlockedHeir>,
+        bornOutOfWedlock: Boolean
+    ) {
+        if (bornOutOfWedlock) {
+            if (input.fatherCount > 0) {
+                blocked += BlockedHeir(HeirType.FATHER, input.fatherCount, BlockingReasonKey.OUT_OF_WEDLOCK)
+            }
+            if (input.paternalBrotherCount > 0) {
+                blocked += BlockedHeir(HeirType.PATERNAL_BROTHER, input.paternalBrotherCount, BlockingReasonKey.OUT_OF_WEDLOCK)
+            }
+            if (input.paternalSisterCount > 0) {
+                blocked += BlockedHeir(HeirType.PATERNAL_SISTER, input.paternalSisterCount, BlockingReasonKey.OUT_OF_WEDLOCK)
+            }
+        }
+
         if (ctx.grandchildrenBlocked) {
             addBlocked(input.grandsonCount, HeirType.GRANDSON, BlockingReasonKey.BY_CHILDREN, blocked)
             addBlocked(input.granddaughterCount, HeirType.GRANDDAUGHTER, BlockingReasonKey.BY_CHILDREN, blocked)
         }
         if (ctx.siblingsBlocked) {
             val reason = if (ctx.hasChild) BlockingReasonKey.BY_CHILDREN else BlockingReasonKey.BY_FATHER
-            addBlocked(input.fullBrotherCount, HeirType.FULL_BROTHER, reason, blocked)
-            addBlocked(input.fullSisterCount, HeirType.FULL_SISTER, reason, blocked)
-            addBlocked(input.paternalBrotherCount, HeirType.PATERNAL_BROTHER, reason, blocked)
-            addBlocked(input.paternalSisterCount, HeirType.PATERNAL_SISTER, reason, blocked)
+            if (!bornOutOfWedlock) {
+                addBlocked(input.fullBrotherCount, HeirType.FULL_BROTHER, reason, blocked)
+                addBlocked(input.fullSisterCount, HeirType.FULL_SISTER, reason, blocked)
+                addBlocked(input.paternalBrotherCount, HeirType.PATERNAL_BROTHER, reason, blocked)
+                addBlocked(input.paternalSisterCount, HeirType.PATERNAL_SISTER, reason, blocked)
+            } else {
+                if (ctx.hasChild) {
+                    addBlocked(input.fullBrotherCount, HeirType.FULL_BROTHER, reason, blocked)
+                    addBlocked(input.fullSisterCount, HeirType.FULL_SISTER, reason, blocked)
+                }
+            }
             val maternalHeads = input.maternalBrotherCount + input.maternalSisterCount
             if (maternalHeads > 0) {
                 blocked += BlockedHeir(HeirType.MATERNAL_SIBLING, maternalHeads, reason)
@@ -272,9 +309,13 @@ object FaraidhEngine {
         }
 
         if (!ctx.siblingsBlocked) {
-            val maternalHeads = input.maternalBrotherCount + input.maternalSisterCount
+            val maternalHeads = if (profile.bornOutOfWedlock) {
+                input.maternalBrotherCount + input.maternalSisterCount + input.fullBrotherCount + input.fullSisterCount
+            } else {
+                input.maternalBrotherCount + input.maternalSisterCount
+            }
             if (maternalHeads > 0) {
-                val share = if (maternalHeads == 1) FaraidhFraction.of(1, 3) else FaraidhFraction.of(2, 3)
+                val share = if (maternalHeads == 1) FaraidhFraction.of(1, 6) else FaraidhFraction.of(1, 3)
                 slots += Slot(
                     HeirType.MATERNAL_SIBLING,
                     maternalHeads,

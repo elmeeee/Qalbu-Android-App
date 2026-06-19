@@ -66,6 +66,8 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -234,6 +236,7 @@ fun FaraidhCalculatorScreen(
                 currency = currency,
                 onDeceasedNameChange = vm::setDeceasedName,
                 onGenderChange = vm::setGender,
+                onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
                 onMadhhabChange = vm::setMadhhab,
                 onEstateFieldChange = vm::setEstateField,
                 onHeirChange = vm::setHeirCount,
@@ -336,6 +339,7 @@ fun FaraidhCalculatorScreen(
                     1 -> FaraidhSilsilahTab(
                         nodes = state.result?.silsilah.orEmpty(),
                         hasHeirs = heirCount > 0,
+                        currency = currency,
                         onStart = { vm.toggleInputSheet(true) }
                     )
                     2 -> FaraidhDalilTab(
@@ -559,6 +563,7 @@ private fun FaraidhInputSheetContent(
     currency: NumberFormat,
     onDeceasedNameChange: (String) -> Unit,
     onGenderChange: (DeceasedGender) -> Unit,
+    onBornOutOfWedlockChange: (Boolean) -> Unit,
     onMadhhabChange: (FaraidhMadhhab) -> Unit,
     onEstateFieldChange: (EstateAssetInput.() -> EstateAssetInput) -> Unit,
     onHeirChange: (HeirCountField, Int) -> Unit,
@@ -597,6 +602,7 @@ private fun FaraidhInputSheetContent(
             estate = state.estate,
             computation = state.estateComputation,
             currency = currency,
+            liveGoldPrice = state.liveGoldPrice,
             onFieldChange = onEstateFieldChange
         )
 
@@ -630,6 +636,40 @@ private fun FaraidhInputSheetContent(
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
                 colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = Color.White)
             ) { Text(stringResource(R.string.faraidh_gender_female)) }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AlKhatibColors.PureWhite, RoundedCornerShape(12.dp))
+                .border(1.dp, AlKhatibColors.SoftGrey, RoundedCornerShape(12.dp))
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.faraidh_born_out_of_wedlock_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.Slate900
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.faraidh_born_out_of_wedlock_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate500
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Switch(
+                checked = state.deceasedBornOutOfWedlock,
+                onCheckedChange = onBornOutOfWedlockChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = AlKhatibColors.DeepEmerald
+                )
+            )
         }
 
         Spacer(Modifier.height(20.dp))
@@ -1019,7 +1059,12 @@ private fun BlockedHeirCard(blocked: app.kamy.saatApp.domain.faraidh.BlockedHeir
 }
 
 @Composable
-private fun FaraidhSilsilahTab(nodes: List<SilsilahNode>, hasHeirs: Boolean, onStart: () -> Unit) {
+private fun FaraidhSilsilahTab(
+    nodes: List<SilsilahNode>,
+    hasHeirs: Boolean,
+    currency: NumberFormat,
+    onStart: () -> Unit
+) {
     if (!hasHeirs || nodes.isEmpty()) {
         EmptyState(
             icon = Icons.Filled.AccountTree,
@@ -1041,6 +1086,7 @@ private fun FaraidhSilsilahTab(nodes: List<SilsilahNode>, hasHeirs: Boolean, onS
                 nodes = nodes,
                 nodeTitle = { node -> silsilahNodeTitle(node) },
                 nodeSubtitle = { node -> silsilahNodeSubtitle(node) },
+                currency = currency,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -1268,6 +1314,7 @@ private fun blockingReasonLabel(reason: BlockingReasonKey): String = when (reaso
     BlockingReasonKey.BY_GRANDCHILDREN_SUBSTITUTE -> stringResource(R.string.faraidh_block_by_grandchild)
     BlockingReasonKey.GENDER_MISMATCH -> stringResource(R.string.faraidh_block_gender)
     BlockingReasonKey.NO_SHARE_REMAINDER -> stringResource(R.string.faraidh_block_no_share)
+    BlockingReasonKey.OUT_OF_WEDLOCK -> stringResource(R.string.faraidh_block_out_of_wedlock)
 }
 
 private fun heirTypeRes(type: HeirType): Int = when (type) {
