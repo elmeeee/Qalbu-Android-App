@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.domain.tools.GoldPriceQuote
 import app.kamy.saatApp.domain.tools.ZakatCalculationResult
 import app.kamy.saatApp.domain.tools.ZakatCalculator
+import app.kamy.saatApp.domain.tools.ZakatType
 import app.kamy.saatApp.infrastructure.repository.GoldPriceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -15,11 +16,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ZakatUiState(
+    val selectedType: ZakatType = ZakatType.MAAL,
     val cash: String = "",
     val goldGrams: String = "",
     val silverGrams: String = "",
     val investments: String = "",
     val debts: String = "",
+    val manualGoldPrice: String = "",
+    val familyMembers: String = "",
+    val ricePricePerKg: String = "",
     val priceQuote: GoldPriceQuote? = null,
     val priceLoading: Boolean = false,
     val priceError: Boolean = false,
@@ -53,27 +58,51 @@ class ZakatViewModel @Inject constructor(
         }
     }
 
+    fun updateType(type: ZakatType) {
+        _state.update { it.copy(selectedType = type) }
+        recompute()
+    }
+
     fun updateCash(v: String) { _state.update { it.copy(cash = v) }; recompute() }
     fun updateGoldGrams(v: String) { _state.update { it.copy(goldGrams = v) }; recompute() }
     fun updateSilverGrams(v: String) { _state.update { it.copy(silverGrams = v) }; recompute() }
     fun updateInvestments(v: String) { _state.update { it.copy(investments = v) }; recompute() }
     fun updateDebts(v: String) { _state.update { it.copy(debts = v) }; recompute() }
+    fun updateManualGoldPrice(v: String) { _state.update { it.copy(manualGoldPrice = v) }; recompute() }
+    fun updateFamilyMembers(v: String) { _state.update { it.copy(familyMembers = v) }; recompute() }
+    fun updateRicePricePerKg(v: String) { _state.update { it.copy(ricePricePerKg = v) }; recompute() }
 
     private fun recompute() {
         val s = _state.value
-        val quote = s.priceQuote ?: return
-        _state.update {
-            it.copy(
-                result = ZakatCalculator.calculate(
-                    cash = s.cash.toDoubleOrNull() ?: 0.0,
-                    goldGrams = s.goldGrams.toDoubleOrNull() ?: 0.0,
-                    silverGrams = s.silverGrams.toDoubleOrNull() ?: 0.0,
-                    investments = s.investments.toDoubleOrNull() ?: 0.0,
-                    debts = s.debts.toDoubleOrNull() ?: 0.0,
-                    goldPricePerGram = quote.goldPerGramIdr,
-                    silverPricePerGram = quote.silverPerGramIdr
-                )
-            )
+        val result: ZakatCalculationResult? = when (s.selectedType) {
+            ZakatType.MAAL -> {
+                val goldPrice = s.priceQuote?.goldPerGramIdr?.takeIf { it > 0 } ?: s.manualGoldPrice.toDoubleOrNull()
+                if (goldPrice == null || goldPrice <= 0.0) {
+                    null
+                } else {
+                    val silverPrice = s.priceQuote?.silverPerGramIdr ?: ZakatCalculator.silverPriceFromGold(goldPrice)
+                    ZakatCalculator.calculate(
+                        cash = s.cash.toDoubleOrNull() ?: 0.0,
+                        goldGrams = s.goldGrams.toDoubleOrNull() ?: 0.0,
+                        silverGrams = s.silverGrams.toDoubleOrNull() ?: 0.0,
+                        investments = s.investments.toDoubleOrNull() ?: 0.0,
+                        debts = s.debts.toDoubleOrNull() ?: 0.0,
+                        goldPricePerGram = goldPrice,
+                        silverPricePerGram = silverPrice
+                    )
+                }
+            }
+            ZakatType.FITRAH -> {
+                val members = s.familyMembers.toIntOrNull()
+                val ricePrice = s.ricePricePerKg.toDoubleOrNull()
+                if (members == null || members <= 0 || ricePrice == null || ricePrice <= 0.0) {
+                    null
+                } else {
+                    ZakatCalculator.calculateFitrah(members, ricePrice)
+                }
+            }
         }
+
+        _state.update { it.copy(result = result) }
     }
 }

@@ -23,6 +23,7 @@ import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioData
 import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioMeta
 import app.kamy.saatApp.infrastructure.preferences.FaraidhScenarioStore
 import app.kamy.saatApp.infrastructure.repository.GoldPriceRepository
+import app.kamy.saatApp.domain.faraidh.MoneyInputFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.math.BigDecimal
@@ -95,7 +96,13 @@ class FaraidhViewModel @Inject constructor(
                 goldPriceRepository.fetchQuote("IDR")
             }.onSuccess { quote ->
                 if (quote != null) {
-                    _state.update { it.copy(liveGoldPrice = quote.goldPerGramIdr.toLong().toString()) }
+                    val livePrice = quote.goldPerGramIdr.toLong().toString()
+                    _state.update { current ->
+                        val estate = if (current.estate.goldPricePerGram.isBlank()) {
+                            current.estate.copy(goldPricePerGram = MoneyInputFormatter.format(livePrice))
+                        } else current.estate
+                        current.copy(liveGoldPrice = livePrice, estate = estate)
+                    }
                 }
             }
         }

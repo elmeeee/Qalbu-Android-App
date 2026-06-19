@@ -22,17 +22,69 @@ class GoldPriceRepository @Inject constructor() {
 
     suspend fun fetchQuote(currency: String = "IDR"): GoldPriceQuote? = withContext(Dispatchers.IO) {
         runCatching {
-            val goldUsdOz = fetchGoldUsdPerTroyOz() ?: return@runCatching null
-            val usdRate = fetchUsdRate(currency) ?: return@runCatching null
-            val goldPerGramLocal = ZakatCalculator.goldUsdPerGram(goldUsdOz) * usdRate
-            val silverPerGramLocal = goldPerGramLocal / 80.0
-            GoldPriceQuote(
-                goldPerGramIdr = goldPerGramLocal,
-                silverPerGramIdr = silverPerGramLocal,
-                sourceLabel = "metals.live + open.er-api.com",
-                fetchedAtMillis = System.currentTimeMillis()
-            )
+            fetchQuoteFromLogamMulia() ?: fetchQuoteFallback(currency)
         }.getOrNull()
+    }
+
+    private fun fetchQuoteFromLogamMulia(): GoldPriceQuote? {
+        val request = Request.Builder()
+            .url("https://logam-mulia-api.iamutaki.workers.dev/api/prices/hargaemas-net")
+            .get()
+            .build()
+
+        val body = client.newCall(request).execute().body?.string() ?: return null
+        val json = JSONObject(body)
+        if (!json.optBoolean("success", false)) return null
+        val data = json.optJSONArray("data") ?: return null
+        val goldPerGramLocal = parseGramPrice(data, "gold") ?: return null
+        val silverPerGramLocal = parseGramPrice(data, "silver") ?: ZakatCalculator.silverPriceFromGold(goldPerGramLocal)
+
+        return GoldPriceQuote(
+            goldPerGramIdr = goldPerGramLocal,
+            silverPerGramIdr = silverPerGramLocal,
+            sourceLabel = "Logam Mulia / Harga Emas.net",
+            fetchedAtMillis = System.currentTimeMillis()
+        )
+    }
+
+    private fun parseGramPrice(data: JSONArray, material: String): Double? {
+        var fallbackWeight: Double? = null
+        var fallbackPrice: Double? = null
+
+        for (i in 0 until data.length()) {
+            val item = data.optJSONObject(i) ?: continue
+            if (item.optString("material") != material) continue
+            if (item.optString("weightUnit") != "gr") continue
+            val weight = item.optDouble("weight", -1.0)
+            val sellPrice = item.optDouble("sellPrice", -1.0)
+            if (weight <= 0.0 || sellPrice <= 0.0) continue
+            if (weight == 1.0) {
+                return sellPrice
+            }
+            if (fallbackWeight == null || weight < fallbackWeight) {
+                fallbackWeight = weight
+                fallbackPrice = sellPrice
+            }
+        }
+
+        return if (fallbackWeight != null && fallbackPrice != null) {
+            fallbackPrice / fallbackWeight
+        } else {
+            null
+        }
+    }
+
+    private fun fetchQuoteFallback(currency: String): GoldPriceQuote? {
+        val goldUsdOz = fetchGoldUsdPerTroyOz() ?: return null
+        val usdRate = fetchUsdRate(currency) ?: return null
+        val goldPerGramLocal = ZakatCalculator.goldUsdPerGram(goldUsdOz) * usdRate
+        val silverPerGramLocal = goldPerGramLocal / 80.0
+        return GoldPriceQuote(
+            goldPerGramIdr = goldPerGramLocal,
+            silverPerGramIdr = silverPerGramLocal,
+            sourceLabel = "metals.live + open.er-api.com",
+            fetchedAtMillis = System.currentTimeMillis()
+        )
     }
 
     private fun fetchGoldUsdPerTroyOz(): Double? {

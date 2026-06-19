@@ -20,6 +20,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,6 +40,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.domain.tools.ZakatFitrahCalculationResult
+import app.kamy.saatApp.domain.tools.ZakatMaalCalculationResult
+import app.kamy.saatApp.domain.tools.ZakatType
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.text.NumberFormat
 import java.util.Locale
@@ -78,80 +85,159 @@ fun ZakatCalculatorScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = stringResource(R.string.zakat_intro_sharia),
+                text = stringResource(R.string.zakat_intro),
                 style = MaterialTheme.typography.bodyMedium,
                 color = AlKhatibColors.Slate500
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (state.priceLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.height(20.dp),
-                        strokeWidth = 2.dp,
-                        color = AlKhatibColors.DeepEmerald
-                    )
-                } else {
-                    state.priceQuote?.let { quote ->
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                ZakatType.values().forEachIndexed { index, type ->
+                    SegmentedButton(
+                        selected = state.selectedType == type,
+                        onClick = { vm.updateType(type) },
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = ZakatType.values().size),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = AlKhatibColors.DeepEmerald,
+                            activeContentColor = Color.White
+                        )
+                    ) {
                         Text(
                             text = stringResource(
-                                R.string.zakat_live_gold_price,
-                                currency.format(quote.goldPerGramIdr)
-                            ),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = AlKhatibColors.DeepEmerald,
-                            fontWeight = FontWeight.SemiBold
+                                if (type == ZakatType.MAAL) R.string.zakat_type_maal else R.string.zakat_type_fitrah
+                            )
                         )
-                    } ?: Text(
-                        text = stringResource(R.string.zakat_price_error),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = AlKhatibColors.Gold
-                    )
-                }
-                TextButton(onClick = vm::refreshPrices) {
-                    Text(stringResource(R.string.retry))
+                    }
                 }
             }
 
-            ZakatField(stringResource(R.string.zakat_cash), state.cash, vm::updateCash)
-            ZakatField(stringResource(R.string.zakat_gold_grams), state.goldGrams, vm::updateGoldGrams)
-            ZakatField(stringResource(R.string.zakat_silver_grams), state.silverGrams, vm::updateSilverGrams)
-            ZakatField(stringResource(R.string.zakat_investments), state.investments, vm::updateInvestments)
-            ZakatField(stringResource(R.string.zakat_debts), state.debts, vm::updateDebts)
+            if (state.selectedType == ZakatType.MAAL) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (state.priceLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.height(20.dp),
+                            strokeWidth = 2.dp,
+                            color = AlKhatibColors.DeepEmerald
+                        )
+                    } else {
+                        state.priceQuote?.let { quote ->
+                            Column {
+                                Text(
+                                    text = stringResource(
+                                        R.string.zakat_live_gold_price,
+                                        currency.format(quote.goldPerGramIdr)
+                                    ),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = AlKhatibColors.DeepEmerald,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = stringResource(R.string.zakat_live_price_source, quote.sourceLabel),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = AlKhatibColors.Slate500
+                                )
+                            }
+                        } ?: Text(
+                            text = stringResource(R.string.zakat_price_error),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = AlKhatibColors.Gold
+                        )
+                    }
+                    TextButton(onClick = vm::refreshPrices) {
+                        Text(stringResource(R.string.retry))
+                    }
+                }
 
-            Text(
-                text = stringResource(R.string.zakat_haul_note),
-                style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500
-            )
+                if (!state.priceLoading && state.priceQuote == null) {
+                    ZakatField(stringResource(R.string.zakat_manual_gold_price), state.manualGoldPrice, vm::updateManualGoldPrice)
+                    Text(
+                        text = stringResource(R.string.zakat_manual_price_help),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AlKhatibColors.Slate500
+                    )
+                }
+
+                ZakatField(stringResource(R.string.zakat_cash), state.cash, vm::updateCash)
+                ZakatField(stringResource(R.string.zakat_gold_grams), state.goldGrams, vm::updateGoldGrams)
+                ZakatField(stringResource(R.string.zakat_silver_grams), state.silverGrams, vm::updateSilverGrams)
+                ZakatField(stringResource(R.string.zakat_investments), state.investments, vm::updateInvestments)
+                ZakatField(stringResource(R.string.zakat_debts), state.debts, vm::updateDebts)
+
+                Text(
+                    text = stringResource(R.string.zakat_haul_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate500
+                )
+            } else {
+                ZakatField(
+                    label = stringResource(R.string.zakat_family_members),
+                    value = state.familyMembers,
+                    onValueChange = vm::updateFamilyMembers,
+                    keyboardType = KeyboardType.Number
+                )
+                ZakatField(
+                    label = stringResource(R.string.zakat_rice_price_per_kg),
+                    value = state.ricePricePerKg,
+                    onValueChange = vm::updateRicePricePerKg
+                )
+                Text(
+                    text = stringResource(R.string.zakat_fitrah_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate500
+                )
+            }
 
             if (result != null) {
                 Spacer(Modifier.height(8.dp))
                 HorizontalDivider(color = AlKhatibColors.SoftGrey)
                 Spacer(Modifier.height(8.dp))
-                ResultRow(stringResource(R.string.zakat_net_wealth), currency.format(result.zakatableWealth))
-                ResultRow(
-                    stringResource(R.string.zakat_nisab_gold, result.nisabGoldGrams.toInt()),
-                    currency.format(result.nisabGoldValue)
-                )
-                ResultRow(
-                    stringResource(R.string.zakat_nisab_silver, result.nisabSilverGrams.toInt()),
-                    currency.format(result.nisabSilverValue)
-                )
-                ResultRow(
-                    stringResource(R.string.zakat_due),
-                    currency.format(result.zakatDue),
-                    highlight = result.meetsNisab
-                )
-                if (!result.meetsNisab) {
-                    Text(
-                        text = stringResource(R.string.zakat_below_nisab),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
-                    )
+                when (result) {
+                    is ZakatMaalCalculationResult -> {
+                        ResultRow(stringResource(R.string.zakat_net_wealth), currency.format(result.zakatableWealth))
+                        ResultRow(
+                            stringResource(R.string.zakat_nisab_gold, result.nisabGoldGrams.toInt()),
+                            currency.format(result.nisabGoldValue)
+                        )
+                        ResultRow(
+                            stringResource(R.string.zakat_nisab_silver, result.nisabSilverGrams.toInt()),
+                            currency.format(result.nisabSilverValue)
+                        )
+                        ResultRow(
+                            stringResource(R.string.zakat_due),
+                            currency.format(result.zakatDue),
+                            highlight = result.meetsNisab
+                        )
+                        if (!result.meetsNisab) {
+                            Text(
+                                text = stringResource(R.string.zakat_below_nisab),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = AlKhatibColors.Slate500
+                            )
+                        }
+                    }
+                    is ZakatFitrahCalculationResult -> {
+                        ResultRow(stringResource(R.string.zakat_family_members), result.familyMembers.toString())
+                        ResultRow(
+                            stringResource(R.string.zakat_fitrah_weight_per_person),
+                            "${result.stapleWeightPerPersonKg} kg"
+                        )
+                        ResultRow(
+                            stringResource(R.string.zakat_fitrah_total_weight),
+                            "${result.totalStapleKilograms} kg"
+                        )
+                        ResultRow(
+                            stringResource(R.string.zakat_rice_price_per_kg),
+                            currency.format(result.staplePricePerKg)
+                        )
+                        ResultRow(
+                            stringResource(R.string.zakat_due),
+                            currency.format(result.zakatDue),
+                            highlight = true
+                        )
+                    }
                 }
             }
         }
@@ -159,13 +245,18 @@ fun ZakatCalculatorScreen(
 }
 
 @Composable
-private fun ZakatField(label: String, value: String, onValueChange: (String) -> Unit) {
+private fun ZakatField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    keyboardType: KeyboardType = KeyboardType.Decimal
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         singleLine = true
     )
 }
