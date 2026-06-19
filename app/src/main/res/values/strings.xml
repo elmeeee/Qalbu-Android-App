@@ -690,9 +690,9 @@
     <string name="shortcut_prayer_today">Prayer times</string>
 
     <!-- Faraidh calculator -->
-    <string name="faraidh_title">Faraidh calculator</string>
-    <string name="faraidh_subtitle">Offline Islamic inheritance · BigDecimal precision</string>
-    <string name="faraidh_subtitle_short">100% offline · precise inheritance shares</string>
+    <string name="faraidh_title">Faraidh</string>
+    <string name="faraidh_subtitle">Islamic inheritance</string>
+    <string name="faraidh_subtitle_short">Precise inheritance shares</string>
     <string name="faraidh_account_subtitle">Hajb, ashab al-furud, asabah, awl &amp; radd</string>
     <string name="faraidh_tooltip_title">What is Faraidh?</string>
     <string name="faraidh_tooltip_body">Faraidh is the Islamic science of inheritance distribution after death. This tool calculates each heir\'s Quranic share (furud), residue (asabah), blocking rules (hajb), and special adjustments (ʿawl when shares exceed the estate, radd when surplus remains). Use it for planning and education—always consult a qualified scholar for binding legal rulings.</string>
