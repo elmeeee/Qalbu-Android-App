@@ -637,7 +637,11 @@ object FaraidhPdfExporter {
 
         var rowIndex = 0
         result.activeShares.forEach { share ->
-            val role = heirLabel(share.type, language)
+            val role = if (share.heirId == "baitul_mal") {
+                t(language, "Baitul Mal / Kas Negara", "Baitul Mal / Perbendaharaan Negara", "State Treasury (Baitul Mal)")
+            } else {
+                heirLabel(share.type, language)
+            }
             val persons = FaraidhNameLabels.displayList(share.type, role, names, share.headCount)
             val indivFrac = share.fraction.divideAmongHeads(share.headCount)
             val indivPercent = share.percentage.divide(BigDecimal(share.headCount), 1, RoundingMode.HALF_UP)

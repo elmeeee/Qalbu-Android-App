@@ -945,7 +945,11 @@ private fun BreakdownTableHeader() {
 private fun HeirShareCard(share: HeirShare, names: FaraidhParticipantNames, currency: NumberFormat) {
     val percentFloat = share.percentage.toFloat().coerceIn(0f, 100f) / 100f
     val perHead = if (share.headCount > 1) share.cashAmount.divide(BigDecimal(share.headCount), 2, RoundingMode.HALF_UP) else null
-    val roleLabel = heirTypeLabel(share.type)
+    val roleLabel = if (share.heirId == "baitul_mal") {
+        stringResource(R.string.faraidh_heir_baitul_mal)
+    } else {
+        heirTypeLabel(share.type)
+    }
     val personNames = FaraidhNameLabels.displayList(share.type, roleLabel, names, share.headCount)
 
     Surface(

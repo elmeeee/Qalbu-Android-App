@@ -259,6 +259,7 @@
     <string name="faraidh_heir_maternal_brother">Saudara seibu</string>
     <string name="faraidh_heir_maternal_sister">Saudari seibu</string>
     <string name="faraidh_heir_maternal_sibling">Saudara seibu</string>
+    <string name="faraidh_heir_baitul_mal">Baitul Mal / Perbendaharaan Negara</string>
     <string name="faraidh_node_deceased">Si mati</string>
     <string name="faraidh_active_heirs">Waris aktif</string>
     <string name="faraidh_blocked_heirs">Waris terhalang (hajb)</string>

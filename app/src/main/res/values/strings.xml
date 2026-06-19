@@ -722,6 +722,7 @@
     <string name="faraidh_heir_maternal_brother">Maternal brother</string>
     <string name="faraidh_heir_maternal_sister">Maternal sister</string>
     <string name="faraidh_heir_maternal_sibling">Maternal sibling</string>
+    <string name="faraidh_heir_baitul_mal">State Treasury (Baitul Mal)</string>
     <string name="faraidh_node_deceased">Deceased</string>
     <string name="faraidh_active_heirs">Active heirs</string>
     <string name="faraidh_blocked_heirs">Blocked heirs (hajb)</string>
