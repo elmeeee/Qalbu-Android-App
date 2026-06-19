@@ -846,4 +846,9 @@
     <string name="faraidh_scenario_empty">No saved scenarios yet</string>
     <string name="faraidh_reset">Reset calculation</string>
     <string name="onboarding_step_progress">Step %1$d of %2$d</string>
+    <string name="faraidh_block_homicide">Excluded: Homicide (killer)</string>
+    <string name="faraidh_block_difference_of_religion">Excluded: Difference of religion</string>
+    <string name="faraidh_block_simultaneous_death">Excluded: Simultaneous death</string>
+    <string name="faraidh_heir_step_child">Step-child</string>
+    <string name="faraidh_heir_unborn_fetus">Unborn Fetus (Al-Janin)</string>
 </resources>

@@ -26,11 +26,33 @@ object FaraidhEngine {
     ): FaraidhResult {
         val estate = profile.netEstate.max(BigDecimal.ZERO)
         val blocked = mutableListOf<BlockedHeir>()
-        val ctx = analyze(input, profile.gender, profile.bornOutOfWedlock)
+
+        // Add disqualified heirs to the blocked list
+        for (dq in input.disqualifiedHeirs) {
+            blocked.add(BlockedHeir(dq.type, dq.count, dq.reason))
+        }
 
         if (!input.hasAnyHeir()) {
-            return emptyResult(profile, input, estate, names)
+            val fallback = DzawilArhamResolver.resolve(estate, input)
+            val graph = FaraidhGraphBuilder.build(profile, input, fallback.activeShares, blocked)
+            return FaraidhResult(
+                deceased = profile,
+                input = input,
+                activeShares = fallback.activeShares,
+                blockedHeirs = blocked,
+                silsilah = emptyList(),
+                adjustment = FaraidhAdjustment.NONE,
+                adjustmentNoteKey = fallback.noteKey,
+                proofKeys = fallback.proofKeys,
+                totalDistributed = estate,
+                remainderFraction = FaraidhFraction.ZERO,
+                madhhab = madhhab,
+                madhhabNoteKey = madhhabNoteKey(madhhab),
+                familyGraph = graph
+            )
         }
+
+        val ctx = analyze(input, profile.gender, profile.bornOutOfWedlock)
 
         resolveBlocking(input, ctx, blocked, profile.bornOutOfWedlock)
         val slots = mutableListOf<Slot>()
@@ -93,19 +115,37 @@ object FaraidhEngine {
             }
         ).normalized()
 
+        var finalShares = activeShares
+        var finalAdjustmentNoteKey = adjustmentNoteKey
+        var finalProofKeys = proofKeys
+        var finalTotalDistributed = totalDistributed
+        var finalRemainder = remainder
+
+        if (finalShares.isEmpty()) {
+            val fallback = DzawilArhamResolver.resolve(estate, input)
+            finalShares = fallback.activeShares
+            finalAdjustmentNoteKey = fallback.noteKey
+            finalProofKeys = (finalProofKeys + fallback.proofKeys).distinct()
+            finalTotalDistributed = estate
+            finalRemainder = FaraidhFraction.ZERO
+        }
+
+        val graph = FaraidhGraphBuilder.build(profile, input, finalShares, blocked)
+
         return FaraidhResult(
             deceased = profile,
             input = input,
-            activeShares = activeShares,
+            activeShares = finalShares,
             blockedHeirs = blocked,
             silsilah = silsilah,
             adjustment = adjustment,
-            adjustmentNoteKey = adjustmentNoteKey,
-            proofKeys = proofKeys.distinct(),
-            totalDistributed = totalDistributed,
-            remainderFraction = remainder,
+            adjustmentNoteKey = finalAdjustmentNoteKey,
+            proofKeys = finalProofKeys.distinct(),
+            totalDistributed = finalTotalDistributed,
+            remainderFraction = finalRemainder,
             madhhab = madhhab,
-            madhhabNoteKey = madhhabNoteKey(madhhab)
+            madhhabNoteKey = madhhabNoteKey(madhhab),
+            familyGraph = graph
         )
     }
 

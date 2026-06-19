@@ -189,6 +189,8 @@ object FaraidhSilsilahBuilder {
         HeirType.PATERNAL_BROTHER -> "faraidh_heir_paternal_brother"
         HeirType.PATERNAL_SISTER -> "faraidh_heir_paternal_sister"
         HeirType.MATERNAL_SIBLING -> "faraidh_heir_maternal_sibling"
+        HeirType.STEP_CHILD -> "faraidh_heir_step_child"
+        HeirType.UNBORN_FETUS -> "faraidh_heir_unborn_fetus"
     }
 
     private fun node(

@@ -1313,6 +1313,9 @@ private fun blockingReasonLabel(reason: BlockingReasonKey): String = when (reaso
     BlockingReasonKey.GENDER_MISMATCH -> stringResource(R.string.faraidh_block_gender)
     BlockingReasonKey.NO_SHARE_REMAINDER -> stringResource(R.string.faraidh_block_no_share)
     BlockingReasonKey.OUT_OF_WEDLOCK -> stringResource(R.string.faraidh_block_out_of_wedlock)
+    BlockingReasonKey.HOMICIDE -> stringResource(R.string.faraidh_block_homicide)
+    BlockingReasonKey.DIFFERENCE_OF_RELIGION -> stringResource(R.string.faraidh_block_difference_of_religion)
+    BlockingReasonKey.SIMULTANEOUS_DEATH -> stringResource(R.string.faraidh_block_simultaneous_death)
 }
 
 private fun heirTypeRes(type: HeirType): Int = when (type) {
@@ -1329,6 +1332,8 @@ private fun heirTypeRes(type: HeirType): Int = when (type) {
     HeirType.PATERNAL_BROTHER -> R.string.faraidh_heir_paternal_brother
     HeirType.PATERNAL_SISTER -> R.string.faraidh_heir_paternal_sister
     HeirType.MATERNAL_SIBLING -> R.string.faraidh_heir_maternal_sibling
+    HeirType.STEP_CHILD -> R.string.faraidh_heir_step_child
+    HeirType.UNBORN_FETUS -> R.string.faraidh_heir_unborn_fetus
 }
 
 private fun heirLabelRes(key: String): Int = when (key) {
@@ -1348,6 +1353,8 @@ private fun heirLabelRes(key: String): Int = when (key) {
             "faraidh_heir_paternal_brother" -> HeirType.PATERNAL_BROTHER
             "faraidh_heir_paternal_sister" -> HeirType.PATERNAL_SISTER
             "faraidh_heir_maternal_sibling" -> HeirType.MATERNAL_SIBLING
+            "faraidh_heir_step_child" -> HeirType.STEP_CHILD
+            "faraidh_heir_unborn_fetus" -> HeirType.UNBORN_FETUS
             else -> HeirType.SON
         }
     )

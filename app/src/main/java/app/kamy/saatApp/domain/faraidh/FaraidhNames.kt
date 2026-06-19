@@ -42,6 +42,7 @@ object FaraidhNameLabels {
         HeirType.PATERNAL_BROTHER -> names.paternalBrotherNames
         HeirType.PATERNAL_SISTER -> names.paternalSisterNames
         HeirType.MATERNAL_SIBLING -> (names.maternalBrotherNames + names.maternalSisterNames).filter { it.isNotBlank() }
+        HeirType.STEP_CHILD, HeirType.UNBORN_FETUS -> emptyList()
     }
 
     fun displayList(

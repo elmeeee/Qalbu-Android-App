@@ -12,9 +12,13 @@ private fun BigInteger.lcm(other: BigInteger): BigInteger {
 data class FaraidhFraction(
     val numerator: BigInteger,
     val denominator: BigInteger
-) {
+) : Comparable<FaraidhFraction> {
     init {
         require(denominator > BigInteger.ZERO) { "Denominator must be positive" }
+    }
+
+    override fun compareTo(other: FaraidhFraction): Int {
+        return (this.numerator * other.denominator).compareTo(other.numerator * this.denominator)
     }
 
     fun normalized(): FaraidhFraction {
@@ -29,6 +33,22 @@ data class FaraidhFraction(
         val a = numerator * (lcm / denominator)
         val b = other.numerator * (lcm / other.denominator)
         return FaraidhFraction(a + b, lcm).normalized()
+    }
+
+    fun subtract(other: FaraidhFraction): FaraidhFraction {
+        val lcm = denominator.lcm(other.denominator)
+        val a = numerator * (lcm / denominator)
+        val b = other.numerator * (lcm / other.denominator)
+        return FaraidhFraction(a - b, lcm).normalized()
+    }
+
+    fun multiply(other: FaraidhFraction): FaraidhFraction {
+        return FaraidhFraction(this.numerator * other.numerator, this.denominator * other.denominator).normalized()
+    }
+
+    fun divide(other: FaraidhFraction): FaraidhFraction {
+        require(other.numerator != BigInteger.ZERO) { "Division by zero fraction" }
+        return FaraidhFraction(this.numerator * other.denominator, this.denominator * other.numerator).normalized()
     }
 
     fun multiplyScalar(count: Int): FaraidhFraction {

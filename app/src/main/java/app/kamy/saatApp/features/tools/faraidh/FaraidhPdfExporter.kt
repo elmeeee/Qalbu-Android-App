@@ -719,6 +719,9 @@ object FaraidhPdfExporter {
         BlockingReasonKey.GENDER_MISMATCH -> t(language, "Tidak berlaku", "Tidak terpakai", "Not applicable")
         BlockingReasonKey.NO_SHARE_REMAINDER -> t(language, "Tidak ada sisa bagian", "Tiada baki bahagian", "No remaining share")
         BlockingReasonKey.OUT_OF_WEDLOCK -> t(language, "Tidak ada nasab bapak", "Tiada nasab bapa", "No paternal lineage (born out of wedlock)")
+        BlockingReasonKey.HOMICIDE -> t(language, "Terhalang: Pembunuhan (pembunuh)", "Terhalang: Pembunuhan (pembunuh)", "Excluded: Homicide (killer)")
+        BlockingReasonKey.DIFFERENCE_OF_RELIGION -> t(language, "Terhalang: Perbedaan agama", "Terhalang: Perbezaan agama", "Excluded: Difference of religion")
+        BlockingReasonKey.SIMULTANEOUS_DEATH -> t(language, "Terhalang: Kematian serentak", "Terhalang: Kematian serentak", "Excluded: Simultaneous death")
     }
 
     private fun madhhabLabel(madhhab: FaraidhMadhhab, language: AppLanguage): String = when (madhhab) {
@@ -745,6 +748,8 @@ object FaraidhPdfExporter {
         HeirType.PATERNAL_BROTHER -> t(language, "Saudara sebapak", "Saudara sebapa", "Paternal half-brother")
         HeirType.PATERNAL_SISTER -> t(language, "Saudari sebapak", "Saudari sebapa", "Paternal half-sister")
         HeirType.MATERNAL_SIBLING -> t(language, "Saudara seibu", "Saudara seibu", "Maternal sibling")
+        HeirType.STEP_CHILD -> t(language, "Anak tiri", "Anak tiri", "Step-child")
+        HeirType.UNBORN_FETUS -> t(language, "Janin dalam kandungan", "Janin dalam kandungan", "Unborn Fetus (Al-Janin)")
     }
 
     private class PdfPaints {

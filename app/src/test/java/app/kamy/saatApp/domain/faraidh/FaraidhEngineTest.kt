@@ -86,15 +86,126 @@ class FaraidhEngineTest {
         // 2 Maternal Siblings share 16000 equally -> 8000 each.
         val motherShare = result.activeShares.find { it.type == HeirType.MOTHER }
         val maternalShare = result.activeShares.find { it.type == HeirType.MATERNAL_SIBLING }
-
-        println("Active Shares: " + result.activeShares.map { "${it.type} count=${it.headCount} fraction=${it.fraction} cash=${it.cashAmount}" })
-        println("Blocked Heirs: " + result.blockedHeirs.map { "${it.type} reason=${it.reason}" })
-
         assertTrue("Mother should inherit", motherShare != null)
         assertTrue("Maternal siblings should inherit", maternalShare != null)
-
         assertEquals(BigDecimal("8000.00"), motherShare!!.cashAmount)
         assertEquals(BigDecimal("16000.00"), maternalShare!!.cashAmount)
         assertEquals(2, maternalShare.headCount)
+    }
+
+    @Test
+    fun testDisqualifiedHeirExclusion() {
+        val profile = DeceasedProfile(
+            gender = DeceasedGender.MALE,
+            netEstate = BigDecimal("30000.00")
+        )
+        // 1 Wife (qualified), 1 Son (non-Muslim, disqualified), 1 Full Brother (qualified)
+        val input = HeirInput(
+            wifeCount = 1,
+            fullBrotherCount = 1,
+            disqualifiedHeirs = listOf(
+                DisqualifiedHeir(HeirType.SON, 1, BlockingReasonKey.DIFFERENCE_OF_RELIGION)
+            )
+        )
+        val result = FaraidhEngine.calculate(profile, input)
+
+        // The non-Muslim son must be excluded and get 0 share
+        val sonShare = result.activeShares.find { it.type == HeirType.SON }
+        assertTrue("Son should not inherit", sonShare == null)
+
+        val sonBlocked = result.blockedHeirs.find { it.type == HeirType.SON }
+        assertTrue("Son should be blocked", sonBlocked != null)
+        assertEquals(BlockingReasonKey.DIFFERENCE_OF_RELIGION, sonBlocked!!.reason)
+
+        // Since the son is disqualified, he is treated as non-existent for blocking.
+        // Therefore, Wife gets 1/4 (instead of 1/8) = 7500.00
+        val wifeShare = result.activeShares.find { it.type == HeirType.WIFE }
+        assertTrue("Wife should inherit", wifeShare != null)
+        assertEquals(BigDecimal("7500.00"), wifeShare!!.cashAmount)
+
+        // Full Brother inherits the remaining 3/4 as Asabah = 22500.00
+        val brotherShare = result.activeShares.find { it.type == HeirType.FULL_BROTHER }
+        assertTrue("Brother should inherit", brotherShare != null)
+        assertEquals(BigDecimal("22500.00"), brotherShare!!.cashAmount)
+    }
+
+    @Test
+    fun testPregnancyReserveSimulation() {
+        val profile = DeceasedProfile(
+            gender = DeceasedGender.MALE,
+            netEstate = BigDecimal("24000.00")
+        )
+        // Deceased has Wife, Mother, Father, and an unborn child (1 fetus)
+        val baseInput = HeirInput(
+            wifeCount = 1,
+            motherCount = 1,
+            fatherCount = 1
+        )
+        val contingency = ContingencyEngine.calculatePregnancyReserve(profile, baseInput, numberOfFetuses = 1)
+
+        // Let's verify active distributions:
+        // Scenario A (no birth): Wife (1/4 = 6000), Mother (1/3 = 8000), Father (1/3 + Asabah = 10000)
+        // Scenario B (male birth): Wife (1/8 = 3000), Mother (1/6 = 4000), Father (1/6 = 4000)
+        // Scenario C (female birth): Wife (1/8 = 3000), Mother (1/6 = 4000), Father (1/6 = 4000)
+        // Guaranteed minimums: Wife (3000), Mother (4000), Father (4000)
+        // Total distributed: 11000
+        // Frozen reserve: 24000 - 11000 = 13000
+        assertEquals(BigDecimal("3000.00"), contingency.activeDistribution["wife"])
+        assertEquals(BigDecimal("4000.00"), contingency.activeDistribution["mother"])
+        assertEquals(BigDecimal("4000.00"), contingency.activeDistribution["father"])
+        assertEquals(BigDecimal("13000.00"), contingency.frozenReserve)
+    }
+
+    @Test
+    fun testMunasakhatChainedCalculation() {
+        // Original Deceased has estate 24000
+        // Heirs: Mother (gets 1/3 = 8000), Full Brother (gets 2/3 = 16000)
+        val profile = DeceasedProfile(
+            gender = DeceasedGender.MALE,
+            netEstate = BigDecimal("24000.00")
+        )
+        val baseInput = HeirInput(
+            motherCount = 1,
+            fullBrotherCount = 1
+        )
+        val primaryResult = FaraidhEngine.calculate(profile, baseInput)
+
+        // Full Brother dies before distribution, leaving his Mother and a Son.
+        // His personal estate is 4000. So his total estate is 16000 (inherited) + 4000 = 20000.
+        // Sub-heirs of Brother: Mother (gets 1/6 of 20000 = 3333.33), Son (gets 5/6 as Asabah = 16666.67)
+        val brotherSubTree = MunasakhatNode(
+            deceasedId = "full_brother",
+            deceasedName = "Ahmad",
+            netPersonalEstate = BigDecimal("4000.00"),
+            input = HeirInput(
+                motherCount = 1,
+                sonCount = 1
+            )
+        )
+
+        val collapsed = MunasakhatEngine.calculate(
+            primaryResult,
+            mapOf("full_brother" to brotherSubTree)
+        )
+
+        // Combined Mother share: Mother of primary deceased (8000) + Mother of Brother (3333.33) = 11333.33.
+        assertEquals(BigDecimal("11333.33"), collapsed["mother"])
+        assertEquals(BigDecimal("16666.67"), collapsed["son"])
+    }
+
+    @Test
+    fun testBaitulMalFallback() {
+        val profile = DeceasedProfile(
+            gender = DeceasedGender.MALE,
+            netEstate = BigDecimal("15000.00")
+        )
+        val input = HeirInput() // No heirs entered at all
+        val result = FaraidhEngine.calculate(profile, input)
+
+        assertEquals(1, result.activeShares.size)
+        val fallbackShare = result.activeShares.first()
+        assertEquals("baitul_mal", fallbackShare.heirId)
+        assertEquals(BigDecimal("15000.00"), fallbackShare.cashAmount)
+        assertEquals(FaraidhFraction.ONE, fallbackShare.fraction)
     }
 }
