@@ -54,6 +54,13 @@ fun OnboardingScreen(
         ActivityResultContracts.RequestPermission()
     ) { vm.onNotificationPermissionResult() }
 
+    val stepIndex = when (state.step) {
+        OnboardingStep.WELCOME -> 1
+        OnboardingStep.LOCATION -> 2
+        OnboardingStep.NOTIFICATIONS -> 3
+        OnboardingStep.WIDGET -> 4
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,17 +74,7 @@ fun OnboardingScreen(
             .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.lg),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val stepIndex = when (state.step) {
-                OnboardingStep.WELCOME -> 1
-                OnboardingStep.LOCATION -> 2
-                OnboardingStep.NOTIFICATIONS -> 3
-                OnboardingStep.WIDGET -> 4
-            }
+        Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 stringResource(R.string.onboarding_step_progress, stepIndex, 4),
                 style = MaterialTheme.typography.labelMedium,
@@ -86,12 +83,17 @@ fun OnboardingScreen(
             )
             LinearProgressIndicator(
                 progress = { stepIndex / 4f },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 20.dp),
+                modifier = Modifier.fillMaxWidth(),
                 color = AlKhatibColors.GoldBright,
                 trackColor = Color.White.copy(alpha = 0.2f)
             )
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             when (state.step) {
                 OnboardingStep.WELCOME -> WelcomeStep()
                 OnboardingStep.LOCATION -> LocationStep(

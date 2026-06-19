@@ -208,4 +208,59 @@ class FaraidhEngineTest {
         assertEquals(BigDecimal("15000.00"), fallbackShare.cashAmount)
         assertEquals(FaraidhFraction.ONE, fallbackShare.fraction)
     }
+
+    /**
+     * Two daughters, no son.
+     * Islamic ruling: daughters get 2/3 as furud (Quran 4:11).
+     * No son present → daughters do NOT become asabah.
+     * No other asabah → radd distributes the remaining 1/3 back proportionally → daughters receive 3/3 = all.
+     */
+    @Test
+    fun test_twoDaughtersOnly_getRaddNotAsabah() {
+        val profile = DeceasedProfile(
+            gender = DeceasedGender.MALE,
+            netEstate = BigDecimal("12000.00")
+        )
+        val input = HeirInput(daughterCount = 2)
+        val result = FaraidhEngine.calculate(profile, input)
+
+        val daughterShare = result.activeShares.find { it.type == HeirType.DAUGHTER }
+        assertTrue("Daughters should inherit", daughterShare != null)
+        // After radd: daughters get the full estate
+        assertEquals(BigDecimal("12000.00"), daughterShare!!.cashAmount)
+        // Must NOT be marked as asabah — they received furud + radd only
+        assertTrue("Daughters should NOT be asabah when alone", !daughterShare.isAsabah)
+        // No second daughter entry with isAsabah=true
+        val asabahDaughterEntry = result.activeShares.filter { it.type == HeirType.DAUGHTER && it.isAsabah }
+        assertTrue("No asabah daughter slot should exist", asabahDaughterEntry.isEmpty())
+    }
+
+    /**
+     * Father + two daughters (no son).
+     * Islamic ruling:
+     *   - Daughters: 2/3 furud
+     *   - Father: 1/6 fixed + residue (1/6) as asabah = 1/3 total
+     */
+    @Test
+    fun test_fatherAndTwoDaughters_fatherTakesResidueAsAsabah() {
+        val profile = DeceasedProfile(
+            gender = DeceasedGender.MALE,
+            netEstate = BigDecimal("12000.00")
+        )
+        val input = HeirInput(fatherCount = 1, daughterCount = 2)
+        val result = FaraidhEngine.calculate(profile, input)
+
+        val daughterShare = result.activeShares.find { it.type == HeirType.DAUGHTER }
+        assertTrue("Daughters should inherit", daughterShare != null)
+        assertEquals(BigDecimal("8000.00"), daughterShare!!.cashAmount)  // 2/3 of 12000
+
+        // Father: 1/6 (fixed) + 1/6 (residue asabah) = 2/6 = 1/3 = 4000
+        val fatherShares = result.activeShares.filter { it.type == HeirType.FATHER }
+        val fatherTotal = fatherShares.fold(BigDecimal.ZERO) { acc, s -> acc.add(s.cashAmount) }
+        assertEquals(BigDecimal("4000.00"), fatherTotal)  // 1/3 of 12000
+
+        // No asabah daughter slot
+        val asabahDaughter = result.activeShares.filter { it.type == HeirType.DAUGHTER && it.isAsabah }
+        assertTrue("Daughters must not appear as asabah", asabahDaughter.isEmpty())
+    }
 }

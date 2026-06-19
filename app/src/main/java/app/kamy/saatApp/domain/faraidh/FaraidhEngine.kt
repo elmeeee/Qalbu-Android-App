@@ -306,6 +306,9 @@ object FaraidhEngine {
 
         if (ctx.hasFather) {
             if (ctx.hasChild || ctx.hasGrandchild) {
+                // Father always gets 1/6 fixed when any descendant exists.
+                // If only daughters/granddaughters (no sons/grandsons) remain, father also takes
+                // the residue as asabah — handled in assignAsabahResidue.
                 slots += Slot(
                     HeirType.FATHER,
                     1,
@@ -446,7 +449,13 @@ object FaraidhEngine {
             return
         }
 
-        if (ctx.hasFather && !ctx.hasChild && !ctx.hasGrandchild) {
+        // Father takes the full residue as asabah when:
+        //   (a) no descendants at all — he is the sole/primary asabah, OR
+        //   (b) there are only daughters / granddaughters (no sons/grandsons):
+        //       daughters took their furud (1/2 or 2/3); father sweeps the rest.
+        val onlyFemaleDescendants =
+            (ctx.hasDaughter && !ctx.hasSon) || (ctx.hasGranddaughter && !ctx.hasGrandson)
+        if (ctx.hasFather && (!ctx.hasChild && !ctx.hasGrandchild || onlyFemaleDescendants)) {
             mergeOrAdd(
                 slots,
                 Slot(HeirType.FATHER, 1, residue, true, mutableListOf("proof_father_residue"))
@@ -457,9 +466,13 @@ object FaraidhEngine {
     private data class AsabahGroup(val type: HeirType, val maleHeads: Int, val femaleHeads: Int)
 
     private fun buildAsabahPriority(input: HeirInput, ctx: Context): List<AsabahGroup> = buildList {
-        if (ctx.hasSon || ctx.hasDaughter) {
+        if (ctx.hasSon) {
+            // Sons (and daughters riding with them as asabah bil-ghayr) take the residue.
+            // Daughters ALONE (no son) already received furud — they do NOT enter here.
             add(AsabahGroup(HeirType.SON, input.sonCount, input.daughterCount))
-        } else if (ctx.hasGrandson || ctx.hasGranddaughter) {
+        } else if (ctx.hasGrandson) {
+            // Same rule one generation down: grandsons pull granddaughters as asabah bil-ghayr.
+            // Granddaughters alone already received furud — they do NOT enter here.
             add(AsabahGroup(HeirType.GRANDSON, input.grandsonCount, input.granddaughterCount))
         } else if (!ctx.siblingsBlocked && !ctx.bornOutOfWedlock) {
             if (input.fullBrotherCount > 0 || input.fullSisterCount > 0) {
