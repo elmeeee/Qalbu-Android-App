@@ -8,6 +8,7 @@ import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import androidx.core.content.FileProvider
+import androidx.core.graphics.scale
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.faraidh.BlockingReasonKey
@@ -18,10 +19,8 @@ import app.kamy.saatApp.domain.faraidh.FaraidhMadhhab
 import app.kamy.saatApp.domain.faraidh.FaraidhNameLabels
 import app.kamy.saatApp.domain.faraidh.FaraidhParticipantNames
 import app.kamy.saatApp.domain.faraidh.FaraidhProofItem
-import app.kamy.saatApp.domain.faraidh.FaraidhProofKind
 import app.kamy.saatApp.domain.faraidh.FaraidhResult
 import app.kamy.saatApp.domain.faraidh.HeirType
-import app.kamy.saatApp.domain.faraidh.SilsilahNode
 import app.kamy.saatApp.domain.faraidh.EstateAssetInput
 import app.kamy.saatApp.domain.faraidh.EstateComputation
 import app.kamy.saatApp.domain.faraidh.FaraidhEstateCalculator
@@ -54,7 +53,6 @@ object FaraidhPdfExporter {
         val detail: String,
         val amount: BigDecimal,
         val isDeduction: Boolean = false,
-        val isHeader: Boolean = false,
         val isTotal: Boolean = false
     )
 
@@ -81,7 +79,7 @@ object FaraidhPdfExporter {
         val locale = localeFor(language)
 
         loadLogo(context)?.let { logo ->
-            ctx.canvas.drawBitmap(Bitmap.createScaledBitmap(logo, 64, 64, true), MARGIN, ctx.y, null)
+            ctx.canvas.drawBitmap(logo.scale(64, 64, filter = true), MARGIN, ctx.y, null)
             ctx.y += 72f
         }
 
@@ -113,7 +111,7 @@ object FaraidhPdfExporter {
         result.deceased.estate?.let { estate ->
             drawLine(ctx, paints.section, t(language, "Perhitungan harta (tarikah)", "Pengiraan harta (tarikah)", "Estate calculation (tarikah)"))
             ctx.y += 8f
-            drawEstateTable(ctx, paints, estate, estateInput, currency, language)
+            drawEstateTable(ctx, estate, estateInput, currency, language)
             ctx.y += 8f
             if (estate.hasResidentialProperty) {
                 ensureSpace(ctx, 14f)
@@ -131,14 +129,14 @@ object FaraidhPdfExporter {
         ctx.y += 12f
 
         // --- Adjustment ---
+        val (title, body) = when (result.adjustment) {
+            FaraidhAdjustment.AWL -> t(language, "Penyesuaian Aul", "Pelarasan Aul", "ʿAwl adjustment") to
+                t(language, "Bagian furud melebihi harta — semua porsi diskalakan proporsional.", "Bahagian furud melebihi harta — semua bahagian diskalakan.", "Fixed shares exceeded estate — all portions scaled proportionally.")
+            FaraidhAdjustment.RADD -> t(language, "Penyesuaian Radd", "Pelarasan Radd", "Radd adjustment") to
+                t(language, "Kelebihan harta dikembalikan ke waris nasab (pasangan dikecualikan).", "Lebihan harta dikembalikan kepada waris nasab.", "Surplus redistributed to blood heirs (spouses excluded).")
+            FaraidhAdjustment.NONE -> "" to ""
+        }
         if (result.adjustment != FaraidhAdjustment.NONE) {
-            val (title, body) = when (result.adjustment) {
-                FaraidhAdjustment.AWL -> t(language, "Penyesuaian Aul", "Pelarasan Aul", "ʿAwl adjustment") to
-                    t(language, "Bagian furud melebihi harta — semua porsi diskalakan proporsional.", "Bahagian furud melebihi harta — semua bahagian diskalakan.", "Fixed shares exceeded estate — all portions scaled proportionally.")
-                FaraidhAdjustment.RADD -> t(language, "Penyesuaian Radd", "Pelarasan Radd", "Radd adjustment") to
-                    t(language, "Kelebihan harta dikembalikan ke waris nasab (pasangan dikecualikan).", "Lebihan harta dikembalikan kepada waris nasab.", "Surplus redistributed to blood heirs (spouses excluded).")
-                FaraidhAdjustment.NONE -> "" to ""
-            }
             drawLine(ctx, paints.bodyBold, title)
             ctx.y += 4f
             drawWrapped(ctx, paints.body, body)
@@ -148,7 +146,7 @@ object FaraidhPdfExporter {
         // --- Breakdown table ---
         drawLine(ctx, paints.section, t(language, "Rincian pembagian waris", "Perincian pembahagian", "Inheritance breakdown"))
         ctx.y += 8f
-        drawInheritanceTable(ctx, paints, result, names, currency, language)
+        drawInheritanceTable(ctx, result, names, currency, language)
         ctx.y += 14f
 
         // --- Blocked Heirs ---
@@ -303,7 +301,6 @@ object FaraidhPdfExporter {
 
     private fun drawEstateTable(
         ctx: PdfExportContext,
-        paints: PdfPaints,
         estate: EstateComputation,
         estateInput: EstateAssetInput,
         currency: NumberFormat,
@@ -565,7 +562,6 @@ object FaraidhPdfExporter {
 
     private fun drawInheritanceTable(
         ctx: PdfExportContext,
-        paints: PdfPaints,
         result: FaraidhResult,
         names: FaraidhParticipantNames,
         currency: NumberFormat,
@@ -687,7 +683,7 @@ object FaraidhPdfExporter {
     }
 
     private fun formatPercent(value: BigDecimal, language: AppLanguage): String {
-        val scaled = value.setScale(1, java.math.RoundingMode.HALF_UP).stripTrailingZeros()
+        val scaled = value.setScale(1, RoundingMode.HALF_UP).stripTrailingZeros()
         val sep = when (language) {
             AppLanguage.INDONESIAN, AppLanguage.MALAY -> ','
             AppLanguage.ENGLISH -> '.'
@@ -704,8 +700,8 @@ object FaraidhPdfExporter {
     }
 
     private fun localeFor(language: AppLanguage) = when (language) {
-        AppLanguage.INDONESIAN -> Locale("id", "ID")
-        AppLanguage.MALAY -> Locale("ms", "MY")
+        AppLanguage.INDONESIAN -> Locale.forLanguageTag("id-ID")
+        AppLanguage.MALAY -> Locale.forLanguageTag("ms-MY")
         AppLanguage.ENGLISH -> Locale.US
     }
 
