@@ -44,6 +44,7 @@ data class FaraidhUiState(
     val husbandCount: Int = 0,
     val wifeCount: Int = 0,
     val fatherCount: Int = 0,
+    val grandfatherCount: Int = 0,
     val motherCount: Int = 0,
     val sonCount: Int = 0,
     val daughterCount: Int = 0,
@@ -155,6 +156,7 @@ class FaraidhViewModel @Inject constructor(
         husbandCount = state.husbandCount,
         wifeCount = state.wifeCount,
         fatherCount = state.fatherCount,
+        grandfatherCount = state.grandfatherCount,
         motherCount = state.motherCount,
         sonCount = state.sonCount,
         daughterCount = state.daughterCount,
@@ -178,6 +180,7 @@ class FaraidhViewModel @Inject constructor(
             husbandCount = data.husbandCount,
             wifeCount = data.wifeCount,
             fatherCount = data.fatherCount,
+            grandfatherCount = data.grandfatherCount,
             motherCount = data.motherCount,
             sonCount = data.sonCount,
             daughterCount = data.daughterCount,
@@ -254,6 +257,7 @@ class FaraidhViewModel @Inject constructor(
                     }
                 )
                 HeirNameField.FATHER -> state.names.copy(fatherName = value)
+                HeirNameField.GRANDFATHER -> state.names.copy(grandfatherName = value)
                 HeirNameField.MOTHER -> state.names.copy(motherName = value)
                 HeirNameField.SON -> state.names.copy(
                     sonNames = state.names.sonNames.toMutableList().apply {
@@ -327,7 +331,16 @@ class FaraidhViewModel @Inject constructor(
             val updated = when (field) {
                 HeirCountField.HUSBAND -> state.copy(husbandCount = safe.coerceAtMost(1))
                 HeirCountField.WIFE -> state.copy(wifeCount = safe.coerceIn(0, 4))
-                HeirCountField.FATHER -> state.copy(fatherCount = safe.coerceAtMost(1))
+                HeirCountField.FATHER -> state.copy(
+                    fatherCount = safe.coerceAtMost(1),
+                    // Father blocks grandfather: auto-reset grandfather when father is added
+                    grandfatherCount = if (safe > 0) 0 else state.grandfatherCount
+                )
+                HeirCountField.GRANDFATHER -> state.copy(
+                    grandfatherCount = safe.coerceAtMost(1),
+                    // Grandfather can only exist if no father
+                    fatherCount = if (safe > 0) 0 else state.fatherCount
+                )
                 HeirCountField.MOTHER -> state.copy(motherCount = safe.coerceAtMost(1))
                 HeirCountField.SON -> state.copy(sonCount = safe)
                 HeirCountField.DAUGHTER -> state.copy(daughterCount = safe)
@@ -404,6 +417,7 @@ class FaraidhViewModel @Inject constructor(
             husbandCount = if (s.gender == DeceasedGender.FEMALE) s.husbandCount else 0,
             wifeCount = if (s.gender == DeceasedGender.MALE) s.wifeCount else 0,
             fatherCount = s.fatherCount,
+            grandfatherCount = s.grandfatherCount,
             motherCount = s.motherCount,
             sonCount = s.sonCount,
             daughterCount = s.daughterCount,
@@ -458,7 +472,7 @@ class FaraidhViewModel @Inject constructor(
 }
 
 enum class HeirCountField {
-    HUSBAND, WIFE, FATHER, MOTHER, SON, DAUGHTER,
+    HUSBAND, WIFE, FATHER, GRANDFATHER, MOTHER, SON, DAUGHTER,
     GRANDSON, GRANDDAUGHTER,
     FULL_BROTHER, FULL_SISTER,
     PATERNAL_BROTHER, PATERNAL_SISTER,
@@ -466,7 +480,7 @@ enum class HeirCountField {
 }
 
 enum class HeirNameField {
-    DECEASED, HUSBAND, WIFE, FATHER, MOTHER, SON, DAUGHTER,
+    DECEASED, HUSBAND, WIFE, FATHER, GRANDFATHER, MOTHER, SON, DAUGHTER,
     GRANDSON, GRANDDAUGHTER,
     FULL_BROTHER, FULL_SISTER,
     PATERNAL_BROTHER, PATERNAL_SISTER,

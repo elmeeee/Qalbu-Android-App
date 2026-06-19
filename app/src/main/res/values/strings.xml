@@ -710,6 +710,19 @@
     <string name="faraidh_heir_husband">Husband</string>
     <string name="faraidh_heir_wife">Wife</string>
     <string name="faraidh_heir_father">Father</string>
+    <string name="faraidh_heir_grandfather">Grandfather (paternal)</string>
+    <string name="faraidh_section_grandparents">Grandparents</string>
+    <string name="faraidh_block_by_grandfather">Blocked by grandfather (hajb)</string>
+    <string name="faraidh_classical_case_label">Classical case</string>
+    <string name="faraidh_classical_al_minbariyah">Al-Minbariyah</string>
+    <string name="faraidh_classical_al_akdariyah">Al-Akdariyah</string>
+    <string name="faraidh_classical_al_marwaniyah">Al-Marwaniyah</string>
+    <string name="faraidh_classical_umariyatain">Al-ʿUmariyatain</string>
+    <string name="faraidh_classical_al_minbariyah_desc">The case posed to ʿAlī ibn Abī Ṭālib (RA) while on the minbar: shares exceed 1 so ʿawl applies — the wife receives ¼ of her normal entitlement.</string>
+    <string name="faraidh_classical_al_akdariyah_desc">The muddled case: grandfather and full sister each receive 1/6 fixed, then pool and redivide their combined 2/6 in a 2:1 ratio (grandfather 2 parts, sister 1 part) — Ibn Masʿūd and Zayd ibn Thābit ruling.</string>
+    <string name="faraidh_classical_al_marwaniyah_desc">Al-Mushtaraka: ʿUmar ibn Al-Khaṭṭāb (RA) ruled that full brothers share equally with maternal siblings in the 1/3 — applied in the Mālikī madhhab.</string>
+    <string name="faraidh_classical_umariyatain_desc">The two ʿUmari rulings: when both parents and a spouse survive with no children, the mother receives 1/3 of the residue (after the spouse\'s share) — not 1/3 of the whole estate.</string>
+
     <string name="faraidh_heir_mother">Mother</string>
     <string name="faraidh_heir_son">Son</string>
     <string name="faraidh_heir_daughter">Daughter</string>

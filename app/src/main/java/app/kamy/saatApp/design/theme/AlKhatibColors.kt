@@ -22,6 +22,7 @@ object AlKhatibColors {
     val SoftGrey = Color(0xFFE5E7EB)
     val LightGrey = Color(0xFFF3F4F6)
     val Slate500 = Color(0xFF64748B)
+    val Slate700 = Color(0xFF334155)
     val Slate800 = Color(0xFF1E293B)
     val Slate900 = Color(0xFF0F172A)
     val PrayerCream = Color(0xFFFFF7ED)

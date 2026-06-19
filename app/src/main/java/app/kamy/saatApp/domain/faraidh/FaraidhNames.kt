@@ -8,6 +8,7 @@ data class FaraidhParticipantNames(
     val husbandName: String = "",
     val wifeNames: List<String> = emptyList(),
     val fatherName: String = "",
+    val grandfatherName: String = "",
     val motherName: String = "",
     val sonNames: List<String> = emptyList(),
     val daughterNames: List<String> = emptyList(),
@@ -32,6 +33,7 @@ object FaraidhNameLabels {
         HeirType.HUSBAND -> listOfNotNull(names.husbandName.takeIf { it.isNotBlank() })
         HeirType.WIFE -> names.wifeNames.filter { it.isNotBlank() }
         HeirType.FATHER -> listOfNotNull(names.fatherName.takeIf { it.isNotBlank() })
+        HeirType.GRANDFATHER -> listOfNotNull(names.grandfatherName.takeIf { it.isNotBlank() })
         HeirType.MOTHER -> listOfNotNull(names.motherName.takeIf { it.isNotBlank() })
         HeirType.SON -> names.sonNames
         HeirType.DAUGHTER -> names.daughterNames

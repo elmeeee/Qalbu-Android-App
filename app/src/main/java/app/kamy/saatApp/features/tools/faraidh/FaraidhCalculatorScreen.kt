@@ -108,6 +108,7 @@ import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryItem
 import app.kamy.saatApp.domain.faraidh.FaraidhMadhhab
 import app.kamy.saatApp.domain.faraidh.BlockingReasonKey
 import app.kamy.saatApp.domain.faraidh.DeceasedGender
+import app.kamy.saatApp.domain.faraidh.ClassicalCase
 import app.kamy.saatApp.domain.faraidh.FaraidhAdjustment
 import app.kamy.saatApp.domain.faraidh.FaraidhProofItem
 import app.kamy.saatApp.domain.faraidh.FaraidhProofKind
@@ -703,6 +704,7 @@ private fun FaraidhInputSheetContent(
 
         HeirSection(title = stringResource(R.string.faraidh_section_parents), icon = Icons.Filled.People) {
             NamedHeirStepper(stringResource(R.string.faraidh_heir_father), state.fatherCount, listOf(state.names.fatherName), 0, 1, { onHeirChange(HeirCountField.FATHER, it) }) { _, n -> onHeirNameChange(HeirNameField.FATHER, 0, n) }
+            NamedHeirStepper(stringResource(R.string.faraidh_heir_grandfather), state.grandfatherCount, listOf(state.names.grandfatherName), 0, 1, { onHeirChange(HeirCountField.GRANDFATHER, it) }) { _, n -> onHeirNameChange(HeirNameField.GRANDFATHER, 0, n) }
             NamedHeirStepper(stringResource(R.string.faraidh_heir_mother), state.motherCount, listOf(state.names.motherName), 0, 1, { onHeirChange(HeirCountField.MOTHER, it) }) { _, n -> onHeirNameChange(HeirNameField.MOTHER, 0, n) }
         }
 
@@ -865,6 +867,9 @@ private fun FaraidhBreakdownTab(
             }
             if (result.adjustment != FaraidhAdjustment.NONE) {
                 item { AdjustmentBanner(result) }
+            }
+            result.classicalCase?.let { classicalCase ->
+                item { ClassicalCaseBanner(classicalCase) }
             }
             item {
                 BreakdownTableHeader()
@@ -1035,6 +1040,50 @@ private fun AdjustmentBanner(result: FaraidhResult) {
         Column(Modifier.padding(14.dp)) {
             Text(title, fontWeight = FontWeight.Bold, color = AlKhatibColors.GoldDeep)
             Text(body, style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.GoldDeep.copy(alpha = 0.85f), modifier = Modifier.padding(top = 4.dp))
+        }
+    }
+}
+
+@Composable
+private fun ClassicalCaseBanner(classicalCase: ClassicalCase) {
+    val (name, desc) = when (classicalCase) {
+        ClassicalCase.AL_MINBARIYAH ->
+            stringResource(R.string.faraidh_classical_al_minbariyah) to
+                stringResource(R.string.faraidh_classical_al_minbariyah_desc)
+        ClassicalCase.AL_AKDARIYAH ->
+            stringResource(R.string.faraidh_classical_al_akdariyah) to
+                stringResource(R.string.faraidh_classical_al_akdariyah_desc)
+        ClassicalCase.AL_MARWANIYAH ->
+            stringResource(R.string.faraidh_classical_al_marwaniyah) to
+                stringResource(R.string.faraidh_classical_al_marwaniyah_desc)
+        ClassicalCase.UMARIYATAIN ->
+            stringResource(R.string.faraidh_classical_umariyatain) to
+                stringResource(R.string.faraidh_classical_umariyatain_desc)
+    }
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = AlKhatibColors.Teal.copy(alpha = 0.10f),
+        modifier = Modifier.border(1.dp, AlKhatibColors.Teal.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+    ) {
+        Column(Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .background(AlKhatibColors.Teal, CircleShape)
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.faraidh_classical_case_label).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Text(name, fontWeight = FontWeight.Bold, color = AlKhatibColors.TealDark)
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(desc, style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.Slate700)
         }
     }
 }
@@ -1298,7 +1347,7 @@ private fun EmptyState(
 }
 
 private fun countActiveHeirs(state: FaraidhUiState): Int = listOf(
-    state.husbandCount, state.wifeCount, state.fatherCount, state.motherCount,
+    state.husbandCount, state.wifeCount, state.fatherCount, state.grandfatherCount, state.motherCount,
     state.sonCount, state.daughterCount, state.grandsonCount, state.granddaughterCount,
     state.fullBrotherCount, state.fullSisterCount,
     state.paternalBrotherCount, state.paternalSisterCount,
@@ -1313,6 +1362,7 @@ private fun blockingReasonLabel(reason: BlockingReasonKey): String = when (reaso
     BlockingReasonKey.BY_SON -> stringResource(R.string.faraidh_block_by_son)
     BlockingReasonKey.BY_CHILDREN -> stringResource(R.string.faraidh_block_by_children)
     BlockingReasonKey.BY_FATHER -> stringResource(R.string.faraidh_block_by_father)
+    BlockingReasonKey.BY_GRANDFATHER -> stringResource(R.string.faraidh_block_by_grandfather)
     BlockingReasonKey.BY_GRANDCHILDREN_SUBSTITUTE -> stringResource(R.string.faraidh_block_by_grandchild)
     BlockingReasonKey.GENDER_MISMATCH -> stringResource(R.string.faraidh_block_gender)
     BlockingReasonKey.NO_SHARE_REMAINDER -> stringResource(R.string.faraidh_block_no_share)
@@ -1326,6 +1376,7 @@ private fun heirTypeRes(type: HeirType): Int = when (type) {
     HeirType.HUSBAND -> R.string.faraidh_heir_husband
     HeirType.WIFE -> R.string.faraidh_heir_wife
     HeirType.FATHER -> R.string.faraidh_heir_father
+    HeirType.GRANDFATHER -> R.string.faraidh_heir_grandfather
     HeirType.MOTHER -> R.string.faraidh_heir_mother
     HeirType.SON -> R.string.faraidh_heir_son
     HeirType.DAUGHTER -> R.string.faraidh_heir_daughter
@@ -1345,6 +1396,7 @@ private fun heirLabelRes(key: String): Int = when (key) {
     else -> heirTypeRes(
         when (key) {
             "faraidh_heir_father" -> HeirType.FATHER
+            "faraidh_heir_grandfather" -> HeirType.GRANDFATHER
             "faraidh_heir_mother" -> HeirType.MOTHER
             "faraidh_heir_husband" -> HeirType.HUSBAND
             "faraidh_heir_wife" -> HeirType.WIFE

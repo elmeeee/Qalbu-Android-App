@@ -27,6 +27,7 @@ data class FaraidhScenarioData(
     val husbandCount: Int = 0,
     val wifeCount: Int = 0,
     val fatherCount: Int = 0,
+    val grandfatherCount: Int = 0,
     val motherCount: Int = 0,
     val sonCount: Int = 0,
     val daughterCount: Int = 0,

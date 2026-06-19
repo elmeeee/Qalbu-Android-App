@@ -23,6 +23,7 @@ data class HeirInput(
     val husbandCount: Int = 0,
     val wifeCount: Int = 0,
     val fatherCount: Int = 0,
+    val grandfatherCount: Int = 0,
     val motherCount: Int = 0,
     val sonCount: Int = 0,
     val daughterCount: Int = 0,
@@ -37,7 +38,7 @@ data class HeirInput(
     val disqualifiedHeirs: List<DisqualifiedHeir> = emptyList()
 ) {
     fun hasAnyHeir(): Boolean = listOf(
-        husbandCount, wifeCount, fatherCount, motherCount,
+        husbandCount, wifeCount, fatherCount, grandfatherCount, motherCount,
         sonCount, daughterCount, grandsonCount, granddaughterCount,
         fullBrotherCount, fullSisterCount,
         paternalBrotherCount, paternalSisterCount,
@@ -49,6 +50,7 @@ enum class HeirType {
     HUSBAND,
     WIFE,
     FATHER,
+    GRANDFATHER,
     MOTHER,
     SON,
     DAUGHTER,
@@ -67,6 +69,7 @@ enum class BlockingReasonKey {
     BY_SON,
     BY_CHILDREN,
     BY_FATHER,
+    BY_GRANDFATHER,
     BY_GRANDCHILDREN_SUBSTITUTE,
     GENDER_MISMATCH,
     NO_SHARE_REMAINDER,
@@ -169,6 +172,14 @@ data class ContingencyInput(
     val missingHeirCount: Int = 0
 )
 
+/** Named classical inheritance scenarios detected by the engine. */
+enum class ClassicalCase {
+    AL_MINBARIYAH,   // Husband + Mother + Two Daughters + Father — ʿAlī's famous minbar ruling
+    AL_AKDARIYAH,    // Husband + Mother + Grandfather + Full Sister — grandfather/sister pool & redivide 2:1
+    AL_MARWANIYAH,   // Husband + Mother + Full Brother(s) + Uterine siblings — siblings share 1/3 (Maliki)
+    UMARIYATAIN      // Spouse + both parents with no children — mother gets 1/3 of residue after spouse
+}
+
 data class FaraidhResult(
     val deceased: DeceasedProfile,
     val input: HeirInput,
@@ -182,5 +193,6 @@ data class FaraidhResult(
     val remainderFraction: FaraidhFraction,
     val madhhab: FaraidhMadhhab = FaraidhMadhhab.SHAFII,
     val madhhabNoteKey: String? = null,
-    val familyGraph: FaraidhFamilyGraph? = null
+    val familyGraph: FaraidhFamilyGraph? = null,
+    val classicalCase: ClassicalCase? = null
 )

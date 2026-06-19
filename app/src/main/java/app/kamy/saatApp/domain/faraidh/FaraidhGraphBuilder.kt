@@ -84,6 +84,32 @@ object FaraidhGraphBuilder {
             edges.add(FaraidhGraphEdge(id, rootId, GraphEdgeType.PARENT_CHILD))
         }
 
+        if (input.grandfatherCount > 0) {
+            val id = "grandfather_1"
+            val share = activeShares.find { it.type == HeirType.GRANDFATHER }
+            val blocked = blockedHeirs.find { it.type == HeirType.GRANDFATHER }
+            val status = when {
+                blocked?.reason == BlockingReasonKey.OUT_OF_WEDLOCK -> GraphNodeStatus.EXCLUDED_BY_LAW
+                blocked != null -> GraphNodeStatus.MAHJUB_HIRMAN
+                else -> GraphNodeStatus.ACTIVE
+            }
+            nodes[id] = FaraidhGraphNode(
+                id = id,
+                displayName = "Grandfather",
+                generationLevel = 2,
+                relationType = HeirType.GRANDFATHER,
+                status = status,
+                baseShareFraction = share?.fraction?.toDisplayString(),
+                finalPercentage = share?.percentage?.toDouble() ?: 0.0,
+                cashValue = share?.cashAmount ?: BigDecimal.ZERO,
+                disqualificationReasonId = blocked?.reason?.name?.lowercase(),
+                visualColorHex = if (status == GraphNodeStatus.ACTIVE) "#10B981" else "#EF4444"
+            )
+            // Edge: grandfather → father if father present, else grandfather → root
+            val parentId = if (input.fatherCount > 0) "father_1" else rootId
+            edges.add(FaraidhGraphEdge(id, parentId, GraphEdgeType.PARENT_CHILD))
+        }
+
         if (input.motherCount > 0) {
             val id = "mother_1"
             val share = activeShares.find { it.type == HeirType.MOTHER }

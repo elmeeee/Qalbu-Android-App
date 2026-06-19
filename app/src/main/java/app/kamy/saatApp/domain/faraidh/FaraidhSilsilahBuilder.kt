@@ -39,6 +39,15 @@ object FaraidhSilsilahBuilder {
                 activeTypes.contains(HeirType.FATHER), reason != null, reason, names.fatherName, activeShares, profile.bornOutOfWedlock
             )
         }
+        if (input.grandfatherCount > 0) {
+            val reason = blockedMap[HeirType.GRANDFATHER]?.firstOrNull()?.reason
+            // Grandfather sits one generation above father; parent node = father if present, else root
+            val parentId = if (input.fatherCount > 0) "father" else DECEASED_ID
+            nodes += node(
+                "grandfather", parentId, -2, HeirType.GRANDFATHER, "faraidh_heir_grandfather", 1,
+                activeTypes.contains(HeirType.GRANDFATHER), reason != null, reason, names.grandfatherName, activeShares, profile.bornOutOfWedlock
+            )
+        }
         if (input.motherCount > 0) {
             val reason = blockedMap[HeirType.MOTHER]?.firstOrNull()?.reason
             nodes += node(
@@ -179,6 +188,7 @@ object FaraidhSilsilahBuilder {
         HeirType.HUSBAND -> "faraidh_heir_husband"
         HeirType.WIFE -> "faraidh_heir_wife"
         HeirType.FATHER -> "faraidh_heir_father"
+        HeirType.GRANDFATHER -> "faraidh_heir_grandfather"
         HeirType.MOTHER -> "faraidh_heir_mother"
         HeirType.SON -> "faraidh_heir_son"
         HeirType.DAUGHTER -> "faraidh_heir_daughter"
