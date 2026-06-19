@@ -1,10 +1,14 @@
 package app.kamy.saatApp.features.today.components
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -120,8 +124,9 @@ fun TodayHeader(
                             }
                         },
                     transitionSpec = {
-                        fadeIn(animationSpec = tween(220)) togetherWith
-                            fadeOut(animationSpec = tween(180))
+                        (fadeIn(animationSpec = tween(220)) togetherWith
+                            fadeOut(animationSpec = tween(180)))
+                            .using(SizeTransform(clip = false) { _, _ -> snap() })
                     },
                     label = "headerDate"
                 ) { date ->
@@ -158,20 +163,27 @@ fun TodayHeader(
                 }
             }
 
-            AnimatedContent(
-                targetState = dayName,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180))
-                },
-                label = "headerDay"
-            ) { name ->
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
+            Box(
+                modifier = Modifier.width(80.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                AnimatedContent(
+                    targetState = dayName,
+                    transitionSpec = {
+                        (fadeIn(animationSpec = tween(220)) togetherWith
+                            fadeOut(animationSpec = tween(180)))
+                            .using(SizeTransform(clip = false) { _, _ -> snap() })
+                    },
+                    label = "headerDay"
+                ) { name ->
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
             }
         }
 

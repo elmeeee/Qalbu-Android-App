@@ -100,10 +100,14 @@ data class FaraidhFraction(
                 if (type in spouseTypes || frac.numerator == BigInteger.ZERO) {
                     type to frac
                 } else {
-                    val extra = FaraidhFraction(
-                        surplus.numerator * frac.numerator,
-                        surplus.denominator * eligibleTotal.numerator
+                    val extraProp = FaraidhFraction(
+                        frac.numerator * eligibleTotal.denominator,
+                        frac.denominator * eligibleTotal.numerator
                     )
+                    val extra = FaraidhFraction(
+                        surplus.numerator * extraProp.numerator,
+                        surplus.denominator * extraProp.denominator
+                    ).normalized()
                     type to frac.add(extra).normalized()
                 }
             }

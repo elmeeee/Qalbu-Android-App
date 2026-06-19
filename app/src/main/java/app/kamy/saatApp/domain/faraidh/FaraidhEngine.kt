@@ -128,7 +128,8 @@ object FaraidhEngine {
         val siblingHeads: Int,
         val hasTwoOrMoreSiblings: Boolean,
         val siblingsBlocked: Boolean,
-        val grandchildrenBlocked: Boolean
+        val grandchildrenBlocked: Boolean,
+        val bornOutOfWedlock: Boolean
     )
 
     private fun analyze(input: HeirInput, gender: DeceasedGender, bornOutOfWedlock: Boolean): Context {
@@ -163,7 +164,8 @@ object FaraidhEngine {
             siblingHeads = siblingHeads,
             hasTwoOrMoreSiblings = siblingHeads >= 2,
             siblingsBlocked = siblingsBlocked,
-            grandchildrenBlocked = grandchildrenBlocked
+            grandchildrenBlocked = grandchildrenBlocked,
+            bornOutOfWedlock = bornOutOfWedlock
         )
     }
 
@@ -325,7 +327,7 @@ object FaraidhEngine {
                 )
             }
 
-            if (input.fullBrotherCount == 0 && input.fullSisterCount > 0 && !ctx.hasChild) {
+            if (!profile.bornOutOfWedlock && input.fullBrotherCount == 0 && input.fullSisterCount > 0 && !ctx.hasChild) {
                 val share = if (input.fullSisterCount == 1) {
                     FaraidhFraction.of(1, 2)
                 } else {
@@ -340,7 +342,7 @@ object FaraidhEngine {
                 )
             }
 
-            if (input.paternalBrotherCount == 0 && input.paternalSisterCount > 0 &&
+            if (!profile.bornOutOfWedlock && input.paternalBrotherCount == 0 && input.paternalSisterCount > 0 &&
                 input.fullBrotherCount == 0 && input.fullSisterCount == 0 && !ctx.hasChild
             ) {
                 val share = if (input.paternalSisterCount == 1) {
@@ -419,7 +421,7 @@ object FaraidhEngine {
             add(AsabahGroup(HeirType.SON, input.sonCount, input.daughterCount))
         } else if (ctx.hasGrandson || ctx.hasGranddaughter) {
             add(AsabahGroup(HeirType.GRANDSON, input.grandsonCount, input.granddaughterCount))
-        } else if (!ctx.siblingsBlocked) {
+        } else if (!ctx.siblingsBlocked && !ctx.bornOutOfWedlock) {
             if (input.fullBrotherCount > 0 || input.fullSisterCount > 0) {
                 add(AsabahGroup(HeirType.FULL_BROTHER, input.fullBrotherCount, input.fullSisterCount))
             } else if (input.paternalBrotherCount > 0 || input.paternalSisterCount > 0) {

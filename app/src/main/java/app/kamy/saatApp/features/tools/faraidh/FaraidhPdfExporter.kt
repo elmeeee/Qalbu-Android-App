@@ -41,6 +41,23 @@ object FaraidhPdfExporter {
     private const val MARGIN = 44f
     private const val CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2
 
+    private class PdfExportContext(
+        val document: PdfDocument,
+        var pageNumber: Int,
+        var page: PdfDocument.Page,
+        var canvas: android.graphics.Canvas,
+        var y: Float
+    )
+
+    private class EstateRow(
+        val category: String,
+        val detail: String,
+        val amount: BigDecimal,
+        val isDeduction: Boolean = false,
+        val isHeader: Boolean = false,
+        val isTotal: Boolean = false
+    )
+
     fun export(
         context: Context,
         result: FaraidhResult,
@@ -51,72 +68,67 @@ object FaraidhPdfExporter {
         language: AppLanguage
     ): Uri {
         val document = PdfDocument()
-        var pageNumber = 1
+        val firstPage = startPage(document, 1)
+        val ctx = PdfExportContext(
+            document = document,
+            pageNumber = 1,
+            page = firstPage,
+            canvas = firstPage.canvas,
+            y = MARGIN
+        )
         val paints = PdfPaints()
         val currency = currencyFormat(language)
         val locale = localeFor(language)
 
-        var page = startPage(document, pageNumber++)
-        var canvas = page.canvas
-        var y = MARGIN
-
-        fun ensure(needed: Float) {
-            if (y + needed > PAGE_HEIGHT - MARGIN) {
-                document.finishPage(page)
-                page = startPage(document, pageNumber++)
-                canvas = page.canvas
-                y = MARGIN
-            }
-        }
-
         loadLogo(context)?.let { logo ->
-            canvas.drawBitmap(Bitmap.createScaledBitmap(logo, 64, 64, true), MARGIN, y, null)
-            y += 72f
+            ctx.canvas.drawBitmap(Bitmap.createScaledBitmap(logo, 64, 64, true), MARGIN, ctx.y, null)
+            ctx.y += 72f
         }
 
-        y = drawLine(canvas, y, paints.title, "SĀAT — ${t(language, "Laporan Faraidh", "Laporan Faraidh", "Faraidh Report")}")
-        y += 4f
-        y = drawLine(canvas, y, paints.small, SimpleDateFormat("yyyy-MM-dd HH:mm", locale).format(Date()))
-        y += 16f
+        drawLine(ctx, paints.title, "SĀAT — ${t(language, "Laporan Faraidh", "Laporan Faraidh", "Faraidh Report")}")
+        ctx.y += 4f
+        drawLine(ctx, paints.small, SimpleDateFormat("yyyy-MM-dd HH:mm", locale).format(Date()))
+        ctx.y += 16f
 
         // --- Deceased ---
-        y = drawLine(canvas, y, paints.section, t(language, "Data pewaris", "Data si mati", "Deceased profile"))
-        y += 10f
+        drawLine(ctx, paints.section, t(language, "Data pewaris", "Data si mati", "Deceased profile"))
+        ctx.y += 10f
         val deceasedName = names.deceasedName.ifBlank { t(language, "(Belum diisi)", "(Belum diisi)", "(Not provided)") }
-        y = drawLine(canvas, y, paints.bodyBold, "${t(language, "Nama", "Nama", "Name")}: $deceasedName")
-        y += 4f
+        drawLine(ctx, paints.bodyBold, "${t(language, "Nama", "Nama", "Name")}: $deceasedName")
+        ctx.y += 4f
         val genderLabel = when (result.deceased.gender) {
             DeceasedGender.MALE -> t(language, "Laki-laki", "Lelaki", "Male")
             DeceasedGender.FEMALE -> t(language, "Perempuan", "Perempuan", "Female")
         }
-        y = drawLine(canvas, y, paints.body, "${t(language, "Jenis kelamin", "Jantina", "Gender")}: $genderLabel")
-        y += 4f
-        y = drawLine(canvas, y, paints.body, "${t(language, "Mazhab", "Mazhab", "Madhhab")}: ${madhhabLabel(result.madhhab, language)}")
-        y += 4f
-        y = drawLine(canvas, y, paints.body, "${t(language, "Harta bersih (tarikah)", "Harta bersih (tarikah)", "Net estate (tarikah)")}: ${currency.format(result.deceased.netEstate)}")
-        y += 4f
-        y = drawLine(canvas, y, paints.body, "${t(language, "Total terdistribusi", "Jumlah diagihkan", "Total distributed")}: ${currency.format(result.totalDistributed)}")
-        y += 14f
+        drawLine(ctx, paints.body, "${t(language, "Jenis kelamin", "Jantina", "Gender")}: $genderLabel")
+        ctx.y += 4f
+        drawLine(ctx, paints.body, "${t(language, "Mazhab", "Mazhab", "Madhhab")}: ${madhhabLabel(result.madhhab, language)}")
+        ctx.y += 4f
+        drawLine(ctx, paints.body, "${t(language, "Harta bersih (tarikah)", "Harta bersih (tarikah)", "Net estate (tarikah)")}: ${currency.format(result.deceased.netEstate.toDouble())}")
+        ctx.y += 4f
+        drawLine(ctx, paints.body, "${t(language, "Total terdistribusi", "Jumlah diagihkan", "Total distributed")}: ${currency.format(result.totalDistributed.toDouble())}")
+        ctx.y += 14f
 
+        // --- Estate table ---
         result.deceased.estate?.let { estate ->
-            y = drawLine(canvas, y, paints.section, t(language, "Perhitungan harta (tarikah)", "Pengiraan harta (tarikah)", "Estate calculation (tarikah)"))
-            y += 8f
-            y = drawEstateTable(canvas, y, paints, estate, estateInput, currency, language, ::ensure)
-            y += 8f
+            drawLine(ctx, paints.section, t(language, "Perhitungan harta (tarikah)", "Pengiraan harta (tarikah)", "Estate calculation (tarikah)"))
+            ctx.y += 8f
+            drawEstateTable(ctx, paints, estate, estateInput, currency, language)
+            ctx.y += 8f
             if (estate.hasResidentialProperty) {
-                ensure(14f)
+                ensureSpace(ctx, 14f)
                 val note = estate.propertyNotes.ifBlank { t(language, "Rumah tinggal", "Rumah kediaman", "Residential house") }
-                y = drawLine(canvas, y, paints.small, "${t(language, "Catatan kediaman", "Nota kediaman", "Residential note")}: $note")
-                y += 6f
+                drawLine(ctx, paints.small, "${t(language, "Catatan kediaman", "Nota kediaman", "Residential note")}: $note")
+                ctx.y += 6f
             }
-            y += 12f
+            ctx.y += 12f
         }
 
         // --- Family register ---
-        y = drawLine(canvas, y, paints.section, t(language, "Daftar keluarga", "Senarai keluarga", "Family register"))
-        y += 10f
-        y = drawFamilyRegister(canvas, y, paints, names, result, language, ::ensure)
-        y += 12f
+        drawLine(ctx, paints.section, t(language, "Daftar keluarga", "Senarai keluarga", "Family register"))
+        ctx.y += 10f
+        drawFamilyRegister(ctx, paints, names, result, language)
+        ctx.y += 12f
 
         // --- Adjustment ---
         if (result.adjustment != FaraidhAdjustment.NONE) {
@@ -127,92 +139,93 @@ object FaraidhPdfExporter {
                     t(language, "Kelebihan harta dikembalikan ke waris nasab (pasangan dikecualikan).", "Lebihan harta dikembalikan kepada waris nasab.", "Surplus redistributed to blood heirs (spouses excluded).")
                 FaraidhAdjustment.NONE -> "" to ""
             }
-            y = drawLine(canvas, y, paints.bodyBold, title)
-            y += 4f
-            y = drawWrapped(canvas, y, paints.body, body, ::ensure)
-            y += 12f
+            drawLine(ctx, paints.bodyBold, title)
+            ctx.y += 4f
+            drawWrapped(ctx, paints.body, body)
+            ctx.y += 12f
         }
 
         // --- Breakdown table ---
-        y = drawLine(canvas, y, paints.section, t(language, "Rincian pembagian waris", "Perincian pembahagian", "Inheritance breakdown"))
-        y += 8f
-        y = drawInheritanceTable(canvas, y, paints, result, names, currency, language, ::ensure)
-        y += 14f
+        drawLine(ctx, paints.section, t(language, "Rincian pembagian waris", "Perincian pembahagian", "Inheritance breakdown"))
+        ctx.y += 8f
+        drawInheritanceTable(ctx, paints, result, names, currency, language)
+        ctx.y += 14f
 
+        // --- Blocked Heirs ---
         if (result.blockedHeirs.isNotEmpty()) {
-            ensure(24f)
-            y = drawLine(canvas, y, paints.section, t(language, "Ahli waris terhalang (hajb)", "Waris terhalang (hajb)", "Blocked heirs (hajb)"))
-            y += 8f
+            ensureSpace(ctx, 24f)
+            drawLine(ctx, paints.section, t(language, "Ahli waris terhalang (hajb)", "Waris terhalang (hajb)", "Blocked heirs (hajb)"))
+            ctx.y += 8f
             result.blockedHeirs.forEach { blocked ->
-                ensure(14f)
+                ensureSpace(ctx, 14f)
                 val reason = blockReason(blocked.reason, language)
-                y = drawLine(canvas, y, paints.body, "• ${heirLabel(blocked.type, language)} ×${blocked.headCount} — $reason")
-                y += 2f
+                drawLine(ctx, paints.body, "• ${heirLabel(blocked.type, language)} ×${blocked.headCount} — $reason")
+                ctx.y += 2f
             }
-            y += 8f
+            ctx.y += 8f
         }
 
         // --- Silsilah summary ---
-        ensure(24f)
-        y = drawLine(canvas, y, paints.section, t(language, "Ringkasan silsilah", "Ringkasan silsilah", "Lineage summary"))
-        y += 8f
+        ensureSpace(ctx, 24f)
+        drawLine(ctx, paints.section, t(language, "Ringkasan silsilah", "Ringkasan silsilah", "Lineage summary"))
+        ctx.y += 8f
         result.silsilah.forEach { node ->
-            ensure(14f)
+            ensureSpace(ctx, 14f)
             val name = node.displayName.ifBlank { heirLabel(node.type, language) }
             val status = when {
                 node.blocked -> t(language, "Terhalang", "Terhalang", "Blocked")
                 node.inherits -> t(language, "Mewaris", "Mewarisi", "Inherits")
                 else -> t(language, "Tidak mewaris", "Tidak mewarisi", "Not inheriting")
             }
-            y = drawLine(canvas, y, paints.small, "• $name — $status")
+            drawLine(ctx, paints.small, "• $name — $status")
         }
-        y += 12f
+        ctx.y += 12f
 
         // --- Glossary ---
-        ensure(28f)
-        y = drawLine(canvas, y, paints.section, t(language, "Glosarium istilah faraidh", "Glosari istilah faraidh", "Faraidh glossary"))
-        y += 10f
+        ensureSpace(ctx, 28f)
+        drawLine(ctx, paints.section, t(language, "Glosarium istilah faraidh", "Glosari istilah faraidh", "Faraidh glossary"))
+        ctx.y += 10f
         glossary.forEach { term ->
-            ensure(36f)
-            y = drawLine(canvas, y, paints.bodyBold, term.title)
-            y += 3f
+            ensureSpace(ctx, 36f)
+            drawLine(ctx, paints.bodyBold, term.title)
+            ctx.y += 3f
             term.arabic?.let { arabic ->
-                y = drawWrapped(canvas, y, paints.arabic, arabic, ::ensure)
-                y += 2f
+                drawWrapped(ctx, paints.arabic, arabic)
+                ctx.y += 2f
             }
-            y = drawWrapped(canvas, y, paints.body, term.body, ::ensure)
-            y += 8f
+            drawWrapped(ctx, paints.body, term.body)
+            ctx.y += 8f
         }
 
         // --- Dalil ---
-        ensure(28f)
-        y = drawLine(canvas, y, paints.section, t(language, "Dalil & rujukan syariah", "Dalil & rujukan syariah", "Scriptural proofs"))
-        y += 10f
+        ensureSpace(ctx, 28f)
+        drawLine(ctx, paints.section, t(language, "Dalil & rujukan syariah", "Dalil & rujukan syariah", "Scriptural proofs"))
+        ctx.y += 10f
         proofs.forEach { proof ->
-            ensure(40f)
-            y = drawLine(canvas, y, paints.bodyBold, "[${proof.kind.name}] ${proof.title}")
-            y += 4f
+            ensureSpace(ctx, 40f)
+            drawLine(ctx, paints.bodyBold, "[${proof.kind.name}] ${proof.title}")
+            ctx.y += 4f
             proof.arabic?.let { arabic ->
-                y = drawWrapped(canvas, y, paints.arabic, arabic, ::ensure)
-                y += 4f
+                drawWrapped(ctx, paints.arabic, arabic)
+                ctx.y += 4f
             }
-            y = drawWrapped(canvas, y, paints.body, proof.body, ::ensure)
+            drawWrapped(ctx, paints.body, proof.body)
             proof.externalUrl?.let { url ->
-                ensure(12f)
-                y = drawLine(canvas, y, paints.small, url)
+                ensureSpace(ctx, 12f)
+                drawLine(ctx, paints.small, url)
             }
-            y += 10f
+            ctx.y += 10f
         }
 
-        ensure(20f)
-        y = drawLine(canvas, y, paints.small, t(
+        ensureSpace(ctx, 20f)
+        drawLine(ctx, paints.small, t(
             language,
             "Dokumen ini dihasilkan oleh SĀAT untuk tujuan edukasi. Konsultasikan ulama untuk keputusan hukum yang mengikat.",
             "Dokumen ini dijana oleh SĀAT untuk pendidikan. Rujuk ulama untuk keputusan mengikat.",
             "Generated by SĀAT for educational purposes. Consult a qualified scholar for binding rulings."
         ))
 
-        document.finishPage(page)
+        document.finishPage(ctx.page)
 
         val dir = File(context.cacheDir, "faraidh_reports").apply { mkdirs() }
         val file = File(dir, "faraidh_report_${System.currentTimeMillis()}.pdf")
@@ -221,16 +234,44 @@ object FaraidhPdfExporter {
         return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
+    private fun startPage(document: PdfDocument, number: Int): PdfDocument.Page {
+        val info = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, number).create()
+        return document.startPage(info)
+    }
+
+    private fun ensureSpace(ctx: PdfExportContext, needed: Float) {
+        if (ctx.y + needed > PAGE_HEIGHT - MARGIN) {
+            ctx.document.finishPage(ctx.page)
+            ctx.pageNumber++
+            ctx.page = startPage(ctx.document, ctx.pageNumber)
+            ctx.canvas = ctx.page.canvas
+            ctx.y = MARGIN
+        }
+    }
+
+    private fun drawLine(ctx: PdfExportContext, paint: Paint, text: String) {
+        ctx.canvas.drawText(text, MARGIN, ctx.y, paint)
+        ctx.y += paint.textSize + 4f
+    }
+
+    private fun drawWrapped(
+        ctx: PdfExportContext,
+        paint: Paint,
+        text: String
+    ) {
+        wrapText(text, paint, CONTENT_WIDTH.toInt()).forEach { line ->
+            ensureSpace(ctx, 14f)
+            drawLine(ctx, paint, line)
+        }
+    }
+
     private fun drawFamilyRegister(
-        canvas: android.graphics.Canvas,
-        startY: Float,
+        ctx: PdfExportContext,
         paints: PdfPaints,
         names: FaraidhParticipantNames,
         result: FaraidhResult,
-        language: AppLanguage,
-        ensure: (Float) -> Unit
-    ): Float {
-        var y = startY
+        language: AppLanguage
+    ) {
         val entries = buildList {
             if (result.deceased.gender == DeceasedGender.FEMALE && result.input.husbandCount > 0) {
                 add(heirLabel(HeirType.HUSBAND, language) to names.husbandName)
@@ -254,247 +295,21 @@ object FaraidhPdfExporter {
             names.maternalSisterNames.forEachIndexed { i, n -> add("${t(language, "Saudari seibu", "Saudari seibu", "Maternal sister")} ${i + 1}" to n) }
         }
         entries.forEach { (role, name) ->
-            ensure(14f)
+            ensureSpace(ctx, 14f)
             val display = name.ifBlank { t(language, "(Belum diisi)", "(Belum diisi)", "(Not provided)") }
-            y = drawLine(canvas, y, paints.body, "• $role: $display")
+            drawLine(ctx, paints.body, "• $role: $display")
         }
-        return y
     }
-
-    private fun drawInheritanceTable(
-        canvas: android.graphics.Canvas,
-        startY: Float,
-        paints: PdfPaints,
-        result: FaraidhResult,
-        names: FaraidhParticipantNames,
-        currency: NumberFormat,
-        language: AppLanguage,
-        ensure: (Float) -> Unit
-    ): Float {
-        var y = startY
-        ensure(30f)
-
-        val colWidths = floatArrayOf(197f, 80f, 80f, 150f)
-        val colXs = FloatArray(4).apply {
-            this[0] = MARGIN
-            this[1] = MARGIN + colWidths[0]
-            this[2] = MARGIN + colWidths[0] + colWidths[1]
-            this[3] = MARGIN + colWidths[0] + colWidths[1] + colWidths[2]
-        }
-
-        val headerHeight = 24f
-        val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFF064E3B.toInt()
-            style = Paint.Style.FILL
-        }
-        val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFFCBD5E1.toInt()
-            style = Paint.Style.STROKE
-            strokeWidth = 1f
-        }
-        val headerTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = android.graphics.Color.WHITE
-            textSize = 9.5f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
-
-        canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + headerHeight, headerPaint)
-        
-        val headers = arrayOf(
-            t(language, "Ahli Waris", "Waris", "Heir"),
-            t(language, "Bagian", "Bahagian", "Share"),
-            t(language, "Persen", "Peratus", "Percentage"),
-            t(language, "Nilai Waris", "Amaun", "Amount")
-        )
-        for (i in 0..3) {
-            canvas.drawText(headers[i], colXs[i] + 8f, y + 16f, headerTextPaint)
-        }
-        
-        canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + headerHeight, borderPaint)
-        for (i in 1..3) {
-            canvas.drawLine(colXs[i], y, colXs[i], y + headerHeight, borderPaint)
-        }
-
-        y += headerHeight
-
-        val rowHeight = 22f
-        val bgPaintEven = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = android.graphics.Color.WHITE
-            style = Paint.Style.FILL
-        }
-        val bgPaintOdd = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFFF8FAFC.toInt()
-            style = Paint.Style.FILL
-        }
-        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFF334155.toInt()
-            textSize = 9f
-        }
-        val textPaintBold = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = 0xFF1E293B.toInt()
-            textSize = 9f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        }
-
-        var rowIndex = 0
-        result.activeShares.forEach { share ->
-            val role = heirLabel(share.type, language)
-            val persons = FaraidhNameLabels.displayList(share.type, role, names, share.headCount)
-            val indivFrac = share.fraction.divideAmongHeads(share.headCount)
-            val indivPercent = share.percentage.divide(BigDecimal(share.headCount), 1, RoundingMode.HALF_UP)
-            val indivCash = share.cashAmount.divide(BigDecimal(share.headCount), 2, RoundingMode.HALF_UP)
-
-            persons.forEach { person ->
-                ensure(rowHeight)
-                
-                val bgPaint = if (rowIndex % 2 == 0) bgPaintEven else bgPaintOdd
-                canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + rowHeight, bgPaint)
-                
-                canvas.drawText(person, colXs[0] + 8f, y + 15f, textPaintBold)
-                canvas.drawText(indivFrac.toDisplayString(), colXs[1] + 8f, y + 15f, textPaint)
-                canvas.drawText(formatPercent(indivPercent, language), colXs[2] + 8f, y + 15f, textPaint)
-                canvas.drawText(currency.format(indivCash), colXs[3] + 8f, y + 15f, textPaint)
-                
-                canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + rowHeight, borderPaint)
-                for (i in 1..3) {
-                    canvas.drawLine(colXs[i], y, colXs[i], y + rowHeight, borderPaint)
-                }
-
-                y += rowHeight
-                rowIndex++
-            }
-        }
-        return y
-    }
-
-    private fun startPage(document: PdfDocument, number: Int): PdfDocument.Page {
-        val info = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, number).create()
-        return document.startPage(info)
-    }
-
-    private fun drawLine(canvas: android.graphics.Canvas, y: Float, paint: Paint, text: String): Float {
-        canvas.drawText(text, MARGIN, y, paint)
-        return y + paint.textSize + 4f
-    }
-
-    private fun drawWrapped(
-        canvas: android.graphics.Canvas,
-        startY: Float,
-        paint: Paint,
-        text: String,
-        ensure: (Float) -> Unit
-    ): Float {
-        var y = startY
-        wrapText(text, paint, CONTENT_WIDTH.toInt()).forEach { line ->
-            ensure(14f)
-            y = drawLine(canvas, y, paint, line)
-        }
-        return y
-    }
-
-    private fun wrapText(text: String, paint: Paint, maxWidth: Int): List<String> {
-        val words = text.split(" ")
-        val lines = mutableListOf<String>()
-        var current = StringBuilder()
-        for (word in words) {
-            val test = if (current.isEmpty()) word else "$current $word"
-            if (paint.measureText(test) <= maxWidth) {
-                current = StringBuilder(test)
-            } else {
-                if (current.isNotEmpty()) lines += current.toString()
-                current = StringBuilder(word)
-            }
-        }
-        if (current.isNotEmpty()) lines += current.toString()
-        return lines
-    }
-
-    private fun formatPercent(value: BigDecimal, language: AppLanguage): String {
-        val scaled = value.setScale(1, java.math.RoundingMode.HALF_UP).stripTrailingZeros()
-        val sep = when (language) {
-            AppLanguage.INDONESIAN, AppLanguage.MALAY -> ','
-            AppLanguage.ENGLISH -> '.'
-        }
-        return "${scaled.toPlainString().replace('.', sep)}%"
-    }
-
-    private fun loadLogo(context: Context): Bitmap? =
-        runCatching { BitmapFactory.decodeResource(context.resources, R.drawable.splash_screen_saat) }.getOrNull()
-
-    private fun currencyFormat(language: AppLanguage) = NumberFormat.getNumberInstance(localeFor(language)).apply {
-        minimumFractionDigits = 2
-        maximumFractionDigits = 2
-    }
-
-    private fun localeFor(language: AppLanguage) = when (language) {
-        AppLanguage.INDONESIAN -> Locale("id", "ID")
-        AppLanguage.MALAY -> Locale("ms", "MY")
-        AppLanguage.ENGLISH -> Locale.US
-    }
-
-    private fun t(language: AppLanguage, id: String, ms: String, en: String) = when (language) {
-        AppLanguage.INDONESIAN -> id
-        AppLanguage.MALAY -> ms
-        AppLanguage.ENGLISH -> en
-    }
-
-    private fun blockReason(reason: BlockingReasonKey, language: AppLanguage): String = when (reason) {
-        BlockingReasonKey.BY_SON -> t(language, "Dihijab anak laki-laki", "Dihalang anak lelaki", "Blocked by son")
-        BlockingReasonKey.BY_CHILDREN -> t(language, "Dihijab anak", "Dihalang anak", "Blocked by children")
-        BlockingReasonKey.BY_FATHER -> t(language, "Dihijab ayah", "Dihalang bapa", "Blocked by father")
-        BlockingReasonKey.BY_GRANDCHILDREN_SUBSTITUTE -> t(language, "Digantikan waris lebih dekat", "Diganti waris lebih dekat", "Substituted by closer heirs")
-        BlockingReasonKey.GENDER_MISMATCH -> t(language, "Tidak berlaku", "Tidak terpakai", "Not applicable")
-        BlockingReasonKey.NO_SHARE_REMAINDER -> t(language, "Tidak ada sisa bagian", "Tiada baki bahagian", "No remaining share")
-        BlockingReasonKey.OUT_OF_WEDLOCK -> t(language, "Tidak ada nasab bapak", "Tiada nasab bapa", "No paternal lineage (born out of wedlock)")
-    }
-
-    private fun madhhabLabel(madhhab: FaraidhMadhhab, language: AppLanguage): String = when (madhhab) {
-        FaraidhMadhhab.HANAFI -> "Hanafi"
-        FaraidhMadhhab.MALIKI -> "Maliki"
-        FaraidhMadhhab.SHAFII -> when (language) {
-            AppLanguage.INDONESIAN, AppLanguage.MALAY -> "Syafi'i"
-            AppLanguage.ENGLISH -> "Shafi'i"
-        }
-        FaraidhMadhhab.HANBALI -> "Hanbali"
-    }
-
-    private fun heirLabel(type: HeirType, language: AppLanguage): String = when (type) {
-        HeirType.HUSBAND -> t(language, "Suami", "Suami", "Husband")
-        HeirType.WIFE -> t(language, "Istri", "Isteri", "Wife")
-        HeirType.FATHER -> t(language, "Ayah", "Bapa", "Father")
-        HeirType.MOTHER -> t(language, "Ibu", "Ibu", "Mother")
-        HeirType.SON -> t(language, "Anak laki-laki", "Anak lelaki", "Son")
-        HeirType.DAUGHTER -> t(language, "Anak perempuan", "Anak perempuan", "Daughter")
-        HeirType.GRANDSON -> t(language, "Cucu laki-laki", "Cucu lelaki", "Grandson")
-        HeirType.GRANDDAUGHTER -> t(language, "Cucu perempuan", "Cucu perempuan", "Granddaughter")
-        HeirType.FULL_BROTHER -> t(language, "Saudara kandung", "Saudara kandung", "Full brother")
-        HeirType.FULL_SISTER -> t(language, "Saudari kandung", "Saudari kandung", "Full sister")
-        HeirType.PATERNAL_BROTHER -> t(language, "Saudara sebapak", "Saudara sebapa", "Paternal half-brother")
-        HeirType.PATERNAL_SISTER -> t(language, "Saudari sebapak", "Saudari sebapa", "Paternal half-sister")
-        HeirType.MATERNAL_SIBLING -> t(language, "Saudara seibu", "Saudara seibu", "Maternal sibling")
-    }
- 
-    private class EstateRow(
-        val category: String,
-        val detail: String,
-        val amount: BigDecimal,
-        val isDeduction: Boolean = false,
-        val isHeader: Boolean = false,
-        val isTotal: Boolean = false
-    )
 
     private fun drawEstateTable(
-        canvas: android.graphics.Canvas,
-        startY: Float,
+        ctx: PdfExportContext,
         paints: PdfPaints,
         estate: EstateComputation,
         estateInput: EstateAssetInput,
         currency: NumberFormat,
-        language: AppLanguage,
-        ensure: (Float) -> Unit
-    ): Float {
-        var y = startY
-        ensure(30f)
+        language: AppLanguage
+    ) {
+        ensureSpace(ctx, 30f)
 
         val colWidths = floatArrayOf(200f, 187f, 120f)
         val colXs = FloatArray(3).apply {
@@ -519,7 +334,7 @@ object FaraidhPdfExporter {
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         }
 
-        canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + headerHeight, headerPaint)
+        ctx.canvas.drawRect(MARGIN, ctx.y, PAGE_WIDTH - MARGIN, ctx.y + headerHeight, headerPaint)
         
         val headers = arrayOf(
             t(language, "Item / Kategori", "Item / Kategori", "Item / Category"),
@@ -527,15 +342,15 @@ object FaraidhPdfExporter {
             t(language, "Nilai", "Nilai", "Value")
         )
         for (i in 0..2) {
-            canvas.drawText(headers[i], colXs[i] + 8f, y + 16f, headerTextPaint)
+            ctx.canvas.drawText(headers[i], colXs[i] + 8f, ctx.y + 16f, headerTextPaint)
         }
         
-        canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + headerHeight, borderPaint)
+        ctx.canvas.drawRect(MARGIN, ctx.y, PAGE_WIDTH - MARGIN, ctx.y + headerHeight, borderPaint)
         for (i in 1..2) {
-            canvas.drawLine(colXs[i], y, colXs[i], y + headerHeight, borderPaint)
+            ctx.canvas.drawLine(colXs[i], ctx.y, colXs[i], ctx.y + headerHeight, borderPaint)
         }
 
-        y += headerHeight
+        ctx.y += headerHeight
 
         val rows = mutableListOf<EstateRow>()
         
@@ -555,7 +370,7 @@ object FaraidhPdfExporter {
             val detailText = if (estateInput.inputGoldByGrams) {
                 val weight = estateInput.goldWeightGrams.replace(',', '.')
                 val price = FaraidhEstateCalculator.parseAmount(estateInput.goldPricePerGram)
-                "$weight g × ${currency.format(price)}"
+                "$weight g × ${currency.format(price.toDouble())}"
             } else {
                 ""
             }
@@ -713,41 +528,223 @@ object FaraidhPdfExporter {
         }
 
         rows.forEachIndexed { index, row ->
-            ensure(rowHeight)
+            ensureSpace(ctx, rowHeight)
             val bgPaint = when {
                 row.isTotal && row.category.contains("Tarikah") -> bgPaintNet
                 row.isTotal -> bgPaintGross
                 index % 2 == 0 -> bgPaintEven
                 else -> bgPaintOdd
             }
-            canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + rowHeight, bgPaint)
+            ctx.canvas.drawRect(MARGIN, ctx.y, PAGE_WIDTH - MARGIN, ctx.y + rowHeight, bgPaint)
             
             // Draw category
             val catPaint = if (row.isTotal) textPaintBold else textPaint
-            canvas.drawText(row.category, colXs[0] + 8f, y + 15f, catPaint)
+            ctx.canvas.drawText(row.category, colXs[0] + 8f, ctx.y + 15f, catPaint)
             
             // Draw details
-            canvas.drawText(row.detail, colXs[1] + 8f, y + 15f, textPaint)
+            ctx.canvas.drawText(row.detail, colXs[1] + 8f, ctx.y + 15f, textPaint)
             
             // Draw value
             val prefix = if (row.isDeduction) "− " else ""
-            val valStr = "$prefix${currency.format(row.amount)}"
+            val valStr = "$prefix${currency.format(row.amount.toDouble())}"
             val valPaint = when {
                 row.isDeduction -> textPaintRed
                 row.isTotal -> textPaintBold
                 else -> textPaint
             }
-            canvas.drawText(valStr, colXs[2] + 8f, y + 15f, valPaint)
+            ctx.canvas.drawText(valStr, colXs[2] + 8f, ctx.y + 15f, valPaint)
             
             // Draw borders
-            canvas.drawRect(MARGIN, y, PAGE_WIDTH - MARGIN, y + rowHeight, borderPaint)
+            ctx.canvas.drawRect(MARGIN, ctx.y, PAGE_WIDTH - MARGIN, ctx.y + rowHeight, borderPaint)
             for (i in 1..2) {
-                canvas.drawLine(colXs[i], y, colXs[i], y + rowHeight, borderPaint)
+                ctx.canvas.drawLine(colXs[i], ctx.y, colXs[i], ctx.y + rowHeight, borderPaint)
             }
-            y += rowHeight
+            ctx.y += rowHeight
+        }
+    }
+
+    private fun drawInheritanceTable(
+        ctx: PdfExportContext,
+        paints: PdfPaints,
+        result: FaraidhResult,
+        names: FaraidhParticipantNames,
+        currency: NumberFormat,
+        language: AppLanguage
+    ) {
+        ensureSpace(ctx, 30f)
+
+        val colWidths = floatArrayOf(197f, 80f, 80f, 150f)
+        val colXs = FloatArray(4).apply {
+            this[0] = MARGIN
+            this[1] = MARGIN + colWidths[0]
+            this[2] = MARGIN + colWidths[0] + colWidths[1]
+            this[3] = MARGIN + colWidths[0] + colWidths[1] + colWidths[2]
         }
 
-        return y
+        val headerHeight = 24f
+        val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF064E3B.toInt()
+            style = Paint.Style.FILL
+        }
+        val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFCBD5E1.toInt()
+            style = Paint.Style.STROKE
+            strokeWidth = 1f
+        }
+        val headerTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.WHITE
+            textSize = 9.5f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+
+        ctx.canvas.drawRect(MARGIN, ctx.y, PAGE_WIDTH - MARGIN, ctx.y + headerHeight, headerPaint)
+        
+        val headers = arrayOf(
+            t(language, "Ahli Waris", "Waris", "Heir"),
+            t(language, "Bagian", "Bahagian", "Share"),
+            t(language, "Persen", "Peratus", "Percentage"),
+            t(language, "Nilai Waris", "Amaun", "Amount")
+        )
+        for (i in 0..3) {
+            ctx.canvas.drawText(headers[i], colXs[i] + 8f, ctx.y + 16f, headerTextPaint)
+        }
+        
+        ctx.canvas.drawRect(MARGIN, ctx.y, PAGE_WIDTH - MARGIN, ctx.y + headerHeight, borderPaint)
+        for (i in 1..3) {
+            ctx.canvas.drawLine(colXs[i], ctx.y, colXs[i], ctx.y + headerHeight, borderPaint)
+        }
+
+        ctx.y += headerHeight
+
+        val rowHeight = 22f
+        val bgPaintEven = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.WHITE
+            style = Paint.Style.FILL
+        }
+        val bgPaintOdd = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFFF8FAFC.toInt()
+            style = Paint.Style.FILL
+        }
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF334155.toInt()
+            textSize = 9f
+        }
+        val textPaintBold = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = 0xFF1E293B.toInt()
+            textSize = 9f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        }
+
+        var rowIndex = 0
+        result.activeShares.forEach { share ->
+            val role = heirLabel(share.type, language)
+            val persons = FaraidhNameLabels.displayList(share.type, role, names, share.headCount)
+            val indivFrac = share.fraction.divideAmongHeads(share.headCount)
+            val indivPercent = share.percentage.divide(BigDecimal(share.headCount), 1, RoundingMode.HALF_UP)
+            val indivCash = share.cashAmount.divide(BigDecimal(share.headCount), 2, RoundingMode.HALF_UP)
+
+            persons.forEach { person ->
+                ensureSpace(ctx, rowHeight)
+                
+                val bgPaint = if (rowIndex % 2 == 0) bgPaintEven else bgPaintOdd
+                ctx.canvas.drawRect(MARGIN, ctx.y, PAGE_WIDTH - MARGIN, ctx.y + rowHeight, bgPaint)
+                
+                ctx.canvas.drawText(person, colXs[0] + 8f, ctx.y + 15f, textPaintBold)
+                ctx.canvas.drawText(indivFrac.toDisplayString(), colXs[1] + 8f, ctx.y + 15f, textPaint)
+                ctx.canvas.drawText(formatPercent(indivPercent, language), colXs[2] + 8f, ctx.y + 15f, textPaint)
+                ctx.canvas.drawText(currency.format(indivCash.toDouble()), colXs[3] + 8f, ctx.y + 15f, textPaint)
+                
+                ctx.canvas.drawRect(MARGIN, ctx.y, PAGE_WIDTH - MARGIN, ctx.y + rowHeight, borderPaint)
+                for (i in 1..3) {
+                    ctx.canvas.drawLine(colXs[i], ctx.y, colXs[i], ctx.y + rowHeight, borderPaint)
+                }
+
+                ctx.y += rowHeight
+                rowIndex++
+            }
+        }
+    }
+
+    private fun wrapText(text: String, paint: Paint, maxWidth: Int): List<String> {
+        val words = text.split(" ")
+        val lines = mutableListOf<String>()
+        var current = StringBuilder()
+        for (word in words) {
+            val test = if (current.isEmpty()) word else "$current $word"
+            if (paint.measureText(test) <= maxWidth) {
+                current = StringBuilder(test)
+            } else {
+                if (current.isNotEmpty()) lines += current.toString()
+                current = StringBuilder(word)
+            }
+        }
+        if (current.isNotEmpty()) lines += current.toString()
+        return lines
+    }
+
+    private fun formatPercent(value: BigDecimal, language: AppLanguage): String {
+        val scaled = value.setScale(1, java.math.RoundingMode.HALF_UP).stripTrailingZeros()
+        val sep = when (language) {
+            AppLanguage.INDONESIAN, AppLanguage.MALAY -> ','
+            AppLanguage.ENGLISH -> '.'
+        }
+        return "${scaled.toPlainString().replace('.', sep)}%"
+    }
+
+    private fun loadLogo(context: Context): Bitmap? =
+        runCatching { BitmapFactory.decodeResource(context.resources, R.drawable.splash_screen_saat) }.getOrNull()
+
+    private fun currencyFormat(language: AppLanguage) = NumberFormat.getNumberInstance(localeFor(language)).apply {
+        minimumFractionDigits = 2
+        maximumFractionDigits = 2
+    }
+
+    private fun localeFor(language: AppLanguage) = when (language) {
+        AppLanguage.INDONESIAN -> Locale("id", "ID")
+        AppLanguage.MALAY -> Locale("ms", "MY")
+        AppLanguage.ENGLISH -> Locale.US
+    }
+
+    private fun t(language: AppLanguage, id: String, ms: String, en: String) = when (language) {
+        AppLanguage.INDONESIAN -> id
+        AppLanguage.MALAY -> ms
+        AppLanguage.ENGLISH -> en
+    }
+
+    private fun blockReason(reason: BlockingReasonKey, language: AppLanguage): String = when (reason) {
+        BlockingReasonKey.BY_SON -> t(language, "Dihijab anak laki-laki", "Dihalang anak lelaki", "Blocked by son")
+        BlockingReasonKey.BY_CHILDREN -> t(language, "Dihijab anak", "Dihalang anak", "Blocked by children")
+        BlockingReasonKey.BY_FATHER -> t(language, "Dihijab ayah", "Dihalang bapa", "Blocked by father")
+        BlockingReasonKey.BY_GRANDCHILDREN_SUBSTITUTE -> t(language, "Digantikan waris lebih dekat", "Diganti waris lebih dekat", "Substituted by closer heirs")
+        BlockingReasonKey.GENDER_MISMATCH -> t(language, "Tidak berlaku", "Tidak terpakai", "Not applicable")
+        BlockingReasonKey.NO_SHARE_REMAINDER -> t(language, "Tidak ada sisa bagian", "Tiada baki bahagian", "No remaining share")
+        BlockingReasonKey.OUT_OF_WEDLOCK -> t(language, "Tidak ada nasab bapak", "Tiada nasab bapa", "No paternal lineage (born out of wedlock)")
+    }
+
+    private fun madhhabLabel(madhhab: FaraidhMadhhab, language: AppLanguage): String = when (madhhab) {
+        FaraidhMadhhab.HANAFI -> "Hanafi"
+        FaraidhMadhhab.MALIKI -> "Maliki"
+        FaraidhMadhhab.SHAFII -> when (language) {
+            AppLanguage.INDONESIAN, AppLanguage.MALAY -> "Syafi'i"
+            AppLanguage.ENGLISH -> "Shafi'i"
+        }
+        FaraidhMadhhab.HANBALI -> "Hanbali"
+    }
+
+    private fun heirLabel(type: HeirType, language: AppLanguage): String = when (type) {
+        HeirType.HUSBAND -> t(language, "Suami", "Suami", "Husband")
+        HeirType.WIFE -> t(language, "Istri", "Isteri", "Wife")
+        HeirType.FATHER -> t(language, "Ayah", "Bapa", "Father")
+        HeirType.MOTHER -> t(language, "Ibu", "Ibu", "Mother")
+        HeirType.SON -> t(language, "Anak laki-laki", "Anak lelaki", "Son")
+        HeirType.DAUGHTER -> t(language, "Anak perempuan", "Anak perempuan", "Daughter")
+        HeirType.GRANDSON -> t(language, "Cucu laki-laki", "Cucu lelaki", "Grandson")
+        HeirType.GRANDDAUGHTER -> t(language, "Cucu perempuan", "Cucu perempuan", "Granddaughter")
+        HeirType.FULL_BROTHER -> t(language, "Saudara kandung", "Saudara kandung", "Full brother")
+        HeirType.FULL_SISTER -> t(language, "Saudari kandung", "Saudari kandung", "Full sister")
+        HeirType.PATERNAL_BROTHER -> t(language, "Saudara sebapak", "Saudara sebapa", "Paternal half-brother")
+        HeirType.PATERNAL_SISTER -> t(language, "Saudari sebapak", "Saudari sebapa", "Paternal half-sister")
+        HeirType.MATERNAL_SIBLING -> t(language, "Saudara seibu", "Saudara seibu", "Maternal sibling")
     }
 
     private class PdfPaints {

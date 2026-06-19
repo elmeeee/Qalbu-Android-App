@@ -248,9 +248,7 @@ fun FaraidhCalculatorScreen(
 
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
-            .tabContentStatusBarInset(),
+            .fillMaxSize(),
         containerColor = AlKhatibColors.ScreenBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
