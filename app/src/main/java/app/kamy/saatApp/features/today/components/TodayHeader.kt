@@ -2,6 +2,11 @@ package app.kamy.saatApp.features.today.components
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -10,6 +15,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,10 +40,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -116,6 +127,7 @@ fun TodayHeader(
                 AnimatedContent(
                     targetState = displayDate,
                     modifier = Modifier
+                        .heightIn(min = 24.dp)
                         .then(
                             if (canAlternate) Modifier.clickable { showHijri = !showHijri }
                             else Modifier
@@ -126,20 +138,22 @@ fun TodayHeader(
                             }
                         },
                     transitionSpec = {
-                        (slideInVertically(animationSpec = tween(260)) { height -> height } +
+                        ((slideInVertically(animationSpec = tween(260)) { height -> height } +
                             fadeIn(animationSpec = tween(220))) togetherWith
                             (slideOutVertically(animationSpec = tween(200)) { height -> -height } +
-                                fadeOut(animationSpec = tween(180)))
+                                fadeOut(animationSpec = tween(180))))
+                            .using(SizeTransform(clip = false) { _, _ -> snap() })
                     },
                     label = "headerDate"
                 ) { date ->
-                    Text(
+                    ShimmeringText(
                         text = date,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Medium,
+                        ),
+                        shimmer = canAlternate,
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                 }
 
@@ -180,12 +194,14 @@ fun TodayHeader(
                     },
                     label = "headerDay"
                 ) { name ->
-                    Text(
+                    ShimmeringText(
                         text = name,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        shimmer = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -215,6 +231,54 @@ private fun rememberRotatingDayName(): String {
     }
 
     return names[index]
+}
+
+@Composable
+private fun ShimmeringText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle,
+    shimmer: Boolean
+) {
+    if (!shimmer) {
+        Text(
+            text = text,
+            modifier = modifier,
+            style = style,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        return
+    }
+
+    var widthPx by remember { mutableStateOf(0f) }
+    val transition = rememberInfiniteTransition(label = "shimmer")
+    val progress by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shimmerProgress"
+    )
+
+    val baseColor = style.color?.takeIf { it != Color.Unspecified }
+        ?: MaterialTheme.colorScheme.onBackground
+    val shimmerColor = baseColor.copy(alpha = 0.25f)
+    val brush = Brush.linearGradient(
+        colors = listOf(shimmerColor, baseColor, shimmerColor),
+        start = Offset(x = widthPx * (progress - 0.5f), y = 0f),
+        end = Offset(x = widthPx * progress, y = 0f)
+    )
+
+    Text(
+        text = text,
+        modifier = modifier.onSizeChanged { widthPx = it.width.toFloat() },
+        style = style.copy(brush = brush),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
 }
 
 @Composable

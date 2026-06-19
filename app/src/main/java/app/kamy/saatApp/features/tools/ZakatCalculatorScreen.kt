@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.domain.faraidh.MoneyInputFormatter
 import app.kamy.saatApp.domain.tools.ZakatFitrahCalculationResult
 import app.kamy.saatApp.domain.tools.ZakatMaalCalculationResult
 import app.kamy.saatApp.domain.tools.ZakatType
@@ -152,19 +153,35 @@ fun ZakatCalculatorScreen(
                 }
 
                 if (!state.priceLoading && state.priceQuote == null) {
-                    ZakatField(stringResource(R.string.zakat_manual_gold_price), state.manualGoldPrice, vm::updateManualGoldPrice)
-                    Text(
-                        text = stringResource(R.string.zakat_manual_price_help),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
-                    )
-                }
+ZakatField(
+                            stringResource(R.string.zakat_manual_gold_price),
+                            state.manualGoldPrice,
+                            { vm.updateManualGoldPrice(MoneyInputFormatter.format(it)) }
+                        )
+                        Text(
+                            text = stringResource(R.string.zakat_manual_price_help),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = AlKhatibColors.Slate500
+                        )
+                    }
 
-                ZakatField(stringResource(R.string.zakat_cash), state.cash, vm::updateCash)
-                ZakatField(stringResource(R.string.zakat_gold_grams), state.goldGrams, vm::updateGoldGrams)
-                ZakatField(stringResource(R.string.zakat_silver_grams), state.silverGrams, vm::updateSilverGrams)
-                ZakatField(stringResource(R.string.zakat_investments), state.investments, vm::updateInvestments)
-                ZakatField(stringResource(R.string.zakat_debts), state.debts, vm::updateDebts)
+                    ZakatField(
+                        stringResource(R.string.zakat_cash),
+                        state.cash,
+                        { vm.updateCash(MoneyInputFormatter.format(it)) }
+                    )
+                    ZakatField(stringResource(R.string.zakat_gold_grams), state.goldGrams, vm::updateGoldGrams)
+                    ZakatField(stringResource(R.string.zakat_silver_grams), state.silverGrams, vm::updateSilverGrams)
+                    ZakatField(
+                        stringResource(R.string.zakat_investments),
+                        state.investments,
+                        { vm.updateInvestments(MoneyInputFormatter.format(it)) }
+                    )
+                    ZakatField(
+                        stringResource(R.string.zakat_debts),
+                        state.debts,
+                        { vm.updateDebts(MoneyInputFormatter.format(it)) }
+                    )
 
                 Text(
                     text = stringResource(R.string.zakat_haul_note),
@@ -181,7 +198,7 @@ fun ZakatCalculatorScreen(
                 ZakatField(
                     label = stringResource(R.string.zakat_rice_price_per_kg),
                     value = state.ricePricePerKg,
-                    onValueChange = vm::updateRicePricePerKg
+                    onValueChange = { vm.updateRicePricePerKg(MoneyInputFormatter.format(it)) }
                 )
                 Text(
                     text = stringResource(R.string.zakat_fitrah_note),

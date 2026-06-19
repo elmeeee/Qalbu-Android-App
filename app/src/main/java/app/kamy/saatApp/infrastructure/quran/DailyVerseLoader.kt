@@ -32,7 +32,7 @@ class DailyVerseLoader @Inject constructor(
         val cached = DailyVerseSnapshotStore.loadForToday(appContext)
         if (cached != null && !refreshTranslation) {
             var verse = cached.toVersePayload()
-            if (verse.transliterationId.isNullOrBlank() && verse.transliterationEn.isNullOrBlank()) {
+            if (verse.audio?.url.isNullOrBlank() || (verse.transliterationId.isNullOrBlank() && verse.transliterationEn.isNullOrBlank())) {
                 val key = cached.verseKey ?: "${cached.chapterNumber}:${cached.ayahNumber}"
                 contentRepository.getVerseByKey(key)?.let { fresh ->
                     val chapterName = fresh.chapterNumber?.let { num ->

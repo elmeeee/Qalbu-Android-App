@@ -2,6 +2,7 @@ package app.kamy.saatApp.features.tools
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.kamy.saatApp.domain.faraidh.MoneyInputFormatter
 import app.kamy.saatApp.domain.tools.GoldPriceQuote
 import app.kamy.saatApp.domain.tools.ZakatCalculationResult
 import app.kamy.saatApp.domain.tools.ZakatCalculator
@@ -76,17 +77,17 @@ class ZakatViewModel @Inject constructor(
         val s = _state.value
         val result: ZakatCalculationResult? = when (s.selectedType) {
             ZakatType.MAAL -> {
-                val goldPrice = s.priceQuote?.goldPerGramIdr?.takeIf { it > 0 } ?: s.manualGoldPrice.toDoubleOrNull()
-                if (goldPrice == null || goldPrice <= 0.0) {
+                val goldPrice = s.priceQuote?.goldPerGramIdr?.takeIf { it > 0 } ?: MoneyInputFormatter.parseAmount(s.manualGoldPrice).toDouble()
+                if (goldPrice <= 0.0) {
                     null
                 } else {
                     val silverPrice = s.priceQuote?.silverPerGramIdr ?: ZakatCalculator.silverPriceFromGold(goldPrice)
                     ZakatCalculator.calculate(
-                        cash = s.cash.toDoubleOrNull() ?: 0.0,
+                        cash = MoneyInputFormatter.parseAmount(s.cash).toDouble(),
                         goldGrams = s.goldGrams.toDoubleOrNull() ?: 0.0,
                         silverGrams = s.silverGrams.toDoubleOrNull() ?: 0.0,
-                        investments = s.investments.toDoubleOrNull() ?: 0.0,
-                        debts = s.debts.toDoubleOrNull() ?: 0.0,
+                        investments = MoneyInputFormatter.parseAmount(s.investments).toDouble(),
+                        debts = MoneyInputFormatter.parseAmount(s.debts).toDouble(),
                         goldPricePerGram = goldPrice,
                         silverPricePerGram = silverPrice
                     )
@@ -94,8 +95,8 @@ class ZakatViewModel @Inject constructor(
             }
             ZakatType.FITRAH -> {
                 val members = s.familyMembers.toIntOrNull()
-                val ricePrice = s.ricePricePerKg.toDoubleOrNull()
-                if (members == null || members <= 0 || ricePrice == null || ricePrice <= 0.0) {
+                val ricePrice = MoneyInputFormatter.parseAmount(s.ricePricePerKg).toDouble()
+                if (members == null || members <= 0 || ricePrice <= 0.0) {
                     null
                 } else {
                     ZakatCalculator.calculateFitrah(members, ricePrice)
