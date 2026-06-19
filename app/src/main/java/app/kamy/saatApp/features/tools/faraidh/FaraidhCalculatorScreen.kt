@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -308,7 +309,8 @@ fun FaraidhCalculatorScreen(
                 onBack = onBack,
                 onInfo = { showTooltip = true },
                 onSave = { showSaveDialog = true },
-                onScenarios = { showScenarioList = true }
+                onScenarios = { showScenarioList = true },
+                onReset = { vm.resetCalculation() }
             )
 
             FaraidhStatusStrip(
@@ -360,7 +362,8 @@ private fun FaraidhHeader(
     onBack: () -> Unit,
     onInfo: () -> Unit,
     onSave: () -> Unit,
-    onScenarios: () -> Unit
+    onScenarios: () -> Unit,
+    onReset: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -404,6 +407,9 @@ private fun FaraidhHeader(
             }
             IconButton(onClick = onSave) {
                 Icon(Icons.Filled.Save, contentDescription = stringResource(R.string.faraidh_save_scenario), tint = AlKhatibColors.Teal)
+            }
+            IconButton(onClick = onReset) {
+                Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.faraidh_reset), tint = AlKhatibColors.Teal)
             }
             IconButton(onClick = onInfo) {
                 Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.faraidh_tooltip_title), tint = AlKhatibColors.Teal)
