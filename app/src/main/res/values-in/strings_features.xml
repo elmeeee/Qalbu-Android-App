@@ -227,6 +227,14 @@
     <string name="zakat_price_error">Gagal memuat harga emas live</string>
     <string name="zakat_silver_grams">Perak (gram)</string>
     <string name="zakat_title">Kalkulator zakat</string>
+    <string name="zakat_pay_where_title">Bayar Zakat ke Mana?</string>
+    <string name="zakat_pay_where_subtitle">Lembaga resmi di negara Anda</string>
+    <string name="zakat_body_open_website">Buka website</string>
+    <string name="zakat_body_malaysia_note">Di Malaysia, Zakat dikelola oleh Dewan Agama Islam masing-masing negeri (Majlis Agama Islam Negeri — MAIN). Pilih lembaga sesuai negeri Anda.</string>
+    <string name="zakat_country_indonesia">Indonesia</string>
+    <string name="zakat_country_malaysia">Malaysia</string>
+    <string name="zakat_country_singapore">Singapura</string>
+    <string name="zakat_country_brunei">Brunei</string>
 
     <string name="faraidh_title">Faraidh</string>
     <string name="faraidh_subtitle">Warisan Islam</string>

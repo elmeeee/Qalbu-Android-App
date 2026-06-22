@@ -632,6 +632,14 @@
     <string name="zakat_haul_note">Ensure wealth has been held for one full hijri year (haul) before zakat is due.</string>
     <string name="zakat_nisab_gold">Nisab gold (%1$dg)</string>
     <string name="zakat_nisab_silver">Nisab silver (%1$dg)</string>
+    <string name="zakat_pay_where_title">Where to pay Zakat?</string>
+    <string name="zakat_pay_where_subtitle">Official institutions in your country</string>
+    <string name="zakat_body_open_website">Open website</string>
+    <string name="zakat_body_malaysia_note">In Malaysia, Zakat is administered by each state&#8217;s Islamic Religious Council (Majlis Agama Islam Negeri — MAIN). Choose the institution for your state.</string>
+    <string name="zakat_country_indonesia">Indonesia</string>
+    <string name="zakat_country_malaysia">Malaysia</string>
+    <string name="zakat_country_singapore">Singapore</string>
+    <string name="zakat_country_brunei">Brunei</string>
 
     <!-- Ramadan -->
     <string name="ramadan_mode_title">Ramadan mode</string>

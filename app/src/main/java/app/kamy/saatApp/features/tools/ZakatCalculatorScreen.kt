@@ -1,8 +1,14 @@
 package app.kamy.saatApp.features.tools
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,11 +16,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,6 +33,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,7 +42,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,6 +54,9 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.domain.faraidh.MoneyInputFormatter
+import app.kamy.saatApp.domain.tools.ZakatBody
+import app.kamy.saatApp.domain.tools.ZakatBodyRepository
+import app.kamy.saatApp.domain.tools.ZakatCountry
 import app.kamy.saatApp.domain.tools.ZakatFitrahCalculationResult
 import app.kamy.saatApp.domain.tools.ZakatMaalCalculationResult
 import app.kamy.saatApp.domain.tools.ZakatType
@@ -54,7 +70,7 @@ fun ZakatCalculatorScreen(
     vm: ZakatViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
-    val currency = remember { NumberFormat.getNumberInstance(Locale("id", "ID")) }
+    val currency = remember { NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")) }
     val result = state.result
 
     Column(
@@ -154,34 +170,34 @@ fun ZakatCalculatorScreen(
 
                 if (!state.priceLoading && state.priceQuote == null) {
 ZakatField(
-                            stringResource(R.string.zakat_manual_gold_price),
-                            state.manualGoldPrice,
-                            { vm.updateManualGoldPrice(MoneyInputFormatter.format(it)) }
-                        )
-                        Text(
-                            text = stringResource(R.string.zakat_manual_price_help),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = AlKhatibColors.Slate500
-                        )
-                    }
+                        stringResource(R.string.zakat_manual_gold_price),
+                        state.manualGoldPrice,
+                        { vm.updateManualGoldPrice(MoneyInputFormatter.format(it)) }
+                    )
+                    Text(
+                        text = stringResource(R.string.zakat_manual_price_help),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AlKhatibColors.Slate500
+                    )
+                }
 
-                    ZakatField(
-                        stringResource(R.string.zakat_cash),
-                        state.cash,
-                        { vm.updateCash(MoneyInputFormatter.format(it)) }
-                    )
-                    ZakatField(stringResource(R.string.zakat_gold_grams), state.goldGrams, vm::updateGoldGrams)
-                    ZakatField(stringResource(R.string.zakat_silver_grams), state.silverGrams, vm::updateSilverGrams)
-                    ZakatField(
-                        stringResource(R.string.zakat_investments),
-                        state.investments,
-                        { vm.updateInvestments(MoneyInputFormatter.format(it)) }
-                    )
-                    ZakatField(
-                        stringResource(R.string.zakat_debts),
-                        state.debts,
-                        { vm.updateDebts(MoneyInputFormatter.format(it)) }
-                    )
+                ZakatField(
+                    stringResource(R.string.zakat_cash),
+                    state.cash,
+                    { vm.updateCash(MoneyInputFormatter.format(it)) }
+                )
+                ZakatField(stringResource(R.string.zakat_gold_grams), state.goldGrams, vm::updateGoldGrams)
+                ZakatField(stringResource(R.string.zakat_silver_grams), state.silverGrams, vm::updateSilverGrams)
+                ZakatField(
+                    stringResource(R.string.zakat_investments),
+                    state.investments,
+                    { vm.updateInvestments(MoneyInputFormatter.format(it)) }
+                )
+                ZakatField(
+                    stringResource(R.string.zakat_debts),
+                    state.debts,
+                    { vm.updateDebts(MoneyInputFormatter.format(it)) }
+                )
 
                 Text(
                     text = stringResource(R.string.zakat_haul_note),
@@ -257,9 +273,160 @@ ZakatField(
                     }
                 }
             }
+
+            // ── Zakat Bodies Directory ─────────────────────────────────────────
+            Spacer(Modifier.height(8.dp))
+            HorizontalDivider(color = AlKhatibColors.SoftGrey)
+            Spacer(Modifier.height(4.dp))
+
+            ZakatBodiesSection(
+                selectedCountry = state.selectedZakatCountry,
+                onCountrySelected = vm::updateZakatCountry
+            )
         }
     }
 }
+
+// ── Zakat Bodies Section ───────────────────────────────────────────────────────
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ZakatBodiesSection(
+    selectedCountry: ZakatCountry,
+    onCountrySelected: (ZakatCountry) -> Unit
+) {
+    val context = LocalContext.current
+    val bodies = remember(selectedCountry) { ZakatBodyRepository.byCountry(selectedCountry) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+        // Section header
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = stringResource(R.string.zakat_pay_where_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.Slate900
+            )
+            Text(
+                text = stringResource(R.string.zakat_pay_where_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = AlKhatibColors.Slate500
+            )
+        }
+
+        // Country chip selector
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            ZakatCountry.values().forEach { country ->
+                FilterChip(
+                    selected = selectedCountry == country,
+                    onClick = { onCountrySelected(country) },
+                    label = {
+                        Text(
+                            text = "${country.emoji} ${stringResource(country.labelRes)}",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = AlKhatibColors.DeepEmerald,
+                        selectedLabelColor = Color.White
+                    )
+                )
+            }
+        }
+
+        // Malaysia special note
+        if (selectedCountry == ZakatCountry.MALAYSIA) {
+            Text(
+                text = stringResource(R.string.zakat_body_malaysia_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = AlKhatibColors.Slate500
+            )
+        }
+
+        // Body cards
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            bodies.forEach { body ->
+                ZakatBodyCard(
+                    body = body,
+                    onOpenUrl = { url ->
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        context.startActivity(intent)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ZakatBodyCard(
+    body: ZakatBody,
+    onOpenUrl: (String) -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .border(
+                width = 1.dp,
+                color = AlKhatibColors.SoftGrey,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable { onOpenUrl("https://${body.websiteUrl}") },
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                // State tag badge (Malaysia only)
+                body.stateTag?.let { tag ->
+                    Text(
+                        text = tag,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AlKhatibColors.DeepEmerald,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Text(
+                    text = body.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AlKhatibColors.Slate900
+                )
+                Text(
+                    text = body.fullName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate500
+                )
+                Text(
+                    text = body.websiteUrl,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AlKhatibColors.DeepEmerald
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                contentDescription = stringResource(R.string.zakat_body_open_website),
+                tint = AlKhatibColors.Slate500
+            )
+        }
+    }
+}
+
+// ── Reusable field composables ─────────────────────────────────────────────────
 
 @Composable
 private fun ZakatField(
@@ -293,4 +460,3 @@ private fun ResultRow(label: String, value: String, highlight: Boolean = false) 
         )
     }
 }
-
