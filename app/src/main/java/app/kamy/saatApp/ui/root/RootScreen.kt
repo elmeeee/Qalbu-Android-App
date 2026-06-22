@@ -33,6 +33,7 @@ import app.kamy.saatApp.features.tools.DoaZikirScreen
 import app.kamy.saatApp.features.tools.DhikrScreen
 import app.kamy.saatApp.features.tools.QiblaScreen
 import app.kamy.saatApp.features.tools.QiyamScreen
+import app.kamy.saatApp.features.tools.ManzilScreen
 import app.kamy.saatApp.features.tools.SpiritualToolsScreen
 import app.kamy.saatApp.features.tools.ZakatCalculatorScreen
 import app.kamy.saatApp.features.tools.faraidh.FaraidhCalculatorScreen
@@ -206,6 +207,9 @@ fun RootScreen(
             }
             composable("tools/qiyam") {
                 QiyamScreen(onBack = { navController.popBackStack() })
+            }
+            composable("tools/manzil") {
+                ManzilScreen(onBack = { navController.popBackStack() })
             }
             composable("tools/faraidh",
                 enterTransition = { slideInHorizontally(tween(280)) { it } + fadeIn(tween(200)) },

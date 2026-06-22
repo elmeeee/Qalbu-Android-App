@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -105,6 +106,14 @@ fun SpiritualToolsScreen(
             "qiyam",
             AlKhatibColors.DeepEmerald,
             AlKhatibColors.IndigoAccent
+        ),
+        SpiritualToolItem(
+            Icons.Filled.Shield,
+            R.string.manzil_title,
+            R.string.manzil_account_subtitle,
+            "manzil",
+            AlKhatibColors.DeepEmerald,
+            AlKhatibColors.GoldDeep
         )
     )
 

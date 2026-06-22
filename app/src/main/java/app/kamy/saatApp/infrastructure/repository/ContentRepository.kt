@@ -118,6 +118,15 @@ class ContentRepository @Inject constructor(
         audioRecitationId: Int = selectedRecitationId()
     ) = local.getVerseByKey(verseKey, translationId, audioRecitationId)
 
+    suspend fun getVersesByRange(
+        chapterNumber: Int,
+        startAyah: Int,
+        endAyah: Int,
+        translationId: Int = selectedTranslationId(),
+        audioRecitationId: Int = selectedRecitationId()
+    ): List<RandomAyahPayload> =
+        local.getVersesByRange(chapterNumber, startAyah, endAyah, translationId, audioRecitationId)
+
     suspend fun getRecitations(): List<RecitationPayload> =
         LocalQuranConfig.recitations
 

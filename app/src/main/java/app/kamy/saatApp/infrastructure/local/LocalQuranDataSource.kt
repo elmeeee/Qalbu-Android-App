@@ -218,6 +218,33 @@ class LocalQuranDataSource @Inject constructor(
         }
     }
 
+    suspend fun getVersesByRange(
+        chapterNumber: Int,
+        startAyah: Int,
+        endAyah: Int,
+        translationId: Int,
+        recitationId: Int
+    ): List<RandomAyahPayload> = withContext(Dispatchers.IO) {
+        if (chapterNumber < 1 || startAyah < 1 || endAyah < startAyah) return@withContext emptyList()
+        val db = database.openReadable()
+        db.rawQuery(
+            """
+            SELECT $AYAH_SELECT
+            FROM ayas a
+            JOIN suras s ON s."index" = a.sura
+            WHERE a.sura = ? AND a.aya BETWEEN ? AND ?
+            ORDER BY a.aya
+            """.trimIndent(),
+            arrayOf(chapterNumber.toString(), startAyah.toString(), endAyah.toString())
+        ).use { cursor ->
+            buildList {
+                while (cursor.moveToNext()) {
+                    add(cursor.toVersePayload(translationId, recitationId, loadWords = false))
+                }
+            }
+        }
+    }
+
     suspend fun getVerseByKey(
         verseKey: String,
         translationId: Int,
