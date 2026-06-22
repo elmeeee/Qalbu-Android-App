@@ -379,8 +379,8 @@ class PrayerDashboardViewModel @Inject constructor(
             }
         }
 
-        val lastPassed = timings.lastOrNull { it.date.before(now) }
-        val active = lastPassed?.type ?: timings.first().type
+        val lastPassed = timings.lastOrNull { it.date.before(now) && it.type != PrayerType.SUNRISE }
+        val active = lastPassed?.type ?: timings.first { it.type != PrayerType.SUNRISE }.type
         val theme = if (active == PrayerType.MAGHRIB || active == PrayerType.ISHA) {
             PrayerTheme.NIGHT
         } else {
@@ -425,8 +425,9 @@ class PrayerDashboardViewModel @Inject constructor(
     }
 
     private fun resolveNextPrayerEntry(timings: List<PrayerEntry>, now: Date): PrayerEntry {
-        timings.firstOrNull { it.date.after(now) }?.let { return it }
-        val anchor = timings.firstOrNull { it.type == PrayerType.FAJR } ?: timings.first()
+        // Skip SUNRISE — it is not a salah, so the next prayer after Fajr should be Dhuhr.
+        timings.firstOrNull { it.date.after(now) && it.type != PrayerType.SUNRISE }?.let { return it }
+        val anchor = timings.firstOrNull { it.type == PrayerType.FAJR } ?: timings.first { it.type != PrayerType.SUNRISE }
         val nextDay = Calendar.getInstance().apply {
             time = anchor.date
             add(Calendar.DAY_OF_YEAR, 1)
