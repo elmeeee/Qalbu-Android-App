@@ -9,6 +9,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -527,28 +528,34 @@ private fun SaatAyahPage(
             }
     }
 
+    val interactionSource = remember { MutableInteractionSource() }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .pointerInput(verse.listIdentity, hifzModeEnabled, hifzRevealStage) {
-                detectTapGestures(onTap = {
-                    if (hifzModeEnabled) {
-                        when (hifzRevealStage) {
-                            0 -> hifzRevealStage = 1
-                            1 -> if (showTranslation) hifzRevealStage = 2 else onPlay()
-                            else -> onPlay()
-                        }
-                    } else {
-                        onPlay()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                if (hifzModeEnabled) {
+                    when (hifzRevealStage) {
+                        0 -> hifzRevealStage = 1
+                        1 -> if (showTranslation) hifzRevealStage = 2 else onPlay()
+                        else -> onPlay()
                     }
-                })
+                } else {
+                    onPlay()
+                }
             },
         contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(scrollState)
+                .verticalScroll(
+                    state = scrollState,
+                    enabled = scrollState.maxValue > 0
+                )
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
