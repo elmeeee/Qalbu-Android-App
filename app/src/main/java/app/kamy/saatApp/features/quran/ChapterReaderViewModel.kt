@@ -10,6 +10,7 @@ import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.error.toAppError
 import app.kamy.saatApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.saatApp.core.error.isAuthenticationFailure
+import app.kamy.saatApp.core.error.userFacingAuthOrApiMessage
 import app.kamy.saatApp.domain.model.HadithReference
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.RecitationPayload
@@ -632,8 +633,7 @@ class ChapterReaderViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isPublishing = false,
-                        publishMessage = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
-                        else t.message ?: appContext.getString(R.string.publish_failed)
+                        publishMessage = t.userFacingAuthOrApiMessage(appContext)
                     )
                 }
             }

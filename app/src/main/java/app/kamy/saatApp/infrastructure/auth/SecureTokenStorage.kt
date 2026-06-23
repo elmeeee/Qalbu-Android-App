@@ -59,6 +59,7 @@ class SecureTokenStorage @Inject constructor(
         const val USER_REFRESH_TOKEN = "qf.user.refreshToken"
         const val USER_ID_TOKEN = "qf.user.idToken"
         const val USER_ACCESS_EXPIRY = "qf.user.accessExpiryEpochSec"
+        const val USER_AVATAR_URL = "qf.user.avatarUrl"
         const val CONTENT_ACCESS_TOKEN = "qf.content.accessToken"
         const val CONTENT_ACCESS_EXPIRY = "qf.content.accessExpiryEpochSec"
     }

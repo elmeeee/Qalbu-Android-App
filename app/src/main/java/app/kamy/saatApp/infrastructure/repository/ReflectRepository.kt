@@ -58,9 +58,6 @@ class ReflectRepository @Inject constructor(
         val response = qfCall {
             api.createPost(PostCreateRequest(payload), idempotencyKey = idempotencyKey)
         }
-        if (!response.isSuccessful) {
-            throw IllegalStateException("create post failed: HTTP ${response.code()}")
-        }
 
         runCatching {
             qfCall {
@@ -75,7 +72,7 @@ class ReflectRepository @Inject constructor(
             }
         }
 
-        return response.body()?.createdPost
+        return response.createdPost
     }
 
     private fun parseVerseKey(key: String): Pair<Int, Int>? {

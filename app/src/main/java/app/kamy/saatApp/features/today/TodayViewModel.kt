@@ -9,6 +9,7 @@ import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.error.AppErrorKind
 import app.kamy.saatApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.saatApp.core.error.isAuthenticationFailure
+import app.kamy.saatApp.core.error.userFacingAuthOrApiMessage
 import app.kamy.saatApp.core.error.toAppError
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.infrastructure.network.NetworkMonitor
@@ -120,6 +121,7 @@ class TodayViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val p = reflectRepository.fetchMyProfile()
+                userSession.updateAvatarUrl(p.preferredAvatarUrl)
                 _state.update { it.copy(profile = p, profileLoading = false) }
             } catch (t: Throwable) {
                 userSession.invalidateIfAuthenticationFailure(t)
@@ -306,8 +308,7 @@ class TodayViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isPublishing = false,
-                        publishToast = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
-                        else t.message ?: appContext.getString(R.string.publish_failed),
+                        publishToast = t.userFacingAuthOrApiMessage(appContext),
                         publishToastIsError = true
                     )
                 }

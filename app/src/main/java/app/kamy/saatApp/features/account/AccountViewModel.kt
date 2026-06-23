@@ -313,6 +313,7 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val p = reflectRepository.fetchMyProfile()
+                userSession.updateAvatarUrl(p.preferredAvatarUrl)
                 _state.update { it.copy(isLoading = false, profile = p, error = null) }
             } catch (t: Throwable) {
                 val signedOut = userSession.invalidateIfAuthenticationFailure(t)

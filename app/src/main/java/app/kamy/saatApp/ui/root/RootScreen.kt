@@ -45,6 +45,7 @@ import app.kamy.saatApp.features.today.TodayScreen
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.infrastructure.audio.parseVerseKey
 import app.kamy.saatApp.infrastructure.auth.OAuthService
+import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.ui.components.FloatingAudioBar
 import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
 import app.kamy.saatApp.ui.components.FloatingTabBar
@@ -62,6 +63,7 @@ interface RootEntryPoint {
     fun audioPlayer(): AudioPlayerController
     fun oauthService(): OAuthService
     fun authorizationService(): AuthorizationService
+    fun userSession(): UserSession
 }
 
 @Composable
@@ -77,6 +79,8 @@ fun RootScreen(
     val audioState by audioPlayer.state.collectAsState()
     val oauthService = entryPoint.oauthService()
     val authService = entryPoint.authorizationService()
+    val userSession = entryPoint.userSession()
+    val avatarUrl by userSession.avatarUrl.collectAsState()
 
     val navController = rememberNavController()
     LaunchedEffect(pendingDeepLinkRoute) {
@@ -298,6 +302,7 @@ fun RootScreen(
         if (showBottomBar) {
             FloatingTabBar(
                 selectedRoute = currentRoute,
+                avatarUrl = avatarUrl,
                 onTabSelected = { tab ->
                     if (currentRoute != tab.route) {
                         navController.navigate(tab.route) {

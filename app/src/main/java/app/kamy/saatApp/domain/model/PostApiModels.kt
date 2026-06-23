@@ -13,9 +13,9 @@ data class PostCreatePayload(
     val body: String,
     val draft: Boolean,
     val references: List<PostCreateReference>,
-    val mentions: List<PostCreateMention> = emptyList(),
-    val roomPostStatus: Int = 1,
-    val roomId: Int = 0,
+    val mentions: List<PostCreateMention>? = null,
+    val roomPostStatus: Int? = 1,
+    val roomId: Int? = null,
     val postAsAuthorId: String,
     val publishedAt: String
 )
@@ -28,7 +28,7 @@ data class PostCreateReference(
     val chapterId: Int,
     val from: Int,
     val to: Int,
-    val id: String = "surah-$chapterId-$from:$to"
+    val id: String? = null
 )
 
 @Serializable

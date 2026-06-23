@@ -25,7 +25,7 @@ interface ReflectApiService {
         @Query("sortBy") sortBy: String = "latest",
         @Query("page") page: Int = 1,
         @Query("limit") limit: Int = 20,
-        @Query("filter[postTypeIds]") postTypeIds: String = "1"
+        @Query("filter[postTypeIds]") postTypeIds: String? = null
     ): ReflectFeedEnvelope
 
     @GET("posts/my-posts")
@@ -40,7 +40,7 @@ interface ReflectApiService {
     suspend fun createPost(
         @Body request: PostCreateRequest,
         @Header("Idempotency-Key") idempotencyKey: String? = null
-    ): retrofit2.Response<PostCreateEnvelope>
+    ): PostCreateEnvelope
 
     @POST("posts/{postId}/toggle-like")
     suspend fun togglePostLike(@Path("postId") postId: String): ReflectToggleLikeResponse
