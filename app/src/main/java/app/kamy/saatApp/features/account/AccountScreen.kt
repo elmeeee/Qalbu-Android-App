@@ -468,27 +468,56 @@ private fun ProfileHeader(
                         color = AlKhatibColors.Teal
                     )
                 }
-                if (profile?.followersCount != null) {
+                val stats = remember(profile) {
+                    listOfNotNull(
+                        profile?.postsCount?.let { "posts" to it },
+                        profile?.followersCount?.let { "followers" to it },
+                        profile?.likesCount?.let { "likes" to it }
+                    )
+                }
+
+                if (stats.isNotEmpty()) {
                     Spacer(Modifier.height(4.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .clickable { onOpenFollowers() }
-                            .padding(vertical = 2.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(vertical = 2.dp)
                     ) {
-                        Text(
-                            text = "${profile.followersCount}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.DeepEmerald
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.followers),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = AlKhatibColors.Slate500
-                        )
+                        stats.forEachIndexed { index, pair ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = if (pair.first == "followers") {
+                                    Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .clickable { onOpenFollowers() }
+                                        .padding(horizontal = 2.dp, vertical = 2.dp)
+                                } else Modifier
+                            ) {
+                                Text(
+                                    text = "${pair.second}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = AlKhatibColors.DeepEmerald
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = when (pair.first) {
+                                        "posts" -> stringResource(R.string.posts)
+                                        "followers" -> stringResource(R.string.followers)
+                                        else -> stringResource(R.string.likes)
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = AlKhatibColors.Slate500
+                                )
+                            }
+                            if (index < stats.lastIndex) {
+                                Text(
+                                    text = "•",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = AlKhatibColors.Slate500
+                                )
+                            }
+                        }
                     }
                 }
                 profileErrorDisplay?.let { display ->

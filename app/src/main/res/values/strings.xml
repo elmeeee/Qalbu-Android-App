@@ -965,4 +965,6 @@
     <string name="no_followers">You don\'t have any followers yet.</string>
     <string name="loading_followers">Loading followers…</string>
     <string name="followers_load_failed">Failed to load followers.</string>
+    <string name="posts">Reflections</string>
+    <string name="likes">Likes</string>
 </resources>

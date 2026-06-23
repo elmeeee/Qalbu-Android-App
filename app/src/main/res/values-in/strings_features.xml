@@ -484,4 +484,6 @@
     <string name="no_followers">Anda belum memiliki pengikut.</string>
     <string name="loading_followers">Memuat pengikut…</string>
     <string name="followers_load_failed">Gagal memuat pengikut.</string>
+    <string name="posts">Refleksi</string>
+    <string name="likes">Suka</string>
 </resources>

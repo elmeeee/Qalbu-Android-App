@@ -626,7 +626,13 @@ class ChapterReaderViewModel @Inject constructor(
                 reflectRepository.createReflectionPost(body, verseKey, authorId, idempotencyKey)
             }.onSuccess {
                 _state.update {
-                    it.copy(isPublishing = false, publishMessage = appContext.getString(R.string.published_to_reflect))
+                    it.copy(
+                        isPublishing = false,
+                        publishMessage = appContext.getString(R.string.published_to_reflect),
+                        aiShareVisible = false,
+                        aiShareVerseIndex = null,
+                        aiShareDraft = ""
+                    )
                 }
             }.onFailure { t ->
                 userSession.invalidateIfAuthenticationFailure(t)
