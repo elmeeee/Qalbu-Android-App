@@ -8,6 +8,8 @@ import app.kamy.saatApp.domain.model.PostCreateRequest
 import app.kamy.saatApp.domain.model.ReflectFeedEnvelope
 import app.kamy.saatApp.domain.model.ReflectFeedPost
 import app.kamy.saatApp.domain.model.UserProfilePayload
+import app.kamy.saatApp.domain.model.ToggleFollowRequest
+import app.kamy.saatApp.domain.model.UserFollowersEnvelope
 import app.kamy.saatApp.infrastructure.network.api.ReflectApiService
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -30,6 +32,12 @@ class ReflectRepository @Inject constructor(
 
     suspend fun togglePostLike(postId: String): Boolean =
         qfCall { api.togglePostLike(postId).liked }
+
+    suspend fun toggleFollow(followeeId: String, action: String? = null): Boolean =
+        qfCall { api.toggleFollow(followeeId, ToggleFollowRequest(action)).followed }
+
+    suspend fun getUserFollowers(userId: String, page: Int, limit: Int = 20): UserFollowersEnvelope =
+        qfCall { api.getUserFollowers(userId, page = page, limit = limit) }
 
     suspend fun createReflectionPost(
         body: String,

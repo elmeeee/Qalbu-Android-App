@@ -32,7 +32,9 @@ data class ReflectUiState(
     val currentPage: Int = 0,
     val hasMore: Boolean = true,
     val error: AppError? = null,
-    val togglingLikePostIds: Set<String> = emptySet()
+    val togglingLikePostIds: Set<String> = emptySet(),
+    val togglingFollowAuthorIds: Set<String> = emptySet(),
+    val currentUserId: String? = null
 )
 
 @HiltViewModel
@@ -51,10 +53,16 @@ class ReflectViewModel @Inject constructor(
         viewModelScope.launch {
             userSession.isSignedIn.collect { signedIn ->
                 _state.update { it.copy(isAuthenticated = signedIn) }
-                if (signedIn && _state.value.posts.isEmpty()) loadPosts(reset = true)
+                if (signedIn) {
+                    if (_state.value.posts.isEmpty()) loadPosts(reset = true)
+                    fetchCurrentUserId()
+                }
             }
         }
-        if (_state.value.isAuthenticated) loadPosts(reset = true)
+        if (_state.value.isAuthenticated) {
+            loadPosts(reset = true)
+            fetchCurrentUserId()
+        }
     }
 
     fun switchSegment(segment: ReflectSegment) {
@@ -183,6 +191,91 @@ class ReflectViewModel @Inject constructor(
                         )
                     } else {
                         rolled
+                    }
+                }
+            }
+        }
+    }
+
+    private fun fetchCurrentUserId() {
+        viewModelScope.launch {
+            try {
+                val profile = repository.fetchMyProfile()
+                _state.update { it.copy(currentUserId = profile.id) }
+            } catch (t: Throwable) {
+                // Ignore profile fetch failure for follow button, it just won't hide own follow button
+            }
+        }
+    }
+
+    fun toggleFollowAuthor(authorId: String) {
+        val current = _state.value
+        if (authorId in current.togglingFollowAuthorIds) return
+
+        val postsByAuthor = current.posts.filter { it.author?.id == authorId }
+        if (postsByAuthor.isEmpty()) return
+
+        val firstAuthor = postsByAuthor.first().author
+        val wasFollowed = firstAuthor?.followed == true
+        val newFollowed = !wasFollowed
+
+        // Optimistically update all posts by this author in the list
+        val updatedPosts = current.posts.map { post ->
+            if (post.author?.id == authorId) {
+                post.copy(author = post.author.copy(followed = newFollowed))
+            } else {
+                post
+            }
+        }
+
+        _state.update {
+            it.copy(
+                togglingFollowAuthorIds = it.togglingFollowAuthorIds + authorId,
+                posts = updatedPosts
+            )
+        }
+
+        viewModelScope.launch {
+            try {
+                val action = if (newFollowed) "follow" else "unfollow"
+                val followedResult = repository.toggleFollow(authorId, action)
+
+                _state.update { s ->
+                    val serverPosts = s.posts.map { post ->
+                        if (post.author?.id == authorId) {
+                            post.copy(author = post.author.copy(followed = followedResult))
+                        } else {
+                            post
+                        }
+                    }
+                    s.copy(
+                        togglingFollowAuthorIds = s.togglingFollowAuthorIds - authorId,
+                        posts = serverPosts
+                    )
+                }
+            } catch (t: Throwable) {
+                val signedOut = userSession.invalidateIfAuthenticationFailure(t)
+                _state.update { s ->
+                    val revertedPosts = s.posts.map { post ->
+                        if (post.author?.id == authorId) {
+                            post.copy(author = post.author.copy(followed = wasFollowed))
+                        } else {
+                            post
+                        }
+                    }
+                    val rolled = s.copy(
+                        togglingFollowAuthorIds = s.togglingFollowAuthorIds - authorId,
+                        posts = revertedPosts
+                    )
+                    if (signedOut) {
+                        rolled.copy(
+                            isAuthenticated = false,
+                            error = AppError(AppErrorKind.Unauthorized)
+                        )
+                    } else {
+                        rolled.copy(
+                            error = t.toAppError()
+                        )
                     }
                 }
             }

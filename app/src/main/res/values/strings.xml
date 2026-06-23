@@ -939,4 +939,15 @@
     <string name="manzil_desc_al_falaq">Seek refuge with the Lord of daybreak from the evil of creation, darkness, sorcery, and envy.</string>
     <string name="manzil_item_an_nas">An-Nas 1–6</string>
     <string name="manzil_desc_an_nas">Seek refuge with the Lord of mankind, the King of mankind, from the whisperer who withdraws.</string>
+
+    <!-- Follow Feature -->
+    <string name="follow">Follow</string>
+    <string name="following">Following</string>
+    <string name="follow_failed">Follow failed</string>
+    <string name="unfollow_failed">Unfollow failed</string>
+    <string name="followers">Followers</string>
+    <string name="followers_title">Followers</string>
+    <string name="no_followers">You don\'t have any followers yet.</string>
+    <string name="loading_followers">Loading followers…</string>
+    <string name="followers_load_failed">Failed to load followers.</string>
 </resources>

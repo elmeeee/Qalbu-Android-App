@@ -44,6 +44,8 @@ object NetworkModule {
         ignoreUnknownKeys = true
         coerceInputValues = true
         explicitNulls = false
+        @OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)
+        namingStrategy = kotlinx.serialization.json.JsonNamingStrategy.SnakeCase
     }
 
     @Provides

@@ -249,8 +249,11 @@ private fun ReflectFeed(
                 itemsIndexed(state.posts, key = { _, p -> p.id }) { _, post ->
                     ReflectPostCard(
                         post = post,
+                        currentUserId = state.currentUserId,
                         togglingLike = post.id in state.togglingLikePostIds,
+                        togglingFollow = post.author?.id in state.togglingFollowAuthorIds,
                         onLike = { vm.toggleLike(post.id) },
+                        onFollow = { post.author?.id?.let(vm::toggleFollowAuthor) },
                         onOpenVerse = { post.references?.firstOrNull()?.verseKey?.let(onOpenVerse) },
                         contributorLabel = contributorLabel,
                         verifiedLabel = verifiedLabel,
@@ -354,8 +357,11 @@ private fun SegmentSwitcher(
 @Composable
 private fun ReflectPostCard(
     post: ReflectFeedPost,
+    currentUserId: String?,
     togglingLike: Boolean,
+    togglingFollow: Boolean,
     onLike: () -> Unit,
+    onFollow: () -> Unit,
     onOpenVerse: () -> Unit,
     contributorLabel: String,
     verifiedLabel: String,
@@ -407,6 +413,16 @@ private fun ReflectPostCard(
                     text = formatReflectTime(post.createdAt),
                     color = ReflectPaperMuted,
                     style = MaterialTheme.typography.labelSmall
+                )
+            }
+            val authorId = post.author?.id
+            val showFollowButton = authorId != null && authorId != currentUserId
+            if (showFollowButton) {
+                Spacer(Modifier.width(8.dp))
+                FollowButton(
+                    followed = post.author?.followed == true,
+                    loading = togglingFollow,
+                    onClick = onFollow
                 )
             }
         }
@@ -563,6 +579,45 @@ private fun ReflectEmptyState(message: String) {
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
+    }
+}
+
+@Composable
+private fun FollowButton(
+    followed: Boolean,
+    loading: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (followed) AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+                else AlKhatibColors.DeepEmerald.copy(alpha = 0.15f)
+            )
+            .border(
+                width = 1.dp,
+                color = if (followed) AlKhatibColors.DeepEmerald.copy(alpha = 0.3f) else AlKhatibColors.DeepEmerald.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(50)
+            )
+            .clickable(enabled = !loading, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                color = AlKhatibColors.DeepEmerald,
+                strokeWidth = 1.5.dp,
+                modifier = Modifier.size(14.dp)
+            )
+        } else {
+            Text(
+                text = if (followed) stringResource(R.string.following) else stringResource(R.string.follow),
+                color = AlKhatibColors.DeepEmerald,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

@@ -458,4 +458,15 @@
     <string name="manzil_desc_al_falaq">Berlindung kepada Tuhan Subuh dari kejahatan makhluk, malam gelap, sihir, dan iri hati.</string>
     <string name="manzil_item_an_nas">An-Nas 1–6</string>
     <string name="manzil_desc_an_nas">Berlindung kepada Tuhan manusia, Raja manusia, dari bisikan setan yang bersembunyi.</string>
+
+    <!-- Follow Feature -->
+    <string name="follow">Ikuti</string>
+    <string name="following">Mengikuti</string>
+    <string name="follow_failed">Gagal mengikuti</string>
+    <string name="unfollow_failed">Gagal berhenti mengikuti</string>
+    <string name="followers">Pengikut</string>
+    <string name="followers_title">Pengikut</string>
+    <string name="no_followers">Anda belum memiliki pengikut.</string>
+    <string name="loading_followers">Memuat pengikut…</string>
+    <string name="followers_load_failed">Gagal memuat pengikut.</string>
 </resources>

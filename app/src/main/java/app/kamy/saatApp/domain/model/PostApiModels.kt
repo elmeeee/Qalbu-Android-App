@@ -124,7 +124,8 @@ data class ReflectFeedAuthor(
     val firstName: String? = null,
     val lastName: String? = null,
     val verified: Boolean? = null,
-    val avatarUrls: UserProfileAvatarUrls? = null
+    val avatarUrls: UserProfileAvatarUrls? = null,
+    val followed: Boolean? = null
 ) {
     val displayName: String
         get() {
@@ -153,3 +154,24 @@ data class ReflectFeedReference(
             return null
         }
 }
+
+// ---- Follow/Unfollow ----
+
+@Serializable
+data class ToggleFollowRequest(
+    val action: String? = null
+)
+
+@Serializable
+data class ToggleFollowResponse(
+    val followed: Boolean
+)
+
+@Serializable
+data class UserFollowersEnvelope(
+    val total: Int? = null,
+    val currentPage: Int? = null,
+    val limit: Int? = null,
+    val pages: Int? = null,
+    val data: List<UserProfilePayload> = emptyList()
+)

@@ -40,6 +40,7 @@ class OAuthService @Inject constructor(
             Uri.parse(AppConfig.qfOauthAppCallbackUrl)
         )
             .setScopes(AppConfig.qfOauthScopes.split(' ').filter { it.isNotBlank() })
+            .setPrompt(AuthorizationRequest.Prompt.LOGIN)
             .build()
         return authService.getAuthorizationRequestIntent(request)
     }

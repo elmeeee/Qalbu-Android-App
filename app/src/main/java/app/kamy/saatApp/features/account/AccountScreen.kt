@@ -15,11 +15,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +43,7 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -58,6 +62,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -151,7 +156,8 @@ fun AccountScreen(
             onSignIn = {
                 val intent = oauthService.buildAuthorizationIntent(authService)
                 signInLauncher.launch(intent)
-            }
+            },
+            onOpenFollowers = vm::openFollowers
         )
     }
 
@@ -237,6 +243,20 @@ fun AccountScreen(
             onDismiss = vm::closeLanguageSheet
         )
     }
+
+    if (state.showFollowersSheet) {
+        FollowersSheet(
+            followers = state.followers,
+            isLoading = state.followersLoading,
+            isLoadingMore = state.followersLoadingMore,
+            error = state.followersError,
+            togglingFollowIds = state.togglingFollowFollowerIds,
+            onItemRendered = vm::loadMoreFollowersIfNeeded,
+            onToggleFollow = vm::toggleFollowFollower,
+            onDismiss = vm::closeFollowers,
+            onRetry = { vm.loadFollowers(reset = true) }
+        )
+    }
 }
 
 @Composable
@@ -245,7 +265,8 @@ private fun AccountSettingsContent(
     vm: AccountViewModel,
     onBack: (() -> Unit)?,
     onOpenNotifications: () -> Unit,
-    onSignIn: () -> Unit
+    onSignIn: () -> Unit,
+    onOpenFollowers: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -274,7 +295,8 @@ private fun AccountSettingsContent(
             isLoading = state.isLoading,
             error = state.error,
             onRetry = vm::fetchProfile,
-            onSignIn = onSignIn
+            onSignIn = onSignIn,
+            onOpenFollowers = onOpenFollowers
         )
 
         SettingsSectionLabel(stringResource(R.string.general))
@@ -369,7 +391,8 @@ private fun ProfileHeader(
     isLoading: Boolean,
     error: AppError?,
     onRetry: () -> Unit,
-    onSignIn: () -> Unit
+    onSignIn: () -> Unit,
+    onOpenFollowers: () -> Unit
 ) {
     val avatarUrl = profile?.preferredAvatarUrl ?: sessionAvatarUrl
     val loadingLabel = stringResource(R.string.loading)
@@ -444,6 +467,29 @@ private fun ProfileHeader(
                         style = MaterialTheme.typography.labelMedium,
                         color = AlKhatibColors.Teal
                     )
+                }
+                if (profile?.followersCount != null) {
+                    Spacer(Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .clickable { onOpenFollowers() }
+                            .padding(vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "${profile.followersCount}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = AlKhatibColors.DeepEmerald
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.followers),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = AlKhatibColors.Slate500
+                        )
+                    }
                 }
                 profileErrorDisplay?.let { display ->
                     Spacer(Modifier.height(8.dp))
@@ -962,5 +1008,224 @@ private fun scaleLabel(scale: Float): String {
         scale < 1.1f -> medium
         scale < 1.25f -> large
         else -> extraLarge
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FollowersSheet(
+    followers: List<app.kamy.saatApp.domain.model.UserProfilePayload>,
+    isLoading: Boolean,
+    isLoadingMore: Boolean,
+    error: AppError?,
+    togglingFollowIds: Set<String>,
+    onItemRendered: (Int) -> Unit,
+    onToggleFollow: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onRetry: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val errorDisplay = error.rememberErrorDisplay(R.string.followers_load_failed)
+
+    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp)
+        ) {
+            PremiumSheetHeader(
+                title = stringResource(R.string.followers_title)
+            )
+            Spacer(Modifier.height(12.dp))
+
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            color = AlKhatibColors.DeepEmerald,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+                }
+                errorDisplay != null -> {
+                    AlKhatibInlineError(
+                        display = errorDisplay,
+                        onRetry = onRetry
+                    )
+                    Spacer(Modifier.height(24.dp))
+                }
+                followers.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_followers),
+                            color = AlKhatibColors.Slate500,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+                else -> {
+                    val listState = rememberLazyListState()
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 420.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        itemsIndexed(followers, key = { _, f -> f.id }) { index, follower ->
+                            LaunchedEffect(index) {
+                                onItemRendered(index)
+                            }
+                            FollowerRow(
+                                follower = follower,
+                                isTogglingFollow = follower.id in togglingFollowIds,
+                                onToggleFollow = { onToggleFollow(follower.id) }
+                            )
+                        }
+                        if (isLoadingMore) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 12.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = AlKhatibColors.DeepEmerald,
+                                        strokeWidth = 2.dp,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun FollowerRow(
+    follower: app.kamy.saatApp.domain.model.UserProfilePayload,
+    isTogglingFollow: Boolean,
+    onToggleFollow: () -> Unit
+) {
+    val avatarUrl = follower.avatarUrls?.medium ?: follower.avatarUrls?.small ?: follower.avatarUrls?.large
+    val displayTitle = follower.firstName?.let { fn ->
+        val ln = follower.lastName.orEmpty()
+        if (ln.isNotBlank()) "$fn $ln" else fn
+    } ?: follower.username ?: ""
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(AlKhatibColors.PureWhite)
+            .border(
+                width = 1.dp,
+                color = AlKhatibColors.SoftGrey.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 10.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(AlKhatibColors.LightGrey),
+            contentAlignment = Alignment.Center
+        ) {
+            if (avatarUrl != null) {
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = displayTitle,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = null,
+                    tint = AlKhatibColors.Slate500,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = displayTitle,
+                color = AlKhatibColors.Slate900,
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            follower.username?.let {
+                Text(
+                    text = "@$it",
+                    color = AlKhatibColors.Slate500,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+        Spacer(Modifier.width(8.dp))
+        FollowButton(
+            followed = follower.followed == true,
+            loading = isTogglingFollow,
+            onClick = onToggleFollow
+        )
+    }
+}
+
+@Composable
+private fun FollowButton(
+    followed: Boolean,
+    loading: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (followed) AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+                else AlKhatibColors.DeepEmerald.copy(alpha = 0.15f)
+            )
+            .border(
+                width = 1.dp,
+                color = if (followed) AlKhatibColors.DeepEmerald.copy(alpha = 0.3f) else AlKhatibColors.DeepEmerald.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(50)
+            )
+            .clickable(enabled = !loading, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                color = AlKhatibColors.DeepEmerald,
+                strokeWidth = 1.5.dp,
+                modifier = Modifier.size(14.dp)
+            )
+        } else {
+            Text(
+                text = if (followed) stringResource(R.string.following) else stringResource(R.string.follow),
+                color = AlKhatibColors.DeepEmerald,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }

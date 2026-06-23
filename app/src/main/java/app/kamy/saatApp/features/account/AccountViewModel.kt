@@ -8,6 +8,7 @@ import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.domain.model.QFTranslation
 import app.kamy.saatApp.domain.model.UserProfilePayload
+import app.kamy.saatApp.domain.model.UserFollowersEnvelope
 import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.saatApp.domain.prayer.PrayerMethodOption
@@ -89,7 +90,15 @@ data class AccountUiState(
     val showLanguageSheet: Boolean = false,
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
     val selectedAdhanVoice: AdhanVoice = AdhanVoice.DEFAULT,
-    val previewingAdhanVoiceId: String? = null
+    val previewingAdhanVoiceId: String? = null,
+    val showFollowersSheet: Boolean = false,
+    val followers: List<UserProfilePayload> = emptyList(),
+    val followersLoading: Boolean = false,
+    val followersLoadingMore: Boolean = false,
+    val followersCurrentPage: Int = 0,
+    val followersHasMore: Boolean = true,
+    val followersError: AppError? = null,
+    val togglingFollowFollowerIds: Set<String> = emptySet()
 ) {
     fun isPrayerNotificationEnabled(type: PrayerType): Boolean = when (type) {
         PrayerType.FAJR -> fajrNotificationEnabled
@@ -573,6 +582,128 @@ class AccountViewModel @Inject constructor(
             it.name.lowercase().contains(q) ||
                 it.authorName.lowercase().contains(q) ||
                 it.languageName.lowercase().contains(q)
+        }
+    }
+
+    fun openFollowers() {
+        _state.update { it.copy(showFollowersSheet = true, followersError = null) }
+        loadFollowers(reset = true)
+    }
+
+    fun closeFollowers() {
+        _state.update { it.copy(showFollowersSheet = false) }
+    }
+
+    fun loadFollowers(reset: Boolean = false) {
+        val s = _state.value
+        val userId = s.profile?.id ?: return
+        if (!reset && (s.followersLoadingMore || !s.followersHasMore)) return
+
+        val targetPage = if (reset) 1 else s.followersCurrentPage + 1
+        _state.update {
+            if (reset) it.copy(followersLoading = true, followersError = null)
+            else it.copy(followersLoadingMore = true)
+        }
+
+        viewModelScope.launch {
+            try {
+                val envelope = reflectRepository.getUserFollowers(userId, targetPage)
+                _state.update {
+                    val combined = if (reset) envelope.data else it.followers + envelope.data
+                    val page = envelope.currentPage ?: targetPage
+                    val totalPages = envelope.pages
+                    val pageLimit = envelope.limit ?: 20
+                    it.copy(
+                        followersLoading = false,
+                        followersLoadingMore = false,
+                        followers = combined,
+                        followersCurrentPage = page,
+                        followersHasMore = when {
+                            totalPages != null -> page < totalPages
+                            else -> envelope.data.size >= pageLimit
+                        }
+                    )
+                }
+            } catch (t: Throwable) {
+                val signedOut = userSession.invalidateIfAuthenticationFailure(t)
+                _state.update {
+                    it.copy(
+                        followersLoading = false,
+                        followersLoadingMore = false,
+                        isSignedIn = if (signedOut) false else it.isSignedIn,
+                        followersError = t.toAppError()
+                    )
+                }
+            }
+        }
+    }
+
+    fun loadMoreFollowersIfNeeded(currentIndex: Int) {
+        val s = _state.value
+        if (s.followersLoadingMore || !s.followersHasMore) return
+        if (currentIndex < s.followers.size - 3) return
+        loadFollowers(reset = false)
+    }
+
+    fun toggleFollowFollower(followerId: String) {
+        val current = _state.value
+        if (followerId in current.togglingFollowFollowerIds) return
+
+        val index = current.followers.indexOfFirst { it.id == followerId }.takeIf { it >= 0 } ?: return
+        val original = current.followers[index]
+        val wasFollowed = original.followed == true
+        val newFollowed = !wasFollowed
+
+        val optimistic = original.copy(followed = newFollowed)
+        _state.update {
+            it.copy(
+                togglingFollowFollowerIds = it.togglingFollowFollowerIds + followerId,
+                followers = it.followers.toMutableList().also { list -> list[index] = optimistic }
+            )
+        }
+
+        viewModelScope.launch {
+            try {
+                val action = if (newFollowed) "follow" else "unfollow"
+                val followedResult = reflectRepository.toggleFollow(followerId, action)
+
+                _state.update { s ->
+                    val refreshedIdx = s.followers.indexOfFirst { it.id == followerId }
+                    if (refreshedIdx < 0) {
+                        s.copy(togglingFollowFollowerIds = s.togglingFollowFollowerIds - followerId)
+                    } else {
+                        val cur = s.followers[refreshedIdx]
+                        val corrected = cur.copy(followed = followedResult)
+                        s.copy(
+                            togglingFollowFollowerIds = s.togglingFollowFollowerIds - followerId,
+                            followers = s.followers.toMutableList().also { it[refreshedIdx] = corrected }
+                        )
+                    }
+                }
+            } catch (t: Throwable) {
+                val signedOut = userSession.invalidateIfAuthenticationFailure(t)
+                _state.update { s ->
+                    val rollIdx = s.followers.indexOfFirst { it.id == followerId }
+                    val rolled = if (rollIdx < 0) {
+                        s.copy(togglingFollowFollowerIds = s.togglingFollowFollowerIds - followerId)
+                    } else {
+                        s.copy(
+                            togglingFollowFollowerIds = s.togglingFollowFollowerIds - followerId,
+                            followers = s.followers.toMutableList().also { it[rollIdx] = original }
+                        )
+                    }
+                    if (signedOut) {
+                        rolled.copy(
+                            isSignedIn = false,
+                            error = AppError(AppErrorKind.Unauthorized)
+                        )
+                    } else {
+                        rolled.copy(
+                            followersError = t.toAppError()
+                        )
+                    }
+                }
+            }
         }
     }
 }

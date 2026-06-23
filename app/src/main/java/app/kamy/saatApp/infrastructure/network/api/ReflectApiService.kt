@@ -7,6 +7,9 @@ import app.kamy.saatApp.domain.model.PostCreateRequest
 import app.kamy.saatApp.domain.model.ReflectFeedEnvelope
 import app.kamy.saatApp.domain.model.ReflectToggleLikeResponse
 import app.kamy.saatApp.domain.model.UserProfilePayload
+import app.kamy.saatApp.domain.model.ToggleFollowRequest
+import app.kamy.saatApp.domain.model.ToggleFollowResponse
+import app.kamy.saatApp.domain.model.UserFollowersEnvelope
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -44,6 +47,19 @@ interface ReflectApiService {
 
     @POST("posts/{postId}/toggle-like")
     suspend fun togglePostLike(@Path("postId") postId: String): ReflectToggleLikeResponse
+
+    @GET("users/{id}/followers")
+    suspend fun getUserFollowers(
+        @Path("id") userId: String,
+        @Query("page") page: Int = 1,
+        @Query("limit") limit: Int = 20
+    ): UserFollowersEnvelope
+
+    @POST("users/{followeeId}/toggle-follow")
+    suspend fun toggleFollow(
+        @Path("followeeId") followeeId: String,
+        @Body request: ToggleFollowRequest
+    ): ToggleFollowResponse
 
     @POST("activity_days")
     suspend fun logActivityDay(@Body input: ActivityDayInput): ActivityDayEnvelope
