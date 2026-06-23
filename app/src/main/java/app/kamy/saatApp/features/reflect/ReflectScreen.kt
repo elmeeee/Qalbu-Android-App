@@ -41,7 +41,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -87,7 +87,7 @@ fun ReflectScreen(
     onOpenVerse: (verseKey: String) -> Unit = {}
 ) {
     val vm: ReflectViewModel = hiltViewModel()
-    val state by vm.state.collectAsState()
+    val state by vm.state.collectAsStateWithLifecycle()
     val reflectTitle = stringResource(R.string.nav_reflect)
     val reflectCommunity = stringResource(R.string.reflect_community)
     val shareLabel = stringResource(R.string.share)
