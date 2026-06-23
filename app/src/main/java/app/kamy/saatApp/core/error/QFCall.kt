@@ -17,6 +17,10 @@ suspend inline fun <T> qfCall(crossinline block: suspend () -> T): T {
     } catch (e: java.io.IOException) {
         throw QFError.Network(e)
     } catch (e: kotlinx.serialization.SerializationException) {
+        e.printStackTrace()
         throw QFError.Parsing(e.message ?: "serialization failed")
+    } catch (e: Throwable) {
+        e.printStackTrace()
+        throw e
     }
 }

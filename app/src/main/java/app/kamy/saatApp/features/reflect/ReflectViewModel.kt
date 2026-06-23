@@ -121,6 +121,7 @@ class ReflectViewModel @Inject constructor(
                 )
             }
         } catch (t: Throwable) {
+            t.printStackTrace()
             val signedOut = userSession.invalidateIfAuthenticationFailure(t)
             _state.update {
                 it.copy(

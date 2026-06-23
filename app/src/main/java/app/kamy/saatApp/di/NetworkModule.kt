@@ -181,7 +181,7 @@ object NetworkModule {
     @AuthV1Api
     fun provideAuthV1Retrofit(
         @Named("user") okHttp: OkHttpClient,
-        json: Json
+        @ReflectJson json: Json
     ): Retrofit = buildRetrofit(
         baseUrl = AppConfig.qfApiBaseUrl,
         prefix = AppConfig.Prefix.authV1,

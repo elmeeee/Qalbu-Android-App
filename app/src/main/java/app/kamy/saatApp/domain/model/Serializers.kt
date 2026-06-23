@@ -35,8 +35,7 @@ internal object StringFromAnyScalarSerializer : KSerializer<String> {
         if (element !is JsonPrimitive) {
             throw IllegalStateException("Expected primitive id, got $element")
         }
-        return element.contentOrNull
-            ?: element.long.toString()
+        return element.contentOrNull ?: element.content
     }
 }
 
@@ -54,7 +53,7 @@ internal object NullableStringFromAnyScalarSerializer : KSerializer<String?> {
         val element = decoder.decodeJsonElement()
         if (element is kotlinx.serialization.json.JsonNull) return null
         if (element !is JsonPrimitive) return null
-        return element.contentOrNull ?: element.long.toString()
+        return element.contentOrNull ?: element.content
     }
 }
 
@@ -141,5 +140,9 @@ private fun JsonElement.toReflectFeedTag(): ReflectFeedTag? = when (this) {
 private fun JsonElement.jsonPrimitiveOrNull(): String? =
     (this as? JsonPrimitive)?.contentOrNull
 
-private fun JsonElement.jsonIntOrNull(): Int? =
-    (this as? JsonPrimitive)?.contentOrNull?.toIntOrNull() ?: (this as? JsonPrimitive)?.long?.toInt()
+private fun JsonElement.jsonIntOrNull(): Int? {
+    val primitive = this as? JsonPrimitive ?: return null
+    val content = primitive.contentOrNull ?: return null
+    content.toIntOrNull()?.let { return it }
+    return runCatching { content.toDouble().toInt() }.getOrNull()
+}
