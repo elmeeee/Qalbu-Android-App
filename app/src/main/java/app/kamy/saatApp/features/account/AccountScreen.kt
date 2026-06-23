@@ -480,7 +480,7 @@ private fun ProfileHeader(
                     Spacer(Modifier.height(4.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier.padding(vertical = 2.dp)
                     ) {
                         stats.forEachIndexed { index, pair ->
@@ -495,26 +495,31 @@ private fun ProfileHeader(
                             ) {
                                 Text(
                                     text = "${pair.second}",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
                                     fontWeight = FontWeight.Bold,
-                                    color = AlKhatibColors.DeepEmerald
+                                    color = AlKhatibColors.DeepEmerald,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
-                                Spacer(Modifier.width(4.dp))
+                                Spacer(Modifier.width(3.dp))
                                 Text(
                                     text = when (pair.first) {
                                         "posts" -> stringResource(R.string.posts)
                                         "followers" -> stringResource(R.string.followers)
                                         else -> stringResource(R.string.likes)
                                     },
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = AlKhatibColors.Slate500
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                    color = AlKhatibColors.Slate500,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                             if (index < stats.lastIndex) {
                                 Text(
                                     text = "•",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = AlKhatibColors.Slate500
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                    color = AlKhatibColors.SoftGrey,
+                                    modifier = Modifier.padding(horizontal = 2.dp)
                                 )
                             }
                         }
