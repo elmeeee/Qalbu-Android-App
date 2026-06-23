@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.design.theme.AlKhatibColors
@@ -38,7 +39,8 @@ fun PremiumTasbihCounter(
     target: Int,
     pulseKey: Int,
     modifier: Modifier = Modifier,
-    subtitle: String
+    subtitle: String,
+    counterSize: Dp = 88.dp
 ) {
     val scale by animateFloatAsState(
         targetValue = if (pulseKey == 0) 1f else 0.96f,
@@ -53,11 +55,11 @@ fun PremiumTasbihCounter(
         modifier = modifier.scale(scale),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.fillMaxWidth().height(300.dp)) {
+        Canvas(modifier = Modifier.size(counterSize)) {
             val cx = size.width / 2f
             val cy = size.height / 2f
             val outerRadius = size.minDimension * 0.42f
-            val beadRadius = size.minDimension * 0.018f
+            val beadRadius = size.minDimension * 0.022f // slightly larger relative bead size for small counters
 
             drawCircle(
                 brush = Brush.radialGradient(
@@ -128,12 +130,12 @@ fun PremiumTasbihCounter(
         }
 
         Surface(
-            modifier = Modifier.size(148.dp),
+            modifier = Modifier.size(counterSize * 0.68f),
             shape = CircleShape,
             color = AlKhatibColors.PureWhite,
-            shadowElevation = 8.dp,
+            shadowElevation = 6.dp,
             border = androidx.compose.foundation.BorderStroke(
-                2.dp,
+                1.5.dp,
                 Brush.linearGradient(listOf(AlKhatibColors.Teal.copy(0.35f), AlKhatibColors.Gold.copy(0.35f)))
             )
         ) {
@@ -141,15 +143,16 @@ fun PremiumTasbihCounter(
                 androidx.compose.foundation.layout.Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         count.toString(),
-                        style = MaterialTheme.typography.displayMedium,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = AlKhatibColors.Slate900,
-                        fontSize = 44.sp
+                        fontSize = 18.sp
                     )
                     Text(
                         subtitle,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = AlKhatibColors.Slate500
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AlKhatibColors.Slate500,
+                        fontSize = 9.sp
                     )
                     if (round > 0) {
                         Text(
@@ -157,7 +160,8 @@ fun PremiumTasbihCounter(
                             style = MaterialTheme.typography.labelSmall,
                             color = AlKhatibColors.Teal,
                             fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.clip(CircleShape)
+                            modifier = Modifier.clip(CircleShape),
+                            fontSize = 8.sp
                         )
                     }
                 }
