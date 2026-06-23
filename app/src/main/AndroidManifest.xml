@@ -119,9 +119,7 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
-        <receiver
-            android:name=".infrastructure.notifications.QuranReadingReminderReceiver"
-            android:exported="false" />
+
 
         <receiver
             android:name=".infrastructure.widget.WidgetRefreshReceiver"

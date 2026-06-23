@@ -3,15 +3,11 @@ package app.kamy.saatApp.ui.navigation
 import android.content.Intent
 import android.net.Uri
 import app.kamy.saatApp.infrastructure.notifications.DailyVerseNotificationScheduler
-import app.kamy.saatApp.infrastructure.notifications.QuranReadingReminderScheduler
 
 object DeepLinkRoutes {
     fun fromIntent(intent: Intent?): String? {
         intent ?: return null
         notificationRoute(intent)?.let { return it }
-        if (intent.getBooleanExtra(QuranReadingReminderScheduler.EXTRA_OPEN_QURAN, false)) {
-            return RootTab.Quran.route
-        }
         return uriRoute(intent.data)
     }
 

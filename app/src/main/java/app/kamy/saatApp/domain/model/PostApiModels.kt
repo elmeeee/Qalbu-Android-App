@@ -76,7 +76,17 @@ data class ReflectFeedEnvelope(
     private val posts: List<ReflectFeedPost>? = null
 ) {
     val items: List<ReflectFeedPost>
-        get() = data ?: posts ?: emptyList()
+        get() = (data ?: posts ?: emptyList()).map { post ->
+            if (post.author != null) {
+                post.copy(
+                    author = post.author.copy(
+                        followed = post.author.followed ?: (post.isByFollowedUser == true)
+                    )
+                )
+            } else {
+                post
+            }
+        }
 }
 
 // ---- Feed post ----
@@ -97,7 +107,8 @@ data class ReflectFeedPost(
     val draft: Boolean? = null,
     var likesCount: Int? = null,
     val commentsCount: Int? = null,
-    val postTypeName: String? = null
+    val postTypeName: String? = null,
+    val isByFollowedUser: Boolean? = null
 )
 
 @Serializable

@@ -255,11 +255,15 @@ class ReflectViewModel @Inject constructor(
                     )
                 }
             } catch (t: Throwable) {
+                val isAlreadyFollowed = t is app.kamy.saatApp.core.error.QFError.HttpStatus &&
+                        t.bodyText?.contains("ALREADY_FOLLOWED") == true
+                val finalFollowedState = if (isAlreadyFollowed) true else wasFollowed
+
                 val signedOut = userSession.invalidateIfAuthenticationFailure(t)
                 _state.update { s ->
                     val revertedPosts = s.posts.map { post ->
                         if (post.author?.id == authorId) {
-                            post.copy(author = post.author.copy(followed = wasFollowed))
+                            post.copy(author = post.author.copy(followed = finalFollowedState))
                         } else {
                             post
                         }
@@ -273,6 +277,9 @@ class ReflectViewModel @Inject constructor(
                             isAuthenticated = false,
                             error = AppError(AppErrorKind.Unauthorized)
                         )
+                    } else if (isAlreadyFollowed) {
+                        // Do not propagate error to UI if it's just "already followed"
+                        rolled
                     } else {
                         rolled.copy(
                             error = t.toAppError()

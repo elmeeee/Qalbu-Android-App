@@ -9,7 +9,6 @@ import app.kamy.saatApp.infrastructure.notifications.DailyVerseNotificationSched
 import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
 import app.kamy.saatApp.infrastructure.notifications.PrayerCheckReminderScheduler
 import app.kamy.saatApp.infrastructure.notifications.PrayerNotificationCoordinator
-import app.kamy.saatApp.infrastructure.notifications.QuranReadingReminderScheduler
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.OfflineDownloadStore
 import app.kamy.saatApp.infrastructure.widget.WidgetCoordinator
@@ -33,7 +32,6 @@ class SaatApplication : Application() {
         runCatching { DailyVerseNotificationScheduler.reschedule(this) }
         runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
         runCatching { PrayerCheckReminderScheduler.reschedule(this) }
-        runCatching { QuranReadingReminderScheduler.reschedule(this) }
         runCatching {
             WidgetCoordinator.refreshAll(this)
             if (WidgetCoordinator.hasAnyWidgets(this)) {
