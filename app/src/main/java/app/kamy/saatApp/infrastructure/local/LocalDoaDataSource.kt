@@ -23,7 +23,8 @@ class LocalDoaDataSource @Inject constructor(
     private val dhikrSlugs = setOf(
         "morning-dhikir",
         "evening-dhikir",
-        "dhikir-after-salah"
+        "dhikir-after-salah",
+        "sleep-dhikir"
     )
 
     suspend fun getCatalog(): List<DoaCatalogEntry> = withContext(Dispatchers.IO) {

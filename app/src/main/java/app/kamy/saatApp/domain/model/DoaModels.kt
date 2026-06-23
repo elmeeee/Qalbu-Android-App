@@ -39,6 +39,7 @@ data class DhikrContentItem(
     val translation: String? = null,
     val fawaid: String? = null,
     val notes: String? = null,
+    val source: String? = null,
     @SerialName("repeat_count") val repeatCount: Int? = null
 )
 

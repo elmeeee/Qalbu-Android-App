@@ -8,7 +8,8 @@ internal object DoaBuiltinLocales {
             "doa-ketika-sakit" to "When Ill",
             "morning-dhikir" to "Morning Dhikr",
             "evening-dhikir" to "Evening Dhikr",
-            "dhikir-after-salah" to "Dhikr After Prayer"
+            "dhikir-after-salah" to "Dhikr After Prayer",
+            "sleep-dhikir" to "Dhikr Before Sleep"
         ),
         doa = mapOf(
             "66b1944156f9d2cc8301cd3d" to entry(
@@ -160,7 +161,8 @@ internal object DoaBuiltinLocales {
             "doa-ketika-sakit" to "Ketika Sakit",
             "morning-dhikir" to "Zikir Pagi",
             "evening-dhikir" to "Zikir Petang",
-            "dhikir-after-salah" to "Zikir Selepas Solat"
+            "dhikir-after-salah" to "Zikir Selepas Solat",
+            "sleep-dhikir" to "Zikir Sebelum Tidur"
         ),
         doa = english.doa.mapValues { (_, value) ->
             malayDoa[value.title] ?: value
