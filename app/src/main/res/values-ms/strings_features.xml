@@ -459,6 +459,21 @@
     <string name="manzil_item_an_nas">An-Nas 1–6</string>
     <string name="manzil_desc_an_nas">Berlindung kepada Tuhan manusia, Raja manusia, daripada bisikan syaitan yang bersembunyi.</string>
 
+    <!-- Manzil Info Card -->
+    <string name="manzil_info_title">Tentang Manzil Al-Quran</string>
+    <string name="manzil_info_subtitle">Definisi, pembahagian 7 hari &amp; panduan amalan</string>
+    <string name="manzil_info_definition">Manzil (bahasa Arab: منزل) ialah sistem pembahagian bacaan Al-Quran bagi memudahkan penyelesaian (khatam) Al-Quran dalam tempoh tujuh hari (seminggu). Tradisi ini lazim diamalkan dalam komuniti Muslim Asia Selatan dan dipopularkan oleh ulama seperti Syah Waliullah al-Dahlawi.\n\nNota: "Manzil" di sini merujuk kepada pembahagian 7 bahagian Al-Quran untuk khatam, dan adalah berbeza daripada ayat-ayat ruqyah perlindungan (Manzil ruqyah) yang dikumpulkan oleh Maulana Zakariyya Kandhlawi. Bahagian ini dalam aplikasi merangkumi ayat-ayat perlindungan.</string>
+    <string name="manzil_fami_label">Fami bi Syauqin (فَمِي بِشَوْقٍ)</string>
+    <string name="manzil_fami_desc">Ungkapan mnemonik bermaksud "mulutku sentiasa rindu (membaca Al-Quran)". Tujuh huruf — ف م ي ب ش و ق — ialah huruf pertama bagi surah yang memulakan setiap Manzil: Al-Fatihah, Al-Ma\'idah, Yunus, Al-Isra\', Asy-Syu\'ara, Ash-Shaffat, dan Qaf.</string>
+    <string name="manzil_table_title">Pembahagian Manzil 7 Hari</string>
+    <string name="manzil_col_manzil">Manzil</string>
+    <string name="manzil_col_juz">Juz</string>
+    <string name="manzil_col_surah">Julat Surah</string>
+    <string name="manzil_how_title">Cara Mengamalkan</string>
+    <string name="manzil_how_body">Setiap hari, bacalah satu Manzil secara berurutan dari Isnin hingga Ahad, bagi menamatkan seluruh Al-Quran dalam masa seminggu. Boleh dibaca dalam satu duduk atau dibahagikan kepada beberapa sesi sepanjang hari (contohnya selepas Subuh, Zohor, Asar, Maghrib, dan Isyak).\n\nUntuk bermula, mulakan dengan Manzil 1 (Juz 1–6) dan teruskan ke Manzil berikutnya setiap hari. Istiqamah adalah kunci — walaupun tidak dapat menyelesaikan satu Manzil penuh dalam sehari, usahakan sekurang-kurangnya membaca sebahagian dan teruskan keesokan harinya.</string>
+    <string name="manzil_benefits_title">Kelebihan &amp; Faedah</string>
+    <string name="manzil_benefits_list">Membolehkan khatam Al-Quran secara rutin — sekali seminggu.|Membina hubungan yang kukuh dan konsisten dengan Kitab Allah.|Membaca keseluruhan Al-Quran secara tetap mendatangkan pahala yang besar dan keampunan.|Menggalakkan tadabbur harian pada bahagian-bahagian Al-Quran yang berbeza.|Pendekatan berstruktur yang disyorkan oleh ulama klasik dan diwarisi turun-temurun.</string>
+
     <!-- Follow Feature -->
     <string name="follow">Ikuti</string>
     <string name="following">Mengikuti</string>

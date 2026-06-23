@@ -940,6 +940,21 @@
     <string name="manzil_item_an_nas">An-Nas 1–6</string>
     <string name="manzil_desc_an_nas">Seek refuge with the Lord of mankind, the King of mankind, from the whisperer who withdraws.</string>
 
+    <!-- Manzil Info Card -->
+    <string name="manzil_info_title">About Manzil Al-Quran</string>
+    <string name="manzil_info_subtitle">Definition, 7-day division &amp; practice guide</string>
+    <string name="manzil_info_definition">Manzil (Arabic: منزل) is a system for dividing the recitation of the Quran to facilitate completing (khatam) the Quran over seven days (one week). This tradition is widely practiced in South Asian Muslim communities and has been popularized by scholars such as Shah Waliullah al-Dehlawi.\n\nNote: "Manzil" here refers to the 7-part Quran division for khatam, and is different from the protection verses (Manzil ruqyah) compiled by Maulana Zakariyya Kandhlawi. This section in the app covers the protection verses.</string>
+    <string name="manzil_fami_label">Fami bi Syauqin (فَمِي بِشَوْقٍ)</string>
+    <string name="manzil_fami_desc">A mnemonic phrase meaning "My mouth longs to recite (the Quran)". The 7 letters — ف م ي ب ش و ق — are the first letters of the surah that begins each of the 7 Manzils: Al-Fatihah, Al-Ma\'idah, Yunus, Al-Isra\', Asy-Syu\'ara, Ash-Shaffat, and Qaf.</string>
+    <string name="manzil_table_title">7-Day Manzil Division</string>
+    <string name="manzil_col_manzil">Manzil</string>
+    <string name="manzil_col_juz">Juz</string>
+    <string name="manzil_col_surah">Surah Range</string>
+    <string name="manzil_how_title">How to Practice</string>
+    <string name="manzil_how_body">Each day, recite one Manzil in sequence from Monday to Sunday, completing the entire Quran in one week. You may recite it in one sitting or spread it across multiple sessions during the day (e.g. after Fajr, Zuhr, Asr, Maghrib, and Isya\').\n\nTo begin, start with Manzil 1 (Juz 1–6) and proceed to the next Manzil each day. Consistency is key — even if you cannot complete a full Manzil in a day, try to at least read a portion and continue the next day.</string>
+    <string name="manzil_benefits_title">Virtues &amp; Benefits</string>
+    <string name="manzil_benefits_list">Enables regular completion (khatam) of the Quran — once per week.|Builds a strong, consistent relationship with the Book of Allah.|Reciting the entire Quran regularly earns great reward and forgiveness.|Encourages daily reflection on different parts of the Quran.|A structured approach recommended by classical scholars and passed down through generations.</string>
+
     <!-- Follow Feature -->
     <string name="follow">Follow</string>
     <string name="following">Following</string>

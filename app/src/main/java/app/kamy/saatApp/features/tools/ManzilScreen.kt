@@ -27,6 +27,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -37,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -142,6 +145,9 @@ fun ManzilScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            item(key = "manzil_info_card") {
+                ManzilInfoCard()
+            }
             itemsIndexed(
                 uiState.sections,
                 key = { _, section -> section.def.key }
@@ -167,6 +173,329 @@ fun ManzilScreen(
                     },
                     index = index
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Expandable "About Manzil Al-Quran" info card — shows the 7-day division table,
+ * the Fami bi Syauqin mnemonic, purpose, and how to practice Manzil.
+ */
+@Composable
+private fun ManzilInfoCard() {
+    var expanded by remember { mutableStateOf(false) }
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = tween(durationMillis = 280),
+        label = "info_chevron"
+    )
+
+    val manzilRows = listOf(
+        Triple("١ — ف (fa')", "Juz 1–6", "Al-Fatihah – An-Nisa'"),
+        Triple("٢ — م (mim)", "Juz 6–11", "Al-Ma'idah – At-Taubah"),
+        Triple("٣ — ي (ya')", "Juz 11–14", "Yunus – An-Nahl"),
+        Triple("٤ — ب (ba')", "Juz 15–19", "Al-Isra' – Al-Furqan"),
+        Triple("٥ — ش (syin)", "Juz 19–23", "Asy-Syu'ara – Yasin"),
+        Triple("٦ — و (wau)", "Juz 23–26", "Ash-Shaffat – Al-Hujurat"),
+        Triple("٧ — ق (qaf)", "Juz 26–30", "Qaf – An-Nas"),
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (expanded) 6.dp else 2.dp,
+                shape = RoundedCornerShape(18.dp),
+                ambientColor = AlKhatibColors.IndigoAccent.copy(alpha = 0.10f),
+                spotColor = AlKhatibColors.IndigoAccent.copy(alpha = 0.14f),
+                clip = false
+            )
+            .clip(RoundedCornerShape(18.dp))
+            .background(AlKhatibColors.PureWhite)
+            .border(
+                width = if (expanded) 1.5.dp else 1.dp,
+                color = if (expanded) AlKhatibColors.IndigoAccent.copy(alpha = 0.30f)
+                else AlKhatibColors.SoftGrey.copy(alpha = 0.7f),
+                shape = RoundedCornerShape(18.dp)
+            )
+            .animateContentSize(animationSpec = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMedium
+            ))
+            .clickable { expanded = !expanded }
+    ) {
+        // Header row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (expanded)
+                            Brush.linearGradient(listOf(AlKhatibColors.IndigoAccent, AlKhatibColors.Teal))
+                        else
+                            Brush.linearGradient(listOf(AlKhatibColors.IndigoAccent.copy(0.14f), AlKhatibColors.Teal.copy(0.08f)))
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = AlKhatibColors.IndigoAccent.copy(alpha = if (expanded) 0.6f else 0.22f),
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.Info,
+                    contentDescription = null,
+                    tint = if (expanded) AlKhatibColors.PureWhite else AlKhatibColors.IndigoAccent,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.manzil_info_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AlKhatibColors.Slate800
+                )
+                Text(
+                    text = stringResource(R.string.manzil_info_subtitle),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (expanded) AlKhatibColors.IndigoAccent.copy(0.85f) else AlKhatibColors.Slate500,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+            Box(
+                modifier = Modifier.size(34.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.ExpandMore,
+                    contentDescription = null,
+                    tint = if (expanded) AlKhatibColors.IndigoAccent else AlKhatibColors.Teal,
+                    modifier = Modifier
+                        .size(22.dp)
+                        .graphicsLayer { rotationZ = chevronRotation }
+                )
+            }
+        }
+
+        if (expanded) {
+            Column(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
+            ) {
+                HorizontalDivider(
+                    color = AlKhatibColors.IndigoAccent.copy(alpha = 0.10f),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                // ── Definition ──────────────────────────────────────────
+                Text(
+                    text = stringResource(R.string.manzil_info_definition),
+                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                    color = AlKhatibColors.Slate700
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                // ── Fami bi Syauqin badge ────────────────────────────────
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    AlKhatibColors.IndigoAccent.copy(alpha = 0.09f),
+                                    AlKhatibColors.Teal.copy(alpha = 0.07f)
+                                )
+                            )
+                        )
+                        .border(
+                            1.dp,
+                            AlKhatibColors.IndigoAccent.copy(alpha = 0.18f),
+                            RoundedCornerShape(14.dp)
+                        )
+                        .padding(horizontal = 14.dp, vertical = 12.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = "فَمِي بِشَوْقٍ",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontSize = 22.sp,
+                                lineHeight = 36.sp,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            textAlign = TextAlign.End,
+                            color = AlKhatibColors.Slate900,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            text = stringResource(R.string.manzil_fami_label),
+                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+                            color = AlKhatibColors.IndigoAccent,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.manzil_fami_desc),
+                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+                            color = AlKhatibColors.Slate500
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // ── 7-Manzil Table ───────────────────────────────────────
+                Text(
+                    text = stringResource(R.string.manzil_table_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.DeepEmerald,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                // Table header
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
+                        .background(AlKhatibColors.DeepEmerald)
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.manzil_col_manzil),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.PureWhite,
+                        modifier = Modifier.weight(1.5f)
+                    )
+                    Text(
+                        text = stringResource(R.string.manzil_col_juz),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.PureWhite,
+                        modifier = Modifier.weight(1.2f)
+                    )
+                    Text(
+                        text = stringResource(R.string.manzil_col_surah),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.PureWhite,
+                        modifier = Modifier.weight(2.3f)
+                    )
+                }
+
+                // Table rows
+                manzilRows.forEachIndexed { idx, (manzil, juz, surah) ->
+                    val isEven = idx % 2 == 0
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .then(
+                                if (idx == manzilRows.lastIndex)
+                                    Modifier.clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
+                                else Modifier
+                            )
+                            .background(
+                                if (isEven) AlKhatibColors.MintWash.copy(alpha = 0.55f)
+                                else AlKhatibColors.PureWhite
+                            )
+                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = manzil,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = AlKhatibColors.DeepEmerald,
+                            modifier = Modifier.weight(1.5f)
+                        )
+                        Text(
+                            text = juz,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = AlKhatibColors.Slate700,
+                            modifier = Modifier.weight(1.2f)
+                        )
+                        Text(
+                            text = surah,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = AlKhatibColors.Slate700,
+                            modifier = Modifier.weight(2.3f)
+                        )
+                    }
+                    if (idx < manzilRows.lastIndex) {
+                        HorizontalDivider(
+                            color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f),
+                            thickness = 0.5.dp
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // ── How to Practice ─────────────────────────────────────
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.MenuBook,
+                        contentDescription = null,
+                        tint = AlKhatibColors.GoldDeep,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.manzil_how_title),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.DeepEmerald
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.manzil_how_body),
+                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                    color = AlKhatibColors.Slate700
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                // ── Benefits chip row ────────────────────────────────────
+                Text(
+                    text = stringResource(R.string.manzil_benefits_title),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.DeepEmerald,
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
+                val benefits = stringResource(R.string.manzil_benefits_list).split("|")
+                benefits.forEach { benefit ->
+                    Row(
+                        modifier = Modifier.padding(vertical = 3.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 6.dp)
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(AlKhatibColors.GoldDeep)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = benefit.trim(),
+                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+                            color = AlKhatibColors.Slate700
+                        )
+                    }
+                }
             }
         }
     }
