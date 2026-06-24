@@ -404,4 +404,7 @@
     <plurals name="hadith_count">
         <item quantity="other">%d hadis</item>
     </plurals>
+    <string name="important_days_reminder">Puasa &amp; Hari Penting</string>
+    <string name="important_days_reminder_subtitle">Dapatkan peringatan bagi puasa sunat dan hari penting akan datang</string>
+    <string name="notif_summary_important_days">Puasa &amp; hari penting</string>
 </resources>

@@ -185,6 +185,13 @@ fun NotificationSettingsScreen(
                 checked = state.kahfReminderEnabled,
                 onCheckedChange = vm::setKahfReminderEnabled
             )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Notifications,
+                title = stringResource(R.string.important_days_reminder),
+                subtitle = stringResource(R.string.important_days_reminder_subtitle),
+                checked = state.importantDaysReminderEnabled,
+                onCheckedChange = vm::setImportantDaysReminderEnabled
+            )
         }
 
         Spacer(Modifier.height(AlKhatibSpacing.xl))

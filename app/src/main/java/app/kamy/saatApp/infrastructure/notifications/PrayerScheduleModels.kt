@@ -49,7 +49,8 @@ data class PrayerNotificationScheduleOptions(
     val firstThirdEnabled: Boolean,
     val lastThirdEnabled: Boolean,
     val yasinReminderEnabled: Boolean,
-    val kahfReminderEnabled: Boolean
+    val kahfReminderEnabled: Boolean,
+    val importantDaysReminderEnabled: Boolean
 ) {
     fun isAdzanEnabledFor(prayerName: String): Boolean = prayerName in enabledAdzanPrayers
 }

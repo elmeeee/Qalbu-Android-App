@@ -967,4 +967,7 @@
     <string name="followers_load_failed">Failed to load followers.</string>
     <string name="posts">Reflections</string>
     <string name="likes">Likes</string>
+    <string name="important_days_reminder">Fasting &amp; Important Days</string>
+    <string name="important_days_reminder_subtitle">Get reminded about upcoming Sunnah fasts and key events</string>
+    <string name="notif_summary_important_days">Fasting &amp; important days</string>
 </resources>

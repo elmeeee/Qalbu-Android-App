@@ -10,7 +10,9 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.kamy.saatApp.MainActivity
 import app.kamy.saatApp.R
+import app.kamy.saatApp.di.PrayerRefreshEntryPoint
 import app.kamy.saatApp.infrastructure.audio.AdhanStopReceiver
+import dagger.hilt.android.EntryPointAccessors
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -22,11 +24,13 @@ object PrayerNotificationScheduler {
     private const val SUNNAH_YASIN_REQUEST = 10_001
     private const val SUNNAH_KAHF_REQUEST = 10_002
     private const val MIDNIGHT_REFRESH_REQUEST = 11_000
+    private const val IMPORTANT_DAYS_REQUEST_BASE = 12_000
+    private const val IMPORTANT_DAYS_ID_BASE = 12_000
     private const val NOTIFICATION_ID_BASE = 8_000
     private const val DAYS_TO_SCHEDULE = 7
     private const val SUNNAH_WEEKS_TO_SCHEDULE = 8
 
-    fun reschedule(
+    suspend fun reschedule(
         context: Context,
         bundle: PrayerScheduleBundle?,
         options: PrayerNotificationScheduleOptions
@@ -34,6 +38,7 @@ object PrayerNotificationScheduler {
         NotificationChannels.ensureAll(context)
         runCatching { cancelAll(context) }
         scheduleSunnahReminders(context, options)
+        scheduleImportantDaysReminders(context, options)
         scheduleMidnightRefresh(context)
         if (bundle == null) return
 
@@ -195,6 +200,7 @@ object PrayerNotificationScheduler {
             )
         )
         cancelSunnah(context)
+        cancelImportantDays(context)
         val nm = NotificationManagerCompat.from(context)
         (NOTIFICATION_ID_BASE until NOTIFICATION_ID_BASE + 80).forEach { nm.cancel(it) }
     }
@@ -208,6 +214,62 @@ object PrayerNotificationScheduler {
         (SUNNAH_KAHF_REQUEST until SUNNAH_KAHF_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
             NotificationManagerCompat.from(context).cancel(code)
+        }
+    }
+
+    suspend fun scheduleImportantDaysReminders(context: Context, options: PrayerNotificationScheduleOptions) {
+        cancelImportantDays(context)
+        if (!options.importantDaysReminderEnabled) return
+
+        val now = System.currentTimeMillis()
+        val entryPoint = runCatching {
+            EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                PrayerRefreshEntryPoint::class.java
+            )
+        }.getOrNull() ?: return
+        
+        val khgtCalendar = entryPoint.khgtCalendarRepository()
+
+        val checkCal = Calendar.getInstance()
+        for (offset in 0 until 7) {
+            checkCal.timeInMillis = now
+            checkCal.add(Calendar.DAY_OF_YEAR, offset)
+            
+            val info = runCatching { khgtCalendar.infoForDate(checkCal) }.getOrNull()
+            if (info != null && info.isImportantDay) {
+                val fireCal = Calendar.getInstance().apply {
+                    timeInMillis = checkCal.timeInMillis
+                    add(Calendar.DAY_OF_YEAR, -1) // Night before
+                    set(Calendar.HOUR_OF_DAY, 20)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+
+                if (fireCal.timeInMillis > now + 2_000L) {
+                    scheduleOneShot(
+                        context = context,
+                        requestCode = IMPORTANT_DAYS_REQUEST_BASE + offset,
+                        fireAt = fireCal.timeInMillis,
+                        channelId = NotificationChannels.SUNNAH,
+                        title = "",
+                        body = "",
+                        kind = "important_day_${info.eventTitle}",
+                        notificationId = IMPORTANT_DAYS_ID_BASE + offset
+                    )
+                }
+            }
+        }
+    }
+
+    private fun cancelImportantDays(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val nm = NotificationManagerCompat.from(context)
+        for (offset in 0 until 7) {
+            val code = IMPORTANT_DAYS_REQUEST_BASE + offset
+            alarmManager.cancel(pendingAlarm(context, code))
+            nm.cancel(IMPORTANT_DAYS_ID_BASE + offset)
         }
     }
 

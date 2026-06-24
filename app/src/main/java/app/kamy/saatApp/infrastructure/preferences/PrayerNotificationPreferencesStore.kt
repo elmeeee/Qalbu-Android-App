@@ -41,7 +41,8 @@ open class PrayerNotificationPreferencesStoreBase(
         firstThirdEnabled = bool(KEY_FIRST_THIRD, default = true),
         lastThirdEnabled = bool(KEY_TAHAJUD, default = true),
         yasinReminderEnabled = bool(KEY_YASIN, default = true),
-        kahfReminderEnabled = bool(KEY_KAHF, default = true)
+        kahfReminderEnabled = bool(KEY_KAHF, default = true),
+        importantDaysReminderEnabled = bool(KEY_IMPORTANT_DAYS, default = true)
     )
 
     fun isPrayerEnabled(type: PrayerType): Boolean =
@@ -53,6 +54,7 @@ open class PrayerNotificationPreferencesStoreBase(
     fun isTahajudEnabled(): Boolean = bool(KEY_TAHAJUD, default = true)
     fun isYasinReminderEnabled(): Boolean = bool(KEY_YASIN, default = true)
     fun isKahfReminderEnabled(): Boolean = bool(KEY_KAHF, default = true)
+    fun isImportantDaysReminderEnabled(): Boolean = bool(KEY_IMPORTANT_DAYS, default = true)
 
     fun setPrayerEnabled(type: PrayerType, enabled: Boolean) = setBool(prayerKey(type), enabled)
 
@@ -62,6 +64,7 @@ open class PrayerNotificationPreferencesStoreBase(
     fun setTahajudEnabled(enabled: Boolean) = setBool(KEY_TAHAJUD, enabled)
     fun setYasinReminderEnabled(enabled: Boolean) = setBool(KEY_YASIN, enabled)
     fun setKahfReminderEnabled(enabled: Boolean) = setBool(KEY_KAHF, enabled)
+    fun setImportantDaysReminderEnabled(enabled: Boolean) = setBool(KEY_IMPORTANT_DAYS, enabled)
 
     fun isAdzanEnabled(): Boolean =
         PrayerType.ADZAN_NOTIFICATION_PRAYERS.any { isPrayerEnabled(it) }
@@ -101,5 +104,6 @@ open class PrayerNotificationPreferencesStoreBase(
         private const val KEY_TAHAJUD = "tahajudNotificationsEnabled"
         private const val KEY_YASIN = "yasinReminderEnabled"
         private const val KEY_KAHF = "kahfReminderEnabled"
+        private const val KEY_IMPORTANT_DAYS = "importantDaysReminderEnabled"
     }
 }

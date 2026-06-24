@@ -2,7 +2,9 @@ package app.kamy.saatApp.infrastructure.notifications
 
 import android.content.Context
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.core.locale.AppLocale
+import app.kamy.saatApp.infrastructure.local.ImportantDayRegistry
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -81,6 +83,10 @@ object AppNotificationCopy {
             }
         }
         sunnahTitle(context, kind.orEmpty())?.let { return it }
+        if (kind?.startsWith("important_day_") == true) {
+            val eventTitle = kind.removePrefix("important_day_")
+            return importantDayTitle(context, eventTitle)
+        }
         return ""
     }
 
@@ -96,7 +102,40 @@ object AppNotificationCopy {
                 return nightBody(context, it)
             }
         }
-        return sunnahBody(context, kind.orEmpty()).orEmpty()
+        sunnahBody(context, kind.orEmpty())?.let { return it }
+        if (kind?.startsWith("important_day_") == true) {
+            val eventTitle = kind.removePrefix("important_day_")
+            return importantDayBody(context, eventTitle)
+        }
+        return ""
+    }
+
+    fun importantDayTitle(context: Context, eventTitle: String): String {
+        val ctx = localized(context)
+        val languageCode = ctx.resources.configuration.locales[0].language
+        val language = when (languageCode) {
+            "in", "id" -> AppLanguage.INDONESIAN
+            "ms" -> AppLanguage.MALAY
+            else -> AppLanguage.ENGLISH
+        }
+        val localizedTitle = ImportantDayRegistry.getLocalizedEventName(eventTitle, language)
+        return when (language) {
+            AppLanguage.ENGLISH -> "Tomorrow: $localizedTitle"
+            AppLanguage.INDONESIAN -> "Besok: $localizedTitle"
+            AppLanguage.MALAY -> "Esok: $localizedTitle"
+        }
+    }
+
+    fun importantDayBody(context: Context, eventTitle: String): String {
+        val ctx = localized(context)
+        val languageCode = ctx.resources.configuration.locales[0].language
+        val language = when (languageCode) {
+            "in", "id" -> AppLanguage.INDONESIAN
+            "ms" -> AppLanguage.MALAY
+            else -> AppLanguage.ENGLISH
+        }
+        val detail = ImportantDayRegistry.getImportantDayDetail(eventTitle, language) ?: return eventTitle
+        return detail.sunnah
     }
 
     fun prayerDisplayName(context: Context, prayerName: String): String {

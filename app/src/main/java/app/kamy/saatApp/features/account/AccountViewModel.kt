@@ -86,6 +86,7 @@ data class AccountUiState(
     val tahajudEnabled: Boolean = true,
     val yasinReminderEnabled: Boolean = true,
     val kahfReminderEnabled: Boolean = true,
+    val importantDaysReminderEnabled: Boolean = true,
     val showAdhanSheet: Boolean = false,
     val showLanguageSheet: Boolean = false,
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
@@ -231,7 +232,8 @@ class AccountViewModel @Inject constructor(
                 firstThirdEnabled = prayerNotificationPrefs.isFirstThirdEnabled(),
                 tahajudEnabled = prayerNotificationPrefs.isTahajudEnabled(),
                 yasinReminderEnabled = prayerNotificationPrefs.isYasinReminderEnabled(),
-                kahfReminderEnabled = prayerNotificationPrefs.isKahfReminderEnabled()
+                kahfReminderEnabled = prayerNotificationPrefs.isKahfReminderEnabled(),
+                importantDaysReminderEnabled = prayerNotificationPrefs.isImportantDaysReminderEnabled()
             )
         }
     }
@@ -517,6 +519,11 @@ class AccountViewModel @Inject constructor(
         reschedulePrayerNotifications()
     }
 
+    fun setImportantDaysReminderEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setImportantDaysReminderEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
     fun openAdhanSheet() = _state.update { it.copy(showAdhanSheet = true) }
 
     fun closeAdhanSheet() {
@@ -551,6 +558,7 @@ class AccountViewModel @Inject constructor(
             if (state.tahajudEnabled) add(appContext.getString(R.string.notif_summary_tahajud))
             if (state.yasinReminderEnabled) add(appContext.getString(R.string.notif_summary_yasin))
             if (state.kahfReminderEnabled) add(appContext.getString(R.string.notif_summary_kahf))
+            if (state.importantDaysReminderEnabled) add(appContext.getString(R.string.notif_summary_important_days))
         }
         return when {
             labels.isEmpty() -> appContext.getString(R.string.notif_summary_all_off)
