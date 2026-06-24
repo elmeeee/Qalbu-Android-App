@@ -267,10 +267,25 @@ class PrayerDashboardViewModel @Inject constructor(
         if (!locationProvider.hasAnyPermission()) {
             return LocationResolveResult.NeedsPermission
         }
-        val loc = locationProvider.currentLocation() ?: return LocationResolveResult.Unavailable
+        val loc = locationProvider.currentLocation() ?: run {
+            val cachedGps = locationPrefs.gpsLocation()
+            if (cachedGps != null) {
+                return LocationResolveResult.Success(
+                    ResolvedPrayerLocation(
+                        latitude = cachedGps.latitude,
+                        longitude = cachedGps.longitude,
+                        cityLabel = cachedGps.label,
+                        countryCode = null,
+                        isManual = false
+                    )
+                )
+            }
+            return LocationResolveResult.Unavailable
+        }
         val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
         val cityLabel = geocode.cityName
             ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
+        locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, cityLabel)
         return LocationResolveResult.Success(
             ResolvedPrayerLocation(
                 latitude = loc.latitude,

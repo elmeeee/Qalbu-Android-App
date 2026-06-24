@@ -58,6 +58,27 @@ class LocationPreferencesStore @Inject constructor(
             .apply()
     }
 
+    fun saveGpsLocation(latitude: Double, longitude: Double, label: String) {
+        prefs.edit()
+            .putFloat(KEY_GPS_LAT, latitude.toFloat())
+            .putFloat(KEY_GPS_LON, longitude.toFloat())
+            .putString(KEY_GPS_LABEL, label)
+            .apply()
+    }
+
+    fun gpsLocation(): SavedManualLocation? {
+        if (!prefs.contains(KEY_GPS_LAT) || !prefs.contains(KEY_GPS_LON)) return null
+        val lat = prefs.getFloat(KEY_GPS_LAT, Float.NaN).toDouble()
+        val lon = prefs.getFloat(KEY_GPS_LON, Float.NaN).toDouble()
+        if (lat.isNaN() || lon.isNaN()) return null
+        val label = prefs.getString(KEY_GPS_LABEL, null)?.takeIf { it.isNotBlank() } ?: return null
+        return SavedManualLocation(
+            latitude = lat,
+            longitude = lon,
+            label = label
+        )
+    }
+
     fun saveActiveLabel(label: String) {
         prefs.edit().putString(KEY_ACTIVE_LABEL, label).apply()
     }
@@ -77,5 +98,8 @@ class LocationPreferencesStore @Inject constructor(
         private const val KEY_LABEL = "label"
         private const val KEY_COUNTRY = "country_code"
         private const val KEY_ACTIVE_LABEL = "active_label"
+        private const val KEY_GPS_LAT = "gps_latitude"
+        private const val KEY_GPS_LON = "gps_longitude"
+        private const val KEY_GPS_LABEL = "gps_label"
     }
 }

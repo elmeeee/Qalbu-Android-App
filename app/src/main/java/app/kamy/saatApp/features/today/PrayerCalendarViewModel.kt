@@ -160,6 +160,9 @@ class PrayerCalendarViewModel @Inject constructor(
     }
 
     private suspend fun resolveLocation(): Boolean {
+        if (latitude != null && longitude != null) {
+            return true
+        }
         if (locationPrefs.mode() == LocationMode.MANUAL) {
             val manual = locationPrefs.manualLocation()
             if (manual == null) {
@@ -169,6 +172,13 @@ class PrayerCalendarViewModel @Inject constructor(
             latitude = manual.latitude
             longitude = manual.longitude
             _state.update { it.copy(cityName = manual.label, needsLocation = false) }
+            return true
+        }
+        val cachedGps = locationPrefs.gpsLocation()
+        if (cachedGps != null) {
+            latitude = cachedGps.latitude
+            longitude = cachedGps.longitude
+            _state.update { it.copy(cityName = cachedGps.label, needsLocation = false) }
             return true
         }
         if (!locationProvider.hasAnyPermission()) {
@@ -185,6 +195,7 @@ class PrayerCalendarViewModel @Inject constructor(
         val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
         val label = geocode.cityName
             ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
+        locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, label)
         _state.update { it.copy(cityName = label, needsLocation = false) }
         return true
     }
