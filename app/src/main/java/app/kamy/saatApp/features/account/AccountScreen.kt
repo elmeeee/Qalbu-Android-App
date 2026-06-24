@@ -1,6 +1,5 @@
 package app.kamy.saatApp.features.account
 
-import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,7 +31,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
@@ -53,7 +51,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -62,7 +59,6 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -114,7 +110,7 @@ fun AccountScreen(
     val state by vm.state.collectAsState()
     val context = LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var showNotificationSettings by rememberSaveable { mutableStateOf(false) }
+    val showNotificationSettings = rememberSaveable { mutableStateOf(false) }
 
     val signInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -142,17 +138,17 @@ fun AccountScreen(
         }
     }
 
-    if (showNotificationSettings) {
+    if (showNotificationSettings.value) {
         NotificationSettingsScreen(
             vm = vm,
-            onBack = { showNotificationSettings = false }
+            onBack = { showNotificationSettings.value = false }
         )
     } else {
         AccountSettingsContent(
             state = state,
             vm = vm,
             onBack = onBack,
-            onOpenNotifications = { showNotificationSettings = true },
+            onOpenNotifications = { showNotificationSettings.value = true },
             onSignIn = {
                 val intent = oauthService.buildAuthorizationIntent(authService)
                 signInLauncher.launch(intent)
@@ -779,6 +775,7 @@ private fun AlKhatibModalBottomSheet(
     )
 }
 
+@Suppress("SpellCheckingInspection")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismiss: () -> Unit) {
