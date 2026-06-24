@@ -51,6 +51,8 @@ import app.kamy.saatApp.design.components.AlKhatibErrorState
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.infrastructure.repository.PrayerCalendarDay
+import app.kamy.saatApp.features.today.components.TodayImportantDayBanner
+import app.kamy.saatApp.domain.model.KhgtTodayInfo
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import java.text.DateFormatSymbols
 import java.util.Calendar
@@ -177,6 +179,7 @@ fun PrayerCalendarScreen(
                     WeekdayHeaderRow()
                     MonthGrid(
                         cells = gridCells,
+                        days = state.days,
                         isCurrentMonth = isCurrentMonth,
                         todayDay = todayDay,
                         selectedDay = state.selectedDay,
@@ -226,6 +229,7 @@ private fun buildMonthGrid(year: Int, month: Int): List<MonthCell?> {
 @Composable
 private fun MonthGrid(
     cells: List<MonthCell?>,
+    days: List<PrayerCalendarDay>,
     isCurrentMonth: Boolean,
     todayDay: Int,
     selectedDay: Int,
@@ -247,10 +251,14 @@ private fun MonthGrid(
                         } else {
                             val isToday = isCurrentMonth && cell.day == todayDay
                             val isSelected = cell.day == selectedDay
+                            val isImportant = remember(days, cell.day) {
+                                days.firstOrNull { it.day == cell.day }?.isImportantDay == true
+                            }
                             CalendarDayCell(
                                 day = cell.day,
                                 isToday = isToday,
                                 isSelected = isSelected,
+                                isImportantDay = isImportant,
                                 onClick = { onSelectDay(cell.day) }
                             )
                         }
@@ -293,6 +301,7 @@ private fun CalendarDayCell(
     day: Int,
     isToday: Boolean,
     isSelected: Boolean,
+    isImportantDay: Boolean,
     onClick: () -> Unit
 ) {
     val background = when {
@@ -319,12 +328,26 @@ private fun CalendarDayCell(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = day.toString(),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
-            color = textColor
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = day.toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
+                color = textColor
+            )
+            if (isImportantDay) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Box(
+                    modifier = Modifier
+                        .size(4.dp)
+                        .clip(CircleShape)
+                        .background(if (isSelected) androidx.compose.ui.graphics.Color.White else AlKhatibColors.GoldDeep)
+                )
+            }
+        }
     }
 }
 
@@ -381,6 +404,21 @@ private fun SelectedDayPrayerCard(
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
+            
+            day.khgtEventTitle?.let { title ->
+                Spacer(Modifier.height(12.dp))
+                TodayImportantDayBanner(
+                    info = KhgtTodayInfo(
+                        hijriLabel = day.hijriLabel.orEmpty(),
+                        gregorianLabel = day.gregorianLabel,
+                        pasaran = null,
+                        eventTitle = title,
+                        isImportantDay = true
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            
             Spacer(Modifier.height(14.dp))
             PrayerTimeGrid(day = day)
         }

@@ -12,6 +12,7 @@ import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.saatApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.saatApp.infrastructure.repository.PrayerCalendarDay
+import app.kamy.saatApp.infrastructure.repository.KhgtCalendarRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -44,7 +45,8 @@ class PrayerCalendarViewModel @Inject constructor(
     private val repository: AlAdhanRepository,
     private val locationProvider: LocationProvider,
     private val locationPrefs: LocationPreferencesStore,
-    private val prayerMethodStore: PrayerCalculationStore
+    private val prayerMethodStore: PrayerCalculationStore,
+    private val khgtCalendar: KhgtCalendarRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PrayerCalendarUiState())
@@ -125,14 +127,30 @@ class PrayerCalendarViewModel @Inject constructor(
                 method = prayerMethodStore.current()
             )
             if (generation != loadGeneration) return
+            
+            // Enrich days with local KHGT calendar Hijri dates and important events
+            val enrichedDays = days.map { day ->
+                val dateCal = Calendar.getInstance().apply {
+                    set(Calendar.YEAR, year)
+                    set(Calendar.MONTH, month - 1)
+                    set(Calendar.DAY_OF_MONTH, day.day)
+                }
+                val khgtInfo = runCatching { khgtCalendar.infoForDate(dateCal) }.getOrNull()
+                day.copy(
+                    hijriLabel = khgtInfo?.hijriLabel ?: day.hijriLabel,
+                    khgtEventTitle = khgtInfo?.eventTitle,
+                    isImportantDay = khgtInfo?.isImportantDay == true
+                )
+            }
+
             _state.update {
                 it.copy(
                     isLoading = false,
-                    days = days,
+                    days = enrichedDays,
                     loadedYear = year,
                     loadedMonth = month,
                     error = null,
-                    selectedDay = it.selectedDay.coerceIn(1, days.size.coerceAtLeast(1))
+                    selectedDay = it.selectedDay.coerceIn(1, enrichedDays.size.coerceAtLeast(1))
                 )
             }
         } catch (t: Throwable) {

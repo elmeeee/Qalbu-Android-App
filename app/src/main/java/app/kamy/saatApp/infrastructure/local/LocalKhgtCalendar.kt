@@ -25,12 +25,13 @@ class LocalKhgtCalendar @Inject constructor(
     @Volatile
     private var cachedYears: MutableMap<Int, KhgtCalendarResponse> = mutableMapOf()
 
-    suspend fun todayInfo(): KhgtTodayInfo? = withContext(Dispatchers.IO) {
-        val today = Calendar.getInstance()
-        val gregorian = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH).format(today.time)
-        val gregorianShort = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(today.time)
+    suspend fun todayInfo(): KhgtTodayInfo? = infoForDate(Calendar.getInstance())
 
-        for (year in listOf(currentHijriYearGuess(today), currentHijriYearGuess(today) + 1)) {
+    suspend fun infoForDate(date: Calendar): KhgtTodayInfo? = withContext(Dispatchers.IO) {
+        val gregorian = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH).format(date.time)
+        val gregorianShort = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date.time)
+
+        for (year in listOf(currentHijriYearGuess(date), currentHijriYearGuess(date) + 1)) {
             val calendar = loadYear(year) ?: continue
             val day = findDayByGregorian(calendar.data.orEmpty(), gregorian) ?: continue
             val hijriLabel = buildString {

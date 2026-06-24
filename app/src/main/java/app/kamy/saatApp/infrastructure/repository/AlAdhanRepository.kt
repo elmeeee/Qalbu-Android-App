@@ -36,7 +36,9 @@ data class PrayerCalendarDay(
     val dhuhr: String,
     val asr: String,
     val maghrib: String,
-    val isha: String
+    val isha: String,
+    val khgtEventTitle: String? = null,
+    val isImportantDay: Boolean = false
 )
 
 @Singleton
