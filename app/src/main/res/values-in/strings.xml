@@ -412,8 +412,10 @@
     <string name="about">Tentang</string>
     <string name="about_developer">Tentang Pengembang</string>
     <string name="developer_name">Sufiandy Elmy</string>
-    <string name="developer_role">Software Engineer</string>
-    <string name="developer_bio">Software Engineer yang bersemangat dalam membangun aplikasi berkualitas tinggi dan elegan. Mari terhubung!</string>
+    <string name="developer_role">Senior Software Engineer</string>
+    <string name="developer_bio">Sufiandy Elmy adalah seorang Software Engineer asal Indonesia yang berfokus pada pengembangan aplikasi mobile dan sistem full-stack. Ia memiliki pengalaman dalam merancang serta memelihara arsitektur aplikasi berskala besar untuk platform iOS dan Android.</string>
+    <string name="developer_achievement">WWDC21 Swift Student Challenge Winner: Menjadi salah satu pemenang penghargaan global dari Apple Inc. pada ajang Worldwide Developers Conference 2021 melalui inovasi aplikasi berbasis Swift.</string>
+    <string name="developer_achievement_title">Pencapaian</string>
     <string name="contact_linkedin">LinkedIn</string>
     <string name="contact_website">Situs Web</string>
     <string name="contact_github">GitHub</string>

@@ -1298,7 +1298,6 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -1349,6 +1348,39 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                 color = AlKhatibColors.Slate700,
                 modifier = Modifier.fillMaxWidth()
             )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Achievement
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(AlKhatibColors.LightGrey.copy(alpha = 0.5f))
+                    .padding(16.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Filled.Star,
+                        contentDescription = null,
+                        tint = AlKhatibColors.IndigoAccent,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.developer_achievement_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.Slate900
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.developer_achievement),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AlKhatibColors.Slate700
+                )
+            }
             
             Spacer(modifier = Modifier.height(32.dp))
             
