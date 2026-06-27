@@ -970,4 +970,15 @@
     <string name="important_days_reminder">Fasting &amp; Important Days</string>
     <string name="important_days_reminder_subtitle">Get reminded about upcoming Sunnah fasts and key events</string>
     <string name="notif_summary_important_days">Fasting &amp; important days</string>
+
+    <!-- About Developer -->
+    <string name="about">About</string>
+    <string name="about_developer">About Developer</string>
+    <string name="developer_name">Sufiandy Elmy</string>
+    <string name="developer_role">Android Developer</string>
+    <string name="developer_bio">Passionate Android Developer focused on crafting elegant and high-quality applications. Let\'s connect!</string>
+    <string name="contact_linkedin">LinkedIn</string>
+    <string name="contact_website">Website</string>
+    <string name="contact_github">GitHub</string>
+    <string name="contact_email">Email</string>
 </resources>

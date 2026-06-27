@@ -1,5 +1,7 @@
 package app.kamy.saatApp.features.account
 
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,6 +41,7 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -111,6 +114,7 @@ fun AccountScreen(
     val context = LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val showNotificationSettings = rememberSaveable { mutableStateOf(false) }
+    val showAboutDeveloper = rememberSaveable { mutableStateOf(false) }
 
     val signInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -153,8 +157,13 @@ fun AccountScreen(
                 val intent = oauthService.buildAuthorizationIntent(authService)
                 signInLauncher.launch(intent)
             },
-            onOpenFollowers = vm::openFollowers
+            onOpenFollowers = vm::openFollowers,
+            onOpenAboutDeveloper = { showAboutDeveloper.value = true }
         )
+    }
+
+    if (showAboutDeveloper.value) {
+        AboutDeveloperSheet(onDismiss = { showAboutDeveloper.value = false })
     }
 
     // Translator sheet
@@ -262,7 +271,8 @@ private fun AccountSettingsContent(
     onBack: (() -> Unit)?,
     onOpenNotifications: () -> Unit,
     onSignIn: () -> Unit,
-    onOpenFollowers: () -> Unit
+    onOpenFollowers: () -> Unit,
+    onOpenAboutDeveloper: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -356,6 +366,15 @@ private fun AccountSettingsContent(
                 title = stringResource(R.string.reminders),
                 subtitle = vm.notificationSummary(state),
                 onClick = onOpenNotifications
+            )
+        }
+
+        SettingsSectionLabel(stringResource(R.string.about))
+        AlKhatibSettingsGroup {
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Outlined.Info,
+                title = stringResource(R.string.about_developer),
+                onClick = onOpenAboutDeveloper
             )
         }
 
@@ -1258,5 +1277,138 @@ private fun FollowButton(
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AboutDeveloperSheet(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    
+    val openLink = { url: String ->
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        context.startActivity(intent)
+    }
+
+    app.kamy.saatApp.design.components.AlKhatibPartialBottomSheet(
+        onDismiss = onDismiss,
+        maxHeightFraction = 0.85f
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Avatar Placeholder (Gradient Circle with Initials)
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                AlKhatibColors.IndigoAccent,
+                                AlKhatibColors.DeepEmerald
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "SE",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = stringResource(R.string.developer_name),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.Slate900
+            )
+            Text(
+                text = stringResource(R.string.developer_role),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate500,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            // Bio
+            Text(
+                text = stringResource(R.string.developer_bio),
+                style = MaterialTheme.typography.bodyLarge,
+                color = AlKhatibColors.Slate700,
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            // Links
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                AboutLinkRow(
+                    label = stringResource(R.string.contact_linkedin),
+                    url = "https://www.linkedin.com/in/elmysf/",
+                    onClick = openLink
+                )
+                AboutLinkRow(
+                    label = stringResource(R.string.contact_website),
+                    url = "https://elmee.my",
+                    onClick = openLink
+                )
+                AboutLinkRow(
+                    label = stringResource(R.string.contact_github),
+                    url = "https://github.com/elmeeee",
+                    onClick = openLink
+                )
+                AboutLinkRow(
+                    label = stringResource(R.string.contact_email),
+                    url = "mailto:hello@elmee.my",
+                    onClick = openLink
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(48.dp))
+        }
+    }
+}
+
+@Composable
+private fun AboutLinkRow(
+    label: String,
+    url: String,
+    onClick: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick(url) }
+            .background(AlKhatibColors.LightGrey.copy(alpha = 0.5f))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            color = AlKhatibColors.Slate800,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Login,
+            contentDescription = null,
+            tint = AlKhatibColors.Slate400,
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

@@ -407,4 +407,15 @@
     <string name="important_days_reminder">Puasa &amp; Hari Penting</string>
     <string name="important_days_reminder_subtitle">Dapatkan pengingat untuk puasa sunnah dan hari penting mendatang</string>
     <string name="notif_summary_important_days">Puasa &amp; hari penting</string>
+
+    <!-- About Developer -->
+    <string name="about">Tentang</string>
+    <string name="about_developer">Tentang Pengembang</string>
+    <string name="developer_name">Sufiandy Elmy</string>
+    <string name="developer_role">Android Developer</string>
+    <string name="developer_bio">Developer Android yang bersemangat dalam membangun aplikasi berkualitas tinggi dan elegan. Mari terhubung!</string>
+    <string name="contact_linkedin">LinkedIn</string>
+    <string name="contact_website">Situs Web</string>
+    <string name="contact_github">GitHub</string>
+    <string name="contact_email">Email</string>
 </resources>
