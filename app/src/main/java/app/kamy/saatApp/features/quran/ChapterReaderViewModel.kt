@@ -14,6 +14,7 @@ import app.kamy.saatApp.core.error.userFacingAuthOrApiMessage
 import app.kamy.saatApp.domain.model.HadithReference
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.RecitationPayload
+import app.kamy.saatApp.domain.model.TafsirPayload
 import app.kamy.saatApp.domain.model.ArabicTextType
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.audio.AudioQueueItem
