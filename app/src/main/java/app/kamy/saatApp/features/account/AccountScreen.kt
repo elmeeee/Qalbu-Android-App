@@ -374,6 +374,7 @@ private fun AccountSettingsContent(
             AlKhatibSettingsNavigationRow(
                 icon = Icons.Outlined.Info,
                 title = stringResource(R.string.about_developer),
+                subtitle = stringResource(R.string.developer_name),
                 onClick = onOpenAboutDeveloper
             )
         }
@@ -1407,7 +1408,7 @@ private fun AboutLinkRow(
         Icon(
             imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Login,
             contentDescription = null,
-            tint = AlKhatibColors.Slate400,
+            tint = AlKhatibColors.Slate500,
             modifier = Modifier.size(20.dp)
         )
     }
