@@ -35,7 +35,7 @@ class LocalQuranDataSource @Inject constructor(
 ) {
     private companion object {
         const val AYAH_SELECT = """
-            a.sura, a.aya, a.text, a.indonesian, a.malay, a.translation_en, a.kemenag,
+            a.sura, a.aya, a.text, a.text_tajweed, a.indonesian, a.malay, a.translation_en, a.kemenag,
             a.jalalayn, a.transliteration_id, a.transliteration_en,
             a.page, a.juz, a."index", CAST(s.start AS INTEGER) + a.aya AS global_ayah
         """
@@ -560,7 +560,9 @@ class LocalQuranDataSource @Inject constructor(
             chapterId = sura,
             verseNumber = aya,
             verseKey = "$sura:$aya",
-            textUthmani = getStringOrNull("text"),
+            textUthmani = getStringOrNull("text_tajweed")
+                ?: getStringOrNull("text"),
+            textUthmaniTajweed = getStringOrNull("text_tajweed"),
             pageNumber = getIntOrNull("page"),
             juzNumber = getIntOrNull("juz"),
             transliterationId = getStringOrNull("transliteration_id"),
