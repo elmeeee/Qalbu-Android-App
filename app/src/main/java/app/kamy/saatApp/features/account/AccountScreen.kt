@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -1361,7 +1362,7 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Filled.Star,
+                        imageVector = Icons.Filled.Star,
                         contentDescription = null,
                         tint = AlKhatibColors.IndigoAccent,
                         modifier = Modifier.size(20.dp)
