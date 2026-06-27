@@ -72,6 +72,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -102,6 +103,7 @@ import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.displayTransliteration
 import app.kamy.saatApp.domain.model.transliterationUsesHtml
+import app.kamy.saatApp.domain.model.ArabicTextType
 import app.kamy.saatApp.features.reader.HadithSheet
 import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.features.today.components.TafsirSheet
@@ -247,8 +249,9 @@ fun ChapterReaderScreen(
                     verse = verse,
                     fontScale = state.fontScale,
                     showTranslation = state.showTranslation && !state.hifzModeEnabled,
-                    showTransliteration = state.showTransliteration && !state.hifzModeEnabled,
+                    showTransliteration = state.showTransliteration,
                     translationId = state.selectedTranslationId,
+                    arabicTextType = state.arabicTextType,
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
                     personalDataRevision = state.personalDataRevision,
@@ -423,7 +426,8 @@ fun ChapterReaderScreen(
             state = state,
             onDismiss = { settingsVisible = false },
             onFontScaleChange = vm::setFontScale,
-            onToggleTranslation = vm::toggleTranslation,
+            onArabicTextTypeChange = vm::setArabicTextType,
+            onToggleTranslation = { vm.toggleTranslation(it) },
             onToggleTransliteration = vm::toggleTransliteration,
             onSelectRecitation = vm::selectRecitation,
             onSetPlaybackMode = vm::setPlaybackMode,
@@ -507,6 +511,7 @@ private fun SaatAyahPage(
     showTranslation: Boolean,
     showTransliteration: Boolean,
     translationId: Int,
+    arabicTextType: ArabicTextType,
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
     personalDataRevision: Int,
@@ -597,8 +602,13 @@ private fun SaatAyahPage(
                     }
                 }
                 else -> {
+                    val textToRender = when (arabicTextType) {
+                        ArabicTextType.INDOPAK -> verse.textIndopak ?: verse.textUthmani
+                        ArabicTextType.MADANI -> verse.textUthmani
+                        ArabicTextType.TAJWEED -> verse.textUthmaniTajweed ?: verse.textUthmani
+                    }
                     TajweedHtmlView(
-                        textUthmani = verse.textUthmani,
+                        textUthmani = textToRender ?: "",
                         ayahNumber = verse.resolvedVerseNumber,
                         fontSizeSp = (30 * fontScale).toInt(),
                         compact = true,
@@ -852,13 +862,14 @@ private fun ReaderSettingsSheet(
     state: ChapterReaderUiState,
     onDismiss: () -> Unit,
     onFontScaleChange: (Float) -> Unit,
+    onArabicTextTypeChange: (ArabicTextType) -> Unit,
     onToggleTranslation: (Boolean) -> Unit,
     onToggleTransliteration: (Boolean) -> Unit,
     onSelectRecitation: (Int) -> Unit,
     onSetPlaybackMode: (AyahPlaybackMode) -> Unit,
     onToggleHifzMode: (Boolean) -> Unit
 ) {
-    AlKhatibPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.58f) {
+    AlKhatibPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.65f) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -906,6 +917,40 @@ private fun ReaderSettingsSheet(
                             activeTrackColor = AlKhatibColors.DeepEmerald
                         )
                     )
+                }
+            )
+            ReaderSettingToggleRow(
+                title = "Text Type",
+                content = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        ArabicTextType.entries.forEach { type ->
+                            val selected = state.arabicTextType == type
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable { onArabicTextTypeChange(type) }
+                                    .background(
+                                        if (selected) AlKhatibColors.DeepEmerald
+                                        else AlKhatibColors.SoftGrey.copy(alpha = 0.5f)
+                                    )
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = type.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    color = if (selected) Color.White else AlKhatibColors.Slate700,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
                 }
             )
             ReaderSettingToggleRow(

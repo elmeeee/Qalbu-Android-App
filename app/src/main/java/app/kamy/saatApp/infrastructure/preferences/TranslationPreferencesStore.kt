@@ -3,6 +3,7 @@ package app.kamy.saatApp.infrastructure.preferences
 import android.content.Context
 import app.kamy.saatApp.core.config.AppConfig
 import app.kamy.saatApp.core.config.LocalQuranConfig
+import app.kamy.saatApp.domain.model.ArabicTextType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +28,9 @@ class TranslationPreferencesStore @Inject constructor(
 
     private val _showTransliteration = MutableStateFlow(prefs.getBoolean(KEY_SHOW_LATIN, false))
     val showTransliteration: StateFlow<Boolean> = _showTransliteration.asStateFlow()
+
+    private val _arabicTextType = MutableStateFlow(loadArabicTextType())
+    val arabicTextType: StateFlow<ArabicTextType> = _arabicTextType.asStateFlow()
 
     private val _recitationId = MutableStateFlow(loadRecitationId())
     val recitationId: StateFlow<Int> = _recitationId.asStateFlow()
@@ -54,6 +58,11 @@ class TranslationPreferencesStore @Inject constructor(
         _showTransliteration.value = enabled
     }
 
+    fun setArabicTextType(type: ArabicTextType) {
+        prefs.edit().putString(KEY_ARABIC_TEXT_TYPE, type.name).apply()
+        _arabicTextType.value = type
+    }
+
     fun setRecitation(id: Int) {
         if (id <= 0) return
         prefs.edit().putInt(KEY_RECITATION_ID, id).apply()
@@ -72,6 +81,11 @@ class TranslationPreferencesStore @Inject constructor(
         return LocalQuranConfig.normalizeRecitationId(raw)
     }
 
+    private fun loadArabicTextType(): ArabicTextType {
+        val saved = prefs.getString(KEY_ARABIC_TEXT_TYPE, null)
+        return runCatching { ArabicTextType.valueOf(saved!!) }.getOrDefault(ArabicTextType.TAJWEED)
+    }
+
     companion object {
         const val DEFAULT_RECITATION_ID = LocalQuranConfig.DEFAULT_RECITATION_ID
         private const val PREFS_NAME = "saat_reader_prefs"
@@ -80,5 +94,6 @@ class TranslationPreferencesStore @Inject constructor(
         private const val KEY_SHOW = "chapterReaderShowTranslation"
         private const val KEY_SHOW_LATIN = "chapterReaderShowTransliteration"
         private const val KEY_RECITATION_ID = "chapterReaderRecitationId"
+        private const val KEY_ARABIC_TEXT_TYPE = "chapterReaderArabicTextType"
     }
 }

@@ -14,7 +14,7 @@ import app.kamy.saatApp.core.error.userFacingAuthOrApiMessage
 import app.kamy.saatApp.domain.model.HadithReference
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.RecitationPayload
-import app.kamy.saatApp.domain.model.TafsirPayload
+import app.kamy.saatApp.domain.model.ArabicTextType
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.audio.AudioQueueItem
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
@@ -55,6 +55,7 @@ data class ChapterReaderUiState(
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
+    val arabicTextType: ArabicTextType = ArabicTextType.TAJWEED,
     val selectedTranslationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
     val currentVerseIndex: Int = 0,
     val loadedApiPage: Int = 0,
@@ -142,6 +143,7 @@ class ChapterReaderViewModel @Inject constructor(
                 showTranslation = if (isJuzMode) false else translationStore.showTranslation.value,
                 showTransliteration = if (isJuzMode) false else translationStore.showTransliteration.value,
                 selectedRecitationId = translationStore.currentRecitationId(),
+                arabicTextType = translationStore.arabicTextType.value,
                 selectedTranslationId = LocalQuranConfig.normalizeTranslationId(
                     translationStore.currentTranslationId()
                 ),
@@ -171,6 +173,11 @@ class ChapterReaderViewModel @Inject constructor(
                 if (juzNumber == null) {
                     _state.update { it.copy(showTransliteration = enabled) }
                 }
+            }
+        }
+        viewModelScope.launch {
+            translationStore.arabicTextType.collect { type ->
+                _state.update { it.copy(arabicTextType = type) }
             }
         }
 
@@ -243,14 +250,25 @@ class ChapterReaderViewModel @Inject constructor(
             runCatching {
                 fetchVersePage(page = 1)
             }.onSuccess { resp ->
-                _state.update {
+                val trans = translationStore.showTranslation.value
+                val translit = translationStore.showTransliteration.value
+                val arabicType = translationStore.arabicTextType.value
+                val rec = translationStore.currentRecitationId()
+                val tid = LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
+                
+                _state.update { 
                     it.copy(
                         isLoading = false,
                         verses = resp.verses,
                         currentVerseIndex = 0,
                         loadedApiPage = resp.pagination?.currentPage ?: 1,
-                        hasMore = resp.pagination?.hasNextPage ?: false
-                    )
+                        hasMore = resp.pagination?.hasNextPage ?: false,
+                        selectedTranslationId = tid,
+                        showTranslation = trans,
+                        showTransliteration = translit,
+                        arabicTextType = arabicType,
+                        selectedRecitationId = rec
+                    ) 
                 }
                 tryScrollToPendingVerse()
                 logCurrentVerseReading(force = true)
@@ -368,6 +386,11 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun toggleTransliteration(enabled: Boolean) {
         translationStore.setShowTransliteration(enabled)
+    }
+
+    fun setArabicTextType(type: ArabicTextType) {
+        translationStore.setArabicTextType(type)
+        _state.update { it.copy(arabicTextType = type) }
     }
 
     fun onPageChanged(index: Int) {
