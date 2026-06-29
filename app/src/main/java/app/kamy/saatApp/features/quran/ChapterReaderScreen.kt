@@ -1353,7 +1353,7 @@ private fun TajweedInfoSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Rounded.Info,
+                        imageVector = androidx.compose.material.icons.Icons.Default.Info,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
                         tint = tajweedColor
