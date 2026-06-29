@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.CircularProgressIndicator
@@ -1353,7 +1354,7 @@ private fun TajweedInfoSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = androidx.compose.material.icons.Icons.Default.Info,
+                        imageVector = Icons.Filled.Info,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
                         tint = tajweedColor
