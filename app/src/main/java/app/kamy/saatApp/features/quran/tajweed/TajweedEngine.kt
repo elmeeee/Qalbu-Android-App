@@ -54,6 +54,12 @@ object TajweedEngine {
                         start = start,
                         end = end
                     )
+                    addStringAnnotation(
+                        tag = "TAJWEED",
+                        annotation = result.type.name,
+                        start = start,
+                        end = end
+                    )
                 }
             }
         }

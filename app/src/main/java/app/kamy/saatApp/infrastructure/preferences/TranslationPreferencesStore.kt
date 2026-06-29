@@ -29,6 +29,9 @@ class TranslationPreferencesStore @Inject constructor(
     private val _showTransliteration = MutableStateFlow(prefs.getBoolean(KEY_SHOW_LATIN, false))
     val showTransliteration: StateFlow<Boolean> = _showTransliteration.asStateFlow()
 
+    private val _isTajweedEnabled = MutableStateFlow(prefs.getBoolean(KEY_TAJWEED_ENABLED, true))
+    val isTajweedEnabled: StateFlow<Boolean> = _isTajweedEnabled.asStateFlow()
+
     private val _arabicTextType = MutableStateFlow(loadArabicTextType())
     val arabicTextType: StateFlow<ArabicTextType> = _arabicTextType.asStateFlow()
 
@@ -56,6 +59,11 @@ class TranslationPreferencesStore @Inject constructor(
     fun setShowTransliteration(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_SHOW_LATIN, enabled).apply()
         _showTransliteration.value = enabled
+    }
+
+    fun setTajweedEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_TAJWEED_ENABLED, enabled).apply()
+        _isTajweedEnabled.value = enabled
     }
 
     fun setArabicTextType(type: ArabicTextType) {
@@ -95,5 +103,6 @@ class TranslationPreferencesStore @Inject constructor(
         private const val KEY_SHOW_LATIN = "chapterReaderShowTransliteration"
         private const val KEY_RECITATION_ID = "chapterReaderRecitationId"
         private const val KEY_ARABIC_TEXT_TYPE = "chapterReaderArabicTextType"
+        private const val KEY_TAJWEED_ENABLED = "chapterReaderTajweedEnabled"
     }
 }

@@ -8,6 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.design.theme.TajweedFontFamily
@@ -31,6 +35,7 @@ fun TajweedHtmlView(
     textColor: Color = Color(0xFF0F172A),
     compact: Boolean = false,
     textAlign: TajweedTextAlign = TajweedTextAlign.Center,
+    isTajweedEnabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val lineHeightMultiplier = if (compact) 2.05f else 2.35f
@@ -42,19 +47,32 @@ fun TajweedHtmlView(
             ayahNumber = ayahNumber,
             baseColor = textColor,
             markerFontSize = markerFontSize,
-            markerFontFamily = TajweedFontFamily
+            markerFontFamily = TajweedFontFamily,
+            isTajweedEnabled = isTajweedEnabled
         )
     }
 
+    val context = LocalContext.current
+
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Text(
+        ClickableText(
             text = annotated,
             modifier = modifier,
-            fontFamily = TajweedFontFamily,
-            fontSize = fontSize,
-            lineHeight = (fontSizeSp * lineHeightMultiplier).sp,
-            color = textColor,
-            textAlign = textAlign.toComposeAlign()
+            style = TextStyle(
+                fontFamily = TajweedFontFamily,
+                fontSize = fontSize,
+                lineHeight = (fontSizeSp * lineHeightMultiplier).sp,
+                color = textColor,
+                textAlign = textAlign.toComposeAlign()
+            ),
+            onClick = { offset ->
+                val annotations = annotated.getStringAnnotations("TAJWEED", offset, offset)
+                val annotation = annotations.firstOrNull()
+                if (annotation != null) {
+                    val tajweedName = annotation.item.replace("_", " ")
+                    Toast.makeText(context, "Hukum Tajwid: $tajweedName", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
     }
 }

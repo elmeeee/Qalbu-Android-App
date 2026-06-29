@@ -26,7 +26,8 @@ fun buildTajweedAnnotatedString(
     ayahNumber: Int? = null,
     baseColor: Color = Color(0xFF0F172A),
     markerFontSize: TextUnit = TextUnit.Unspecified,
-    markerFontFamily: FontFamily? = null
+    markerFontFamily: FontFamily? = null,
+    isTajweedEnabled: Boolean = true
 ): AnnotatedString {
     val body = textUthmani?.sanitizeTajweedArabicHtml().orEmpty()
     if (body.isEmpty()) return AnnotatedString("")
@@ -34,7 +35,7 @@ fun buildTajweedAnnotatedString(
     val strippedHtml = cleaned.stripHtmlTags()
     
     // Apply Dynamic Algorithmic Tajweed Engine
-    val tajweedAnnotated = TajweedEngine.applyTajweed(strippedHtml, isTajweedEnabled = true)
+    val tajweedAnnotated = TajweedEngine.applyTajweed(strippedHtml, isTajweedEnabled = isTajweedEnabled)
 
     val built = buildAnnotatedString {
         append(tajweedAnnotated)

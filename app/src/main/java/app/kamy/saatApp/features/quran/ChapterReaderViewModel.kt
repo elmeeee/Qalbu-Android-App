@@ -56,6 +56,7 @@ data class ChapterReaderUiState(
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
+    val isTajweedEnabled: Boolean = true,
     val arabicTextType: ArabicTextType = ArabicTextType.TAJWEED,
     val selectedTranslationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
     val currentVerseIndex: Int = 0,
@@ -145,6 +146,7 @@ class ChapterReaderViewModel @Inject constructor(
                 showTranslation = if (isJuzMode) false else translationStore.showTranslation.value,
                 showTransliteration = if (isJuzMode) false else translationStore.showTransliteration.value,
                 selectedRecitationId = translationStore.currentRecitationId(),
+                isTajweedEnabled = translationStore.isTajweedEnabled.value,
                 arabicTextType = translationStore.arabicTextType.value,
                 selectedTranslationId = LocalQuranConfig.normalizeTranslationId(
                     translationStore.currentTranslationId()
@@ -175,6 +177,11 @@ class ChapterReaderViewModel @Inject constructor(
                 if (juzNumber == null) {
                     _state.update { it.copy(showTransliteration = enabled) }
                 }
+            }
+        }
+        viewModelScope.launch {
+            translationStore.isTajweedEnabled.collect { enabled ->
+                _state.update { it.copy(isTajweedEnabled = enabled) }
             }
         }
         viewModelScope.launch {
@@ -261,6 +268,7 @@ class ChapterReaderViewModel @Inject constructor(
             }.onSuccess { resp ->
                 val trans = translationStore.showTranslation.value
                 val translit = translationStore.showTransliteration.value
+                val tajweed = translationStore.isTajweedEnabled.value
                 val arabicType = translationStore.arabicTextType.value
                 val rec = translationStore.currentRecitationId()
                 val tid = LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
@@ -275,6 +283,7 @@ class ChapterReaderViewModel @Inject constructor(
                         selectedTranslationId = tid,
                         showTranslation = trans,
                         showTransliteration = translit,
+                        isTajweedEnabled = tajweed,
                         arabicTextType = arabicType,
                         selectedRecitationId = rec
                     ) 
@@ -395,6 +404,11 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun toggleTransliteration(enabled: Boolean) {
         translationStore.setShowTransliteration(enabled)
+    }
+
+    fun toggleTajweed(enabled: Boolean) {
+        translationStore.setTajweedEnabled(enabled)
+        _state.update { it.copy(isTajweedEnabled = enabled) }
     }
 
     fun setArabicTextType(type: ArabicTextType) {

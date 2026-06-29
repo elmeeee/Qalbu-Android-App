@@ -252,6 +252,7 @@ fun ChapterReaderScreen(
                     showTransliteration = state.showTransliteration,
                     translationId = state.selectedTranslationId,
                     arabicTextType = state.arabicTextType,
+                    isTajweedEnabled = state.isTajweedEnabled,
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
                     personalDataRevision = state.personalDataRevision,
@@ -428,9 +429,10 @@ fun ChapterReaderScreen(
             onDismiss = { settingsVisible = false },
             onFontScaleChange = vm::setFontScale,
             onArabicTextTypeChange = vm::setArabicTextType,
-            onToggleTranslation = { vm.toggleTranslation(it) },
+            onToggleTranslation = vm::toggleTranslation,
             onToggleTransliteration = vm::toggleTransliteration,
-            onSelectRecitation = vm::selectRecitation,
+            onToggleTajweed = vm::toggleTajweed,
+            onSelectRecitation = vm::setRecitation,
             onSetPlaybackMode = vm::setPlaybackMode,
             onToggleHifzMode = vm::toggleHifzMode
         )
@@ -513,6 +515,7 @@ private fun SaatAyahPage(
     showTransliteration: Boolean,
     translationId: Int,
     arabicTextType: ArabicTextType,
+    isTajweedEnabled: Boolean,
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
     personalDataRevision: Int,
@@ -583,6 +586,7 @@ private fun SaatAyahPage(
                     fontSizeSp = (34 * fontScale).toInt(),
                     compact = true,
                     textAlign = TajweedTextAlign.Center,
+                    isTajweedEnabled = isTajweedEnabled,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -625,6 +629,7 @@ private fun SaatAyahPage(
                         fontSizeSp = (30 * fontScale).toInt(),
                         compact = true,
                         textAlign = TajweedTextAlign.Justify,
+                        isTajweedEnabled = isTajweedEnabled,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -877,6 +882,7 @@ private fun ReaderSettingsSheet(
     onArabicTextTypeChange: (ArabicTextType) -> Unit,
     onToggleTranslation: (Boolean) -> Unit,
     onToggleTransliteration: (Boolean) -> Unit,
+    onToggleTajweed: (Boolean) -> Unit,
     onSelectRecitation: (Int) -> Unit,
     onSetPlaybackMode: (AyahPlaybackMode) -> Unit,
     onToggleHifzMode: (Boolean) -> Unit
@@ -974,6 +980,11 @@ private fun ReaderSettingsSheet(
                 title = stringResource(R.string.show_transliteration),
                 checked = state.showTransliteration,
                 onCheckedChange = onToggleTransliteration
+            )
+            ReaderSettingToggleRow(
+                title = "Show Tajweed",
+                checked = state.isTajweedEnabled,
+                onCheckedChange = onToggleTajweed
             )
             ReaderSettingToggleRow(
                 title = stringResource(R.string.hifz_mode),
