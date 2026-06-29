@@ -255,6 +255,7 @@ fun ChapterReaderScreen(
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
                     personalDataRevision = state.personalDataRevision,
+                    showBismillahPre = pageIndex == 0 && state.bismillahPre,
                     onPlay = { vm.onTapAyah(pageIndex) },
                     onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null
                 )
@@ -515,6 +516,7 @@ private fun SaatAyahPage(
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
     personalDataRevision: Int,
+    showBismillahPre: Boolean,
     onPlay: () -> Unit,
     onContentScroll: (() -> Unit)? = null
 ) {
@@ -574,6 +576,16 @@ private fun SaatAyahPage(
                 personalDataRevision = personalDataRevision,
                 modifier = Modifier.padding(bottom = 2.dp)
             )
+            if (showBismillahPre) {
+                TajweedHtmlView(
+                    textUthmani = stringResource(R.string.bismillah_arabic),
+                    ayahNumber = null,
+                    fontSizeSp = (34 * fontScale).toInt(),
+                    compact = true,
+                    textAlign = TajweedTextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             when {
                 hifzModeEnabled && hifzRevealStage == 0 -> {
                     Box(

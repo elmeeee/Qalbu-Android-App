@@ -536,6 +536,7 @@ class LocalQuranDataSource @Inject constructor(
         return QuranChapter(
             id = id,
             revelationPlace = revelation,
+            bismillahPre = (id != 1 && id != 9),
             pages = (firstPage..lastPage).toList(),
             nameSimple = tname,
             nameComplex = tname,

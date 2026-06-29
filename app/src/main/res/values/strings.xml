@@ -410,6 +410,8 @@
     <string name="verified">Verified</string>
     <string name="reflect_feed_load_failed">Failed to load feed</string>
 
+    <string name="bismillah_arabic">بِسْمِ ٱللَّهِ ٱلرَّحْمٰنِ ٱلرَّحِيمِ</string>
+
     <!-- Reader sheets -->
     <string name="done">Done</string>
     <string name="this_verse">This verse</string>

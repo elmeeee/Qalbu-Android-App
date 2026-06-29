@@ -91,7 +91,8 @@ data class ChapterReaderUiState(
     val noteVisible: Boolean = false,
     val noteDraft: String = "",
     val hifzPickerVisible: Boolean = false,
-    val personalDataRevision: Int = 0
+    val personalDataRevision: Int = 0,
+    val bismillahPre: Boolean = false
 )
 
 enum class AyahPlaybackMode {
@@ -229,8 +230,15 @@ class ChapterReaderViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    val name = chapters.find { it.id == _state.value.chapterNumber }?.displayComplexName
-                    _state.update { it.copy(chapterDisplayName = name, chapterLookup = lookup) }
+                    val chapter = chapters.find { it.id == _state.value.chapterNumber }
+                    val name = chapter?.displayComplexName
+                    _state.update { 
+                        it.copy(
+                            chapterDisplayName = name, 
+                            chapterLookup = lookup,
+                            bismillahPre = chapter?.bismillahPre ?: false
+                        ) 
+                    }
                 }
             }
         }
