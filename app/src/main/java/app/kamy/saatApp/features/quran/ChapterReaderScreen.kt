@@ -110,8 +110,6 @@ import app.kamy.saatApp.features.today.components.TafsirSheet
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.ui.common.TajweedHtmlView
 import app.kamy.saatApp.features.quran.tajweed.TajweedType
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
 import app.kamy.saatApp.ui.common.TajweedTextAlign
 import app.kamy.saatApp.ui.common.TransliterationView
 import app.kamy.saatApp.ui.common.toVerseTranslationPlainText
@@ -1337,8 +1335,13 @@ private fun TajweedInfoSheet(
     }
 
     AlKhatibPartialBottomSheet(
-        onDismiss = onDismiss,
-        title = {
+        onDismiss = onDismiss
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 24.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -1350,7 +1353,7 @@ private fun TajweedInfoSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Info,
+                        imageVector = androidx.compose.material.icons.Icons.Rounded.Info,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
                         tint = tajweedColor
@@ -1363,14 +1366,7 @@ private fun TajweedInfoSheet(
                     fontWeight = FontWeight.Bold
                 )
             }
-        },
-        bottomPadding = 32.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 8.dp)
-        ) {
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = stringResource(descRes),
                 style = MaterialTheme.typography.bodyLarge,
