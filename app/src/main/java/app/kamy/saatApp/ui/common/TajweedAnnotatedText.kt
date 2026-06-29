@@ -111,12 +111,9 @@ private fun stripResidualTags(text: String): String =
 
 private fun stripInlineAyahEndMarkers(html: String, ayahNumber: Int?): String {
     var text = html.replace(endSpanRegex, "").trim()
-    text = text.replace(
-        Regex("\u06DD[\u200C\u200D\u200E\u200F\\s]*[\u0660-\u0669]+\$")
-    ) { "" }.trim()
-    val n = ayahNumber?.takeIf { it > 0 } ?: return text
-    val digits = easternArabicIndicDigits(n)
-    text = text.replace(Regex("\\s*${Regex.escape(digits)}\\s*$"), "").trim()
+    text = text.replace("\u06DD", "").trim()
+    text = text.replace("?", "").trim() // Also remove literal question marks just in case
+    text = text.replace(Regex("[\\s\u200C-\u200F]*[\u0660-\u0669\u06F0-\u06F9]+\$"), "").trim()
     return text
 }
 

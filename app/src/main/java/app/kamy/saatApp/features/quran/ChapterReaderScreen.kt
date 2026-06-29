@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,8 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -43,8 +41,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
+
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.SnackbarHost
@@ -73,7 +70,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -86,9 +83,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
@@ -129,7 +124,7 @@ fun ChapterReaderScreen(
 ) {
     val vm: ChapterReaderViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
-    val audioState by audioPlayer.state.collectAsState()
+
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val onboardingStore = remember { ReaderOnboardingStore.from(context) }
@@ -383,9 +378,9 @@ fun ChapterReaderScreen(
                 )
                 Spacer(Modifier.height(6.dp))
                 val subtitle = if (state.juzNumber != null) {
-                    val verseLabel = currentVerse?.displayVerseReference?.let { ref ->
+                    val verseLabel = verse.displayVerseReference?.let { ref ->
                         stringResource(R.string.verse_key_label, ref)
-                    } ?: currentVerse?.resolvedVerseNumber?.let { num ->
+                    } ?: verse.resolvedVerseNumber?.let { num ->
                         stringResource(R.string.verse_number, num)
                     } ?: stringResource(R.string.verse_label, "—")
                     listOfNotNull(
@@ -393,9 +388,9 @@ fun ChapterReaderScreen(
                         state.juzNumber?.let { stringResource(R.string.juz_number, it) }
                     ).joinToString(" · ")
                 } else {
-                    currentVerse?.resolvedVerseNumber?.let { num ->
+                    verse.resolvedVerseNumber?.let { num ->
                         stringResource(R.string.verse_number, num)
-                    } ?: currentVerse?.displayVerseReference?.let { ref ->
+                    } ?: verse.displayVerseReference?.let { ref ->
                         stringResource(R.string.verse_key_label, ref)
                     } ?: stringResource(R.string.verse_label, "—")
                 }
@@ -693,14 +688,14 @@ private fun ReaderVerseActionsMenu(
     bookmarked: Boolean,
     hasNote: Boolean,
     hifzStatus: HifzStatus,
+    modifier: Modifier = Modifier,
     showTafsir: Boolean = true,
     onBookmark: () -> Unit,
     onNote: () -> Unit,
     onHifz: () -> Unit,
     onAiShare: () -> Unit,
     onTafsir: () -> Unit,
-    onHadith: () -> Unit,
-    modifier: Modifier = Modifier
+    onHadith: () -> Unit
 ) {
     Column(
         modifier = modifier,
@@ -1241,17 +1236,17 @@ private fun VerseNoteSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (hasExistingNote) {
-                    androidx.compose.material3.TextButton(onClick = onDelete) {
+                    TextButton(onClick = onDelete) {
                         Text(stringResource(R.string.delete_note), color = AlKhatibColors.Danger)
                     }
                 } else {
                     Spacer(Modifier.width(1.dp))
                 }
                 Row {
-                    androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    TextButton(onClick = onDismiss) {
                         Text(stringResource(R.string.back))
                     }
-                    androidx.compose.material3.TextButton(onClick = onSave) {
+                    TextButton(onClick = onSave) {
                         Text(stringResource(R.string.done))
                     }
                 }
