@@ -420,4 +420,20 @@
     <string name="contact_website">Situs Web</string>
     <string name="contact_github">GitHub</string>
     <string name="contact_email">Email</string>
+    <string name="tajweed_ghunna_title">Ghunnah</string>
+    <string name="tajweed_ghunna_desc">Dibaca berdengung (masuk ke hidung) dan ditahan selama 2 harakat.</string>
+    <string name="tajweed_idgham_without_ghunna_title">Idgham Bilaghunnah</string>
+    <string name="tajweed_idgham_without_ghunna_desc">Memasukkan huruf ke huruf berikutnya tanpa dengung.</string>
+    <string name="tajweed_idgham_with_ghunna_title">Idgham Bighunnah</string>
+    <string name="tajweed_idgham_with_ghunna_desc">Memasukkan huruf ke huruf berikutnya dengan dengung (2 harakat).</string>
+    <string name="tajweed_idgham_mimi_title">Idgham Mimi (Mutamasilain)</string>
+    <string name="tajweed_idgham_mimi_desc">Pertemuan huruf Mim sukun dengan Mim, dibaca berdengung (2 harakat).</string>
+    <string name="tajweed_iqlab_title">Iqlab</string>
+    <string name="tajweed_iqlab_desc">Mengganti bunyi Nun sukun/Tanwin menjadi Mim samar disertai dengung.</string>
+    <string name="tajweed_ikhfa_title">Ikhfa Haqiqi</string>
+    <string name="tajweed_ikhfa_desc">Membaca Nun sukun/Tanwin secara samar (antara idzhar &amp; idgham) dengan dengung.</string>
+    <string name="tajweed_ikhfa_syafawi_title">Ikhfa Syafawi</string>
+    <string name="tajweed_ikhfa_syafawi_desc">Membaca Mim sukun secara samar ketika bertemu Ba, disertai dengung.</string>
+    <string name="tajweed_qalqalah_title">Qalqalah</string>
+    <string name="tajweed_qalqalah_desc">Memantulkan bunyi huruf dengan jelas saat sukun (mati).</string>
 </resources>

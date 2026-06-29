@@ -9,12 +9,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
-import android.widget.Toast
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.design.theme.TajweedFontFamily
+import app.kamy.saatApp.features.quran.tajweed.TajweedType
 
 enum class TajweedTextAlign {
     Center,
@@ -36,6 +37,7 @@ fun TajweedHtmlView(
     compact: Boolean = false,
     textAlign: TajweedTextAlign = TajweedTextAlign.Center,
     isTajweedEnabled: Boolean = true,
+    onTajweedClick: ((TajweedType) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val lineHeightMultiplier = if (compact) 2.05f else 2.35f
@@ -69,8 +71,11 @@ fun TajweedHtmlView(
                 val annotations = annotated.getStringAnnotations("TAJWEED", offset, offset)
                 val annotation = annotations.firstOrNull()
                 if (annotation != null) {
-                    val tajweedName = annotation.item.replace("_", " ")
-                    Toast.makeText(context, "Hukum Tajwid: $tajweedName", Toast.LENGTH_SHORT).show()
+                    val tajweedName = annotation.item
+                    val tajweedType = runCatching { TajweedType.valueOf(tajweedName) }.getOrNull()
+                    if (tajweedType != null) {
+                        onTajweedClick?.invoke(tajweedType)
+                    }
                 }
             }
         )

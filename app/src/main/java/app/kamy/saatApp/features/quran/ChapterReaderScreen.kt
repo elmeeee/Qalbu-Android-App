@@ -109,6 +109,9 @@ import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.features.today.components.TafsirSheet
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.ui.common.TajweedHtmlView
+import app.kamy.saatApp.features.quran.tajweed.TajweedType
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
 import app.kamy.saatApp.ui.common.TajweedTextAlign
 import app.kamy.saatApp.ui.common.TransliterationView
 import app.kamy.saatApp.ui.common.toVerseTranslationPlainText
@@ -140,6 +143,7 @@ fun ChapterReaderScreen(
     }
     var settingsVisible by remember { mutableStateOf(false) }
     var verseMenuExpanded by remember { mutableStateOf(false) }
+    var activeTajweedType by remember { mutableStateOf<TajweedType?>(null) }
 
     // Pager requires pageCount > 0; verses may be empty while the first page is loading.
     val verseCount = state.verses.size
@@ -258,7 +262,8 @@ fun ChapterReaderScreen(
                     personalDataRevision = state.personalDataRevision,
                     showBismillahPre = pageIndex == 0 && state.bismillahPre,
                     onPlay = { vm.onTapAyah(pageIndex) },
-                    onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null
+                    onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null,
+                    onTajweedClick = { activeTajweedType = it }
                 )
             }
         }
@@ -449,6 +454,13 @@ fun ChapterReaderScreen(
         )
     }
 
+    activeTajweedType?.let { type ->
+        TajweedInfoSheet(
+            type = type,
+            onDismiss = { activeTajweedType = null }
+        )
+    }
+
     if (state.hifzPickerVisible) {
         HifzPickerSheet(
             currentStatus = state.currentVerseHifzStatus,
@@ -521,7 +533,8 @@ private fun SaatAyahPage(
     personalDataRevision: Int,
     showBismillahPre: Boolean,
     onPlay: () -> Unit,
-    onContentScroll: (() -> Unit)? = null
+    onContentScroll: (() -> Unit)? = null,
+    onTajweedClick: (TajweedType) -> Unit
 ) {
     val contentTopPadding = 56.dp
     val contentBottomPadding = if (audioBarVisible) 188.dp else 148.dp
@@ -587,6 +600,7 @@ private fun SaatAyahPage(
                     compact = true,
                     textAlign = TajweedTextAlign.Center,
                     isTajweedEnabled = isTajweedEnabled,
+                    onTajweedClick = onTajweedClick,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -630,6 +644,7 @@ private fun SaatAyahPage(
                         compact = true,
                         textAlign = TajweedTextAlign.Justify,
                         isTajweedEnabled = isTajweedEnabled,
+                        onTajweedClick = onTajweedClick,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -1281,5 +1296,88 @@ private fun ReaderScrollHint(
             color = Color.White,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TajweedInfoSheet(
+    type: TajweedType,
+    onDismiss: () -> Unit
+) {
+    val titleRes = when (type) {
+        TajweedType.GHUNNA -> R.string.tajweed_ghunna_title
+        TajweedType.IDGHAM_WITHOUT_GHUNNA -> R.string.tajweed_idgham_without_ghunna_title
+        TajweedType.IDGHAM_WITH_GHUNNA -> R.string.tajweed_idgham_with_ghunna_title
+        TajweedType.IDGHAM_MIMI -> R.string.tajweed_idgham_mimi_title
+        TajweedType.IQLAB -> R.string.tajweed_iqlab_title
+        TajweedType.IKHFA -> R.string.tajweed_ikhfa_title
+        TajweedType.IKHFA_SYAFAWI -> R.string.tajweed_ikhfa_syafawi_title
+        TajweedType.QALQALAH -> R.string.tajweed_qalqalah_title
+    }
+    val descRes = when (type) {
+        TajweedType.GHUNNA -> R.string.tajweed_ghunna_desc
+        TajweedType.IDGHAM_WITHOUT_GHUNNA -> R.string.tajweed_idgham_without_ghunna_desc
+        TajweedType.IDGHAM_WITH_GHUNNA -> R.string.tajweed_idgham_with_ghunna_desc
+        TajweedType.IDGHAM_MIMI -> R.string.tajweed_idgham_mimi_desc
+        TajweedType.IQLAB -> R.string.tajweed_iqlab_desc
+        TajweedType.IKHFA -> R.string.tajweed_ikhfa_desc
+        TajweedType.IKHFA_SYAFAWI -> R.string.tajweed_ikhfa_syafawi_desc
+        TajweedType.QALQALAH -> R.string.tajweed_qalqalah_desc
+    }
+    
+    val tajweedColor = when (type) {
+        TajweedType.GHUNNA -> Color(0xFFF97316)
+        TajweedType.IDGHAM_WITHOUT_GHUNNA -> Color(0xFF94A3B8)
+        TajweedType.IDGHAM_WITH_GHUNNA -> Color(0xFF10B981)
+        TajweedType.IDGHAM_MIMI -> Color(0xFF10B981)
+        TajweedType.IQLAB -> Color(0xFF3B82F6)
+        TajweedType.IKHFA, TajweedType.IKHFA_SYAFAWI -> Color(0xFFEAB308)
+        TajweedType.QALQALAH -> Color(0xFFEF4444)
+    }
+
+    AlKhatibPartialBottomSheet(
+        onDismiss = onDismiss,
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(tajweedColor.copy(alpha = 0.15f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = tajweedColor
+                    )
+                }
+                Text(
+                    text = stringResource(titleRes),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = AlKhatibColors.DeepEmerald,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        },
+        bottomPadding = 32.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = stringResource(descRes),
+                style = MaterialTheme.typography.bodyLarge,
+                color = AlKhatibColors.Slate700,
+                lineHeight = 24.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }

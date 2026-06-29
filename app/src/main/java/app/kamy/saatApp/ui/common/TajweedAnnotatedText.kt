@@ -98,8 +98,8 @@ private fun AnnotatedString.Builder.appendAyahEndMarker(
             fontFamily = markerFontFamily
         )
     ) {
-        // U+06DD draws Eastern-Arabic digits inside the ayah rosette in Uthmani fonts.
-        append("\u06DD${easternArabicIndicDigits(ayahNumber)}")
+        // U+FD3F and U+FD3E are Ornate Parentheses for ayah endings.
+        append("\uFD3F${easternArabicIndicDigits(ayahNumber)}\uFD3E")
     }
 }
 

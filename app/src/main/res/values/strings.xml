@@ -985,4 +985,20 @@
     <string name="contact_website">Website</string>
     <string name="contact_github">GitHub</string>
     <string name="contact_email">Email</string>
+    <string name="tajweed_ghunna_title">Ghunnah</string>
+    <string name="tajweed_ghunna_desc">Read with a nasal sound, holding it for 2 beats.</string>
+    <string name="tajweed_idgham_without_ghunna_title">Idgham Bilaghunnah</string>
+    <string name="tajweed_idgham_without_ghunna_desc">Merge the letter into the next without a nasal sound.</string>
+    <string name="tajweed_idgham_with_ghunna_title">Idgham Bighunnah</string>
+    <string name="tajweed_idgham_with_ghunna_desc">Merge the letter into the next with a nasal sound (2 beats).</string>
+    <string name="tajweed_idgham_mimi_title">Idgham Mimi</string>
+    <string name="tajweed_idgham_mimi_desc">Merge the letter Mim into the next Mim with a nasal sound.</string>
+    <string name="tajweed_iqlab_title">Iqlab</string>
+    <string name="tajweed_iqlab_desc">Convert Nun/Tanween into a hidden Mim with a nasal sound.</string>
+    <string name="tajweed_ikhfa_title">Ikhfa</string>
+    <string name="tajweed_ikhfa_desc">Hide the Nun/Tanween sound with a light nasal tone.</string>
+    <string name="tajweed_ikhfa_syafawi_title">Ikhfa Syafawi</string>
+    <string name="tajweed_ikhfa_syafawi_desc">Hide the Mim sound when followed by Ba, with a nasal tone.</string>
+    <string name="tajweed_qalqalah_title">Qalqalah</string>
+    <string name="tajweed_qalqalah_desc">Bounce the sound of the letter clearly.</string>
 </resources>
