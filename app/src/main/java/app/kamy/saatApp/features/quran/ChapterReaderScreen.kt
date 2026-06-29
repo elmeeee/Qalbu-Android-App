@@ -432,7 +432,7 @@ fun ChapterReaderScreen(
             onToggleTranslation = vm::toggleTranslation,
             onToggleTransliteration = vm::toggleTransliteration,
             onToggleTajweed = vm::toggleTajweed,
-            onSelectRecitation = vm::setRecitation,
+            onSelectRecitation = vm::selectRecitation,
             onSetPlaybackMode = vm::setPlaybackMode,
             onToggleHifzMode = vm::toggleHifzMode
         )
