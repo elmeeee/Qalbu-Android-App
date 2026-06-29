@@ -11,31 +11,11 @@ import androidx.core.net.toUri
 import java.util.Locale
 
 fun Context.isIgnoringBatteryOptimizations(): Boolean {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
-    val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
-    return pm.isIgnoringBatteryOptimizations(packageName)
+    return true
 }
 
 fun hasAggressiveOemBatteryManagement(): Boolean {
-    val brand = Build.BRAND.lowercase(Locale.US)
-    val manufacturer = Build.MANUFACTURER.lowercase(Locale.US)
-    val targets = listOf(
-        "samsung",
-        "xiaomi",
-        "redmi",
-        "poco",
-        "oppo",
-        "realme",
-        "oneplus",
-        "vivo",
-        "huawei",
-        "honor",
-        "motorola",
-        "asus",
-        "tecno",
-        "infinix",
-    )
-    return targets.any { it in brand || it in manufacturer }
+    return false
 }
 
 fun Context.requestIgnoreBatteryOptimizations(): Boolean {

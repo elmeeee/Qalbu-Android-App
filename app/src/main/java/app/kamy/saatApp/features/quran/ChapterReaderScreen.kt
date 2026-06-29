@@ -592,15 +592,12 @@ private fun SaatAyahPage(
                 modifier = Modifier.padding(bottom = 2.dp)
             )
             if (showBismillahPre) {
-                TajweedHtmlView(
-                    textUthmani = stringResource(R.string.bismillah_arabic),
-                    ayahNumber = null,
-                    fontSizeSp = (34 * fontScale).toInt(),
-                    compact = true,
-                    textAlign = TajweedTextAlign.Center,
-                    isTajweedEnabled = isTajweedEnabled,
-                    onTajweedClick = onTajweedClick,
-                    modifier = Modifier.fillMaxWidth()
+                Text(
+                    text = "﷽",
+                    fontSize = (38 * fontScale).sp,
+                    color = AlKhatibColors.DeepEmerald,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
                 )
             }
             when {
@@ -632,7 +629,7 @@ private fun SaatAyahPage(
                 }
                 else -> {
                     val textToRender = when (arabicTextType) {
-                        ArabicTextType.INDOPAK -> verse.textIndopak ?: verse.textUthmani
+                        ArabicTextType.INDOPAK -> (verse.textIndopak ?: verse.textUthmani)?.replace("!", "")
                         ArabicTextType.MADANI -> verse.textUthmani
                         ArabicTextType.TAJWEED -> verse.textUthmaniTajweed ?: verse.textUthmani
                     }
