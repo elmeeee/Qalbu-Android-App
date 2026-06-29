@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.text.HtmlCompat
+import app.kamy.saatApp.features.quran.tajweed.TajweedEngine
 
 private val tajweedTagRegex = Regex(
     """<(?:span|tajweed)\b[^>]*?\bclass\s*=\s*['"]?([^'">\s]+)['"]?[^>]*>([\s\S]*?)</(?:span|tajweed)>|([^<]+)""",
@@ -30,17 +31,18 @@ fun buildTajweedAnnotatedString(
     val body = textUthmani?.sanitizeTajweedArabicHtml().orEmpty()
     if (body.isEmpty()) return AnnotatedString("")
     val cleaned = stripInlineAyahEndMarkers(body, ayahNumber).ifEmpty { body }
+    val strippedHtml = cleaned.stripHtmlTags()
+    
+    // Apply Dynamic Algorithmic Tajweed Engine
+    val tajweedAnnotated = TajweedEngine.applyTajweed(strippedHtml, isTajweedEnabled = true)
+
     val built = buildAnnotatedString {
-        appendTajweedHtml(cleaned, baseColor)
+        append(tajweedAnnotated)
         ayahNumber?.takeIf { it > 0 }?.let {
             appendAyahEndMarker(it, markerFontSize, markerFontFamily)
         }
     }
-    return if (built.text.contains('<')) {
-        AnnotatedString(built.text.stripHtmlTags())
-    } else {
-        built
-    }
+    return built
 }
 
 private fun AnnotatedString.Builder.appendTajweedHtml(html: String, baseColor: Color) {
