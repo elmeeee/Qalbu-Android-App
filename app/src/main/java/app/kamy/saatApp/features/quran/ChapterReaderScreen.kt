@@ -59,6 +59,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.collectAsState
@@ -126,6 +127,13 @@ fun ChapterReaderScreen(
     val state by vm.state.collectAsState()
 
     val context = LocalContext.current
+    DisposableEffect(Unit) {
+        val activity = context as? android.app.Activity
+        activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose {
+            activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val onboardingStore = remember { ReaderOnboardingStore.from(context) }
     var showScrollHint by remember { mutableStateOf(!onboardingStore.hasShownScrollHint()) }
@@ -930,8 +938,8 @@ private fun ReaderSettingsSheet(
                     Slider(
                         value = state.fontScale,
                         onValueChange = onFontScaleChange,
-                        valueRange = 0.85f..1.35f,
-                        steps = 9,
+                        valueRange = 0.85f..2.0f,
+                        steps = 11,
                         colors = androidx.compose.material3.SliderDefaults.colors(
                             thumbColor = AlKhatibColors.Teal,
                             activeTrackColor = AlKhatibColors.DeepEmerald

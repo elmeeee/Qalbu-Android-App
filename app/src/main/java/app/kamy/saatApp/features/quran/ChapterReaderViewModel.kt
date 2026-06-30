@@ -391,7 +391,7 @@ class ChapterReaderViewModel @Inject constructor(
     }
 
     fun setFontScale(scale: Float) {
-        _state.update { it.copy(fontScale = scale.coerceIn(0.85f, 1.35f)) }
+        _state.update { it.copy(fontScale = scale.coerceIn(0.85f, 2.0f)) }
     }
 
     fun setPlaybackMode(mode: AyahPlaybackMode) {

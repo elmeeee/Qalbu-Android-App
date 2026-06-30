@@ -130,6 +130,9 @@ fun RootScreen(
                     },
                     onOpenTrackerCalendar = {
                         navController.navigate("prayer/tracker/calendar") { launchSingleTop = true }
+                    },
+                    onOpenChapterReader = { chapter, ayah ->
+                        navController.navigate("quran/reader/${chapter}?ayah=${ayah}") { launchSingleTop = true }
                     }
                 )
             }

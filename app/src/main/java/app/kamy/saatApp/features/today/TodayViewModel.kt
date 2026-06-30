@@ -23,6 +23,9 @@ import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.repository.ContentRepository
 import app.kamy.saatApp.infrastructure.repository.ReflectRepository
+import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
+import app.kamy.saatApp.domain.model.ReadingSession
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.async
@@ -63,7 +66,9 @@ data class TodayUiState(
     val isOfflineData: Boolean = false,
     val showTransliteration: Boolean = false,
     val showTranslation: Boolean = true,
-    val verseOccasion: DailyVerseOccasion? = null
+    val verseOccasion: DailyVerseOccasion? = null,
+    val continueReading: ReadingSession? = null,
+    val continueReadingChapterName: String? = null
 )
 
 @HiltViewModel
@@ -74,7 +79,8 @@ class TodayViewModel @Inject constructor(
     private val shareComposer: VerseShareTextComposer,
     private val userSession: UserSession,
     private val translationStore: TranslationPreferencesStore,
-    private val dailyVerseLoader: DailyVerseLoader
+    private val dailyVerseLoader: DailyVerseLoader,
+    private val readingSessions: ReadingSessionRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TodayUiState())
@@ -91,6 +97,7 @@ class TodayViewModel @Inject constructor(
         }
         loadDailyAyahWithRecitations()
         loadProfile()
+        loadContinueReading()
         viewModelScope.launch {
             userSession.isSignedIn.collect { signedIn ->
                 if (signedIn) loadProfile() else _state.update { it.copy(profile = null) }
@@ -111,6 +118,27 @@ class TodayViewModel @Inject constructor(
         viewModelScope.launch {
             translationStore.showTransliteration.collect { enabled ->
                 _state.update { it.copy(showTransliteration = enabled) }
+            }
+        }
+    }
+
+    fun loadContinueReading() {
+        viewModelScope.launch {
+            try {
+                val session = readingSessions.fetchMostRecent()
+                val chapterName = session?.let { s ->
+                    contentRepository.getChapters(force = false)
+                        .firstOrNull { it.id == s.chapterNumber }
+                        ?.displayComplexName
+                }
+                _state.update {
+                    it.copy(
+                        continueReading = session,
+                        continueReadingChapterName = chapterName
+                    )
+                }
+            } catch (e: Throwable) {
+                Log.e("TodayViewModel", "Failed to load continue reading session", e)
             }
         }
     }
@@ -174,6 +202,7 @@ class TodayViewModel @Inject constructor(
                     )
                 }
             }
+            loadContinueReading()
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.toAppError(), isOfflineData = false) }
         }

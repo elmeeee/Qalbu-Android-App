@@ -43,7 +43,7 @@ fun TajweedHtmlView(
     val lineHeightMultiplier = if (compact) 2.05f else 2.35f
     val fontSize = fontSizeSp.sp
     val markerFontSize = (fontSizeSp * 0.58f).sp
-    val annotated = remember(textUthmani, ayahNumber, textColor, markerFontSize) {
+    val annotated = remember(textUthmani, ayahNumber, textColor, markerFontSize, isTajweedEnabled) {
         buildTajweedAnnotatedString(
             textUthmani = textUthmani,
             ayahNumber = ayahNumber,

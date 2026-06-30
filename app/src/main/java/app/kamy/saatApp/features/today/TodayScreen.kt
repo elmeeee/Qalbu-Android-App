@@ -21,6 +21,19 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.font.FontWeight
+import app.kamy.saatApp.domain.model.ReadingSession
+import app.kamy.saatApp.design.theme.AlKhatibColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -75,7 +88,8 @@ import kotlinx.coroutines.launch
 fun TodayScreen(
     audioPlayer: AudioPlayerController,
     onOpenPrayerCalendar: () -> Unit = {},
-    onOpenTrackerCalendar: () -> Unit = {}
+    onOpenTrackerCalendar: () -> Unit = {},
+    onOpenChapterReader: (Int, Int) -> Unit = { _, _ -> }
 ) {
     val todayVm: TodayViewModel = hiltViewModel()
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
@@ -229,6 +243,7 @@ fun TodayScreen(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 trackerVm.refresh()
+                todayVm.loadContinueReading()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -316,6 +331,19 @@ fun TodayScreen(
                             onOpenCalendar = onOpenTrackerCalendar,
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                         )
+                    }
+
+                    todayState.continueReading?.let { session ->
+                        item(key = "continue_reading") {
+                            TodayContinueReadingCard(
+                                session = session,
+                                chapterName = todayState.continueReadingChapterName,
+                                onTap = {
+                                    onOpenChapterReader(session.chapterNumber, session.verseNumber)
+                                },
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+                            )
+                        }
                     }
 
                     item(key = "quran_of_day") {
@@ -428,4 +456,60 @@ fun TodayScreen(
             }
         }
     )
+}
+
+@Composable
+private fun TodayContinueReadingCard(
+    session: ReadingSession,
+    chapterName: String?,
+    onTap: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onTap,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.55f),
+        tonalElevation = 0.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(AlKhatibColors.Gold.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.Bookmark,
+                    contentDescription = null,
+                    tint = AlKhatibColors.GoldDeep,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.continue_reading),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = AlKhatibColors.GoldDeep,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = AlKhatibColors.Slate900
+                )
+                Text(
+                    text = stringResource(R.string.ayah_number, session.verseNumber),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate500
+                )
+            }
+        }
+    }
 }
