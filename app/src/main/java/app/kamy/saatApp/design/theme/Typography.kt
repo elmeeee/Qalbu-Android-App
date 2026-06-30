@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 
 
-val TajweedFontFamily = FontFamily(Font(R.font.tajweed_font))
+val TajweedFontFamily = FontFamily(Font(R.font.lpmq))
 
 
 val AlKhatibTypography: Typography = Typography(

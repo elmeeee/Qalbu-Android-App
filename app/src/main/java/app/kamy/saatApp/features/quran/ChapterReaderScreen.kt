@@ -117,7 +117,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterReaderScreen(
-    audioPlayer: AudioPlayerController,
     initialVerseNumber: Int? = null,
     initialVerseKey: String? = null,
     audioBarVisible: Boolean = false,
@@ -257,7 +256,6 @@ fun ChapterReaderScreen(
                     showTranslation = state.showTranslation && !state.hifzModeEnabled,
                     showTransliteration = state.showTransliteration,
                     translationId = state.selectedTranslationId,
-                    arabicTextType = state.arabicTextType,
                     isTajweedEnabled = state.isTajweedEnabled,
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
@@ -435,7 +433,6 @@ fun ChapterReaderScreen(
             state = state,
             onDismiss = { settingsVisible = false },
             onFontScaleChange = vm::setFontScale,
-            onArabicTextTypeChange = vm::setArabicTextType,
             onToggleTranslation = vm::toggleTranslation,
             onToggleTransliteration = vm::toggleTransliteration,
             onToggleTajweed = vm::toggleTajweed,
@@ -528,7 +525,6 @@ private fun SaatAyahPage(
     showTranslation: Boolean,
     showTransliteration: Boolean,
     translationId: Int,
-    arabicTextType: ArabicTextType,
     isTajweedEnabled: Boolean,
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
@@ -889,7 +885,6 @@ private fun ReaderSettingsSheet(
     state: ChapterReaderUiState,
     onDismiss: () -> Unit,
     onFontScaleChange: (Float) -> Unit,
-    onArabicTextTypeChange: (ArabicTextType) -> Unit,
     onToggleTranslation: (Boolean) -> Unit,
     onToggleTransliteration: (Boolean) -> Unit,
     onToggleTajweed: (Boolean) -> Unit,

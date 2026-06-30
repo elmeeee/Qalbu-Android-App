@@ -240,7 +240,6 @@ fun RootScreen(
             ) { entry ->
                 val initialAyah = entry.arguments?.getInt("ayah")?.takeIf { it > 0 }
                 ChapterReaderScreen(
-                    audioPlayer = audioPlayer,
                     initialVerseNumber = initialAyah,
                     audioBarVisible = showAudioBar,
                     onBack = { navController.popBackStack() }
@@ -257,7 +256,6 @@ fun RootScreen(
                     ?.takeIf { it.isNotBlank() }
                     ?.let { java.net.URLDecoder.decode(it, Charsets.UTF_8.name()) }
                 ChapterReaderScreen(
-                    audioPlayer = audioPlayer,
                     initialVerseKey = verseKey,
                     audioBarVisible = showAudioBar,
                     onBack = { navController.popBackStack() }
