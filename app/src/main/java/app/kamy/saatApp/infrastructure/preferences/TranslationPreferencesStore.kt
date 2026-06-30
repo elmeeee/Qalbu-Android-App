@@ -91,7 +91,7 @@ class TranslationPreferencesStore @Inject constructor(
 
     private fun loadArabicTextType(): ArabicTextType {
         val saved = prefs.getString(KEY_ARABIC_TEXT_TYPE, null)
-        return runCatching { ArabicTextType.valueOf(saved!!) }.getOrDefault(ArabicTextType.TAJWEED)
+        return runCatching { ArabicTextType.valueOf(saved!!) }.getOrDefault(ArabicTextType.MADANI)
     }
 
     companion object {

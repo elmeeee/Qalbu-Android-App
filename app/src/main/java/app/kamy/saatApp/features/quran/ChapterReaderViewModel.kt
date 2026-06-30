@@ -57,7 +57,7 @@ data class ChapterReaderUiState(
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
     val isTajweedEnabled: Boolean = true,
-    val arabicTextType: ArabicTextType = ArabicTextType.TAJWEED,
+    val arabicTextType: ArabicTextType = ArabicTextType.MADANI,
     val selectedTranslationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
     val currentVerseIndex: Int = 0,
     val loadedApiPage: Int = 0,

@@ -623,11 +623,7 @@ private fun SaatAyahPage(
                     }
                 }
                 else -> {
-                    val textToRender = when (arabicTextType) {
-                        ArabicTextType.INDOPAK -> (verse.textIndopak ?: verse.textUthmani)?.replace("!", "")
-                        ArabicTextType.MADANI -> verse.textUthmani
-                        ArabicTextType.TAJWEED -> verse.textUthmaniTajweed ?: verse.textUthmani
-                    }
+                    val textToRender = verse.textUthmani
                     TajweedHtmlView(
                         textUthmani = textToRender ?: "",
                         ayahNumber = verse.resolvedVerseNumber,
@@ -943,40 +939,7 @@ private fun ReaderSettingsSheet(
                     )
                 }
             )
-            ReaderSettingToggleRow(
-                title = "Text Type",
-                content = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        ArabicTextType.entries.forEach { type ->
-                            val selected = state.arabicTextType == type
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable { onArabicTextTypeChange(type) }
-                                    .background(
-                                        if (selected) AlKhatibColors.DeepEmerald
-                                        else AlKhatibColors.SoftGrey.copy(alpha = 0.5f)
-                                    )
-                                    .padding(vertical = 8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = type.name.lowercase().replaceFirstChar { it.uppercase() },
-                                    color = if (selected) Color.White else AlKhatibColors.Slate700,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
-                }
-            )
+
             ReaderSettingToggleRow(
                 title = stringResource(R.string.show_translation),
                 checked = state.showTranslation,

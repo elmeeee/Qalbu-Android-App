@@ -152,7 +152,7 @@ class LocalQuranDatabase @Inject constructor(
         private const val VERSION_FILE_NAME = "quran_db_version"
         private const val TAG = "LocalQuranDatabase"
         /** Bump when bundled asset changes (forces re-copy). */
-        private const val DB_ASSET_VERSION = 6
+        private const val DB_ASSET_VERSION = 7
         private const val MIN_DB_BYTES = 15_000_000L
         private val SQLITE_MAGIC = "SQLite format 3".toByteArray(Charsets.US_ASCII)
     }
