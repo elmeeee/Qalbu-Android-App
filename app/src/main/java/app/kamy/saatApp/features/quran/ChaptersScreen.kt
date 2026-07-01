@@ -717,20 +717,6 @@ private fun ChapterRow(
                     }
                 }
             }
-            chapter.nameArabic?.takeIf { it.isNotBlank() }?.let { arabic ->
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = arabic,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.End,
-                    maxLines = 1,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
         }
     }
 }

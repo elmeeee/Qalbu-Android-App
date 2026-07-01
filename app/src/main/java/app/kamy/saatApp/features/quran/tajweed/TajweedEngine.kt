@@ -47,21 +47,36 @@ object TajweedEngine {
                 val color = colorMap[result.type] ?: Color.Unspecified
                 val start = result.start.coerceAtLeast(0)
                 val end = result.end.coerceAtMost(rawAyat.length)
-                
-                if (start < end) {
+                val (adjustedStart, adjustedEnd) = adjustSpanRange(rawAyat, start, end)
+
+                if (adjustedStart < adjustedEnd) {
                     addStyle(
                         style = SpanStyle(color = color),
-                        start = start,
-                        end = end
+                        start = adjustedStart,
+                        end = adjustedEnd
                     )
                     addStringAnnotation(
                         tag = "TAJWEED",
                         annotation = result.type.name,
-                        start = start,
-                        end = end
+                        start = adjustedStart,
+                        end = adjustedEnd
                     )
                 }
             }
         }
+    }
+
+    private fun adjustSpanRange(text: String, start: Int, end: Int): Pair<Int, Int> {
+        var adjustedStart = start
+        while (adjustedStart > 0 && ArabicCharUtil.isCombiningMark(ArabicCharUtil.getCodePointAt(text, adjustedStart))) {
+            adjustedStart--
+        }
+
+        var adjustedEnd = end
+        while (adjustedEnd < text.length && ArabicCharUtil.isCombiningMark(ArabicCharUtil.getCodePointAt(text, adjustedEnd))) {
+            adjustedEnd++
+        }
+
+        return adjustedStart to adjustedEnd
     }
 }

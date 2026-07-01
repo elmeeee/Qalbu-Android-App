@@ -59,6 +59,21 @@ object ArabicCharUtil {
     fun isHarf(codePoint: Int): Boolean {
         return codePoint in 0x0621..0x064A
     }
+
+    fun isCombiningMark(codePoint: Int): Boolean {
+        return codePoint in 0x064B..0x0652 ||
+            codePoint == 0x0670 ||
+            codePoint in 0x06D6..0x06ED ||
+            codePoint == 0x06E3 ||
+            codePoint == 0x06E5 ||
+            codePoint == 0x06E6 ||
+            codePoint == 0x06EA ||
+            codePoint == 0x06EB ||
+            codePoint == 0x06EC ||
+            codePoint == 0x06DF ||
+            codePoint == 0x06E0 ||
+            codePoint == 0x06E1
+    }
     
     fun getNextHarfIndex(text: String, startIndex: Int): Int {
         var index = startIndex
