@@ -5,6 +5,8 @@ package app.kamy.saatApp.features.quran
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -627,56 +629,74 @@ private fun ContinueReadingCard(
     Surface(
         onClick = onTap,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.55f),
-        tonalElevation = 0.dp
+        shape = RoundedCornerShape(18.dp),
+        color = AlKhatibColors.PureWhite,
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, AlKhatibColors.Teal.copy(alpha = 0.2f))
     ) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            AlKhatibColors.MintWash.copy(alpha = 0.5f),
+                            AlKhatibColors.PureWhite
+                        )
+                    )
+                )
         ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(AlKhatibColors.Gold.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(AlKhatibColors.Teal.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Filled.Bookmark,
+                        contentDescription = null,
+                        tint = AlKhatibColors.Teal,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                Spacer(Modifier.width(14.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.continue_reading).uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = AlKhatibColors.Teal,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.Slate900,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(1.dp))
+                    Text(
+                        text = stringResource(R.string.verse_number, session.verseNumber),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AlKhatibColors.Slate500
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
                 Icon(
-                    Icons.Filled.Bookmark,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
-                    tint = AlKhatibColors.GoldDeep,
-                    modifier = Modifier.size(22.dp)
+                    tint = AlKhatibColors.Teal.copy(alpha = 0.7f),
+                    modifier = Modifier.size(20.dp)
                 )
             }
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.continue_reading),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = AlKhatibColors.GoldDeep,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = stringResource(R.string.verse_number, session.verseNumber),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.size(20.dp)
-            )
         }
     }
 }

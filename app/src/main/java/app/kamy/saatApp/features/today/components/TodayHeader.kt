@@ -1,65 +1,38 @@
 package app.kamy.saatApp.features.today.components
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
+import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
-import kotlinx.coroutines.delay
 import java.util.Calendar
-
-private const val DATE_ALTERNATE_MS = 4_000L
-private const val DAY_ALTERNATE_MS = 4_000L
 
 @Composable
 fun TodayHeader(
@@ -71,32 +44,25 @@ fun TodayHeader(
     modifier: Modifier = Modifier
 ) {
     val greeting = rememberGreeting()
-    val dayName = rememberRotatingDayName()
-    val canAlternate = !hijriLabel.isNullOrBlank() && !gregorianLabel.isNullOrBlank()
-    var showHijri by remember(hijriLabel, gregorianLabel) { mutableStateOf(false) }
 
-    LaunchedEffect(hijriLabel, gregorianLabel) {
-        when {
-            canAlternate -> {
-                showHijri = false
-                while (true) {
-                    delay(DATE_ALTERNATE_MS)
-                    showHijri = !showHijri
-                }
-            }
-            !hijriLabel.isNullOrBlank() -> showHijri = true
-            else -> showHijri = false
-        }
+    val weekdays = stringArrayResource(R.array.weekday_names)
+    val dayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+    val localDayName = remember(dayIndex, weekdays) {
+        if (dayIndex in weekdays.indices) weekdays[dayIndex] else ""
     }
 
-    val displayDate = when {
-        canAlternate && showHijri -> hijriLabel!!
-        canAlternate -> gregorianLabel!!
-        !gregorianLabel.isNullOrBlank() -> gregorianLabel
-        else -> hijriLabel.orEmpty()
+    val context = LocalContext.current
+    val languageCode = context.resources.configuration.locales[0].language
+    val isIndonesianOrMalay = languageCode == "in" || languageCode == "id" || languageCode == "ms"
+    val hijriSuffix = if (isIndonesianOrMalay) " H" else " AH"
+
+    val formattedHijri = remember(hijriLabel, hijriSuffix) {
+        if (!hijriLabel.isNullOrBlank()) {
+            if (hijriLabel.endsWith(" H") || hijriLabel.endsWith(" AH")) hijriLabel
+            else "$hijriLabel$hijriSuffix"
+        } else null
     }
 
-    val dateSwitchA11y = stringResource(R.string.date_switch_a11y)
     val locationText = cityName ?: locationStatus ?: stringResource(R.string.locating)
 
     Column(
@@ -106,102 +72,85 @@ fun TodayHeader(
             .background(MaterialTheme.colorScheme.background)
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
+                // Greeting: e.g. "Selamat Pagi" / "Good Morning"
                 Text(
                     text = greeting,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                AnimatedContent(
-                    targetState = displayDate,
-                    modifier = Modifier
-                        .heightIn(min = 24.dp)
-                        .then(
-                            if (canAlternate) Modifier.clickable { showHijri = !showHijri }
-                            else Modifier
-                        )
-                        .semantics {
-                            if (canAlternate) {
-                                contentDescription = dateSwitchA11y
-                            }
-                        },
-                    transitionSpec = {
-                        ((slideInVertically(animationSpec = tween(260)) { height -> height } +
-                            fadeIn(animationSpec = tween(220))) togetherWith
-                            (slideOutVertically(animationSpec = tween(200)) { height -> -height } +
-                                fadeOut(animationSpec = tween(180))))
-                            .using(SizeTransform(clip = false) { _, _ -> snap() })
+                // Day and Gregorian Date: e.g. "Rabu, 1 Juli 2026"
+                Text(
+                    text = buildString {
+                        if (localDayName.isNotEmpty()) {
+                            append(localDayName)
+                            append(", ")
+                        }
+                        append(gregorianLabel.orEmpty())
                     },
-                    label = "headerDate"
-                ) { date ->
-                    ShimmeringText(
-                        text = date,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Medium,
-                        ),
-                        shimmer = canAlternate,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(3.dp),
-                    modifier = Modifier
-                        .clickable(onClick = onLocationClick)
-                        .padding(top = 1.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.LocationOn,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(12.dp)
-                    )
+                // Hijri Date: e.g. "16 Muharram 1448 H"
+                if (!formattedHijri.isNullOrBlank()) {
                     Text(
-                        text = locationText,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = formattedHijri,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = AlKhatibColors.GoldDeep,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
-            Box(
-                modifier = Modifier.width(80.dp),
-                contentAlignment = Alignment.CenterEnd
+            Spacer(Modifier.width(16.dp))
+
+            // Location Badge on the right
+            Surface(
+                onClick = onLocationClick,
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.align(Alignment.CenterVertically)
             ) {
-                AnimatedContent(
-                    targetState = dayName,
-                    transitionSpec = {
-                        (slideInVertically(animationSpec = tween(260)) { height -> height } +
-                            fadeIn(animationSpec = tween(220))) togetherWith
-                            (slideOutVertically(animationSpec = tween(200)) { height -> -height } +
-                                fadeOut(animationSpec = tween(180)))
-                    },
-                    label = "headerDay"
-                ) { name ->
-                    ShimmeringText(
-                        text = name,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.LocationOn,
+                        contentDescription = stringResource(R.string.location_enable),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = locationText,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Medium
                         ),
-                        shimmer = true,
-                        modifier = Modifier.fillMaxWidth()
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.widthIn(max = 100.dp)
                     )
                 }
             }
@@ -213,72 +162,6 @@ fun TodayHeader(
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
         )
     }
-}
-
-@Composable
-private fun rememberRotatingDayName(): String {
-    val weekdays = stringArrayResource(R.array.weekday_names)
-    val weekdaysAr = stringArrayResource(R.array.weekday_names_ar)
-    val dayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
-    val names = listOf(weekdays[dayIndex], weekdaysAr[dayIndex])
-    var index by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(DAY_ALTERNATE_MS)
-            index = (index + 1) % names.size
-        }
-    }
-
-    return names[index]
-}
-
-@Composable
-private fun ShimmeringText(
-    text: String,
-    modifier: Modifier = Modifier,
-    style: TextStyle,
-    shimmer: Boolean
-) {
-    if (!shimmer) {
-        Text(
-            text = text,
-            modifier = modifier,
-            style = style,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        return
-    }
-
-    var widthPx by remember { mutableStateOf(0f) }
-    val transition = rememberInfiniteTransition(label = "shimmer")
-    val progress by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmerProgress"
-    )
-
-    val baseColor = style.color?.takeIf { it != Color.Unspecified }
-        ?: MaterialTheme.colorScheme.onBackground
-    val shimmerColor = baseColor.copy(alpha = 0.25f)
-    val brush = Brush.linearGradient(
-        colors = listOf(shimmerColor, baseColor, shimmerColor),
-        start = Offset(x = widthPx * (progress - 0.5f), y = 0f),
-        end = Offset(x = widthPx * progress, y = 0f)
-    )
-
-    Text(
-        text = text,
-        modifier = modifier.onSizeChanged { widthPx = it.width.toFloat() },
-        style = style.copy(brush = brush),
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
 }
 
 @Composable
