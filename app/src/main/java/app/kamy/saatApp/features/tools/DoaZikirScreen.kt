@@ -680,23 +680,7 @@ private fun DoaZikirTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .then(
-                if (inDetail) {
-                    Modifier
-                        .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    AlKhatibColors.DeepEmerald.copy(alpha = 0.12f),
-                                    AlKhatibColors.Teal.copy(alpha = 0.06f)
-                                )
-                            )
-                        )
-                } else {
-                    Modifier
-                }
-            )
-            .padding(horizontal = 4.dp, vertical = if (inDetail) 10.dp else 8.dp),
+            .padding(horizontal = 4.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onBack) {
@@ -708,7 +692,7 @@ private fun DoaZikirTopBar(
         }
         Text(
             text = title,
-            style = if (inDetail) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = AlKhatibColors.DeepEmerald,
             modifier = Modifier.weight(1f)

@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -77,6 +79,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -439,141 +442,205 @@ private fun ProfileHeader(
                     )
                 )
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-        ) {
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .clip(CircleShape)
-                .background(AlKhatibColors.LightGrey),
-            contentAlignment = Alignment.Center
-        ) {
-            if (avatarUrl != null) {
-                AsyncImage(
-                    model = avatarUrl,
-                    contentDescription = displayTitle ?: stringResource(R.string.profile_photo),
-                    modifier = Modifier.fillMaxSize().clip(CircleShape)
-                )
-            } else {
-                Icon(Icons.Filled.Person, contentDescription = null, tint = AlKhatibColors.Slate500, modifier = Modifier.size(40.dp))
-            }
-        }
-        Spacer(Modifier.width(16.dp))
-        Column(Modifier.weight(1f)) {
-            if (isSignedIn) {
-                Text(
-                    text = displayTitle ?: stringResource(R.string.signed_in),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
-                )
-                username?.let {
+        if (isSignedIn) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(AlKhatibColors.LightGrey),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (avatarUrl != null) {
+                        AsyncImage(
+                            model = avatarUrl,
+                            contentDescription = displayTitle ?: stringResource(R.string.profile_photo),
+                            modifier = Modifier.fillMaxSize().clip(CircleShape)
+                        )
+                    } else {
+                        Icon(Icons.Filled.Person, contentDescription = null, tint = AlKhatibColors.Slate500, modifier = Modifier.size(40.dp))
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(Modifier.weight(1f)) {
                     Text(
-                        text = "@$it",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        text = displayTitle ?: stringResource(R.string.signed_in),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.DeepEmerald
                     )
-                }
-                profile?.country?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = AlKhatibColors.Teal
-                    )
-                }
-                val stats = remember(profile) {
-                    listOfNotNull(
-                        profile?.postsCount?.let { "posts" to it },
-                        profile?.followersCount?.let { "followers" to it },
-                        profile?.likesCount?.let { "likes" to it }
-                    )
-                }
+                    username?.let {
+                        Text(
+                            text = "@$it",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = AlKhatibColors.Slate500
+                        )
+                    }
+                    profile?.country?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = AlKhatibColors.Teal
+                        )
+                    }
+                    val stats = remember(profile) {
+                        listOfNotNull(
+                            profile?.postsCount?.let { "posts" to it },
+                            profile?.followersCount?.let { "followers" to it },
+                            profile?.likesCount?.let { "likes" to it }
+                        )
+                    }
 
-                if (stats.isNotEmpty()) {
-                    Spacer(Modifier.height(4.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    ) {
-                        stats.forEachIndexed { index, pair ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = if (pair.first == "followers") {
-                                    Modifier
-                                        .clip(RoundedCornerShape(4.dp))
-                                        .clickable { onOpenFollowers() }
-                                        .padding(horizontal = 2.dp, vertical = 2.dp)
-                                } else Modifier
-                            ) {
-                                Text(
-                                    text = "${pair.second}",
-                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                                    fontWeight = FontWeight.Bold,
-                                    color = AlKhatibColors.DeepEmerald,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                                Spacer(Modifier.width(3.dp))
-                                Text(
-                                    text = when (pair.first) {
-                                        "posts" -> stringResource(R.string.posts)
-                                        "followers" -> stringResource(R.string.followers)
-                                        else -> stringResource(R.string.likes)
-                                    },
-                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                                    color = AlKhatibColors.Slate500,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                            if (index < stats.lastIndex) {
-                                Text(
-                                    text = "•",
-                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                                    color = AlKhatibColors.SoftGrey,
-                                    modifier = Modifier.padding(horizontal = 2.dp)
-                                )
+                    if (stats.isNotEmpty()) {
+                        Spacer(Modifier.height(4.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        ) {
+                            stats.forEachIndexed { index, pair ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = if (pair.first == "followers") {
+                                        Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .clickable { onOpenFollowers() }
+                                            .padding(horizontal = 2.dp, vertical = 2.dp)
+                                    } else Modifier
+                                ) {
+                                    Text(
+                                        text = "${pair.second}",
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                        fontWeight = FontWeight.Bold,
+                                        color = AlKhatibColors.DeepEmerald,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                    Spacer(Modifier.width(3.dp))
+                                    Text(
+                                        text = when (pair.first) {
+                                            "posts" -> stringResource(R.string.posts)
+                                            "followers" -> stringResource(R.string.followers)
+                                            else -> stringResource(R.string.likes)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                        color = AlKhatibColors.Slate500,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
+                                if (index < stats.lastIndex) {
+                                    Text(
+                                        text = "•",
+                                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                        color = AlKhatibColors.SoftGrey,
+                                        modifier = Modifier.padding(horizontal = 2.dp)
+                                    )
+                                }
                             }
                         }
                     }
+                    profileErrorDisplay?.let { display ->
+                        Spacer(Modifier.height(8.dp))
+                        AlKhatibInlineError(
+                            display = display,
+                            onRetry = onRetry
+                        )
+                    }
                 }
-                profileErrorDisplay?.let { display ->
-                    Spacer(Modifier.height(8.dp))
-                    AlKhatibInlineError(
-                        display = display,
-                        onRetry = onRetry
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.linearGradient(
+                            listOf(
+                                AlKhatibColors.DeepEmerald.copy(alpha = 0.05f),
+                                AlKhatibColors.Teal.copy(alpha = 0.02f)
+                            )
+                        )
+                    )
+                    .padding(18.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(54.dp)
+                        .clip(CircleShape)
+                        .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.1f))
+                        .border(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.2f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Person,
+                        contentDescription = null,
+                        tint = AlKhatibColors.DeepEmerald,
+                        modifier = Modifier.size(28.dp)
                     )
                 }
-            } else {
-                Text(
-                    text = stringResource(R.string.sync_reflections),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
-                )
-                Text(
-                    text = stringResource(R.string.sign_in_prompt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
-                )
-                Spacer(Modifier.height(8.dp))
-                Button(onClick = onSignIn) {
-                    Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.sign_in))
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.sync_reflections),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.DeepEmerald,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = stringResource(R.string.sign_in_prompt),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AlKhatibColors.Slate500,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                    )
                 }
+
+                Surface(
+                    onClick = onSignIn,
+                    shape = RoundedCornerShape(12.dp),
+                    color = AlKhatibColors.DeepEmerald,
+                    tonalElevation = 2.dp,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Login,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.sign_in),
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
+                }
+
                 profileErrorDisplay?.let { display ->
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(4.dp))
                     AlKhatibInlineError(display = display)
                 }
             }
         }
-    }
     }
 }
 

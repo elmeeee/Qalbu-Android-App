@@ -334,10 +334,6 @@ fun ChaptersScreen(
                                         onClick = { onOpenChapter(chapter, null) },
                                         modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
                                     )
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-                                    )
                                 }
                             }
                             QuranBrowseMode.JUZ -> when {
@@ -376,10 +372,6 @@ fun ChaptersScreen(
                                             chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
                                             onClick = { onOpenJuz(juz.juzNumber, null) },
                                             modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                                        )
-                                        HorizontalDivider(
-                                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                                         )
                                     }
                                 }
@@ -687,38 +679,40 @@ private fun ChapterRow(
 ) {
     Surface(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        color = Color.Transparent,
-        shape = RoundedCornerShape(0.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = AlKhatibColors.PureWhite,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             ChapterNumberBadge(number = chapter.id)
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(
                     text = chapter.displayComplexName,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.Slate900
                 )
                 if (chapter.displayTranslatedName.isNotEmpty()) {
                     Text(
                         text = chapter.displayTranslatedName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AlKhatibColors.Slate500,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(8.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -732,12 +726,19 @@ private fun ChapterRow(
                     chapter.versesCount?.let { count ->
                         Text(
                             text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.labelMedium,
+                            color = AlKhatibColors.Slate500
                         )
                     }
                 }
             }
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = AlKhatibColors.Teal.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
@@ -758,33 +759,35 @@ private fun JuzRow(
     }
     Surface(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        color = Color.Transparent,
-        shape = RoundedCornerShape(0.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = AlKhatibColors.PureWhite,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             ChapterNumberBadge(number = juz.juzNumber)
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(
                     text = stringResource(R.string.juz_number, juz.juzNumber),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.Slate900
                 )
                 startLabel?.let { label ->
                     Text(
                         text = stringResource(R.string.juz_starts_at, label),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = AlKhatibColors.Slate500,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(top = 2.dp)
                     )
@@ -792,12 +795,20 @@ private fun JuzRow(
                 juz.versesCount?.let { count ->
                     Text(
                         text = pluralStringResource(R.plurals.juz_verse_count, count, count),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
+                        style = MaterialTheme.typography.labelMedium,
+                        color = AlKhatibColors.Teal,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(top = 6.dp)
                     )
                 }
             }
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = AlKhatibColors.Teal.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }

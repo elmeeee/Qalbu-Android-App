@@ -6,6 +6,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,7 +70,8 @@ fun PrayerTrackerCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
-        shadowElevation = 2.dp
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
     ) {
         Column(
             Modifier
@@ -264,8 +267,22 @@ private fun PrayerCheckChip(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(bg)
-                .border(2.dp, borderColor, CircleShape),
+                .then(
+                    if (completed) {
+                        Modifier.background(
+                            Brush.linearGradient(
+                                listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                            )
+                        )
+                    } else {
+                        Modifier.background(bg)
+                    }
+                )
+                .then(
+                    if (!completed) {
+                        Modifier.border(2.dp, borderColor, CircleShape)
+                    } else Modifier
+                ),
             contentAlignment = Alignment.Center
         ) {
             if (completed) {

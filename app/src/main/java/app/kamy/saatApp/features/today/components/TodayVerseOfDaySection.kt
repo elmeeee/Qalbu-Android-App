@@ -2,6 +2,7 @@ package app.kamy.saatApp.features.today.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -145,8 +146,13 @@ fun TodayVerseOfDaySection(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.05f))
-                            .padding(horizontal = 12.dp, vertical = 14.dp)
+                            .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.04f))
+                            .border(
+                                width = 1.dp,
+                                color = AlKhatibColors.DeepEmerald.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 16.dp, vertical = 16.dp)
                     ) {
                         TajweedHtmlView(
                             textUthmani = verse.textUthmani,
@@ -162,8 +168,13 @@ fun TodayVerseOfDaySection(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(AlKhatibColors.LightGrey.copy(alpha = 0.5f))
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                                .background(AlKhatibColors.LightGrey.copy(alpha = 0.35f))
+                                .border(
+                                    width = 1.dp,
+                                    color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(14.dp)
+                                )
+                                .padding(horizontal = 14.dp, vertical = 10.dp)
                         ) {
                             TransliterationView(
                                 text = latin,
@@ -300,7 +311,8 @@ private fun VerseActionButton(
         onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(14.dp),
-        color = tint.copy(alpha = 0.1f)
+        color = tint.copy(alpha = 0.08f),
+        border = BorderStroke(1.dp, tint.copy(alpha = 0.25f))
     ) {
         Column(
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 6.dp),
