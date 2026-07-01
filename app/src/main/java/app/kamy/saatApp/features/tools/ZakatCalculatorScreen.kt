@@ -315,28 +315,7 @@ private fun ZakatBodiesSection(
             )
         }
 
-        // Country chip selector
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            ZakatCountry.values().forEach { country ->
-                FilterChip(
-                    selected = selectedCountry == country,
-                    onClick = { onCountrySelected(country) },
-                    label = {
-                        Text(
-                            text = "${country.emoji} ${stringResource(country.labelRes)}",
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = AlKhatibColors.DeepEmerald,
-                        selectedLabelColor = Color.White
-                    )
-                )
-            }
-        }
+        // Removed Country chip selector per user request to auto-detect and only show relevant agencies
 
         // Malaysia special note
         if (selectedCountry == ZakatCountry.MALAYSIA) {
