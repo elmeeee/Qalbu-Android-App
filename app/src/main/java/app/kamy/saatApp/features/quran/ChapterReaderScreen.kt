@@ -54,7 +54,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -981,35 +985,25 @@ private fun ReaderSettingsSheet(
             ReaderSettingToggleRow(
                 title = "Khat / Rasm Type",
                 content = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
+                    SingleChoiceSegmentedButtonRow(
+                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp, start = 8.dp)
                     ) {
-                        Text(
-                            text = "Madani",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = if (state.arabicTextType == ArabicTextType.MADANI) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
-                            modifier = Modifier.clickable { onArabicTextTypeChange(ArabicTextType.MADANI) }.padding(8.dp)
-                        )
-                        Switch(
-                            checked = state.arabicTextType == ArabicTextType.INDOPAK,
-                            onCheckedChange = { isIndoPak ->
-                                onArabicTextTypeChange(if (isIndoPak) ArabicTextType.INDOPAK else ArabicTextType.MADANI)
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = AlKhatibColors.PureWhite,
-                                checkedTrackColor = AlKhatibColors.DeepEmerald,
-                                uncheckedThumbColor = AlKhatibColors.PureWhite,
-                                uncheckedTrackColor = AlKhatibColors.Teal
-                            )
-                        )
-                        Text(
-                            text = "Indo-Pak",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = if (state.arabicTextType == ArabicTextType.INDOPAK) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
-                            modifier = Modifier.clickable { onArabicTextTypeChange(ArabicTextType.INDOPAK) }.padding(8.dp)
-                        )
+                        SegmentedButton(
+                            selected = state.arabicTextType == ArabicTextType.MADANI,
+                            onClick = { onArabicTextTypeChange(ArabicTextType.MADANI) },
+                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                            colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = androidx.compose.ui.graphics.Color.White)
+                        ) {
+                            Text("Madani")
+                        }
+                        SegmentedButton(
+                            selected = state.arabicTextType == ArabicTextType.INDOPAK,
+                            onClick = { onArabicTextTypeChange(ArabicTextType.INDOPAK) },
+                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                            colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = androidx.compose.ui.graphics.Color.White)
+                        ) {
+                            Text("Indo-Pak")
+                        }
                     }
                 }
             )

@@ -51,9 +51,6 @@ import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
 import app.kamy.saatApp.ui.components.FloatingTabBar
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.navigation.RootTab
-import app.kamy.saatApp.features.tools.dhikr.ui.DhikrDetailScreen
-import app.kamy.saatApp.features.tools.wudhu.ui.WudhuGuideScreen
-import app.kamy.saatApp.features.quran.tajweed.ui.TajweedGuideScreen
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -220,25 +217,6 @@ fun RootScreen(
             }
             composable("tools/manzil") {
                 ManzilScreen(onBack = { navController.popBackStack() })
-            }
-            composable("tools/tajweed") {
-                TajweedGuideScreen(onNavigateBack = { navController.popBackStack() })
-            }
-            composable("tools/wudhu") {
-                WudhuGuideScreen(onNavigateBack = { navController.popBackStack() })
-            }
-            composable(
-                route = "tools/dhikr/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val id = backStackEntry.arguments?.getString("id") ?: ""
-                val titleRes = when(id) {
-                    "dzikiralmathuratkubro" -> app.kamy.saatApp.R.string.title_dzikir_kubro
-                    "dzikiralmathuratsughro" -> app.kamy.saatApp.R.string.title_dzikir_sughro
-                    "fadhilahdoa" -> app.kamy.saatApp.R.string.title_fadhilah_doa
-                    else -> app.kamy.saatApp.R.string.title_dzikir_kubro
-                }
-                DhikrDetailScreen(titleRes = titleRes, onNavigateBack = { navController.popBackStack() })
             }
             composable("tools/faraidh",
                 enterTransition = { slideInHorizontally(tween(280)) { it } + fadeIn(tween(200)) },
