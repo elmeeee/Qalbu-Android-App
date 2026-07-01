@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -88,7 +89,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TodayScreen(
     audioPlayer: AudioPlayerController,
@@ -288,7 +289,7 @@ fun TodayScreen(
                 contentPadding = PaddingValues(bottom = listBottomPadding),
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
             ) {
-                item(key = "today_header") {
+                stickyHeader(key = "today_header") {
                     TodayHeader(
                         cityName = prayerState.cityName,
                         locationStatus = when {

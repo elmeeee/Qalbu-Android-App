@@ -438,10 +438,13 @@
 
     <!-- About Developer -->
     <string name="about">Mengenai</string>
-    <string name="about_developer">Mengenai Pembangun</string>
+    <string name="about_developer">Tentang Aplikasi</string>
+    <string name="about_app_desc">SĀAT ialah aplikasi pendamping Islami moden dan komprehensif yang direka untuk meningkatkan rutin ibadah harian anda. Menampilkan waktu solat yang tepat, notifikasi azan, Al-Quran dengan panduan Tajweed berwarna berserta tilawah audio, cabaran penjejakan solat, dan platform komuniti untuk berkongsi serta membaca refleksi keimanan, SĀAT membantu anda kekal terhubung dengan ibadah di mana jua.</string>
+    <string name="app_details_title">Butiran Aplikasi</string>
+    <string name="developer_details_title">Mengenai Pembangun</string>
     <string name="developer_name">Sufiandy Elmy</string>
     <string name="developer_role">Senior Software Engineer</string>
-    <string name="developer_bio">Sufiandy Elmy ialah seorang Jurutera Perisian dari Indonesia yang memfokuskan kepada pembangunan aplikasi mudah alih dan sistem full-stack. Beliau mempunyai pengalaman dalam mereka bentuk dan menyelenggara seni bina aplikasi berskala besar untuk platform iOS dan Android.</string>
+    <string name="developer_bio">Sufiandy Elmy ialah seorang Jurutera Perisian dari Indonesia yang memfokuskan kepada pembangunan aplikasi mudah alih dan sistem full-stack. Beliau mempunyai pengalaman dalam mereka bentuk dan menyelenggara seni bina aplikasi berskala besar untuk Mobile.</string>
     <string name="developer_achievement">Pemenang WWDC21 Swift Student Challenge: Menjadi salah seorang pemenang anugerah global daripada Apple Inc. pada Worldwide Developers Conference 2021 melalui inovasi aplikasi berasaskan Swift.</string>
     <string name="developer_achievement_title">Pencapaian</string>
     <string name="contact_linkedin">LinkedIn</string>

@@ -1003,10 +1003,13 @@
 
     <!-- About Developer -->
     <string name="about">About</string>
-    <string name="about_developer">About Developer</string>
+    <string name="about_developer">About Application</string>
+    <string name="about_app_desc">SĀAT is a modern, comprehensive companion application designed to elevate your daily Islamic routines. Featuring precise prayer times, adhan alerts, colored Tajweed Quran with audio recitations, prayer progress challenges, and a community platform to share and read reflective insights, SĀAT helps you stay connected to your faith, wherever you are.</string>
+    <string name="app_details_title">Application Details</string>
+    <string name="developer_details_title">About Developer</string>
     <string name="developer_name">Sufiandy Elmy</string>
     <string name="developer_role">Senior Software Engineer</string>
-    <string name="developer_bio">Sufiandy Elmy is a Software Engineer from Indonesia focused on mobile app and full-stack system development. He has experience designing and maintaining large-scale application architectures for iOS and Android platforms.</string>
+    <string name="developer_bio">Sufiandy Elmy is a Software Engineer from Indonesia focused on mobile app and full-stack system development. He has experience designing and maintaining large-scale application architectures for Mobile platforms.</string>
     <string name="developer_achievement">WWDC21 Swift Student Challenge Winner: One of the global award winners from Apple Inc. at the Worldwide Developers Conference 2021 through an innovative Swift-based application.</string>
     <string name="developer_achievement_title">Achievement</string>
     <string name="contact_linkedin">LinkedIn</string>

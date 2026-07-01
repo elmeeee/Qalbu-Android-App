@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -374,11 +375,22 @@ private fun AccountSettingsContent(
         }
 
         SettingsSectionLabel(stringResource(R.string.about))
+        val context = LocalContext.current
+        val packageInfo = remember {
+            try {
+                context.packageManager.getPackageInfo(context.packageName, 0)
+            } catch (e: Exception) {
+                null
+            }
+        }
+        val appVersion = remember(packageInfo) {
+            packageInfo?.versionName ?: "1.0.0"
+        }
         AlKhatibSettingsGroup {
             AlKhatibSettingsNavigationRow(
                 icon = Icons.Outlined.Info,
                 title = stringResource(R.string.about_developer),
-                subtitle = stringResource(R.string.developer_name),
+                subtitle = "Version $appVersion",
                 onClick = onOpenAboutDeveloper
             )
         }
@@ -1363,16 +1375,102 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
         onDismiss = onDismiss,
         maxHeightFraction = 0.85f
     ) {
+        val packageInfo = remember {
+            try {
+                context.packageManager.getPackageInfo(context.packageName, 0)
+            } catch (e: Exception) {
+                null
+            }
+        }
+        val appVersion = remember(packageInfo) {
+            packageInfo?.versionName ?: "1.0.0"
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Avatar Placeholder (Gradient Circle with Initials)
+            // App Icon / Initial
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                AlKhatibColors.DeepEmerald,
+                                AlKhatibColors.MintWash
+                            )
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "SĀ",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "SĀAT",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.Slate900
+            )
+            Text(
+                text = "Version $appVersion",
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate500,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // App Details Section
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.app_details_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.DeepEmerald
+                )
+                Text(
+                    text = stringResource(R.string.about_app_desc),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AlKhatibColors.Slate700,
+                    lineHeight = 20.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider(color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Developer Section Title
+            Text(
+                text = stringResource(R.string.developer_details_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Developer Avatar
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(
@@ -1387,74 +1485,77 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                 Text(
                     text = "SE",
                     color = Color.White,
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
             }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             Text(
                 text = stringResource(R.string.developer_name),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = AlKhatibColors.Slate900
             )
             Text(
                 text = stringResource(R.string.developer_role),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = AlKhatibColors.Slate500,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 2.dp)
             )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Bio
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Developer Bio
             Text(
                 text = stringResource(R.string.developer_bio),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = AlKhatibColors.Slate700,
+                lineHeight = 20.sp,
                 modifier = Modifier.fillMaxWidth()
             )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Achievement
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Achievement Card
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(AlKhatibColors.LightGrey.copy(alpha = 0.5f))
-                    .padding(16.dp)
+                    .padding(14.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
                         tint = AlKhatibColors.IndigoAccent,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = stringResource(R.string.developer_achievement_title),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = AlKhatibColors.Slate900
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = stringResource(R.string.developer_achievement),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate700
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AlKhatibColors.Slate700,
+                    lineHeight = 18.sp
                 )
             }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Links
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Links / Contact info
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 AboutLinkRow(
                     label = stringResource(R.string.contact_linkedin),
