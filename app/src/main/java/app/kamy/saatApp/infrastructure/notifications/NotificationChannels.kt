@@ -21,7 +21,6 @@ object NotificationChannels {
 
 
     fun ensureAll(context: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(
             NotificationChannel(
@@ -87,7 +86,6 @@ object NotificationChannels {
 
     /** Channel with custom adhan sound for notification fallback when foreground playback cannot start. */
     fun ensureAdhanAlert(context: Context, @RawRes rawRes: Int) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val soundUri = Uri.parse("android.resource://${context.packageName}/$rawRes")
         val audioAttributes = AudioAttributes.Builder()

@@ -218,7 +218,6 @@ fun TodayScreen(
         if (batteryOptPrompted || prayerState.timings.isEmpty()) return@LaunchedEffect
         if (!hasAggressiveOemBatteryManagement()) return@LaunchedEffect
         if (context.isIgnoringBatteryOptimizations()) return@LaunchedEffect
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return@LaunchedEffect
         batteryOptPrompted = true
         val message = context.getString(
             R.string.battery_opt_snackbar_oem_message,

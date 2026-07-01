@@ -19,7 +19,6 @@ fun hasAggressiveOemBatteryManagement(): Boolean {
 }
 
 fun Context.requestIgnoreBatteryOptimizations(): Boolean {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true
     if (isIgnoringBatteryOptimizations()) return true
     val direct = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
         data = "package:$packageName".toUri()
