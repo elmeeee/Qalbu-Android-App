@@ -62,6 +62,10 @@ android {
         noCompress += listOf("gz", "db")
     }
 
+    aaptOptions {
+        ignoreAssetsPattern = "!*.bak"
+    }
+
     buildTypes {
         debug {
             // Point debug at production APIs so behaviour matches release.
