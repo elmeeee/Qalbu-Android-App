@@ -57,6 +57,18 @@ fun IqraLessonScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Text(
+                text = stringResource(R.string.iqra_lesson_content_header),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = stringResource(lesson.contentRes),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            Text(
                 text = stringResource(lesson.detailRes),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,

@@ -202,9 +202,12 @@
     <string name="iqra_lesson_5_title">Iqra 5 — Qalqalah</string>
     <string name="iqra_lesson_5_desc">Latih huruf qalqalah di akhir kata</string>
     <string name="iqra_lesson_5_detail">Kenali hentakan qalqalah pada kata. Fokus pada bentuk dan susunan huruf.</string>
+    <string name="iqra_lesson_5_content">Qalqalah memberi hentakan halus pada huruf ق ط ب ج د apabila mati. Latih perkataan berakhir seperti أَقْتَبَ.</string>
     <string name="iqra_lesson_6_title">Iqra 6 — Latihan bacaan</string>
     <string name="iqra_lesson_6_desc">Gabungkan huruf menjadi frasa pendek</string>
+    <string name="iqra_lesson_6_content">Baca kombinasi pendek: بَسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ, أَلْمُ, نُونٌ، مِيمٌ. Fokus pada bentuk huruf dan tanda vokal.</string>
     <string name="iqra_lesson_6_detail">Baca gabungan huruf dan perkataan pendek. Pelajaran ini menguatkan aturan sebelum ini.</string>
+    <string name="iqra_lesson_content_header">Kandungan pelajaran</string>
     <string name="iqra_done">Selesai</string>
     <string name="quran_tab_mushaf">Mushaf</string>
     <string name="quran_subtitle_mushaf">Mushaf Madani dengan warna Tajweed — leret untuk baca</string>

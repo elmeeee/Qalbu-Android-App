@@ -222,9 +222,12 @@
     <string name="iqra_lesson_5_title">Iqra 5 — Qalqalah</string>
     <string name="iqra_lesson_5_desc">Practice bouncing consonants at the end</string>
     <string name="iqra_lesson_5_detail">Recognize qalqalah stops in words. Focus on the shape and letter sequence rather than sound.</string>
+    <string name="iqra_lesson_5_content">Qalqalah triggers a slight bounce on letters ق ط ب ج د when they stop. Practice ending words like أَقْتَبَ.</string>
     <string name="iqra_lesson_6_title">Iqra 6 — Reading practice</string>
     <string name="iqra_lesson_6_desc">Combine letters into short phrases</string>
+    <string name="iqra_lesson_6_content">Read short combinations: بَسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ, أَلْمُ, نُونٌ، مِيمٌ. Focus on letter shape and vowel marking.</string>
     <string name="iqra_lesson_6_detail">Read short Arabic combinations and words. This lesson reinforces the previous rules in context.</string>
+    <string name="iqra_lesson_content_header">Lesson content</string>
     <string name="iqra_done">Done</string>
     <string name="quran_tab_mushaf">Mushaf</string>
     <string name="quran_subtitle_mushaf">Madani mushaf with Tajweed colors — swipe to read</string>
