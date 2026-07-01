@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -677,6 +678,11 @@ private fun ChapterRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val meanings = stringArrayResource(R.array.chapter_meanings)
+    val meaning = remember(meanings, chapter.id) {
+        meanings.getOrNull(chapter.id - 1) ?: chapter.displayTranslatedName
+    }
+
     Surface(
         onClick = onClick,
         modifier = modifier
@@ -702,9 +708,9 @@ private fun ChapterRow(
                     fontWeight = FontWeight.Bold,
                     color = AlKhatibColors.Slate900
                 )
-                if (chapter.displayTranslatedName.isNotEmpty()) {
+                if (meaning.isNotEmpty()) {
                     Text(
-                        text = chapter.displayTranslatedName,
+                        text = meaning,
                         style = MaterialTheme.typography.bodyMedium,
                         color = AlKhatibColors.Slate500,
                         maxLines = 1,

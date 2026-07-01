@@ -469,4 +469,130 @@
     <string name="title_dzikir_sughro">Zikir Al-Mathurat Sughro</string>
     <string name="title_fadhilah_doa">Fadhilat Doa</string>
     <string name="title_wudhu_guide">Panduan Wuduk</string>
+
+    <plurals name="chapter_verse_count">
+        <item quantity="one">1 ayat</item>
+        <item quantity="other">%d ayat</item>
+    </plurals>
+    <plurals name="juz_verse_count">
+        <item quantity="one">1 ayat</item>
+        <item quantity="other">%d ayat</item>
+    </plurals>
+
+    <string-array name="chapter_meanings">
+        <item>Pembukaan</item>
+        <item>Lembu Betina</item>
+        <item>Keluarga Imran</item>
+        <item>Wanita</item>
+        <item>Hidangan</item>
+        <item>Binatang Ternakan</item>
+        <item>Tempat Tertinggi</item>
+        <item>Rampasan Perang</item>
+        <item>Taubat</item>
+        <item>Yunus</item>
+        <item>Hud</item>
+        <item>Yusuf</item>
+        <item>Guruh</item>
+        <item>Ibrahim</item>
+        <item>Kawasan Berbatu</item>
+        <item>Lebah</item>
+        <item>Perjalanan Malam</item>
+        <item>Gua</item>
+        <item>Maryam</item>
+        <item>Thaha</item>
+        <item>Para Nabi</item>
+        <item>Haji</item>
+        <item>Golongan yang Beriman</item>
+        <item>Cahaya</item>
+        <item>Pembeza</item>
+        <item>Para Penyair</item>
+        <item>Semut</item>
+        <item>Kisah-Kisah</item>
+        <item>Labah-Labah</item>
+        <item>Rom</item>
+        <item>Luqman</item>
+        <item>Sujud</item>
+        <item>Golongan yang Bersekutu</item>
+        <item>Saba\'</item>
+        <item>Pencipta</item>
+        <item>Yasin</item>
+        <item>Barisan-Barisan</item>
+        <item>Shad</item>
+        <item>Kumpulan-Kumpulan</item>
+        <item>Pengampun</item>
+        <item>Dijelaskan Satu Persatu</item>
+        <item>Mesyuarat</item>
+        <item>Perhiasan Emas</item>
+        <item>Asap</item>
+        <item>Yang Berlutut</item>
+        <item>Bukit-Bukit Pasir</item>
+        <item>Muhammad</item>
+        <item>Kemenangan</item>
+        <item>Bilik-Bilik</item>
+        <item>Qaf</item>
+        <item>Angin yang Menerbangkan</item>
+        <item>Bukit</item>
+        <item>Bintang</item>
+        <item>Bulan</item>
+        <item>Yang Maha Pemurah</item>
+        <item>Peristiwa yang Dahsyat</item>
+        <item>Besi</item>
+        <item>Wanita yang Menyanggah</item>
+        <item>Pengusiran</item>
+        <item>Wanita yang Diuji</item>
+        <item>Barisan</item>
+        <item>Hari Jumaat</item>
+        <item>Orang-Orang Munafik</item>
+        <item>Hari Dinampakkan Kesilapan</item>
+        <item>Talak</item>
+        <item>Mengharamkan</item>
+        <item>Kerajaan</item>
+        <item>Pena</item>
+        <item>Hari Kiamat</item>
+        <item>Tempat-Tempat Naik</item>
+        <item>Nuh</item>
+        <item>Jin</item>
+        <item>Orang yang Berselimut</item>
+        <item>Orang yang Berkemul</item>
+        <item>Hari Kiamat</item>
+        <item>Manusia</item>
+        <item>Malaikat yang Diutus</item>
+        <item>Berita Besar</item>
+        <item>Malaikat yang Mencabut</item>
+        <item>Ia Bermuka Masam</item>
+        <item>Menggulung</item>
+        <item>Terbelah</item>
+        <item>Orang-Orang yang Curang</item>
+        <item>Terbelah</item>
+        <item>Gugusan Bintang</item>
+        <item>Yang Datang di Waktu Malam</item>
+        <item>Yang Maha Tinggi</item>
+        <item>Hari Pembalasan</item>
+        <item>Fajar</item>
+        <item>Negeri</item>
+        <item>Matahari</item>
+        <item>Malam</item>
+        <item>Waktu Duha</item>
+        <item>Kelapangan</item>
+        <item>Buah Tin</item>
+        <item>Segumpal Darah</item>
+        <item>Kemuliaan</item>
+        <item>Bukti Nyata</item>
+        <item>Kegoncangan</item>
+        <item>Kuda Perang yang Berlari Kencang</item>
+        <item>Hari Kiamat</item>
+        <item>Bermegah-Megah</item>
+        <item>Demi Masa</item>
+        <item>Pengumpat</item>
+        <item>Gajah</item>
+        <item>Suku Quraisy</item>
+        <item>Barangan Berguna</item>
+        <item>Nikmat yang Melimpah</item>
+        <item>Golongan Kafir</item>
+        <item>Pertolongan</item>
+        <item>Nyalaan Api</item>
+        <item>Keikhlasan</item>
+        <item>Waktu Subuh</item>
+        <item>Manusia</item>
+    </string-array>
 </resources>

@@ -1038,4 +1038,121 @@
     <string name="wudhu_subtitle">Step by step ablution guide</string>
     <string name="tajweed_title">Tajweed Guide</string>
     <string name="tajweed_subtitle">Learn the rules of recitation</string>
+
+    <string-array name="chapter_meanings">
+        <item>The Opening</item>
+        <item>The Cow</item>
+        <item>Family of Imran</item>
+        <item>The Women</item>
+        <item>The Table Spread</item>
+        <item>The Cattle</item>
+        <item>The Heights</item>
+        <item>The Spoils of War</item>
+        <item>The Repentance</item>
+        <item>Jonah</item>
+        <item>Hud</item>
+        <item>Joseph</item>
+        <item>The Thunder</item>
+        <item>Abraham</item>
+        <item>The Rocky Tract</item>
+        <item>The Bee</item>
+        <item>The Night Journey</item>
+        <item>The Cave</item>
+        <item>Mary</item>
+        <item>Ta-Ha</item>
+        <item>The Prophets</item>
+        <item>The Pilgrimage</item>
+        <item>The Believers</item>
+        <item>The Light</item>
+        <item>The Criterion</item>
+        <item>The Poets</item>
+        <item>The Ant</item>
+        <item>The Stories</item>
+        <item>The Spider</item>
+        <item>The Romans</item>
+        <item>Luqman</item>
+        <item>The Prostration</item>
+        <item>The Combined Forces</item>
+        <item>Sheba</item>
+        <item>The Originator</item>
+        <item>Ya-Sin</item>
+        <item>Those who set the Ranks</item>
+        <item>Sad</item>
+        <item>The Troops</item>
+        <item>The Forgiver</item>
+        <item>Explained in Detail</item>
+        <item>The Consultation</item>
+        <item>The Ornaments of Gold</item>
+        <item>The Smoke</item>
+        <item>The Crouching</item>
+        <item>The Wind-Curved Sandhills</item>
+        <item>Muhammad</item>
+        <item>The Victory</item>
+        <item>The Dwellings</item>
+        <item>Qaf</item>
+        <item>The Winnowing Winds</item>
+        <item>The Mount</item>
+        <item>The Star</item>
+        <item>The Moon</item>
+        <item>The Beneficent</item>
+        <item>The Inevitable Event</item>
+        <item>The Iron</item>
+        <item>The Pleading Woman</item>
+        <item>The Exile</item>
+        <item>The She-Test</item>
+        <item>The Ranks</item>
+        <item>The Congregation</item>
+        <item>The Hypocrites</item>
+        <item>The Mutual Disillusion</item>
+        <item>The Divorce</item>
+        <item>The Prohibition</item>
+        <item>The Sovereignty</item>
+        <item>The Pen</item>
+        <item>The Reality</item>
+        <item>The Ascending Stairways</item>
+        <item>Noah</item>
+        <item>The Jinn</item>
+        <item>The Enshrouded One</item>
+        <item>The Cloaked One</item>
+        <item>The Resurrection</item>
+        <item>The Man</item>
+        <item>The Emissaries</item>
+        <item>The Tidings</item>
+        <item>Those who drag forth</item>
+        <item>He frowned</item>
+        <item>The Overthrowing</item>
+        <item>The Cleaving</item>
+        <item>The Defrauders</item>
+        <item>The Sundering</item>
+        <item>The Mansions of the Stars</item>
+        <item>The Nightcomer</item>
+        <item>The Most High</item>
+        <item>The Overwhelming</item>
+        <item>The Dawn</item>
+        <item>The City</item>
+        <item>The Sun</item>
+        <item>The Night</item>
+        <item>The Morning Hours</item>
+        <item>The Relief</item>
+        <item>The Fig</item>
+        <item>The Clot</item>
+        <item>The Power</item>
+        <item>The Clear Proof</item>
+        <item>The Earthquake</item>
+        <item>The Courser</item>
+        <item>The Calamity</item>
+        <item>The Rivalry in World Increase</item>
+        <item>The Declining Day</item>
+        <item>The Traducer</item>
+        <item>The Elephant</item>
+        <item>Quraysh</item>
+        <item>The Small Kindnesses</item>
+        <item>The Abundance</item>
+        <item>The Disbelievers</item>
+        <item>The Help</item>
+        <item>The Palm Fiber</item>
+        <item>The Sincerity</item>
+        <item>The Daybreak</item>
+        <item>Mankind</item>
+    </string-array>
 </resources>

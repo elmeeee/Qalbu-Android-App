@@ -1,6 +1,7 @@
 package app.kamy.saatApp.features.today.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -112,35 +116,30 @@ fun TodayHeader(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                // Day and Gregorian Date: e.g. "Rabu, 1 Juli 2026"
+                var showHijri by remember { mutableStateOf(false) }
+                val dateText = remember(showHijri, localDayName, gregorianLabel, formattedHijri) {
+                    val prefix = if (localDayName.isNotEmpty()) "$localDayName, " else ""
+                    if (showHijri && !formattedHijri.isNullOrBlank()) {
+                        "$prefix$formattedHijri"
+                    } else {
+                        "$prefix${gregorianLabel.orEmpty()}"
+                    }
+                }
+                val textColor = if (showHijri) AlKhatibColors.GoldDeep else MaterialTheme.colorScheme.onSurface
+
                 Text(
-                    text = buildString {
-                        if (localDayName.isNotEmpty()) {
-                            append(localDayName)
-                            append(", ")
-                        }
-                        append(gregorianLabel.orEmpty())
-                    },
+                    text = dateText,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = textColor,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                // Hijri Date: e.g. "16 Muharram 1448 H"
-                if (!formattedHijri.isNullOrBlank()) {
-                    Text(
-                        text = formattedHijri,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = AlKhatibColors.GoldDeep,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.clickable(
+                        onClickLabel = stringResource(R.string.date_switch_a11y),
+                        onClick = { showHijri = !showHijri }
                     )
-                }
+                )
             }
 
             Spacer(Modifier.width(16.dp))
