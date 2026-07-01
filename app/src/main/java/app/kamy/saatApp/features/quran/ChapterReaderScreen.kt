@@ -145,7 +145,7 @@ fun ChapterReaderScreen(
         onboardingStore.markScrollHintShown()
     }
     val settingsVisible = remember { mutableStateOf(false) }
-    var verseMenuExpanded by remember { mutableStateOf(false) }
+    val verseMenuExpanded = remember { mutableStateOf(false) }
     val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
 
     // Pager requires pageCount > 0; verses may be empty while the first page is loading.
@@ -196,7 +196,7 @@ fun ChapterReaderScreen(
     }
 
     LaunchedEffect(pagerState.currentPage) {
-        verseMenuExpanded = false
+        verseMenuExpanded.value = false
     }
 
     LaunchedEffect(state.publishMessage) {
@@ -319,8 +319,8 @@ fun ChapterReaderScreen(
         if (state.verses.isNotEmpty()) {
             val readerActionsBottom = FloatingAudioBarMetrics.bottomGap + 14.dp
             ReaderVerseActionsMenu(
-                expanded = verseMenuExpanded,
-                onToggle = { verseMenuExpanded = !verseMenuExpanded },
+                expanded = verseMenuExpanded.value,
+                onToggle = { verseMenuExpanded.value = !verseMenuExpanded.value },
                 bookmarked = state.currentVerseBookmarked,
                 hasNote = state.currentVerseHasNote,
                 hifzStatus = state.currentVerseHifzStatus,
@@ -330,27 +330,27 @@ fun ChapterReaderScreen(
                     .navigationBarsPadding()
                     .padding(end = 10.dp, bottom = readerActionsBottom),
                 onBookmark = {
-                    verseMenuExpanded = false
+                    verseMenuExpanded.value = false
                     vm.toggleBookmark(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
                 },
                 onNote = {
-                    verseMenuExpanded = false
+                    verseMenuExpanded.value = false
                     vm.openNote(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
                 },
                 onHifz = {
-                    verseMenuExpanded = false
+                    verseMenuExpanded.value = false
                     vm.cycleHifzStatus(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
                 },
                 onAiShare = {
-                    verseMenuExpanded = false
+                    verseMenuExpanded.value = false
                     vm.openAiShare(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
                 },
                 onTafsir = {
-                    verseMenuExpanded = false
+                    verseMenuExpanded.value = false
                     currentVerse?.verseKey?.let(vm::openTafsir)
                 },
                 onHadith = {
-                    verseMenuExpanded = false
+                    verseMenuExpanded.value = false
                     currentVerse?.verseKey?.let(vm::openHadith)
                 }
             )
