@@ -1,5 +1,11 @@
 package app.kamy.saatApp.features.today.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
@@ -117,29 +124,47 @@ fun TodayHeader(
                 )
 
                 var showHijri by remember { mutableStateOf(false) }
-                val dateText = remember(showHijri, localDayName, gregorianLabel, formattedHijri) {
-                    val prefix = if (localDayName.isNotEmpty()) "$localDayName, " else ""
-                    if (showHijri && !formattedHijri.isNullOrBlank()) {
-                        "$prefix$formattedHijri"
-                    } else {
-                        "$prefix${gregorianLabel.orEmpty()}"
+                LaunchedEffect(formattedHijri) {
+                    if (!formattedHijri.isNullOrBlank()) {
+                        while (true) {
+                            kotlinx.coroutines.delay(5000)
+                            showHijri = !showHijri
+                        }
                     }
                 }
-                val textColor = if (showHijri) AlKhatibColors.GoldDeep else MaterialTheme.colorScheme.onSurface
 
-                Text(
-                    text = dateText,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = textColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.clickable(
-                        onClickLabel = stringResource(R.string.date_switch_a11y),
-                        onClick = { showHijri = !showHijri }
+                AnimatedContent(
+                    targetState = showHijri,
+                    transitionSpec = {
+                        (slideInVertically { height -> height } + fadeIn()) togetherWith
+                                (slideOutVertically { height -> -height } + fadeOut())
+                    },
+                    label = "dateTransition"
+                ) { targetShowHijri ->
+                    val dateText = remember(targetShowHijri, localDayName, gregorianLabel, formattedHijri) {
+                        val prefix = if (localDayName.isNotEmpty()) "$localDayName, " else ""
+                        if (targetShowHijri && !formattedHijri.isNullOrBlank()) {
+                            "$prefix$formattedHijri"
+                        } else {
+                            "$prefix${gregorianLabel.orEmpty()}"
+                        }
+                    }
+                    val textColor = if (targetShowHijri) AlKhatibColors.GoldDeep else MaterialTheme.colorScheme.onSurface
+
+                    Text(
+                        text = dateText,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = textColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.clickable(
+                            onClickLabel = stringResource(R.string.date_switch_a11y),
+                            onClick = { showHijri = !showHijri }
+                        )
                     )
-                )
+                }
             }
 
             Spacer(Modifier.width(16.dp))
