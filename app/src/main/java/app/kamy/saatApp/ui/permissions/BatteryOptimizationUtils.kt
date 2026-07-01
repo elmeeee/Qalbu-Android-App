@@ -11,10 +11,13 @@ import androidx.core.net.toUri
 import java.util.Locale
 
 fun Context.isIgnoringBatteryOptimizations(): Boolean {
-    return true
+    val pm = getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return false
+    return pm.isIgnoringBatteryOptimizations(packageName)
 }
 
 fun hasAggressiveOemBatteryManagement(): Boolean {
+    // Disabled (returns false) because elderly users get confused by complex OEM menus.
+    // We will only rely on the simple Android system popup.
     return false
 }
 

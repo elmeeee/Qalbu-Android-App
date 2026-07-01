@@ -216,13 +216,9 @@ fun TodayScreen(
     // Battery / autostart — only on OEMs that kill background apps (Samsung, Xiaomi, Oppo, …).
     LaunchedEffect(prayerState.timings.isNotEmpty(), batteryOptPrompted) {
         if (batteryOptPrompted || prayerState.timings.isEmpty()) return@LaunchedEffect
-        if (!hasAggressiveOemBatteryManagement()) return@LaunchedEffect
         if (context.isIgnoringBatteryOptimizations()) return@LaunchedEffect
         batteryOptPrompted = true
-        val message = context.getString(
-            R.string.battery_opt_snackbar_oem_message,
-            Build.MANUFACTURER.replaceFirstChar { it.titlecase() }
-        )
+        val message = context.getString(R.string.battery_opt_snackbar_message)
         val result = snackbarHostState.showSnackbar(
             message = message,
             actionLabel = allowLabel,
