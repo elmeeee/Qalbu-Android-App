@@ -78,7 +78,6 @@ import kotlinx.coroutines.launch
 fun ChaptersScreen(
     onOpenChapter: (chapter: QuranChapter, initialVerse: Int?) -> Unit,
     onOpenJuz: (juzNumber: Int, verseKey: String?) -> Unit,
-    onOpenIqraLesson: (lessonId: Int) -> Unit,
     onOpenBookmarks: () -> Unit = {}
 ) {
     val vm: ChaptersViewModel = hiltViewModel()
@@ -341,19 +340,6 @@ fun ChaptersScreen(
                                     )
                                 }
                             }
-                            QuranBrowseMode.IQRA -> {
-                                items(IqraLessons.all, key = { "iqra_${it.id}" }) { lesson ->
-                                    IqraLessonRow(
-                                        lesson = lesson,
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                                        onClick = { onOpenIqraLesson(lesson.id) }
-                                    )
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-                                    )
-                                }
-                            }
                             QuranBrowseMode.JUZ -> when {
                                 state.juzsLoading && state.juzs.isEmpty() -> {
                                     items(10, key = { "juz_skeleton_$it" }) { index ->
@@ -457,7 +443,6 @@ private fun QuranListHeader(
         val defaultSubtitle = when (browseMode) {
             QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
             QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
-            QuranBrowseMode.IQRA -> stringResource(R.string.quran_subtitle_iqra)
         }
         val noMatchesSubtitle = stringResource(R.string.no_matches)
         val oneSurahSubtitle = stringResource(R.string.one_surah_found)
@@ -565,13 +550,6 @@ private fun QuranBrowseTabs(
                 label = juzLabel,
                 selected = browseMode == QuranBrowseMode.JUZ,
                 onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
-                modifier = Modifier.weight(1f),
-                shape = tabShape
-            )
-            QuranBrowseTab(
-                label = stringResource(R.string.quran_tab_iqra),
-                selected = browseMode == QuranBrowseMode.IQRA,
-                onClick = { onBrowseModeChange(QuranBrowseMode.IQRA) },
                 modifier = Modifier.weight(1f),
                 shape = tabShape
             )
@@ -764,52 +742,6 @@ private fun ChapterRow(
     }
 }
 
-@Composable
-private fun IqraLessonRow(
-    lesson: IqraLesson,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick),
-        color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(lesson.titleRes),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = stringResource(lesson.descriptionRes),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
 
 @Composable
 private fun JuzRow(

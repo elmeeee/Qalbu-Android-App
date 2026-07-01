@@ -29,7 +29,6 @@ import androidx.navigation.navArgument
 import app.kamy.saatApp.features.account.AccountScreen
 import app.kamy.saatApp.features.quran.ChapterReaderScreen
 import app.kamy.saatApp.features.quran.ChaptersScreen
-import app.kamy.saatApp.features.quran.IqraLessonScreen
 import app.kamy.saatApp.features.tools.DoaZikirScreen
 import app.kamy.saatApp.features.tools.DhikrScreen
 import app.kamy.saatApp.features.tools.QiblaScreen
@@ -175,9 +174,6 @@ fun RootScreen(
                         val keyArg = verseKey?.let { java.net.URLEncoder.encode(it, Charsets.UTF_8.name()) }.orEmpty()
                         navController.navigate("quran/juz/$juzNumber?verseKey=$keyArg")
                     },
-                    onOpenIqraLesson = { lessonId ->
-                        navController.navigate("quran/iqra/$lessonId") { launchSingleTop = true }
-                    },
                     onOpenBookmarks = {
                         navController.navigate("quran/bookmarks") { launchSingleTop = true }
                     }
@@ -262,18 +258,6 @@ fun RootScreen(
                 ChapterReaderScreen(
                     initialVerseKey = verseKey,
                     audioBarVisible = showAudioBar,
-                    onBack = { navController.popBackStack() }
-                )
-            }
-            composable(
-                route = "quran/iqra/{lessonId}",
-                arguments = listOf(
-                    navArgument("lessonId") { type = NavType.IntType }
-                )
-            ) { entry ->
-                val lessonId = entry.arguments?.getInt("lessonId") ?: 1
-                IqraLessonScreen(
-                    lessonId = lessonId,
                     onBack = { navController.popBackStack() }
                 )
             }
