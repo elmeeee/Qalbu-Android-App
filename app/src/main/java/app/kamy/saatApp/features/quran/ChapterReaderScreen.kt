@@ -257,6 +257,7 @@ fun ChapterReaderScreen(
                     showTransliteration = state.showTransliteration,
                     translationId = state.selectedTranslationId,
                     isTajweedEnabled = state.isTajweedEnabled,
+                    arabicTextType = state.arabicTextType,
                     hifzModeEnabled = state.hifzModeEnabled,
                     audioBarVisible = audioBarVisible,
                     personalDataRevision = state.personalDataRevision,
@@ -438,7 +439,8 @@ fun ChapterReaderScreen(
             onToggleTajweed = vm::toggleTajweed,
             onSelectRecitation = vm::selectRecitation,
             onSetPlaybackMode = vm::setPlaybackMode,
-            onToggleHifzMode = vm::toggleHifzMode
+            onToggleHifzMode = vm::toggleHifzMode,
+            onArabicTextTypeChange = vm::setArabicTextType
         )
     }
 
@@ -526,6 +528,7 @@ private fun SaatAyahPage(
     showTransliteration: Boolean,
     translationId: Int,
     isTajweedEnabled: Boolean,
+    arabicTextType: ArabicTextType,
     hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
     personalDataRevision: Int,
@@ -627,7 +630,7 @@ private fun SaatAyahPage(
                     }
                 }
                 else -> {
-                    val textToRender = verse.textUthmani
+                    val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) (verse.textIndopak ?: verse.textUthmani) else verse.textUthmani
                     TajweedHtmlView(
                         textUthmani = textToRender ?: "",
                         ayahNumber = verse.resolvedVerseNumber,
@@ -890,7 +893,8 @@ private fun ReaderSettingsSheet(
     onToggleTajweed: (Boolean) -> Unit,
     onSelectRecitation: (Int) -> Unit,
     onSetPlaybackMode: (AyahPlaybackMode) -> Unit,
-    onToggleHifzMode: (Boolean) -> Unit
+    onToggleHifzMode: (Boolean) -> Unit,
+    onArabicTextTypeChange: (ArabicTextType) -> Unit
 ) {
     AlKhatibPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.65f) {
         Column(
@@ -970,6 +974,41 @@ private fun ReaderSettingsSheet(
                     onSetPlaybackMode(
                         if (enabled) AyahPlaybackMode.CONTINUOUS else AyahPlaybackMode.SINGLE
                     )
+                }
+            )
+            ReaderSettingToggleRow(
+                title = "Khat / Rasm Type",
+                content = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Madani",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (state.arabicTextType == ArabicTextType.MADANI) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
+                            modifier = Modifier.clickable { onArabicTextTypeChange(ArabicTextType.MADANI) }.padding(8.dp)
+                        )
+                        Switch(
+                            checked = state.arabicTextType == ArabicTextType.INDOPAK,
+                            onCheckedChange = { isIndoPak ->
+                                onArabicTextTypeChange(if (isIndoPak) ArabicTextType.INDOPAK else ArabicTextType.MADANI)
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = AlKhatibColors.PureWhite,
+                                checkedTrackColor = AlKhatibColors.DeepEmerald,
+                                uncheckedThumbColor = AlKhatibColors.PureWhite,
+                                uncheckedTrackColor = AlKhatibColors.Teal
+                            )
+                        )
+                        Text(
+                            text = "Indo-Pak",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = if (state.arabicTextType == ArabicTextType.INDOPAK) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
+                            modifier = Modifier.clickable { onArabicTextTypeChange(ArabicTextType.INDOPAK) }.padding(8.dp)
+                        )
+                    }
                 }
             )
             Text(

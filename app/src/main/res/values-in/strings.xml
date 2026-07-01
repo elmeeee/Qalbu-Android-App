@@ -436,4 +436,9 @@
     <string name="tajweed_ikhfa_syafawi_desc">Membaca Mim sukun secara samar ketika bertemu Ba, disertai dengung.</string>
     <string name="tajweed_qalqalah_title">Qalqalah</string>
     <string name="tajweed_qalqalah_desc">Memantulkan bunyi huruf dengan jelas saat sukun (mati).</string>
+    <!-- Dzikir, Doa, Wudhu -->
+    <string name="title_dzikir_kubro">Dzikir Al-Mathurat Kubro</string>
+    <string name="title_dzikir_sughro">Dzikir Al-Mathurat Sughro</string>
+    <string name="title_fadhilah_doa">Fadhilah Doa</string>
+    <string name="title_wudhu_guide">Panduan Wudhu</string>
 </resources>

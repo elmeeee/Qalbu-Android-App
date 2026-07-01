@@ -114,6 +114,46 @@ fun SpiritualToolsScreen(
             "manzil",
             AlKhatibColors.DeepEmerald,
             AlKhatibColors.GoldDeep
+        ),
+        SpiritualToolItem(
+            Icons.Filled.WaterDrop,
+            R.string.wudhu_title,
+            R.string.wudhu_subtitle,
+            "wudhu",
+            AlKhatibColors.Teal,
+            AlKhatibColors.DeepEmerald
+        ),
+        SpiritualToolItem(
+            Icons.Filled.MenuBook,
+            R.string.tajweed_title,
+            R.string.tajweed_subtitle,
+            "tajweed",
+            AlKhatibColors.DeepEmerald,
+            AlKhatibColors.GoldDeep
+        ),
+        SpiritualToolItem(
+            Icons.Filled.AutoStories,
+            R.string.title_dzikir_kubro,
+            R.string.dhikr_account_subtitle,
+            "dhikr/dzikiralmathuratkubro",
+            AlKhatibColors.DeepEmerald,
+            AlKhatibColors.Teal
+        ),
+        SpiritualToolItem(
+            Icons.Filled.AutoStories,
+            R.string.title_dzikir_sughro,
+            R.string.dhikr_account_subtitle,
+            "dhikr/dzikiralmathuratsughro",
+            AlKhatibColors.DeepEmerald,
+            AlKhatibColors.Teal
+        ),
+        SpiritualToolItem(
+            Icons.Filled.AutoStories,
+            R.string.title_fadhilah_doa,
+            R.string.doa_zikir_account_subtitle,
+            "dhikr/fadhilahdoa",
+            AlKhatibColors.DeepEmerald,
+            AlKhatibColors.Teal
         )
     )
 

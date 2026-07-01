@@ -1001,4 +1001,10 @@
     <string name="tajweed_ikhfa_syafawi_desc">Hide the Mim sound when followed by Ba, with a nasal tone.</string>
     <string name="tajweed_qalqalah_title">Qalqalah</string>
     <string name="tajweed_qalqalah_desc">Bounce the sound of the letter clearly.</string>
+    
+    <!-- Dzikir, Doa, Wudhu -->
+    <string name="title_dzikir_kubro">Dzikir Al-Mathurat Kubro</string>
+    <string name="title_dzikir_sughro">Dzikir Al-Mathurat Sughro</string>
+    <string name="title_fadhilah_doa">Fadhilah Doa</string>
+    <string name="title_wudhu_guide">Wudhu Guide</string>
 </resources>
