@@ -44,8 +44,6 @@ fun TodayHeader(
     onLocationClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val greeting = rememberGreeting()
-
     val weekdays = stringArrayResource(R.array.weekday_names)
     val dayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
     val localDayName = remember(dayIndex, weekdays) {
@@ -66,6 +64,29 @@ fun TodayHeader(
 
     val locationText = cityName ?: locationStatus ?: stringResource(R.string.locating)
 
+    val displayLocation = remember(locationText) {
+        val raw = if (locationText.contains(",")) {
+            val parts = locationText.split(",")
+            if (parts.size == 2 && parts[0].trim().toDoubleOrNull() != null) {
+                locationText
+            } else {
+                parts[0].trim()
+            }
+        } else {
+            locationText
+        }
+        raw.replace("Kecamatan", "Kec", ignoreCase = true)
+           .replace("Kelurahan", "Kel", ignoreCase = true)
+           .replace("Subdistrict", "Subdist", ignoreCase = true)
+           .replace("Township", "Twp", ignoreCase = true)
+           .replace("District", "Dist", ignoreCase = true)
+           .replace("Municipality", "Mun", ignoreCase = true)
+           .replace("County", "Co.", ignoreCase = true)
+           .replace("Kampung", "Kg", ignoreCase = true)
+           .replace("Kampong", "Kg", ignoreCase = true)
+           .replace("Taman", "Tmn", ignoreCase = true)
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -76,15 +97,15 @@ fun TodayHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                // Greeting: e.g. "Selamat Pagi" / "Good Morning"
                 Text(
-                    text = greeting,
+                    text = "Assalamualaikum Warahmatullahi Wabarakatuh",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -120,37 +141,38 @@ fun TodayHeader(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
 
-                Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.width(16.dp))
 
-                // Clickable Location Badge
-                Surface(
-                    onClick = onLocationClick,
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.align(Alignment.Start)
+            // Location Badge on the right
+            Surface(
+                onClick = onLocationClick,
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.align(Alignment.CenterVertically)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.LocationOn,
-                            contentDescription = stringResource(R.string.location_enable),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = locationText,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Medium
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.LocationOn,
+                        contentDescription = stringResource(R.string.location_enable),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = displayLocation,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.widthIn(max = 140.dp)
+                    )
                 }
             }
         }
@@ -163,17 +185,3 @@ fun TodayHeader(
     }
 }
 
-@Composable
-private fun rememberGreeting(): String {
-    val morning = stringResource(R.string.greeting_morning)
-    val afternoon = stringResource(R.string.greeting_afternoon)
-    val evening = stringResource(R.string.greeting_evening)
-    val night = stringResource(R.string.greeting_night)
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    return when (hour) {
-        in 3..11 -> morning
-        in 12..17 -> afternoon
-        in 18..20 -> evening
-        else -> night
-    }
-}
