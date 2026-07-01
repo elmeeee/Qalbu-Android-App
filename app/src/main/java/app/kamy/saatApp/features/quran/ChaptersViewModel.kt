@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class QuranBrowseMode { SURAH, JUZ }
+enum class QuranBrowseMode { SURAH, JUZ, IQRA }
 
 data class ChaptersUiState(
     val isLoading: Boolean = false,
