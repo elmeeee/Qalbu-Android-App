@@ -1373,7 +1373,8 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
 
     app.kamy.saatApp.design.components.AlKhatibPartialBottomSheet(
         onDismiss = onDismiss,
-        maxHeightFraction = 0.85f
+        maxHeightFraction = 0.85f,
+        scrollContent = false
     ) {
         val packageInfo = remember {
             try {
