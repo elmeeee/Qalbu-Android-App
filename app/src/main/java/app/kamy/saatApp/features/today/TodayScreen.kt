@@ -281,33 +281,29 @@ fun TodayScreen(
             },
             modifier = Modifier.fillMaxSize()
         ) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(MaterialTheme.colorScheme.background),
+                contentPadding = PaddingValues(bottom = listBottomPadding),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
             ) {
-                TodayHeader(
-                    cityName = prayerState.cityName,
-                    locationStatus = when {
-                        prayerState.cityName != null -> null
-                        prayerState.needsPermission -> locationEnable
-                        prayerState.error?.kind == app.kamy.saatApp.core.error.AppErrorKind.Location -> locationUnavailable
-                        prayerState.isLoading -> locating
-                        else -> locating
-                    },
-                    hijriLabel = prayerState.hijriLabel,
-                    gregorianLabel = prayerState.gregorianLabel,
-                    onLocationClick = prayerVm::openLocationSheet,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentPadding = PaddingValues(bottom = listBottomPadding),
-                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
-                ) {
+                item(key = "today_header") {
+                    TodayHeader(
+                        cityName = prayerState.cityName,
+                        locationStatus = when {
+                            prayerState.cityName != null -> null
+                            prayerState.needsPermission -> locationEnable
+                            prayerState.error?.kind == app.kamy.saatApp.core.error.AppErrorKind.Location -> locationUnavailable
+                            prayerState.isLoading -> locating
+                            else -> locating
+                        },
+                        hijriLabel = prayerState.hijriLabel,
+                        gregorianLabel = prayerState.gregorianLabel,
+                        onLocationClick = prayerVm::openLocationSheet,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                     item(key = "khgt_banner") {
                         TodayImportantDayBanner(
                             info = prayerState.khgtToday,
@@ -387,7 +383,6 @@ fun TodayScreen(
                             onRetry = { scope.launch { todayVm.refreshContent() } }
                         )
                     }
-                }
             }
         }
 

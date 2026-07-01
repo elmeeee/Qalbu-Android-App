@@ -982,31 +982,6 @@ private fun ReaderSettingsSheet(
                     )
                 }
             )
-            ReaderSettingToggleRow(
-                title = "Khat / Rasm Type",
-                content = {
-                    SingleChoiceSegmentedButtonRow(
-                        modifier = Modifier.fillMaxWidth().padding(end = 16.dp, start = 8.dp)
-                    ) {
-                        SegmentedButton(
-                            selected = state.arabicTextType == ArabicTextType.MADANI,
-                            onClick = { onArabicTextTypeChange(ArabicTextType.MADANI) },
-                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                            colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = androidx.compose.ui.graphics.Color.White)
-                        ) {
-                            Text("Madani")
-                        }
-                        SegmentedButton(
-                            selected = state.arabicTextType == ArabicTextType.INDOPAK,
-                            onClick = { onArabicTextTypeChange(ArabicTextType.INDOPAK) },
-                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                            colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = androidx.compose.ui.graphics.Color.White)
-                        ) {
-                            Text("Indo-Pak")
-                        }
-                    }
-                }
-            )
             Text(
                 stringResource(R.string.reciter),
                 style = MaterialTheme.typography.labelLarge,
