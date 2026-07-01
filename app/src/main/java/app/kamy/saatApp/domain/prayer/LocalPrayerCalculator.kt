@@ -181,10 +181,22 @@ object LocalPrayerCalculator {
 
         when (method) {
             PrayerCalculationMethod.MUHAMMADIYAH -> {
-                base.fajrAngle = 20.0
+                base.fajrAngle = 18.0
                 base.ishaAngle = 18.0
             }
             PrayerCalculationMethod.KEMENAG -> {
+                base.fajrAngle = 20.0
+                base.ishaAngle = 18.0
+            }
+            PrayerCalculationMethod.MUIS -> {
+                base.fajrAngle = 20.0
+                base.ishaAngle = 18.0
+            }
+            PrayerCalculationMethod.JAKIM -> {
+                base.fajrAngle = 20.0
+                base.ishaAngle = 18.0
+            }
+            PrayerCalculationMethod.BRUNEI -> {
                 base.fajrAngle = 20.0
                 base.ishaAngle = 18.0
             }
