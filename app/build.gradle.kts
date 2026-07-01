@@ -138,6 +138,15 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    applicationVariants.all {
+        if (name == "release") {
+            outputs.all {
+                val output = this as? com.android.build.gradle.api.ApkVariantOutput
+                output?.outputFileName = "Sāat-Production.apk"
+            }
+        }
+    }
 }
 
 dependencies {
