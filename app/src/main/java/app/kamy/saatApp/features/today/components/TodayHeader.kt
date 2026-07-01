@@ -101,8 +101,8 @@ fun TodayHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .tabContentStatusBarInset()
             .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
     ) {
         Row(
             modifier = Modifier
