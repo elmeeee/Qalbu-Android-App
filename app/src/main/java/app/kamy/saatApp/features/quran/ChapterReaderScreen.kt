@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection", "UNUSED_VALUE", "AssignedButNeverAccessedVariable", "UnusedAssignment")
+
 package app.kamy.saatApp.features.quran
 
 import android.content.Intent
@@ -55,6 +57,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -104,7 +107,6 @@ import app.kamy.saatApp.domain.model.ArabicTextType
 import app.kamy.saatApp.features.reader.HadithSheet
 import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.features.today.components.TafsirSheet
-import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.ui.common.TajweedHtmlView
 import app.kamy.saatApp.features.quran.tajweed.TajweedType
 import app.kamy.saatApp.ui.common.TajweedTextAlign
@@ -142,9 +144,9 @@ fun ChapterReaderScreen(
         showScrollHint = false
         onboardingStore.markScrollHintShown()
     }
-    var settingsVisible by remember { mutableStateOf(false) }
+    val settingsVisible = remember { mutableStateOf(false) }
     var verseMenuExpanded by remember { mutableStateOf(false) }
-    var activeTajweedType by remember { mutableStateOf<TajweedType?>(null) }
+    val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
 
     // Pager requires pageCount > 0; verses may be empty while the first page is loading.
     val verseCount = state.verses.size
@@ -264,7 +266,7 @@ fun ChapterReaderScreen(
                     showBismillahPre = pageIndex == 0 && state.bismillahPre,
                     onPlay = { vm.onTapAyah(pageIndex) },
                     onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null,
-                    onTajweedClick = { activeTajweedType = it }
+                    onTajweedClick = { activeTajweedType.value = it }
                 )
             }
         }
@@ -298,7 +300,7 @@ fun ChapterReaderScreen(
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = { settingsVisible = true }) {
+                IconButton(onClick = { settingsVisible.value = true }) {
                     Icon(
                         Icons.Filled.Settings,
                         contentDescription = stringResource(R.string.reading_settings_a11y),
@@ -429,10 +431,10 @@ fun ChapterReaderScreen(
         }
     }
 
-    if (settingsVisible) {
+    if (settingsVisible.value) {
         ReaderSettingsSheet(
             state = state,
-            onDismiss = { settingsVisible = false },
+            onDismiss = { settingsVisible.value = false },
             onFontScaleChange = vm::setFontScale,
             onToggleTranslation = vm::toggleTranslation,
             onToggleTransliteration = vm::toggleTransliteration,
@@ -455,10 +457,10 @@ fun ChapterReaderScreen(
         )
     }
 
-    activeTajweedType?.let { type ->
+    activeTajweedType.value?.let { type ->
         TajweedInfoSheet(
             type = type,
-            onDismiss = { activeTajweedType = null }
+            onDismiss = { activeTajweedType.value = null }
         )
     }
 

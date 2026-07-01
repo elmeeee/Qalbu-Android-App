@@ -1,5 +1,5 @@
-<resources>
-    <string name="app_name">SĀAT</string>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="Typos,MissingTranslation">
+    <string name="app_name">Sāat</string>
     <!-- U+200C between letters stops launchers title-casing SĀAT → Sāat -->
     <string name="app_name_launcher">S\u200cĀ\u200cA\u200cT</string>
 
@@ -1007,4 +1007,7 @@
     <string name="title_dzikir_sughro">Dzikir Al-Mathurat Sughro</string>
     <string name="title_fadhilah_doa">Fadhilah Doa</string>
     <string name="title_wudhu_guide">Wudhu Guide</string>
+    <string name="wudhu_subtitle">Step by step ablution guide</string>
+    <string name="tajweed_title">Tajweed Guide</string>
+    <string name="tajweed_subtitle">Learn the rules of recitation</string>
 </resources>

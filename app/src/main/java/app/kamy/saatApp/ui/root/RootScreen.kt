@@ -222,17 +222,23 @@ fun RootScreen(
                 ManzilScreen(onBack = { navController.popBackStack() })
             }
             composable("tools/tajweed") {
-                TajweedGuideScreen(onBack = { navController.popBackStack() })
+                TajweedGuideScreen(onNavigateBack = { navController.popBackStack() })
             }
             composable("tools/wudhu") {
-                WudhuGuideScreen(onBack = { navController.popBackStack() })
+                WudhuGuideScreen(onNavigateBack = { navController.popBackStack() })
             }
             composable(
                 route = "tools/dhikr/{id}",
                 arguments = listOf(navArgument("id") { type = NavType.StringType })
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getString("id") ?: ""
-                DhikrDetailScreen(categoryId = id, onBack = { navController.popBackStack() })
+                val titleRes = when(id) {
+                    "dzikiralmathuratkubro" -> app.kamy.saatApp.R.string.title_dzikir_kubro
+                    "dzikiralmathuratsughro" -> app.kamy.saatApp.R.string.title_dzikir_sughro
+                    "fadhilahdoa" -> app.kamy.saatApp.R.string.title_fadhilah_doa
+                    else -> app.kamy.saatApp.R.string.title_dzikir_kubro
+                }
+                DhikrDetailScreen(titleRes = titleRes, onNavigateBack = { navController.popBackStack() })
             }
             composable("tools/faraidh",
                 enterTransition = { slideInHorizontally(tween(280)) { it } + fadeIn(tween(200)) },
