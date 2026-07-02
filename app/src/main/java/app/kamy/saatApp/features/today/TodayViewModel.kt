@@ -198,11 +198,12 @@ class TodayViewModel @Inject constructor(
                         verseOccasion = loaded.occasion,
                         recitations = recitations,
                         error = null,
-                        isOfflineData = true
+                        isOfflineData = loaded.fromCache
                     )
                 }
             }
             loadContinueReading()
+            loadProfile()
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.toAppError(), isOfflineData = false) }
         }

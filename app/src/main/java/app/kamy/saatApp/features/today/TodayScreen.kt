@@ -270,12 +270,18 @@ fun TodayScreen(
             onRefresh = {
                 scope.launch {
                     isPullRefreshing = true
+                    val startTime = System.currentTimeMillis()
                     runCatching {
                         coroutineScope {
                             launch { prayerVm.refresh(force = true) }
-                            launch { todayVm.refreshContent() }
+                            launch { todayVm.refreshContent(refreshTranslation = true) }
                             launch { trackerVm.refresh() }
                         }
+                    }
+                    val elapsed = System.currentTimeMillis() - startTime
+                    val remainingDelay = 700L - elapsed
+                    if (remainingDelay > 0) {
+                        kotlinx.coroutines.delay(remainingDelay)
                     }
                     isPullRefreshing = false
                 }
