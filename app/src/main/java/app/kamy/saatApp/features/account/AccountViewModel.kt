@@ -30,6 +30,7 @@ import app.kamy.saatApp.infrastructure.preferences.DailyVerseNotificationStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
+import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.widget.WidgetCoordinator
 import app.kamy.saatApp.infrastructure.repository.AlAdhanRepository
