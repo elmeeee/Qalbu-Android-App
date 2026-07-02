@@ -387,7 +387,7 @@ fun TodayScreen(
                             aiShareLoading = todayState.aiShareLoading,
                             onAiShare = { todayVm.openAiShare() },
                             onTafsir = { todayVm.openTafsir() },
-                            onRetry = { scope.launch { todayVm.refreshContent() } }
+                            onRetry = { scope.launch { todayVm.refreshContent(refreshTranslation = true) } }
                         )
                     }
             }
