@@ -113,6 +113,9 @@ import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.features.today.components.TafsirSheet
 import app.kamy.saatApp.ui.common.TajweedHtmlView
 import app.kamy.saatApp.features.quran.tajweed.TajweedType
+import app.kamy.saatApp.features.quran.tajweed.TajweedDetailProvider
+import app.kamy.saatApp.design.theme.TajweedFontFamily
+import androidx.compose.ui.text.font.FontStyle
 import app.kamy.saatApp.ui.common.TajweedTextAlign
 import app.kamy.saatApp.ui.common.TransliterationView
 import app.kamy.saatApp.ui.common.toVerseTranslationPlainText
@@ -1272,44 +1275,20 @@ private fun TajweedInfoSheet(
     type: TajweedType,
     onDismiss: () -> Unit
 ) {
-    val titleRes = when (type) {
-        TajweedType.GHUNNA -> R.string.tajweed_ghunna_title
-        TajweedType.IDGHAM_WITHOUT_GHUNNA -> R.string.tajweed_idgham_without_ghunna_title
-        TajweedType.IDGHAM_WITH_GHUNNA -> R.string.tajweed_idgham_with_ghunna_title
-        TajweedType.IDGHAM_MIMI -> R.string.tajweed_idgham_mimi_title
-        TajweedType.IQLAB -> R.string.tajweed_iqlab_title
-        TajweedType.IKHFA -> R.string.tajweed_ikhfa_title
-        TajweedType.IKHFA_SYAFAWI -> R.string.tajweed_ikhfa_syafawi_title
-        TajweedType.QALQALAH -> R.string.tajweed_qalqalah_title
-    }
-    val descRes = when (type) {
-        TajweedType.GHUNNA -> R.string.tajweed_ghunna_desc
-        TajweedType.IDGHAM_WITHOUT_GHUNNA -> R.string.tajweed_idgham_without_ghunna_desc
-        TajweedType.IDGHAM_WITH_GHUNNA -> R.string.tajweed_idgham_with_ghunna_desc
-        TajweedType.IDGHAM_MIMI -> R.string.tajweed_idgham_mimi_desc
-        TajweedType.IQLAB -> R.string.tajweed_iqlab_desc
-        TajweedType.IKHFA -> R.string.tajweed_ikhfa_desc
-        TajweedType.IKHFA_SYAFAWI -> R.string.tajweed_ikhfa_syafawi_desc
-        TajweedType.QALQALAH -> R.string.tajweed_qalqalah_desc
-    }
-    
-    val tajweedColor = when (type) {
-        TajweedType.GHUNNA -> Color(0xFFF97316)
-        TajweedType.IDGHAM_WITHOUT_GHUNNA -> Color(0xFF94A3B8)
-        TajweedType.IDGHAM_WITH_GHUNNA -> Color(0xFF10B981)
-        TajweedType.IDGHAM_MIMI -> Color(0xFF10B981)
-        TajweedType.IQLAB -> Color(0xFF3B82F6)
-        TajweedType.IKHFA, TajweedType.IKHFA_SYAFAWI -> Color(0xFFEAB308)
-        TajweedType.QALQALAH -> Color(0xFFEF4444)
+    val context = LocalContext.current
+    val languageCode = context.resources.configuration.locales[0].language
+    val detail = remember(type, languageCode) {
+        TajweedDetailProvider.getDetail(type, languageCode)
     }
 
     AlKhatibPartialBottomSheet(
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        maxHeightFraction = 0.85f
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 24.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1317,31 +1296,164 @@ private fun TajweedInfoSheet(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .background(tajweedColor.copy(alpha = 0.15f), CircleShape),
+                        .size(40.dp)
+                        .background(detail.color.copy(alpha = 0.15f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Info,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = tajweedColor
+                        modifier = Modifier.size(20.dp),
+                        tint = detail.color
                     )
                 }
-                Text(
-                    text = stringResource(titleRes),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = AlKhatibColors.DeepEmerald,
-                    fontWeight = FontWeight.Bold
-                )
+                Column {
+                    Text(
+                        text = detail.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = AlKhatibColors.DeepEmerald,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Hukum Tajwid" else "Tajweed Rule",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AlKhatibColors.Slate500
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+
+            Spacer(modifier = Modifier.height(18.dp))
+
             Text(
-                text = stringResource(descRes),
-                style = MaterialTheme.typography.bodyLarge,
-                color = AlKhatibColors.Slate700,
-                lineHeight = 24.sp
+                text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Huruf Tajwid" else "Letters",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.Slate800
             )
+            Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = AlKhatibColors.LightGrey,
+                border = androidx.compose.foundation.BorderStroke(1.dp, AlKhatibColors.SoftGrey)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp, horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = detail.letters,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = TajweedFontFamily,
+                            textAlign = TextAlign.Center,
+                            color = detail.color
+                        ),
+                        letterSpacing = 4.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Text(
+                text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Pengertian" else "Definition",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.Slate800
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = detail.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate700,
+                lineHeight = 22.sp
+            )
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            Text(
+                text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Cara Membaca" else "How to Read",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.Slate800
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = detail.howToRead,
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate700,
+                lineHeight = 22.sp
+            )
+
+            if (detail.examples.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Contoh Bacaan" else "Examples",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = AlKhatibColors.Slate800
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                detail.examples.forEach { example ->
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = AlKhatibColors.PureWhite,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, AlKhatibColors.SoftGrey)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                androidx.compose.runtime.CompositionLocalProvider(
+                                    androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Rtl
+                                ) {
+                                    Text(
+                                        text = example.arabic,
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontFamily = TajweedFontFamily,
+                                            fontSize = 28.sp,
+                                            color = AlKhatibColors.Slate900
+                                        )
+                                    )
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = example.transliteration,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontStyle = FontStyle.Italic,
+                                    fontWeight = FontWeight.Medium,
+                                    color = AlKhatibColors.DeepEmerald
+                                )
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = example.explanation,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = AlKhatibColors.Slate500,
+                                lineHeight = 16.sp
+                            )
+                        }
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

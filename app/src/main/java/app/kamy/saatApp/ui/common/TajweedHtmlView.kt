@@ -68,8 +68,31 @@ fun TajweedHtmlView(
                 textAlign = textAlign.toComposeAlign()
             ),
             onClick = { offset ->
-                val annotations = annotated.getStringAnnotations("TAJWEED", offset, offset)
-                val annotation = annotations.firstOrNull()
+                var annotation = annotated.getStringAnnotations("TAJWEED", offset, offset).firstOrNull()
+                
+                if (annotation == null) {
+                    val maxSearchDistance = 3
+                    val searchStart = (offset - maxSearchDistance).coerceAtLeast(0)
+                    val searchEnd = (offset + maxSearchDistance).coerceAtMost(annotated.length)
+                    val neighborhoodAnnotations = annotated.getStringAnnotations("TAJWEED", searchStart, searchEnd)
+                    
+                    var bestAnnotation: androidx.compose.ui.text.AnnotatedString.Range<String>? = null
+                    var bestDistance = Int.MAX_VALUE
+                    
+                    for (ann in neighborhoodAnnotations) {
+                        val dist = when {
+                            offset < ann.start -> ann.start - offset
+                            offset >= ann.end -> offset - (ann.end - 1)
+                            else -> 0
+                        }
+                        if (dist < bestDistance) {
+                            bestDistance = dist
+                            bestAnnotation = ann
+                        }
+                    }
+                    annotation = bestAnnotation
+                }
+
                 if (annotation != null) {
                     val tajweedName = annotation.item
                     val tajweedType = runCatching { TajweedType.valueOf(tajweedName) }.getOrNull()
