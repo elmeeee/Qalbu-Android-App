@@ -9,6 +9,13 @@
     <string name="language_settings_title">Bahasa aplikasi</string>
     <string name="language_settings_subtitle">English, Indonesia, atau Melayu</string>
 
+    <!-- Theme Settings -->
+    <string name="theme_settings_title">Warna Tema Aplikasi</string>
+    <string name="theme_settings_subtitle">Ubah warna tema utama</string>
+    <string name="theme_emerald">Hijau Zamrud</string>
+    <string name="theme_indigo">Biru Samudra</string>
+    <string name="theme_gold">Emas Kerajaan</string>
+
     <string name="nav_today">Hari Ini</string>
     <string name="nav_reflect">Refleksi</string>
     <string name="nav_quran">Al-Quran</string>

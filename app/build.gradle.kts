@@ -60,9 +60,6 @@ android {
     // Keep bundled SQLite/gzip assets readable without APK re-compression.
     androidResources {
         noCompress += listOf("gz", "db")
-    }
-
-    aaptOptions {
         ignoreAssetsPattern = "!*.bak"
     }
 

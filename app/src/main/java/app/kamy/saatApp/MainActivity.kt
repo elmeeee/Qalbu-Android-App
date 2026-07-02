@@ -23,10 +23,14 @@ import app.kamy.saatApp.ui.splash.AppSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+import androidx.compose.runtime.collectAsState
+import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var onboardingStore: OnboardingStore
+    @Inject lateinit var themePreferencesStore: ThemePreferencesStore
 
     private val deepLinkRoute = mutableStateOf<String?>(null)
 
@@ -45,8 +49,9 @@ class MainActivity : ComponentActivity() {
             var showGreetingSplash by rememberSaveable { mutableStateOf(true) }
             var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
             val pendingRoute by deepLinkRoute
+            val currentTheme by themePreferencesStore.themeFlow.collectAsState()
 
-            AlKhatibTheme {
+            AlKhatibTheme(theme = currentTheme) {
                 when {
                     showGreetingSplash -> AppSplashScreen(onFinished = { showGreetingSplash = false })
                     showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })

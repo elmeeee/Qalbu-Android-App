@@ -466,14 +466,6 @@ private fun QuranListHeader(
                 )
         )
         Spacer(Modifier.height(AlKhatibSpacing.md))
-        if (showBrowseTabs) {
-            QuranBrowseTabs(
-                browseMode = browseMode,
-                onBrowseModeChange = onBrowseModeChange,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(AlKhatibSpacing.sm))
-        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -490,11 +482,16 @@ private fun QuranListHeader(
                 modifier = Modifier.weight(1f)
             )
             if (isSearching && searchEnabled) {
-                TextButton(onClick = onClearSearch) {
+                Spacer(Modifier.width(8.dp))
+                TextButton(
+                    onClick = onClearSearch,
+                    contentPadding = PaddingValues(horizontal = 12.dp)
+                ) {
                     Text(
                         text = stringResource(R.string.cancel),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        color = AlKhatibColors.DeepEmerald,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
@@ -502,6 +499,14 @@ private fun QuranListHeader(
         if (showSuggestions && searchEnabled) {
             Spacer(Modifier.height(AlKhatibSpacing.sm))
             QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
+        }
+        if (showBrowseTabs) {
+            Spacer(Modifier.height(AlKhatibSpacing.md))
+            QuranBrowseTabs(
+                browseMode = browseMode,
+                onBrowseModeChange = onBrowseModeChange,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }

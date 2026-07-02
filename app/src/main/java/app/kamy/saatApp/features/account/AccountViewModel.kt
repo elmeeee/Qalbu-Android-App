@@ -90,6 +90,8 @@ data class AccountUiState(
     val showAdhanSheet: Boolean = false,
     val showLanguageSheet: Boolean = false,
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
+    val appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD,
+    val showThemeSheet: Boolean = false,
     val selectedAdhanVoice: AdhanVoice = AdhanVoice.DEFAULT,
     val previewingAdhanVoiceId: String? = null,
     val showFollowersSheet: Boolean = false,
@@ -128,11 +130,18 @@ class AccountViewModel @Inject constructor(
     private val shareComposer: VerseShareTextComposer
 ) : ViewModel() {
 
+    private val themeStore = ThemePreferencesStore.from(appContext)
+
     private val _state = MutableStateFlow(AccountUiState(isSignedIn = userSession.isSignedIn.value))
     val state: StateFlow<AccountUiState> = _state.asStateFlow()
 
     init {
         syncPreferencesIntoState()
+        viewModelScope.launch {
+            themeStore.themeFlow.collect { theme ->
+                _state.update { it.copy(appTheme = theme) }
+            }
+        }
         if (userSession.isSignedIn.value) {
             refreshSessionFromIdToken()
         }
@@ -254,7 +263,8 @@ class AccountViewModel @Inject constructor(
                 reminderHour = notificationStore.morningHour(),
                 reminderMinute = notificationStore.morningMinute(),
                 reminderTimeLabel = notificationStore.formattedMorningTime(),
-                appLanguage = appLanguageStore.current()
+                appLanguage = appLanguageStore.current(),
+                appTheme = themeStore.currentTheme()
             )
         }
     }
@@ -265,6 +275,24 @@ class AccountViewModel @Inject constructor(
 
     fun closeLanguageSheet() {
         _state.update { it.copy(showLanguageSheet = false) }
+    }
+
+    fun openThemeSheet() {
+        _state.update { it.copy(showThemeSheet = true) }
+    }
+
+    fun closeThemeSheet() {
+        _state.update { it.copy(showThemeSheet = false) }
+    }
+
+    fun setAppTheme(theme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor) {
+        themeStore.set(theme)
+        _state.update {
+            it.copy(
+                appTheme = theme,
+                showThemeSheet = false
+            )
+        }
     }
 
     fun setAppLanguage(language: AppLanguage) {

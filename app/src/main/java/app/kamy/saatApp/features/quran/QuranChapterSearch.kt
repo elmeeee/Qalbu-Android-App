@@ -57,6 +57,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.domain.model.QuranChapter
@@ -425,28 +426,47 @@ fun QuranChapterSearchBar(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val activeQuery = query.normalizedSearchQuery()
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    val borderAlpha by animateFloatAsState(
+        targetValue = if (isFocused) 0.8f else 0.15f,
+        animationSpec = tween(300),
+        label = "border_alpha"
+    )
+    val borderColor = if (isFocused) AlKhatibColors.DeepEmerald.copy(alpha = borderAlpha) else AlKhatibColors.SoftGrey
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (isFocused) 4.dp else 1.dp,
+                shape = RoundedCornerShape(24.dp),
+                ambientColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.08f),
+                spotColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        color = if (isFocused) AlKhatibColors.PureWhite else AlKhatibColors.LightGrey,
+        border = androidx.compose.foundation.BorderStroke(1.dp, borderColor)
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 4.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Icon(
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
                 tint = if (isFocused) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(10.dp))
             BasicTextField(
                 value = query,
                 onValueChange = onQueryChange,
                 enabled = enabled,
                 singleLine = true,
                 textStyle = TextStyle(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                    color = AlKhatibColors.Slate900,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Medium
                 ),
                 cursorBrush = SolidColor(AlKhatibColors.DeepEmerald),
@@ -463,7 +483,7 @@ fun QuranChapterSearchBar(
                             Text(
                                 text = resolvedPlaceholder,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = AlKhatibColors.Slate500.copy(alpha = 0.85f),
+                                color = AlKhatibColors.Slate500.copy(alpha = 0.7f),
                                 maxLines = 1
                             )
                         }
@@ -472,35 +492,19 @@ fun QuranChapterSearchBar(
                 }
             )
             if (activeQuery.isNotEmpty() && enabled) {
-                IconButton(onClick = onClear, modifier = Modifier.size(32.dp)) {
+                IconButton(
+                    onClick = onClear,
+                    modifier = Modifier.size(24.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.clear_search_a11y),
                         tint = AlKhatibColors.Slate500,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(if (isFocused) 2.dp else 1.dp)
-                .background(
-                    if (isFocused) {
-                        Brush.horizontalGradient(
-                            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
-                        )
-                    } else {
-                        Brush.horizontalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
-                            )
-                        )
-                    }
-                )
-        )
     }
 }
 

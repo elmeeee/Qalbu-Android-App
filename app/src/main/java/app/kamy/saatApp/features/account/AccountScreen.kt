@@ -42,6 +42,8 @@ import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Palette
+import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.BottomSheetDefaults
@@ -220,6 +222,15 @@ fun AccountScreen(
         )
     }
 
+    // Theme selection sheet
+    if (state.showThemeSheet) {
+        ThemeSelectionSheet(
+            selected = state.appTheme,
+            onSelect = vm::setAppTheme,
+            onDismiss = vm::closeThemeSheet
+        )
+    }
+
     // Prayer method sheet
     if (state.showPrayerSheet) {
         PrayerMethodSheet(
@@ -323,6 +334,12 @@ private fun AccountSettingsContent(
                 title = stringResource(R.string.font_size),
                 subtitle = stringResource(R.string.font_size_subtitle),
                 onClick = { vm.openFontScale() }
+            )
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.Palette,
+                title = stringResource(R.string.theme_settings_title),
+                subtitle = stringResource(state.appTheme.displayNameRes),
+                onClick = { vm.openThemeSheet() }
             )
         }
 
@@ -1613,5 +1630,93 @@ private fun AboutLinkRow(
             tint = AlKhatibColors.Slate500,
             modifier = Modifier.size(20.dp)
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ThemeSelectionSheet(
+    selected: AppThemeColor,
+    onSelect: (AppThemeColor) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.theme_settings_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            Text(
+                text = stringResource(R.string.theme_settings_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate500
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AppThemeColor.values().forEach { theme ->
+                    val isSelected = theme == selected
+                    val dotColor = when (theme) {
+                        AppThemeColor.EMERALD -> Color(0xFF064E3B)
+                        AppThemeColor.INDIGO -> Color(0xFF1E3A8A)
+                        AppThemeColor.GOLD -> Color(0xFFD97706)
+                    }
+                    Surface(
+                        onClick = { onSelect(theme) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) {
+                            AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+                        } else {
+                            Color.Transparent
+                        },
+                        border = if (isSelected) {
+                            BorderStroke(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.2f))
+                        } else {
+                            null
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Theme Color Indicator Dot
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .background(dotColor, CircleShape)
+                            )
+                            Spacer(Modifier.width(16.dp))
+                            Text(
+                                text = stringResource(theme.displayNameRes),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (isSelected) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (isSelected) {
+                                Text(
+                                    text = "✓",
+                                    color = AlKhatibColors.DeepEmerald,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
     }
 }

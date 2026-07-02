@@ -12,6 +12,13 @@
     <string name="language_settings_title">App language</string>
     <string name="language_settings_subtitle">English, Indonesian, or Malay</string>
 
+    <!-- Theme Settings -->
+    <string name="theme_settings_title">App Theme Color</string>
+    <string name="theme_settings_subtitle">Change the primary theme color</string>
+    <string name="theme_emerald">Emerald Green</string>
+    <string name="theme_indigo">Ocean Indigo</string>
+    <string name="theme_gold">Royal Gold</string>
+
     <!-- Bottom navigation -->
     <string name="nav_today">Today</string>
     <string name="nav_reflect">Reflect</string>
