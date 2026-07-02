@@ -287,7 +287,7 @@ class AccountViewModel @Inject constructor(
     }
 
     fun setAppTheme(theme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor) {
-        themeStore.set(theme)
+        themeStore.setTheme(theme)
         _state.update {
             it.copy(
                 appTheme = theme,
