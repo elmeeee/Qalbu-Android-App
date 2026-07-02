@@ -124,7 +124,8 @@ class PrayerCalendarViewModel @Inject constructor(
                 month = month,
                 latitude = lat,
                 longitude = lon,
-                method = prayerMethodStore.current()
+                method = prayerMethodStore.current(),
+                madhab = prayerMethodStore.currentMadhab()
             )
             if (generation != loadGeneration) return
             

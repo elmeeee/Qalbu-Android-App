@@ -33,13 +33,14 @@ object LocalPrayerCalculator {
         longitude: Double,
         cityName: String? = null,
         method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
+        madhab: PrayerMadhab = PrayerMadhab.SHAFI,
         timestamp: Long = System.currentTimeMillis() / 1000L
     ): PrayerDayResult {
         val day = Date(timestamp * 1000L)
         val cal = Calendar.getInstance().apply { time = day }
         val components = DateComponents(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH))
         val coords = Coordinates(latitude, longitude)
-        val params = parametersFor(method)
+        val params = parametersFor(method, madhab)
         val prayerTimes = PrayerTimes(coords, components, params)
 
         val baseDate = startOfDay(day)
@@ -84,7 +85,8 @@ object LocalPrayerCalculator {
         month: Int,
         latitude: Double,
         longitude: Double,
-        method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod
+        method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
+        madhab: PrayerMadhab = PrayerMadhab.SHAFI
     ): List<PrayerCalendarDay> {
         val cal = Calendar.getInstance()
         cal.set(year, month - 1, 1, 0, 0, 0)
@@ -98,6 +100,7 @@ object LocalPrayerCalculator {
                 latitude = latitude,
                 longitude = longitude,
                 method = method,
+                madhab = madhab,
                 timestamp = cal.timeInMillis / 1000L
             )
             val byKey = result.timings.associate { it.type.aladhanKey to formatHm(it.date) }
@@ -150,7 +153,7 @@ object LocalPrayerCalculator {
         }
     }
 
-    private fun parametersFor(method: PrayerCalculationMethod): CalculationParameters {
+    private fun parametersFor(method: PrayerCalculationMethod, madhab: PrayerMadhab): CalculationParameters {
         val base = when (method) {
             PrayerCalculationMethod.KARACHI -> CalculationMethod.KARACHI
             PrayerCalculationMethod.ISNA -> CalculationMethod.NORTH_AMERICA
@@ -211,7 +214,10 @@ object LocalPrayerCalculator {
             else -> Unit
         }
 
-        base.madhab = Madhab.SHAFI
+        base.madhab = when (madhab) {
+            PrayerMadhab.HANAFI -> Madhab.HANAFI
+            else -> Madhab.SHAFI
+        }
         base.adjustments = parseTune(method.aladhanTune)
         return base
     }

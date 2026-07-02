@@ -43,7 +43,9 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Gavel
 import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
+import app.kamy.saatApp.domain.prayer.PrayerMadhab
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.BottomSheetDefaults
@@ -231,6 +233,15 @@ fun AccountScreen(
         )
     }
 
+    // Madhab selection sheet
+    if (state.showMadhabSheet) {
+        MadhabSelectionSheet(
+            selected = state.prayerMadhab,
+            onSelect = vm::setPrayerMadhab,
+            onDismiss = vm::closeMadhabSheet
+        )
+    }
+
     // Prayer method sheet
     if (state.showPrayerSheet) {
         PrayerMethodSheet(
@@ -345,11 +356,17 @@ private fun AccountSettingsContent(
 
         SettingsSectionLabel(stringResource(R.string.prayer_settings))
         AlKhatibSettingsGroup {
-            AlKhatibSettingsNavigationRow(
+             AlKhatibSettingsNavigationRow(
                 icon = Icons.Filled.Schedule,
                 title = stringResource(R.string.prayer_calculation_method),
                 subtitle = state.prayerMethod.organization,
                 onClick = { vm.togglePrayerSheet(true) }
+            )
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Filled.Gavel,
+                title = stringResource(R.string.madhab_settings_title),
+                subtitle = stringResource(state.prayerMadhab.displayNameRes),
+                onClick = { vm.openMadhabSheet() }
             )
             AlKhatibSettingsNavigationRow(
                 icon = Icons.AutoMirrored.Filled.VolumeUp,
@@ -1720,3 +1737,80 @@ private fun ThemeSelectionSheet(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MadhabSelectionSheet(
+    selected: PrayerMadhab,
+    onSelect: (PrayerMadhab) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.madhab_settings_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.DeepEmerald
+            )
+            Text(
+                text = stringResource(R.string.madhab_settings_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AlKhatibColors.Slate500
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PrayerMadhab.values().forEach { madhab ->
+                    val isSelected = madhab == selected
+                    Surface(
+                        onClick = { onSelect(madhab) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) {
+                            AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+                        } else {
+                            Color.Transparent
+                        },
+                        border = if (isSelected) {
+                            BorderStroke(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.2f))
+                        } else {
+                            null
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(madhab.displayNameRes),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (isSelected) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (isSelected) {
+                                Text(
+                                    text = "✓",
+                                    color = AlKhatibColors.DeepEmerald,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+

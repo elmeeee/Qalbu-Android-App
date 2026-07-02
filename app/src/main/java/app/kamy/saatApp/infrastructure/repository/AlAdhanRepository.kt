@@ -12,6 +12,8 @@ import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
+import app.kamy.saatApp.domain.prayer.PrayerMadhab
+
 data class PrayerEntry(
     val type: PrayerType,
     val rawTime: String,
@@ -52,12 +54,14 @@ class AlAdhanRepository @Inject constructor() {
         longitude: Double,
         cityName: String? = null,
         method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
+        madhab: PrayerMadhab = PrayerMadhab.SHAFI,
         timestamp: Long = System.currentTimeMillis() / 1000L
     ): PrayerDayResult = LocalPrayerCalculator.fetchTimings(
         latitude = latitude,
         longitude = longitude,
         cityName = cityName,
         method = method,
+        madhab = madhab,
         timestamp = timestamp
     )
 
@@ -66,12 +70,14 @@ class AlAdhanRepository @Inject constructor() {
         month: Int,
         latitude: Double,
         longitude: Double,
-        method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod
+        method: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
+        madhab: PrayerMadhab = PrayerMadhab.SHAFI
     ): List<PrayerCalendarDay> = LocalPrayerCalculator.fetchMonthCalendar(
         year = year,
         month = month,
         latitude = latitude,
         longitude = longitude,
-        method = method
+        method = method,
+        madhab = madhab
     )
 }

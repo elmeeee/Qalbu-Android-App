@@ -93,6 +93,8 @@ data class AccountUiState(
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
     val appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD,
     val showThemeSheet: Boolean = false,
+    val prayerMadhab: app.kamy.saatApp.domain.prayer.PrayerMadhab = app.kamy.saatApp.domain.prayer.PrayerMadhab.SHAFI,
+    val showMadhabSheet: Boolean = false,
     val selectedAdhanVoice: AdhanVoice = AdhanVoice.DEFAULT,
     val previewingAdhanVoiceId: String? = null,
     val showFollowersSheet: Boolean = false,
@@ -141,6 +143,11 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             themeStore.themeFlow.collect { theme ->
                 _state.update { it.copy(appTheme = theme) }
+            }
+        }
+        viewModelScope.launch {
+            prayerMethodStore.madhab.collect { madhab ->
+                _state.update { it.copy(prayerMadhab = madhab) }
             }
         }
         if (userSession.isSignedIn.value) {
@@ -265,7 +272,8 @@ class AccountViewModel @Inject constructor(
                 reminderMinute = notificationStore.morningMinute(),
                 reminderTimeLabel = notificationStore.formattedMorningTime(),
                 appLanguage = appLanguageStore.current(),
-                appTheme = themeStore.currentTheme()
+                appTheme = themeStore.currentTheme(),
+                prayerMadhab = prayerMethodStore.currentMadhab()
             )
         }
     }
@@ -292,6 +300,28 @@ class AccountViewModel @Inject constructor(
             it.copy(
                 appTheme = theme,
                 showThemeSheet = false
+            )
+        }
+    }
+
+    fun openMadhabSheet() {
+        _state.update { it.copy(showMadhabSheet = true) }
+    }
+
+    fun closeMadhabSheet() {
+        _state.update { it.copy(showMadhabSheet = false) }
+    }
+
+    fun setPrayerMadhab(madhab: app.kamy.saatApp.domain.prayer.PrayerMadhab) {
+        prayerMethodStore.setMadhab(madhab)
+        viewModelScope.launch {
+            PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+            WidgetCoordinator.refreshAll(appContext)
+        }
+        _state.update {
+            it.copy(
+                prayerMadhab = madhab,
+                showMadhabSheet = false
             )
         }
     }

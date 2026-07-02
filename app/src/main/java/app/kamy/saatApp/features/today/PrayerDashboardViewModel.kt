@@ -172,12 +172,14 @@ class PrayerDashboardViewModel @Inject constructor(
             }
         }
         val calculationMethod = prayerMethodStore.current()
+        val madhab = prayerMethodStore.currentMadhab()
         try {
             val result = repository.fetchTimings(
                 latitude = location.latitude,
                 longitude = location.longitude,
                 cityName = location.cityLabel,
-                method = calculationMethod
+                method = calculationMethod,
+                madhab = madhab
             )
             val cityName = result.cityName ?: location.cityLabel
             locationPrefs.saveActiveLabel(cityName)

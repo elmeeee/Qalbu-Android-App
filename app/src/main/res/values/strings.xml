@@ -19,6 +19,14 @@
     <string name="theme_indigo">Ocean Indigo</string>
     <string name="theme_gold">Royal Gold</string>
 
+    <!-- Madhab Settings -->
+    <string name="madhab_shafi">Shafi\'i</string>
+    <string name="madhab_maliki">Maliki</string>
+    <string name="madhab_hanbali">Hanbali</string>
+    <string name="madhab_hanafi">Hanafi</string>
+    <string name="madhab_settings_title">Calculation School (Madhab)</string>
+    <string name="madhab_settings_subtitle">Change school for prayer times calculation</string>
+
     <!-- Bottom navigation -->
     <string name="nav_today">Today</string>
     <string name="nav_reflect">Reflect</string>

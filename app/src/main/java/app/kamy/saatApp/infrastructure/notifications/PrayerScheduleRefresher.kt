@@ -21,10 +21,12 @@ object PrayerScheduleRefresher {
                     PrayerRefreshEntryPoint::class.java
                 )
                 val method = entryPoint.prayerCalculationStore().current()
+                val madhab = entryPoint.prayerCalculationStore().currentMadhab()
                 val result = entryPoint.alAdhanRepository().fetchTimings(
                     latitude = coords.first,
                     longitude = coords.second,
-                    method = method
+                    method = method,
+                    madhab = madhab
                 )
                 val bundle = result.scheduleBundle
                 if (bundle != null) {
