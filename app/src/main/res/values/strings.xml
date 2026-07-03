@@ -18,6 +18,7 @@
     <string name="theme_emerald">Emerald Green</string>
     <string name="theme_ocean">Ocean Indigo</string>
     <string name="theme_gold">Royal Gold</string>
+    <string name="theme_indigo">Ocean Indigo</string>
 
     <!-- Madhab Settings -->
     <string name="madhab_shafi">Shafi\'i</string>
