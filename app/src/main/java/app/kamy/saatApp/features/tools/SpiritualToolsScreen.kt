@@ -23,10 +23,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FamilyRestroom
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
