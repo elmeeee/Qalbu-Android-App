@@ -5,6 +5,9 @@ package app.kamy.saatApp.features.quran
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
@@ -688,68 +691,73 @@ private fun ChapterRow(
         meanings.getOrNull(chapter.id - 1) ?: chapter.displayTranslatedName
     }
 
-    Surface(
-        onClick = onClick,
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = AlKhatibColors.PureWhite,
-        shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+        contentAlignment = Alignment.Center
     ) {
-        Row(
+        Surface(
+            onClick = onClick,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .width(345.dp)
+                .height(90.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = AlKhatibColors.PureWhite,
+            shadowElevation = 1.dp,
+            border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
         ) {
-            ChapterNumberBadge(number = chapter.id)
-            Spacer(Modifier.width(16.dp))
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = chapter.displayComplexName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate900
-                )
-                if (meaning.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 16.dp, end = 0.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ChapterNumberBadge(number = chapter.id)
+                Spacer(Modifier.width(16.dp))
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 8.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        Text(
+                            text = chapter.displayComplexName,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = AlKhatibColors.Slate800
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "- ${chapter.versesCount} Verses",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Normal,
+                            color = AlKhatibColors.Slate800
+                        )
+                    }
+                    val subtitle = "${chapter.revelationLabel} - $meaning"
                     Text(
-                        text = meaning,
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = AlKhatibColors.Slate500,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 2.dp)
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (chapter.revelationLabel.isNotEmpty()) {
-                        AlKhatibRevelationChip(
-                            label = chapter.revelationLabel,
-                            isMeccan = chapter.isMeccan
-                        )
-                    }
-                    chapter.versesCount?.let { count ->
-                        Text(
-                            text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = AlKhatibColors.Slate500
-                        )
-                    }
-                }
+                Image(
+                    painter = painterResource(if (chapter.isMeccan) R.drawable.mecca else R.drawable.medina),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(113.dp)
+                        .height(90.dp),
+                    contentScale = ContentScale.Fit
+                )
             }
-            Spacer(Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = AlKhatibColors.Teal.copy(alpha = 0.6f),
-                modifier = Modifier.size(20.dp)
-            )
         }
     }
 }
