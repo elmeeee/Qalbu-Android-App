@@ -95,7 +95,6 @@ import app.kamy.saatApp.design.components.AlKhatibInlineError
 import app.kamy.saatApp.design.components.AlKhatibSettingsGroup
 import app.kamy.saatApp.design.components.AlKhatibSettingsNavigationRow
 import app.kamy.saatApp.design.components.AlKhatibSettingsToggleRow
-import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
@@ -304,7 +303,7 @@ private fun AccountSettingsContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(MaterialTheme.colorScheme.background)
             .tabContentStatusBarInset()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
@@ -471,10 +470,10 @@ private fun ProfileHeader(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(AlKhatibColors.PureWhite)
+            .background(MaterialTheme.colorScheme.surface)
             .border(
                 width = 1.dp,
-                color = AlKhatibColors.SoftGrey.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.7f),
                 shape = RoundedCornerShape(20.dp)
             )
     ) {
@@ -484,7 +483,7 @@ private fun ProfileHeader(
                 .height(3.dp)
                 .background(
                     Brush.horizontalGradient(
-                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                        listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
                     )
                 )
         )
@@ -499,7 +498,7 @@ private fun ProfileHeader(
                     modifier = Modifier
                         .size(72.dp)
                         .clip(CircleShape)
-                        .background(AlKhatibColors.LightGrey),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     if (avatarUrl != null) {
@@ -509,7 +508,7 @@ private fun ProfileHeader(
                             modifier = Modifier.fillMaxSize().clip(CircleShape)
                         )
                     } else {
-                        Icon(Icons.Filled.Person, contentDescription = null, tint = AlKhatibColors.Slate500, modifier = Modifier.size(40.dp))
+                        Icon(Icons.Filled.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(40.dp))
                     }
                 }
                 Spacer(Modifier.width(16.dp))
@@ -518,20 +517,20 @@ private fun ProfileHeader(
                         text = displayTitle ?: stringResource(R.string.signed_in),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald
+                        color = MaterialTheme.colorScheme.primary
                     )
                     username?.let {
                         Text(
                             text = "@$it",
                             style = MaterialTheme.typography.bodySmall,
-                            color = AlKhatibColors.Slate500
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     profile?.country?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.labelMedium,
-                            color = AlKhatibColors.Teal
+                            color = MaterialTheme.colorScheme.secondary
                         )
                     }
                     val stats = remember(profile) {
@@ -563,7 +562,7 @@ private fun ProfileHeader(
                                         text = "${pair.second}",
                                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
                                         fontWeight = FontWeight.Bold,
-                                        color = AlKhatibColors.DeepEmerald,
+                                        color = MaterialTheme.colorScheme.primary,
                                         maxLines = 1,
                                         softWrap = false
                                     )
@@ -575,7 +574,7 @@ private fun ProfileHeader(
                                             else -> stringResource(R.string.likes)
                                         },
                                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                                        color = AlKhatibColors.Slate500,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,
                                         softWrap = false
                                     )
@@ -584,7 +583,7 @@ private fun ProfileHeader(
                                     Text(
                                         text = "•",
                                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                                        color = AlKhatibColors.SoftGrey,
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
                                         modifier = Modifier.padding(horizontal = 2.dp)
                                     )
                                 }
@@ -607,8 +606,8 @@ private fun ProfileHeader(
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                AlKhatibColors.DeepEmerald.copy(alpha = 0.05f),
-                                AlKhatibColors.Teal.copy(alpha = 0.02f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.02f)
                             )
                         )
                     )
@@ -620,14 +619,14 @@ private fun ProfileHeader(
                     modifier = Modifier
                         .size(54.dp)
                         .clip(CircleShape)
-                        .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.1f))
-                        .border(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.2f), CircleShape),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Person,
                         contentDescription = null,
-                        tint = AlKhatibColors.DeepEmerald,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -640,13 +639,13 @@ private fun ProfileHeader(
                         text = stringResource(R.string.sync_reflections),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald,
+                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center
                     )
                     Text(
                         text = stringResource(R.string.sign_in_prompt),
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 12.dp)
                     )
@@ -655,7 +654,7 @@ private fun ProfileHeader(
                 Surface(
                     onClick = onSignIn,
                     shape = RoundedCornerShape(12.dp),
-                    color = AlKhatibColors.DeepEmerald,
+                    color = MaterialTheme.colorScheme.primary,
                     tonalElevation = 2.dp,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
                 ) {
@@ -667,13 +666,13 @@ private fun ProfileHeader(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Login,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.sign_in),
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.Bold
                             )
@@ -701,13 +700,13 @@ private fun SettingsSectionLabel(text: String) {
                 .width(3.dp)
                 .height(16.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(AlKhatibColors.DeepEmerald)
+                .background(MaterialTheme.colorScheme.primary)
         )
         Spacer(Modifier.width(10.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.titleSmall,
-            color = AlKhatibColors.Slate800,
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.SemiBold
         )
     }
@@ -725,8 +724,8 @@ private fun PremiumSheetHeader(
             .background(
                 Brush.linearGradient(
                     listOf(
-                        AlKhatibColors.DeepEmerald.copy(alpha = 0.16f),
-                        AlKhatibColors.Teal.copy(alpha = 0.08f)
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f)
                     )
                 )
             )
@@ -737,13 +736,13 @@ private fun PremiumSheetHeader(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.DeepEmerald
+            color = MaterialTheme.colorScheme.primary
         )
         subtitle?.let {
             Text(
                 text = it,
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -766,13 +765,13 @@ private fun TranslatorSheet(
     val errorDisplay = error.rememberErrorDisplay(R.string.failed_load_translators)
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = AlKhatibColors.Slate900,
-        unfocusedTextColor = AlKhatibColors.Slate900,
-        focusedBorderColor = AlKhatibColors.Teal,
-        unfocusedBorderColor = AlKhatibColors.Slate500,
-        cursorColor = AlKhatibColors.Teal,
-        focusedPlaceholderColor = AlKhatibColors.Slate500,
-        unfocusedPlaceholderColor = AlKhatibColors.Slate500
+        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        focusedBorderColor = MaterialTheme.colorScheme.primary,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+        cursorColor = MaterialTheme.colorScheme.primary,
+        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
     AlKhatibModalBottomSheet(onDismiss, sheetState) {
         Column(
@@ -788,14 +787,14 @@ private fun TranslatorSheet(
             OutlinedTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                placeholder = { Text(stringResource(R.string.search_translator_placeholder), color = AlKhatibColors.Slate500) },
+                placeholder = { Text(stringResource(R.string.search_translator_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions.Default,
                 singleLine = true,
                 colors = fieldColors
             )
             when {
-                isLoading -> Text(stringResource(R.string.loading_translators), color = AlKhatibColors.Slate500)
+                isLoading -> Text(stringResource(R.string.loading_translators), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 errorDisplay != null -> {
                     AlKhatibInlineError(
                         display = errorDisplay,
@@ -803,7 +802,7 @@ private fun TranslatorSheet(
                     )
                 }
                 translations.isEmpty() -> {
-                    Text(stringResource(R.string.no_translators), color = AlKhatibColors.Slate500)
+                    Text(stringResource(R.string.no_translators), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 else -> {
                     translations.forEach { t ->
@@ -814,7 +813,7 @@ private fun TranslatorSheet(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(
-                                    if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                                    if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
                                 )
                                 .clickable { onPick(t) }
                                 .padding(horizontal = 12.dp, vertical = 12.dp)
@@ -822,17 +821,17 @@ private fun TranslatorSheet(
                             Column(Modifier.weight(1f)) {
                                 Text(
                                     t.authorName.ifBlank { t.name },
-                                    color = AlKhatibColors.Slate900,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
                                     text = "${t.languageName.replaceFirstChar { c -> c.titlecase() }} · ${t.name}",
-                                    color = AlKhatibColors.Slate500,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     style = MaterialTheme.typography.bodySmall
                                 )
                             }
                             if (isSelected) {
-                                Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                                Text("✓", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -869,12 +868,12 @@ private fun ReminderTimeSheet(
                 stringResource(R.string.reminder_time_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
                 stringResource(R.string.reminder_time_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate500
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             TimePicker(state = timeState)
             Row(
@@ -882,10 +881,10 @@ private fun ReminderTimeSheet(
                 horizontalArrangement = Arrangement.End
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel), color = AlKhatibColors.Slate500)
+                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 TextButton(onClick = { onSave(timeState.hour, timeState.minute) }) {
-                    Text(stringResource(R.string.save), color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.save), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -916,11 +915,11 @@ private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismi
     val sheetState = rememberModalBottomSheetState()
     AlKhatibModalBottomSheet(onDismiss, sheetState) {
         Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(stringResource(R.string.font_size), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald)
-            Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ", fontSize = (26 * scale).sp, color = AlKhatibColors.Slate900)
-            Text(stringResource(R.string.font_preview_translation), fontSize = (14 * scale).sp, color = AlKhatibColors.Slate800)
+            Text(stringResource(R.string.font_size), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ", fontSize = (26 * scale).sp, color = MaterialTheme.colorScheme.onBackground)
+            Text(stringResource(R.string.font_preview_translation), fontSize = (14 * scale).sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("A", fontSize = 14.sp, color = AlKhatibColors.Slate500)
+                Text("A", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Slider(
                     value = scale,
                     onValueChange = onScaleChange,
@@ -928,9 +927,9 @@ private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismi
                     steps = 9,
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
                 )
-                Text("A", fontSize = 22.sp, color = AlKhatibColors.Slate500)
+                Text("A", fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(scaleLabel(scale), color = AlKhatibColors.Slate500)
+            Text(scaleLabel(scale), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -959,10 +958,10 @@ private fun PrayerMethodSheet(
                 stringResource(R.string.calculation_method),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = MaterialTheme.colorScheme.primary
             )
             if (isLoading) {
-                Text(stringResource(R.string.loading_methods), color = AlKhatibColors.Slate500)
+                Text(stringResource(R.string.loading_methods), color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else if (errorDisplay != null) {
                 AlKhatibInlineError(
                     display = errorDisplay,
@@ -983,7 +982,7 @@ private fun PrayerMethodSheet(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(
-                                    if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                                    if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
                                 )
                                 .clickable {
                                     onSelect(option.method)
@@ -992,15 +991,15 @@ private fun PrayerMethodSheet(
                                 .padding(14.dp)
                         ) {
                             Column(Modifier.weight(1f)) {
-                                Text(option.name, color = AlKhatibColors.Slate900, fontWeight = FontWeight.Medium)
+                                Text(option.name, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium)
                                 Text(
                                     option.organization,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = AlKhatibColors.Slate500
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             if (isSelected) {
-                                Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                                Text("✓", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
@@ -1031,12 +1030,12 @@ private fun AdhanVoiceSheet(
                 stringResource(R.string.adhan_voice_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
                 stringResource(R.string.adhan_voice_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate500
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             AlKhatibCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -1047,17 +1046,17 @@ private fun AdhanVoiceSheet(
                     Text(
                         stringResource(R.string.subuh_fajr),
                         fontWeight = FontWeight.SemiBold,
-                        color = AlKhatibColors.Slate900
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
                         AdhanVoiceCatalog.fajrDisplayName,
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         stringResource(R.string.adhan_fajr_fixed_note),
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Teal
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 }
             }
@@ -1076,18 +1075,18 @@ private fun AdhanVoiceSheet(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(10.dp))
                             .background(
-                                if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                                if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
                             )
                             .clickable { onSelect(voice) }
                             .padding(horizontal = 8.dp, vertical = 10.dp)
                     ) {
                         Column(Modifier.weight(1f).padding(horizontal = 6.dp)) {
-                            Text(voice.displayName, color = AlKhatibColors.Slate900, fontWeight = FontWeight.Medium)
+                            Text(voice.displayName, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium)
                             if (voice == AdhanVoice.DEFAULT) {
                                 Text(
                                     stringResource(R.string.default_label),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = AlKhatibColors.Slate500
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -1097,11 +1096,11 @@ private fun AdhanVoiceSheet(
                             Icon(
                                 imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
                                 contentDescription = if (isPreviewing) stopPreviewLabel else previewAdhanLabel,
-                                tint = AlKhatibColors.Teal
+                                tint = MaterialTheme.colorScheme.secondary
                             )
                         }
                         if (isSelected) {
-                            Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 8.dp))
+                            Text("✓", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 8.dp))
                         }
                     }
                 }
@@ -1142,7 +1141,7 @@ private fun LanguageSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
                         .background(
-                            if (isSelected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+                            if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
                         )
                         .clickable { onSelect(language) }
                         .padding(horizontal = 12.dp, vertical = 14.dp)
@@ -1150,11 +1149,11 @@ private fun LanguageSheet(
                     Text(
                         text = stringResource(language.labelRes),
                         modifier = Modifier.weight(1f),
-                        color = AlKhatibColors.Slate900,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                     )
                     if (isSelected) {
-                        Text("✓", color = AlKhatibColors.Teal, fontWeight = FontWeight.Bold)
+                        Text("✓", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -1212,7 +1211,7 @@ private fun FollowersSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
-                            color = AlKhatibColors.DeepEmerald,
+                            color = MaterialTheme.colorScheme.primary,
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(36.dp)
                         )
@@ -1234,7 +1233,7 @@ private fun FollowersSheet(
                     ) {
                         Text(
                             text = stringResource(R.string.no_followers),
-                            color = AlKhatibColors.Slate500,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -1267,7 +1266,7 @@ private fun FollowersSheet(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator(
-                                        color = AlKhatibColors.DeepEmerald,
+                                        color = MaterialTheme.colorScheme.primary,
                                         strokeWidth = 2.dp,
                                         modifier = Modifier.size(24.dp)
                                     )
@@ -1299,10 +1298,10 @@ private fun FollowerRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(AlKhatibColors.PureWhite)
+            .background(MaterialTheme.colorScheme.surface)
             .border(
                 width = 1.dp,
-                color = AlKhatibColors.SoftGrey.copy(alpha = 0.4f),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 12.dp, vertical = 10.dp)
@@ -1311,7 +1310,7 @@ private fun FollowerRow(
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(AlKhatibColors.LightGrey),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             if (avatarUrl != null) {
@@ -1326,7 +1325,7 @@ private fun FollowerRow(
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = null,
-                    tint = AlKhatibColors.Slate500,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -1335,14 +1334,14 @@ private fun FollowerRow(
         Column(Modifier.weight(1f)) {
             Text(
                 text = displayTitle,
-                color = AlKhatibColors.Slate900,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.bodyMedium
             )
             follower.username?.let {
                 Text(
                     text = "@$it",
-                    color = AlKhatibColors.Slate500,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -1366,12 +1365,12 @@ private fun FollowButton(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
-                if (followed) AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
-                else AlKhatibColors.DeepEmerald.copy(alpha = 0.15f)
+                if (followed) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
             )
             .border(
                 width = 1.dp,
-                color = if (followed) AlKhatibColors.DeepEmerald.copy(alpha = 0.3f) else AlKhatibColors.DeepEmerald.copy(alpha = 0.6f),
+                color = if (followed) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                 shape = RoundedCornerShape(50)
             )
             .clickable(enabled = !loading, onClick = onClick)
@@ -1380,14 +1379,14 @@ private fun FollowButton(
     ) {
         if (loading) {
             CircularProgressIndicator(
-                color = AlKhatibColors.DeepEmerald,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 1.5.dp,
                 modifier = Modifier.size(14.dp)
             )
         } else {
             Text(
                 text = if (followed) stringResource(R.string.following) else stringResource(R.string.follow),
-                color = AlKhatibColors.DeepEmerald,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -1436,33 +1435,26 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                     .background(
                         Brush.linearGradient(
                             colors = listOf(
-                                AlKhatibColors.DeepEmerald,
-                                AlKhatibColors.MintWash
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primaryContainer
+                                )
                             )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "SĀ",
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "SĀ",
+                        color = MaterialTheme.colorScheme.onPrimary,
             Text(
                 text = "SĀAT",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.Slate900
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = "Version $appVersion",
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate500,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp)
             )
 
@@ -1477,18 +1469,18 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                     text = stringResource(R.string.app_details_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = stringResource(R.string.about_app_desc),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate700,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 20.sp
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
             Spacer(modifier = Modifier.height(24.dp))
 
             // Developer Section Title
@@ -1496,7 +1488,7 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                 text = stringResource(R.string.developer_details_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.align(Alignment.Start)
             )
 
@@ -1510,8 +1502,8 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                     .background(
                         Brush.linearGradient(
                             colors = listOf(
-                                AlKhatibColors.IndigoAccent,
-                                AlKhatibColors.DeepEmerald
+                                MaterialTheme.colorScheme.secondary,
+                                MaterialTheme.colorScheme.primary
                             )
                         )
                     ),
@@ -1519,7 +1511,7 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
             ) {
                 Text(
                     text = "SE",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -1531,12 +1523,12 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                 text = stringResource(R.string.developer_name),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.Slate900
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = stringResource(R.string.developer_role),
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp)
             )
 
@@ -1546,7 +1538,7 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
             Text(
                 text = stringResource(R.string.developer_bio),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate700,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 20.sp,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -1558,14 +1550,14 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(AlKhatibColors.LightGrey.copy(alpha = 0.5f))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     .padding(14.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Filled.Star,
                         contentDescription = null,
-                        tint = AlKhatibColors.IndigoAccent,
+                        tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -1573,14 +1565,14 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                         text = stringResource(R.string.developer_achievement_title),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.Slate900
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = stringResource(R.string.developer_achievement),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate700,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 18.sp
                 )
             }
@@ -1630,7 +1622,7 @@ private fun AboutLinkRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .clickable { onClick(url) }
-            .background(AlKhatibColors.LightGrey.copy(alpha = 0.5f))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1638,13 +1630,13 @@ private fun AboutLinkRow(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
-            color = AlKhatibColors.Slate800,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f)
         )
         Icon(
             imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Login,
             contentDescription = null,
-            tint = AlKhatibColors.Slate500,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(20.dp)
         )
     }
@@ -1669,12 +1661,12 @@ private fun ThemeSelectionSheet(
                 text = stringResource(R.string.theme_settings_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = stringResource(R.string.theme_settings_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate500
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -1683,21 +1675,21 @@ private fun ThemeSelectionSheet(
                 AppThemeColor.values().forEach { theme ->
                     val isSelected = theme == selected
                     val dotColor = when (theme) {
-                        AppThemeColor.EMERALD -> Color(0xFF064E3B)
-                        AppThemeColor.INDIGO -> Color(0xFF1E3A8A)
-                        AppThemeColor.GOLD -> Color(0xFFD97706)
+                        AppThemeColor.EMERALD -> MaterialTheme.colorScheme.primary
+                        AppThemeColor.INDIGO -> MaterialTheme.colorScheme.secondary
+                        AppThemeColor.GOLD -> MaterialTheme.colorScheme.tertiary
                     }
                     Surface(
                         onClick = { onSelect(theme) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         color = if (isSelected) {
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                         } else {
                             Color.Transparent
                         },
                         border = if (isSelected) {
-                            BorderStroke(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.2f))
+                            BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                         } else {
                             null
                         }
@@ -1719,13 +1711,13 @@ private fun ThemeSelectionSheet(
                                 text = stringResource(theme.displayNameRes),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.weight(1f)
                             )
                             if (isSelected) {
                                 Text(
                                     text = "✓",
-                                    color = AlKhatibColors.DeepEmerald,
+                                    color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -1757,12 +1749,12 @@ private fun MadhabSelectionSheet(
                 text = stringResource(R.string.madhab_settings_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = MaterialTheme.colorScheme.primary
             )
             Text(
                 text = stringResource(R.string.madhab_settings_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate500
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -1775,12 +1767,12 @@ private fun MadhabSelectionSheet(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         color = if (isSelected) {
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                         } else {
                             Color.Transparent
                         },
                         border = if (isSelected) {
-                            BorderStroke(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.2f))
+                            BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                         } else {
                             null
                         }
@@ -1795,13 +1787,13 @@ private fun MadhabSelectionSheet(
                                 text = stringResource(madhab.displayNameRes),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.weight(1f)
                             )
                             if (isSelected) {
                                 Text(
                                     text = "✓",
-                                    color = AlKhatibColors.DeepEmerald,
+                                    color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold
                                 )
                             }

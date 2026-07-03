@@ -5,6 +5,7 @@ import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryBundle
 import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryItem
 import app.kamy.saatApp.domain.faraidh.FaraidhGlossaryTerm
+import app.kamy.saatApp.domain.faraidh.FaraidhDictionaryBundle
 import app.kamy.saatApp.domain.faraidh.FaraidhMadhhab
 import app.kamy.saatApp.domain.faraidh.FaraidhProofItem
 import app.kamy.saatApp.domain.faraidh.FaraidhProofKind
@@ -28,6 +29,7 @@ class FaraidhReferenceRepository @Inject constructor(
 
     private var cached: FaraidhReferenceBundle? = null
     private var glossaryCached: FaraidhGlossaryBundle? = null
+    private var dictionaryCached: FaraidhDictionaryBundle? = null
 
     suspend fun loadBundle(): FaraidhReferenceBundle = withContext(Dispatchers.IO) {
         cached ?: run {
@@ -43,8 +45,55 @@ class FaraidhReferenceRepository @Inject constructor(
         }
     }
 
-    suspend fun glossaryItems(language: AppLanguage): List<FaraidhGlossaryItem> =
-        loadGlossary().terms.map { it.toItem(language) }
+    suspend fun loadDictionary(): FaraidhDictionaryBundle = withContext(Dispatchers.IO) {
+        dictionaryCached ?: run {
+            val text = context.assets.open("faraidh/faraidh_terms_dictionary.json").bufferedReader().use { it.readText() }
+            assetJson.decodeFromString(FaraidhDictionaryBundle.serializer(), text).also { dictionaryCached = it }
+        }
+    }
+
+    suspend fun glossaryItems(language: AppLanguage): List<FaraidhGlossaryItem> = withContext(Dispatchers.IO) {
+        val baseItems = loadGlossary().terms.map { it.toItem(language) }
+        val dict = loadDictionary()
+        val dictItems = mutableListOf<FaraidhGlossaryItem>()
+
+        fun addDictItems(map: Map<String, app.kamy.saatApp.domain.faraidh.FaraidhDictionaryItem>) {
+            map.forEach { (key, item) ->
+                val title = item.display_name[language.tag] ?: item.display_name["en"] ?: key
+                val definition = item.glossary_definition[language.tag] ?: item.glossary_definition["en"].orEmpty()
+                
+                val dalilText = if (item.dalil.isNotEmpty()) {
+                    val label = when (language) {
+                        AppLanguage.INDONESIAN -> "\nRujukan Syariah (Dalil):"
+                        AppLanguage.MALAY -> "\nRujukan Syariah (Dalil):"
+                        AppLanguage.ENGLISH -> "\nScriptural Proofs (Dalil):"
+                    }
+                    val list = item.dalil.map { d ->
+                        val citation = d.reference_citation[language.tag] ?: d.reference_citation["en"].orEmpty()
+                        val trans = d.translation?.get(language.tag) ?: d.translation?.get("en").orEmpty()
+                        val arab = d.arabic_text?.let { "\n   \"$it\"" }.orEmpty()
+                        val citationSuffix = if (citation.isNotBlank()) " [$citation]" else ""
+                        "- ${d.source}$citationSuffix: $trans$arab"
+                    }.joinToString("\n")
+                    "$label\n$list"
+                } else ""
+
+                dictItems += FaraidhGlossaryItem(
+                    id = "dict_${item.id}",
+                    title = title,
+                    arabic = item.arabic_term,
+                    body = if (dalilText.isNotBlank()) "$definition\n$dalilText" else definition
+                )
+            }
+        }
+
+        addDictItems(dict.standard_heirs)
+        addDictItems(dict.classical_cases)
+        addDictItems(dict.anomalies_and_legal_rules)
+        addDictItems(dict.disqualifications)
+
+        baseItems + dictItems
+    }
 
     private fun FaraidhGlossaryTerm.toItem(language: AppLanguage): FaraidhGlossaryItem =
         FaraidhGlossaryItem(

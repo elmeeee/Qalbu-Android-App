@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
@@ -55,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
 import app.kamy.saatApp.domain.tools.QiblaCalculator
 import app.kamy.saatApp.infrastructure.notifications.PrayerScheduleCache
@@ -108,7 +106,7 @@ fun QiblaScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(MaterialTheme.colorScheme.background)
             .tabContentStatusBarInset()
     ) {
         Row(
@@ -118,13 +116,13 @@ fun QiblaScreen(onBack: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onBackground)
             }
             Text(
                 text = stringResource(R.string.qibla_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -151,7 +149,7 @@ fun QiblaScreen(onBack: () -> Unit) {
         if (location == null) {
             Text(
                 text = stringResource(R.string.qibla_location_required),
-                color = Color.White.copy(alpha = 0.85f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f),
                 modifier = Modifier.padding(24.dp),
                 textAlign = TextAlign.Center
             )
@@ -188,7 +186,10 @@ fun QiblaScreen(onBack: () -> Unit) {
                         .fillMaxSize()
                         .background(
                             Brush.radialGradient(
-                                listOf(Color(0xFF0F172A), Color(0xFF020617))
+                                listOf(
+                                    MaterialTheme.colorScheme.background,
+                                    MaterialTheme.colorScheme.surface
+                                )
                             )
                         )
                 )
@@ -207,7 +208,7 @@ fun QiblaScreen(onBack: () -> Unit) {
             } else {
                 stringResource(R.string.qibla_bearing, bearing.roundToInt())
             },
-            color = if (aligned) AlKhatibColors.GoldBright else AlKhatibColors.GoldBright,
+            color = MaterialTheme.colorScheme.tertiary,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -259,19 +260,19 @@ private fun QiblaNeedleOverlay(
         Canvas(modifier = Modifier.size(260.dp)) {
             val center = Offset(size.width / 2f, size.height / 2f)
             drawCircle(
-                color = Color.White.copy(alpha = 0.12f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f),
                 radius = size.minDimension / 2f,
                 center = center,
                 style = Stroke(width = 3f)
             )
             rotate(needleRotation, center) {
                 drawLine(
-                    color = Color(0xFFD97706),
+                    color = MaterialTheme.colorScheme.tertiary,
                     start = center,
                     end = Offset(center.x, center.y - size.height * 0.38f),
                     strokeWidth = 8f
                 )
-                drawCircle(color = Color(0xFFD97706), radius = 10f, center = center)
+                drawCircle(color = MaterialTheme.colorScheme.tertiary, radius = 10f, center = center)
             }
         }
         Box(
@@ -279,12 +280,12 @@ private fun QiblaNeedleOverlay(
                 .align(Alignment.TopCenter)
                 .padding(top = 48.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.15f))
+                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.15f))
                 .padding(horizontal = 14.dp, vertical = 6.dp)
         ) {
             Text(
                 text = stringResource(R.string.qibla_bearing_compass, bearing.roundToInt()),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
         }

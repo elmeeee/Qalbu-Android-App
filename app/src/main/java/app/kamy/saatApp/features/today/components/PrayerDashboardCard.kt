@@ -70,10 +70,10 @@ fun PrayerDashboardCard(
         ?.rememberErrorDisplay(R.string.error_prayer_fetch_title)
     val background = when (state.theme) {
         PrayerTheme.DAYLIGHT -> Brush.linearGradient(
-            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
+            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
         )
         PrayerTheme.NIGHT -> Brush.linearGradient(
-            listOf(AlKhatibColors.EmeraldNight, AlKhatibColors.DeepEmerald)
+            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
         )
     }
     val slotEntries = remember(state.timings) {
@@ -99,7 +99,10 @@ fun PrayerDashboardCard(
                 .border(
                     width = 1.dp,
                     brush = Brush.linearGradient(
-                        listOf(Color.White.copy(alpha = 0.28f), Color.White.copy(alpha = 0.08f))
+                        listOf(
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.28f),
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.08f)
+                        )
                     ),
                     shape = RoundedCornerShape(20.dp)
                 )
@@ -124,7 +127,7 @@ fun PrayerDashboardCard(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = headline.label,
-                                    color = WidgetGoldLabel,
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     letterSpacing = 0.6.sp
@@ -132,7 +135,7 @@ fun PrayerDashboardCard(
                                 Spacer(Modifier.height(4.dp))
                                 Text(
                                     text = headline.title,
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 2,
@@ -141,7 +144,7 @@ fun PrayerDashboardCard(
                                 if (headline.subtitle.isNotBlank()) {
                                     Text(
                                         text = headline.subtitle,
-                                        color = Color.White.copy(alpha = 0.82f),
+                                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f),
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier.padding(top = 4.dp),
                                         maxLines = 1,
@@ -160,7 +163,7 @@ fun PrayerDashboardCard(
                             ) { countdown ->
                                 Text(
                                     text = countdown,
-                                    color = WidgetGold,
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontSize = 26.sp,
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.Monospace,
@@ -177,7 +180,7 @@ fun PrayerDashboardCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(Color.Black.copy(alpha = 0.2f))
+                                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f))
                                 .padding(vertical = 10.dp, horizontal = 4.dp),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {

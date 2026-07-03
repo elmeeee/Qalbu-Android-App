@@ -404,7 +404,7 @@ private fun ReflectPostCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = post.author?.displayName ?: contributorLabel,
-                        color = ReflectPaperInk,
+                        color = ReflectOnSurfaceColor(),
                         fontWeight = FontWeight.SemiBold,
                         style = MaterialTheme.typography.titleSmall,
                         maxLines = 1,
@@ -533,7 +533,7 @@ private fun ReflectPostCard(
             )
             ReflectActionChip(
                 icon = Icons.Filled.Share,
-                tint = ReflectPaperMuted,
+                tint = ReflectOnSurfaceVariantColor(),
                 label = shareLabel,
                 onClick = onShare
             )
@@ -604,12 +604,12 @@ private fun FollowButton(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
-                if (followed) AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
-                else AlKhatibColors.DeepEmerald.copy(alpha = 0.15f)
+                if (followed) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
             )
             .border(
                 width = 1.dp,
-                color = if (followed) AlKhatibColors.DeepEmerald.copy(alpha = 0.3f) else AlKhatibColors.DeepEmerald.copy(alpha = 0.6f),
+                color = if (followed) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                 shape = RoundedCornerShape(50)
             )
             .clickable(enabled = !loading, onClick = onClick)
@@ -618,14 +618,14 @@ private fun FollowButton(
     ) {
         if (loading) {
             CircularProgressIndicator(
-                color = AlKhatibColors.DeepEmerald,
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 1.5.dp,
                 modifier = Modifier.size(14.dp)
             )
         } else {
             Text(
                 text = if (followed) stringResource(R.string.following) else stringResource(R.string.follow),
-                color = AlKhatibColors.DeepEmerald,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold
             )
