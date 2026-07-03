@@ -53,6 +53,34 @@ object LocalPrayerCalculator {
             PrayerType.ISHA.aladhanKey to formatPrayerTime(prayerTimes.isha)
         )
 
+        val maghribTime = prayerTimes.maghrib
+        val tomorrowCal = Calendar.getInstance().apply {
+            time = day
+            add(Calendar.DAY_OF_MONTH, 1)
+        }
+        val tomorrowComponents = DateComponents(
+            tomorrowCal.get(Calendar.YEAR),
+            tomorrowCal.get(Calendar.MONTH) + 1,
+            tomorrowCal.get(Calendar.DAY_OF_MONTH)
+        )
+        val tomorrowPrayerTimes = PrayerTimes(coords, tomorrowComponents, params)
+        val tomorrowFajrTime = tomorrowPrayerTimes.fajr
+
+        if (maghribTime != null && tomorrowFajrTime != null) {
+            val maghribMillis = maghribTime.time
+            val tomorrowFajrMillis = tomorrowFajrTime.time
+            val nightDuration = tomorrowFajrMillis - maghribMillis
+            if (nightDuration > 0) {
+                val firstThirdMillis = maghribMillis + nightDuration / 3
+                val midnightMillis = maghribMillis + nightDuration / 2
+                val lastThirdMillis = maghribMillis + (2 * nightDuration) / 3
+
+                timingsMap["Firstthird"] = timeOut.format(Date(firstThirdMillis))
+                timingsMap["Midnight"] = timeOut.format(Date(midnightMillis))
+                timingsMap["Lastthird"] = timeOut.format(Date(lastThirdMillis))
+            }
+        }
+
         val entries = PrayerType.entries.mapNotNull { type ->
             val raw = timingsMap[type.aladhanKey] ?: return@mapNotNull null
             val parsed = parseTime(raw, baseDate) ?: return@mapNotNull null

@@ -21,8 +21,8 @@ object PrayerNotificationScheduler {
 
     private const val PRAYER_REQUEST_BASE = 8_000
     private const val NIGHT_REQUEST_BASE = 9_000
-    private const val SUNNAH_YASIN_REQUEST = 10_001
-    private const val SUNNAH_KAHF_REQUEST = 10_002
+    private const val SUNNAH_YASIN_REQUEST = 10_000
+    private const val SUNNAH_KAHF_REQUEST = 10_100
     private const val MIDNIGHT_REFRESH_REQUEST = 11_000
     private const val IMPORTANT_DAYS_REQUEST_BASE = 12_000
     private const val IMPORTANT_DAYS_ID_BASE = 12_000
@@ -164,8 +164,8 @@ object PrayerNotificationScheduler {
         if (options.kahfReminderEnabled) {
             val firstFire = nextWeekdayTime(
                 weekday = Calendar.FRIDAY,
-                hour = 9,
-                minute = 0,
+                hour = 10,
+                minute = 30,
                 from = now
             )
             upcomingWeeklyOccurrences(firstFire, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
