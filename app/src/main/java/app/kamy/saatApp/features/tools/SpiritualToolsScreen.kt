@@ -117,6 +117,14 @@ fun SpiritualToolsScreen(
             AlKhatibColors.DeepEmerald,
             AlKhatibColors.GoldDeep
         ),
+        SpiritualToolItem(
+            Icons.Filled.WaterDrop,
+            R.string.title_wudhu_guide,
+            R.string.wudhu_subtitle,
+            "wudhu",
+            AlKhatibColors.Teal,
+            AlKhatibColors.IndigoAccent
+        )
     )
 
     Column(

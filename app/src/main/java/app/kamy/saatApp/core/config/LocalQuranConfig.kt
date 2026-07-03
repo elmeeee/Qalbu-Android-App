@@ -134,6 +134,5 @@ object LocalQuranConfig {
     fun translationDisplayLabel(translation: QFTranslation): String =
         translation.authorName.ifBlank { translation.name }
 
-    fun supportsTafsir(translationId: Int): Boolean =
-        translationId == TRANSLATION_INDONESIAN || translationId == TRANSLATION_KEMENAG
+    fun supportsTafsir(translationId: Int): Boolean = true
 }

@@ -135,13 +135,23 @@ class ContentRepository @Inject constructor(
 
     suspend fun getTafsirByAyah(ayahKey: String): TafsirPayload? {
         val translationId = selectedTranslationId()
-        if (!LocalQuranConfig.supportsTafsir(translationId)) return null
-        return local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
-            ?: local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)
+        return when (translationId) {
+            LocalQuranConfig.TRANSLATION_KEMENAG -> {
+                local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)
+                    ?: local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
+            }
+            LocalQuranConfig.TRANSLATION_INDONESIAN -> {
+                local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
+                    ?: local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)
+            }
+            else -> {
+                local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
+                    ?: local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)
+            }
+        }
     }
 
     suspend fun getJalalaynByAyah(ayahKey: String): TafsirPayload? {
-        if (!LocalQuranConfig.supportsTafsir(selectedTranslationId())) return null
         return local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
     }
 

@@ -163,6 +163,9 @@ class ChapterReaderViewModel @Inject constructor(
                     it.copy(selectedTranslationId = LocalQuranConfig.normalizeTranslationId(id))
                 }
                 loadInitial()
+                if (_state.value.tafsirVisible) {
+                    reloadTafsir()
+                }
             }
         }
         viewModelScope.launch {

@@ -77,9 +77,20 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlinx.coroutines.launch
 
-private val ReflectPaper = Color(0xFFFAF6EE)
-private val ReflectPaperMuted = Color(0xFF6B6358)
-private val ReflectPaperInk = Color(0xFF1E1A14)
+@Composable
+private fun ReflectSurfaceColor() = MaterialTheme.colorScheme.surface
+
+@Composable
+private fun ReflectSurfaceVariantColor() = MaterialTheme.colorScheme.surfaceVariant
+
+@Composable
+private fun ReflectOnSurfaceColor() = MaterialTheme.colorScheme.onSurface
+
+@Composable
+private fun ReflectOnSurfaceVariantColor() = MaterialTheme.colorScheme.onSurfaceVariant
+
+@Composable
+private fun ReflectOnPrimaryColor() = MaterialTheme.colorScheme.onPrimary
 
 @Composable
 fun ReflectScreen(
@@ -105,9 +116,9 @@ fun ReflectScreen(
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        AlKhatibColors.ForestDark,
-                        AlKhatibColors.DeepEmerald,
-                        AlKhatibColors.ForestDeeper
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.background
                     )
                 )
             )
@@ -302,14 +313,14 @@ private fun ReflectStickyHeader(
         Text(
             text = reflectTitle,
             style = MaterialTheme.typography.headlineSmall,
-            color = Color.White,
+            color = ReflectOnPrimaryColor(),
             fontWeight = FontWeight.Bold
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = reflectCommunity,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.White.copy(alpha = 0.72f)
+            color = ReflectOnPrimaryColor().copy(alpha = 0.72f)
         )
         Spacer(Modifier.height(AlKhatibSpacing.md))
         SegmentSwitcher(
@@ -333,10 +344,10 @@ private fun SegmentSwitcher(
             onClick = { onSelect(ReflectSegment.ALL) },
             shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
             colors = SegmentedButtonDefaults.colors(
-                activeContainerColor = Color.White.copy(alpha = 0.18f),
-                activeContentColor = Color.White,
+                activeContainerColor = ReflectOnPrimaryColor().copy(alpha = 0.18f),
+                activeContentColor = ReflectOnPrimaryColor(),
                 inactiveContainerColor = Color.Transparent,
-                inactiveContentColor = Color.White.copy(alpha = 0.55f)
+                inactiveContentColor = ReflectOnPrimaryColor().copy(alpha = 0.55f)
             )
         ) { Text(stringResource(R.string.reflect_all)) }
         SegmentedButton(
@@ -344,10 +355,10 @@ private fun SegmentSwitcher(
             onClick = { onSelect(ReflectSegment.MINE) },
             shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
             colors = SegmentedButtonDefaults.colors(
-                activeContainerColor = Color.White.copy(alpha = 0.18f),
-                activeContentColor = Color.White,
+                activeContainerColor = ReflectOnPrimaryColor().copy(alpha = 0.18f),
+                activeContentColor = ReflectOnPrimaryColor(),
                 inactiveContainerColor = Color.Transparent,
-                inactiveContentColor = Color.White.copy(alpha = 0.55f)
+                inactiveContentColor = ReflectOnPrimaryColor().copy(alpha = 0.55f)
             )
         ) { Text(stringResource(R.string.reflect_mine)) }
     }
@@ -376,7 +387,7 @@ private fun ReflectPostCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(ReflectPaper)
+            .background(ReflectSurfaceColor())
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -386,7 +397,7 @@ private fun ReflectPostCard(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(ReflectPaperMuted.copy(alpha = 0.15f))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f))
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -411,7 +422,7 @@ private fun ReflectPostCard(
                 }
                 Text(
                     text = formatReflectTime(post.createdAt),
-                    color = ReflectPaperMuted,
+                    color = ReflectOnSurfaceVariantColor(),
                     style = MaterialTheme.typography.labelSmall
                 )
             }
@@ -433,21 +444,21 @@ private fun ReflectPostCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.12f))
-                    .border(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
                     .clickable(onClick = onOpenVerse)
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.MenuBook,
                     contentDescription = null,
-                    tint = AlKhatibColors.DeepEmerald,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = verseKey,
-                    color = AlKhatibColors.DeepEmerald,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.labelLarge
                 )
@@ -458,7 +469,7 @@ private fun ReflectPostCard(
             Spacer(Modifier.height(12.dp))
             Text(
                 text = bodyText,
-                color = ReflectPaperInk,
+                color = ReflectOnSurfaceColor(),
                 style = MaterialTheme.typography.bodyLarge,
                 lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
             )
@@ -472,9 +483,9 @@ private fun ReflectPostCard(
                         text = "#$tag",
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
-                            .background(ReflectPaperMuted.copy(alpha = 0.12f))
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
                             .padding(horizontal = 10.dp, vertical = 4.dp),
-                        color = ReflectPaperMuted,
+                        color = ReflectOnSurfaceVariantColor(),
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -487,19 +498,19 @@ private fun ReflectPostCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(ReflectPaperMuted.copy(alpha = 0.08f))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.08f))
                     .padding(12.dp)
             ) {
                 Text(
                     text = recentCommentLabel,
-                    color = ReflectPaperMuted,
+                    color = ReflectOnSurfaceVariantColor(),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = commentBody,
-                    color = ReflectPaperInk.copy(alpha = 0.85f),
+                    color = ReflectOnSurfaceColor().copy(alpha = 0.85f),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
@@ -515,7 +526,7 @@ private fun ReflectPostCard(
         ) {
             ReflectActionChip(
                 icon = if (post.isLiked == true) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                tint = if (post.isLiked == true) AlKhatibColors.Danger else ReflectPaperMuted,
+                tint = if (post.isLiked == true) MaterialTheme.colorScheme.error else ReflectOnSurfaceVariantColor(),
                 label = (post.likesCount ?: 0).toString(),
                 loading = togglingLike,
                 onClick = onLike
@@ -542,6 +553,7 @@ private fun ReflectActionChip(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable(enabled = !loading, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
@@ -557,7 +569,7 @@ private fun ReflectActionChip(
         Spacer(Modifier.width(6.dp))
         Text(
             text = label,
-            color = ReflectPaperInk,
+            color = ReflectOnSurfaceColor(),
             fontWeight = FontWeight.Medium,
             style = MaterialTheme.typography.labelLarge
         )
@@ -574,7 +586,7 @@ private fun ReflectEmptyState(message: String) {
     ) {
         Text(
             text = message,
-            color = Color.White.copy(alpha = 0.75f),
+            color = ReflectOnPrimaryColor().copy(alpha = 0.75f),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 24.dp)
@@ -634,7 +646,7 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
             modifier = Modifier
                 .size(72.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.12f)),
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -647,7 +659,7 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
         Spacer(Modifier.height(20.dp))
         Text(
             text = title,
-            color = Color.White,
+            color = ReflectOnPrimaryColor(),
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
@@ -655,7 +667,7 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
         Spacer(Modifier.height(10.dp))
         Text(
             text = subtitle,
-            color = Color.White.copy(alpha = 0.72f),
+            color = ReflectOnPrimaryColor().copy(alpha = 0.72f),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
@@ -664,8 +676,8 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
         Button(
             onClick = onSignIn,
             colors = ButtonDefaults.buttonColors(
-                containerColor = AlKhatibColors.GoldBright,
-                contentColor = ReflectPaperInk
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
         ) {
             Text(stringResource(R.string.sign_in_qf), fontWeight = FontWeight.SemiBold)

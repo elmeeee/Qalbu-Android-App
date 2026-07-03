@@ -130,10 +130,9 @@ class AccountViewModel @Inject constructor(
     private val adhanPrefs: AdhanPreferencesStore,
     private val adhanPreviewPlayer: AdhanPreviewPlayer,
     private val appLanguageStore: AppLanguageStore,
-    private val shareComposer: VerseShareTextComposer
+    private val shareComposer: VerseShareTextComposer,
+    private val themeStore: ThemePreferencesStore
 ) : ViewModel() {
-
-    private val themeStore = ThemePreferencesStore.from(appContext)
 
     private val _state = MutableStateFlow(AccountUiState(isSignedIn = userSession.isSignedIn.value))
     val state: StateFlow<AccountUiState> = _state.asStateFlow()
