@@ -208,7 +208,7 @@
     <string name="verse_note_edit">Edit catatan</string>
     <string name="verse_note_hint">Apa makna ayat ini bagi Anda hari ini?</string>
     <string name="verse_number">Ayat %1$d</string>
-    <string name="zakat_account_subtitle">Harga emas live · aturan nisab 2,5%</string>
+    <string name="zakat_account_subtitle">Harga emas · aturan nisab 2,5%</string>
     <string name="zakat_below_nisab">Di bawah nisab — tidak ada zakat pada perkiraan ini.</string>
     <string name="zakat_cash">Tunai &amp; tabungan</string>
     <string name="zakat_debts">Hutang jatuh tempo</string>
@@ -219,12 +219,12 @@
     <string name="zakat_intro">Masukkan aset dan harga emas lokal per gram (nisab kira-kira 85g emas).</string>
     <string name="zakat_intro_sharia">Zakat maal: 2,5% saat harta mencapai nisab (85g emas atau 595g perak) selama satu tahun qomariah.</string>
     <string name="zakat_investments">Investasi</string>
-    <string name="zakat_live_gold_price">Emas: %1$s / gram (live)</string>
+    <string name="zakat_live_gold_price">Emas: %1$s / gram</string>
     <string name="zakat_net_wealth">Kekayaan zakatable bersih</string>
     <string name="zakat_nisab">Ambang nisab</string>
     <string name="zakat_nisab_gold">Nisab emas (%1$dg)</string>
     <string name="zakat_nisab_silver">Nisab perak (%1$dg)</string>
-    <string name="zakat_price_error">Gagal memuat harga emas live</string>
+    <string name="zakat_price_error">Gagal memuat harga emas</string>
     <string name="zakat_silver_grams">Perak (gram)</string>
     <string name="zakat_title">Kalkulator zakat</string>
     <string name="zakat_pay_where_title">Bayar Zakat ke Mana?</string>
