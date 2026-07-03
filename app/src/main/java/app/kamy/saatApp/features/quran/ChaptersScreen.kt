@@ -701,7 +701,7 @@ private fun ChapterRow(
             onClick = onClick,
             modifier = Modifier
                 .width(345.dp)
-                .height(90.dp),
+                .height(104.dp),
             shape = RoundedCornerShape(16.dp),
             color = AlKhatibColors.PureWhite,
             shadowElevation = 1.dp,
@@ -718,43 +718,51 @@ private fun ChapterRow(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(vertical = 8.dp),
+                        .padding(vertical = 10.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
+                    Text(
+                        text = chapter.displayComplexName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = AlKhatibColors.Slate900
+                    )
+                    if (meaning.isNotEmpty()) {
                         Text(
-                            text = chapter.displayComplexName,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.Slate800
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = "- ${chapter.versesCount} Verses",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Normal,
-                            color = AlKhatibColors.Slate800
+                            text = meaning,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = AlKhatibColors.Slate500,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 2.dp)
                         )
                     }
-                    val subtitle = "${chapter.revelationLabel} - $meaning"
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = AlKhatibColors.Slate500,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (chapter.revelationLabel.isNotEmpty()) {
+                            AlKhatibRevelationChip(
+                                label = chapter.revelationLabel,
+                                isMeccan = chapter.isMeccan
+                            )
+                        }
+                        chapter.versesCount?.let { count ->
+                            Text(
+                                text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = AlKhatibColors.Slate500
+                            )
+                        }
+                    }
                 }
                 Image(
                     painter = painterResource(if (chapter.isMeccan) R.drawable.mecca else R.drawable.medina),
                     contentDescription = null,
                     modifier = Modifier
-                        .width(113.dp)
-                        .height(90.dp),
+                        .width(130.dp)
+                        .height(104.dp),
                     contentScale = ContentScale.Fit
                 )
             }

@@ -318,7 +318,9 @@ data class QuranChapter(
         }
 
     val isMeccan: Boolean
-        get() = revelationPlace?.lowercase() in setOf("makkah", "mecca")
+        get() = revelationPlace?.lowercase()?.let {
+            !it.contains("madin") && !it.contains("medin")
+        } ?: true
 }
 
 @Serializable
