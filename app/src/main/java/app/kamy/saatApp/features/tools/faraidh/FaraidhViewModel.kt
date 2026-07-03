@@ -104,6 +104,8 @@ class FaraidhViewModel @Inject constructor(
                         current.copy(liveGoldPrice = livePrice, estate = estate)
                     }
                 }
+            }.onFailure { e ->
+                e.printStackTrace()
             }
         }
     }
@@ -207,6 +209,8 @@ class FaraidhViewModel @Inject constructor(
                 referenceRepository.glossaryItems(languageStore.current())
             }.onSuccess { items ->
                 _state.update { it.copy(glossary = items) }
+            }.onFailure { e ->
+                e.printStackTrace()
             }
         }
     }
@@ -463,7 +467,8 @@ class FaraidhViewModel @Inject constructor(
                     )
                 }
                 persistDraft()
-            }.onFailure {
+            }.onFailure { e ->
+                e.printStackTrace()
                 _state.update {
                     it.copy(
                         result = result,

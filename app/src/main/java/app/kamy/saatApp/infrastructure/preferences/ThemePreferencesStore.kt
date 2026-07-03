@@ -10,7 +10,7 @@ import javax.inject.Singleton
 
 enum class AppThemeColor(val key: String, val displayNameRes: Int) {
     EMERALD("emerald", app.kamy.saatApp.R.string.theme_emerald),
-    INDIGO("indigo", app.kamy.saatApp.R.string.theme_indigo),
+    OCEAN("ocean", app.kamy.saatApp.R.string.theme_ocean),
     GOLD("gold", app.kamy.saatApp.R.string.theme_gold);
 
     companion object {

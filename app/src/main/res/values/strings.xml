@@ -16,7 +16,7 @@
     <string name="theme_settings_title">App Theme Color</string>
     <string name="theme_settings_subtitle">Change the primary theme color</string>
     <string name="theme_emerald">Emerald Green</string>
-    <string name="theme_indigo">Ocean Indigo</string>
+    <string name="theme_ocean">Ocean Indigo</string>
     <string name="theme_gold">Royal Gold</string>
 
     <!-- Madhab Settings -->

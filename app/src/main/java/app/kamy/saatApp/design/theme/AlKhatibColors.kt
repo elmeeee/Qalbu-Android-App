@@ -47,43 +47,43 @@ object AlKhatibColors {
     fun applyTheme(theme: AppThemeColor) {
         when (theme) {
             AppThemeColor.EMERALD -> {
-                DeepEmerald = Color(0xFF064E3B)
-                Teal = Color(0xFF0D9488)
-                TealDark = Color(0xFF0F766E)
-                EmeraldRich = Color(0xFF065F46)
-                EmeraldNight = Color(0xFF022C22)
-                ForestDark = Color(0xFF0B3D34)
-                ForestDeeper = Color(0xFF051F1A)
-                ReaderMoss = Color(0xFF0A3D2E)
-                ReaderForest = Color(0xFF0F2A22)
-                SageTint = Color(0xFFE7F0DF)
-                MintWash = Color(0xFFF0FDF4)
+                DeepEmerald = Color(0xFF0F4C3A) // Softer emerald
+                Teal = Color(0xFF14806A)
+                TealDark = Color(0xFF106352)
+                EmeraldRich = Color(0xFF165C4B)
+                EmeraldNight = Color(0xFF09291F)
+                ForestDark = Color(0xFF0C382A)
+                ForestDeeper = Color(0xFF062118)
+                ReaderMoss = Color(0xFF0E4030)
+                ReaderForest = Color(0xFF08261C)
+                SageTint = Color(0xFFE8F2ED)
+                MintWash = Color(0xFFF2F9F6)
             }
-            AppThemeColor.INDIGO -> {
-                DeepEmerald = Color(0xFF1E3A8A)
-                Teal = Color(0xFF2563EB)
-                TealDark = Color(0xFF1D4ED8)
-                EmeraldRich = Color(0xFF3B82F6)
-                EmeraldNight = Color(0xFF172554)
-                ForestDark = Color(0xFF1E40AF)
-                ForestDeeper = Color(0xFF0F172A)
-                ReaderMoss = Color(0xFF1E3A8A)
-                ReaderForest = Color(0xFF0F172A)
-                SageTint = Color(0xFFDBEAFE)
-                MintWash = Color(0xFFEFF6FF)
+            AppThemeColor.OCEAN -> {
+                DeepEmerald = Color(0xFF1B4965) // Deep ocean blue
+                Teal = Color(0xFF3B82F6) // Softer blue
+                TealDark = Color(0xFF2563EB)
+                EmeraldRich = Color(0xFF2C6CA5)
+                EmeraldNight = Color(0xFF0F2C3F)
+                ForestDark = Color(0xFF153B53)
+                ForestDeeper = Color(0xFF0A1F2D)
+                ReaderMoss = Color(0xFF18425C)
+                ReaderForest = Color(0xFF0D2534)
+                SageTint = Color(0xFFE8F2F8)
+                MintWash = Color(0xFFF3F8FC)
             }
             AppThemeColor.GOLD -> {
-                DeepEmerald = Color(0xFF78350F)
-                Teal = Color(0xFFD97706)
-                TealDark = Color(0xFFB45309)
-                EmeraldRich = Color(0xFFF59E0B)
-                EmeraldNight = Color(0xFF451A03)
-                ForestDark = Color(0xFF92400E)
-                ForestDeeper = Color(0xFF180800)
-                ReaderMoss = Color(0xFF78350F)
-                ReaderForest = Color(0xFF451A03)
-                SageTint = Color(0xFFFEF3C7)
-                MintWash = Color(0xFFFFFBEB)
+                DeepEmerald = Color(0xFF8B6015) // Royal gold
+                Teal = Color(0xFFC08A27) // Softer, less bright gold
+                TealDark = Color(0xFFA6741F)
+                EmeraldRich = Color(0xFF9C7221)
+                EmeraldNight = Color(0xFF382607)
+                ForestDark = Color(0xFF5A3E0C)
+                ForestDeeper = Color(0xFF2B1D04)
+                ReaderMoss = Color(0xFF6B4A0E)
+                ReaderForest = Color(0xFF3F2B07)
+                SageTint = Color(0xFFF9F5EC)
+                MintWash = Color(0xFFFDFBF7)
             }
         }
     }

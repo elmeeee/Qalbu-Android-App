@@ -127,7 +127,7 @@ fun PrayerDashboardCard(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = headline.label,
-                                    color = MaterialTheme.colorScheme.tertiary,
+                                    color = Color.White,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     letterSpacing = 0.6.sp
@@ -135,7 +135,7 @@ fun PrayerDashboardCard(
                                 Spacer(Modifier.height(4.dp))
                                 Text(
                                     text = headline.title,
-                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    color = Color.White,
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 2,
@@ -144,7 +144,7 @@ fun PrayerDashboardCard(
                                 if (headline.subtitle.isNotBlank()) {
                                     Text(
                                         text = headline.subtitle,
-                                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f),
+                                        color = Color.White.copy(alpha = 0.82f),
                                         style = MaterialTheme.typography.bodySmall,
                                         modifier = Modifier.padding(top = 4.dp),
                                         maxLines = 1,
@@ -163,7 +163,7 @@ fun PrayerDashboardCard(
                             ) { countdown ->
                                 Text(
                                     text = countdown,
-                                    color = MaterialTheme.colorScheme.tertiary,
+                                    color = Color.White,
                                     fontSize = 26.sp,
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = FontFamily.Monospace,

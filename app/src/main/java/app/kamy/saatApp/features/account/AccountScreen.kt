@@ -1680,7 +1680,7 @@ private fun ThemeSelectionSheet(
                     val isSelected = theme == selected
                     val dotColor = when (theme) {
                         AppThemeColor.EMERALD -> MaterialTheme.colorScheme.primary
-                        AppThemeColor.INDIGO -> MaterialTheme.colorScheme.secondary
+                        AppThemeColor.OCEAN -> MaterialTheme.colorScheme.secondary
                         AppThemeColor.GOLD -> MaterialTheme.colorScheme.tertiary
                     }
                     Surface(

@@ -180,7 +180,7 @@ fun DoaZikirScreen(
                         }
                     } else {
                         if (state.doaItems.isNotEmpty()) {
-                            items(state.doaItems, key = { it.id ?: it.title.orEmpty() }) { doa ->
+                            items(state.doaItems) { doa ->
                                 PremiumDoaCard(
                                     title = doa.title.orEmpty(),
                                     arabic = doa.arabic.orEmpty(),
@@ -206,7 +206,7 @@ fun DoaZikirScreen(
                                     }
                                 }
                             }
-                            items(bundle.content.orEmpty(), key = { it.arabic.orEmpty() }) { item ->
+                            items(bundle.content.orEmpty()) { item ->
                                 PremiumDoaCard(
                                     title = "",
                                     arabic = item.arabic.orEmpty(),

@@ -659,7 +659,7 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
         Spacer(Modifier.height(20.dp))
         Text(
             text = title,
-            color = ReflectOnPrimaryColor(),
+            color = AlKhatibColors.Slate800,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
@@ -667,7 +667,7 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
         Spacer(Modifier.height(10.dp))
         Text(
             text = subtitle,
-            color = ReflectOnPrimaryColor().copy(alpha = 0.72f),
+            color = AlKhatibColors.Slate800.copy(alpha = 0.72f),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
