@@ -58,8 +58,8 @@ object LocalFaraidhRuleBook {
         prettyPrint = false
     }
 
-    fun load(context: Context, assetName: String = "faraidh/inheritance_rules.json.gz"): InheritanceRuleBook {
-        val payload = GZIPInputStream(context.assets.open(assetName)).bufferedReader().use { it.readText() }
+    fun load(context: Context, assetName: String = "faraidh/inheritance_rules.json"): InheritanceRuleBook {
+        val payload = context.assets.open(assetName).bufferedReader().use { it.readText() }
         return json.decodeFromString(InheritanceRuleBook.serializer(), payload)
     }
 

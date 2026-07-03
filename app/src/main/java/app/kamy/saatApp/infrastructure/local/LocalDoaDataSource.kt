@@ -40,11 +40,11 @@ class LocalDoaDataSource @Inject constructor(
     }
 
     suspend fun getDailyDoas(): List<DoaItem> = withContext(Dispatchers.IO) {
-        loadDoaResponse("daily.json.gz").data.orEmpty()
+        loadDoaResponse("daily.json").data.orEmpty()
     }
 
     suspend fun getDoasBySlug(slug: String): List<DoaItem> = withContext(Dispatchers.IO) {
-        val file = "duas_$slug.json.gz"
+        val file = "duas_$slug.json"
         if (assetExists("doa/$file")) {
             loadDoaResponse(file).data.orEmpty()
         } else if (slug == "daily") {
@@ -55,7 +55,7 @@ class LocalDoaDataSource @Inject constructor(
     }
 
     suspend fun getDhikrBySlug(slug: String): List<DhikrBundle> = withContext(Dispatchers.IO) {
-        val file = "dhikir_$slug.json.gz"
+        val file = "dhikir_$slug.json"
         if (!assetExists("doa/$file")) return@withContext emptyList()
         readAsset("doa/$file").let { text ->
             json.decodeFromString(DhikrListResponse.serializer(), text).data.orEmpty()
@@ -63,7 +63,7 @@ class LocalDoaDataSource @Inject constructor(
     }
 
     private fun loadCategories(): DoaCategoriesResponse =
-        readAsset("doa/categories.json.gz").let {
+        readAsset("doa/categories.json").let {
             json.decodeFromString(DoaCategoriesResponse.serializer(), it)
         }
 
@@ -76,5 +76,5 @@ class LocalDoaDataSource @Inject constructor(
         runCatching { context.assets.open(path).close(); true }.getOrDefault(false)
 
     private fun readAsset(path: String): String =
-        java.util.zip.GZIPInputStream(context.assets.open(path)).bufferedReader().use { it.readText() }
+        context.assets.open(path).bufferedReader().use { it.readText() }
 }

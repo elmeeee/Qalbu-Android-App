@@ -15,18 +15,25 @@ import app.kamy.saatApp.infrastructure.local.LocalHadithDataSource
 import app.kamy.saatApp.infrastructure.local.LocalQuranDataSource
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
+import android.content.Context
+import app.kamy.saatApp.infrastructure.network.api.ContentApiService
+import app.kamy.saatApp.infrastructure.network.NetworkMonitor
+import dagger.Lazy
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Quran content from bundled SQLite ([qurannew.db]) — no Quran Foundation Content API.
+ * Quran content from bundled SQLite ([qurannew.db]) — fallback to Quran Foundation Content API for Tafsir.
  */
 @Singleton
 class ContentRepository @Inject constructor(
     private val local: LocalQuranDataSource,
     private val hadith: LocalHadithDataSource,
     private val translationStore: TranslationPreferencesStore,
-    private val appLanguageStore: AppLanguageStore
+    private val appLanguageStore: AppLanguageStore,
+    @ApplicationContext private val context: Context,
+    private val apiService: Lazy<ContentApiService>
 ) {
     private fun selectedTranslationId(): Int =
         LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
@@ -135,6 +142,18 @@ class ContentRepository @Inject constructor(
 
     suspend fun getTafsirByAyah(ayahKey: String): TafsirPayload? {
         val translationId = selectedTranslationId()
+        if (NetworkMonitor.isOnline(context)) {
+            val onlineTafsirId = when (translationId) {
+                LocalQuranConfig.TRANSLATION_ENGLISH -> "169" // English Tafsir Ibn Kathir
+                LocalQuranConfig.TRANSLATION_MALAY -> "30" // Malay
+                LocalQuranConfig.TRANSLATION_INDONESIAN, LocalQuranConfig.TRANSLATION_KEMENAG -> "156" // Kemenag
+                else -> "169"
+            }
+            runCatching {
+                apiService.get().getTafsirByAyah(onlineTafsirId, ayahKey).tafsir
+            }.getOrNull()?.let { return it }
+        }
+
         return when (translationId) {
             LocalQuranConfig.TRANSLATION_KEMENAG -> {
                 local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)

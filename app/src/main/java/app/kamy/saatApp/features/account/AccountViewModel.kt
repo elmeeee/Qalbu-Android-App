@@ -331,7 +331,6 @@ class AccountViewModel @Inject constructor(
             return
         }
         appLanguageStore.set(language)
-        syncTranslationForLanguage(language)
         contentRepository.clearCache()
         shareComposer.clearCaches()
         viewModelScope.launch {
@@ -352,28 +351,14 @@ class AccountViewModel @Inject constructor(
     fun selectTranslation(translation: QFTranslation): Boolean {
         val label = LocalQuranConfig.translationDisplayLabel(translation)
         translationStore.setTranslation(translation.id, label)
-        val linkedLanguage = LocalQuranConfig.appLanguageForTranslationId(translation.id)
-        val languageChanged = linkedLanguage != null && linkedLanguage != appLanguageStore.current()
-        if (linkedLanguage != null && languageChanged) {
-            appLanguageStore.set(linkedLanguage)
-            contentRepository.clearCache()
-            shareComposer.clearCaches()
-        }
         _state.update {
             it.copy(
                 showTranslatorSheet = false,
-                appLanguage = appLanguageStore.current()
+                selectedTranslationId = translation.id,
+                selectedTranslationName = label
             )
         }
-        return languageChanged
-    }
-
-    private fun syncTranslationForLanguage(language: AppLanguage) {
-        val translation = LocalQuranConfig.translationForAppLanguage(language)
-        translationStore.setTranslation(
-            translation.id,
-            LocalQuranConfig.translationDisplayLabel(translation)
-        )
+        return false
     }
 
     fun fetchProfile() {
