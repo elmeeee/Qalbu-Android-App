@@ -256,23 +256,25 @@ private fun QiblaNeedleOverlay(
     bearing: Float,
     modifier: Modifier = Modifier
 ) {
+    val onBackgroundColor = MaterialTheme.colorScheme.onBackground
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.size(260.dp)) {
             val center = Offset(size.width / 2f, size.height / 2f)
             drawCircle(
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f),
+                color = onBackgroundColor.copy(alpha = 0.12f),
                 radius = size.minDimension / 2f,
                 center = center,
                 style = Stroke(width = 3f)
             )
             rotate(needleRotation, center) {
                 drawLine(
-                    color = MaterialTheme.colorScheme.tertiary,
+                    color = tertiaryColor,
                     start = center,
                     end = Offset(center.x, center.y - size.height * 0.38f),
                     strokeWidth = 8f
                 )
-                drawCircle(color = MaterialTheme.colorScheme.tertiary, radius = 10f, center = center)
+                drawCircle(color = tertiaryColor, radius = 10f, center = center)
             }
         }
         Box(

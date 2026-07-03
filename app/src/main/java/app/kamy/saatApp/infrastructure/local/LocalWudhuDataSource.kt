@@ -9,13 +9,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
+import java.util.zip.GZIPInputStream
+
 @Singleton
 class LocalWudhuDataSource @Inject constructor(
     @ApplicationContext private val context: Context,
     private val json: Json
 ) {
     suspend fun getWudhuSteps(): List<WudhuItem> = withContext(Dispatchers.IO) {
-        context.assets.open("qara/wudhu.json").bufferedReader().use { it.readText() }.let { text ->
+        GZIPInputStream(context.assets.open("wudhu/wudhu.json.gz")).bufferedReader().use { it.readText() }.let { text ->
             json.decodeFromString<List<WudhuItem>>(text)
         }
     }

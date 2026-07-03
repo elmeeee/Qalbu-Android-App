@@ -1445,6 +1445,10 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
                     Text(
                         text = "SĀ",
                         color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             Text(
                 text = "SĀAT",
                 style = MaterialTheme.typography.headlineMedium,

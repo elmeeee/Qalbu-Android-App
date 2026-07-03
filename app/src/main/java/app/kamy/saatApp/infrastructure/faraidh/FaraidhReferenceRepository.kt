@@ -17,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
+import java.util.zip.GZIPInputStream
+
 @Singleton
 class FaraidhReferenceRepository @Inject constructor(
     @ApplicationContext private val context: Context
@@ -33,21 +35,21 @@ class FaraidhReferenceRepository @Inject constructor(
 
     suspend fun loadBundle(): FaraidhReferenceBundle = withContext(Dispatchers.IO) {
         cached ?: run {
-            val text = context.assets.open("faraidh/references.json").bufferedReader().use { it.readText() }
+            val text = GZIPInputStream(context.assets.open("faraidh/references.json.gz")).bufferedReader().use { it.readText() }
             assetJson.decodeFromString(FaraidhReferenceBundle.serializer(), text).also { cached = it }
         }
     }
 
     suspend fun loadGlossary(): FaraidhGlossaryBundle = withContext(Dispatchers.IO) {
         glossaryCached ?: run {
-            val text = context.assets.open("faraidh/glossary.json").bufferedReader().use { it.readText() }
+            val text = GZIPInputStream(context.assets.open("faraidh/glossary.json.gz")).bufferedReader().use { it.readText() }
             assetJson.decodeFromString(FaraidhGlossaryBundle.serializer(), text).also { glossaryCached = it }
         }
     }
 
     suspend fun loadDictionary(): FaraidhDictionaryBundle = withContext(Dispatchers.IO) {
         dictionaryCached ?: run {
-            val text = context.assets.open("faraidh/faraidh_terms_dictionary.json").bufferedReader().use { it.readText() }
+            val text = GZIPInputStream(context.assets.open("faraidh/faraidh_terms_dictionary.json.gz")).bufferedReader().use { it.readText() }
             assetJson.decodeFromString(FaraidhDictionaryBundle.serializer(), text).also { dictionaryCached = it }
         }
     }
