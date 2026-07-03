@@ -319,7 +319,7 @@ data class QuranChapter(
 
     val isMeccan: Boolean
         get() = revelationPlace?.lowercase()?.let {
-            !it.contains("madin") && !it.contains("medin")
+            !it.contains("mad") && !it.contains("med")
         } ?: true
 }
 
