@@ -94,6 +94,10 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
                     )
                 }
             }
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                error.printStackTrace()
+                stop()
+            }
         })
 
         scope.launch {
@@ -183,10 +187,12 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
     fun pause() = player.pause()
 
     fun stop() {
-        player.stop()
-        player.clearMediaItems()
+        runCatching { player.stop() }
+        runCatching { player.clearMediaItems() }
         _state.value = AudioPlaybackState()
-        context.stopService(Intent(context, RecitationPlaybackService::class.java))
+        runCatching {
+            context.stopService(Intent(context, RecitationPlaybackService::class.java))
+        }
     }
 
     fun seekTo(progress: Float) {

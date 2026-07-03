@@ -442,6 +442,15 @@ class ChapterReaderViewModel @Inject constructor(
         val s = _state.value
         if (index !in s.verses.indices) return
 
+        if (!app.kamy.saatApp.infrastructure.network.NetworkMonitor.isOnline(appContext)) {
+            android.widget.Toast.makeText(
+                appContext,
+                appContext.getString(R.string.error_no_internet_title),
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         val page = s.verses[index]
         val verseKey = page.verseKey
         val isSamePlaying = s.currentlyPlayingVerseKey != null && verseKey != null && verseKey == s.currentlyPlayingVerseKey

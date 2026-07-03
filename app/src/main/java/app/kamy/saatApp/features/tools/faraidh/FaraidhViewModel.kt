@@ -88,6 +88,12 @@ class FaraidhViewModel @Inject constructor(
         restoreAutoDraft()
         fetchLiveGoldPrice()
         recompute()
+        viewModelScope.launch {
+            languageStore.currentFlow.drop(1).collect {
+                loadGlossary()
+                recompute()
+            }
+        }
     }
 
     private fun fetchLiveGoldPrice() {

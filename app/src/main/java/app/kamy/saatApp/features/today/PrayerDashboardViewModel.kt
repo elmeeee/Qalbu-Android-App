@@ -286,8 +286,11 @@ class PrayerDashboardViewModel @Inject constructor(
         }
         val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
         val cityLabel = geocode.cityName
+            ?: locationPrefs.gpsLocation()?.label
             ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
-        locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, cityLabel)
+        if (geocode.cityName != null) {
+            locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, cityLabel)
+        }
         return LocationResolveResult.Success(
             ResolvedPrayerLocation(
                 latitude = loc.latitude,

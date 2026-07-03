@@ -195,8 +195,11 @@ class PrayerCalendarViewModel @Inject constructor(
         longitude = loc.longitude
         val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
         val label = geocode.cityName
+            ?: locationPrefs.gpsLocation()?.label
             ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
-        locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, label)
+        if (geocode.cityName != null) {
+            locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, label)
+        }
         _state.update { it.copy(cityName = label, needsLocation = false) }
         return true
     }

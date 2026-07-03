@@ -36,10 +36,10 @@ class DoaZikirViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            loadCatalog()
+            runCatching { loadCatalog() }.onFailure { it.printStackTrace() }
             appLanguageStore.currentFlow.drop(1).collect {
                 repository.invalidateLocaleCache()
-                reloadForLanguage()
+                runCatching { reloadForLanguage() }.onFailure { it.printStackTrace() }
             }
         }
     }
@@ -56,12 +56,17 @@ class DoaZikirViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            if (entry.kind == DoaCatalogKind.DHIKR) {
-                val bundles = repository.getDhikr(slug)
-                _state.update { it.copy(loading = false, dhikrBundles = bundles) }
-            } else {
-                val doas = repository.getDoas(slug)
-                _state.update { it.copy(loading = false, doaItems = doas) }
+            runCatching {
+                if (entry.kind == DoaCatalogKind.DHIKR) {
+                    val bundles = repository.getDhikr(slug)
+                    _state.update { it.copy(loading = false, dhikrBundles = bundles) }
+                } else {
+                    val doas = repository.getDoas(slug)
+                    _state.update { it.copy(loading = false, doaItems = doas) }
+                }
+            }.onFailure { e ->
+                e.printStackTrace()
+                _state.update { it.copy(loading = false) }
             }
         }
     }

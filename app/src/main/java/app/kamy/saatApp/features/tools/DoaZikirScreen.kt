@@ -190,11 +190,11 @@ fun DoaZikirScreen(
                                 )
                             }
                         }
-                        state.dhikrBundles.forEach { bundle ->
+                        state.dhikrBundles.forEachIndexed { bundleIndex, bundle ->
                             val showBundleTitle = state.dhikrBundles.size > 1 ||
                                 bundle.title?.equals(state.selectedTitle, ignoreCase = true) == false
                             if (showBundleTitle) {
-                                item(key = "bundle-${bundle.title}") {
+                                item(key = "bundle-${bundle.title ?: ""}-$bundleIndex") {
                                     bundle.title?.let { title ->
                                         Text(
                                             text = title,

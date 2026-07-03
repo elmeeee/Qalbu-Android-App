@@ -35,24 +35,40 @@ class FaraidhReferenceRepository @Inject constructor(
 
     suspend fun loadBundle(): FaraidhReferenceBundle = withContext(Dispatchers.IO) {
         cached ?: run {
-            val text = GZIPInputStream(context.assets.open("faraidh/references.json.gz")).bufferedReader().use { it.readText() }
-            assetJson.decodeFromString(FaraidhReferenceBundle.serializer(), text).also { cached = it }
+            runCatching {
+                val text = GZIPInputStream(context.assets.open("faraidh/references.json.gz")).bufferedReader().use { it.readText() }
+                assetJson.decodeFromString(FaraidhReferenceBundle.serializer(), text)
+            }.getOrElse {
+                it.printStackTrace()
+                FaraidhReferenceBundle()
+            }.also { cached = it }
         }
     }
 
     suspend fun loadGlossary(): FaraidhGlossaryBundle = withContext(Dispatchers.IO) {
         glossaryCached ?: run {
-            val text = GZIPInputStream(context.assets.open("faraidh/glossary.json.gz")).bufferedReader().use { it.readText() }
-            assetJson.decodeFromString(FaraidhGlossaryBundle.serializer(), text).also { glossaryCached = it }
+            runCatching {
+                val text = GZIPInputStream(context.assets.open("faraidh/glossary.json.gz")).bufferedReader().use { it.readText() }
+                assetJson.decodeFromString(FaraidhGlossaryBundle.serializer(), text)
+            }.getOrElse {
+                it.printStackTrace()
+                FaraidhGlossaryBundle()
+            }.also { glossaryCached = it }
         }
     }
 
     suspend fun loadDictionary(): FaraidhDictionaryBundle = withContext(Dispatchers.IO) {
         dictionaryCached ?: run {
-            val text = GZIPInputStream(context.assets.open("faraidh/faraidh_terms_dictionary.json.gz")).bufferedReader().use { it.readText() }
-            assetJson.decodeFromString(FaraidhDictionaryBundle.serializer(), text).also { dictionaryCached = it }
+            runCatching {
+                val text = GZIPInputStream(context.assets.open("faraidh/faraidh_terms_dictionary.json.gz")).bufferedReader().use { it.readText() }
+                assetJson.decodeFromString(FaraidhDictionaryBundle.serializer(), text)
+            }.getOrElse {
+                it.printStackTrace()
+                FaraidhDictionaryBundle()
+            }.also { dictionaryCached = it }
         }
     }
+
 
     suspend fun glossaryItems(language: AppLanguage): List<FaraidhGlossaryItem> = withContext(Dispatchers.IO) {
         val baseItems = loadGlossary().terms.map { it.toItem(language) }
