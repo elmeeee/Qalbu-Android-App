@@ -29,8 +29,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         val body = AppNotificationCopy.resolveBody(appContext, kind, prayerName)
             .ifBlank { intent.getStringExtra(EXTRA_BODY).orEmpty() }
 
-        val adhanSoundEnabled = PrayerNotificationPreferencesStore.from(appContext).isAdhanSoundEnabled()
-        val shouldPlayAdhan = playAdhan && adhanSoundEnabled
+        val shouldPlayAdhan = playAdhan
 
         var adhanPlaying = false
         var adhanRawRes: Int? = null

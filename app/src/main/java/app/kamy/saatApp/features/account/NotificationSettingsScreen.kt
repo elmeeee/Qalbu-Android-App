@@ -124,19 +124,19 @@ fun NotificationSettingsScreen(
                     onClick = { context.openBackgroundReliabilitySettings() }
                 )
             }
-            AlKhatibSettingsToggleRow(
-                icon = Icons.Filled.Notifications,
-                title = stringResource(R.string.adhan_sound),
-                subtitle = stringResource(R.string.adhan_sound_subtitle),
-                checked = state.adhanSoundEnabled,
-                onCheckedChange = vm::setAdhanSoundEnabled
-            )
             PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { prayer ->
+                val isAdzanSoundEnabled = state.isPrayerNotificationEnabled(prayer)
+                val isIndoMalay = state.appLanguage == app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN || state.appLanguage == app.kamy.saatApp.core.locale.AppLanguage.MALAY
+                val sub = if (isAdzanSoundEnabled) {
+                    if (isIndoMalay) "Suara Adzan" else "Adhan Voice"
+                } else {
+                    if (isIndoMalay) "Suara Bawaan HP" else "Default System Sound"
+                }
                 AlKhatibSettingsToggleRow(
                     icon = Icons.Filled.Notifications,
                     title = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
-                    subtitle = prayerNotificationSubtitle(context, prayer),
-                    checked = state.isPrayerNotificationEnabled(prayer),
+                    subtitle = sub,
+                    checked = isAdzanSoundEnabled,
                     onCheckedChange = { enabled ->
                         vm.setPrayerNotificationEnabled(prayer, enabled)
                     }

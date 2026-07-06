@@ -224,9 +224,6 @@ class AdhanPlaybackService : Service() {
     }
 
     private fun cancelLinkedNotifications() {
-        if (linkedNotificationId >= 0) {
-            NotificationManagerCompat.from(this).cancel(linkedNotificationId)
-        }
         NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
         linkedNotificationId = -1
     }

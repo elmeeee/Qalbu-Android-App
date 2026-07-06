@@ -49,7 +49,7 @@ object PrayerNotificationScheduler {
         val now = System.currentTimeMillis()
 
         bundle.adzanPrayers.forEachIndexed { index, prayer ->
-                if (!options.isAdzanEnabledFor(prayer.name)) return@forEachIndexed
+                val adhanSoundEnabledForThisPrayer = options.isAdzanEnabledFor(prayer.name)
                 PrayerScheduleBuilder.upcomingOccurrences(
                     prayer.fireAtMillis,
                     now,
@@ -64,7 +64,7 @@ object PrayerNotificationScheduler {
                             body = prayerBody(prayer.name),
                             kind = "prayer_${prayer.name}",
                             notificationId = NOTIFICATION_ID_BASE + index + offset,
-                            playAdhan = true,
+                            playAdhan = adhanSoundEnabledForThisPrayer,
                             prayerName = prayer.name
                         )
                     }
