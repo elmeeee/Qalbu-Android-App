@@ -148,7 +148,15 @@ class SurahReminderStore @Inject constructor(
         cal.set(Calendar.MINUTE, minute)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
-        while (cal.get(Calendar.DAY_OF_WEEK) != weekday || cal.timeInMillis <= from) {
+
+        val compareCal = Calendar.getInstance().apply {
+            timeInMillis = from
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val fromTime = compareCal.timeInMillis
+
+        while (cal.get(Calendar.DAY_OF_WEEK) != weekday || cal.timeInMillis < fromTime) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis
