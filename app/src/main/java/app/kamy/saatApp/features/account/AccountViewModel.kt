@@ -31,6 +31,8 @@ import app.kamy.saatApp.infrastructure.preferences.PrayerCalculationStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
+import app.kamy.saatApp.infrastructure.preferences.SurahReminder
+import app.kamy.saatApp.infrastructure.preferences.SurahReminderStore
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.widget.WidgetCoordinator
 import app.kamy.saatApp.infrastructure.repository.AlAdhanRepository
@@ -88,10 +90,16 @@ data class AccountUiState(
     val yasinReminderEnabled: Boolean = true,
     val kahfReminderEnabled: Boolean = true,
     val importantDaysReminderEnabled: Boolean = true,
+    val adhanSoundEnabled: Boolean = true,
+    val monThuFastReminderEnabled: Boolean = true,
+    val dhuhaReminderEnabled: Boolean = true,
     val showAdhanSheet: Boolean = false,
     val showLanguageSheet: Boolean = false,
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
     val appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD,
+    val customThemeColorHex: String = "#0F4C3A",
+    val surahReminders: List<SurahReminder> = emptyList(),
+    val showSurahRemindersSheet: Boolean = false,
     val showThemeSheet: Boolean = false,
     val prayerMadhab: app.kamy.saatApp.domain.prayer.PrayerMadhab = app.kamy.saatApp.domain.prayer.PrayerMadhab.SHAFI,
     val showMadhabSheet: Boolean = false,
@@ -131,7 +139,8 @@ class AccountViewModel @Inject constructor(
     private val adhanPreviewPlayer: AdhanPreviewPlayer,
     private val appLanguageStore: AppLanguageStore,
     private val shareComposer: VerseShareTextComposer,
-    private val themeStore: ThemePreferencesStore
+    private val themeStore: ThemePreferencesStore,
+    private val surahReminderStore: SurahReminderStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountUiState(isSignedIn = userSession.isSignedIn.value))
@@ -249,7 +258,10 @@ class AccountViewModel @Inject constructor(
                 tahajudEnabled = prayerNotificationPrefs.isTahajudEnabled(),
                 yasinReminderEnabled = prayerNotificationPrefs.isYasinReminderEnabled(),
                 kahfReminderEnabled = prayerNotificationPrefs.isKahfReminderEnabled(),
-                importantDaysReminderEnabled = prayerNotificationPrefs.isImportantDaysReminderEnabled()
+                importantDaysReminderEnabled = prayerNotificationPrefs.isImportantDaysReminderEnabled(),
+                adhanSoundEnabled = prayerNotificationPrefs.isAdhanSoundEnabled(),
+                monThuFastReminderEnabled = prayerNotificationPrefs.isMonThuFastEnabled(),
+                dhuhaReminderEnabled = prayerNotificationPrefs.isDhuhaEnabled()
             )
         }
     }
@@ -272,7 +284,9 @@ class AccountViewModel @Inject constructor(
                 reminderTimeLabel = notificationStore.formattedMorningTime(),
                 appLanguage = appLanguageStore.current(),
                 appTheme = themeStore.currentTheme(),
-                prayerMadhab = prayerMethodStore.currentMadhab()
+                customThemeColorHex = themeStore.customColorHex(),
+                prayerMadhab = prayerMethodStore.currentMadhab(),
+                surahReminders = surahReminderStore.getReminders()
             )
         }
     }
@@ -302,6 +316,50 @@ class AccountViewModel @Inject constructor(
             )
         }
     }
+
+    fun setCustomThemeColor(hex: String) {
+        themeStore.setCustomColorHex(hex)
+        themeStore.setTheme(app.kamy.saatApp.infrastructure.preferences.AppThemeColor.CUSTOM)
+        _state.update {
+            it.copy(
+                customThemeColorHex = hex,
+                appTheme = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.CUSTOM,
+                showThemeSheet = false
+            )
+        }
+    }
+
+    fun openSurahRemindersSheet() {
+        _state.update { it.copy(showSurahRemindersSheet = true) }
+    }
+
+    fun closeSurahRemindersSheet() {
+        _state.update { it.copy(showSurahRemindersSheet = false) }
+    }
+
+    fun addSurahReminder(reminder: SurahReminder) {
+        surahReminderStore.addReminder(reminder)
+        _state.update { it.copy(surahReminders = surahReminderStore.getReminders()) }
+    }
+
+    fun updateSurahReminder(reminder: SurahReminder) {
+        surahReminderStore.updateReminder(reminder)
+        _state.update { it.copy(surahReminders = surahReminderStore.getReminders()) }
+    }
+
+    fun deleteSurahReminder(id: String) {
+        surahReminderStore.deleteReminder(id)
+        _state.update { it.copy(surahReminders = surahReminderStore.getReminders()) }
+    }
+
+    fun toggleSurahReminder(id: String, enabled: Boolean) {
+        val reminder = surahReminderStore.getReminders().firstOrNull { it.id == id } ?: return
+        val updated = reminder.copy(enabled = enabled)
+        surahReminderStore.updateReminder(updated)
+        _state.update { it.copy(surahReminders = surahReminderStore.getReminders()) }
+    }
+
+
 
     fun openMadhabSheet() {
         _state.update { it.copy(showMadhabSheet = true) }
@@ -566,6 +624,22 @@ class AccountViewModel @Inject constructor(
         prayerNotificationPrefs.setImportantDaysReminderEnabled(enabled)
         reschedulePrayerNotifications()
     }
+
+    fun setAdhanSoundEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setAdhanSoundEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
+    fun setMonThuFastReminderEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setMonThuFastEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
+    fun setDhuhaReminderEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setDhuhaEnabled(enabled)
+        reschedulePrayerNotifications()
+    }
+
 
     fun openAdhanSheet() = _state.update { it.copy(showAdhanSheet = true) }
 

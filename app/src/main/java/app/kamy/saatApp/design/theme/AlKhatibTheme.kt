@@ -5,18 +5,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
+import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
 
 @Composable
 fun AlKhatibTheme(
     theme: AppThemeColor = AppThemeColor.EMERALD,
     content: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
+    val customColorHex = androidx.compose.runtime.remember(theme) {
+        ThemePreferencesStore.from(context).customColorHex()
+    }
     // Synchronize AlKhatibColors state with theme
-    AlKhatibColors.applyTheme(theme)
+    AlKhatibColors.applyTheme(theme, customColorHex)
 
     val dynamicColors = lightColorScheme(
         primary = AlKhatibColors.DeepEmerald,

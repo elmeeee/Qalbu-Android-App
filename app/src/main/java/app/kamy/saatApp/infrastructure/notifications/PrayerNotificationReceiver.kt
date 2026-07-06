@@ -6,6 +6,7 @@ import android.content.Intent
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.saatApp.infrastructure.audio.AdhanPlaybackService
 import app.kamy.saatApp.infrastructure.preferences.AdhanPreferencesStore
+import app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,9 +29,12 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         val body = AppNotificationCopy.resolveBody(appContext, kind, prayerName)
             .ifBlank { intent.getStringExtra(EXTRA_BODY).orEmpty() }
 
+        val adhanSoundEnabled = PrayerNotificationPreferencesStore.from(appContext).isAdhanSoundEnabled()
+        val shouldPlayAdhan = playAdhan && adhanSoundEnabled
+
         var adhanPlaying = false
         var adhanRawRes: Int? = null
-        if (playAdhan && !prayerName.isNullOrBlank()) {
+        if (shouldPlayAdhan && !prayerName.isNullOrBlank()) {
             val voice = AdhanPreferencesStore.from(appContext).currentVoice()
             val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice)
             adhanRawRes = rawRes
@@ -44,10 +48,10 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         }
 
         if (title.isNotEmpty()) {
-            if (playAdhan && adhanPlaying) {
+            if (shouldPlayAdhan && adhanPlaying) {
                 // Foreground service already shows the adhan notification with stop action.
             } else {
-                val alertChannel = if (playAdhan && adhanRawRes != null) {
+                val alertChannel = if (shouldPlayAdhan && adhanRawRes != null) {
                     NotificationChannels.ensureAdhanAlert(appContext, adhanRawRes)
                     NotificationChannels.ADHAN_ALERT
                 } else {
@@ -60,8 +64,8 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                     title = title,
                     body = body,
                     silent = false,
-                    showStopAdhan = playAdhan && adhanRawRes != null,
-                    adhanSoundRes = if (playAdhan && adhanRawRes != null) adhanRawRes else null,
+                    showStopAdhan = shouldPlayAdhan && adhanRawRes != null,
+                    adhanSoundRes = if (shouldPlayAdhan && adhanRawRes != null) adhanRawRes else null,
                     kind = kind
                 )
             }

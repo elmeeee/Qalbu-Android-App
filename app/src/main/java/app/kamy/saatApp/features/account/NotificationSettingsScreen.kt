@@ -124,6 +124,13 @@ fun NotificationSettingsScreen(
                     onClick = { context.openBackgroundReliabilitySettings() }
                 )
             }
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Notifications,
+                title = stringResource(R.string.adhan_sound),
+                subtitle = stringResource(R.string.adhan_sound_subtitle),
+                checked = state.adhanSoundEnabled,
+                onCheckedChange = vm::setAdhanSoundEnabled
+            )
             PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { prayer ->
                 AlKhatibSettingsToggleRow(
                     icon = Icons.Filled.Notifications,
@@ -171,19 +178,11 @@ fun NotificationSettingsScreen(
 
         NotificationSectionLabel(stringResource(R.string.section_sunnah))
         AlKhatibSettingsGroup {
-            AlKhatibSettingsToggleRow(
+            AlKhatibSettingsNavigationRow(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = stringResource(R.string.surah_yasin),
-                subtitle = stringResource(R.string.surah_yasin_subtitle),
-                checked = state.yasinReminderEnabled,
-                onCheckedChange = vm::setYasinReminderEnabled
-            )
-            AlKhatibSettingsToggleRow(
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = stringResource(R.string.surah_kahf),
-                subtitle = stringResource(R.string.surah_kahf_subtitle),
-                checked = state.kahfReminderEnabled,
-                onCheckedChange = vm::setKahfReminderEnabled
+                title = stringResource(R.string.surah_reminders_settings_title),
+                subtitle = stringResource(R.string.surah_reminders_settings_subtitle),
+                onClick = vm::openSurahRemindersSheet
             )
             AlKhatibSettingsToggleRow(
                 icon = Icons.Filled.Notifications,
@@ -191,6 +190,20 @@ fun NotificationSettingsScreen(
                 subtitle = stringResource(R.string.important_days_reminder_subtitle),
                 checked = state.importantDaysReminderEnabled,
                 onCheckedChange = vm::setImportantDaysReminderEnabled
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Notifications,
+                title = stringResource(R.string.fast_mon_thu),
+                subtitle = stringResource(R.string.fast_mon_thu_subtitle),
+                checked = state.monThuFastReminderEnabled,
+                onCheckedChange = vm::setMonThuFastReminderEnabled
+            )
+            AlKhatibSettingsToggleRow(
+                icon = Icons.Filled.Notifications,
+                title = stringResource(R.string.dhuha_reminder),
+                subtitle = stringResource(R.string.dhuha_reminder_subtitle),
+                checked = state.dhuhaReminderEnabled,
+                onCheckedChange = vm::setDhuhaReminderEnabled
             )
         }
 

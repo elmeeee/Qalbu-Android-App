@@ -42,8 +42,21 @@ open class PrayerNotificationPreferencesStoreBase(
         lastThirdEnabled = bool(KEY_TAHAJUD, default = true),
         yasinReminderEnabled = bool(KEY_YASIN, default = true),
         kahfReminderEnabled = bool(KEY_KAHF, default = true),
-        importantDaysReminderEnabled = bool(KEY_IMPORTANT_DAYS, default = true)
+        importantDaysReminderEnabled = bool(KEY_IMPORTANT_DAYS, default = true),
+        adhanSoundEnabled = bool(KEY_ADZAN_SOUND, default = true),
+        monThuFastReminderEnabled = bool(KEY_MON_THU_FAST, default = true),
+        dhuhaReminderEnabled = bool(KEY_DHUHA, default = true)
     )
+
+    fun isAdhanSoundEnabled(): Boolean = bool(KEY_ADZAN_SOUND, default = true)
+    fun setAdhanSoundEnabled(enabled: Boolean) = setBool(KEY_ADZAN_SOUND, enabled)
+
+    fun isMonThuFastEnabled(): Boolean = bool(KEY_MON_THU_FAST, default = true)
+    fun setMonThuFastEnabled(enabled: Boolean) = setBool(KEY_MON_THU_FAST, enabled)
+
+    fun isDhuhaEnabled(): Boolean = bool(KEY_DHUHA, default = true)
+    fun setDhuhaEnabled(enabled: Boolean) = setBool(KEY_DHUHA, enabled)
+
 
     fun isPrayerEnabled(type: PrayerType): Boolean =
         bool(prayerKey(type), default = legacyAdzanDefault())
@@ -105,5 +118,9 @@ open class PrayerNotificationPreferencesStoreBase(
         private const val KEY_YASIN = "yasinReminderEnabled"
         private const val KEY_KAHF = "kahfReminderEnabled"
         private const val KEY_IMPORTANT_DAYS = "importantDaysReminderEnabled"
+        private const val KEY_ADZAN_SOUND = "adhanSoundEnabled"
+        private const val KEY_MON_THU_FAST = "monThuFastReminderEnabled"
+        private const val KEY_DHUHA = "dhuhaReminderEnabled"
+
     }
 }

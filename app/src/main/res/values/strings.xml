@@ -19,6 +19,29 @@
     <string name="theme_ocean">Ocean Indigo</string>
     <string name="theme_gold">Royal Gold</string>
     <string name="theme_indigo">Ocean Indigo</string>
+    <string name="theme_dark">Midnight Dark</string>
+    <string name="theme_rose">Rose Petal</string>
+    <string name="theme_purple">Lavender Purple</string>
+    <string name="theme_orange">Sunset Orange</string>
+    <string name="theme_red">Crimson Red</string>
+    <string name="theme_custom">Custom Color Palette</string>
+
+    <!-- Notification & Sound Settings -->
+    <string name="adhan_sound">Adhan Sound</string>
+    <string name="adhan_sound_subtitle">Play call to prayer audio at prayer times</string>
+    <string name="surah_reminders_settings_title">Surah Reminders</string>
+    <string name="surah_reminders_settings_subtitle">Customize reminder times for Yasin, Al-Kahf, and other Surahs</string>
+    <string name="fast_mon_thu">Monday &amp; Thursday Fasting</string>
+    <string name="fast_mon_thu_subtitle">Remind about Monday and Thursday sunnah fasting on Sunday and Wednesday evenings</string>
+    <string name="dhuha_reminder">Dhuha Prayer</string>
+    <string name="dhuha_reminder_subtitle">Daily reminder at 8:30 AM for Dhuha sunnah prayer</string>
+
+    <string name="sunnah_mon_fast_title">Monday Sunnah Fasting</string>
+    <string name="sunnah_mon_fast_body">Tomorrow is Monday. Prepare for your sunnah fast.</string>
+    <string name="sunnah_thu_fast_title">Thursday Sunnah Fasting</string>
+    <string name="sunnah_thu_fast_body">Tomorrow is Thursday. Prepare for your sunnah fast.</string>
+    <string name="sunnah_dhuha_title">Dhuha Prayer</string>
+    <string name="sunnah_dhuha_body">It is time for Dhuha prayer. Take a moment to pray.</string>
 
     <!-- Madhab Settings -->
     <string name="madhab_shafi">Shafi\'i</string>

@@ -111,6 +111,14 @@
             android:exported="false" />
 
         <receiver
+            android:name=".infrastructure.notifications.SurahReminderReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="app.kamy.saatApp.ACTION_SURAH_REMINDER" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
             android:name=".infrastructure.audio.AdhanStopReceiver"
             android:exported="false" />
 

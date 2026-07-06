@@ -15,6 +15,30 @@
     <string name="theme_emerald">Hijau Zamrud</string>
     <string name="theme_indigo">Biru Samudra</string>
     <string name="theme_gold">Emas Kerajaan</string>
+    <string name="theme_ocean">Biru Samudra</string>
+    <string name="theme_dark">Hitam Midnight</string>
+    <string name="theme_rose">Mawar Merah Muda</string>
+    <string name="theme_purple">Ungu Lavender</string>
+    <string name="theme_orange">Jingga Senja</string>
+    <string name="theme_red">Merah Hati</string>
+    <string name="theme_custom">Palet Warna Kustom</string>
+
+    <!-- Notification & Sound Settings -->
+    <string name="adhan_sound">Suara Adzan</string>
+    <string name="adhan_sound_subtitle">Mainkan suara panggilan shalat saat waktu tiba</string>
+    <string name="surah_reminders_settings_title">Peringatan Membaca Surah</string>
+    <string name="surah_reminders_settings_subtitle">Kustomisasi waktu pengingat untuk Yasin, Al-Kahf, dan surah lainnya</string>
+    <string name="fast_mon_thu">Puasa Senin &amp; Kamis</string>
+    <string name="fast_mon_thu_subtitle">Ingatkan puasa sunnah Senin &amp; Kamis pada Minggu malam dan Rabu malam</string>
+    <string name="dhuha_reminder">Shalat Duha</string>
+    <string name="dhuha_reminder_subtitle">Ingatkan shalat sunnah Duha setiap hari pukul 08:30</string>
+
+    <string name="sunnah_mon_fast_title">Puasa Sunnah Senin</string>
+    <string name="sunnah_mon_fast_body">Besok adalah hari Senin. Jangan lupa persiapkan puasa sunnah Anda.</string>
+    <string name="sunnah_thu_fast_title">Puasa Sunnah Kamis</string>
+    <string name="sunnah_thu_fast_body">Besok adalah hari Kamis. Jangan lupa persiapkan puasa sunnah Anda.</string>
+    <string name="sunnah_dhuha_title">Shalat Duha</string>
+    <string name="sunnah_dhuha_body">Waktu shalat Duha telah tiba. Sempatkan melaksanakan shalat sunnah Duha.</string>
 
     <!-- Madhab Settings -->
     <string name="madhab_shafi">Syafi\'i</string>

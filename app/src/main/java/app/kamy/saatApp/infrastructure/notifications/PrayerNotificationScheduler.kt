@@ -23,12 +23,16 @@ object PrayerNotificationScheduler {
     private const val NIGHT_REQUEST_BASE = 9_000
     private const val SUNNAH_YASIN_REQUEST = 10_000
     private const val SUNNAH_KAHF_REQUEST = 10_100
+    private const val FAST_MON_REQUEST = 10_300
+    private const val FAST_THU_REQUEST = 10_350
+    private const val DHUHA_REQUEST_BASE = 10_400
     private const val MIDNIGHT_REFRESH_REQUEST = 11_000
     private const val IMPORTANT_DAYS_REQUEST_BASE = 12_000
     private const val IMPORTANT_DAYS_ID_BASE = 12_000
     private const val NOTIFICATION_ID_BASE = 8_000
     private const val DAYS_TO_SCHEDULE = 7
     private const val SUNNAH_WEEKS_TO_SCHEDULE = 8
+
 
     suspend fun reschedule(
         context: Context,
@@ -140,44 +144,47 @@ object PrayerNotificationScheduler {
         cancelSunnah(context)
         val now = System.currentTimeMillis()
 
-        if (options.yasinReminderEnabled) {
-            val firstFire = nextWeekdayTime(
-                weekday = Calendar.THURSDAY,
-                hour = 20,
-                minute = 0,
-                from = now
-            )
-            upcomingWeeklyOccurrences(firstFire, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
+        if (options.monThuFastReminderEnabled) {
+            val nextSun = nextWeekdayTime(Calendar.SUNDAY, 20, 0, now)
+            upcomingWeeklyOccurrences(nextSun, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
                 scheduleOneShot(
                     context = context,
-                    requestCode = SUNNAH_YASIN_REQUEST + offset,
+                    requestCode = FAST_MON_REQUEST + offset,
                     fireAt = fireAt,
                     channelId = NotificationChannels.SUNNAH,
-                    title = "📖 Read Surah Yasin",
-                    body = "Thursday night — a blessed time to read Surah Yasin before Jumu'ah.",
-                    kind = "sunnah_yasin",
-                    notificationId = SUNNAH_YASIN_REQUEST + offset
+                    title = "Puasa Sunnah Senin",
+                    body = "Besok adalah hari Senin, jangan lupa persiapkan sahur untuk puasa sunnah.",
+                    kind = "sunnah_mon_fast",
+                    notificationId = FAST_MON_REQUEST + offset
+                )
+            }
+            val nextWed = nextWeekdayTime(Calendar.WEDNESDAY, 20, 0, now)
+            upcomingWeeklyOccurrences(nextWed, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
+                scheduleOneShot(
+                    context = context,
+                    requestCode = FAST_THU_REQUEST + offset,
+                    fireAt = fireAt,
+                    channelId = NotificationChannels.SUNNAH,
+                    title = "Puasa Sunnah Kamis",
+                    body = "Besok adalah hari Kamis, jangan lupa persiapkan sahur untuk puasa sunnah.",
+                    kind = "sunnah_thu_fast",
+                    notificationId = FAST_THU_REQUEST + offset
                 )
             }
         }
 
-        if (options.kahfReminderEnabled) {
-            val firstFire = nextWeekdayTime(
-                weekday = Calendar.FRIDAY,
-                hour = 10,
-                minute = 30,
-                from = now
-            )
-            upcomingWeeklyOccurrences(firstFire, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
+        if (options.dhuhaReminderEnabled) {
+            val firstDhuha = nextDailyTime(8, 30, now)
+            upcomingDailyOccurrences(firstDhuha, now, 7).forEachIndexed { offset, fireAt ->
                 scheduleOneShot(
                     context = context,
-                    requestCode = SUNNAH_KAHF_REQUEST + offset,
+                    requestCode = DHUHA_REQUEST_BASE + offset,
                     fireAt = fireAt,
                     channelId = NotificationChannels.SUNNAH,
-                    title = "📖 Read Surah Al-Kahf",
-                    body = "It's Friday — read Surah Al-Kahf for light between this Friday and the next.",
-                    kind = "sunnah_kahf",
-                    notificationId = SUNNAH_KAHF_REQUEST + offset
+                    title = "Shalat Duha",
+                    body = "Sempatkan shalat sunnah Duha pagi ini.",
+                    kind = "sunnah_dhuha",
+                    notificationId = DHUHA_REQUEST_BASE + offset
                 )
             }
         }
@@ -207,13 +214,26 @@ object PrayerNotificationScheduler {
 
     private fun cancelSunnah(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val nm = NotificationManagerCompat.from(context)
         (SUNNAH_YASIN_REQUEST until SUNNAH_YASIN_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
-            NotificationManagerCompat.from(context).cancel(code)
+            nm.cancel(code)
         }
         (SUNNAH_KAHF_REQUEST until SUNNAH_KAHF_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
-            NotificationManagerCompat.from(context).cancel(code)
+            nm.cancel(code)
+        }
+        (FAST_MON_REQUEST until FAST_MON_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
+            alarmManager.cancel(pendingAlarm(context, code))
+            nm.cancel(code)
+        }
+        (FAST_THU_REQUEST until FAST_THU_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
+            alarmManager.cancel(pendingAlarm(context, code))
+            nm.cancel(code)
+        }
+        (DHUHA_REQUEST_BASE until DHUHA_REQUEST_BASE + 7).forEach { code ->
+            alarmManager.cancel(pendingAlarm(context, code))
+            nm.cancel(code)
         }
     }
 
@@ -412,6 +432,18 @@ object PrayerNotificationScheduler {
         return cal.timeInMillis
     }
 
+    private fun nextDailyTime(hour: Int, minute: Int, from: Long): Long {
+        val cal = Calendar.getInstance().apply { timeInMillis = from }
+        cal.set(Calendar.HOUR_OF_DAY, hour)
+        cal.set(Calendar.MINUTE, minute)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        if (cal.timeInMillis <= from) {
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return cal.timeInMillis
+    }
+
     private fun upcomingWeeklyOccurrences(firstFireAt: Long, now: Long, count: Int): List<Long> {
         if (count <= 0) return emptyList()
         val cal = Calendar.getInstance().apply { timeInMillis = firstFireAt }
@@ -421,6 +453,19 @@ object PrayerNotificationScheduler {
                     add(cal.timeInMillis)
                 }
                 cal.add(Calendar.WEEK_OF_YEAR, 1)
+            }
+        }
+    }
+
+    private fun upcomingDailyOccurrences(firstFireAt: Long, now: Long, count: Int): List<Long> {
+        if (count <= 0) return emptyList()
+        val cal = Calendar.getInstance().apply { timeInMillis = firstFireAt }
+        return buildList {
+            repeat(count) {
+                if (cal.timeInMillis > now + 2_000L) {
+                    add(cal.timeInMillis)
+                }
+                cal.add(Calendar.DAY_OF_YEAR, 1)
             }
         }
     }

@@ -57,6 +57,9 @@ object AppNotificationCopy {
         return when (kind) {
             "sunnah_yasin" -> ctx.getString(R.string.sunnah_yasin_title)
             "sunnah_kahf" -> ctx.getString(R.string.sunnah_kahf_title)
+            "sunnah_mon_fast" -> ctx.getString(R.string.sunnah_mon_fast_title)
+            "sunnah_thu_fast" -> ctx.getString(R.string.sunnah_thu_fast_title)
+            "sunnah_dhuha" -> ctx.getString(R.string.sunnah_dhuha_title)
             else -> null
         }
     }
@@ -66,6 +69,9 @@ object AppNotificationCopy {
         return when (kind) {
             "sunnah_yasin" -> ctx.getString(R.string.sunnah_yasin_body)
             "sunnah_kahf" -> ctx.getString(R.string.sunnah_kahf_body)
+            "sunnah_mon_fast" -> ctx.getString(R.string.sunnah_mon_fast_body)
+            "sunnah_thu_fast" -> ctx.getString(R.string.sunnah_thu_fast_body)
+            "sunnah_dhuha" -> ctx.getString(R.string.sunnah_dhuha_body)
             else -> null
         }
     }
