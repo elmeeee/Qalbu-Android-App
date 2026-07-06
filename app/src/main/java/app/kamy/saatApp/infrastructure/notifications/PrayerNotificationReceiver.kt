@@ -50,11 +50,16 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
             if (shouldPlayAdhan && adhanPlaying) {
                 // Foreground service already shows the adhan notification with stop action.
             } else {
-                val alertChannel = if (shouldPlayAdhan && adhanRawRes != null) {
-                    NotificationChannels.ensureAdhanAlert(appContext, adhanRawRes)
-                    NotificationChannels.ADHAN_ALERT
-                } else {
-                    channelId
+                val alertChannel = when {
+                    shouldPlayAdhan && adhanRawRes != null -> {
+                        NotificationChannels.ensureAdhanAlert(appContext, adhanRawRes)
+                        NotificationChannels.ADHAN_ALERT
+                    }
+                    kind?.startsWith("prayer_") == true || kind == "imsak" -> {
+                        // Toggle OFF → default device sound via high-importance PRAYER_ALERT channel
+                        NotificationChannels.PRAYER_ALERT
+                    }
+                    else -> channelId
                 }
                 PrayerNotificationScheduler.showNotification(
                     context = appContext,

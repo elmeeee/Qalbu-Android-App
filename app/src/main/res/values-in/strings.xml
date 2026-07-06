@@ -39,6 +39,8 @@
     <string name="sunnah_thu_fast_body">Besok adalah hari Kamis. Jangan lupa persiapkan puasa sunnah Anda.</string>
     <string name="sunnah_dhuha_title">Shalat Duha</string>
     <string name="sunnah_dhuha_body">Saatnya shalat Duha. Sempatkan melaksanakan shalat sunnah Duha.</string>
+    <string name="surah_reminder_notif_title">Saatnya membaca Surah %s</string>
+    <string name="surah_reminder_notif_body">Sempatkan membaca Surah %s hari ini. Semoga membawa ketenangan dan keberkahan.</string>
 
     <!-- Madhab Settings -->
     <string name="madhab_shafi">Syafi\'i</string>

@@ -59,7 +59,7 @@ object PrayerNotificationScheduler {
                             context = context,
                             requestCode = PRAYER_REQUEST_BASE + index * 20 + offset,
                             fireAt = fireAt,
-                            channelId = NotificationChannels.PRAYER,
+                            channelId = NotificationChannels.PRAYER_ALERT,
                             title = prayerTitle(context, prayer.name, fireAt),
                             body = prayerBody(context, prayer.name),
                             kind = "prayer_${prayer.name}",

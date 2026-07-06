@@ -12,6 +12,7 @@ import app.kamy.saatApp.R
 object NotificationChannels {
     const val DAILY_VERSE = "daily_verse"
     const val PRAYER = "prayer_times"
+    const val PRAYER_ALERT = "prayer_alert"
     const val SUNNAH = "sunnah_reminders"
     const val ADHAN_PLAYBACK = "adhan_playback"
     const val ADHAN_ALERT = "adhan_alert"
@@ -26,12 +27,26 @@ object NotificationChannels {
             NotificationChannel(
                 DAILY_VERSE,
                 context.getString(R.string.channel_daily_verse),
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply { description = context.getString(R.string.channel_daily_verse_desc) }
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = context.getString(R.string.channel_daily_verse_desc)
+                enableVibration(true)
+            }
         )
         manager.createNotificationChannel(
             NotificationChannel(
                 PRAYER,
+                context.getString(R.string.channel_prayer),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = context.getString(R.string.channel_prayer_desc)
+                enableVibration(true)
+            }
+        )
+        // Dedicated high-priority channel for prayer time alerts (no adzan sound — uses device default)
+        manager.createNotificationChannel(
+            NotificationChannel(
+                PRAYER_ALERT,
                 context.getString(R.string.channel_prayer),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
@@ -44,7 +59,7 @@ object NotificationChannels {
             NotificationChannel(
                 SUNNAH,
                 context.getString(R.string.channel_sunnah),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_sunnah_desc)
                 enableVibration(true)
