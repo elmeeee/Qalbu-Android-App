@@ -320,14 +320,15 @@ object PrayerNotificationScheduler {
         silent: Boolean = false,
         showStopAdhan: Boolean = false,
         @RawRes adhanSoundRes: Int? = null,
-        kind: String? = null
+        kind: String? = null,
+        customPendingIntent: PendingIntent? = null
     ) {
         NotificationChannels.ensureAll(context)
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        val pending = PendingIntent.getActivity(
+        val pending = customPendingIntent ?: PendingIntent.getActivity(
             context,
             notificationId,
             openIntent,

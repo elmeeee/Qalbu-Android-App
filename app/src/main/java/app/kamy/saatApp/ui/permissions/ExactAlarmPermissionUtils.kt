@@ -9,7 +9,8 @@ import android.provider.Settings
 import androidx.core.net.toUri
 
 fun Context.canScheduleExactAlarms(): Boolean {
-    return true
+    val alarmManager = getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return true
+    return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
 }
 
 fun Context.openExactAlarmSettings() {

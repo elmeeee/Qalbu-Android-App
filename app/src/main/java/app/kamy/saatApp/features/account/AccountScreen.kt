@@ -117,7 +117,8 @@ import net.openid.appauth.AuthorizationService
 fun AccountScreen(
     oauthService: OAuthService,
     authService: AuthorizationService,
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
+    onAccountDetailScreenChanged: (Boolean) -> Unit = {}
 ) {
     val vm: AccountViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
@@ -152,6 +153,12 @@ fun AccountScreen(
         if (state.isSignedIn && state.profile == null && !state.isLoading) {
             vm.fetchProfile()
         }
+    }
+
+    LaunchedEffect(showNotificationSettings.value, showPrivacyPolicy.value, showTerms.value) {
+        onAccountDetailScreenChanged(
+            showNotificationSettings.value || showPrivacyPolicy.value || showTerms.value
+        )
     }
 
     when {

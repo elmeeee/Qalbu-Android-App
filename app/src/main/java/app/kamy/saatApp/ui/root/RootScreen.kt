@@ -14,7 +14,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -66,6 +69,20 @@ interface RootEntryPoint {
     fun userSession(): UserSession
 }
 
+internal fun shouldShowBottomBar(
+    currentRoute: String?,
+    isAccountDetailScreen: Boolean
+): Boolean {
+    val isReaderRoute = currentRoute?.startsWith("quran/reader") == true ||
+        currentRoute?.startsWith("quran/juz") == true
+    val isPrayerCalendarRoute = currentRoute == "prayer/calendar" ||
+        currentRoute == "prayer/tracker/calendar"
+    val isToolRoute = currentRoute?.startsWith("tools/") == true
+    val isBookmarksRoute = currentRoute == "quran/bookmarks"
+    return !isAccountDetailScreen && !isReaderRoute && !isPrayerCalendarRoute && !isToolRoute &&
+        !isBookmarksRoute
+}
+
 @Composable
 fun RootScreen(
     pendingDeepLinkRoute: String? = null,
@@ -94,12 +111,8 @@ fun RootScreen(
     val currentRoute = backStackEntry?.destination?.route
     val isReaderRoute = currentRoute?.startsWith("quran/reader") == true ||
         currentRoute?.startsWith("quran/juz") == true
-    val isPrayerCalendarRoute = currentRoute == "prayer/calendar" ||
-        currentRoute == "prayer/tracker/calendar"
-    val isToolRoute = currentRoute?.startsWith("tools/") == true
-    val isBookmarksRoute = currentRoute == "quran/bookmarks"
-    val showBottomBar = !isReaderRoute && !isPrayerCalendarRoute && !isToolRoute &&
-        !isBookmarksRoute
+    var isAccountDetailScreen by rememberSaveable { mutableStateOf(false) }
+    val showBottomBar = shouldShowBottomBar(currentRoute, isAccountDetailScreen)
     val showAudioBar = audioState.currentUrl != null
     val audioBarBottomPadding = if (showBottomBar) {
         floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
@@ -271,7 +284,8 @@ fun RootScreen(
                 AccountScreen(
                     oauthService = oauthService,
                     authService = authService,
-                    onBack = null
+                    onBack = null,
+                    onAccountDetailScreenChanged = { isAccountDetailScreen = it }
                 )
             }
         }

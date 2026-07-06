@@ -26,12 +26,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -257,6 +256,7 @@ fun ChapterReaderScreen(
             VerticalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
+                userScrollEnabled = false
             ) { pageIndex ->
                 val verse = state.verses.getOrNull(pageIndex) ?: return@VerticalPager
                 SaatAyahPage(

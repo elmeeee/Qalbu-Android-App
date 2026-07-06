@@ -13,9 +13,15 @@ object DeepLinkRoutes {
 
     private fun notificationRoute(intent: Intent): String? {
         val chapter = intent.getIntExtra(DailyVerseNotificationScheduler.EXTRA_CHAPTER, -1)
-        if (chapter <= 0) return null
-        val ayah = intent.getIntExtra(DailyVerseNotificationScheduler.EXTRA_AYAH, -1)
-        return if (ayah > 0) "quran/reader/$chapter?ayah=$ayah" else "quran/reader/$chapter?ayah=-1"
+        if (chapter > 0) {
+            val ayah = intent.getIntExtra(DailyVerseNotificationScheduler.EXTRA_AYAH, -1)
+            return if (ayah > 0) "quran/reader/$chapter?ayah=$ayah" else "quran/reader/$chapter?ayah=-1"
+        }
+        val surahNumber = intent.getIntExtra("surah_number", -1)
+        if (surahNumber > 0) {
+            return "quran/reader/$surahNumber?ayah=-1"
+        }
+        return null
     }
 
     private fun uriRoute(uri: Uri?): String? {

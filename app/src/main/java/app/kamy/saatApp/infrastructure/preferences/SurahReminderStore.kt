@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import app.kamy.saatApp.infrastructure.notifications.ExactAlarmScheduler
 import app.kamy.saatApp.infrastructure.notifications.SurahReminderReceiver
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -136,12 +137,12 @@ class SurahReminderStore @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Set exact alarm
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, actualFireAt, pending)
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, actualFireAt, pending)
-        }
+        ExactAlarmScheduler.schedule(
+            context = context,
+            triggerAtMillis = actualFireAt,
+            pending = pending,
+            showIntentRequestCode = reminder.id.hashCode()
+        )
     }
 
     fun cancelAlarm(id: String) {

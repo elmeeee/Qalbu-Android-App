@@ -9,9 +9,13 @@ import app.kamy.saatApp.MainActivity
 
 object ExactAlarmScheduler {
 
+    internal fun shouldUseExactScheduling(sdkInt: Int, canScheduleExact: Boolean): Boolean {
+        return sdkInt < Build.VERSION_CODES.S || canScheduleExact
+    }
+
     fun canScheduleExactAlarms(context: Context): Boolean {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+        return shouldUseExactScheduling(Build.VERSION.SDK_INT, alarmManager.canScheduleExactAlarms())
     }
 
     fun schedule(
@@ -22,7 +26,7 @@ object ExactAlarmScheduler {
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+            if (!shouldUseExactScheduling(Build.VERSION.SDK_INT, alarmManager.canScheduleExactAlarms())) {
                 scheduleInexact(alarmManager, triggerAtMillis, pending)
                 return
             }
@@ -49,13 +53,14 @@ object ExactAlarmScheduler {
         pending: PendingIntent
     ) {
         runCatching {
-            alarmManager.setAndAllowWhileIdle(
+            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
+        }.onFailure {
+            alarmManager.setWindow(
                 AlarmManager.RTC_WAKEUP,
                 triggerAtMillis,
+                60_000L,
                 pending
             )
-        }.onFailure {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
         }
     }
 }
