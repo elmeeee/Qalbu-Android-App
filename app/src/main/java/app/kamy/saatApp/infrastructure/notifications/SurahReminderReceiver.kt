@@ -26,7 +26,7 @@ class SurahReminderReceiver : BroadcastReceiver() {
         val isIndoMalay = languageStore.current() == AppLanguage.INDONESIAN || languageStore.current() == AppLanguage.MALAY
         
         val title = if (isIndoMalay) {
-            "Waktunya Membaca Surah $surahName"
+            "Saatnya Membaca Surah $surahName"
         } else {
             "Time to read Surah $surahName"
         }

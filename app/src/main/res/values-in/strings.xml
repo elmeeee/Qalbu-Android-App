@@ -38,7 +38,7 @@
     <string name="sunnah_thu_fast_title">Puasa Sunnah Kamis</string>
     <string name="sunnah_thu_fast_body">Besok adalah hari Kamis. Jangan lupa persiapkan puasa sunnah Anda.</string>
     <string name="sunnah_dhuha_title">Shalat Duha</string>
-    <string name="sunnah_dhuha_body">Waktu shalat Duha telah tiba. Sempatkan melaksanakan shalat sunnah Duha.</string>
+    <string name="sunnah_dhuha_body">Saatnya shalat Duha. Sempatkan melaksanakan shalat sunnah Duha.</string>
 
     <!-- Madhab Settings -->
     <string name="madhab_shafi">Syafi\'i</string>
@@ -146,14 +146,14 @@
     <string name="channel_sunnah">Bacaan sunnah</string>
     <string name="channel_sunnah_desc">Pengingat bacaan surah mingguan</string>
 
-    <string name="prayer_notif_title">Waktunya %1$s · %2$s</string>
+    <string name="prayer_notif_title">Saatnya %1$s · %2$s</string>
     <string name="prayer_body_fajr">Dunia masih tidur. Anda belum tentu.</string>
     <string name="prayer_body_dhuhr">Berhenti sejenak. Sholat. Lalu lanjutkan.</string>
     <string name="prayer_body_asr">Malaikat menyaksikan. Jangan lewatkan sholat ini.</string>
     <string name="prayer_body_maghrib">Matahari baru terbenam. Sholat ini tidak bisa ditunda.</string>
     <string name="prayer_body_isha">Akhiri hari dengan cara yang benar.</string>
     <string name="prayer_body_imsak">Persiapkan puasa. Fajar sudah dekat.</string>
-    <string name="prayer_body_default">Sekarang waktunya sholat %1$s.</string>
+    <string name="prayer_body_default">Sekarang saatnya sholat %1$s.</string>
     <string name="night_midnight_title">🌙 Tengah Malam</string>
     <string name="night_midnight_body">Malam sudah setengah. Sholat Witir sebelum tidur — jangan sampai terlewat.</string>
     <string name="night_first_third_title">🌃 Malam Dimulai</string>

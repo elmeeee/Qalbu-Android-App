@@ -60,8 +60,8 @@ object PrayerNotificationScheduler {
                             requestCode = PRAYER_REQUEST_BASE + index * 20 + offset,
                             fireAt = fireAt,
                             channelId = NotificationChannels.PRAYER,
-                            title = prayerTitle(prayer.name, fireAt),
-                            body = prayerBody(prayer.name),
+                            title = prayerTitle(context, prayer.name, fireAt),
+                            body = prayerBody(context, prayer.name),
                             kind = "prayer_${prayer.name}",
                             notificationId = NOTIFICATION_ID_BASE + index + offset,
                             playAdhan = adhanSoundEnabledForThisPrayer,
@@ -69,7 +69,7 @@ object PrayerNotificationScheduler {
                         )
                     }
             }
-
+ 
         if (options.imsakEnabled) {
             bundle.imsak?.let { imsak ->
                 PrayerScheduleBuilder.upcomingOccurrences(
@@ -82,15 +82,15 @@ object PrayerNotificationScheduler {
                             requestCode = PRAYER_REQUEST_BASE + 120 + offset,
                             fireAt = fireAt,
                             channelId = NotificationChannels.PRAYER,
-                            title = prayerTitle("Imsak", fireAt),
-                            body = prayerBody("Imsak"),
+                            title = prayerTitle(context, "Imsak", fireAt),
+                            body = prayerBody(context, "Imsak"),
                             kind = "imsak",
                             notificationId = NOTIFICATION_ID_BASE + 50 + offset
                         )
                     }
             }
         }
-
+ 
         bundle.nightDivisions.forEach { division ->
             val enabled = when (division.kind) {
                 NightDivisionKind.MIDNIGHT -> options.midnightEnabled
@@ -104,13 +104,24 @@ object PrayerNotificationScheduler {
                 now,
                 DAYS_TO_SCHEDULE
             ).forEachIndexed { offset, fireAt ->
+                    val titleRes = when (division.kind) {
+                        NightDivisionKind.MIDNIGHT -> R.string.night_midnight_title
+                        NightDivisionKind.FIRST_THIRD -> R.string.night_first_third_title
+                        NightDivisionKind.LAST_THIRD -> R.string.night_last_third_title
+                    }
+                    val bodyRes = when (division.kind) {
+                        NightDivisionKind.MIDNIGHT -> R.string.night_midnight_body
+                        NightDivisionKind.FIRST_THIRD -> R.string.night_first_third_body
+                        NightDivisionKind.LAST_THIRD -> R.string.night_last_third_body
+                    }
+                    val localContext = getLocalizedContext(context)
                     scheduleOneShot(
                         context = context,
                         requestCode = NIGHT_REQUEST_BASE + codeOffset * 20 + offset,
                         fireAt = fireAt,
                         channelId = NotificationChannels.PRAYER,
-                        title = division.kind.notificationTitle,
-                        body = division.kind.notificationBody,
+                        title = localContext.getString(titleRes),
+                        body = localContext.getString(bodyRes),
                         kind = "night_${division.kind.name}",
                         notificationId = NOTIFICATION_ID_BASE + 60 + codeOffset + offset
                     )
@@ -143,6 +154,7 @@ object PrayerNotificationScheduler {
     fun scheduleSunnahReminders(context: Context, options: PrayerNotificationScheduleOptions) {
         cancelSunnah(context)
         val now = System.currentTimeMillis()
+        val localContext = getLocalizedContext(context)
 
         if (options.monThuFastReminderEnabled) {
             val nextSun = nextWeekdayTime(Calendar.SUNDAY, 20, 0, now)
@@ -152,8 +164,8 @@ object PrayerNotificationScheduler {
                     requestCode = FAST_MON_REQUEST + offset,
                     fireAt = fireAt,
                     channelId = NotificationChannels.SUNNAH,
-                    title = "Puasa Sunnah Senin",
-                    body = "Besok adalah hari Senin, jangan lupa persiapkan sahur untuk puasa sunnah.",
+                    title = localContext.getString(R.string.sunnah_mon_fast_title),
+                    body = localContext.getString(R.string.sunnah_mon_fast_body),
                     kind = "sunnah_mon_fast",
                     notificationId = FAST_MON_REQUEST + offset
                 )
@@ -165,8 +177,8 @@ object PrayerNotificationScheduler {
                     requestCode = FAST_THU_REQUEST + offset,
                     fireAt = fireAt,
                     channelId = NotificationChannels.SUNNAH,
-                    title = "Puasa Sunnah Kamis",
-                    body = "Besok adalah hari Kamis, jangan lupa persiapkan sahur untuk puasa sunnah.",
+                    title = localContext.getString(R.string.sunnah_thu_fast_title),
+                    body = localContext.getString(R.string.sunnah_thu_fast_body),
                     kind = "sunnah_thu_fast",
                     notificationId = FAST_THU_REQUEST + offset
                 )
@@ -181,8 +193,8 @@ object PrayerNotificationScheduler {
                     requestCode = DHUHA_REQUEST_BASE + offset,
                     fireAt = fireAt,
                     channelId = NotificationChannels.SUNNAH,
-                    title = "Shalat Duha",
-                    body = "Sempatkan shalat sunnah Duha pagi ini.",
+                    title = localContext.getString(R.string.sunnah_dhuha_title),
+                    body = localContext.getString(R.string.sunnah_dhuha_body),
                     kind = "sunnah_dhuha",
                     notificationId = DHUHA_REQUEST_BASE + offset
                 )
@@ -498,27 +510,56 @@ object PrayerNotificationScheduler {
         }
     }
 
-    private fun prayerTitle(name: String, fireAtMillis: Long): String {
-        val time = java.text.SimpleDateFormat("HH.mm", Locale.US).format(Date(fireAtMillis))
-        val display = when (name) {
-            "Fajr" -> "Fajr"
-            "Dhuhr" -> "Dhuhr"
-            "Asr" -> "Asr"
-            "Maghrib" -> "Maghrib"
-            "Isha" -> "Isha"
-            "Imsak" -> "Imsak"
-            else -> name
+    private fun getLocalizedContext(context: Context): Context {
+        val lang = app.kamy.saatApp.infrastructure.preferences.AppLanguageStore.from(context).current()
+        val locale = when (lang) {
+            app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> java.util.Locale.US
+            app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN -> java.util.Locale.forLanguageTag("id-ID")
+            app.kamy.saatApp.core.locale.AppLanguage.MALAY -> java.util.Locale.forLanguageTag("ms-MY")
+            else -> java.util.Locale.US
         }
-        return "It's time for $display · $time"
+        val config = android.content.res.Configuration(context.resources.configuration).apply {
+            setLocale(locale)
+        }
+        return context.createConfigurationContext(config)
     }
 
-    private fun prayerBody(name: String): String = when (name) {
-        "Fajr" -> "The world is still asleep. You don't have to be."
-        "Dhuhr" -> "Pause. Pray. Then carry on."
-        "Asr" -> "The angels are witnessing. Don't let this one pass."
-        "Maghrib" -> "The sun just set. This one can't wait."
-        "Isha" -> "End your day the right way."
-        "Imsak" -> "Prepare for your fast. The dawn is near."
-        else -> "It is now time for the $name prayer."
+    private fun prayerTitle(context: Context, name: String, fireAtMillis: Long): String {
+        val localContext = getLocalizedContext(context)
+        val time = java.text.SimpleDateFormat("HH.mm", java.util.Locale.US).format(java.util.Date(fireAtMillis))
+        val display = when (name) {
+            "Fajr" -> localContext.getString(R.string.prayer_fajr)
+            "Dhuhr" -> localContext.getString(R.string.prayer_dhuhr)
+            "Asr" -> localContext.getString(R.string.prayer_asr)
+            "Maghrib" -> localContext.getString(R.string.prayer_maghrib)
+            "Isha" -> localContext.getString(R.string.prayer_isha)
+            "Imsak" -> localContext.getString(R.string.prayer_imsak)
+            else -> name
+        }
+        return localContext.getString(R.string.prayer_notif_title, display, time)
+    }
+
+    private fun prayerBody(context: Context, name: String): String {
+        val localContext = getLocalizedContext(context)
+        return when (name) {
+            "Fajr" -> localContext.getString(R.string.prayer_body_fajr)
+            "Dhuhr" -> localContext.getString(R.string.prayer_body_dhuhr)
+            "Asr" -> localContext.getString(R.string.prayer_body_asr)
+            "Maghrib" -> localContext.getString(R.string.prayer_body_maghrib)
+            "Isha" -> localContext.getString(R.string.prayer_body_isha)
+            "Imsak" -> localContext.getString(R.string.prayer_body_imsak)
+            else -> {
+                val display = when (name) {
+                    "Fajr" -> localContext.getString(R.string.prayer_fajr)
+                    "Dhuhr" -> localContext.getString(R.string.prayer_dhuhr)
+                    "Asr" -> localContext.getString(R.string.prayer_asr)
+                    "Maghrib" -> localContext.getString(R.string.prayer_maghrib)
+                    "Isha" -> localContext.getString(R.string.prayer_isha)
+                    "Imsak" -> localContext.getString(R.string.prayer_imsak)
+                    else -> name
+                }
+                localContext.getString(R.string.prayer_body_default, display)
+            }
+        }
     }
 }

@@ -89,13 +89,28 @@ object DailyVerseNotificationScheduler {
 
     private fun dailyVersePrefs(context: Context) = DailyVerseNotificationStoreReader(context)
 
+    private fun getLocalizedContext(context: Context): Context {
+        val lang = app.kamy.saatApp.infrastructure.preferences.AppLanguageStore.from(context).current()
+        val locale = when (lang) {
+            app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> java.util.Locale.US
+            app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN -> java.util.Locale.forLanguageTag("id-ID")
+            app.kamy.saatApp.core.locale.AppLanguage.MALAY -> java.util.Locale.forLanguageTag("ms-MY")
+            else -> java.util.Locale.US
+        }
+        val config = android.content.res.Configuration(context.resources.configuration).apply {
+            setLocale(locale)
+        }
+        return context.createConfigurationContext(config)
+    }
+
     fun showNotification(context: Context, snapshot: DailyVerseSnapshot? = null) {
         ensureChannel(context)
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
 
+        val localContext = getLocalizedContext(context)
         val resolved = snapshot ?: DailyVerseSnapshotStore.loadForToday(context)
         val body = resolved?.notificationBody()
-            ?: context.getString(R.string.daily_verse_notif_fallback)
+            ?: localContext.getString(R.string.daily_verse_notif_fallback)
 
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -112,7 +127,7 @@ object DailyVerseNotificationScheduler {
         )
         val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(context.getString(R.string.daily_verse_notif_title))
+            .setContentTitle(localContext.getString(R.string.daily_verse_notif_title))
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setContentIntent(pending)
