@@ -101,6 +101,26 @@ class SurahReminderStore @Inject constructor(
         val now = System.currentTimeMillis()
         val fireAt = nextWeekdayTime(reminder.weekday, reminder.hour, reminder.minute, now)
 
+        val compareCal = Calendar.getInstance().apply {
+            timeInMillis = now
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val nowTime = compareCal.timeInMillis
+
+        val fireCal = Calendar.getInstance().apply {
+            timeInMillis = fireAt
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val fireTime = fireCal.timeInMillis
+
+        val actualFireAt = if (fireTime == nowTime) {
+            now + 1000L
+        } else {
+            fireAt
+        }
+
         val intent = Intent(context, SurahReminderReceiver::class.java).apply {
             action = "app.kamy.saatApp.ACTION_SURAH_REMINDER"
             putExtra("reminder_id", reminder.id)
@@ -118,9 +138,9 @@ class SurahReminderStore @Inject constructor(
 
         // Set exact alarm
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, fireAt, pending)
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, actualFireAt, pending)
         } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, fireAt, pending)
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, actualFireAt, pending)
         }
     }
 

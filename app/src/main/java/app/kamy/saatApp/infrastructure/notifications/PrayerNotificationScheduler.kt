@@ -279,7 +279,13 @@ object PrayerNotificationScheduler {
                     set(Calendar.MILLISECOND, 0)
                 }
 
-                if (fireCal.timeInMillis > now + 2_000L) {
+                val compareCal = Calendar.getInstance().apply {
+                    timeInMillis = now
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val nowTime = compareCal.timeInMillis
+                if (fireCal.timeInMillis >= nowTime) {
                     scheduleOneShot(
                         context = context,
                         requestCode = IMPORTANT_DAYS_REQUEST_BASE + offset,
@@ -382,8 +388,28 @@ object PrayerNotificationScheduler {
         prayerName: String? = null
     ) {
         runCatching {
-            val now = System.currentTimeMillis()
-            if (fireAt <= now + 2_000L) return@runCatching
+            val currentMillis = System.currentTimeMillis()
+            val compareCal = Calendar.getInstance().apply {
+                timeInMillis = currentMillis
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val nowTime = compareCal.timeInMillis
+
+            val fireCal = Calendar.getInstance().apply {
+                timeInMillis = fireAt
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val fireTime = fireCal.timeInMillis
+
+            if (fireTime < nowTime) return@runCatching
+
+            val actualFireAt = if (fireTime == nowTime) {
+                currentMillis + 1000L
+            } else {
+                fireAt
+            }
 
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, PrayerNotificationReceiver::class.java).apply {
@@ -394,7 +420,7 @@ object PrayerNotificationScheduler {
                 putExtra(PrayerNotificationReceiver.EXTRA_KIND, kind)
                 putExtra(PrayerNotificationReceiver.EXTRA_PLAY_ADHAN, playAdhan)
                 putExtra(PrayerNotificationReceiver.EXTRA_PRAYER_NAME, prayerName)
-                putExtra(PrayerNotificationReceiver.EXTRA_FIRE_AT, fireAt)
+                putExtra(PrayerNotificationReceiver.EXTRA_FIRE_AT, actualFireAt)
             }
             val pending = PendingIntent.getBroadcast(
                 context,
@@ -402,7 +428,7 @@ object PrayerNotificationScheduler {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            setExactAlarm(context, alarmManager, fireAt, pending)
+            setExactAlarm(context, alarmManager, actualFireAt, pending)
         }
     }
 
