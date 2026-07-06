@@ -53,7 +53,9 @@ data class PrayerNotificationScheduleOptions(
     val importantDaysReminderEnabled: Boolean,
     val adhanSoundEnabled: Boolean,
     val monThuFastReminderEnabled: Boolean,
-    val dhuhaReminderEnabled: Boolean
+    val dhuhaReminderEnabled: Boolean,
+    val dhuhaHour: Int = 8,
+    val dhuhaMinute: Int = 30
 ) {
     fun isAdzanEnabledFor(prayerName: String): Boolean = prayerName in enabledAdzanPrayers
 }

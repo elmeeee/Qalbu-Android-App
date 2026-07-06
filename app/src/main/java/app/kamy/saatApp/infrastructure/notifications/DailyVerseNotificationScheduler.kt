@@ -141,7 +141,11 @@ object DailyVerseNotificationScheduler {
             set(Calendar.HOUR_OF_DAY, hour.coerceIn(0, 23))
             set(Calendar.MINUTE, minute.coerceIn(0, 59))
         }
-        if (cal.timeInMillis <= System.currentTimeMillis()) {
+        val compareCal = Calendar.getInstance().apply {
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        if (cal.timeInMillis < compareCal.timeInMillis) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis

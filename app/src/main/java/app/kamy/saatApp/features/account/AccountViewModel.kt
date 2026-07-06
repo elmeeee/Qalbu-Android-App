@@ -93,6 +93,9 @@ data class AccountUiState(
     val adhanSoundEnabled: Boolean = true,
     val monThuFastReminderEnabled: Boolean = true,
     val dhuhaReminderEnabled: Boolean = true,
+    val dhuhaHour: Int = 8,
+    val dhuhaMinute: Int = 30,
+    val dhuhaTimeLabel: String = "08:30",
     val showAdhanSheet: Boolean = false,
     val showLanguageSheet: Boolean = false,
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
@@ -260,7 +263,10 @@ class AccountViewModel @Inject constructor(
                 importantDaysReminderEnabled = prayerNotificationPrefs.isImportantDaysReminderEnabled(),
                 adhanSoundEnabled = prayerNotificationPrefs.isAdhanSoundEnabled(),
                 monThuFastReminderEnabled = prayerNotificationPrefs.isMonThuFastEnabled(),
-                dhuhaReminderEnabled = prayerNotificationPrefs.isDhuhaEnabled()
+                dhuhaReminderEnabled = prayerNotificationPrefs.isDhuhaEnabled(),
+                dhuhaHour = prayerNotificationPrefs.dhuhaHour(),
+                dhuhaMinute = prayerNotificationPrefs.dhuhaMinute(),
+                dhuhaTimeLabel = String.format("%02d:%02d", prayerNotificationPrefs.dhuhaHour(), prayerNotificationPrefs.dhuhaMinute())
             )
         }
     }
@@ -623,6 +629,23 @@ class AccountViewModel @Inject constructor(
 
     fun setDhuhaReminderEnabled(enabled: Boolean) {
         prayerNotificationPrefs.setDhuhaEnabled(enabled)
+        syncPrayerNotificationState()
+        reschedulePrayerNotifications()
+    }
+
+    fun setDhuhaTime(hour: Int, minute: Int) {
+        val isIndoMalay = appLanguageStore.current() == AppLanguage.INDONESIAN || appLanguageStore.current() == AppLanguage.MALAY
+        if (hour < 6 || (hour > 11 || (hour == 11 && minute > 45))) {
+            val msg = if (isIndoMalay) {
+                "Waktu Duha harus antara 06:00 dan 11:45 (sebelum Zuhur)"
+            } else {
+                "Dhuha time must be between 06:00 and 11:45 (before Dhuhr)"
+            }
+            android.widget.Toast.makeText(appContext, msg, android.widget.Toast.LENGTH_LONG).show()
+            return
+        }
+        prayerNotificationPrefs.setDhuhaTime(hour, minute)
+        syncPrayerNotificationState()
         reschedulePrayerNotifications()
     }
 

@@ -205,6 +205,26 @@ fun NotificationSettingsScreen(
                 checked = state.dhuhaReminderEnabled,
                 onCheckedChange = vm::setDhuhaReminderEnabled
             )
+            if (state.dhuhaReminderEnabled) {
+                val context = LocalContext.current
+                val isIndoMalay = state.appLanguage == app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN || state.appLanguage == app.kamy.saatApp.core.locale.AppLanguage.MALAY
+                AlKhatibSettingsNavigationRow(
+                    icon = Icons.Filled.Schedule,
+                    title = if (isIndoMalay) "Waktu Pengingat Duha" else "Dhuha Reminder Time",
+                    subtitle = state.dhuhaTimeLabel,
+                    onClick = {
+                        android.app.TimePickerDialog(
+                            context,
+                            { _, hour, minute ->
+                                vm.setDhuhaTime(hour, minute)
+                            },
+                            state.dhuhaHour,
+                            state.dhuhaMinute,
+                            true
+                        ).show()
+                    }
+                )
+            }
         }
 
         Spacer(Modifier.height(AlKhatibSpacing.xl))

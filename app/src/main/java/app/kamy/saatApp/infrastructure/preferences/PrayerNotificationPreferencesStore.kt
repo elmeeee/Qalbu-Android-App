@@ -45,7 +45,9 @@ open class PrayerNotificationPreferencesStoreBase(
         importantDaysReminderEnabled = bool(KEY_IMPORTANT_DAYS, default = true),
         adhanSoundEnabled = bool(KEY_ADZAN_SOUND, default = true),
         monThuFastReminderEnabled = bool(KEY_MON_THU_FAST, default = true),
-        dhuhaReminderEnabled = bool(KEY_DHUHA, default = true)
+        dhuhaReminderEnabled = bool(KEY_DHUHA, default = true),
+        dhuhaHour = dhuhaHour(),
+        dhuhaMinute = dhuhaMinute()
     )
 
     fun isAdhanSoundEnabled(): Boolean = bool(KEY_ADZAN_SOUND, default = true)
@@ -56,6 +58,13 @@ open class PrayerNotificationPreferencesStoreBase(
 
     fun isDhuhaEnabled(): Boolean = bool(KEY_DHUHA, default = true)
     fun setDhuhaEnabled(enabled: Boolean) = setBool(KEY_DHUHA, enabled)
+
+    fun dhuhaHour(): Int = prefs.getInt(KEY_DHUHA_HOUR, 8)
+    fun dhuhaMinute(): Int = prefs.getInt(KEY_DHUHA_MINUTE, 30)
+    fun setDhuhaTime(hour: Int, minute: Int) {
+        prefs.edit().putInt(KEY_DHUHA_HOUR, hour).putInt(KEY_DHUHA_MINUTE, minute).apply()
+        _changed.value = _changed.value + 1
+    }
 
 
     fun isPrayerEnabled(type: PrayerType): Boolean =
@@ -121,6 +130,7 @@ open class PrayerNotificationPreferencesStoreBase(
         private const val KEY_ADZAN_SOUND = "adhanSoundEnabled"
         private const val KEY_MON_THU_FAST = "monThuFastReminderEnabled"
         private const val KEY_DHUHA = "dhuhaReminderEnabled"
-
+        private const val KEY_DHUHA_HOUR = "dhuhaReminderHour"
+        private const val KEY_DHUHA_MINUTE = "dhuhaReminderMinute"
     }
 }

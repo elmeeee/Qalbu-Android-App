@@ -174,7 +174,7 @@ object PrayerNotificationScheduler {
         }
 
         if (options.dhuhaReminderEnabled) {
-            val firstDhuha = nextDailyTime(8, 30, now)
+            val firstDhuha = nextDailyTime(options.dhuhaHour, options.dhuhaMinute, now)
             upcomingDailyOccurrences(firstDhuha, now, 7).forEachIndexed { offset, fireAt ->
                 scheduleOneShot(
                     context = context,
@@ -426,7 +426,15 @@ object PrayerNotificationScheduler {
         cal.set(Calendar.MINUTE, minute)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
-        while (cal.get(Calendar.DAY_OF_WEEK) != weekday || cal.timeInMillis <= from) {
+
+        val compareCal = Calendar.getInstance().apply {
+            timeInMillis = from
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val fromTime = compareCal.timeInMillis
+
+        while (cal.get(Calendar.DAY_OF_WEEK) != weekday || cal.timeInMillis < fromTime) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis
@@ -438,7 +446,15 @@ object PrayerNotificationScheduler {
         cal.set(Calendar.MINUTE, minute)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
-        if (cal.timeInMillis <= from) {
+
+        val compareCal = Calendar.getInstance().apply {
+            timeInMillis = from
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val fromTime = compareCal.timeInMillis
+
+        if (cal.timeInMillis < fromTime) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis
@@ -447,9 +463,15 @@ object PrayerNotificationScheduler {
     private fun upcomingWeeklyOccurrences(firstFireAt: Long, now: Long, count: Int): List<Long> {
         if (count <= 0) return emptyList()
         val cal = Calendar.getInstance().apply { timeInMillis = firstFireAt }
+        val compareCal = Calendar.getInstance().apply {
+            timeInMillis = now
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val nowTime = compareCal.timeInMillis
         return buildList {
             repeat(count) {
-                if (cal.timeInMillis > now + 2_000L) {
+                if (cal.timeInMillis >= nowTime) {
                     add(cal.timeInMillis)
                 }
                 cal.add(Calendar.WEEK_OF_YEAR, 1)
@@ -460,9 +482,15 @@ object PrayerNotificationScheduler {
     private fun upcomingDailyOccurrences(firstFireAt: Long, now: Long, count: Int): List<Long> {
         if (count <= 0) return emptyList()
         val cal = Calendar.getInstance().apply { timeInMillis = firstFireAt }
+        val compareCal = Calendar.getInstance().apply {
+            timeInMillis = now
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val nowTime = compareCal.timeInMillis
         return buildList {
             repeat(count) {
-                if (cal.timeInMillis > now + 2_000L) {
+                if (cal.timeInMillis >= nowTime) {
                     add(cal.timeInMillis)
                 }
                 cal.add(Calendar.DAY_OF_YEAR, 1)
