@@ -17,12 +17,8 @@ fun AlKhatibTheme(
     theme: AppThemeColor = AppThemeColor.EMERALD,
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
-    val customColorHex = androidx.compose.runtime.remember(theme) {
-        ThemePreferencesStore.from(context).customColorHex()
-    }
     // Synchronize AlKhatibColors state with theme
-    AlKhatibColors.applyTheme(theme, customColorHex)
+    AlKhatibColors.applyTheme(theme)
 
     val dynamicColors = lightColorScheme(
         primary = AlKhatibColors.DeepEmerald,

@@ -130,7 +130,7 @@ enum class PrayerCalculationMethod(val rawValue: String) {
         }
 
     companion object {
-        val defaultMethod: PrayerCalculationMethod = MUHAMMADIYAH
+        val defaultMethod: PrayerCalculationMethod = KEMENAG
 
         fun fromRawValue(raw: String?): PrayerCalculationMethod =
             entries.firstOrNull { it.rawValue == raw } ?: defaultMethod
@@ -139,7 +139,7 @@ enum class PrayerCalculationMethod(val rawValue: String) {
             entries.firstOrNull { it.aladhanMethodId == id } ?: defaultMethod
 
         fun forCountryCode(code: String): PrayerCalculationMethod = when (code.uppercase()) {
-            "ID" -> MUHAMMADIYAH
+            "ID" -> KEMENAG
             "SG" -> MUIS
             "MY" -> JAKIM
             "BN" -> BRUNEI

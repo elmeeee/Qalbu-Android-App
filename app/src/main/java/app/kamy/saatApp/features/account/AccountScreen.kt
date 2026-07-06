@@ -227,9 +227,7 @@ fun AccountScreen(
     if (state.showThemeSheet) {
         ThemeSelectionSheet(
             selected = state.appTheme,
-            customColorHex = state.customThemeColorHex,
             onSelect = vm::setAppTheme,
-            onSelectCustomColor = vm::setCustomThemeColor,
             onDismiss = vm::closeThemeSheet
         )
     }
@@ -296,6 +294,7 @@ fun AccountScreen(
             reminders = state.surahReminders,
             onToggle = vm::toggleSurahReminder,
             onAdd = vm::addSurahReminder,
+            onUpdate = vm::updateSurahReminder,
             onDelete = vm::deleteSurahReminder,
             onDismiss = vm::closeSurahRemindersSheet
         )
@@ -1662,9 +1661,7 @@ private fun AboutLinkRow(
 @Composable
 private fun ThemeSelectionSheet(
     selected: AppThemeColor,
-    customColorHex: String,
     onSelect: (AppThemeColor) -> Unit,
-    onSelectCustomColor: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
@@ -1697,109 +1694,54 @@ private fun ThemeSelectionSheet(
                         AppThemeColor.EMERALD -> Color(0xFF0F4C3A)
                         AppThemeColor.OCEAN -> Color(0xFF1B4965)
                         AppThemeColor.GOLD -> Color(0xFF8B6015)
-                        AppThemeColor.DARK -> Color(0xFF121212)
                         AppThemeColor.ROSE -> Color(0xFFE11D48)
                         AppThemeColor.PURPLE -> Color(0xFF7C3AED)
                         AppThemeColor.ORANGE -> Color(0xFFEA580C)
                         AppThemeColor.RED -> Color(0xFFDC2626)
-                        AppThemeColor.CUSTOM -> runCatching { Color(android.graphics.Color.parseColor(customColorHex)) }.getOrDefault(Color(0xFF0F4C3A))
                     }
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Surface(
-                            onClick = { onSelect(theme) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (isSelected) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                            } else {
-                                Color.Transparent
-                            },
-                            border = if (isSelected) {
-                                BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                            } else {
-                                null
-                            }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Theme Color Indicator Dot
-                                Box(
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .background(dotColor, CircleShape)
-                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape)
-                                )
-                                Spacer(Modifier.width(16.dp))
-                                Text(
-                                    text = stringResource(theme.displayNameRes),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                if (isSelected) {
-                                    Text(
-                                        text = "✓",
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
+                    Surface(
+                        onClick = { onSelect(theme) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                        } else {
+                            Color.Transparent
+                        },
+                        border = if (isSelected) {
+                            BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                        } else {
+                            null
                         }
-
-                        if (theme == AppThemeColor.CUSTOM && isSelected) {
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                text = "Pilih Palet Warna Kustom / Choose Color Palette:",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Theme Color Indicator Dot
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .background(dotColor, CircleShape)
+                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape)
                             )
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                listOf("#0D9488", "#4F46E5", "#0891B2", "#16A34A", "#E11D48").forEach { hex ->
-                                    val parsed = Color(android.graphics.Color.parseColor(hex))
-                                    val isColorSelected = customColorHex.equals(hex, ignoreCase = true)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .background(parsed, CircleShape)
-                                            .border(
-                                                width = if (isColorSelected) 3.dp else 1.dp,
-                                                color = if (isColorSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                                                shape = CircleShape
-                                            )
-                                            .clickable { onSelectCustomColor(hex) }
-                                    )
-                                }
+                            Spacer(Modifier.width(16.dp))
+                            Text(
+                                text = stringResource(theme.displayNameRes),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (isSelected) {
+                                Text(
+                                    text = "✓",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                listOf("#7C3AED", "#EA580C", "#DB2777", "#2563EB", "#111827").forEach { hex ->
-                                    val parsed = Color(android.graphics.Color.parseColor(hex))
-                                    val isColorSelected = customColorHex.equals(hex, ignoreCase = true)
-                                    Box(
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .background(parsed, CircleShape)
-                                            .border(
-                                                width = if (isColorSelected) 3.dp else 1.dp,
-                                                color = if (isColorSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                                                shape = CircleShape
-                                            )
-                                            .clickable { onSelectCustomColor(hex) }
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.height(8.dp))
                         }
                     }
                 }

@@ -97,7 +97,6 @@ data class AccountUiState(
     val showLanguageSheet: Boolean = false,
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
     val appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD,
-    val customThemeColorHex: String = "#0F4C3A",
     val surahReminders: List<SurahReminder> = emptyList(),
     val showSurahRemindersSheet: Boolean = false,
     val showThemeSheet: Boolean = false,
@@ -284,7 +283,6 @@ class AccountViewModel @Inject constructor(
                 reminderTimeLabel = notificationStore.formattedMorningTime(),
                 appLanguage = appLanguageStore.current(),
                 appTheme = themeStore.currentTheme(),
-                customThemeColorHex = themeStore.customColorHex(),
                 prayerMadhab = prayerMethodStore.currentMadhab(),
                 surahReminders = surahReminderStore.getReminders()
             )
@@ -312,18 +310,6 @@ class AccountViewModel @Inject constructor(
         _state.update {
             it.copy(
                 appTheme = theme,
-                showThemeSheet = false
-            )
-        }
-    }
-
-    fun setCustomThemeColor(hex: String) {
-        themeStore.setCustomColorHex(hex)
-        themeStore.setTheme(app.kamy.saatApp.infrastructure.preferences.AppThemeColor.CUSTOM)
-        _state.update {
-            it.copy(
-                customThemeColorHex = hex,
-                appTheme = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.CUSTOM,
                 showThemeSheet = false
             )
         }

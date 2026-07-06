@@ -8,6 +8,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -149,7 +150,7 @@ fun TodayHeader(
                             "$prefix${gregorianLabel.orEmpty()}"
                         }
                     }
-                    val textColor = if (targetShowHijri) AlKhatibColors.GoldDeep else MaterialTheme.colorScheme.onSurface
+                    val textColor = if (targetShowHijri) AlKhatibColors.DeepEmerald else Color.Black
 
                     Text(
                         text = dateText,

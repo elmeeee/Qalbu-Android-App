@@ -7,28 +7,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
@@ -58,6 +51,7 @@ fun SurahRemindersSheet(
     reminders: List<SurahReminder>,
     onToggle: (String, Boolean) -> Unit,
     onAdd: (SurahReminder) -> Unit,
+    onUpdate: (SurahReminder) -> Unit,
     onDelete: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -67,6 +61,7 @@ fun SurahRemindersSheet(
     val isIndoMalay = languageStore.current() == AppLanguage.INDONESIAN || languageStore.current() == AppLanguage.MALAY
 
     var showAddForm by remember { mutableStateOf(false) }
+    var reminderToEdit by remember { mutableStateOf<SurahReminder?>(null) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -107,9 +102,9 @@ fun SurahRemindersSheet(
 
             Text(
                 text = if (isIndoMalay) {
-                    "Atur pengingat membaca Surah pilihan Anda (seperti Yasin, Al-Kahf, Al-Mulk, dll) secara rutin."
+                    "Atur pengingat membaca Surah pilihan Anda (seperti Yasin, Al-Kahf, Al-Mulk, dll) secara rutin. Klik kartu untuk mengedit."
                 } else {
-                    "Configure recurring reminders to read your chosen Surahs (e.g. Yasin, Al-Kahf, Al-Mulk, etc.)."
+                    "Configure recurring reminders to read your chosen Surahs (e.g. Yasin, Al-Kahf, Al-Mulk, etc.). Click card to edit."
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = AlKhatibColors.Slate700
@@ -141,7 +136,8 @@ fun SurahRemindersSheet(
                             reminder = reminder,
                             isIndoMalay = isIndoMalay,
                             onToggle = { onToggle(reminder.id, it) },
-                            onDelete = { onDelete(reminder.id) }
+                            onDelete = { onDelete(reminder.id) },
+                            onEdit = { reminderToEdit = reminder }
                         )
                     }
                 }
@@ -151,14 +147,23 @@ fun SurahRemindersSheet(
         }
     }
 
-    if (showAddForm) {
-        AddSurahReminderDialog(
+    if (showAddForm || reminderToEdit != null) {
+        AddEditSurahReminderDialog(
+            reminder = reminderToEdit,
             isIndoMalay = isIndoMalay,
             onSave = { reminder ->
-                onAdd(reminder)
+                if (reminderToEdit != null) {
+                    onUpdate(reminder)
+                } else {
+                    onAdd(reminder)
+                }
                 showAddForm = false
+                reminderToEdit = null
             },
-            onDismiss = { showAddForm = false }
+            onDismiss = {
+                showAddForm = false
+                reminderToEdit = null
+            }
         )
     }
 }
@@ -168,10 +173,13 @@ private fun SurahReminderItemRow(
     reminder: SurahReminder,
     isIndoMalay: Boolean,
     onToggle: (Boolean) -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onEdit() },
         shape = RoundedCornerShape(12.dp),
         color = AlKhatibColors.PureWhite,
         border = BorderStroke(1.dp, AlKhatibColors.SoftGrey)
@@ -222,15 +230,16 @@ private fun SurahReminderItemRow(
 }
 
 @Composable
-private fun AddSurahReminderDialog(
+private fun AddEditSurahReminderDialog(
+    reminder: SurahReminder?,
     isIndoMalay: Boolean,
     onSave: (SurahReminder) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var selectedSurahIndex by remember { mutableStateOf(17) } // Default to Al-Kahf (18th surah, index 17)
-    var selectedWeekday by remember { mutableStateOf(Calendar.FRIDAY) }
-    var hour by remember { mutableStateOf(10) }
-    var minute by remember { mutableStateOf(30) }
+    var selectedSurahIndex by remember { mutableStateOf(reminder?.let { it.surahNumber - 1 } ?: 17) }
+    var selectedWeekday by remember { mutableStateOf(reminder?.weekday ?: Calendar.FRIDAY) }
+    var hour by remember { mutableStateOf(reminder?.hour ?: 10) }
+    var minute by remember { mutableStateOf(reminder?.minute ?: 30) }
     var showSurahPicker by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -250,7 +259,11 @@ private fun AddSurahReminderDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = if (isIndoMalay) "Tambah Pengingat Baru" else "Add New Reminder",
+                    text = if (reminder != null) {
+                        if (isIndoMalay) "Edit Pengingat" else "Edit Reminder"
+                    } else {
+                        if (isIndoMalay) "Tambah Pengingat Baru" else "Add New Reminder"
+                    },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = AlKhatibColors.DeepEmerald
@@ -295,7 +308,7 @@ private fun AddSurahReminderDialog(
                     }
                 }
 
-                // Weekday Selector Row
+                // Weekday Selector Row (using 3-letter abbreviations with weighted spacing)
                 Column {
                     Text(
                         text = if (isIndoMalay) "Hari:" else "Day:",
@@ -305,25 +318,26 @@ private fun AddSurahReminderDialog(
                     Spacer(Modifier.height(6.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         val weekdays = listOf(
-                            Calendar.SUNDAY to "M",
-                            Calendar.MONDAY to "S",
-                            Calendar.TUESDAY to "S",
-                            Calendar.WEDNESDAY to "R",
-                            Calendar.THURSDAY to "K",
-                            Calendar.FRIDAY to "J",
-                            Calendar.SATURDAY to "S"
+                            Calendar.SUNDAY to (if (isIndoMalay) "Min" else "Sun"),
+                            Calendar.MONDAY to (if (isIndoMalay) "Sen" else "Mon"),
+                            Calendar.TUESDAY to (if (isIndoMalay) "Sel" else "Tue"),
+                            Calendar.WEDNESDAY to (if (isIndoMalay) "Rab" else "Wed"),
+                            Calendar.THURSDAY to (if (isIndoMalay) "Kam" else "Thu"),
+                            Calendar.FRIDAY to (if (isIndoMalay) "Jum" else "Fri"),
+                            Calendar.SATURDAY to (if (isIndoMalay) "Sab" else "Sat")
                         )
                         weekdays.forEach { (day, label) ->
                             val isSelected = selectedWeekday == day
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .weight(1f)
+                                    .height(38.dp)
                                     .background(
                                         color = if (isSelected) AlKhatibColors.DeepEmerald else AlKhatibColors.LightGrey,
-                                        shape = CircleShape
+                                        shape = RoundedCornerShape(8.dp)
                                     )
                                     .clickable { selectedWeekday = day },
                                 contentAlignment = Alignment.Center
@@ -331,7 +345,7 @@ private fun AddSurahReminderDialog(
                                 Text(
                                     text = label,
                                     color = if (isSelected) AlKhatibColors.PureWhite else AlKhatibColors.Slate900,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -414,16 +428,16 @@ private fun AddSurahReminderDialog(
                     Spacer(Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            val newReminder = SurahReminder(
-                                id = UUID.randomUUID().toString(),
+                            val finalReminder = SurahReminder(
+                                id = reminder?.id ?: UUID.randomUUID().toString(),
                                 surahNumber = selectedSurahIndex + 1,
                                 surahName = SURAH_NAMES[selectedSurahIndex],
                                 weekday = selectedWeekday,
                                 hour = hour,
                                 minute = minute,
-                                enabled = true
+                                enabled = reminder?.enabled ?: true
                             )
-                            onSave(newReminder)
+                            onSave(finalReminder)
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = AlKhatibColors.DeepEmerald)
                     ) {

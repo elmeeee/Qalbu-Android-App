@@ -109,7 +109,7 @@ fun PrayerTrackerCard(
                     Icon(
                         Icons.Filled.LocalFireDepartment,
                         contentDescription = null,
-                        tint = AlKhatibColors.GoldDeep,
+                        tint = AlKhatibColors.DeepEmerald,
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
@@ -117,7 +117,7 @@ fun PrayerTrackerCard(
                         modifier = Modifier.padding(start = 4.dp),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.GoldDeep
+                        color = AlKhatibColors.DeepEmerald
                     )
                 }
                 IconButton(onClick = onOpenCalendar, modifier = Modifier.size(36.dp)) {
