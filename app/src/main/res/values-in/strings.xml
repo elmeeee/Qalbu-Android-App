@@ -637,4 +637,81 @@
         <item>Waktu Subuh</item>
         <item>Manusia</item>
     </string-array>
+
+    <!-- Legal: Navigation Labels -->
+    <string name="privacy_policy">Kebijakan Privasi</string>
+    <string name="terms_and_conditions">Syarat &amp; Ketentuan</string>
+
+    <!-- Privacy Policy -->
+    <string name="privacy_policy_title">Kebijakan Privasi</string>
+    <string name="privacy_policy_effective">Berlaku Sejak: 1 Juli 2026</string>
+    <string name="privacy_policy_publisher">Diterbitkan oleh KaMy Studio — Sufiandy Elmy</string>
+    <string name="privacy_policy_intro">Kebijakan Privasi ini menjelaskan bagaimana SĀAT ("Aplikasi") mengumpulkan, menggunakan, dan melindungi informasi Anda. Dengan menggunakan Aplikasi, Anda menyetujui praktik yang dijelaskan dalam kebijakan ini.</string>
+
+    <string name="privacy_section1_title">1. Informasi yang Kami Kumpulkan</string>
+    <string name="privacy_section1_body">SĀAT hanya mengumpulkan informasi minimum yang diperlukan untuk menyediakan fitur-fiturnya:\n\n• Lokasi Perangkat — Digunakan semata-mata untuk menghitung waktu shalat harian yang akurat berdasarkan koordinat geografis Anda. Lokasi Anda diproses sepenuhnya di perangkat dan tidak pernah diunggah ke server manapun.\n• Preferensi Aplikasi — Bahasa, tema, metode kalkulasi, pengaturan notifikasi, dan preferensi membaca — disimpan secara lokal di perangkat Anda.\n• Data Akun Opsional — Jika Anda memilih untuk masuk dengan Google, kami menerima nama tampilan, alamat email, dan foto profil Anda hanya untuk mempersonalisasi pengalaman dalam aplikasi.</string>
+
+    <string name="privacy_section2_title">2. Cara Kami Menggunakan Informasi Anda</string>
+    <string name="privacy_section2_body">Kami menggunakan informasi yang dikumpulkan untuk:\n\n• Menghitung dan menampilkan waktu shalat yang akurat untuk lokasi Anda\n• Mengirimkan notifikasi lokal terjadwal (Adzan, Dhuha, pengingat Al-Quran, dll.)\n• Mengingat preferensi aplikasi Anda antar sesi\n• Menampilkan profil Anda jika Anda sudah masuk\n\nKami tidak menggunakan data Anda untuk iklan, pembuatan profil analitik, atau tujuan komersial apapun.</string>
+
+    <string name="privacy_section3_title">3. Data Lokasi</string>
+    <string name="privacy_section3_body">Aplikasi meminta akses ke lokasi perangkat Anda (presisi atau perkiraan) untuk menghitung jadwal shalat lokal Anda. Data ini:\n\n• Hanya digunakan di perangkat secara real-time\n• Tidak pernah disimpan di server eksternal\n• Tidak pernah dibagikan kepada pihak ketiga\n\nAnda dapat mencabut izin lokasi kapan saja melalui Pengaturan perangkat. Tanpa akses lokasi, waktu shalat tidak akan tersedia.</string>
+
+    <string name="privacy_section4_title">4. Notifikasi</string>
+    <string name="privacy_section4_body">Semua notifikasi di SĀAT dijadwalkan secara lokal menggunakan AlarmManager Android. Tidak ada server notifikasi push atau layanan pesan pihak ketiga yang terlibat. Notifikasi dipicu sepenuhnya di perangkat Anda dan tidak memerlukan koneksi internet.</string>
+
+    <string name="privacy_section5_title">5. Layanan Pihak Ketiga</string>
+    <string name="privacy_section5_body">SĀAT dapat menggunakan layanan pihak ketiga berikut:\n\n• Google Sign-In (opsional) — Untuk pembuatan akun dan masuk. Diatur oleh Kebijakan Privasi Google.\n• Firebase Crashlytics — Untuk pelaporan crash anonim guna membantu kami meningkatkan stabilitas. Tidak ada informasi yang dapat diidentifikasi secara pribadi yang disertakan dalam laporan crash.\n\nKami tidak menjual, memperdagangkan, atau menyewakan informasi pribadi Anda kepada pihak ketiga manapun.</string>
+
+    <string name="privacy_section6_title">6. Penyimpanan &amp; Keamanan Data</string>
+    <string name="privacy_section6_body">Semua data aplikasi (preferensi, pengingat, streak) disimpan secara lokal di perangkat Anda menggunakan SharedPreferences Android atau penyimpanan internal. Tidak ada data pribadi yang dikirimkan ke server eksternal tanpa tindakan eksplisit Anda (misalnya, masuk ke akun). Kami menerapkan praktik keamanan standar untuk melindungi data lokal Anda.</string>
+
+    <string name="privacy_section7_title">7. Hak-Hak Anda</string>
+    <string name="privacy_section7_body">Anda memiliki kendali penuh atas data Anda:\n\n• Cabut izin lokasi kapan saja melalui Pengaturan perangkat\n• Nonaktifkan notifikasi melalui Pengaturan perangkat atau pengaturan notifikasi dalam aplikasi\n• Keluar dan hapus data akun Anda dari dalam Aplikasi\n• Hapus instalasi Aplikasi untuk menghapus semua data yang tersimpan secara lokal\n\nUntuk permintaan penghapusan data terkait Google Sign-In, silakan merujuk pada prosedur penghapusan data akun Google.</string>
+
+    <string name="privacy_section8_title">8. Privasi Anak-Anak</string>
+    <string name="privacy_section8_body">SĀAT tidak ditujukan untuk anak-anak di bawah usia 13 tahun. Kami tidak secara sengaja mengumpulkan informasi pribadi dari anak-anak. Jika Anda percaya seorang anak telah memberikan kami informasi pribadi, silakan hubungi kami segera.</string>
+
+    <string name="privacy_section9_title">9. Perubahan pada Kebijakan Ini</string>
+    <string name="privacy_section9_body">Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Setiap perubahan akan tercermin dalam dokumen ini dengan tanggal efektif yang diperbarui. Penggunaan Aplikasi yang berkelanjutan setelah perubahan berarti penerimaan terhadap kebijakan yang direvisi.</string>
+
+    <string name="privacy_section10_title">10. Hubungi Kami</string>
+    <string name="privacy_section10_body">Jika Anda memiliki pertanyaan, kekhawatiran, atau permintaan terkait Kebijakan Privasi ini, silakan hubungi:\n\nPengembang: Sufiandy Elmy\nStudio: KaMy Studio\nEmail: hello@elmee.my</string>
+
+    <!-- Terms and Conditions -->
+    <string name="terms_title">Syarat &amp; Ketentuan</string>
+    <string name="terms_effective">Berlaku Sejak: 1 Juli 2026</string>
+    <string name="terms_publisher">Diterbitkan oleh KaMy Studio — Sufiandy Elmy</string>
+    <string name="terms_intro">Syarat dan Ketentuan ("Syarat") ini mengatur penggunaan Anda atas aplikasi mobile SĀAT ("Aplikasi") yang dikembangkan oleh KaMy Studio (Sufiandy Elmy). Dengan mengunduh, menginstal, atau menggunakan Aplikasi, Anda setuju untuk terikat oleh Syarat ini.</string>
+
+    <string name="terms_section1_title">1. Penerimaan Syarat</string>
+    <string name="terms_section1_body">Dengan mengakses atau menggunakan Aplikasi, Anda mengonfirmasi bahwa Anda berusia minimal 13 tahun dan bahwa Anda telah membaca, memahami, dan setuju untuk terikat oleh Syarat ini dan Kebijakan Privasi kami. Jika Anda tidak setuju dengan Syarat ini, harap jangan gunakan Aplikasi.</string>
+
+    <string name="terms_section2_title">2. Penggunaan yang Diizinkan</string>
+    <string name="terms_section2_body">SĀAT disediakan hanya untuk penggunaan pribadi dan non-komersial. Anda tidak boleh:\n\n• Menyalin, memodifikasi, mendistribusikan, atau melakukan rekayasa balik pada Aplikasi\n• Menggunakan Aplikasi untuk tujuan komersial tanpa izin tertulis\n• Mencoba melewati kontrol keamanan atau akses apapun\n• Menggunakan Aplikasi dengan cara apapun yang melanggar hukum atau peraturan yang berlaku</string>
+
+    <string name="terms_section3_title">3. Kekayaan Intelektual</string>
+    <string name="terms_section3_body">Semua konten, desain, kode, merek, dan fitur Aplikasi adalah milik eksklusif KaMy Studio (Sufiandy Elmy) dan dilindungi oleh hukum kekayaan intelektual yang berlaku. Teks Al-Quran, terjemahan, dan audio tilawah bersumber dari repositori Islam terbuka yang tersedia untuk umum dan digunakan dengan penuh hormat sesuai lisensi masing-masing.</string>
+
+    <string name="terms_section4_title">4. Penafian Waktu Shalat</string>
+    <string name="terms_section4_body">Waktu shalat yang ditampilkan di SĀAT adalah estimasi yang dihitung berdasarkan algoritma astronomi dan metode kalkulasi yang Anda pilih. Waktu-waktu ini:\n\n• Mungkin sedikit berbeda dari waktu yang diumumkan oleh masjid atau otoritas keagamaan setempat\n• Bukan merupakan fatwa atau keputusan keagamaan resmi\n• Sebaiknya diverifikasi dengan masjid setempat untuk ibadah yang kritis\n\nKaMy Studio bukan otoritas keagamaan dan tidak bertanggung jawab atas kewajiban keagamaan apapun yang didasarkan semata-mata pada kalkulasi ini.</string>
+
+    <string name="terms_section5_title">5. Konten Al-Quran</string>
+    <string name="terms_section5_body">Teks Al-Quran, transliterasi, terjemahan, dan audio tilawah yang tersedia di Aplikasi disediakan untuk penggunaan keagamaan pribadi. Kami berupaya menjaga keakuratan dan kehormatan dalam semua konten terkait Al-Quran. Setiap kesalahan harus segera dilaporkan kepada kami di hello@elmee.my.</string>
+
+    <string name="terms_section6_title">6. Batasan Tanggung Jawab</string>
+    <string name="terms_section6_body">Sejauh yang diizinkan oleh hukum yang berlaku, KaMy Studio dan Sufiandy Elmy tidak bertanggung jawab atas:\n\n• Shalat yang terlewat karena kegagalan notifikasi, pengaturan perangkat, atau pembatasan OS\n• Ketidakakuratan dalam kalkulasi waktu shalat\n• Kehilangan data akibat kerusakan perangkat atau penghapusan instalasi aplikasi\n• Kerugian tidak langsung, insidental, atau konsekuensial yang timbul dari penggunaan Aplikasi\n\nAplikasi disediakan "sebagaimana adanya" tanpa jaminan apapun.</string>
+
+    <string name="terms_section7_title">7. Perilaku Pengguna</string>
+    <string name="terms_section7_body">Jika Aplikasi menyertakan fitur komunitas atau sosial, Anda setuju untuk:\n\n• Memposting hanya konten yang sopan, sah, dan sesuai dengan nilai-nilai Islam\n• Tidak melecehkan, mencemarkan nama baik, atau merugikan pengguna lain\n• Tidak memposting konten yang menyinggung, menyesatkan, atau melanggar hak orang lain\n\nKami berhak menghapus konten atau menangguhkan akun yang melanggar pedoman ini.</string>
+
+    <string name="terms_section8_title">8. Perubahan Syarat</string>
+    <string name="terms_section8_body">Kami dapat merevisi Syarat ini kapan saja. Syarat yang diperbarui akan diterbitkan di dalam Aplikasi dengan tanggal efektif yang direvisi. Penggunaan Aplikasi Anda yang berkelanjutan setelah perubahan berarti penerimaan Anda terhadap Syarat yang direvisi.</string>
+
+    <string name="terms_section9_title">9. Hukum yang Berlaku</string>
+    <string name="terms_section9_body">Syarat ini diatur oleh dan ditafsirkan sesuai dengan hukum Malaysia, tanpa memperhatikan ketentuan konflik hukumnya. Setiap perselisihan akan diselesaikan melalui negosiasi itikad baik sebelum menempuh upaya hukum.</string>
+
+    <string name="terms_section10_title">10. Hubungi Kami</string>
+    <string name="terms_section10_body">Untuk pertanyaan atau kekhawatiran tentang Syarat ini, silakan hubungi:\n\nPengembang: Sufiandy Elmy\nStudio: KaMy Studio\nEmail: hello@elmee.my</string>
+
 </resources>

@@ -1197,4 +1197,81 @@
         <item>The Daybreak</item>
         <item>Mankind</item>
     </string-array>
+
+    <!-- Legal: Navigation Labels -->
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="terms_and_conditions">Terms &amp; Conditions</string>
+
+    <!-- Privacy Policy -->
+    <string name="privacy_policy_title">Privacy Policy</string>
+    <string name="privacy_policy_effective">Effective Date: 1 July 2026</string>
+    <string name="privacy_policy_publisher">Published by KaMy Studio — Sufiandy Elmy</string>
+    <string name="privacy_policy_intro">This Privacy Policy explains how SĀAT ("the App") collects, uses, and protects your information. By using the App, you agree to the practices described in this policy.</string>
+
+    <string name="privacy_section1_title">1. Information We Collect</string>
+    <string name="privacy_section1_body">SĀAT collects the minimum information necessary to provide its features:\n\n• Device Location — Used solely to calculate accurate daily prayer times based on your geographic coordinates. Your location is processed entirely on-device and is never uploaded to any server.\n• App Preferences — Language, theme, calculation method, notification settings, and reading preferences — stored locally on your device.\n• Optional Account Data — If you choose to sign in with Google, we receive your display name, email address, and profile photo only to personalize your in-app experience.</string>
+
+    <string name="privacy_section2_title">2. How We Use Your Information</string>
+    <string name="privacy_section2_body">We use collected information to:\n\n• Calculate and display accurate prayer times for your location\n• Send scheduled local notifications (Adhan, Dhuha, Quran reminders, etc.)\n• Remember your app preferences across sessions\n• Display your profile if you are signed in\n\nWe do not use your data for advertising, analytics profiling, or any commercial purpose.</string>
+
+    <string name="privacy_section3_title">3. Location Data</string>
+    <string name="privacy_section3_body">The App requests access to your device location (fine or coarse) to compute your local prayer schedule. This data is:\n\n• Used only on-device in real time\n• Never stored on external servers\n• Never shared with third parties\n\nYou may revoke location permission at any time via your device Settings. Without location access, prayer times will not be available.</string>
+
+    <string name="privacy_section4_title">4. Notifications</string>
+    <string name="privacy_section4_body">All notifications in SĀAT are scheduled locally using Android\'s AlarmManager. No push notification servers or third-party messaging services are involved. Notifications are triggered entirely on your device and require no internet connection.</string>
+
+    <string name="privacy_section5_title">5. Third-Party Services</string>
+    <string name="privacy_section5_body">SĀAT may use the following third-party services:\n\n• Google Sign-In (optional) — For account creation and login. Governed by Google\'s Privacy Policy.\n• Firebase Crashlytics — For anonymous crash reporting to help us improve stability. No personally identifiable information is included in crash reports.\n\nWe do not sell, trade, or rent your personal information to any third party.</string>
+
+    <string name="privacy_section6_title">6. Data Storage &amp; Security</string>
+    <string name="privacy_section6_body">All app data (preferences, reminders, streaks) is stored locally on your device using Android SharedPreferences or internal storage. No personal data is transmitted to external servers without your explicit action (e.g., signing in). We implement standard security practices to protect your local data.</string>
+
+    <string name="privacy_section7_title">7. Your Rights</string>
+    <string name="privacy_section7_body">You have full control over your data:\n\n• Revoke location permission at any time via device Settings\n• Disable notifications via device Settings or in-app notification settings\n• Sign out and delete your account data from within the App\n• Uninstall the App to remove all locally stored data\n\nFor data deletion requests related to Google Sign-In, please refer to Google\'s account data deletion procedures.</string>
+
+    <string name="privacy_section8_title">8. Children\'s Privacy</string>
+    <string name="privacy_section8_body">SĀAT is not directed to children under the age of 13. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us immediately.</string>
+
+    <string name="privacy_section9_title">9. Changes to This Policy</string>
+    <string name="privacy_section9_body">We may update this Privacy Policy from time to time. Any changes will be reflected in this document with an updated effective date. Continued use of the App after changes constitutes acceptance of the revised policy.</string>
+
+    <string name="privacy_section10_title">10. Contact Us</string>
+    <string name="privacy_section10_body">If you have any questions, concerns, or requests regarding this Privacy Policy, please contact:\n\nDeveloper: Sufiandy Elmy\nStudio: KaMy Studio\nEmail: hello@elmee.my</string>
+
+    <!-- Terms and Conditions -->
+    <string name="terms_title">Terms &amp; Conditions</string>
+    <string name="terms_effective">Effective Date: 1 July 2026</string>
+    <string name="terms_publisher">Published by KaMy Studio — Sufiandy Elmy</string>
+    <string name="terms_intro">These Terms and Conditions ("Terms") govern your use of the SĀAT mobile application ("the App") developed by KaMy Studio (Sufiandy Elmy). By downloading, installing, or using the App, you agree to be bound by these Terms.</string>
+
+    <string name="terms_section1_title">1. Acceptance of Terms</string>
+    <string name="terms_section1_body">By accessing or using the App, you confirm that you are at least 13 years of age and that you have read, understood, and agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, please do not use the App.</string>
+
+    <string name="terms_section2_title">2. Permitted Use</string>
+    <string name="terms_section2_body">SĀAT is provided for personal, non-commercial use only. You may not:\n\n• Copy, modify, distribute, or reverse-engineer the App\n• Use the App for commercial purposes without written permission\n• Attempt to circumvent any security or access controls\n• Use the App in any way that violates applicable laws or regulations</string>
+
+    <string name="terms_section3_title">3. Intellectual Property</string>
+    <string name="terms_section3_body">All content, design, code, branding, and features of the App are the exclusive property of KaMy Studio (Sufiandy Elmy) and are protected by applicable intellectual property laws. The Quran text, translations, and audio recitations are sourced from publicly available open Islamic repositories and are used with reverence and in accordance with their respective licenses.</string>
+
+    <string name="terms_section4_title">4. Prayer Time Disclaimer</string>
+    <string name="terms_section4_body">Prayer times displayed in SĀAT are calculated estimates based on astronomical algorithms and your selected calculation method. These times:\n\n• May vary slightly from times announced by local mosques or religious authorities\n• Are not official religious rulings (fatwas)\n• Should be verified with your local mosque for critical religious observances\n\nKaMy Studio is not a religious authority and does not bear responsibility for any religious obligation based solely on these calculations.</string>
+
+    <string name="terms_section5_title">5. Quran Content</string>
+    <string name="terms_section5_body">The Quran text, transliteration, translation, and audio recitations available in the App are provided for personal religious use. We strive to maintain accuracy and reverence in all Quran-related content. Any errors should be reported to us immediately at hello@elmee.my.</string>
+
+    <string name="terms_section6_title">6. Limitation of Liability</string>
+    <string name="terms_section6_body">To the fullest extent permitted by applicable law, KaMy Studio and Sufiandy Elmy shall not be liable for:\n\n• Missed prayers due to notification failures, device settings, or OS restrictions\n• Inaccuracies in prayer time calculations\n• Data loss due to device malfunction or app uninstallation\n• Any indirect, incidental, or consequential damages arising from use of the App\n\nThe App is provided "as is" without warranties of any kind.</string>
+
+    <string name="terms_section7_title">7. User Conduct</string>
+    <string name="terms_section7_body">If the App includes community or social features, you agree to:\n\n• Post only respectful, lawful, and Islamic-appropriate content\n• Not harass, defame, or harm other users\n• Not post content that is offensive, misleading, or violates others\' rights\n\nWe reserve the right to remove content or suspend accounts that violate these guidelines.</string>
+
+    <string name="terms_section8_title">8. Changes to Terms</string>
+    <string name="terms_section8_body">We may revise these Terms at any time. Updated Terms will be posted within the App with a revised effective date. Your continued use of the App following changes constitutes your acceptance of the revised Terms.</string>
+
+    <string name="terms_section9_title">9. Governing Law</string>
+    <string name="terms_section9_body">These Terms shall be governed by and construed in accordance with the laws of Malaysia, without regard to its conflict of law provisions. Any disputes shall be resolved through good-faith negotiation before pursuing legal remedies.</string>
+
+    <string name="terms_section10_title">10. Contact Us</string>
+    <string name="terms_section10_body">For questions or concerns about these Terms, please contact:\n\nDeveloper: Sufiandy Elmy\nStudio: KaMy Studio\nEmail: hello@elmee.my</string>
+
 </resources>

@@ -47,7 +47,9 @@ import androidx.compose.material.icons.filled.Gavel
 import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
 import app.kamy.saatApp.domain.prayer.PrayerMadhab
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
@@ -123,6 +125,8 @@ fun AccountScreen(
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val showNotificationSettings = rememberSaveable { mutableStateOf(false) }
     val showAboutDeveloper = rememberSaveable { mutableStateOf(false) }
+    val showPrivacyPolicy = rememberSaveable { mutableStateOf(false) }
+    val showTerms = rememberSaveable { mutableStateOf(false) }
 
     val signInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -150,24 +154,35 @@ fun AccountScreen(
         }
     }
 
-    if (showNotificationSettings.value) {
-        NotificationSettingsScreen(
-            vm = vm,
-            onBack = { showNotificationSettings.value = false }
-        )
-    } else {
-        AccountSettingsContent(
-            state = state,
-            vm = vm,
-            onBack = onBack,
-            onOpenNotifications = { showNotificationSettings.value = true },
-            onSignIn = {
-                val intent = oauthService.buildAuthorizationIntent(authService)
-                signInLauncher.launch(intent)
-            },
-            onOpenFollowers = vm::openFollowers,
-            onOpenAboutDeveloper = { showAboutDeveloper.value = true }
-        )
+    when {
+        showNotificationSettings.value -> {
+            NotificationSettingsScreen(
+                vm = vm,
+                onBack = { showNotificationSettings.value = false }
+            )
+        }
+        showPrivacyPolicy.value -> {
+            PrivacyPolicyScreen(onBack = { showPrivacyPolicy.value = false })
+        }
+        showTerms.value -> {
+            TermsAndConditionsScreen(onBack = { showTerms.value = false })
+        }
+        else -> {
+            AccountSettingsContent(
+                state = state,
+                vm = vm,
+                onBack = onBack,
+                onOpenNotifications = { showNotificationSettings.value = true },
+                onSignIn = {
+                    val intent = oauthService.buildAuthorizationIntent(authService)
+                    signInLauncher.launch(intent)
+                },
+                onOpenFollowers = vm::openFollowers,
+                onOpenAboutDeveloper = { showAboutDeveloper.value = true },
+                onOpenPrivacyPolicy = { showPrivacyPolicy.value = true },
+                onOpenTerms = { showTerms.value = true }
+            )
+        }
     }
 
     if (showAboutDeveloper.value) {
@@ -309,7 +324,9 @@ private fun AccountSettingsContent(
     onOpenNotifications: () -> Unit,
     onSignIn: () -> Unit,
     onOpenFollowers: () -> Unit,
-    onOpenAboutDeveloper: () -> Unit
+    onOpenAboutDeveloper: () -> Unit,
+    onOpenPrivacyPolicy: () -> Unit,
+    onOpenTerms: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -436,6 +453,18 @@ private fun AccountSettingsContent(
                 title = stringResource(R.string.about_developer),
                 subtitle = "Version $appVersion",
                 onClick = onOpenAboutDeveloper
+            )
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Outlined.Shield,
+                title = stringResource(R.string.privacy_policy),
+                subtitle = stringResource(R.string.privacy_policy_effective),
+                onClick = onOpenPrivacyPolicy
+            )
+            AlKhatibSettingsNavigationRow(
+                icon = Icons.Outlined.Gavel,
+                title = stringResource(R.string.terms_and_conditions),
+                subtitle = stringResource(R.string.terms_effective),
+                onClick = onOpenTerms
             )
         }
 
@@ -1823,6 +1852,273 @@ private fun MadhabSelectionSheet(
                 }
             }
             Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+// ─── Legal Section Helper ────────────────────────────────────────────────────
+
+@Composable
+private fun LegalSectionItem(title: String, body: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            lineHeight = 22.sp
+        )
+    }
+}
+
+@Composable
+private fun LegalScreenHeader(title: String, effective: String, publisher: String, intro: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = effective,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = publisher,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(12.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = intro,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            lineHeight = 22.sp
+        )
+    }
+}
+
+// ─── Privacy Policy Screen ───────────────────────────────────────────────────
+
+@Composable
+fun PrivacyPolicyScreen(onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
+    ) {
+        // Top bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                text = stringResource(R.string.privacy_policy),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        // Scrollable content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            LegalScreenHeader(
+                title = stringResource(R.string.privacy_policy_title),
+                effective = stringResource(R.string.privacy_policy_effective),
+                publisher = stringResource(R.string.privacy_policy_publisher),
+                intro = stringResource(R.string.privacy_policy_intro)
+            )
+            Spacer(Modifier.height(8.dp))
+            LegalSectionItem(stringResource(R.string.privacy_section1_title), stringResource(R.string.privacy_section1_body))
+            LegalSectionItem(stringResource(R.string.privacy_section2_title), stringResource(R.string.privacy_section2_body))
+            LegalSectionItem(stringResource(R.string.privacy_section3_title), stringResource(R.string.privacy_section3_body))
+            LegalSectionItem(stringResource(R.string.privacy_section4_title), stringResource(R.string.privacy_section4_body))
+            LegalSectionItem(stringResource(R.string.privacy_section5_title), stringResource(R.string.privacy_section5_body))
+            LegalSectionItem(stringResource(R.string.privacy_section6_title), stringResource(R.string.privacy_section6_body))
+            LegalSectionItem(stringResource(R.string.privacy_section7_title), stringResource(R.string.privacy_section7_body))
+            LegalSectionItem(stringResource(R.string.privacy_section8_title), stringResource(R.string.privacy_section8_body))
+            LegalSectionItem(stringResource(R.string.privacy_section9_title), stringResource(R.string.privacy_section9_body))
+
+            // Contact section with email tap
+            val context = LocalContext.current
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.privacy_section10_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.privacy_section10_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 22.sp
+                )
+                Spacer(Modifier.height(8.dp))
+                TextButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:hello@elmee.my"))
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Icon(
+                        Icons.Outlined.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "hello@elmee.my",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+            Spacer(Modifier.height(floatingNavBottomPadding()))
+        }
+    }
+}
+
+// ─── Terms & Conditions Screen ───────────────────────────────────────────────
+
+@Composable
+fun TermsAndConditionsScreen(onBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
+    ) {
+        // Top bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                text = stringResource(R.string.terms_and_conditions),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        // Scrollable content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            LegalScreenHeader(
+                title = stringResource(R.string.terms_title),
+                effective = stringResource(R.string.terms_effective),
+                publisher = stringResource(R.string.terms_publisher),
+                intro = stringResource(R.string.terms_intro)
+            )
+            Spacer(Modifier.height(8.dp))
+            LegalSectionItem(stringResource(R.string.terms_section1_title), stringResource(R.string.terms_section1_body))
+            LegalSectionItem(stringResource(R.string.terms_section2_title), stringResource(R.string.terms_section2_body))
+            LegalSectionItem(stringResource(R.string.terms_section3_title), stringResource(R.string.terms_section3_body))
+            LegalSectionItem(stringResource(R.string.terms_section4_title), stringResource(R.string.terms_section4_body))
+            LegalSectionItem(stringResource(R.string.terms_section5_title), stringResource(R.string.terms_section5_body))
+            LegalSectionItem(stringResource(R.string.terms_section6_title), stringResource(R.string.terms_section6_body))
+            LegalSectionItem(stringResource(R.string.terms_section7_title), stringResource(R.string.terms_section7_body))
+            LegalSectionItem(stringResource(R.string.terms_section8_title), stringResource(R.string.terms_section8_body))
+            LegalSectionItem(stringResource(R.string.terms_section9_title), stringResource(R.string.terms_section9_body))
+
+            // Contact section with email tap
+            val context = LocalContext.current
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.terms_section10_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.terms_section10_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 22.sp
+                )
+                Spacer(Modifier.height(8.dp))
+                TextButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:hello@elmee.my"))
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Icon(
+                        Icons.Outlined.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "hello@elmee.my",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+            Spacer(Modifier.height(floatingNavBottomPadding()))
         }
     }
 }
