@@ -49,6 +49,8 @@ import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.CircularProgressIndicator
@@ -58,6 +60,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
+import kotlinx.coroutines.launch
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
@@ -158,11 +161,16 @@ fun ChapterReaderScreen(
     val verseMenuExpanded = remember { mutableStateOf(false) }
     val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
 
-    // Pager requires pageCount > 0; verses may be empty while the first page is loading.
-    val verseCount = state.verses.size
-    val pagerState = rememberPagerState(initialPage = 0) { verseCount.coerceAtLeast(1) }
+    val s = state
+    val verseCount = s.verses.size
+    val showNextTransition = !s.hasMore && verseCount > 0 && (
+        (s.juzNumber != null && s.juzNumber < 30) ||
+        (s.juzNumber == null && s.chapterNumber < 114)
+    )
+    val totalPageCount = if (showNextTransition) verseCount + 1 else verseCount
+    val pagerState = rememberPagerState(initialPage = 0) { totalPageCount.coerceAtLeast(1) }
     val pageIndex = pagerState.currentPage.coerceIn(0, (verseCount - 1).coerceAtLeast(0))
-    val currentVerse = state.verses.getOrNull(pageIndex)
+    val currentVerse = s.verses.getOrNull(pageIndex)
     val surahTitle = when {
         state.juzNumber != null -> {
             val chapterNum = currentVerse?.chapterNumber
@@ -257,28 +265,46 @@ fun ChapterReaderScreen(
                 )
             }
         } else if (state.verses.isNotEmpty()) {
+            val scope = androidx.compose.runtime.rememberCoroutineScope()
             VerticalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
                 userScrollEnabled = true
             ) { pageIndex ->
-                val verse = state.verses.getOrNull(pageIndex) ?: return@VerticalPager
-                SaatAyahPage(
-                    verse = verse,
-                    fontScale = state.fontScale,
-                    showTranslation = state.showTranslation && !state.hifzModeEnabled,
-                    showTransliteration = state.showTransliteration,
-                    translationId = state.selectedTranslationId,
-                    isTajweedEnabled = state.isTajweedEnabled,
-                    arabicTextType = state.arabicTextType,
-                    hifzModeEnabled = state.hifzModeEnabled,
-                    audioBarVisible = audioBarVisible,
-                    personalDataRevision = state.personalDataRevision,
-                    showBismillahPre = pageIndex == 0 && state.bismillahPre,
-                    onPlay = { vm.onTapAyah(pageIndex) },
-                    onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null,
-                    onTajweedClick = { activeTajweedType.value = it }
-                )
+                if (showNextTransition && pageIndex == verseCount) {
+                    val nextChapterNum = state.chapterNumber + 1
+                    val nextSurahName = state.chapterLookup[nextChapterNum]
+                    NextSurahTransitionPage(
+                        currentSurahName = state.chapterDisplayName,
+                        nextSurahName = nextSurahName,
+                        isJuz = state.juzNumber != null,
+                        nextJuzNumber = state.juzNumber?.plus(1),
+                        onTriggerTransition = {
+                            scope.launch {
+                                pagerState.scrollToPage(0)
+                            }
+                            vm.loadNextSurahOrJuz()
+                        }
+                    )
+                } else {
+                    val verse = state.verses.getOrNull(pageIndex) ?: return@VerticalPager
+                    SaatAyahPage(
+                        verse = verse,
+                        fontScale = state.fontScale,
+                        showTranslation = state.showTranslation && !state.hifzModeEnabled,
+                        showTransliteration = state.showTransliteration,
+                        translationId = state.selectedTranslationId,
+                        isTajweedEnabled = state.isTajweedEnabled,
+                        arabicTextType = state.arabicTextType,
+                        hifzModeEnabled = state.hifzModeEnabled,
+                        audioBarVisible = audioBarVisible,
+                        personalDataRevision = state.personalDataRevision,
+                        showBismillahPre = pageIndex == 0 && state.bismillahPre,
+                        onPlay = { vm.onTapAyah(pageIndex) },
+                        onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null,
+                        onTajweedClick = { activeTajweedType.value = it }
+                    )
+                }
             }
         }
 
@@ -1515,6 +1541,67 @@ private fun TajweedInfoSheet(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun NextSurahTransitionPage(
+    currentSurahName: String?,
+    nextSurahName: String?,
+    isJuz: Boolean,
+    nextJuzNumber: Int?,
+    onTriggerTransition: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AlKhatibColors.ScreenBackground),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(24.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.AutoStories,
+                contentDescription = null,
+                tint = AlKhatibColors.DeepEmerald,
+                modifier = Modifier.size(64.dp)
+            )
+            Text(
+                text = if (isJuz) {
+                    "Selesai membaca Juz ${nextJuzNumber?.minus(1)}"
+                } else {
+                    "Selesai membaca Surah ${currentSurahName ?: ""}"
+                },
+                style = MaterialTheme.typography.titleMedium,
+                color = AlKhatibColors.Slate500
+            )
+            Text(
+                text = if (isJuz) {
+                    "Lanjut ke Juz $nextJuzNumber"
+                } else {
+                    "Lanjut ke ${nextSurahName ?: "Surah Berikutnya"}"
+                },
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = AlKhatibColors.Slate900,
+                textAlign = TextAlign.Center
+            )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = onTriggerTransition,
+                colors = ButtonDefaults.buttonColors(containerColor = AlKhatibColors.DeepEmerald),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Mulai Membaca",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
         }
     }
 }

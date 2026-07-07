@@ -111,7 +111,7 @@ class ChapterReaderViewModel @Inject constructor(
     private val reflectRepository: ReflectRepository,
     private val userSession: UserSession,
     private val translationStore: TranslationPreferencesStore,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val juzNumber: Int? = savedStateHandle.get<Int>("juzNumber")
@@ -859,6 +859,47 @@ class ChapterReaderViewModel @Inject constructor(
                 val chapter = verse.chapterNumber ?: chapterFallback
                 "$chapter:$ayah"
             }
+
+    fun loadNextSurahOrJuz() {
+        val s = _state.value
+        if (s.juzNumber != null) {
+            val nextJuz = s.juzNumber + 1
+            if (nextJuz <= 30) {
+                savedStateHandle.set("juzNumber", nextJuz)
+                _state.update {
+                    it.copy(
+                        juzNumber = nextJuz,
+                        verses = emptyList(),
+                        currentVerseIndex = 0,
+                        loadedApiPage = 0,
+                        hasMore = true,
+                        isLoading = true,
+                        error = null
+                    )
+                }
+                loadChapterMeta()
+                loadInitial()
+            }
+        } else {
+            val nextChapter = s.chapterNumber + 1
+            if (nextChapter <= 114) {
+                savedStateHandle.set("chapter", nextChapter)
+                _state.update {
+                    it.copy(
+                        chapterNumber = nextChapter,
+                        verses = emptyList(),
+                        currentVerseIndex = 0,
+                        loadedApiPage = 0,
+                        hasMore = true,
+                        isLoading = true,
+                        error = null
+                    )
+                }
+                loadChapterMeta()
+                loadInitial()
+            }
+        }
+    }
 }
 
 sealed interface ReaderEvent {
