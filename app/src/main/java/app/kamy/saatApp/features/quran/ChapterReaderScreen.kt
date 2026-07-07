@@ -32,6 +32,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -256,7 +260,7 @@ fun ChapterReaderScreen(
             VerticalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                userScrollEnabled = false
+                userScrollEnabled = true
             ) { pageIndex ->
                 val verse = state.verses.getOrNull(pageIndex) ?: return@VerticalPager
                 SaatAyahPage(
@@ -561,11 +565,43 @@ private fun SaatAyahPage(
             }
     }
 
+    // Nested scroll connection: let inner Column consume scroll first.
+    // Only release the gesture to the parent VerticalPager when the inner
+    // content has already hit its top or bottom boundary.
+    val nestedScrollConnection = remember(scrollState) {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Scrolling down (negative dy) — forward to pager only when already at bottom
+                if (available.y < 0 && scrollState.value >= scrollState.maxValue) {
+                    return Offset.Zero
+                }
+                // Scrolling up (positive dy) — forward to pager only when already at top
+                if (available.y > 0 && scrollState.value <= 0) {
+                    return Offset.Zero
+                }
+                // Inner scroll can still handle it — consume nothing here so the
+                // inner verticalScroll modifier gets the event.
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                // After the inner scroll has had its chance, any remaining delta
+                // (available != 0) means we hit a boundary — let it bubble up to pager.
+                return Offset.Zero
+            }
+        }
+    }
+
     val interactionSource = remember { MutableInteractionSource() }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .nestedScroll(nestedScrollConnection)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
