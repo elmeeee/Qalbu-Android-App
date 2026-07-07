@@ -30,8 +30,10 @@ object DeepLinkRoutes {
         return when (uri.host) {
             "quran" -> {
                 val chapter = uri.pathSegments.firstOrNull()?.toIntOrNull()
+                    ?: uri.getQueryParameter("chapter")?.toIntOrNull()
                     ?: return RootTab.Quran.route
                 val ayah = uri.getQueryParameter("ayah")?.toIntOrNull()
+                    ?: uri.getQueryParameter("verse")?.toIntOrNull()
                 if (ayah != null && ayah > 0) "quran/reader/$chapter?ayah=$ayah"
                 else "quran/reader/$chapter?ayah=-1"
             }

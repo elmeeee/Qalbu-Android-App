@@ -46,7 +46,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Psychology
-
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.SnackbarHost
@@ -355,6 +355,16 @@ fun ChapterReaderScreen(
                 onAiShare = {
                     verseMenuExpanded.value = false
                     vm.openAiShare(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                },
+                onShareImage = {
+                    verseMenuExpanded.value = false
+                    currentVerse?.let { verse ->
+                        app.kamy.saatApp.features.share.AyahImageShare.shareAyahAsImage(
+                            context = context,
+                            verse = verse,
+                            surahName = surahTitle
+                        )
+                    }
                 },
                 onTafsir = {
                     verseMenuExpanded.value = false
@@ -742,6 +752,7 @@ private fun ReaderVerseActionsMenu(
     onNote: () -> Unit,
     onHifz: () -> Unit,
     onAiShare: () -> Unit,
+    onShareImage: () -> Unit,
     onTafsir: () -> Unit,
     onHadith: () -> Unit
 ) {
@@ -815,6 +826,19 @@ private fun ReaderVerseActionsMenu(
                     label = stringResource(R.string.ai_label),
                     accent = AlKhatibColors.Gold,
                     onClick = onAiShare
+                )
+                ReaderActionPill(
+                    icon = {
+                        Icon(
+                            Icons.Filled.Share,
+                            contentDescription = null,
+                            tint = AlKhatibColors.DeepEmerald,
+                            modifier = Modifier.size(17.dp)
+                        )
+                    },
+                    label = stringResource(R.string.share_as_image),
+                    accent = AlKhatibColors.DeepEmerald,
+                    onClick = onShareImage
                 )
                 if (showTafsir) {
                     ReaderActionPill(

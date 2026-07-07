@@ -16,7 +16,6 @@
         android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
@@ -38,7 +37,7 @@
             android:launchMode="singleTop"
             android:theme="@style/Theme.AlKhatib.Splash"
             android:windowSoftInputMode="adjustResize"
-            android:enableOnBackInvokedCallback="false">
+            android:enableOnBackInvokedCallback="true">
             <intent-filter android:label="@string/app_name_launcher">
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

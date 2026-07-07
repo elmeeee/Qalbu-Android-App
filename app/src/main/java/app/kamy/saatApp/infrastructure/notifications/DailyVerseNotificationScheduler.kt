@@ -109,14 +109,29 @@ object DailyVerseNotificationScheduler {
 
         val localContext = getLocalizedContext(context)
         val resolved = snapshot ?: DailyVerseSnapshotStore.loadForToday(context)
-        val body = resolved?.notificationBody()
-            ?: localContext.getString(R.string.daily_verse_notif_fallback)
+
+        val arabic = resolved?.arabic?.trim().orEmpty()
+        val translationExcerpt = resolved?.translation?.trim().orEmpty()
+        val reference = resolved?.let { "${it.surahName} ${it.ayahNumber}" }.orEmpty()
+
+        val displayBody = buildString {
+            if (arabic.isNotEmpty()) {
+                append(arabic)
+                append("\n\n")
+            }
+            if (translationExcerpt.isNotEmpty()) {
+                append(translationExcerpt)
+                append(" ")
+            }
+            if (reference.isNotEmpty()) {
+                append("($reference)")
+            }
+        }.trim().ifEmpty { localContext.getString(R.string.daily_verse_notif_fallback) }
 
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             resolved?.let {
-                putExtra(EXTRA_CHAPTER, it.chapterNumber)
-                putExtra(EXTRA_AYAH, it.ayahNumber)
+                data = android.net.Uri.parse("saat://quran?chapter=${it.chapterNumber}&verse=${it.ayahNumber}")
             }
         }
         val pending = PendingIntent.getActivity(
@@ -128,8 +143,8 @@ object DailyVerseNotificationScheduler {
         val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(localContext.getString(R.string.daily_verse_notif_title))
-            .setContentText(body)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setContentText(displayBody)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(displayBody))
             .setContentIntent(pending)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

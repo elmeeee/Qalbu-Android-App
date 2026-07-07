@@ -157,6 +157,7 @@ class ChapterReaderViewModel @Inject constructor(
         loadChapterMeta()
         loadInitial()
         loadRecitations()
+        app.kamy.saatApp.infrastructure.review.AppReviewManager.recordReadSession(appContext)
         viewModelScope.launch {
             translationStore.translationId.drop(1).collect { id ->
                 _state.update {
@@ -427,6 +428,12 @@ class ChapterReaderViewModel @Inject constructor(
         refreshPersonalVerseState(index)
         val chapterNum = page.chapterNumber ?: s.chapterNumber
         page.resolvedVerseNumber?.let { logScrollPosition(chapterNum, it) }
+
+        // Auto-mark chapter as read when user reaches the last verse
+        val isLastVerse = !s.hasMore && index == s.verses.size - 1
+        if (isLastVerse && s.juzNumber == null) {
+            QuranPersonalStore.markChapterRead(appContext, chapterNum)
+        }
     }
 
     private fun logCurrentVerseReading(force: Boolean = false) {

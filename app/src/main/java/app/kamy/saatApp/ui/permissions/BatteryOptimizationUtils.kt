@@ -23,11 +23,6 @@ fun hasAggressiveOemBatteryManagement(): Boolean {
 
 fun Context.requestIgnoreBatteryOptimizations(): Boolean {
     if (isIgnoringBatteryOptimizations()) return true
-    val direct = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-        data = "package:$packageName".toUri()
-        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    }
-    if (startActivitySafely(direct)) return true
     return openBatteryOptimizationList()
 }
 

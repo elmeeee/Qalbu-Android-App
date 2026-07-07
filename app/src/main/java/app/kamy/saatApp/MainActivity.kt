@@ -25,6 +25,7 @@ import javax.inject.Inject
 
 import androidx.compose.runtime.collectAsState
 import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
+import app.kamy.saatApp.infrastructure.review.AppReviewManager
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        AppReviewManager.recordAppLaunch(applicationContext)
         deepLinkRoute.value = DeepLinkRoutes.fromIntent(intent)
         enableEdgeToEdge()
         val needsOnboarding = !onboardingStore.isComplete()

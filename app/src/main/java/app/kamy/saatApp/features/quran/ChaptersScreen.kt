@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -113,6 +114,16 @@ fun ChaptersScreen(
 
     LaunchedEffect(Unit) {
         vm.onScreenVisible()
+    }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    LaunchedEffect(Unit) {
+        vm.reviewFlow.collect {
+            val act = context as? android.app.Activity
+            if (act != null) {
+                app.kamy.saatApp.infrastructure.review.AppReviewManager.launchReviewFlow(act)
+            }
+        }
     }
 
     Box(
@@ -332,9 +343,33 @@ fun ChaptersScreen(
                             }
                         } else when (state.browseMode) {
                             QuranBrowseMode.SURAH -> {
+                                item(key = "khatam_header") {
+                                    val readCount = state.readChapters.size
+                                    if (readCount > 0) {
+                                        Row(
+                                            modifier = Modifier
+                                                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 6.dp)
+                                                .fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.khatam_progress_title),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.khatam_progress, readCount),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
+                                }
                                 items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
                                     ChapterRow(
                                         chapter = chapter,
+                                        isRead = chapter.id in state.readChapters,
                                         onClick = { onOpenChapter(chapter, null) },
                                         modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
                                     )
@@ -683,6 +718,7 @@ private fun ContinueReadingCard(
 @Composable
 private fun ChapterRow(
     chapter: QuranChapter,
+    isRead: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -721,12 +757,25 @@ private fun ChapterRow(
                         .padding(vertical = 10.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = chapter.displayComplexName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.Slate900
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = chapter.displayComplexName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = AlKhatibColors.Slate900
+                        )
+                        if (isRead) {
+                            Spacer(Modifier.width(6.dp))
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.Check,
+                                contentDescription = stringResource(R.string.khatam_completed),
+                                tint = AlKhatibColors.DeepEmerald,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
                     if (meaning.isNotEmpty()) {
                         Text(
                             text = meaning,

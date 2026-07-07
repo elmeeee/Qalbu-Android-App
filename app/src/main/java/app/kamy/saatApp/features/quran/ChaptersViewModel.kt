@@ -23,6 +23,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
@@ -49,7 +51,8 @@ data class ChaptersUiState(
     val juzRef: Int? = null,
     val searchLoading: Boolean = false,
     val searchError: AppError? = null,
-    val isOfflineData: Boolean = false
+    val isOfflineData: Boolean = false,
+    val readChapters: Set<Int> = emptySet()
 )
 
 @HiltViewModel
@@ -65,6 +68,9 @@ class ChaptersViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(ChaptersUiState())
     val state: StateFlow<ChaptersUiState> = _state.asStateFlow()
+
+    private val _reviewFlow = MutableSharedFlow<Unit>(replay = 0)
+    val reviewFlow = _reviewFlow.asSharedFlow()
 
     private var searchJob: Job? = null
 
@@ -84,7 +90,12 @@ class ChaptersViewModel @Inject constructor(
     }
 
     fun onScreenVisible() {
-        viewModelScope.launch { refresh(force = false) }
+        viewModelScope.launch {
+            refresh(force = false)
+            if (app.kamy.saatApp.infrastructure.review.AppReviewManager.shouldRequestReview(appContext)) {
+                _reviewFlow.emit(Unit)
+            }
+        }
     }
 
     fun loadAll(force: Boolean = false) {
@@ -96,13 +107,15 @@ class ChaptersViewModel @Inject constructor(
         try {
             val chapters = contentRepository.getChapters(force)
             val continueReading = runCatching { readingSessions.fetchMostRecent() }.getOrNull()
+            val readChapters = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.readChapters(appContext)
             _state.update {
                 it.copy(
                     isLoading = false,
                     chapters = chapters,
                     continueReading = continueReading,
                     error = null,
-                    isOfflineData = true
+                    isOfflineData = true,
+                    readChapters = readChapters
                 )
             }
             recomputeLocalSearch()

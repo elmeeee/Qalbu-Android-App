@@ -165,6 +165,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.play.services.location)
+    implementation(libs.play.review.ktx)
     implementation(libs.adhan)
 
     // Compose

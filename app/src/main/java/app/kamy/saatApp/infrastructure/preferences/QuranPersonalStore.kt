@@ -15,6 +15,7 @@ object QuranPersonalStore {
     private const val KEY_NOTES = "notes_json"
     private const val KEY_HIFZ = "hifz_json"
     private const val KEY_HIFZ_MODE = "hifz_mode_enabled"
+    private const val KEY_KHATAM = "khatam_json"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -75,6 +76,21 @@ object QuranPersonalStore {
     fun removeBookmark(context: Context, verseKey: String) {
         val filtered = bookmarks(context).filterNot { it.verseKey == verseKey }
         saveList(context, KEY_BOOKMARKS, BookmarkList(filtered))
+    }
+
+    // ── Khatam tracker ────────────────────────────────────────────────
+
+    @Serializable
+    private data class KhatamList(val chapters: List<Int> = emptyList())
+
+    fun readChapters(context: Context): Set<Int> =
+        loadList(context, KEY_KHATAM, KhatamList()).chapters.toSet()
+
+    fun markChapterRead(context: Context, chapterNumber: Int) {
+        val current = readChapters(context).toMutableSet()
+        if (current.add(chapterNumber)) {
+            saveList(context, KEY_KHATAM, KhatamList(current.toList()))
+        }
     }
 
     fun noteFor(context: Context, verseKey: String): VerseNote? =

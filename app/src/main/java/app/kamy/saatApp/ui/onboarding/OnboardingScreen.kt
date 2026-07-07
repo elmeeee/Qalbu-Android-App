@@ -27,6 +27,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -46,6 +50,8 @@ fun OnboardingScreen(
     vm: OnboardingViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
+    var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { vm.onLocationPermissionResult(it.values.any { granted -> granted }) }
@@ -59,6 +65,57 @@ fun OnboardingScreen(
         OnboardingStep.LOCATION -> 2
         OnboardingStep.NOTIFICATIONS -> 3
         OnboardingStep.WIDGET -> 4
+    }
+
+    if (showLocationRationale) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showLocationRationale = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.onboarding_location_rationale_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = AlKhatibColors.Slate900
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.onboarding_location_rationale_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = AlKhatibColors.Slate700
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = {
+                        showLocationRationale = false
+                        locationPermissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        )
+                    }
+                ) {
+                    Text(
+                        text = stringResource(android.R.string.ok),
+                        color = AlKhatibColors.DeepEmerald,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = { showLocationRationale = false }
+                ) {
+                    Text(
+                        text = stringResource(android.R.string.cancel),
+                        color = AlKhatibColors.Slate500
+                    )
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = Color.White
+        )
     }
 
     Column(
@@ -101,14 +158,7 @@ fun OnboardingScreen(
                     saving = state.savingLocation,
                     error = state.locationError,
                     onQueryChange = vm::updateLocationQuery,
-                    onUseGps = {
-                        locationPermissionLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            )
-                        )
-                    }
+                    onUseGps = { showLocationRationale = true }
                 )
                 OnboardingStep.NOTIFICATIONS -> NotificationsStep()
                 OnboardingStep.WIDGET -> WidgetStep()
@@ -124,12 +174,7 @@ fun OnboardingScreen(
                             if (state.locationQuery.isNotBlank()) {
                                 vm.saveManualLocation()
                             } else {
-                                locationPermissionLauncher.launch(
-                                    arrayOf(
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
-                                    )
-                                )
+                                showLocationRationale = true
                             }
                         }
                         OnboardingStep.NOTIFICATIONS -> {

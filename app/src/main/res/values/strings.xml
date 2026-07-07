@@ -455,17 +455,19 @@
     <string name="onboarding_welcome_title">Welcome to SĀAT</string>
     <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
     <string name="onboarding_location_title">Where do you pray?</string>
-    <string name="onboarding_location_body">We use your location for accurate prayer times. Search a city or allow GPS.</string>
-    <string name="onboarding_location_denied">Location denied. You can search for a city instead.</string>
+    <string name="onboarding_location_body">We need your location to calculate accurate prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha). Your location is stored only on this device and never sent to our servers.</string>
+    <string name="onboarding_location_denied">Location denied. You can type a city name below to set your prayer location manually.</string>
+    <string name="onboarding_location_rationale_title">Why location?</string>
+    <string name="onboarding_location_rationale_body">Prayer times differ by location. GPS gives you the most accurate times without manual setup.</string>
     <string name="onboarding_notifications_title">Stay on time</string>
-    <string name="onboarding_notifications_body">Enable notifications for adhan reminders and your daily verse.</string>
+    <string name="onboarding_notifications_body">Enable notifications for adhan reminders and your daily verse. You can customize each prayer notification in Settings.</string>
     <string name="onboarding_widget_title">Add a home widget</string>
     <string name="onboarding_widget_body">Long-press your home screen → Widgets → SĀAT to pin prayer times at a glance.</string>
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_enable_notifications">Enable notifications</string>
     <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_skip_location">Skip for now</string>
+    <string name="onboarding_skip_location">I\'ll type my city instead</string>
     <string name="onboarding_skip_notifications">Not now</string>
     <string name="notifications_disabled_snackbar">Notifications are off. Enable them in Settings for prayer reminders.</string>
     <string name="action_settings">Settings</string>
@@ -488,6 +490,15 @@
     <string name="tafsir_empty_detail">This verse doesn\'t include tafsir text for this source yet.</string>
     <string name="hadith_empty_detail">No hadith references are linked to this verse yet.</string>
     <string name="hadith_book_number">Book %1$s</string>
+
+    <!-- Khatam Tracker -->
+    <string name="khatam_progress">%1$d / 114 Surahs read</string>
+    <string name="khatam_completed">✓</string>
+    <string name="khatam_progress_title">Khatam Progress</string>
+
+    <!-- Share as Image -->
+    <string name="share_as_image">Share as Image</string>
+    <string name="share_verse_image_chooser">Share verse image via…</string>
     <string name="juz_number">Juz %1$d</string>
     <string name="ai_label">AI</string>
     <string name="clear_search_a11y">Clear search</string>
