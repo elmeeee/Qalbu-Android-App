@@ -512,7 +512,7 @@ private fun AccountSettingsContent(
             }
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedButton(
-                onClick = { uriHandler.openUri("https://elmee.my/saat-delete-account.html") },
+                onClick = { uriHandler.openUri("https://elmee.my/saat/delete-account?lang=${state.appLanguage.code}") },
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
                 ),
