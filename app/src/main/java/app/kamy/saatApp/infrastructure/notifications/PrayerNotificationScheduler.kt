@@ -358,6 +358,8 @@ object PrayerNotificationScheduler {
             builder.setSound(soundUri)
             builder.setCategory(NotificationCompat.CATEGORY_ALARM)
             builder.setPriority(NotificationCompat.PRIORITY_MAX)
+        } else if (adhanSoundRes == null) {
+            builder.setDefaults(NotificationCompat.DEFAULT_ALL)
         }
         if (showStopAdhan) {
             val stopPending = PendingIntent.getBroadcast(

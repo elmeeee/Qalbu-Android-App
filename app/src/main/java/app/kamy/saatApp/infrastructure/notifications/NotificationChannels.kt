@@ -10,10 +10,10 @@ import androidx.annotation.RawRes
 import app.kamy.saatApp.R
 
 object NotificationChannels {
-    const val DAILY_VERSE = "daily_verse"
+    const val DAILY_VERSE = "daily_verse_v2"
     const val PRAYER = "prayer_times"
-    const val PRAYER_ALERT = "prayer_alert"
-    const val SUNNAH = "sunnah_reminders"
+    const val PRAYER_ALERT = "prayer_alert_v2"
+    const val SUNNAH = "sunnah_reminders_v2"
     const val ADHAN_PLAYBACK = "adhan_playback"
     const val ADHAN_ALERT = "adhan_alert"
     const val MEDIA_PLAYBACK = "media_playback"

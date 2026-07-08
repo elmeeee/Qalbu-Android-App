@@ -150,6 +150,7 @@ object DailyVerseNotificationScheduler {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .build()
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
     }
