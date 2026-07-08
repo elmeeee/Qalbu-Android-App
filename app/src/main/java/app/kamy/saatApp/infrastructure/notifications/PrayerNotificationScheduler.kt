@@ -343,14 +343,7 @@ object PrayerNotificationScheduler {
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        when {
-            kind?.startsWith("prayer_") == true || kind == "imsak" || adhanSoundRes != null ->
-                builder.setCategory(NotificationCompat.CATEGORY_ALARM)
-            kind?.startsWith("night_") == true ->
-                builder.setCategory(NotificationCompat.CATEGORY_REMINDER)
-            kind?.startsWith("sunnah_") == true ->
-                builder.setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
-        }
+        builder.setCategory(NotificationCompat.CATEGORY_ALARM)
         if (silent) {
             builder.setSilent(true)
         } else if (adhanSoundRes != null && channelId != NotificationChannels.ADHAN_ALERT) {
