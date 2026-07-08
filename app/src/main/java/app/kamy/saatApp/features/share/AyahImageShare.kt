@@ -143,7 +143,6 @@ object AyahImageShare {
 
         // Draw App Icon
         val iconDrawable = context.resources.getDrawable(R.drawable.splash_icon_adaptive, context.theme).mutate()
-        iconDrawable.setTint(Color.parseColor(template.appNameColor))
         val iconSize = 96
         val iconX = (width - iconSize) / 2
         val iconY = 100

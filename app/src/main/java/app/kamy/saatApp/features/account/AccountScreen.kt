@@ -666,14 +666,14 @@ private fun ProfileHeader(
                     modifier = Modifier
                         .size(54.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Person,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(28.dp)
                     )
                 }

@@ -148,10 +148,10 @@ fun AyahImageShareSheet(
                                 painter = painterResource(R.drawable.splash_icon_adaptive),
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
-                                tint = tAppNameColor
+                                tint = Color.Unspecified
                             )
                             Text(
-                                text = "S Ā A T",
+                                text = "Sāat",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 7.sp,
                                     fontWeight = FontWeight.Bold,
