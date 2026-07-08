@@ -3,6 +3,7 @@ package app.kamy.saatApp.features.account
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -162,6 +163,14 @@ fun AccountScreen(
         onAccountDetailScreenChanged(
             showNotificationSettings.value || showPrivacyPolicy.value || showTerms.value
         )
+    }
+
+    if (showNotificationSettings.value || showPrivacyPolicy.value || showTerms.value) {
+        BackHandler {
+            showNotificationSettings.value = false
+            showPrivacyPolicy.value = false
+            showTerms.value = false
+        }
     }
 
     when {
@@ -1881,25 +1890,56 @@ private fun LegalWebView(
     url: String,
     modifier: Modifier = Modifier
 ) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                settings.setSupportZoom(false)
-                settings.builtInZoomControls = false
-                settings.displayZoomControls = false
-                webViewClient = WebViewClient()
-                loadUrl(url)
+    var isLoading by remember { mutableStateOf(true) }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    // Enable caching for faster sub-sequent loads
+                    settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+                    
+                    settings.setSupportZoom(false)
+                    settings.builtInZoomControls = false
+                    settings.displayZoomControls = false
+                    
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                            super.onPageStarted(view, url, favicon)
+                            isLoading = true
+                        }
+
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            super.onPageFinished(view, url)
+                            isLoading = false
+                        }
+                    }
+                    loadUrl(url)
+                }
+            },
+            update = { webView ->
+                if (webView.url != url) {
+                    webView.loadUrl(url)
+                }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
-        },
-        update = { webView ->
-            if (webView.url != url) {
-                webView.loadUrl(url)
-            }
-        },
-        modifier = modifier
-    )
+        }
+    }
 }
 
 // ─── Privacy Policy Screen ───────────────────────────────────────────────────
