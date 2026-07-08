@@ -54,6 +54,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
@@ -512,7 +513,7 @@ private fun AccountSettingsContent(
             }
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedButton(
-                onClick = { uriHandler.openUri("https://elmee.my/saat/delete-account?lang=${state.appLanguage.code}") },
+                onClick = { uriHandler.openUri("https://elmee.my/saat/delete-account?lang=${state.appLanguage.tag}") },
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
                 ),
