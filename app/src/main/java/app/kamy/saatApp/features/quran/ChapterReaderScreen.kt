@@ -160,6 +160,7 @@ fun ChapterReaderScreen(
     val settingsVisible = remember { mutableStateOf(false) }
     val verseMenuExpanded = remember { mutableStateOf(false) }
     val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
+    val showImageShareSheet = remember { mutableStateOf(false) }
 
     val s = state
     val verseCount = s.verses.size
@@ -384,13 +385,7 @@ fun ChapterReaderScreen(
                 },
                 onShareImage = {
                     verseMenuExpanded.value = false
-                    currentVerse?.let { verse ->
-                        app.kamy.saatApp.features.share.AyahImageShare.shareAyahAsImage(
-                            context = context,
-                            verse = verse,
-                            surahName = surahTitle
-                        )
-                    }
+                    showImageShareSheet.value = true
                 },
                 onTafsir = {
                     verseMenuExpanded.value = false
@@ -567,6 +562,25 @@ fun ChapterReaderScreen(
         },
         onPublish = { vm.publishAiReflection() }
     )
+
+    if (showImageShareSheet.value) {
+        currentVerse?.let { verse ->
+            app.kamy.saatApp.features.share.AyahImageShareSheet(
+                verse = verse,
+                surahName = surahTitle,
+                onDismiss = { showImageShareSheet.value = false },
+                onShare = { template ->
+                    app.kamy.saatApp.features.share.AyahImageShare.shareAyahAsImage(
+                        context = context,
+                        verse = verse,
+                        surahName = surahTitle,
+                        template = template
+                    )
+                    showImageShareSheet.value = false
+                }
+            )
+        }
+    }
 }
 
 @Composable
