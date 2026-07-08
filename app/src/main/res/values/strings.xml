@@ -1217,4 +1217,6 @@
 
     <string name="privacy_policy_effective">Effective Date: 1 July 2026</string>
     <string name="terms_effective">Effective Date: 1 July 2026</string>
+    <string name="delete_account">Delete Account</string>
+
 </resources>

@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -355,6 +356,7 @@ private fun AccountSettingsContent(
     onOpenPrivacyPolicy: () -> Unit,
     onOpenTerms: () -> Unit
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -507,6 +509,19 @@ private fun AccountSettingsContent(
                 shape = MaterialTheme.shapes.large
             ) {
                 Text(stringResource(R.string.sign_out))
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = { uriHandler.openUri("https://elmee.my/saat-delete-account.html") },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                ),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !state.authBusy,
+                shape = MaterialTheme.shapes.large
+            ) {
+                Text(stringResource(R.string.delete_account))
             }
         }
         Spacer(Modifier.height(floatingNavBottomPadding()))
