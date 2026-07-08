@@ -107,7 +107,8 @@ fun AyahImageShareSheet(
             }
 
             // Real-time Preview Card
-            val tBgColor = Color(android.graphics.Color.parseColor(selectedTemplate.bgColor))
+            val tBgColorStart = Color(android.graphics.Color.parseColor(selectedTemplate.bgColorStart))
+            val tBgColorEnd = Color(android.graphics.Color.parseColor(selectedTemplate.bgColorEnd))
             val tBorderColor = Color(android.graphics.Color.parseColor(selectedTemplate.borderColor))
             val tInnerBorderColor = Color(android.graphics.Color.parseColor(selectedTemplate.innerBorderColor))
             val tAppNameColor = Color(android.graphics.Color.parseColor(selectedTemplate.appNameColor))
@@ -117,12 +118,22 @@ fun AyahImageShareSheet(
             val tReferenceColor = Color(android.graphics.Color.parseColor(selectedTemplate.referenceColor))
             val tFooterColor = Color(android.graphics.Color.parseColor(selectedTemplate.footerColor))
 
+            val tBgBrush = if (selectedTemplate.hasGradient) {
+                androidx.compose.ui.graphics.Brush.verticalGradient(
+                    colors = listOf(tBgColorStart, tBgColorEnd)
+                )
+            } else {
+                androidx.compose.ui.graphics.Brush.linearGradient(
+                    colors = listOf(tBgColorStart, tBgColorStart)
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .width(224.dp)
                     .aspectRatio(4f / 5f)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(tBgColor)
+                    .background(tBgBrush)
                     .border(4.dp, tBorderColor, RoundedCornerShape(8.dp))
                     .padding(8.dp)
             ) {
@@ -144,12 +155,21 @@ fun AyahImageShareSheet(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.splash_icon_adaptive),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                                tint = Color.Unspecified
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(android.graphics.Color.parseColor(selectedTemplate.logoBackdropColor)))
+                                    .border(0.5.dp, tBorderColor, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.splash_icon_adaptive),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Color.Unspecified
+                                )
+                            }
                             Text(
                                 text = "Sāat",
                                 style = MaterialTheme.typography.labelSmall.copy(
@@ -216,11 +236,13 @@ fun AyahImageShareSheet(
                                 )
                             )
                             Text(
-                                text = "Read & Reflect on SĀAT",
+                                text = stringResource(R.string.share_brand_tagline).replace("_", "").trim(),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 5.sp,
                                     color = tFooterColor
-                                )
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -245,7 +267,7 @@ fun AyahImageShareSheet(
             ) {
                 ShareTemplate.values().forEach { template ->
                     val isSelected = selectedTemplate == template
-                    val itemBgColor = Color(android.graphics.Color.parseColor(template.bgColor))
+                    val itemBgColor = Color(android.graphics.Color.parseColor(template.bgColorStart))
                     val itemBorderColor = Color(android.graphics.Color.parseColor(template.borderColor))
 
                     Column(

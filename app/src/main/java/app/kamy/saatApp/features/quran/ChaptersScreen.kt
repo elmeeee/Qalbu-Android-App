@@ -346,23 +346,69 @@ fun ChaptersScreen(
                                 item(key = "khatam_header") {
                                     val readCount = state.readChapters.size
                                     if (readCount > 0) {
-                                        Row(
+                                        val totalChapters = 114
+                                        val progressFraction = readCount.toFloat() / totalChapters.toFloat()
+                                        val percentage = (progressFraction * 100).toInt()
+                                        
+                                        Surface(
                                             modifier = Modifier
-                                                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 6.dp)
-                                                .fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
+                                                .fillMaxWidth()
+                                                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+                                            shape = RoundedCornerShape(16.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
                                         ) {
-                                            Text(
-                                                text = stringResource(R.string.khatam_progress_title),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                            Text(
-                                                text = stringResource(R.string.khatam_progress, readCount),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp)
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = androidx.compose.material.icons.Icons.Default.Bookmark,
+                                                            contentDescription = null,
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.size(18.dp)
+                                                        )
+                                                        Text(
+                                                            text = stringResource(R.string.khatam_progress_title),
+                                                            style = MaterialTheme.typography.titleSmall,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                    }
+                                                    Text(
+                                                        text = "$percentage%",
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
+                                                Spacer(Modifier.height(10.dp))
+                                                androidx.compose.material3.LinearProgressIndicator(
+                                                    progress = { progressFraction },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(8.dp)
+                                                        .clip(RoundedCornerShape(4.dp)),
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                                )
+                                                Spacer(Modifier.height(8.dp))
+                                                Text(
+                                                    text = stringResource(R.string.khatam_progress, readCount),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -736,7 +782,8 @@ private fun ChapterRow(
         Surface(
             onClick = onClick,
             modifier = Modifier
-                .width(345.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
                 .height(104.dp),
             shape = RoundedCornerShape(16.dp),
             color = AlKhatibColors.PureWhite,
@@ -746,7 +793,7 @@ private fun ChapterRow(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 16.dp, end = 0.dp),
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ChapterNumberBadge(number = chapter.id)
@@ -762,9 +809,11 @@ private fun ChapterRow(
                     ) {
                         Text(
                             text = chapter.displayComplexName,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
                             fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.Slate900
+                            color = AlKhatibColors.Slate900,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         if (isRead) {
                             Spacer(Modifier.width(6.dp))
@@ -779,7 +828,7 @@ private fun ChapterRow(
                     if (meaning.isNotEmpty()) {
                         Text(
                             text = meaning,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                             color = AlKhatibColors.Slate500,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -806,12 +855,12 @@ private fun ChapterRow(
                         }
                     }
                 }
+                Spacer(Modifier.width(8.dp))
                 Image(
                     painter = painterResource(if (chapter.isMeccan) R.drawable.mecca else R.drawable.medina),
                     contentDescription = null,
                     modifier = Modifier
-                        .width(130.dp)
-                        .height(104.dp),
+                        .size(52.dp),
                     contentScale = ContentScale.Fit
                 )
             }
