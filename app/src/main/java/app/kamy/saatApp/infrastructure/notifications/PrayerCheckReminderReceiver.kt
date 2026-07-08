@@ -67,6 +67,7 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
             .setContentIntent(openIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .build()
 
         NotificationManagerCompat.from(context).notify(notificationId, notification)
@@ -97,6 +98,7 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
             .setContentIntent(openIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .build()
 
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_WRAP_UP, notification)
