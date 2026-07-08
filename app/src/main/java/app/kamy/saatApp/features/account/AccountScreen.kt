@@ -1928,16 +1928,14 @@ private fun LegalWebView(
         )
 
         if (isLoading) {
-            Box(
+            androidx.compose.material3.LinearProgressIndicator(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .align(Alignment.TopCenter),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = Color.Transparent
+            )
         }
     }
 }

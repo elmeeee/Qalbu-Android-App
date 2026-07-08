@@ -782,8 +782,7 @@ private fun ChapterRow(
         Surface(
             onClick = onClick,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .width(345.dp)
                 .height(104.dp),
             shape = RoundedCornerShape(16.dp),
             color = AlKhatibColors.PureWhite,
