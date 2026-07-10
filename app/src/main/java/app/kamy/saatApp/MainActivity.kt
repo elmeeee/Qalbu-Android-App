@@ -2,7 +2,9 @@ package app.kamy.saatApp
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -44,6 +46,21 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         AppReviewManager.recordAppLaunch(applicationContext)
+
+        if (intent.getBooleanExtra("from_adhan_full_screen", false)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(true)
+                setTurnScreenOn(true)
+            } else {
+                @Suppress("DEPRECATION")
+                window.addFlags(
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                )
+            }
+        }
+
         deepLinkRoute.value = DeepLinkRoutes.fromIntent(intent)
         enableEdgeToEdge()
         val needsOnboarding = !onboardingStore.isComplete()
@@ -59,6 +76,7 @@ class MainActivity : ComponentActivity() {
                     showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })
                     else -> {
                         ExactAlarmPermissionGate()
+                        app.kamy.saatApp.ui.permissions.FullScreenIntentPermissionGate()
                         RootScreen(
                             pendingDeepLinkRoute = pendingRoute,
                             onDeepLinkHandled = { deepLinkRoute.value = null }
@@ -73,5 +91,19 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         deepLinkRoute.value = DeepLinkRoutes.fromIntent(intent)
+
+        if (intent.getBooleanExtra("from_adhan_full_screen", false)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                setShowWhenLocked(true)
+                setTurnScreenOn(true)
+            } else {
+                @Suppress("DEPRECATION")
+                window.addFlags(
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                )
+            }
+        }
     }
 }

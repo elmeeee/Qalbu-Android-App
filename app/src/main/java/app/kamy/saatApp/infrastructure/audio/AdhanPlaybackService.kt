@@ -248,6 +248,18 @@ class AdhanPlaybackService : Service() {
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .apply {
+                val fullScreenIntent = Intent(this@AdhanPlaybackService, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    putExtra("from_adhan_full_screen", true)
+                }
+                val fullScreenPendingIntent = PendingIntent.getActivity(
+                    this@AdhanPlaybackService,
+                    0,
+                    fullScreenIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                setFullScreenIntent(fullScreenPendingIntent, true)
+
                 val stopPending = PendingIntent.getBroadcast(
                     this@AdhanPlaybackService,
                     NOTIFICATION_ID,

@@ -193,6 +193,8 @@
     <string name="recitation_notification_channel">Quran recitation</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
     <string name="exact_alarm_rationale_title">Prayer reminders on time</string>
+    <string name="fullscreen_intent_rationale">Allow full screen access so the adhan can wake up your screen when it\'s time to pray.</string>
+    <string name="fullscreen_intent_rationale_title">Full screen adhan</string>
     <string name="action_later">Later</string>
     <string name="battery_opt_snackbar_message">On some phones, allow unrestricted battery so adhan works when the app is closed.</string>
     <string name="battery_opt_snackbar_oem_message">On %1$s phones: set SĀAT to Unrestricted and enable autostart so adhan works in the background.</string>
