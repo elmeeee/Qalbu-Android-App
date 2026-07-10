@@ -57,7 +57,7 @@ class RecitationPlaybackService : MediaSessionService() {
         this,
         NotificationChannels.MEDIA_PLAYBACK
     )
-        .setSmallIcon(R.mipmap.ic_launcher)
+        .setSmallIcon(R.drawable.ic_stat_notification)
         .setContentTitle(getString(R.string.app_name))
         .setContentText(getString(R.string.recitation_notification_channel))
         .setContentIntent(

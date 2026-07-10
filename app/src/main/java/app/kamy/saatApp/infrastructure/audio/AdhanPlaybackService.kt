@@ -230,7 +230,7 @@ class AdhanPlaybackService : Service() {
 
     private fun buildForegroundNotification(title: String, body: String) =
         NotificationCompat.Builder(this, NotificationChannels.ADHAN_PLAYBACK)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(title.ifBlank { getString(R.string.adhan_playback_title) })
             .setContentText(body.ifBlank { getString(R.string.adhan_playback_body) })
             .setContentIntent(

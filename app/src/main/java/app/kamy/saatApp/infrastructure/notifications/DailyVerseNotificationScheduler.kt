@@ -140,7 +140,7 @@ object DailyVerseNotificationScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(localContext.getString(R.string.daily_verse_notif_title))
             .setContentText(displayBody)
             .setStyle(NotificationCompat.BigTextStyle().bigText(displayBody))
