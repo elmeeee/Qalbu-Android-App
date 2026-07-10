@@ -3,6 +3,10 @@ package app.kamy.saatApp.infrastructure.widget
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
+import androidx.glance.appwidget.updateAll
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object WidgetCoordinator {
 
@@ -11,6 +15,14 @@ object WidgetCoordinator {
         PrayerWidgetUpdater.updateAll(appContext)
         PrayerNextWidgetUpdater.updateAll(appContext)
         DailyVerseWidgetUpdater.updateAll(appContext)
+
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                app.kamy.saatApp.infrastructure.widget.glance.PrayerNextGlanceWidget().updateAll(appContext)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun hasAnyWidgets(context: Context): Boolean {
