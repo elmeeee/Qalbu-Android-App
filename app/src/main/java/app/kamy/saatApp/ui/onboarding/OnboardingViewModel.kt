@@ -5,14 +5,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppStrings
+import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.infrastructure.location.LocationProvider
 import app.kamy.saatApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.SavedManualLocation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +27,7 @@ enum class OnboardingStep {
     WELCOME,
     LOCATION,
     NOTIFICATIONS,
+    PRAYER_NOTIFICATIONS,
     WIDGET
 }
 
@@ -31,7 +35,8 @@ data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.WELCOME,
     val locationQuery: String = "",
     val savingLocation: Boolean = false,
-    val locationError: String? = null
+    val locationError: String? = null,
+    val prayerAdzanToggles: Map<PrayerType, Boolean> = emptyMap()
 )
 
 @HiltViewModel
@@ -40,18 +45,30 @@ class OnboardingViewModel @Inject constructor(
     private val strings: AppStrings,
     private val onboardingStore: OnboardingStore,
     private val locationProvider: LocationProvider,
-    private val locationPrefs: LocationPreferencesStore
+    private val locationPrefs: LocationPreferencesStore,
+    private val prayerPrefs: PrayerNotificationPreferencesStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingUiState())
     val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
+
+    init {
+        _state.update {
+            it.copy(
+                prayerAdzanToggles = PrayerType.ADZAN_NOTIFICATION_PRAYERS.associateWith { type ->
+                    prayerPrefs.isPrayerEnabled(type)
+                }
+            )
+        }
+    }
 
     fun nextStep() {
         _state.update {
             val next = when (it.step) {
                 OnboardingStep.WELCOME -> OnboardingStep.LOCATION
                 OnboardingStep.LOCATION -> OnboardingStep.NOTIFICATIONS
-                OnboardingStep.NOTIFICATIONS -> OnboardingStep.WIDGET
+                OnboardingStep.NOTIFICATIONS -> OnboardingStep.PRAYER_NOTIFICATIONS
+                OnboardingStep.PRAYER_NOTIFICATIONS -> OnboardingStep.WIDGET
                 OnboardingStep.WIDGET -> OnboardingStep.WIDGET
             }
             it.copy(step = next, locationError = null)
@@ -125,9 +142,20 @@ class OnboardingViewModel @Inject constructor(
         onboardingStore.markNotificationsHandled()
         nextStep()
     }
+    
+    fun togglePrayerAdzan(type: PrayerType, enabled: Boolean) {
+        prayerPrefs.setPrayerEnabled(type, enabled)
+        _state.update {
+            it.copy(
+                prayerAdzanToggles = it.prayerAdzanToggles.toMutableMap().apply { put(type, enabled) }
+            )
+        }
+    }
 
     fun completeOnboarding() {
-        onboardingStore.markComplete()
-        DailyVerseNotificationScheduler.reschedule(appContext)
+        viewModelScope.launch(Dispatchers.IO) {
+            onboardingStore.markComplete()
+            DailyVerseNotificationScheduler.reschedule(appContext)
+        }
     }
 }

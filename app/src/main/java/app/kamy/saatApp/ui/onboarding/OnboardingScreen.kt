@@ -8,6 +8,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,6 +44,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.AlKhatibColors
 import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.domain.model.PrayerType
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.rememberCoroutineScope
 
 @Composable
 fun OnboardingScreen(
@@ -51,6 +56,7 @@ fun OnboardingScreen(
 ) {
     val state by vm.state.collectAsState()
     var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -64,7 +70,8 @@ fun OnboardingScreen(
         OnboardingStep.WELCOME -> 1
         OnboardingStep.LOCATION -> 2
         OnboardingStep.NOTIFICATIONS -> 3
-        OnboardingStep.WIDGET -> 4
+        OnboardingStep.PRAYER_NOTIFICATIONS -> 4
+        OnboardingStep.WIDGET -> 5
     }
 
     if (showLocationRationale) {
@@ -133,13 +140,13 @@ fun OnboardingScreen(
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                stringResource(R.string.onboarding_step_progress, stepIndex, 4),
+                stringResource(R.string.onboarding_step_progress, stepIndex, 5),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White.copy(alpha = 0.75f),
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             LinearProgressIndicator(
-                progress = { stepIndex / 4f },
+                progress = { stepIndex / 5f },
                 modifier = Modifier.fillMaxWidth(),
                 color = AlKhatibColors.GoldBright,
                 trackColor = Color.White.copy(alpha = 0.2f)
@@ -161,6 +168,10 @@ fun OnboardingScreen(
                     onUseGps = { showLocationRationale = true }
                 )
                 OnboardingStep.NOTIFICATIONS -> NotificationsStep()
+                OnboardingStep.PRAYER_NOTIFICATIONS -> PrayerNotificationsStep(
+                    toggles = state.prayerAdzanToggles,
+                    onToggle = vm::togglePrayerAdzan
+                )
                 OnboardingStep.WIDGET -> WidgetStep()
             }
         }
@@ -170,6 +181,7 @@ fun OnboardingScreen(
                 onClick = {
                     when (state.step) {
                         OnboardingStep.WELCOME -> vm.nextStep()
+                        OnboardingStep.PRAYER_NOTIFICATIONS -> vm.nextStep()
                         OnboardingStep.LOCATION -> {
                             if (state.locationQuery.isNotBlank()) {
                                 vm.saveManualLocation()
@@ -185,8 +197,11 @@ fun OnboardingScreen(
                             }
                         }
                         OnboardingStep.WIDGET -> {
-                            vm.completeOnboarding()
-                            onFinished()
+                            scope.launch {
+                                vm.completeOnboarding()
+                                delay(200) // Decouple heavy DB read/write to prevent button lag
+                                onFinished()
+                            }
                         }
                     }
                 },
@@ -202,6 +217,7 @@ fun OnboardingScreen(
                 Text(
                     when (state.step) {
                         OnboardingStep.WIDGET -> stringResource(R.string.onboarding_get_started)
+                        OnboardingStep.PRAYER_NOTIFICATIONS -> stringResource(R.string.onboarding_continue)
                         OnboardingStep.NOTIFICATIONS -> stringResource(R.string.onboarding_enable_notifications)
                         OnboardingStep.LOCATION -> stringResource(R.string.onboarding_continue)
                         OnboardingStep.WELCOME -> stringResource(R.string.onboarding_continue)
@@ -225,6 +241,7 @@ fun OnboardingScreen(
                     Text(
                         when (state.step) {
                             OnboardingStep.LOCATION -> stringResource(R.string.onboarding_skip_location)
+                            OnboardingStep.PRAYER_NOTIFICATIONS -> stringResource(R.string.onboarding_skip)
                             OnboardingStep.NOTIFICATIONS -> stringResource(R.string.onboarding_skip_notifications)
                             else -> stringResource(R.string.onboarding_skip)
                         }
@@ -373,4 +390,57 @@ private fun WidgetStep() {
         color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
         textAlign = TextAlign.Center
     )
+}
+
+@Composable
+private fun PrayerNotificationsStep(
+    toggles: Map<PrayerType, Boolean>,
+    onToggle: (PrayerType, Boolean) -> Unit
+) {
+    Text(
+        text = stringResource(R.string.onboarding_prayer_config_title),
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold,
+        color = androidx.compose.ui.graphics.Color.White,
+        textAlign = TextAlign.Center
+    )
+    Spacer(Modifier.height(12.dp))
+    Text(
+        text = stringResource(R.string.onboarding_prayer_config_body),
+        style = MaterialTheme.typography.bodyMedium,
+        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+        textAlign = TextAlign.Center
+    )
+    Spacer(Modifier.height(24.dp))
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { type ->
+            val checked = toggles[type] ?: true
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                val prayerName = when (type) {
+                    PrayerType.FAJR -> stringResource(R.string.prayer_fajr)
+                    PrayerType.DHUHR -> stringResource(R.string.prayer_dhuhr)
+                    PrayerType.ASR -> stringResource(R.string.prayer_asr)
+                    PrayerType.MAGHRIB -> stringResource(R.string.prayer_maghrib)
+                    PrayerType.ISHA -> stringResource(R.string.prayer_isha)
+                    else -> ""
+                }
+                Text(prayerName, color = Color.White, style = MaterialTheme.typography.titleMedium)
+                androidx.compose.material3.Switch(
+                    checked = checked,
+                    onCheckedChange = { onToggle(type, it) },
+                    colors = androidx.compose.material3.SwitchDefaults.colors(
+                        checkedThumbColor = AlKhatibColors.DeepEmerald,
+                        checkedTrackColor = AlKhatibColors.GoldBright,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = Color.White.copy(alpha = 0.3f),
+                        uncheckedBorderColor = Color.Transparent
+                    )
+                )
+            }
+        }
+    }
 }

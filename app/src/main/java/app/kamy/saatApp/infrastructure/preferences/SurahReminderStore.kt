@@ -99,8 +99,7 @@ class SurahReminderStore @Inject constructor(
 
     fun scheduleAlarm(reminder: SurahReminder) {
         val now = System.currentTimeMillis()
-        // Add 1 minute to prevent it from rescheduling repeatedly in the exact same minute
-        val fireAt = nextWeekdayTime(reminder.weekday, reminder.hour, reminder.minute, now + 60_000L)
+        val fireAt = nextWeekdayTime(reminder.weekday, reminder.hour, reminder.minute, now)
 
         val intent = Intent(context, SurahReminderReceiver::class.java).apply {
             action = "app.kamy.saatApp.ACTION_SURAH_REMINDER"
@@ -157,7 +156,7 @@ class SurahReminderStore @Inject constructor(
         }
         val fromTime = compareCal.timeInMillis
 
-        while (cal.get(Calendar.DAY_OF_WEEK) != weekday || cal.timeInMillis < fromTime) {
+        while (cal.get(Calendar.DAY_OF_WEEK) != weekday || cal.timeInMillis <= fromTime) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis

@@ -37,7 +37,7 @@ private const val EXTRA_PREV_VOLUME_STREAM_VALUE = "android.media.EXTRA_PREV_VOL
  * Foreground alarm playback for adhan. Uses a plain [Service] (not MediaSessionService) so
  * scheduled alarms can start playback reliably from a [BroadcastReceiver] in the background.
  */
-@AndroidEntryPoint
+
 class AdhanPlaybackService : Service() {
 
     override fun attachBaseContext(newBase: Context) {
