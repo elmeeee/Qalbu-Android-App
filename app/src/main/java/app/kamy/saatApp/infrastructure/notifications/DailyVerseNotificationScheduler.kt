@@ -62,7 +62,6 @@ object DailyVerseNotificationScheduler {
     fun cancel(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent(context))
-        NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
     }
 
     fun scheduleAt(context: Context, hour: Int, minute: Int) {
@@ -176,7 +175,7 @@ object DailyVerseNotificationScheduler {
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }
-        if (cal.timeInMillis < compareCal.timeInMillis) {
+        if (cal.timeInMillis <= compareCal.timeInMillis) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis

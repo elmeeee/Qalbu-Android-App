@@ -220,32 +220,24 @@ object PrayerNotificationScheduler {
         )
         cancelSunnah(context)
         cancelImportantDays(context)
-        val nm = NotificationManagerCompat.from(context)
-        (NOTIFICATION_ID_BASE until NOTIFICATION_ID_BASE + 80).forEach { nm.cancel(it) }
     }
 
     private fun cancelSunnah(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val nm = NotificationManagerCompat.from(context)
         (SUNNAH_YASIN_REQUEST until SUNNAH_YASIN_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
-            nm.cancel(code)
         }
         (SUNNAH_KAHF_REQUEST until SUNNAH_KAHF_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
-            nm.cancel(code)
         }
         (FAST_MON_REQUEST until FAST_MON_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
-            nm.cancel(code)
         }
         (FAST_THU_REQUEST until FAST_THU_REQUEST + SUNNAH_WEEKS_TO_SCHEDULE).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
-            nm.cancel(code)
         }
         (DHUHA_REQUEST_BASE until DHUHA_REQUEST_BASE + 7).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
-            nm.cancel(code)
         }
     }
 
@@ -303,11 +295,9 @@ object PrayerNotificationScheduler {
 
     private fun cancelImportantDays(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val nm = NotificationManagerCompat.from(context)
         for (offset in 0 until 7) {
             val code = IMPORTANT_DAYS_REQUEST_BASE + offset
             alarmManager.cancel(pendingAlarm(context, code))
-            nm.cancel(IMPORTANT_DAYS_ID_BASE + offset)
         }
     }
 
@@ -468,7 +458,7 @@ object PrayerNotificationScheduler {
         }
         val fromTime = compareCal.timeInMillis
 
-        while (cal.get(Calendar.DAY_OF_WEEK) != weekday || cal.timeInMillis < fromTime) {
+        while (cal.get(Calendar.DAY_OF_WEEK) != weekday || cal.timeInMillis <= fromTime) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis
@@ -488,7 +478,7 @@ object PrayerNotificationScheduler {
         }
         val fromTime = compareCal.timeInMillis
 
-        if (cal.timeInMillis < fromTime) {
+        if (cal.timeInMillis <= fromTime) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis
@@ -505,7 +495,7 @@ object PrayerNotificationScheduler {
         val nowTime = compareCal.timeInMillis
         return buildList {
             repeat(count) {
-                if (cal.timeInMillis >= nowTime) {
+                if (cal.timeInMillis > nowTime) {
                     add(cal.timeInMillis)
                 }
                 cal.add(Calendar.WEEK_OF_YEAR, 1)
@@ -524,7 +514,7 @@ object PrayerNotificationScheduler {
         val nowTime = compareCal.timeInMillis
         return buildList {
             repeat(count) {
-                if (cal.timeInMillis >= nowTime) {
+                if (cal.timeInMillis > nowTime) {
                     add(cal.timeInMillis)
                 }
                 cal.add(Calendar.DAY_OF_YEAR, 1)
