@@ -32,8 +32,8 @@ android {
         applicationId = "app.kamy.saatApp"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -179,6 +179,8 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material3)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Hilt

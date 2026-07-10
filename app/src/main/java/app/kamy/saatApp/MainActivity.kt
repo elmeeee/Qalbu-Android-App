@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
             var showGreetingSplash by rememberSaveable { mutableStateOf(true) }
             var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
             val pendingRoute by deepLinkRoute
-            val currentTheme by themePreferencesStore.themeFlow.collectAsState()
+            val currentTheme by themePreferencesStore.themeFlow.collectAsState(initial = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
 
             AlKhatibTheme(theme = currentTheme) {
                 if (isAdhanFullScreen) {
