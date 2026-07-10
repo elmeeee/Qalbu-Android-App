@@ -24,7 +24,9 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import app.kamy.saatApp.MainActivity
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.locale.AppLocale
 import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 
 private const val VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION"
 private const val EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE"
@@ -35,7 +37,13 @@ private const val EXTRA_PREV_VOLUME_STREAM_VALUE = "android.media.EXTRA_PREV_VOL
  * Foreground alarm playback for adhan. Uses a plain [Service] (not MediaSessionService) so
  * scheduled alarms can start playback reliably from a [BroadcastReceiver] in the background.
  */
+@AndroidEntryPoint
 class AdhanPlaybackService : Service() {
+
+    override fun attachBaseContext(newBase: Context) {
+        val language = AppLanguageStore.from(newBase).current()
+        super.attachBaseContext(AppLocale.wrap(newBase, language))
+    }
 
     private var player: ExoPlayer? = null
     private var playbackStarted = false
@@ -251,6 +259,8 @@ class AdhanPlaybackService : Service() {
                 val fullScreenIntent = Intent(this@AdhanPlaybackService, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                     putExtra("from_adhan_full_screen", true)
+                    putExtra("adhan_title", title.ifBlank { getString(R.string.adhan_playback_title) })
+                    putExtra("adhan_body", body.ifBlank { getString(R.string.adhan_playback_body) })
                 }
                 val fullScreenPendingIntent = PendingIntent.getActivity(
                     this@AdhanPlaybackService,
