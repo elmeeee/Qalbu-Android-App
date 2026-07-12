@@ -19,21 +19,21 @@
 			containerPortal = 3600CD1D2F9C5791001EC262 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3600CD242F9C5791001EC262;
-			remoteInfo = "Saat";
+			remoteInfo = Saat;
 		};
 		3600CD3D2F9C5793001EC262 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3600CD1D2F9C5791001EC262 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3600CD242F9C5791001EC262;
-			remoteInfo = "Saat";
+			remoteInfo = Saat;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3600CD252F9C5791001EC262 /* Saat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Saat.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3600CD322F9C5793001EC262 /* SaatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SaatTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SaatUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3600CD252F9C5791001EC262 /* Saat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Saat.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3600CD322F9C5793001EC262 /* SaatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SaatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SaatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		36A1B2C12F9E0001001EC262 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		36A1B2C22F9E0001001EC262 /* Secrets.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig.example; sourceTree = "<group>"; };
 		36A1B2C42F9E0001001EC262 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
@@ -56,17 +56,17 @@
 			exceptions = (
 				36DC5CFD2FBC1881007DDF44 /* Exceptions for "Saat" folder in "Saat" target */,
 			);
-			path = "Saat";
+			path = Saat;
 			sourceTree = "<group>";
 		};
 		3600CD352F9C5793001EC262 /* SaatTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "SaatTests";
+			path = SaatTests;
 			sourceTree = "<group>";
 		};
 		3600CD3F2F9C5793001EC262 /* SaatUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "SaatUITests";
+			path = SaatUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -150,14 +150,14 @@
 			fileSystemSynchronizedGroups = (
 				3600CD272F9C5791001EC262 /* Saat */,
 			);
-			name = "Saat";
+			name = Saat;
 			packageProductDependencies = (
 				36825E2F2FED073F007D0D9D /* ProwlCore */,
 				36825E312FED073F007D0D9D /* ProwlGRPC */,
 				36825E332FED073F007D0D9D /* ProwlKit */,
 				36825E352FED073F007D0D9D /* ProwlUI */,
 			);
-			productName = "Saat";
+			productName = Saat;
 			productReference = 3600CD252F9C5791001EC262 /* Saat.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -177,10 +177,10 @@
 			fileSystemSynchronizedGroups = (
 				3600CD352F9C5793001EC262 /* SaatTests */,
 			);
-			name = "SaatTests";
+			name = SaatTests;
 			packageProductDependencies = (
 			);
-			productName = "SaatTests";
+			productName = SaatTests;
 			productReference = 3600CD322F9C5793001EC262 /* SaatTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -200,10 +200,10 @@
 			fileSystemSynchronizedGroups = (
 				3600CD3F2F9C5793001EC262 /* SaatUITests */,
 			);
-			name = "SaatUITests";
+			name = SaatUITests;
 			packageProductDependencies = (
 			);
-			productName = "SaatUITests";
+			productName = SaatUITests;
 			productReference = 3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
@@ -456,10 +456,10 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Saat/Info.plist";
+				INFOPLIST_FILE = Saat/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Sāat";
 				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleTypeRole = Editor;
-				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLName = "co.kamy.Saat.oauth";
+				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLName = co.kamy.Saat.oauth;
 				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLSchemes_0 = Saat;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We use your camera to display the Qibla finder in AR mode.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We use your location to show accurate prayer times.";
@@ -484,7 +484,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "co.kamy.Saat";
+				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -521,10 +521,10 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Saat/Info.plist";
+				INFOPLIST_FILE = Saat/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Sāat";
 				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleTypeRole = Editor;
-				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLName = "co.kamy.Saat.oauth";
+				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLName = co.kamy.Saat.oauth;
 				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLSchemes_0 = Saat;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We use your camera to display the Qibla finder in AR mode.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We use your location to show accurate prayer times.";
@@ -549,7 +549,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "co.kamy.Saat";
+				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -572,7 +572,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "co.kamy.SaatTests";
+				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.SaatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -596,7 +596,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "co.kamy.SaatTests";
+				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.SaatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -619,7 +619,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "co.kamy.SaatUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.SaatUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -629,7 +629,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Saat";
+				TEST_TARGET_NAME = Saat;
 			};
 			name = Debug;
 		};
@@ -642,7 +642,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "co.kamy.SaatUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.SaatUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -652,7 +652,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "Saat";
+				TEST_TARGET_NAME = Saat;
 			};
 			name = Release;
 		};

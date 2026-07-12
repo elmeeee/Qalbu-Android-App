@@ -10,26 +10,8 @@ import SwiftUI
 
 struct ChapterReaderBackground: View {
     var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color.Token.readerForest, Color.Token.forestDeeper],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+        Color.Token.screenBackground
             .ignoresSafeArea()
-
-            // Soft radial ambient glow
-            GeometryReader { geo in
-                RadialGradient(
-                    colors: [Color.Token.gold.opacity(0.12), Color.clear],
-                    center: .center,
-                    startRadius: 20,
-                    endRadius: min(geo.size.width, geo.size.height) * 0.65
-                )
-                .frame(width: geo.size.width, height: geo.size.height)
-            }
-            .ignoresSafeArea()
-        }
     }
 }
 

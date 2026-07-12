@@ -118,28 +118,17 @@ struct ChapterAyahPage: View {
                             }
                         }
 
-                        // ── Transliteration ───────────────────────────
                         if showTransliteration, let latinText = verse.transliteration, latinText.isEmpty == false {
                             Text(latinText)
                                 .font(.system(size: CGFloat(15 * effectiveFontScale), weight: .medium, design: .serif))
-                                .foregroundColor(Color.Token.goldBright.opacity(0.95))
+                                .foregroundColor(Color.Token.slate800)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 20)
                                 .padding(.vertical, 10)
+                                .frame(maxWidth: .infinity)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.white.opacity(0.04))
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(
-                                                    LinearGradient(
-                                                        colors: [Color.Token.gold.opacity(0.25), Color.Token.gold.opacity(0.05)],
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    ),
-                                                    lineWidth: 1
-                                                )
-                                        )
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .fill(Color.Token.lightGrey.opacity(0.45))
                                 )
                                 .blur(radius: (isMemorizationMode && !isRevealed) ? 12 : 0)
                                 .overlay {
@@ -167,34 +156,11 @@ struct ChapterAyahPage: View {
 
                         // ── Translation ───────────────────────────────
                         if let translationText {
-                            VStack(alignment: .leading, spacing: 0) {
-                                // Accent bar
-                                HStack(spacing: 0) {
-                                    RoundedRectangle(cornerRadius: 2)
-                                        .fill(
-                                            LinearGradient(
-                                                colors: [Color.Token.teal, Color.Token.teal.opacity(0.3)],
-                                                startPoint: .top,
-                                                endPoint: .bottom
-                                            )
-                                        )
-                                        .frame(width: 3)
-                                    Text(justifiedTranslation(translationText))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .minimumScaleFactor(0.82)
-                                        .lineLimit(nil)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 10)
-                                }
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 4)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color.white.opacity(0.05))
-                                )
-                                .padding(.horizontal, 4)
-                            }
+                            Text(justifiedTranslation(translationText))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .minimumScaleFactor(0.82)
+                                .lineLimit(nil)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .top)
@@ -292,7 +258,7 @@ struct ChapterAyahPage: View {
             string: text,
             attributes: [
                 .font: UIFont.systemFont(ofSize: translationFontSize),
-                .foregroundColor: UIColor(Color.Token.offWhite),
+                .foregroundColor: UIColor(Color.Token.slate800),
                 .paragraphStyle: paragraph
             ]
         )

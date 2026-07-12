@@ -164,8 +164,13 @@ struct ChapterVersesView: View {
             .environment(\.chapterReaderChromeInsets, chromeInsets)
 
             VStack(spacing: 0) {
-                chapterHeader
+                topChrome
                 Spacer()
+            }
+
+            VStack(spacing: 0) {
+                Spacer()
+                bottomLeftChrome
             }
 
             VStack(spacing: 0) {
@@ -291,53 +296,68 @@ struct ChapterVersesView: View {
         return readerCoordinator?.positionLabel(in: vm) ?? ""
     }
 
-    private var chapterHeader: some View {
-        HStack(alignment: .center, spacing: 12) {
-            headerIconButton(systemName: "chevron.left") {
+    private var topChrome: some View {
+        HStack(alignment: .center) {
+            headerIconButton(systemName: "arrow.left") {
                 audio.stop()
                 dismiss()
             }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(currentSurahName)
-                    .font(.subheadline.weight(.bold))
-                    .foregroundColor(Color.Token.offWhite)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                if currentPositionLabel.isEmpty == false {
-                    Text(currentPositionLabel)
-                        .font(.caption)
-                        .foregroundColor(Color.Token.goldBright.opacity(0.85))
-                        .lineLimit(1)
-                }
-            }
-
-            Spacer(minLength: 8)
-
+            Spacer()
             headerIconButton(systemName: "gearshape.fill") {
                 showReadingSettings = true
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 8)
         .safeAreaPadding(.top, 4)
-        .background(Color.Token.readerForest.opacity(0.92))
+        .background(
+            LinearGradient(
+                colors: [Color.Token.screenBackground.opacity(0.95), Color.clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+    }
+
+    private var bottomLeftChrome: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(currentSurahName)
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(Color.Token.slate900)
+                .lineLimit(1)
+            
+            if currentPositionLabel.isEmpty == false {
+                Text(currentPositionLabel)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color.Token.slate500)
+                    .lineLimit(1)
+            }
+        }
+        .padding(.leading, 20)
+        .padding(.trailing, 12)
+        .padding(.top, 48)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [Color.clear, Color.Token.screenBackground.opacity(0.92)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .padding(.bottom, audio.currentURL != nil ? TabBarLayout.spacingAboveTabBar + TabBarLayout.nowPlayingBottomPadding + 12 : 20)
+        .padding(.trailing, 100) // Keep clear of FAB
     }
 
     private func headerIconButton(systemName: String, action: @escaping () -> Void) -> some View {
-        let label = systemName == "chevron.left"
+        let label = systemName == "arrow.left"
             ? SaatAccessibility.Reader.back
             : SaatAccessibility.Reader.settings
         let hint = systemName == "gearshape.fill" ? SaatAccessibility.Reader.settingsHint : nil
         return Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(width: 40, height: 40)
-                .background(Circle().fill(Color.white.opacity(0.08)))
-                .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(Color.Token.slate900)
+                .frame(width: 48, height: 48)
         }
         .saatAccessibility(label: label, hint: hint)
     }
@@ -441,17 +461,21 @@ struct ChapterVersesView: View {
                         Circle()
                             .fill(
                                 LinearGradient(
-                                    colors: [Color.Token.deepEmerald, Color.Token.tealDark],
+                                    colors: [Color.Token.deepEmerald, Color.Token.teal],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .frame(width: 56, height: 56)
-                            .shadow(color: Color.Token.deepEmerald.opacity(0.4), radius: 8, x: 0, y: 4)
+                            .frame(width: 52, height: 52)
+                        
+                        Circle()
+                            .fill(Color.Token.pureWhite)
+                            .frame(width: 48, height: 48)
+                            .shadow(color: .black.opacity(isMenuExpanded ? 0.05 : 0.15), radius: isMenuExpanded ? 2 : 8, y: isMenuExpanded ? 1 : 4)
 
-                        Image(systemName: isMenuExpanded ? "xmark" : "doc.text.image.fill")
-                            .font(.system(size: 22, weight: .bold))
-                            .foregroundColor(.white)
+                        Image(systemName: isMenuExpanded ? "xmark" : "text.book.closed.fill")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(isMenuExpanded ? Color.Token.slate800 : Color.Token.deepEmerald)
                             .rotationEffect(.degrees(isMenuExpanded ? 90 : 0))
                     }
                 }
@@ -462,32 +486,34 @@ struct ChapterVersesView: View {
 
     private func fabMenuItem(icon: String, color: Color, label: String, action: @escaping () -> Void) -> some View {
         Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                 isMenuExpanded = false
             }
             action()
         }) {
             HStack(spacing: 12) {
                 Text(label)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.black.opacity(0.65))
-                    .cornerRadius(8)
-                    .shadow(color: .black.opacity(0.15), radius: 4, y: 2)
-
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Color.Token.slate800)
+                
                 ZStack {
                     Circle()
-                        .fill(color)
-                        .frame(width: 44, height: 44)
-                        .shadow(color: color.opacity(0.3), radius: 6, y: 3)
-
+                        .fill(color.opacity(0.15))
+                        .frame(width: 28, height: 28)
+                    
                     Image(systemName: icon)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(color)
                 }
             }
+            .padding(.leading, 16)
+            .padding(.trailing, 12)
+            .padding(.vertical, 8)
+            .background(
+                Capsule()
+                    .fill(Color.Token.pureWhite)
+                    .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
+            )
         }
         .buttonStyle(.plain)
     }

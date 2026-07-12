@@ -22,12 +22,12 @@ struct ProfileRowView: View {
         HStack(spacing: 14) {
             // ── Icon ────────────────────────────────────────────────
             ZStack {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(iconTint)
-                    .frame(width: 36, height: 36)
+                Circle()
+                    .fill(iconTint.opacity(0.1))
+                    .frame(width: 40, height: 40)
                 Image(systemName: icon)
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(iconTint)
             }
 
             // ── Labels ───────────────────────────────────────────────

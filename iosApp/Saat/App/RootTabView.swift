@@ -32,7 +32,7 @@ struct RootTabView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color(AndroidTokens.Colors.screenBackground)
+            Color(SaatTokens.Colors.screenBackground)
                 .ignoresSafeArea()
 
             // Main Content Area
@@ -62,13 +62,13 @@ struct RootTabView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+
             // Audio Bar & Tab Bar
             VStack(spacing: 0) {
                 // TODO: Wire up actual audio player state from container
                 // FloatingAudioBar(isPlaying: false, trackTitle: "Al-Fatihah", trackSubtitle: "Ayah 1", reciterName: "Mishari", onToggle: {}, onDismiss: {}, onOpenPlayback: nil)
-                //     .padding(.bottom, AndroidTokens.Metrics.floatingAudioBarBottomGap)
-                
+                //     .padding(.bottom, SaatTokens.Metrics.floatingAudioBarBottomGap)
+
                 FloatingTabBar(selectedTab: $selectedTab, avatarUrl: nil)
             }
         }
@@ -106,7 +106,10 @@ struct RootTabView: View {
                 }
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: DailyVerseNotificationPreferences.openTodayTabNotification)) { _ in
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: DailyVerseNotificationPreferences.openTodayTabNotification)
+        ) { _ in
             verseState.selectTodayTab()
         }
         .onReceive(NotificationCenter.default.publisher(for: .qfUserSessionDidChange)) { _ in

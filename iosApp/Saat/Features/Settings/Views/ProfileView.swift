@@ -23,13 +23,17 @@ struct ProfileView: View {
     @AppStorage(PrayerNotificationPreferences.firstThirdKey) private var firstThirdEnabled = true
     @AppStorage(PrayerNotificationPreferences.tahajudKey) private var tahajudEnabled = true
     @AppStorage(DailyVerseNotificationPreferences.enabledKey) private var dailyVerseEnabled = true
-    @AppStorage(DailyVerseNotificationPreferences.hourKey) private var dailyVerseHour = DailyVerseNotificationPreferences.defaultHour
-    @AppStorage(DailyVerseNotificationPreferences.minuteKey) private var dailyVerseMinute = DailyVerseNotificationPreferences.defaultMinute
+    @AppStorage(DailyVerseNotificationPreferences.hourKey) private var dailyVerseHour =
+        DailyVerseNotificationPreferences.defaultHour
+    @AppStorage(DailyVerseNotificationPreferences.minuteKey) private var dailyVerseMinute =
+        DailyVerseNotificationPreferences.defaultMinute
     @State private var showingDailyVerseTimeSheet = false
     @State private var showNotificationDeniedAlert = false
     @State private var notificationAlertMessage = ""
-    @AppStorage(ChapterReaderPreferences.translationIdKey) private var selectedTranslationId = ChapterReaderPreferences.defaultTranslationId
-    @AppStorage(ChapterReaderPreferences.translationNameKey) private var selectedTranslationName = ""
+    @AppStorage(ChapterReaderPreferences.translationIdKey) private var selectedTranslationId =
+        ChapterReaderPreferences.defaultTranslationId
+    @AppStorage(ChapterReaderPreferences.translationNameKey) private var selectedTranslationName =
+        ""
     @AppStorage(PrayerCalculationMethod.storageKey)
     private var prayerMethodRaw = PrayerCalculationMethod.defaultMethod.rawValue
 
@@ -39,34 +43,30 @@ struct ProfileView: View {
     @State private var showingTranslatorSheet = false
     @AppStorage("selected_adhan_sound") private var selectedAdhanSound = "default"
     @State private var showingAdhanVoiceSheet = false
-    
+
     @ObservedObject var languageManager = AppLanguageManager.shared
     @State private var showingAppLanguageSheet = false
 
     var body: some View {
         ZStack {
-            // Subtle two-tone background
-            LinearGradient(
-                colors: [Color.Token.screenBackground, Color.Token.sageMist],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            Color(SaatTokens.Colors.screenBackground)
+                .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 28) {
+                VStack(spacing: SaatTokens.Spacing.lg) {
                     headerSection
                     generalSection
                     prayerSettingsSection
                     notificationsSection
+                    aboutSection
 
                     if showsSignedInActions {
                         logOutButton
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-                .padding(.bottom, 48)
+                .padding(.horizontal, SaatTokens.Spacing.screenHorizontal)
+                .padding(.vertical, SaatTokens.Spacing.md)
+                .padding(.bottom, 90)  // Space for floating tab bar
             }
         }
         .navigationTitle(preferSystemNavigationTitle ? languageManager.localize("tab_profile") : "")
@@ -81,7 +81,8 @@ struct ProfileView: View {
             await viewModel?.reloadIfNeeded()
             viewModel?.sync(to: verseState)
             if dailyVerseEnabled {
-                let result = await DailyVerseNotificationCoordinator.refreshIfNeeded(container: container)
+                let result = await DailyVerseNotificationCoordinator.refreshIfNeeded(
+                    container: container)
                 handleDailyVerseScheduleResult(result)
             }
         }
@@ -118,7 +119,10 @@ struct ProfileView: View {
                 }
             )
         }
-        .alert(languageManager.localize("notif_disabled_title"), isPresented: $showNotificationDeniedAlert) {
+        .alert(
+            languageManager.localize("notif_disabled_title"),
+            isPresented: $showNotificationDeniedAlert
+        ) {
             Button(languageManager.localize("open_settings")) {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
@@ -138,7 +142,8 @@ struct ProfileView: View {
         .onChange(of: tahajudEnabled) { _, _ in PrayerNotificationPreferences.notifyDidChange() }
         .onChange(of: dailyVerseEnabled) { _, enabled in
             Task {
-                let result = await DailyVerseNotificationCoordinator.setEnabled(enabled, container: container)
+                let result = await DailyVerseNotificationCoordinator.setEnabled(
+                    enabled, container: container)
                 handleDailyVerseScheduleResult(result)
             }
         }
@@ -200,13 +205,14 @@ struct ProfileView: View {
         VStack(alignment: .leading, spacing: 10) {
             ProfileSectionHeaderView(title: languageManager.localize("general"))
             VStack(spacing: 0) {
-                Button { showingFontScaleSheet = true } label: {
+                Button {
+                    showingFontScaleSheet = true
+                } label: {
                     ProfileRowView(
                         icon: "textformat.size",
                         title: languageManager.localize("font_size"),
                         subtitle: fontScaleLabel,
                         hasToggle: false,
-                        iconTint: Color.Token.indigoAccent,
                         isOn: .constant(false)
                     )
                 }
@@ -218,13 +224,14 @@ struct ProfileView: View {
 
                 Divider().padding(.leading, 66)
 
-                Button { showingAppLanguageSheet = true } label: {
+                Button {
+                    showingAppLanguageSheet = true
+                } label: {
                     ProfileRowView(
                         icon: "globe",
                         title: languageManager.localize("app_language"),
                         subtitle: languageManager.currentLanguage.displayName,
                         hasToggle: false,
-                        iconTint: Color.Token.teal,
                         isOn: .constant(false)
                     )
                 }
@@ -246,7 +253,6 @@ struct ProfileView: View {
                         title: languageManager.localize("location_source"),
                         subtitle: "",
                         hasToggle: false,
-                        iconTint: Color.Token.teal,
                         isOn: .constant(false)
                     )
                 }
@@ -262,14 +268,14 @@ struct ProfileView: View {
                         title: languageManager.localize("prayer_calc"),
                         subtitle: selectedPrayerMethod.displayName,
                         hasToggle: false,
-                        iconTint: Color.Token.deepEmerald,
                         isOn: .constant(false)
                     )
                 }
                 .buttonStyle(.plain)
                 .saatAccessibility(
                     label: SaatAccessibility.Profile.prayerCalculation,
-                    hint: "Current method \(selectedPrayerMethod.displayName). Choose how prayer times are calculated"
+                    hint:
+                        "Current method \(selectedPrayerMethod.displayName). Choose how prayer times are calculated"
                 )
 
                 Divider().padding(.leading, 66)
@@ -279,19 +285,19 @@ struct ProfileView: View {
                     title: languageManager.localize("show_translation"),
                     subtitle: languageManager.localize("show_translation"),
                     hasToggle: true,
-                    iconTint: Color.Token.gold,
                     isOn: $showTranslation
                 )
 
                 Divider().padding(.leading, 66)
 
-                Button { showingTranslatorSheet = true } label: {
+                Button {
+                    showingTranslatorSheet = true
+                } label: {
                     ProfileRowView(
                         icon: "person.text.rectangle",
                         title: languageManager.localize("translator"),
                         subtitle: selectedTranslationName,
                         hasToggle: false,
-                        iconTint: Color.Token.goldDeep,
                         isOn: .constant(false)
                     )
                 }
@@ -305,19 +311,22 @@ struct ProfileView: View {
 
                 Divider().padding(.leading, 66)
 
-                Button { showingAdhanVoiceSheet = true } label: {
+                Button {
+                    showingAdhanVoiceSheet = true
+                } label: {
                     ProfileRowView(
                         icon: "waveform",
                         title: languageManager.localize("adhan_voice"),
                         subtitle: adhanVoiceDisplayName,
                         hasToggle: false,
-                        iconTint: Color(hex: "#7C3AED"),
                         isOn: .constant(false)
                     )
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(languageManager.localize("adhan_voice"))
-                .accessibilityHint("Current voice: \(adhanVoiceDisplayName). Choose the voice for Adhan notifications")
+                .accessibilityHint(
+                    "Current voice: \(adhanVoiceDisplayName). Choose the voice for Adhan notifications"
+                )
             }
             .profileCardStyle()
         }
@@ -355,7 +364,9 @@ struct ProfileView: View {
         handleDailyVerseScheduleResult(result)
     }
 
-    private func handleDailyVerseScheduleResult(_ result: DailyVerseNotificationScheduler.ScheduleResult) {
+    private func handleDailyVerseScheduleResult(
+        _ result: DailyVerseNotificationScheduler.ScheduleResult
+    ) {
         switch result {
         case .scheduled, .disabled:
             break
@@ -377,7 +388,6 @@ struct ProfileView: View {
                     title: languageManager.localize("verse_of_the_day"),
                     subtitle: dailyVerseNotificationSubtitle,
                     hasToggle: true,
-                    iconTint: Color.Token.gold,
                     isOn: $dailyVerseEnabled
                 )
                 if dailyVerseEnabled {
@@ -390,7 +400,6 @@ struct ProfileView: View {
                             title: languageManager.localize("morning_time"),
                             subtitle: dailyVerseTimeRowSubtitle,
                             hasToggle: false,
-                            iconTint: Color.Token.goldDeep,
                             isOn: .constant(false)
                         )
                     }
@@ -406,7 +415,6 @@ struct ProfileView: View {
                     title: languageManager.localize("prayer_times"),
                     subtitle: languageManager.localize("prayer_times_sub"),
                     hasToggle: true,
-                    iconTint: Color.Token.teal,
                     isOn: $adzanEnabled
                 )
                 Divider().padding(.leading, 66)
@@ -415,7 +423,6 @@ struct ProfileView: View {
                     title: languageManager.localize("imsak"),
                     subtitle: languageManager.localize("imsak_sub"),
                     hasToggle: true,
-                    iconTint: Color.Token.tealDark,
                     isOn: $imsakEnabled
                 )
                 Divider().padding(.leading, 66)
@@ -424,7 +431,6 @@ struct ProfileView: View {
                     title: languageManager.localize("midnight"),
                     subtitle: languageManager.localize("midnight_sub"),
                     hasToggle: true,
-                    iconTint: Color.Token.indigoDeep,
                     isOn: $midnightEnabled
                 )
                 Divider().padding(.leading, 66)
@@ -433,7 +439,6 @@ struct ProfileView: View {
                     title: languageManager.localize("first_third_night"),
                     subtitle: languageManager.localize("first_third_sub"),
                     hasToggle: true,
-                    iconTint: Color(hex: "#4338CA"),
                     isOn: $firstThirdEnabled
                 )
                 Divider().padding(.leading, 66)
@@ -442,7 +447,6 @@ struct ProfileView: View {
                     title: languageManager.localize("tahajud"),
                     subtitle: languageManager.localize("tahajud_sub"),
                     hasToggle: true,
-                    iconTint: Color.Token.deepEmerald,
                     isOn: $tahajudEnabled
                 )
             }
@@ -450,30 +454,116 @@ struct ProfileView: View {
         }
     }
 
-    private var logOutButton: some View {
-        Button {
-            Task {
-                await viewModel?.signOut()
-                hasCompletedOnboarding = true
+    private var aboutSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ProfileSectionHeaderView(title: languageManager.localize("about"))
+            VStack(spacing: 0) {
+                Button {
+                    if let url = URL(string: "https://elmee.my/saat") {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    ProfileRowView(
+                        icon: "info.circle",
+                        title: languageManager.localize("about_developer"),
+                        subtitle:
+                            "Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")",
+                        hasToggle: false,
+                        isOn: .constant(false)
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Divider().padding(.leading, 66)
+
+                Button {
+                    if let url = URL(
+                        string:
+                            "https://elmee.my/saat/privacy?lang=\(languageManager.currentLanguage.rawValue)"
+                    ) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    ProfileRowView(
+                        icon: "shield",
+                        title: languageManager.localize("privacy_policy"),
+                        subtitle: languageManager.localize("privacy_policy_effective"),
+                        hasToggle: false,
+                        isOn: .constant(false)
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Divider().padding(.leading, 66)
+
+                Button {
+                    if let url = URL(
+                        string:
+                            "https://elmee.my/saat/terms?lang=\(languageManager.currentLanguage.tag)"
+                    ) {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    ProfileRowView(
+                        icon: "doc.text",
+                        title: languageManager.localize("terms_and_conditions"),
+                        subtitle: languageManager.localize("terms_effective"),
+                        hasToggle: false,
+                        isOn: .constant(false)
+                    )
+                }
+                .buttonStyle(.plain)
             }
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "rectangle.portrait.and.arrow.right")
-                    .font(.system(size: 16, weight: .bold))
-                Text(languageManager.localize("sign_out"))
-                    .font(.system(size: 16, weight: .bold))
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(Color.Token.danger)
-            .clipShape(Capsule())
-            .shadow(color: Color.Token.danger.opacity(0.2), radius: 8, y: 4)
+            .profileCardStyle()
         }
-        .buttonStyle(PillPressStyle())
-        .disabled(isOAuthPresenting)
-        .opacity(isOAuthPresenting ? 0.5 : 1)
-        .saatAccessibility(label: SaatAccessibility.Profile.signOut)
+    }
+
+    @ViewBuilder
+    private var logOutButton: some View {
+        VStack(spacing: 12) {
+            Button {
+                Task {
+                    await viewModel?.signOut()
+                    hasCompletedOnboarding = true
+                }
+            } label: {
+                Text(languageManager.localize("sign_out"))
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.Token.danger)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(PillPressStyle())
+            .disabled(isOAuthPresenting)
+            .opacity(isOAuthPresenting ? 0.5 : 1)
+            .saatAccessibility(label: SaatAccessibility.Profile.signOut)
+
+            Button {
+                if let url = URL(
+                    string:
+                        "https://elmee.my/saat/delete-account?lang=\(languageManager.currentLanguage.rawValue)"
+                ) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Text(languageManager.localize("delete_account"))
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(Color.Token.danger)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.clear)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(Color.Token.danger, lineWidth: 1)
+                    )
+            }
+            .buttonStyle(PillPressStyle())
+            .disabled(isOAuthPresenting)
+            .opacity(isOAuthPresenting ? 0.5 : 1)
+        }
     }
 
     private var showsSignedInActions: Bool {
@@ -487,8 +577,8 @@ struct ProfileView: View {
     private var fontScaleLabel: String {
         switch fontScale {
         case ..<0.95: return languageManager.localize("font_small")
-        case 0.95 ..< 1.1: return languageManager.localize("font_medium")
-        case 1.1 ..< 1.22: return languageManager.localize("font_large")
+        case 0.95..<1.1: return languageManager.localize("font_medium")
+        case 1.1..<1.22: return languageManager.localize("font_large")
         default: return languageManager.localize("font_extra_large")
         }
     }
@@ -497,7 +587,7 @@ struct ProfileView: View {
 struct AppLanguageSelectionSheet: View {
     @Binding var selectedLanguage: AppLanguage
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         NavigationStack {
             List {
@@ -532,8 +622,8 @@ struct AppLanguageSelectionSheet: View {
     }
 }
 
-private extension View {
-    func profileCardStyle() -> some View {
+extension View {
+    fileprivate func profileCardStyle() -> some View {
         background(Color.Token.pureWhite)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .shadow(color: Color.black.opacity(0.04), radius: 10, y: 4)
