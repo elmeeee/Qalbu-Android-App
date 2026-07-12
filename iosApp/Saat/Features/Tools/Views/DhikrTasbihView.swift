@@ -71,7 +71,6 @@ struct DhikrTasbihView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
             }
-            }
             
             Spacer().frame(height: 12)
             

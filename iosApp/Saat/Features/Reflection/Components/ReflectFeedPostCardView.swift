@@ -45,7 +45,7 @@ struct ReflectFeedPostCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header: Avatar, Name, Date
             HStack(alignment: .center, spacing: 12) {
-                AsyncImage(url: URL(string: post.author?.avatarUrl ?? "")) { phase in
+                AsyncImage(url: URL(string: post.author?.avatarUrls ?? "")) { phase in
                     switch phase {
                     case .empty:
                         Circle().fill(SaatTokens.Colors.softGrey.opacity(0.5))

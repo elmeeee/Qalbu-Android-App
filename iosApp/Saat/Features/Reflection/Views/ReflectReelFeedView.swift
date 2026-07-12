@@ -57,7 +57,7 @@ struct ReflectReelFeedView: View {
                                 .foregroundColor(.white)
                                 .padding()
                         } else if viewModel.posts.isEmpty {
-                            Text(viewModel.selectedSegment == .mine ? AppLanguageManager.shared.localize("reflect_empty_mine") : AppLanguageManager.shared.localize("reflect_empty_all"))
+                            Text(viewModel.selectedSegment == .myPosts ? AppLanguageManager.shared.localize("reflect_empty_mine") : AppLanguageManager.shared.localize("reflect_empty_all"))
                                 .foregroundColor(.white.opacity(0.75))
                                 .multilineTextAlignment(.center)
                                 .padding(40)
