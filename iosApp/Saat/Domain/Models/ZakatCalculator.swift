@@ -40,11 +40,31 @@ struct GoldPriceQuote: Codable, Sendable {
     let fetchedAtMillis: Int64
 }
 
-enum ZakatCountry: String, CaseIterable, Codable, Sendable {
+enum ZakatCountry: String, CaseIterable, Codable, Sendable, Identifiable {
     case indonesia = "ID"
     case malaysia = "MY"
     case singapore = "SG"
     case brunei = "BN"
+    
+    var id: String { rawValue }
+    
+    var emoji: String {
+        switch self {
+        case .indonesia: return "🇮🇩"
+        case .malaysia: return "🇲🇾"
+        case .singapore: return "🇸🇬"
+        case .brunei: return "🇧🇳"
+        }
+    }
+    
+    var labelKey: String {
+        switch self {
+        case .indonesia: return "zakat_country_indonesia"
+        case .malaysia: return "zakat_country_malaysia"
+        case .singapore: return "zakat_country_singapore"
+        case .brunei: return "zakat_country_brunei"
+        }
+    }
 }
 
 struct ZakatCalculator {

@@ -94,13 +94,12 @@ struct QiblaFinderView: View {
     
     var body: some View {
         ZStack {
-            // Background View
             if selectedMode == 0 {
                 ARCameraPreviewContainer()
                     .ignoresSafeArea()
             } else {
                 RadialGradient(
-                    colors: [Color(red: 15/255, green: 23/255, blue: 42/255), Color(red: 2/255, green: 6/255, blue: 23/255)],
+                    colors: [Color.Token.screenBackground, Color.Token.pureWhite],
                     center: .center,
                     startRadius: 100,
                     endRadius: 500
@@ -113,16 +112,15 @@ struct QiblaFinderView: View {
                 // Header Row
                 HStack(spacing: 12) {
                     Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.white)
+                        Image(systemName: "arrow.left")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(selectedMode == 0 ? .white : Color.Token.slate900)
                             .frame(width: 44, height: 44)
-                            .background(Circle().fill(Color.white.opacity(0.12)))
                     }
                     
                     Text(languageManager.localize("tool_qibla"))
-                        .font(.title3.bold())
-                        .foregroundColor(.white)
+                        .font(.title2.bold())
+                        .foregroundColor(selectedMode == 0 ? .white : Color.Token.slate900)
                     
                     Spacer()
                 }
@@ -191,13 +189,13 @@ struct QiblaFinderView: View {
             ZStack {
                 // Outer circle
                 Circle()
-                    .stroke(Color.white.opacity(0.12), lineWidth: 3)
+                    .stroke(selectedMode == 0 ? Color.white.opacity(0.12) : Color.Token.slate900.opacity(0.12), lineWidth: 3)
                     .frame(width: 280, height: 280)
                 
                 // Outer markers
                 ForEach(0..<12) { i in
                     Rectangle()
-                        .fill(Color.white.opacity(i % 3 == 0 ? 0.4 : 0.2))
+                        .fill(selectedMode == 0 ? Color.white.opacity(i % 3 == 0 ? 0.4 : 0.2) : Color.Token.slate900.opacity(i % 3 == 0 ? 0.4 : 0.2))
                         .frame(width: i % 3 == 0 ? 3 : 2, height: i % 3 == 0 ? 15 : 10)
                         .offset(y: -130)
                         .rotationEffect(.degrees(Double(i) * 30.0))
@@ -241,13 +239,12 @@ struct QiblaFinderView: View {
             }
             .frame(width: 300, height: 300)
             
-            // Bearing label HUD inside dial area
             Text(String(format: languageManager.localize("qibla_bearing_format"), Int(manager.bearing.rounded())))
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundColor(selectedMode == 0 ? .white : Color.Token.slate900)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 6)
-                .background(Capsule().fill(Color.white.opacity(0.12)))
+                .background(Capsule().fill(selectedMode == 0 ? Color.white.opacity(0.12) : Color.Token.slate900.opacity(0.12)))
         }
     }
     
@@ -269,35 +266,35 @@ struct QiblaFinderView: View {
                 VStack(spacing: 3) {
                     Text(languageManager.localize("qibla_heading"))
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(selectedMode == 0 ? .white.opacity(0.5) : Color.Token.slate500)
                     Text("\(Int(manager.heading.rounded()))°")
                         .font(.title2.bold())
-                        .foregroundColor(.white)
+                        .foregroundColor(selectedMode == 0 ? .white : Color.Token.slate900)
                 }
                 
                 Divider()
                     .frame(height: 35)
-                    .background(Color.white.opacity(0.15))
+                    .background(selectedMode == 0 ? Color.white.opacity(0.15) : Color.Token.slate900.opacity(0.15))
                 
                 VStack(spacing: 3) {
                     Text(languageManager.localize("qibla_distance"))
                         .font(.caption)
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(selectedMode == 0 ? .white.opacity(0.5) : Color.Token.slate500)
                     Text(String(format: "%.0f km", manager.distanceKm))
                         .font(.title2.bold())
-                        .foregroundColor(.white)
+                        .foregroundColor(selectedMode == 0 ? .white : Color.Token.slate900)
                 }
             }
             .padding(.horizontal, 32)
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color.black.opacity(0.45))
+                    .fill(selectedMode == 0 ? Color.black.opacity(0.45) : Color.Token.pureWhite)
                     .background(.ultraThinMaterial)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(manager.isAligned ? Color.Token.gold.opacity(0.3) : Color.white.opacity(0.1), lineWidth: 1.5)
+                    .stroke(manager.isAligned ? Color.Token.gold.opacity(0.3) : (selectedMode == 0 ? Color.white.opacity(0.1) : Color.Token.slate900.opacity(0.1)), lineWidth: 1.5)
             )
         }
         .padding(.bottom, 36)

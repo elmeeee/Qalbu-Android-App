@@ -33,16 +33,16 @@ struct DhikrTasbihView: View {
                 Button(action: {
                     dismiss()
                 }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.slate900)
                         .frame(width: 44, height: 44)
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(languageManager.localize("dhikr_title"))
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Color.Token.slate900)
+                        .font(.title2.bold())
+                        .foregroundColor(SaatTokens.Colors.slate900)
                     
                     Text(languageManager.localize("dhikr_subtitle"))
                         .font(.system(size: 12, weight: .regular))
@@ -51,9 +51,8 @@ struct DhikrTasbihView: View {
                 
                 Spacer()
             }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, SaatTokens.Spacing.screenHorizontal)
             .padding(.vertical, 8)
-            .background(Color.Token.pureWhite)
             
             // Horizontal Presets Selector
             ScrollView(.horizontal, showsIndicators: false) {
@@ -72,10 +71,9 @@ struct DhikrTasbihView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 12)
             }
-            .background(Color.Token.pureWhite)
+            }
             
-            // Divider
-            Divider()
+            Spacer().frame(height: 12)
             
             // Main Content Area
             VStack(spacing: 16) {
@@ -136,14 +134,16 @@ struct DhikrTasbihView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 20)
             }
-            .background(
-                LinearGradient(
-                    colors: [Color.Token.screenBackground, Color.Token.sageMist, Color.Token.prayerMint],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            }
         }
+        .background(
+            LinearGradient(
+                colors: [SaatTokens.Colors.screenBackground, SaatTokens.Colors.sageMist, SaatTokens.Colors.prayerMint],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+        )
         .navigationBarBackButtonHidden(true)
         .onAppear {
             count = DhikrStore.sessionCount(for: currentPreset.id)
@@ -160,17 +160,17 @@ struct DhikrPresetChip: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(isSelected ? Color.Token.pureWhite : Color.Token.slate800)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(isSelected ? SaatTokens.Colors.pureWhite : SaatTokens.Colors.slate900)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .background(
-                    Capsule()
-                        .fill(isSelected ? Color.Token.deepEmerald : Color.Token.softGrey.opacity(0.3))
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isSelected ? SaatTokens.Colors.deepEmerald : Color.clear)
                 )
                 .overlay(
-                    Capsule()
-                        .stroke(isSelected ? Color.Token.deepEmerald : Color.Token.softGrey.opacity(0.5), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isSelected ? Color.clear : SaatTokens.Colors.softGrey, lineWidth: 1)
                 )
         }
     }
@@ -203,14 +203,14 @@ struct DhikrReadingCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(18)
-        .background(Color.Token.pureWhite)
+        .background(SaatTokens.Colors.pureWhite)
         .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 3)
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
                 .stroke(
                     LinearGradient(
-                        colors: [Color.Token.teal.opacity(0.25), Color.Token.gold.opacity(0.2)],
+                        colors: [SaatTokens.Colors.teal.opacity(0.25), SaatTokens.Colors.gold.opacity(0.2)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
