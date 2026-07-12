@@ -8,180 +8,211 @@
 
 import SwiftUI
 
+private struct ToolItemData: Identifiable {
+    var id: String { route }
+    let iconName: String
+    let titleKey: String
+    let subtitleKey: String
+    let route: String
+    let accentStart: Color
+    let accentEnd: Color
+    let destination: AnyView
+}
+
 struct SpiritualToolsView: View {
     @ObservedObject private var languageManager = AppLanguageManager.shared
     
-    private let columns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
-    ]
+    private var tools: [ToolItemData] {
+        [
+            ToolItemData(
+                iconName: "safari.fill",
+                titleKey: "tool_qibla",
+                subtitleKey: "tool_qibla_sub",
+                route: "qibla",
+                accentStart: Color.Token.deepEmerald,
+                accentEnd: Color.Token.teal,
+                destination: AnyView(QiblaFinderView().toolbar(.hidden, for: .tabBar))
+            ),
+            ToolItemData(
+                iconName: "book.pages.fill",
+                titleKey: "tool_doa_zikir",
+                subtitleKey: "tool_doa_zikir_sub",
+                route: "doa-zikir",
+                accentStart: Color.Token.teal,
+                accentEnd: Color.Token.deepEmerald,
+                destination: AnyView(DoaZikirView().toolbar(.hidden, for: .tabBar))
+            ),
+            ToolItemData(
+                iconName: "heart.fill",
+                titleKey: "tool_tasbih",
+                subtitleKey: "tool_tasbih_sub",
+                route: "dhikr",
+                accentStart: Color.Token.goldDeep,
+                accentEnd: Color.Token.gold,
+                destination: AnyView(DhikrTasbihView().toolbar(.hidden, for: .tabBar))
+            ),
+            ToolItemData(
+                iconName: "percent",
+                titleKey: "tool_zakat",
+                subtitleKey: "tool_zakat_sub",
+                route: "zakat",
+                accentStart: Color.Token.indigoAccent,
+                accentEnd: Color.Token.teal,
+                destination: AnyView(ZakatCalculatorView().toolbar(.hidden, for: .tabBar))
+            ),
+            ToolItemData(
+                iconName: "person.3.fill",
+                titleKey: "tool_faraidh",
+                subtitleKey: "tool_faraidh_sub",
+                route: "faraidh",
+                accentStart: Color.Token.goldDeep,
+                accentEnd: Color.Token.deepEmerald,
+                destination: AnyView(FaraidhCalculatorView().toolbar(.hidden, for: .tabBar))
+            ),
+            ToolItemData(
+                iconName: "moon.stars.fill",
+                titleKey: "tool_qiyam",
+                subtitleKey: "tool_qiyam_sub",
+                route: "qiyam",
+                accentStart: Color.Token.deepEmerald,
+                accentEnd: Color.Token.indigoAccent,
+                destination: AnyView(QiyamTrackerView().toolbar(.hidden, for: .tabBar))
+            ),
+            ToolItemData(
+                iconName: "shield.checkerboard",
+                titleKey: "tool_manzil",
+                subtitleKey: "tool_manzil_sub",
+                route: "manzil",
+                accentStart: Color.Token.deepEmerald,
+                accentEnd: Color.Token.goldDeep,
+                destination: AnyView(ManzilView().toolbar(.hidden, for: .tabBar))
+            )
+        ]
+    }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Text(languageManager.localize("tools_desc"))
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(Color.Token.slate500)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
+            VStack(alignment: .leading, spacing: 0) {
+                // Header Box
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(languageManager.localize("tools_title"))
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(Color.Token.deepEmerald)
+                    
+                    Text(languageManager.localize("tools_desc"))
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color.Token.slate500)
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 22)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    LinearGradient(
+                        colors: [
+                            Color.Token.deepEmerald.opacity(0.14),
+                            Color.Token.teal.opacity(0.08),
+                            Color.Token.gold.opacity(0.06)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .cornerRadius(22)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.Token.deepEmerald.opacity(0.25),
+                                    Color.Token.teal.opacity(0.12)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+                .padding(.horizontal, 16)
+                .padding(.top, 16)
+                .padding(.bottom, 24)
                 
-                LazyVGrid(columns: columns, spacing: 16) {
-                    NavigationLink(destination: DhikrTasbihView().toolbar(.hidden, for: .tabBar)) {
-                        ToolCard(
-                             title: languageManager.localize("tool_tasbih"),
-                             subtitle: languageManager.localize("tool_tasbih_sub"),
-                             iconName: "circle.circle",
-                             color: Color.Token.deepEmerald
-                        )
-                    }
-                    
-                    NavigationLink(destination: DoaZikirView().toolbar(.hidden, for: .tabBar)) {
-                        ToolCard(
-                             title: languageManager.localize("tool_doa_zikir"),
-                             subtitle: languageManager.localize("tool_doa_zikir_sub"),
-                             iconName: "book.pages",
-                             color: Color.Token.teal
-                        )
-                    }
-                    
-                    NavigationLink(destination: QiblaFinderView().toolbar(.hidden, for: .tabBar)) {
-                        ToolCard(
-                             title: languageManager.localize("tool_qibla"),
-                             subtitle: languageManager.localize("tool_qibla_sub"),
-                             iconName: "safari",
-                             color: Color.Token.goldDeep
-                        )
-                    }
-                    
-                    NavigationLink(destination: ZakatCalculatorView().toolbar(.hidden, for: .tabBar)) {
-                        ToolCard(
-                             title: languageManager.localize("tool_zakat"),
-                             subtitle: languageManager.localize("tool_zakat_sub"),
-                             iconName: "percent",
-                             color: Color.Token.indigoAccent
-                        )
-                    }
-                    
-                    NavigationLink(destination: QiyamTrackerView().toolbar(.hidden, for: .tabBar)) {
-                        ToolCard(
-                             title: languageManager.localize("tool_qiyam"),
-                             subtitle: languageManager.localize("tool_qiyam_sub"),
-                             iconName: "moon.stars",
-                             color: Color.Token.indigoDeep
-                        )
-                    }
-                    
-                    NavigationLink(destination: FaraidhCalculatorView().toolbar(.hidden, for: .tabBar)) {
-                        ToolCard(
-                             title: languageManager.localize("tool_faraidh"),
-                             subtitle: languageManager.localize("tool_faraidh_sub"),
-                             iconName: "doc.text",
-                             color: Color.Token.slate900
-                        )
-                    }
-
-                    NavigationLink(destination: ManzilView().toolbar(.hidden, for: .tabBar)) {
-                        ToolCard(
-                             title: languageManager.localize("tool_manzil"),
-                             subtitle: languageManager.localize("tool_manzil_sub"),
-                             iconName: "shield.checkerboard",
-                             color: Color.Token.deepEmerald
-                        )
+                // Tools List
+                LazyVStack(spacing: 12) {
+                    ForEach(tools) { tool in
+                        NavigationLink(destination: tool.destination) {
+                            SpiritualToolCard(
+                                iconName: tool.iconName,
+                                title: languageManager.localize(tool.titleKey),
+                                subtitle: languageManager.localize(tool.subtitleKey),
+                                accentStart: tool.accentStart,
+                                accentEnd: tool.accentEnd
+                            )
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 32)
             }
-            .padding(.bottom, 30)
         }
         .background(Color.Token.screenBackground)
         .navigationTitle(languageManager.localize("tools_title"))
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
-struct ToolCard: View {
+struct SpiritualToolCard: View {
+    let iconName: String
     let title: String
     let subtitle: String
-    let iconName: String
-    let color: Color
+    let accentStart: Color
+    let accentEnd: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: iconName)
-                .font(.system(size: 24, weight: .semibold))
-                .foregroundColor(color)
-                .frame(width: 48, height: 48)
-                .background(color.opacity(0.1))
-                .clipShape(Circle())
+        HStack(alignment: .center, spacing: 14) {
+            // Icon Box
+            ZStack {
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(
+                        LinearGradient(
+                            colors: [accentStart.opacity(0.18), accentEnd.opacity(0.10)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                
+                Image(systemName: iconName)
+                    .font(.system(size: 24, weight: .regular))
+                    .foregroundColor(accentStart)
+            }
+            .frame(width: 48, height: 48)
             
-            VStack(alignment: .leading, spacing: 2) {
+            // Text Content
+            VStack(alignment: .leading, spacing: 3) {
                 Text(title)
-                    .font(.system(size: 15, weight: .bold))
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Color.Token.slate800)
-                    .multilineTextAlignment(.leading)
+                    .lineLimit(1)
                 
                 Text(subtitle)
-                    .font(.system(size: 11, weight: .regular))
+                    .font(.system(size: 12, weight: .regular))
                     .foregroundColor(Color.Token.slate500)
-                    .multilineTextAlignment(.leading)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(Color.Token.pureWhite)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
-    }
-}
-
-struct ToolCardPlaceholder: View {
-    let title: String
-    let subtitle: String
-    let iconName: String
-    let color: Color
-    
-    @State private var showAlert = false
-
-    var body: some View {
-        Button(action: {
-            showAlert = true
-        }) {
-            VStack(alignment: .leading, spacing: 12) {
-                Image(systemName: iconName)
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundColor(color.opacity(0.6))
-                    .frame(width: 48, height: 48)
-                    .background(color.opacity(0.05))
-                    .clipShape(Circle())
-                
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(Color.Token.slate800.opacity(0.7))
-                        .multilineTextAlignment(.leading)
-                    
-                    Text(subtitle)
-                        .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(Color.Token.slate500.opacity(0.7))
-                        .multilineTextAlignment(.leading)
-                }
+                    .lineLimit(2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(16)
-            .background(Color.Token.pureWhite)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.02), radius: 6, x: 0, y: 2)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 1)
-            )
+            
+            // Right Arrow
+            Image(systemName: "chevron.right")
+                .font(.system(size: 20, weight: .medium))
+                .foregroundColor(Color.Token.teal)
         }
-        .alert(isPresented: $showAlert) {
-            Alert(
-                title: Text("\(title) Tool"),
-                message: Text("This tool will be available in a future update. For now, check out the Dhikr & Tasbih and Doa & Zikir features!"),
-                dismissButton: .default(Text("OK"))
-            )
-        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(Color.Token.pureWhite)
+        .cornerRadius(18)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(Color.Token.softGrey.opacity(0.7), lineWidth: 1)
+        )
     }
 }
