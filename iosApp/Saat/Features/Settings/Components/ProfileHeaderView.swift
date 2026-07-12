@@ -167,7 +167,7 @@ struct ProfileHeaderView: View {
                 }
                 .buttonStyle(PillPressStyle())
                 .disabled(isOAuthPresenting)
-                .SaatAccessibility(
+                .saatAccessibility(
                     label: SaatAccessibility.Profile.signIn,
                     hint: "Back up reflections and sync your profile"
                 )

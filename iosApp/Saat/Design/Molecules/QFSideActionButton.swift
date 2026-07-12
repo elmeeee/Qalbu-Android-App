@@ -33,7 +33,7 @@ struct QFSideActionButton: View {
             .foregroundColor(Color.Token.slate800)
         }
         .buttonStyle(PillPressStyle())
-        .SaatAccessibility(
+        .saatAccessibility(
             label: label,
             hint: label == "Hadith"
                 ? "Show hadith narrations for this ayah"

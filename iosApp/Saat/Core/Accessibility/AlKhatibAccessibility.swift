@@ -129,7 +129,7 @@ extension QuranChapter {
 }
 
 extension View {
-    func SaatAccessibility(label: String, hint: String? = nil) -> some View {
+    func saatAccessibility(label: String, hint: String? = nil) -> some View {
         modifier(SaatAccessibilityModifier(label: label, hint: hint))
     }
 }

@@ -57,7 +57,7 @@ struct ReflectReelErrorStateView: View {
                     .background(.white)
                     .clipShape(Capsule())
             }
-            .SaatAccessibility(label: SaatAccessibility.Reflect.tryAgain)
+            .saatAccessibility(label: SaatAccessibility.Reflect.tryAgain)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

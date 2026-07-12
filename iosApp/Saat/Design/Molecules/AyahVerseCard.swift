@@ -91,7 +91,7 @@ struct AyahVerseCard: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .SaatAccessibility(
+        .saatAccessibility(
             label: text,
             hint: text == "Audio"
                 ? SaatAccessibility.VerseActions.audio(hint: "")

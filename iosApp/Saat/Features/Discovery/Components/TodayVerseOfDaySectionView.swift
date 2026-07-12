@@ -100,7 +100,7 @@ struct TodayVerseOfDayCardView: View {
                             .overlay(Circle().stroke(Color.Token.deepEmerald.opacity(0.15), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
-                    .SaatAccessibility(label: AppLanguageManager.shared.localize("share"), hint: SaatAccessibility.VerseActions.shareHint)
+                    .saatAccessibility(label: AppLanguageManager.shared.localize("share"), hint: SaatAccessibility.VerseActions.shareHint)
                     
                     // Day of the Week Badge
                     Text(dayName)
@@ -207,7 +207,7 @@ struct TodayVerseOfDayCardView: View {
                     ),
                     action: onAudio
                 )
-                .SaatAccessibility(label: "Audio", hint: audioAccessibilityHint)
+                .saatAccessibility(label: "Audio", hint: audioAccessibilityHint)
                 
                 // AI
                 actionButton(
@@ -221,7 +221,7 @@ struct TodayVerseOfDayCardView: View {
                     ),
                     action: onReflect
                 )
-                .SaatAccessibility(label: "AI Reflection", hint: SaatAccessibility.VerseActions.reflectHint)
+                .saatAccessibility(label: "AI Reflection", hint: SaatAccessibility.VerseActions.reflectHint)
                 
                 // Tafsir
                 actionButton(
@@ -235,7 +235,7 @@ struct TodayVerseOfDayCardView: View {
                     ),
                     action: onTafsir
                 )
-                .SaatAccessibility(label: "Tafsir", hint: SaatAccessibility.VerseActions.tafsirHint)
+                .saatAccessibility(label: "Tafsir", hint: SaatAccessibility.VerseActions.tafsirHint)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 20)
@@ -336,6 +336,6 @@ struct TodayActionPill: View {
             .overlay(Capsule().stroke(tint.opacity(0.15), lineWidth: 1))
         }
         .buttonStyle(PillPressStyle())
-        .SaatAccessibility(label: text, hint: hint)
+        .saatAccessibility(label: text, hint: hint)
     }
 }

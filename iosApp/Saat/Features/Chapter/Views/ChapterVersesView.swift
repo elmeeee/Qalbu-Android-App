@@ -339,7 +339,7 @@ struct ChapterVersesView: View {
                 .background(Circle().fill(Color.white.opacity(0.08)))
                 .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
         }
-        .SaatAccessibility(label: label, hint: hint)
+        .saatAccessibility(label: label, hint: hint)
     }
 
     private var sideActionButtons: some View {

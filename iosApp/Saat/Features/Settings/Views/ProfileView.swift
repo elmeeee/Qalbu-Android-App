@@ -211,7 +211,7 @@ struct ProfileView: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .SaatAccessibility(
+                .saatAccessibility(
                     label: SaatAccessibility.Profile.fontSize,
                     hint: "Current size \(fontScaleLabel). Opens font size picker"
                 )
@@ -267,7 +267,7 @@ struct ProfileView: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .SaatAccessibility(
+                .saatAccessibility(
                     label: SaatAccessibility.Profile.prayerCalculation,
                     hint: "Current method \(selectedPrayerMethod.displayName). Choose how prayer times are calculated"
                 )
@@ -296,7 +296,7 @@ struct ProfileView: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .SaatAccessibility(
+                .saatAccessibility(
                     label: SaatAccessibility.Profile.translator,
                     hint: selectedTranslationName.isEmpty
                         ? "Choose translation language for Quran text"
@@ -395,7 +395,7 @@ struct ProfileView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .SaatAccessibility(
+                    .saatAccessibility(
                         label: "Morning reminder time",
                         hint: "Currently \(dailyVerseTimeRowSubtitle). Double tap to change."
                     )
@@ -473,7 +473,7 @@ struct ProfileView: View {
         .buttonStyle(PillPressStyle())
         .disabled(isOAuthPresenting)
         .opacity(isOAuthPresenting ? 0.5 : 1)
-        .SaatAccessibility(label: SaatAccessibility.Profile.signOut)
+        .saatAccessibility(label: SaatAccessibility.Profile.signOut)
     }
 
     private var showsSignedInActions: Bool {
