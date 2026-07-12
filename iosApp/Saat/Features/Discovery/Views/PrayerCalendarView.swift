@@ -288,6 +288,7 @@ struct PrayerCalendarView: View {
                     }
                 }
                 .padding(.bottom, 30)
+            }
             .background(SaatTokens.Colors.screenBackground)
         }
         .background(SaatTokens.Colors.screenBackground)
