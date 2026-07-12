@@ -43,9 +43,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibErrorStateDark
-import app.kamy.saatApp.design.components.AlKhatibSkeletonOnDark
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.components.SaatErrorStateDark
+import app.kamy.saatApp.design.components.SaatSkeletonOnDark
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.features.today.PrayerTheme
 import app.kamy.saatApp.features.today.PrayerUiState
@@ -114,7 +114,7 @@ fun PrayerDashboardCard(
             ) {
                 when {
                     state.isLoading && state.timings.isEmpty() -> PrayerCardLoading()
-                    fetchErrorDisplay != null && state.timings.isEmpty() -> AlKhatibErrorStateDark(
+                    fetchErrorDisplay != null && state.timings.isEmpty() -> SaatErrorStateDark(
                         display = fetchErrorDisplay,
                         onRetry = onRetry,
                         modifier = Modifier.fillMaxWidth()
@@ -322,19 +322,19 @@ private fun SchedulePrayerSlot(
 @Composable
 private fun PrayerCardLoading() {
     Column(modifier = Modifier.fillMaxWidth()) {
-        AlKhatibSkeletonOnDark(
+        SaatSkeletonOnDark(
             modifier = Modifier
                 .fillMaxWidth(0.4f)
                 .height(14.dp)
         )
         Spacer(Modifier.height(8.dp))
-        AlKhatibSkeletonOnDark(
+        SaatSkeletonOnDark(
             modifier = Modifier
                 .fillMaxWidth(0.65f)
                 .height(28.dp)
         )
         Spacer(Modifier.height(16.dp))
-        AlKhatibSkeletonOnDark(
+        SaatSkeletonOnDark(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),

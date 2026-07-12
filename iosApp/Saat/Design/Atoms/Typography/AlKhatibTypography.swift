@@ -1,5 +1,5 @@
 //
-//  AlKhatibTypography.swift
+//  SaatTypography.swift
 //  Sāat
 //
 //  Created by Elmee on 25/04/2026.
@@ -10,7 +10,7 @@ import SwiftUI
 import CoreText
 internal import UIKit
 
-enum AlKhatibTypography {
+enum SaatTypography {
     @MainActor
     static func quranArabic(size: CGFloat) -> Font {
         return FontResolver.quranFont(size: size)
@@ -39,10 +39,10 @@ private struct VerseArabicHTMLFontPreparer {
             return nil
         }
 
-        let dir = cachesRoot.appendingPathComponent("AlKhatibWebFonts", isDirectory: true)
+        let dir = cachesRoot.appendingPathComponent("SaatWebFonts", isDirectory: true)
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
 
-        let fontCopy = dir.appendingPathComponent(AlKhatibTypography.verseWebFontRelativeFileName, isDirectory: false)
+        let fontCopy = dir.appendingPathComponent(SaatTypography.verseWebFontRelativeFileName, isDirectory: false)
         if !FileManager.default.fileExists(atPath: fontCopy.path) {
             do {
                 try asset.data.write(to: fontCopy, options: [.atomic])

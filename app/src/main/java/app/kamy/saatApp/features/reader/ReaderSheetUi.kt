@@ -40,11 +40,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import app.kamy.saatApp.design.components.AlKhatibErrorState
-import app.kamy.saatApp.design.components.AlKhatibSkeletonLine
+import app.kamy.saatApp.design.components.SaatErrorState
+import app.kamy.saatApp.design.components.SaatSkeletonLine
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @Composable
 fun ReaderKnowledgeSheetBackground(
@@ -57,7 +57,7 @@ fun ReaderKnowledgeSheetBackground(
             .fillMaxHeight()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(AlKhatibColors.OffWhite, AlKhatibColors.SageMist)
+                    colors = listOf(SaatColors.OffWhite, SaatColors.SageMist)
                 )
             )
             .navigationBarsPadding()
@@ -114,14 +114,14 @@ fun ReaderSheetTopBar(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = AlKhatibColors.DeepEmerald
+            color = SaatColors.DeepEmerald
         )
         Spacer(Modifier.weight(1f))
         TextButton(onClick = onDone) {
             Text(
                 stringResource(R.string.done),
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
         }
     }
@@ -142,7 +142,7 @@ fun VerseContextHeader(
             .shadow(2.dp, RoundedCornerShape(14.dp), spotColor = Color.Black.copy(alpha = 0.04f))
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.88f))
-            .border(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.65f), RoundedCornerShape(14.dp))
+            .border(1.dp, SaatColors.SoftGrey.copy(alpha = 0.65f), RoundedCornerShape(14.dp))
             .padding(14.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top
@@ -150,7 +150,7 @@ fun VerseContextHeader(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = AlKhatibColors.DeepEmerald.copy(alpha = 0.88f),
+            tint = SaatColors.DeepEmerald.copy(alpha = 0.88f),
             modifier = Modifier.size(28.dp)
         )
         Column(modifier = Modifier.weight(1f)) {
@@ -158,14 +158,14 @@ fun VerseContextHeader(
                 text = verseReference.ifBlank { thisVerseLabel },
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
             subtitle?.let {
                 Spacer(Modifier.height(6.dp))
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
         }
@@ -176,7 +176,7 @@ fun VerseContextHeader(
 fun ReaderSheetDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(top = 8.dp),
-        color = AlKhatibColors.SoftGrey.copy(alpha = 0.55f)
+        color = SaatColors.SoftGrey.copy(alpha = 0.55f)
     )
 }
 
@@ -187,7 +187,7 @@ fun ReaderLoadingSkeleton(lines: Int = 8) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         repeat(lines) { i ->
-            AlKhatibSkeletonLine(
+            SaatSkeletonLine(
                 widthFraction = when (i % 3) {
                     0 -> 1f
                     1 -> 0.92f
@@ -208,10 +208,10 @@ fun HadithCardSkeleton() {
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        AlKhatibSkeletonLine(widthFraction = 0.45f, height = 12.dp)
-        AlKhatibSkeletonLine(height = 12.dp)
-        AlKhatibSkeletonLine(height = 12.dp)
-        AlKhatibSkeletonLine(widthFraction = 0.7f, height = 12.dp)
+        SaatSkeletonLine(widthFraction = 0.45f, height = 12.dp)
+        SaatSkeletonLine(height = 12.dp)
+        SaatSkeletonLine(height = 12.dp)
+        SaatSkeletonLine(widthFraction = 0.7f, height = 12.dp)
     }
 }
 
@@ -231,20 +231,20 @@ fun ReaderEmptyState(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = AlKhatibColors.DeepEmerald.copy(alpha = 0.5f),
+            tint = SaatColors.DeepEmerald.copy(alpha = 0.5f),
             modifier = Modifier.size(48.dp)
         )
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
-            color = AlKhatibColors.Slate900,
+            color = SaatColors.Slate900,
             textAlign = TextAlign.Center
         )
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             textAlign = TextAlign.Center
         )
     }
@@ -258,7 +258,7 @@ fun ReaderErrorState(
 ) {
     val display = error.rememberErrorDisplay(featureTitleRes)
     if (display != null) {
-        AlKhatibErrorState(display = display, onRetry = onRetry)
+        SaatErrorState(display = display, onRetry = onRetry)
     }
 }
 
@@ -266,4 +266,4 @@ fun Modifier.readerKnowledgeCard(): Modifier = this
     .shadow(2.dp, RoundedCornerShape(14.dp), spotColor = Color.Black.copy(alpha = 0.04f))
     .clip(RoundedCornerShape(14.dp))
     .background(Color.White.copy(alpha = 0.88f))
-    .border(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.65f), RoundedCornerShape(14.dp))
+    .border(1.dp, SaatColors.SoftGrey.copy(alpha = 0.65f), RoundedCornerShape(14.dp))

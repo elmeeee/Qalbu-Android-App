@@ -1,5 +1,5 @@
 //
-//  AlKhatibAccessibility.swift
+//  SaatAccessibility.swift
 //  Sāat
 //
 //  Created by Elmee on 25/04/2026.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-enum AlKhatibAccessibility {
+enum SaatAccessibility {
     enum Tab {
         static let today = "Today"
         static let todayHint = "Prayer times, verse of the day, and daily actions"
@@ -129,12 +129,12 @@ extension QuranChapter {
 }
 
 extension View {
-    func alKhatibAccessibility(label: String, hint: String? = nil) -> some View {
-        modifier(AlKhatibAccessibilityModifier(label: label, hint: hint))
+    func SaatAccessibility(label: String, hint: String? = nil) -> some View {
+        modifier(SaatAccessibilityModifier(label: label, hint: hint))
     }
 }
 
-private struct AlKhatibAccessibilityModifier: ViewModifier {
+private struct SaatAccessibilityModifier: ViewModifier {
     let label: String
     let hint: String?
 

@@ -59,11 +59,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibErrorStateDark
-import app.kamy.saatApp.design.components.AlKhatibPullToRefresh
+import app.kamy.saatApp.design.components.SaatErrorStateDark
+import app.kamy.saatApp.design.components.SaatPullToRefresh
 import app.kamy.saatApp.design.components.ReflectPostSkeleton
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.ReflectFeedPost
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import app.kamy.saatApp.ui.common.stripHtmlTags
@@ -139,12 +139,12 @@ fun ReflectScreen(
                         reflectTitle = reflectTitle,
                         reflectCommunity = reflectCommunity
                     )
-                    AlKhatibErrorStateDark(
+                    SaatErrorStateDark(
                         display = errorDisplay,
                         onRetry = { vm.loadPosts(reset = true) },
                         modifier = Modifier
                             .weight(1f)
-                            .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                            .padding(horizontal = SaatSpacing.screenHorizontal)
                     )
                 }
             else -> ReflectFeed(
@@ -196,7 +196,7 @@ private fun ReflectLoadingState(
             reflectCommunity = reflectCommunity
         )
         Column(
-            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             repeat(3) { ReflectPostSkeleton() }
@@ -228,7 +228,7 @@ private fun ReflectFeed(
         else R.string.reflect_empty_all
     )
 
-    AlKhatibPullToRefresh(
+    SaatPullToRefresh(
         isRefreshing = state.isLoading && state.posts.isNotEmpty(),
         onRefresh = { scope.launch { vm.refreshFeed() } },
         modifier = Modifier.fillMaxSize()
@@ -246,8 +246,8 @@ private fun ReflectFeed(
                     .fillMaxWidth()
                     .weight(1f),
                 contentPadding = PaddingValues(
-                    start = AlKhatibSpacing.screenHorizontal,
-                    end = AlKhatibSpacing.screenHorizontal,
+                    start = SaatSpacing.screenHorizontal,
+                    end = SaatSpacing.screenHorizontal,
                     bottom = listBottomPadding
                 ),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -281,7 +281,7 @@ private fun ReflectFeed(
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(
-                                color = AlKhatibColors.GoldBright,
+                                color = SaatColors.GoldBright,
                                 strokeWidth = 2.dp,
                                 modifier = Modifier.size(28.dp)
                             )
@@ -306,8 +306,8 @@ private fun ReflectStickyHeader(
             .fillMaxWidth()
             .tabContentStatusBarInset()
             .padding(
-                horizontal = AlKhatibSpacing.screenHorizontal,
-                vertical = AlKhatibSpacing.md
+                horizontal = SaatSpacing.screenHorizontal,
+                vertical = SaatSpacing.md
             )
     ) {
         Text(
@@ -322,7 +322,7 @@ private fun ReflectStickyHeader(
             style = MaterialTheme.typography.bodyMedium,
             color = ReflectOnPrimaryColor().copy(alpha = 0.72f)
         )
-        Spacer(Modifier.height(AlKhatibSpacing.md))
+        Spacer(Modifier.height(SaatSpacing.md))
         SegmentSwitcher(
             segment = segment,
             onSelect = onSelectSegment,
@@ -414,7 +414,7 @@ private fun ReflectPostCard(
                         Spacer(Modifier.width(6.dp))
                         Text(
                             text = "✓",
-                            color = AlKhatibColors.Gold,
+                            color = SaatColors.Gold,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -652,14 +652,14 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
             Icon(
                 Icons.AutoMirrored.Filled.Login,
                 contentDescription = null,
-                tint = AlKhatibColors.GoldBright,
+                tint = SaatColors.GoldBright,
                 modifier = Modifier.size(36.dp)
             )
         }
         Spacer(Modifier.height(20.dp))
         Text(
             text = title,
-            color = AlKhatibColors.Slate800,
+            color = SaatColors.Slate800,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
@@ -667,7 +667,7 @@ private fun SignInGate(onSignIn: () -> Unit, title: String, subtitle: String) {
         Spacer(Modifier.height(10.dp))
         Text(
             text = subtitle,
-            color = AlKhatibColors.Slate800.copy(alpha = 0.72f),
+            color = SaatColors.Slate800.copy(alpha = 0.72f),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight

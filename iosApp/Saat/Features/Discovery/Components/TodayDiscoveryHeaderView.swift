@@ -110,7 +110,7 @@ struct TodayDiscoveryHeaderView: View {
                 .lineLimit(1)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(AlKhatibAccessibility.Today.location), \(cityName ?? "")")
+        .accessibilityLabel("\(SaatAccessibility.Today.location), \(cityName ?? "")")
     }
 
     private var todayBadge: some View {

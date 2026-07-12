@@ -167,8 +167,8 @@ struct ProfileHeaderView: View {
                 }
                 .buttonStyle(PillPressStyle())
                 .disabled(isOAuthPresenting)
-                .alKhatibAccessibility(
-                    label: AlKhatibAccessibility.Profile.signIn,
+                .SaatAccessibility(
+                    label: SaatAccessibility.Profile.signIn,
                     hint: "Back up reflections and sync your profile"
                 )
             }

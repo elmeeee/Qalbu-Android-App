@@ -11,10 +11,10 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @Composable
-fun AlKhatibVerseReferenceChip(
+fun SaatVerseReferenceChip(
     label: String,
     modifier: Modifier = Modifier
 ) {
@@ -34,12 +34,12 @@ fun AlKhatibVerseReferenceChip(
 }
 
 @Composable
-fun AlKhatibRevelationChip(
+fun SaatRevelationChip(
     label: String,
     isMeccan: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val accent = if (isMeccan) AlKhatibColors.Gold else AlKhatibColors.BlueLink
+    val accent = if (isMeccan) SaatColors.Gold else SaatColors.BlueLink
     SuggestionChip(
         onClick = {},
         enabled = false,
@@ -60,7 +60,7 @@ fun AlKhatibRevelationChip(
 }
 
 @Composable
-fun AlKhatibFilterChip(
+fun SaatFilterChip(
     selected: Boolean,
     label: String,
     onClick: () -> Unit,

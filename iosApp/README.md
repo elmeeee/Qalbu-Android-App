@@ -111,8 +111,8 @@ OAuth host (separate from API base):
 
 | Build | Registered redirect URI (QF) | App callback (ASWebAuthenticationSession) |
 |-------|------------------------------|-------------------------------------------|
-| **Debug (Prelive)** | `alkhatib://oauth/callback` | `alkhatib://oauth/callback` |
-| **Release (Production)** | `https://elmee.my/oauth/callback` | `alkhatib://oauth/callback` (bridge from [elmee.my](https://elmee.my/oauth/callback)) |
+| **Debug (Prelive)** | `Saat://oauth/callback` | `Saat://oauth/callback` |
+| **Release (Production)** | `https://elmee.my/oauth/callback` | `Saat://oauth/callback` (bridge from [elmee.my](https://elmee.my/oauth/callback)) |
 
 ### OAuth 2.0 (user identity)
 
@@ -327,7 +327,7 @@ Saat/
    | `API_KEY_GROQ` | Optional — AI reflection drafts on Today |
    | `AI_MODEL` | Optional — Groq model id (default `qwen/qwen3-32b`) |
 
-3. Ensure your QF OAuth app allows the redirect URI for your build (`alkhatib://oauth/callback` for Prelive; `https://elmee.my/oauth/callback` for Production) and scopes matching `QF_OAUTH_SCOPES` in `Config/Debug.xcconfig` / `Release.xcconfig`.
+3. Ensure your QF OAuth app allows the redirect URI for your build (`Saat://oauth/callback` for Prelive; `https://elmee.my/oauth/callback` for Production) and scopes matching `QF_OAUTH_SCOPES` in `Config/Debug.xcconfig` / `Release.xcconfig`.
 
 4. After changing scopes, **sign out and sign in again** so a new refresh token is issued.
 

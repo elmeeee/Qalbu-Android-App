@@ -21,10 +21,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @Composable
-fun AlKhatibEmptyState(
+fun SaatEmptyState(
     icon: ImageVector,
     title: String,
     body: String,
@@ -42,24 +42,24 @@ fun AlKhatibEmptyState(
         androidx.compose.foundation.layout.Box(
             modifier = Modifier
                 .size(72.dp)
-                .background(AlKhatibColors.MintWash, CircleShape),
+                .background(SaatColors.MintWash, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = AlKhatibColors.DeepEmerald, modifier = Modifier.size(36.dp))
+            Icon(icon, contentDescription = null, tint = SaatColors.DeepEmerald, modifier = Modifier.size(36.dp))
         }
         Spacer(Modifier.height(16.dp))
         Text(
             title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.Slate900,
+            color = SaatColors.Slate900,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(8.dp))
         Text(
             body,
             style = MaterialTheme.typography.bodyMedium,
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             textAlign = TextAlign.Center
         )
         if (cta != null && onCta != null) {
@@ -67,7 +67,7 @@ fun AlKhatibEmptyState(
             Button(
                 onClick = onCta,
                 shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = AlKhatibColors.DeepEmerald)
+                colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
             ) {
                 Text(cta, fontWeight = FontWeight.SemiBold)
             }

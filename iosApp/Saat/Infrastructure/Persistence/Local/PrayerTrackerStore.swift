@@ -27,7 +27,7 @@ internal struct PrayerDayProgress: Sendable, Identifiable {
 
 internal final class PrayerTrackerStore: @unchecked Sendable {
     private let defaults: UserDefaults
-    private let PREFS_KEY = "alkhatib.prayer.tracker.v1"
+    private let PREFS_KEY = "Saat.prayer.tracker.v1"
     private let KEY_BEST_STREAK = "best_streak"
     
     private let dayKeyFormatter: DateFormatter = {

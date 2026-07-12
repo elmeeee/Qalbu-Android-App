@@ -56,7 +56,7 @@ struct ProfileRowView: View {
         .accessibilityElement(children: hasToggle ? .ignore : .combine)
         .accessibilityLabel(
             hasToggle
-                ? AlKhatibAccessibility.Profile.toggle(title, subtitle: subtitle, isOn: isOn)
+                ? SaatAccessibility.Profile.toggle(title, subtitle: subtitle, isOn: isOn)
                 : "\(title). \(subtitle)"
         )
     }

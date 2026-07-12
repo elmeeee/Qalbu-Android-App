@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @Composable
 fun SpiritualToolsRow(
@@ -36,7 +36,7 @@ fun SpiritualToolsRow(
             text = stringResource(R.string.spiritual_tools_title),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             modifier = Modifier.padding(bottom = 10.dp)
         )
         Row(
@@ -63,11 +63,11 @@ private fun ToolItem(
             .clickable(onClick = onClick)
             .padding(horizontal = 4.dp, vertical = 6.dp)
     ) {
-        Icon(icon, contentDescription = label, tint = AlKhatibColors.DeepEmerald)
+        Icon(icon, contentDescription = label, tint = SaatColors.DeepEmerald)
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = AlKhatibColors.Slate800,
+            color = SaatColors.Slate800,
             modifier = Modifier.padding(top = 6.dp)
         )
     }

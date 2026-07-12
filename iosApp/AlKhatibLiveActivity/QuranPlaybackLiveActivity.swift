@@ -1,6 +1,6 @@
 //
 //  QuranPlaybackLiveActivity.swift
-//  AlKhatibLiveActivity
+//  SaatLiveActivity
 //
 //  Created by Elmee on 26/06/2026.
 //  Copyright © 2026 Elmee. All rights reserved.

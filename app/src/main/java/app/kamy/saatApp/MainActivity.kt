@@ -13,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import app.kamy.saatApp.design.theme.AlKhatibTheme
+import app.kamy.saatApp.design.theme.SaatTheme
 import app.kamy.saatApp.core.locale.AppLocale
 import app.kamy.saatApp.ui.navigation.DeepLinkRoutes
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
             val pendingRoute by deepLinkRoute
             val currentTheme by themePreferencesStore.themeFlow.collectAsState(initial = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
 
-            AlKhatibTheme(theme = currentTheme) {
+            SaatTheme(theme = currentTheme) {
                 if (isAdhanFullScreen) {
                     AdhanFullScreenOverlay(
                         title = adhanTitle,

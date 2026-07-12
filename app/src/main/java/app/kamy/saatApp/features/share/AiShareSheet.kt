@@ -34,8 +34,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.core.error.AppError
-import app.kamy.saatApp.design.components.AlKhatibInlineError
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.components.SaatInlineError
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,13 +72,13 @@ fun AiShareSheet(
                 Icon(
                     Icons.Filled.AutoAwesome,
                     contentDescription = null,
-                    tint = AlKhatibColors.DeepEmerald
+                    tint = SaatColors.DeepEmerald
                 )
                 Text(
                     text = stringResource(R.string.ai_reflection),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald,
+                    color = SaatColors.DeepEmerald,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -89,7 +89,7 @@ fun AiShareSheet(
                 modifier = Modifier.fillMaxWidth()
             )
             errorDisplay?.let { display ->
-                AlKhatibInlineError(
+                SaatInlineError(
                     display = display,
                     onRetry = onRegenerate
                 )
@@ -101,7 +101,7 @@ fun AiShareSheet(
                         .padding(vertical = 24.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    CircularProgressIndicator(color = AlKhatibColors.DeepEmerald)
+                    CircularProgressIndicator(color = SaatColors.DeepEmerald)
                 }
             } else {
                 OutlinedTextField(
@@ -125,7 +125,7 @@ fun AiShareSheet(
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.padding(end = 8.dp),
-                            color = AlKhatibColors.DeepEmerald,
+                            color = SaatColors.DeepEmerald,
                             strokeWidth = 2.dp
                         )
                         Text(

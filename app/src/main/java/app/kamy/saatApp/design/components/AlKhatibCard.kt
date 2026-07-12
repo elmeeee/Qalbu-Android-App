@@ -14,16 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-enum class AlKhatibCardStyle {
+enum class SaatCardStyle {
     Elevated,
     Filled,
     Outlined
 }
 
 @Composable
-fun AlKhatibCard(
+fun SaatCard(
     modifier: Modifier = Modifier,
-    style: AlKhatibCardStyle = AlKhatibCardStyle.Elevated,
+    style: SaatCardStyle = SaatCardStyle.Elevated,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
@@ -35,10 +35,10 @@ fun AlKhatibCard(
         focusedElevation = 2.dp,
         hoveredElevation = 3.dp
     )
-    val padding = Modifier.padding(AlKhatibCardDefaults.ContentPadding)
+    val padding = Modifier.padding(SaatCardDefaults.ContentPadding)
 
     when (style) {
-        AlKhatibCardStyle.Elevated -> {
+        SaatCardStyle.Elevated -> {
             if (onClick != null) {
                 ElevatedCard(
                     onClick = onClick,
@@ -60,7 +60,7 @@ fun AlKhatibCard(
                 }
             }
         }
-        AlKhatibCardStyle.Filled -> {
+        SaatCardStyle.Filled -> {
             if (onClick != null) {
                 Card(
                     onClick = onClick,
@@ -80,7 +80,7 @@ fun AlKhatibCard(
                 }
             }
         }
-        AlKhatibCardStyle.Outlined -> {
+        SaatCardStyle.Outlined -> {
             if (onClick != null) {
                 OutlinedCard(
                     onClick = onClick,
@@ -103,6 +103,6 @@ fun AlKhatibCard(
     }
 }
 
-object AlKhatibCardDefaults {
+object SaatCardDefaults {
     val ContentPadding = 16.dp
 }

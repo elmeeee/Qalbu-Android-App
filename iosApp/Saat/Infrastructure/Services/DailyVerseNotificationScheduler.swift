@@ -19,8 +19,8 @@ final class DailyVerseNotificationScheduler {
     }
 
     private let center = UNUserNotificationCenter.current()
-    private let identifierPrefix = "alkhatib.dailyverse"
-    private let repeatingIdentifier = "alkhatib.dailyverse.repeating"
+    private let identifierPrefix = "Saat.dailyverse"
+    private let repeatingIdentifier = "Saat.dailyverse.repeating"
 
     func authorizationStatus() async -> UNAuthorizationStatus {
         await center.notificationSettings().authorizationStatus

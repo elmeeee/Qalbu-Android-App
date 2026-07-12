@@ -39,7 +39,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
 import app.kamy.saatApp.domain.model.ReadingSession
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +61,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import app.kamy.saatApp.design.components.AlKhatibPullToRefresh
+import app.kamy.saatApp.design.components.SaatPullToRefresh
 import app.kamy.saatApp.ui.permissions.areAppNotificationsEnabled
 import app.kamy.saatApp.ui.permissions.canScheduleExactAlarms
 import app.kamy.saatApp.ui.permissions.hasAggressiveOemBatteryManagement
@@ -265,7 +265,7 @@ fun TodayScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AlKhatibPullToRefresh(
+        SaatPullToRefresh(
             isRefreshing = isPullRefreshing,
             onRefresh = {
                 scope.launch {
@@ -471,17 +471,17 @@ private fun TodayContinueReadingCard(
         onClick = onTap,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, AlKhatibColors.Teal.copy(alpha = 0.2f))
+        border = BorderStroke(1.dp, SaatColors.Teal.copy(alpha = 0.2f))
     ) {
         Box(
             modifier = Modifier
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
-                            AlKhatibColors.MintWash.copy(alpha = 0.5f),
-                            AlKhatibColors.PureWhite
+                            SaatColors.MintWash.copy(alpha = 0.5f),
+                            SaatColors.PureWhite
                         )
                     )
                 )
@@ -494,13 +494,13 @@ private fun TodayContinueReadingCard(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(AlKhatibColors.Teal.copy(alpha = 0.12f)),
+                        .background(SaatColors.Teal.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Filled.Bookmark,
                         contentDescription = null,
-                        tint = AlKhatibColors.Teal,
+                        tint = SaatColors.Teal,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -511,7 +511,7 @@ private fun TodayContinueReadingCard(
                         style = MaterialTheme.typography.labelSmall.copy(
                             letterSpacing = 0.5.sp
                         ),
-                        color = AlKhatibColors.Teal,
+                        color = SaatColors.Teal,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.height(2.dp))
@@ -519,7 +519,7 @@ private fun TodayContinueReadingCard(
                         text = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.Slate900,
+                        color = SaatColors.Slate900,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -527,14 +527,14 @@ private fun TodayContinueReadingCard(
                     Text(
                         text = stringResource(R.string.ayah_number, session.verseNumber),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
                 Spacer(Modifier.width(8.dp))
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
-                    tint = AlKhatibColors.Teal.copy(alpha = 0.7f),
+                    tint = SaatColors.Teal.copy(alpha = 0.7f),
                     modifier = Modifier.size(20.dp)
                 )
             }

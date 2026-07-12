@@ -18,9 +18,9 @@ struct SaatApp: App {
         Prowl.start()
         UNUserNotificationCenter.current().delegate = PrayerNotificationCenterDelegate.shared
         self.appContainer = AppContainer()
-        _ = AlKhatibTypography.verseArabicHTMLBaseDirectory()
+        _ = SaatTypography.verseArabicHTMLBaseDirectory()
         Task { @MainActor in
-            _ = AlKhatibTypography.quranArabicUIFont(size: 24)
+            _ = SaatTypography.quranArabicUIFont(size: 24)
             if UserDefaults.standard.bool(forKey: "hasCompletedOnboarding"), DailyVerseNotificationPreferences.isEnabled() {
                 _ = await DailyVerseNotificationScheduler().requestAuthorizationIfNeeded()
             }

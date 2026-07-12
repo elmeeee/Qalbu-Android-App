@@ -258,7 +258,7 @@ struct TodayDiscoveryView: View {
     }
 
     private func audioHint(vm: TodayDiscoveryViewModel) -> String {
-        AlKhatibAccessibility.VerseActions.audio(
+        SaatAccessibility.VerseActions.audio(
             hint: vm.recitations.first(where: { $0.id == vm.selectedRecitationId })?.displayName ?? ""
         )
     }

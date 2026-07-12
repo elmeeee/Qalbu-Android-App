@@ -42,7 +42,7 @@ struct ReflectFeedTabBarView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(
-                    AlKhatibAccessibility.Reflect.segmentTab(segment.title, isSelected: isSelected)
+                    SaatAccessibility.Reflect.segmentTab(segment.title, isSelected: isSelected)
                 )
                 .accessibilityAddTraits(isSelected ? [.isSelected] : [])
             }

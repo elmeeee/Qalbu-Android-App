@@ -33,11 +33,11 @@ struct QFSideActionButton: View {
             .foregroundColor(Color.Token.slate800)
         }
         .buttonStyle(PillPressStyle())
-        .alKhatibAccessibility(
+        .SaatAccessibility(
             label: label,
             hint: label == "Hadith"
                 ? "Show hadith narrations for this ayah"
-                : AlKhatibAccessibility.VerseActions.tafsirHint
+                : SaatAccessibility.VerseActions.tafsirHint
         )
     }
 }

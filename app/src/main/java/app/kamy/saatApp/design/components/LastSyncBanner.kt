@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @Composable
 fun LastSyncBanner(
@@ -28,20 +28,20 @@ fun LastSyncBanner(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(AlKhatibColors.SageMist.copy(alpha = 0.65f))
+            .background(SaatColors.SageMist.copy(alpha = 0.65f))
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             Icons.Outlined.Schedule,
             contentDescription = null,
-            tint = AlKhatibColors.Slate500,
+            tint = SaatColors.Slate500,
             modifier = Modifier.padding(end = 8.dp)
         )
         Text(
             text = message,
             style = MaterialTheme.typography.labelMedium,
-            color = AlKhatibColors.Slate500
+            color = SaatColors.Slate500
         )
     }
 }

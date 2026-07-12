@@ -81,8 +81,8 @@ struct NightDivisionEntry: Sendable {
 @MainActor
 final class PrayerNotificationScheduler {
     private let center = UNUserNotificationCenter.current()
-    private let prayerPrefix = "alkhatib.prayer"
-    private let nightPrefix = "alkhatib.night"
+    private let prayerPrefix = "Saat.prayer"
+    private let nightPrefix = "Saat.night"
 
     func requestAuthorizationIfNeeded() async -> Bool {
         let settings = await center.notificationSettings()

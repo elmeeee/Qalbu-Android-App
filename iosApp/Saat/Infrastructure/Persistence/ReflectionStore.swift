@@ -10,7 +10,7 @@ import Foundation
 
 final class ReflectionStore: @unchecked Sendable {
     private let defaults: UserDefaults
-    private let storageKey = "alkhatib.reflection.journal.v1"
+    private let storageKey = "Saat.reflection.journal.v1"
     private let lock = NSLock()
     private let decoder: JSONDecoder = {
         let d = JSONDecoder()

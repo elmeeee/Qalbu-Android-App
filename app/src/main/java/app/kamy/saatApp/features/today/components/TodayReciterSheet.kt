@@ -28,7 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.RecitationPayload
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,12 +54,12 @@ fun TodayReciterSheet(
                 text = stringResource(R.string.reciter),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
             if (recitations.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
             } else {
                 LazyColumn(
@@ -75,7 +75,7 @@ fun TodayReciterSheet(
                                 .clip(RoundedCornerShape(10.dp))
                                 .clickable { onSelectRecitation(recitation.identifiableId) }
                                 .background(
-                                    if (selected) AlKhatibColors.DeepEmerald.copy(alpha = 0.1f)
+                                    if (selected) SaatColors.DeepEmerald.copy(alpha = 0.1f)
                                     else Color.Transparent
                                 )
                                 .padding(horizontal = 12.dp, vertical = 14.dp)
@@ -83,13 +83,13 @@ fun TodayReciterSheet(
                             Text(
                                 text = recitation.displayName,
                                 modifier = Modifier.weight(1f),
-                                color = AlKhatibColors.Slate900,
+                                color = SaatColors.Slate900,
                                 style = MaterialTheme.typography.bodyLarge
                             )
                             if (selected) {
                                 Text(
                                     text = "✓",
-                                    color = AlKhatibColors.DeepEmerald,
+                                    color = SaatColors.DeepEmerald,
                                     fontWeight = FontWeight.Bold
                                 )
                             }

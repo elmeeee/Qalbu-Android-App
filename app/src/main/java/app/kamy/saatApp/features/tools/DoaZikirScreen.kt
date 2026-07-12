@@ -63,7 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.TajweedFontFamily
 import app.kamy.saatApp.domain.model.DhikrBundle
 import app.kamy.saatApp.domain.model.DhikrContentItem
@@ -111,7 +111,7 @@ fun DoaZikirScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(SaatColors.ScreenBackground)
             .tabContentStatusBarInset()
     ) {
         DoaZikirTopBar(
@@ -141,7 +141,7 @@ fun DoaZikirScreen(
                     .padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(color = AlKhatibColors.DeepEmerald)
+                CircularProgressIndicator(color = SaatColors.DeepEmerald)
             }
             return
         }
@@ -200,7 +200,7 @@ fun DoaZikirScreen(
                                             text = title,
                                             style = MaterialTheme.typography.titleSmall,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = AlKhatibColors.TealDark,
+                                            color = SaatColors.TealDark,
                                             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                                         )
                                     }
@@ -227,7 +227,7 @@ fun DoaZikirScreen(
                             .align(Alignment.BottomEnd)
                             .padding(bottom = 24.dp, end = 24.dp),
                         shape = RoundedCornerShape(28.dp),
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         shadowElevation = 6.dp
                     ) {
                         Row(
@@ -235,8 +235,8 @@ fun DoaZikirScreen(
                                 .background(
                                     Brush.horizontalGradient(
                                         listOf(
-                                            AlKhatibColors.DeepEmerald,
-                                            AlKhatibColors.Teal
+                                            SaatColors.DeepEmerald,
+                                            SaatColors.Teal
                                         )
                                     )
                                 )
@@ -251,7 +251,7 @@ fun DoaZikirScreen(
                             Icon(
                                 imageVector = Icons.Filled.PlayArrow,
                                 contentDescription = null,
-                                tint = AlKhatibColors.PureWhite,
+                                tint = SaatColors.PureWhite,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(8.dp))
@@ -259,7 +259,7 @@ fun DoaZikirScreen(
                                 text = "Mulai Zikir",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = AlKhatibColors.PureWhite
+                                color = SaatColors.PureWhite
                             )
                         }
                     }
@@ -305,7 +305,7 @@ private fun ZikirSessionContainer(
             Text(
                 text = "Zikir kosong",
                 style = MaterialTheme.typography.bodyLarge,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
         }
         return
@@ -368,13 +368,13 @@ private fun ZikirSessionContainer(
                 Text(
                     text = "Dzikir ${currentItemIndex + 1} dari ${sessionItems.size}",
                     style = MaterialTheme.typography.labelLarge,
-                    color = AlKhatibColors.DeepEmerald,
+                    color = SaatColors.DeepEmerald,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
                     text = "${(progressPercent * 100).toInt()}%",
                     style = MaterialTheme.typography.labelMedium,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
             Spacer(Modifier.height(8.dp))
@@ -384,7 +384,7 @@ private fun ZikirSessionContainer(
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 trackColor = Color(0xFFE2E8F0)
             )
             Spacer(Modifier.height(16.dp))
@@ -414,11 +414,11 @@ private fun ZikirSessionContainer(
                             .fillMaxSize()
                             .verticalScroll(rememberScrollState())
                             .clip(RoundedCornerShape(24.dp))
-                            .background(AlKhatibColors.PureWhite)
+                            .background(SaatColors.PureWhite)
                             .border(
                                 1.dp,
                                 Brush.linearGradient(
-                                    listOf(AlKhatibColors.Teal.copy(0.25f), AlKhatibColors.Gold.copy(0.2f))
+                                    listOf(SaatColors.Teal.copy(0.25f), SaatColors.Gold.copy(0.2f))
                                 ),
                                 RoundedCornerShape(24.dp)
                             )
@@ -428,7 +428,7 @@ private fun ZikirSessionContainer(
                             Text(
                                 text = item.bundleTitle,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = AlKhatibColors.Teal,
+                                color = SaatColors.Teal,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
@@ -439,7 +439,7 @@ private fun ZikirSessionContainer(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(16.dp))
-                                    .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.05f))
+                                    .background(SaatColors.DeepEmerald.copy(alpha = 0.05f))
                                     .padding(16.dp)
                             ) {
                                 Text(
@@ -451,7 +451,7 @@ private fun ZikirSessionContainer(
                                         fontWeight = FontWeight.Normal
                                     ),
                                     textAlign = TextAlign.End,
-                                    color = AlKhatibColors.Slate900,
+                                    color = SaatColors.Slate900,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -464,7 +464,7 @@ private fun ZikirSessionContainer(
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                                 ),
-                                color = AlKhatibColors.Slate500,
+                                color = SaatColors.Slate500,
                                 lineHeight = 24.sp
                             )
                             Spacer(Modifier.height(12.dp))
@@ -474,7 +474,7 @@ private fun ZikirSessionContainer(
                             Text(
                                 text = item.translation.replace("\r\n", "\n"),
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = AlKhatibColors.Slate800,
+                                color = SaatColors.Slate800,
                                 lineHeight = 26.sp
                             )
                             Spacer(Modifier.height(16.dp))
@@ -497,13 +497,13 @@ private fun ZikirSessionContainer(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .clip(RoundedCornerShape(4.dp))
-                                        .background(AlKhatibColors.GoldDeep)
+                                        .background(SaatColors.GoldDeep)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = referenceSource,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = AlKhatibColors.Slate700,
+                                    color = SaatColors.Slate700,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -545,7 +545,7 @@ private fun ZikirSessionContainer(
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Reset",
-                        tint = AlKhatibColors.Slate500
+                        tint = SaatColors.Slate500
                     )
                 }
 
@@ -606,13 +606,13 @@ private fun ZikirCompletionScreen(
         Surface(
             modifier = Modifier.size(120.dp),
             shape = CircleShape,
-            color = AlKhatibColors.DeepEmerald.copy(alpha = 0.1f)
+            color = SaatColors.DeepEmerald.copy(alpha = 0.1f)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = null,
-                    tint = AlKhatibColors.DeepEmerald,
+                    tint = SaatColors.DeepEmerald,
                     modifier = Modifier.size(64.dp)
                 )
             }
@@ -622,13 +622,13 @@ private fun ZikirCompletionScreen(
             text = "Alhamdulillah",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.DeepEmerald
+            color = SaatColors.DeepEmerald
         )
         Spacer(Modifier.height(12.dp))
         Text(
             text = "Anda telah menyelesaikan seluruh rangkaian zikir dengan baik. Semoga Allah menerima amal ibadah Anda.",
             style = MaterialTheme.typography.bodyLarge,
-            color = AlKhatibColors.Slate800,
+            color = SaatColors.Slate800,
             textAlign = TextAlign.Center,
             lineHeight = 26.sp
         )
@@ -636,7 +636,7 @@ private fun ZikirCompletionScreen(
         androidx.compose.material3.Button(
             onClick = onReset,
             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                containerColor = AlKhatibColors.DeepEmerald
+                containerColor = SaatColors.DeepEmerald
             ),
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
@@ -647,13 +647,13 @@ private fun ZikirCompletionScreen(
                 text = "Ulangi Zikir",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.PureWhite
+                color = SaatColors.PureWhite
             )
         }
         Spacer(Modifier.height(12.dp))
         androidx.compose.material3.OutlinedButton(
             onClick = onClose,
-            border = BorderStroke(1.dp, AlKhatibColors.DeepEmerald),
+            border = BorderStroke(1.dp, SaatColors.DeepEmerald),
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -663,7 +663,7 @@ private fun ZikirCompletionScreen(
                 text = "Kembali ke Menu",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
         }
     }
@@ -687,14 +687,14 @@ private fun DoaZikirTopBar(
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = null,
-                tint = AlKhatibColors.DeepEmerald
+                tint = SaatColors.DeepEmerald
             )
         }
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.DeepEmerald,
+            color = SaatColors.DeepEmerald,
             modifier = Modifier.weight(1f)
         )
     }
@@ -713,15 +713,15 @@ private fun CatalogRow(
             .clip(RoundedCornerShape(18.dp))
             .background(
                 Brush.linearGradient(
-                    listOf(AlKhatibColors.PureWhite, AlKhatibColors.MintWash.copy(alpha = 0.45f))
+                    listOf(SaatColors.PureWhite, SaatColors.MintWash.copy(alpha = 0.45f))
                 )
             )
             .border(
                 width = 1.dp,
                 brush = Brush.linearGradient(
                     listOf(
-                        AlKhatibColors.Teal.copy(alpha = 0.35f),
-                        AlKhatibColors.SoftGrey.copy(alpha = 0.55f)
+                        SaatColors.Teal.copy(alpha = 0.35f),
+                        SaatColors.SoftGrey.copy(alpha = 0.55f)
                     )
                 ),
                 shape = RoundedCornerShape(18.dp)
@@ -735,15 +735,15 @@ private fun CatalogRow(
                 .size(44.dp)
                 .clip(RoundedCornerShape(14.dp))
                 .background(
-                    if (isDhikr) AlKhatibColors.DeepEmerald.copy(alpha = 0.12f)
-                    else AlKhatibColors.AmberWash
+                    if (isDhikr) SaatColors.DeepEmerald.copy(alpha = 0.12f)
+                    else SaatColors.AmberWash
                 ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = if (isDhikr) Icons.Filled.Favorite else Icons.Filled.AutoStories,
                 contentDescription = null,
-                tint = if (isDhikr) AlKhatibColors.DeepEmerald else AlKhatibColors.GoldDeep,
+                tint = if (isDhikr) SaatColors.DeepEmerald else SaatColors.GoldDeep,
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -753,19 +753,19 @@ private fun CatalogRow(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Slate800
+                color = SaatColors.Slate800
             )
             Text(
                 text = kindLabel,
                 style = MaterialTheme.typography.labelSmall,
-                color = AlKhatibColors.Slate500,
+                color = SaatColors.Slate500,
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = AlKhatibColors.Teal,
+            tint = SaatColors.Teal,
             modifier = Modifier.size(22.dp)
         )
     }
@@ -783,10 +783,10 @@ private fun PremiumDoaCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(AlKhatibColors.PureWhite)
+            .background(SaatColors.PureWhite)
             .border(
                 width = 1.dp,
-                color = AlKhatibColors.SoftGrey.copy(alpha = 0.75f),
+                color = SaatColors.SoftGrey.copy(alpha = 0.75f),
                 shape = RoundedCornerShape(20.dp)
             )
     ) {
@@ -796,7 +796,7 @@ private fun PremiumDoaCard(
                 .height(3.dp)
                 .background(
                     Brush.horizontalGradient(
-                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal, AlKhatibColors.Gold.copy(alpha = 0.6f))
+                        listOf(SaatColors.DeepEmerald, SaatColors.Teal, SaatColors.Gold.copy(alpha = 0.6f))
                     )
                 )
         )
@@ -806,7 +806,7 @@ private fun PremiumDoaCard(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
                 Spacer(Modifier.height(14.dp))
             }
@@ -815,7 +815,7 @@ private fun PremiumDoaCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.05f))
+                        .background(SaatColors.DeepEmerald.copy(alpha = 0.05f))
                         .padding(horizontal = 14.dp, vertical = 16.dp)
                 ) {
                     Text(
@@ -828,7 +828,7 @@ private fun PremiumDoaCard(
                         ),
                         textAlign = TextAlign.End,
                         modifier = Modifier.fillMaxWidth(),
-                        color = AlKhatibColors.Slate900
+                        color = SaatColors.Slate900
                     )
                 }
             }
@@ -839,7 +839,7 @@ private fun PremiumDoaCard(
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                     ),
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     lineHeight = 24.sp
                 )
             }
@@ -848,7 +848,7 @@ private fun PremiumDoaCard(
                 Text(
                     text = translation.replace("\r\n", "\n"),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = AlKhatibColors.Slate800,
+                    color = SaatColors.Slate800,
                     lineHeight = 26.sp
                 )
             }
@@ -858,7 +858,7 @@ private fun PremiumDoaCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
-                        .background(AlKhatibColors.LightGrey.copy(alpha = 0.55f))
+                        .background(SaatColors.LightGrey.copy(alpha = 0.55f))
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -866,13 +866,13 @@ private fun PremiumDoaCard(
                         modifier = Modifier
                             .size(6.dp)
                             .clip(RoundedCornerShape(3.dp))
-                            .background(AlKhatibColors.Teal)
+                            .background(SaatColors.Teal)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = it,
                         style = MaterialTheme.typography.labelMedium,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
             }

@@ -29,10 +29,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @Composable
-fun AlKhatibSkeletonBlock(
+fun SaatSkeletonBlock(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(8.dp),
     color: Color? = null
@@ -56,12 +56,12 @@ fun AlKhatibSkeletonBlock(
 }
 
 @Composable
-fun AlKhatibSkeletonLine(
+fun SaatSkeletonLine(
     modifier: Modifier = Modifier,
     widthFraction: Float = 1f,
     height: Dp = 14.dp
 ) {
-    AlKhatibSkeletonBlock(
+    SaatSkeletonBlock(
         modifier = modifier
             .fillMaxWidth(widthFraction)
             .height(height),
@@ -70,15 +70,15 @@ fun AlKhatibSkeletonLine(
 }
 
 @Composable
-fun AlKhatibSkeletonCircle(size: Dp) {
-    AlKhatibSkeletonBlock(
+fun SaatSkeletonCircle(size: Dp) {
+    SaatSkeletonBlock(
         modifier = Modifier.size(size),
         shape = CircleShape
     )
 }
 
 @Composable
-fun AlKhatibSkeletonOnDark(
+fun SaatSkeletonOnDark(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(6.dp)
 ) {
@@ -105,22 +105,22 @@ fun TodayVerseCardSkeleton(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AlKhatibSkeletonLine(height = 28.dp, widthFraction = 0.92f)
+        SaatSkeletonLine(height = 28.dp, widthFraction = 0.92f)
         Spacer(Modifier.height(12.dp))
-        AlKhatibSkeletonLine(height = 28.dp, widthFraction = 0.78f)
+        SaatSkeletonLine(height = 28.dp, widthFraction = 0.78f)
         Spacer(Modifier.height(12.dp))
-        AlKhatibSkeletonLine(height = 28.dp, widthFraction = 0.65f)
+        SaatSkeletonLine(height = 28.dp, widthFraction = 0.65f)
         Spacer(Modifier.height(20.dp))
-        AlKhatibSkeletonLine(height = 16.dp, widthFraction = 0.88f)
+        SaatSkeletonLine(height = 16.dp, widthFraction = 0.88f)
         Spacer(Modifier.height(8.dp))
-        AlKhatibSkeletonLine(height = 16.dp, widthFraction = 0.7f)
+        SaatSkeletonLine(height = 16.dp, widthFraction = 0.7f)
         Spacer(Modifier.height(20.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             repeat(2) {
-                AlKhatibSkeletonBlock(
+                SaatSkeletonBlock(
                     modifier = Modifier
                         .weight(1f)
                         .height(44.dp),
@@ -134,7 +134,7 @@ fun TodayVerseCardSkeleton(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             repeat(2) {
-                AlKhatibSkeletonBlock(
+                SaatSkeletonBlock(
                     modifier = Modifier
                         .weight(1f)
                         .height(44.dp),
@@ -153,15 +153,15 @@ fun ChapterRowSkeleton(modifier: Modifier = Modifier) {
             .padding(vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AlKhatibSkeletonBlock(
+        SaatSkeletonBlock(
             modifier = Modifier.size(40.dp),
             shape = RoundedCornerShape(12.dp)
         )
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
-            AlKhatibSkeletonLine(widthFraction = 0.55f, height = 16.dp)
+            SaatSkeletonLine(widthFraction = 0.55f, height = 16.dp)
             Spacer(Modifier.height(8.dp))
-            AlKhatibSkeletonLine(widthFraction = 0.35f, height = 12.dp)
+            SaatSkeletonLine(widthFraction = 0.35f, height = 12.dp)
         }
     }
 }
@@ -172,20 +172,20 @@ fun ReflectPostSkeleton(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(AlKhatibColors.ForestDark.copy(alpha = 0.6f))
+            .background(SaatColors.ForestDark.copy(alpha = 0.6f))
             .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            AlKhatibSkeletonOnDark(modifier = Modifier.size(36.dp), shape = CircleShape)
+            SaatSkeletonOnDark(modifier = Modifier.size(36.dp), shape = CircleShape)
             Spacer(Modifier.width(10.dp))
             Column {
-                AlKhatibSkeletonOnDark(
+                SaatSkeletonOnDark(
                     modifier = Modifier
                         .width(100.dp)
                         .height(12.dp)
                 )
                 Spacer(Modifier.height(6.dp))
-                AlKhatibSkeletonOnDark(
+                SaatSkeletonOnDark(
                     modifier = Modifier
                         .width(60.dp)
                         .height(10.dp)
@@ -193,9 +193,9 @@ fun ReflectPostSkeleton(modifier: Modifier = Modifier) {
             }
         }
         Spacer(Modifier.height(14.dp))
-        AlKhatibSkeletonOnDark(modifier = Modifier.fillMaxWidth().height(14.dp))
+        SaatSkeletonOnDark(modifier = Modifier.fillMaxWidth().height(14.dp))
         Spacer(Modifier.height(8.dp))
-        AlKhatibSkeletonOnDark(
+        SaatSkeletonOnDark(
             modifier = Modifier
                 .fillMaxWidth(0.85f)
                 .height(14.dp)

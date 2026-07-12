@@ -32,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
 
 object FloatingAudioBarMetrics {
@@ -63,7 +63,7 @@ fun FloatingAudioBar(
                 .padding(start = 16.dp, end = 16.dp + reserveTrailingSpace),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = AlKhatibColors.DeepEmerald
+                containerColor = SaatColors.DeepEmerald
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
         ) {

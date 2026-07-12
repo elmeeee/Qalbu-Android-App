@@ -14,17 +14,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import app.kamy.saatApp.design.components.AlKhatibCard
-import app.kamy.saatApp.design.components.AlKhatibCardStyle
+import app.kamy.saatApp.design.components.SaatCard
+import app.kamy.saatApp.design.components.SaatCardStyle
 
 @Composable
-fun AlKhatibSettingsGroup(
+fun SaatSettingsGroup(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    AlKhatibCard(
+    SaatCard(
         modifier = modifier,
-        style = AlKhatibCardStyle.Filled,
+        style = SaatCardStyle.Filled,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
         content()
@@ -32,7 +32,7 @@ fun AlKhatibSettingsGroup(
 }
 
 @Composable
-fun AlKhatibSettingsNavigationRow(
+fun SaatSettingsNavigationRow(
     icon: ImageVector,
     title: String,
     subtitle: String,
@@ -68,7 +68,7 @@ fun AlKhatibSettingsNavigationRow(
 }
 
 @Composable
-fun AlKhatibSettingsToggleRow(
+fun SaatSettingsToggleRow(
     icon: ImageVector,
     title: String,
     checked: Boolean,

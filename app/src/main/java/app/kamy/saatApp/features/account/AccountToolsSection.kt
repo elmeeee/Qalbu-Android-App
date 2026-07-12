@@ -8,8 +8,8 @@ import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibSettingsGroup
-import app.kamy.saatApp.design.components.AlKhatibSettingsNavigationRow
+import app.kamy.saatApp.design.components.SaatSettingsGroup
+import app.kamy.saatApp.design.components.SaatSettingsNavigationRow
 
 @Composable
 fun AccountToolsSection(
@@ -18,26 +18,26 @@ fun AccountToolsSection(
     onOpenZakat: () -> Unit,
     onOpenQiyam: () -> Unit
 ) {
-    AlKhatibSettingsGroup {
-        AlKhatibSettingsNavigationRow(
+    SaatSettingsGroup {
+        SaatSettingsNavigationRow(
             icon = Icons.Filled.Explore,
             title = stringResource(R.string.qibla_title),
             subtitle = stringResource(R.string.qibla_account_subtitle),
             onClick = onOpenQibla
         )
-        AlKhatibSettingsNavigationRow(
+        SaatSettingsNavigationRow(
             icon = Icons.Filled.AutoStories,
             title = stringResource(R.string.doa_zikir_title),
             subtitle = stringResource(R.string.doa_zikir_account_subtitle),
             onClick = onOpenDhikr
         )
-        AlKhatibSettingsNavigationRow(
+        SaatSettingsNavigationRow(
             icon = Icons.Filled.NightsStay,
             title = stringResource(R.string.qiyam_title),
             subtitle = stringResource(R.string.qiyam_account_subtitle),
             onClick = onOpenQiyam
         )
-        AlKhatibSettingsNavigationRow(
+        SaatSettingsNavigationRow(
             icon = Icons.Filled.Calculate,
             title = stringResource(R.string.zakat_title),
             subtitle = stringResource(R.string.zakat_account_subtitle),

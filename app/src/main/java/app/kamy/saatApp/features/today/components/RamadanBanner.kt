@@ -26,7 +26,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.infrastructure.preferences.RamadanPreferencesStore
 
 @Composable
@@ -44,19 +44,19 @@ fun RamadanBanner(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(AlKhatibColors.Gold.copy(alpha = 0.12f))
+            .background(SaatColors.Gold.copy(alpha = 0.12f))
             .padding(16.dp)
     ) {
         Text(
             text = stringResource(R.string.ramadan_mode_title),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.GoldDeep
+            color = SaatColors.GoldDeep
         )
         Text(
             text = stringResource(R.string.ramadan_mode_body),
             style = MaterialTheme.typography.bodySmall,
-            color = AlKhatibColors.Slate800,
+            color = SaatColors.Slate800,
             modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
         )
         Row(
@@ -72,7 +72,7 @@ fun RamadanBanner(
             Text(
                 text = stringResource(R.string.ramadan_tarawih),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate800
+                color = SaatColors.Slate800
             )
             Switch(
                 checked = tarawihDone,
@@ -123,7 +123,7 @@ fun QiyamTrackerRow(
                 text = stringResource(R.string.qiyam_title),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Slate900
+                color = SaatColors.Slate900
             )
             Text(
                 text = stringResource(
@@ -132,7 +132,7 @@ fun QiyamTrackerRow(
                     snapshot.streak
                 ),
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
         }
         Switch(

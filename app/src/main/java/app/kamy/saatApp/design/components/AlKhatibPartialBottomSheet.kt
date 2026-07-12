@@ -16,11 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AlKhatibPartialBottomSheet(
+fun SaatPartialBottomSheet(
     onDismiss: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     maxHeightFraction: Float = 0.62f,
@@ -31,7 +31,7 @@ fun AlKhatibPartialBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AlKhatibColors.PureWhite,
+        containerColor = SaatColors.PureWhite,
         contentColor = MaterialTheme.colorScheme.onSurface,
         dragHandle = { BottomSheetDefaults.DragHandle() },
         scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.32f)

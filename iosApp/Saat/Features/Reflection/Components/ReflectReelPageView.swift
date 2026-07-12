@@ -66,7 +66,7 @@ struct ReflectReelPageView: View {
         }
         .frame(height: pageHeight)
         .clipped()
-        .accessibilityHint(AlKhatibAccessibility.Reflect.scrollPosts)
+        .accessibilityHint(SaatAccessibility.Reflect.scrollPosts)
         .sheet(isPresented: $showShareSheet) {
             if let body = post.body {
                 let shareLabel = verseKey.map { VerseKeyFormat.humanLabel(for: $0) } ?? ""

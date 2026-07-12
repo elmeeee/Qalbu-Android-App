@@ -91,11 +91,11 @@ struct AyahVerseCard: View {
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .alKhatibAccessibility(
+        .SaatAccessibility(
             label: text,
             hint: text == "Audio"
-                ? AlKhatibAccessibility.VerseActions.audio(hint: "")
-                : AlKhatibAccessibility.VerseActions.tafsirHint
+                ? SaatAccessibility.VerseActions.audio(hint: "")
+                : SaatAccessibility.VerseActions.tafsirHint
         )
     }
 }

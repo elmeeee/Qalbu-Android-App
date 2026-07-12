@@ -100,7 +100,7 @@ struct TodayVerseOfDayCardView: View {
                             .overlay(Circle().stroke(Color.Token.deepEmerald.opacity(0.15), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
-                    .alKhatibAccessibility(label: AppLanguageManager.shared.localize("share"), hint: AlKhatibAccessibility.VerseActions.shareHint)
+                    .SaatAccessibility(label: AppLanguageManager.shared.localize("share"), hint: SaatAccessibility.VerseActions.shareHint)
                     
                     // Day of the Week Badge
                     Text(dayName)
@@ -207,7 +207,7 @@ struct TodayVerseOfDayCardView: View {
                     ),
                     action: onAudio
                 )
-                .alKhatibAccessibility(label: "Audio", hint: audioAccessibilityHint)
+                .SaatAccessibility(label: "Audio", hint: audioAccessibilityHint)
                 
                 // AI
                 actionButton(
@@ -221,7 +221,7 @@ struct TodayVerseOfDayCardView: View {
                     ),
                     action: onReflect
                 )
-                .alKhatibAccessibility(label: "AI Reflection", hint: AlKhatibAccessibility.VerseActions.reflectHint)
+                .SaatAccessibility(label: "AI Reflection", hint: SaatAccessibility.VerseActions.reflectHint)
                 
                 // Tafsir
                 actionButton(
@@ -235,7 +235,7 @@ struct TodayVerseOfDayCardView: View {
                     ),
                     action: onTafsir
                 )
-                .alKhatibAccessibility(label: "Tafsir", hint: AlKhatibAccessibility.VerseActions.tafsirHint)
+                .SaatAccessibility(label: "Tafsir", hint: SaatAccessibility.VerseActions.tafsirHint)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 20)
@@ -307,9 +307,9 @@ struct TodayVerseActionGrid: View {
         let lm = AppLanguageManager.shared
         LazyVGrid(columns: columns, spacing: 8) {
             TodayActionPill(icon: "speaker.wave.2.fill", text: "Audio", tint: Color.Token.deepEmerald, hint: audioAccessibilityHint, action: onAudio)
-            TodayActionPill(icon: "square.and.arrow.up", text: lm.localize("share"), tint: Color.Token.blueLink, hint: AlKhatibAccessibility.VerseActions.shareHint, action: onShare)
-            TodayActionPill(icon: "lightbulb.fill", text: lm.localize("post_reflection"), tint: Color.Token.gold, hint: AlKhatibAccessibility.VerseActions.reflectHint, action: onReflect)
-            TodayActionPill(icon: "book.closed.fill", text: lm.localize("tab_quran"), tint: Color.Token.indigoAccent, hint: AlKhatibAccessibility.VerseActions.tafsirHint, action: onTafsir)
+            TodayActionPill(icon: "square.and.arrow.up", text: lm.localize("share"), tint: Color.Token.blueLink, hint: SaatAccessibility.VerseActions.shareHint, action: onShare)
+            TodayActionPill(icon: "lightbulb.fill", text: lm.localize("post_reflection"), tint: Color.Token.gold, hint: SaatAccessibility.VerseActions.reflectHint, action: onReflect)
+            TodayActionPill(icon: "book.closed.fill", text: lm.localize("tab_quran"), tint: Color.Token.indigoAccent, hint: SaatAccessibility.VerseActions.tafsirHint, action: onTafsir)
         }
     }
 }
@@ -336,6 +336,6 @@ struct TodayActionPill: View {
             .overlay(Capsule().stroke(tint.opacity(0.15), lineWidth: 1))
         }
         .buttonStyle(PillPressStyle())
-        .alKhatibAccessibility(label: text, hint: hint)
+        .SaatAccessibility(label: text, hint: hint)
     }
 }

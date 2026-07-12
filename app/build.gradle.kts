@@ -38,7 +38,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // OAuth callback host/scheme used by AppAuth's RedirectUriReceiverActivity manifest placeholder.
-        manifestPlaceholders["appAuthRedirectScheme"] = "alkhatib"
+        manifestPlaceholders["appAuthRedirectScheme"] = "Saat"
     }
 
     signingConfigs {
@@ -70,7 +70,7 @@ android {
             buildConfigField("String", "QF_OAUTH_TOKEN_URL", "\"https://oauth2.quran.foundation/oauth2/token\"")
             buildConfigField("String", "QF_OAUTH_AUTHORIZE_URL", "\"https://oauth2.quran.foundation/oauth2/auth\"")
             buildConfigField("String", "QF_OAUTH_CALLBACK_URL", "\"https://elmee.my/oauth/callback\"")
-            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"alkhatib://oauth/callback\"")
+            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"Saat://oauth/callback\"")
             buildConfigField("String", "QF_OAUTH_CLIENT_ID", "\"9fd71c6c-efb4-406e-84d0-ff39f186ca9b\"")
             buildConfigField(
                 "String",
@@ -105,7 +105,7 @@ android {
             buildConfigField("String", "QF_OAUTH_TOKEN_URL", "\"https://oauth2.quran.foundation/oauth2/token\"")
             buildConfigField("String", "QF_OAUTH_AUTHORIZE_URL", "\"https://oauth2.quran.foundation/oauth2/auth\"")
             buildConfigField("String", "QF_OAUTH_CALLBACK_URL", "\"https://elmee.my/oauth/callback\"")
-            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"alkhatib://oauth/callback\"")
+            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"Saat://oauth/callback\"")
             buildConfigField("String", "QF_OAUTH_CLIENT_ID", "\"9fd71c6c-efb4-406e-84d0-ff39f186ca9b\"")
             buildConfigField(
                 "String",

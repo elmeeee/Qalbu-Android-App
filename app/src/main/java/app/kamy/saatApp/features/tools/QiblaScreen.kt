@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.tools.QiblaCalculator
 import app.kamy.saatApp.infrastructure.notifications.PrayerScheduleCache
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
@@ -112,7 +112,7 @@ fun QiblaScreen(onBack: () -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {

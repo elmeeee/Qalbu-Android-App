@@ -42,10 +42,10 @@ import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.core.error.AppError
-import app.kamy.saatApp.design.components.AlKhatibErrorStateCompact
+import app.kamy.saatApp.design.components.SaatErrorStateCompact
 import app.kamy.saatApp.design.components.TodayVerseCardSkeleton
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.displayTransliteration
 import app.kamy.saatApp.domain.model.transliterationUsesHtml
@@ -79,16 +79,16 @@ fun TodayVerseOfDaySection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md)
+            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.md)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(22.dp))
-                .background(AlKhatibColors.PureWhite)
+                .background(SaatColors.PureWhite)
                 .border(
                     width = 1.dp,
-                    color = AlKhatibColors.SoftGrey.copy(alpha = 0.75f),
+                    color = SaatColors.SoftGrey.copy(alpha = 0.75f),
                     shape = RoundedCornerShape(22.dp)
                 )
         ) {
@@ -98,9 +98,9 @@ fun TodayVerseOfDaySection(
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                AlKhatibColors.DeepEmerald.copy(alpha = 0.16f),
-                                AlKhatibColors.Teal.copy(alpha = 0.08f),
-                                AlKhatibColors.Gold.copy(alpha = 0.05f)
+                                SaatColors.DeepEmerald.copy(alpha = 0.16f),
+                                SaatColors.Teal.copy(alpha = 0.08f),
+                                SaatColors.Gold.copy(alpha = 0.05f)
                             )
                         )
                     )
@@ -116,7 +116,7 @@ fun TodayVerseOfDaySection(
                             text = stringResource(R.string.verse_of_day),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.DeepEmerald
+                            color = SaatColors.DeepEmerald
                         )
                         occasion?.takeIf { it != DailyVerseOccasion.Daily }?.let {
                             OccasionChip(label = stringResource(it.labelRes))
@@ -127,7 +127,7 @@ fun TodayVerseOfDaySection(
                             text = label,
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
-                            color = AlKhatibColors.Slate500,
+                            color = SaatColors.Slate500,
                             modifier = Modifier.padding(top = 4.dp)
                         )
                     }
@@ -146,10 +146,10 @@ fun TodayVerseOfDaySection(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(AlKhatibColors.DeepEmerald.copy(alpha = 0.04f))
+                            .background(SaatColors.DeepEmerald.copy(alpha = 0.04f))
                             .border(
                                 width = 1.dp,
-                                color = AlKhatibColors.DeepEmerald.copy(alpha = 0.15f),
+                                color = SaatColors.DeepEmerald.copy(alpha = 0.15f),
                                 shape = RoundedCornerShape(16.dp)
                             )
                             .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -168,10 +168,10 @@ fun TodayVerseOfDaySection(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(14.dp))
-                                .background(AlKhatibColors.LightGrey.copy(alpha = 0.35f))
+                                .background(SaatColors.LightGrey.copy(alpha = 0.35f))
                                 .border(
                                     width = 1.dp,
-                                    color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f),
+                                    color = SaatColors.SoftGrey.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(14.dp)
                                 )
                                 .padding(horizontal = 14.dp, vertical = 10.dp)
@@ -191,7 +191,7 @@ fun TodayVerseOfDaySection(
                             if (clean.isNotEmpty()) {
                                 Text(
                                     text = clean,
-                                    color = AlKhatibColors.Slate800,
+                                    color = SaatColors.Slate800,
                                     style = MaterialTheme.typography.bodyLarge,
                                     lineHeight = 26.sp,
                                     textAlign = TextAlign.Center,
@@ -211,7 +211,7 @@ fun TodayVerseOfDaySection(
                     ) {
                         Text(
                             text = "${stringResource(R.string.reciter)}: $name",
-                            color = AlKhatibColors.Slate500,
+                            color = SaatColors.Slate500,
                             style = MaterialTheme.typography.labelMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -233,14 +233,14 @@ fun TodayVerseOfDaySection(
                     VerseActionButton(
                         icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         label = if (isPlaying) pauseLabel else audioLabel,
-                        tint = AlKhatibColors.DeepEmerald,
+                        tint = SaatColors.DeepEmerald,
                         onClick = onPlayAudio,
                         modifier = Modifier.weight(1f)
                     )
                     VerseActionButton(
                         icon = Icons.Filled.AutoAwesome,
                         label = if (aiShareLoading) "…" else aiLabel,
-                        tint = AlKhatibColors.GoldDeep,
+                        tint = SaatColors.GoldDeep,
                         onClick = onAiShare,
                         modifier = Modifier.weight(1f)
                     )
@@ -248,7 +248,7 @@ fun TodayVerseOfDaySection(
                         VerseActionButton(
                             icon = Icons.AutoMirrored.Filled.MenuBook,
                             label = tafsirLabel,
-                            tint = AlKhatibColors.IndigoAccent,
+                            tint = SaatColors.IndigoAccent,
                             onClick = onTafsir,
                             modifier = Modifier.weight(1f)
                         )
@@ -261,7 +261,7 @@ fun TodayVerseOfDaySection(
                         .padding(18.dp)
                 )
             } else if (errorDisplay != null) {
-                AlKhatibErrorStateCompact(
+                SaatErrorStateCompact(
                     display = errorDisplay,
                     onRetry = onRetry,
                     modifier = Modifier.padding(18.dp)
@@ -269,7 +269,7 @@ fun TodayVerseOfDaySection(
             } else {
                 Text(
                     text = stringResource(R.string.no_verse_retry),
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(18.dp),
@@ -286,14 +286,14 @@ private fun OccasionChip(label: String) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(AlKhatibColors.Gold.copy(alpha = 0.18f))
+            .background(SaatColors.Gold.copy(alpha = 0.18f))
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold,
-            color = AlKhatibColors.GoldDeep
+            color = SaatColors.GoldDeep
         )
     }
 }

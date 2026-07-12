@@ -211,8 +211,8 @@ struct ProfileView: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .alKhatibAccessibility(
-                    label: AlKhatibAccessibility.Profile.fontSize,
+                .SaatAccessibility(
+                    label: SaatAccessibility.Profile.fontSize,
                     hint: "Current size \(fontScaleLabel). Opens font size picker"
                 )
 
@@ -267,8 +267,8 @@ struct ProfileView: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .alKhatibAccessibility(
-                    label: AlKhatibAccessibility.Profile.prayerCalculation,
+                .SaatAccessibility(
+                    label: SaatAccessibility.Profile.prayerCalculation,
                     hint: "Current method \(selectedPrayerMethod.displayName). Choose how prayer times are calculated"
                 )
 
@@ -296,8 +296,8 @@ struct ProfileView: View {
                     )
                 }
                 .buttonStyle(.plain)
-                .alKhatibAccessibility(
-                    label: AlKhatibAccessibility.Profile.translator,
+                .SaatAccessibility(
+                    label: SaatAccessibility.Profile.translator,
                     hint: selectedTranslationName.isEmpty
                         ? "Choose translation language for Quran text"
                         : "Current translator \(selectedTranslationName)"
@@ -395,7 +395,7 @@ struct ProfileView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .alKhatibAccessibility(
+                    .SaatAccessibility(
                         label: "Morning reminder time",
                         hint: "Currently \(dailyVerseTimeRowSubtitle). Double tap to change."
                     )
@@ -473,7 +473,7 @@ struct ProfileView: View {
         .buttonStyle(PillPressStyle())
         .disabled(isOAuthPresenting)
         .opacity(isOAuthPresenting ? 0.5 : 1)
-        .alKhatibAccessibility(label: AlKhatibAccessibility.Profile.signOut)
+        .SaatAccessibility(label: SaatAccessibility.Profile.signOut)
     }
 
     private var showsSignedInActions: Bool {

@@ -94,13 +94,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.core.error.AppError
-import app.kamy.saatApp.design.components.AlKhatibCard
-import app.kamy.saatApp.design.components.AlKhatibCardStyle
-import app.kamy.saatApp.design.components.AlKhatibInlineError
-import app.kamy.saatApp.design.components.AlKhatibSettingsGroup
-import app.kamy.saatApp.design.components.AlKhatibSettingsNavigationRow
-import app.kamy.saatApp.design.components.AlKhatibSettingsToggleRow
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.components.SaatCard
+import app.kamy.saatApp.design.components.SaatCardStyle
+import app.kamy.saatApp.design.components.SaatInlineError
+import app.kamy.saatApp.design.components.SaatSettingsGroup
+import app.kamy.saatApp.design.components.SaatSettingsNavigationRow
+import app.kamy.saatApp.design.components.SaatSettingsToggleRow
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
@@ -364,8 +364,8 @@ private fun AccountSettingsContent(
             .background(MaterialTheme.colorScheme.background)
             .tabContentStatusBarInset()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
-        verticalArrangement = Arrangement.spacedBy(AlKhatibSpacing.lg)
+            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(SaatSpacing.lg)
     ) {
         if (onBack != null) {
             IconButton(onClick = onBack) {
@@ -390,20 +390,20 @@ private fun AccountSettingsContent(
         )
 
         SettingsSectionLabel(stringResource(R.string.general))
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsNavigationRow(
+        SaatSettingsGroup {
+            SaatSettingsNavigationRow(
                 icon = Icons.Filled.Translate,
                 title = stringResource(R.string.language_settings_title),
                 subtitle = stringResource(state.appLanguage.labelRes),
                 onClick = { vm.openLanguageSheet() }
             )
-            AlKhatibSettingsNavigationRow(
+            SaatSettingsNavigationRow(
                 icon = Icons.Filled.TextFields,
                 title = stringResource(R.string.font_size),
                 subtitle = stringResource(R.string.font_size_subtitle),
                 onClick = { vm.openFontScale() }
             )
-            AlKhatibSettingsNavigationRow(
+            SaatSettingsNavigationRow(
                 icon = Icons.Filled.Palette,
                 title = stringResource(R.string.theme_settings_title),
                 subtitle = stringResource(state.appTheme.displayNameRes),
@@ -412,20 +412,20 @@ private fun AccountSettingsContent(
         }
 
         SettingsSectionLabel(stringResource(R.string.prayer_settings))
-        AlKhatibSettingsGroup {
-             AlKhatibSettingsNavigationRow(
+        SaatSettingsGroup {
+             SaatSettingsNavigationRow(
                 icon = Icons.Filled.Schedule,
                 title = stringResource(R.string.prayer_calculation_method),
                 subtitle = state.prayerMethod.organization,
                 onClick = { vm.togglePrayerSheet(true) }
             )
-            AlKhatibSettingsNavigationRow(
+            SaatSettingsNavigationRow(
                 icon = Icons.Filled.Gavel,
                 title = stringResource(R.string.madhab_settings_title),
                 subtitle = stringResource(state.prayerMadhab.displayNameRes),
                 onClick = { vm.openMadhabSheet() }
             )
-            AlKhatibSettingsNavigationRow(
+            SaatSettingsNavigationRow(
                 icon = Icons.AutoMirrored.Filled.VolumeUp,
                 title = stringResource(R.string.adhan_voice),
                 subtitle = state.selectedAdhanVoice.displayName,
@@ -434,20 +434,20 @@ private fun AccountSettingsContent(
         }
 
         SettingsSectionLabel(stringResource(R.string.reading_settings))
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsToggleRow(
+        SaatSettingsGroup {
+            SaatSettingsToggleRow(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
                 title = stringResource(R.string.show_translation),
                 checked = state.showTranslation,
                 onCheckedChange = vm::setShowTranslation
             )
-            AlKhatibSettingsToggleRow(
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.TextFields,
                 title = stringResource(R.string.show_transliteration),
                 checked = state.showTransliteration,
                 onCheckedChange = vm::setShowTransliteration
             )
-            AlKhatibSettingsNavigationRow(
+            SaatSettingsNavigationRow(
                 icon = Icons.Filled.Translate,
                 title = stringResource(R.string.translator),
                 subtitle = state.selectedTranslationName.ifBlank { stringResource(R.string.translator_hint) },
@@ -456,8 +456,8 @@ private fun AccountSettingsContent(
         }
 
         SettingsSectionLabel(stringResource(R.string.notifications))
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsNavigationRow(
+        SaatSettingsGroup {
+            SaatSettingsNavigationRow(
                 icon = Icons.Filled.Notifications,
                 title = stringResource(R.string.reminders),
                 subtitle = vm.notificationSummary(state),
@@ -477,20 +477,20 @@ private fun AccountSettingsContent(
         val appVersion = remember(packageInfo) {
             packageInfo?.versionName ?: "1.0.0"
         }
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsNavigationRow(
+        SaatSettingsGroup {
+            SaatSettingsNavigationRow(
                 icon = Icons.Outlined.Info,
                 title = stringResource(R.string.about_developer),
                 subtitle = "Version $appVersion",
                 onClick = onOpenAboutDeveloper
             )
-            AlKhatibSettingsNavigationRow(
+            SaatSettingsNavigationRow(
                 icon = Icons.Outlined.Shield,
                 title = stringResource(R.string.privacy_policy),
                 subtitle = stringResource(R.string.privacy_policy_effective),
                 onClick = onOpenPrivacyPolicy
             )
-            AlKhatibSettingsNavigationRow(
+            SaatSettingsNavigationRow(
                 icon = Icons.Outlined.Gavel,
                 title = stringResource(R.string.terms_and_conditions),
                 subtitle = stringResource(R.string.terms_effective),
@@ -675,7 +675,7 @@ private fun ProfileHeader(
                     }
                     profileErrorDisplay?.let { display ->
                         Spacer(Modifier.height(8.dp))
-                        AlKhatibInlineError(
+                        SaatInlineError(
                             display = display,
                             onRetry = onRetry
                         )
@@ -765,7 +765,7 @@ private fun ProfileHeader(
 
                 profileErrorDisplay?.let { display ->
                     Spacer(Modifier.height(4.dp))
-                    AlKhatibInlineError(display = display)
+                    SaatInlineError(display = display)
                 }
             }
         }
@@ -856,7 +856,7 @@ private fun TranslatorSheet(
         focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
         unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+    SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -879,7 +879,7 @@ private fun TranslatorSheet(
             when {
                 isLoading -> Text(stringResource(R.string.loading_translators), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 errorDisplay != null -> {
-                    AlKhatibInlineError(
+                    SaatInlineError(
                         display = errorDisplay,
                         onRetry = onRetry
                     )
@@ -939,7 +939,7 @@ private fun ReminderTimeSheet(
         initialMinute = minute,
         is24Hour = false
     )
-    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+    SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -976,7 +976,7 @@ private fun ReminderTimeSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AlKhatibModalBottomSheet(
+private fun SaatModalBottomSheet(
     onDismiss: () -> Unit,
     sheetState: androidx.compose.material3.SheetState,
     content: @Composable () -> Unit
@@ -996,7 +996,7 @@ private fun AlKhatibModalBottomSheet(
 @Composable
 private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismiss: () -> Unit) {
     val sheetState = rememberModalBottomSheetState()
-    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+    SaatModalBottomSheet(onDismiss, sheetState) {
         Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(stringResource(R.string.font_size), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
             Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ", fontSize = (26 * scale).sp, color = MaterialTheme.colorScheme.onBackground)
@@ -1030,7 +1030,7 @@ private fun PrayerMethodSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val errorDisplay = error.rememberErrorDisplay(R.string.error_prayer_fetch_title)
-    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+    SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -1046,7 +1046,7 @@ private fun PrayerMethodSheet(
             if (isLoading) {
                 Text(stringResource(R.string.loading_methods), color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else if (errorDisplay != null) {
-                AlKhatibInlineError(
+                SaatInlineError(
                     display = errorDisplay,
                     onRetry = onRetry
                 )
@@ -1102,7 +1102,7 @@ private fun AdhanVoiceSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+    SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -1120,9 +1120,9 @@ private fun AdhanVoiceSheet(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            AlKhatibCard(
+            SaatCard(
                 modifier = Modifier.fillMaxWidth(),
-                style = AlKhatibCardStyle.Filled,
+                style = SaatCardStyle.Filled,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow
             ) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -1208,8 +1208,8 @@ private fun LanguageSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                .padding(bottom = AlKhatibSpacing.xl),
+                .padding(horizontal = SaatSpacing.screenHorizontal)
+                .padding(bottom = SaatSpacing.xl),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             PremiumSheetHeader(
@@ -1274,7 +1274,7 @@ private fun FollowersSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     val errorDisplay = error.rememberErrorDisplay(R.string.followers_load_failed)
 
-    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+    SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1301,7 +1301,7 @@ private fun FollowersSheet(
                     }
                 }
                 errorDisplay != null -> {
-                    AlKhatibInlineError(
+                    SaatInlineError(
                         display = errorDisplay,
                         onRetry = onRetry
                     )
@@ -1487,7 +1487,7 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
         context.startActivity(intent)
     }
 
-    app.kamy.saatApp.design.components.AlKhatibPartialBottomSheet(
+    app.kamy.saatApp.design.components.SaatPartialBottomSheet(
         onDismiss = onDismiss,
         maxHeightFraction = 0.85f,
         scrollContent = false
@@ -1737,7 +1737,7 @@ private fun ThemeSelectionSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
-    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+    SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -1831,7 +1831,7 @@ private fun MadhabSelectionSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
-    AlKhatibModalBottomSheet(onDismiss, sheetState) {
+    SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()

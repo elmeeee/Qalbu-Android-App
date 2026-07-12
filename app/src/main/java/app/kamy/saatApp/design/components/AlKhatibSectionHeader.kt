@@ -16,11 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 
 @Composable
-fun AlKhatibSectionHeader(
+fun SaatSectionHeader(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
@@ -30,8 +30,8 @@ fun AlKhatibSectionHeader(
         modifier = modifier
             .fillMaxWidth()
             .padding(
-                horizontal = AlKhatibSpacing.screenHorizontal,
-                vertical = AlKhatibSpacing.md
+                horizontal = SaatSpacing.screenHorizontal,
+                vertical = SaatSpacing.md
             )
     ) {
         Row {
@@ -41,7 +41,7 @@ fun AlKhatibSectionHeader(
                 color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.width(AlKhatibSpacing.sm))
+            Spacer(Modifier.width(SaatSpacing.sm))
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,
@@ -54,9 +54,9 @@ fun AlKhatibSectionHeader(
                 text = it,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 22.dp, top = AlKhatibSpacing.xs)
+                modifier = Modifier.padding(start = 22.dp, top = SaatSpacing.xs)
             )
-            Spacer(Modifier.height(AlKhatibSpacing.sm))
+            Spacer(Modifier.height(SaatSpacing.sm))
             Box(
                 modifier = Modifier
                     .height(3.dp)

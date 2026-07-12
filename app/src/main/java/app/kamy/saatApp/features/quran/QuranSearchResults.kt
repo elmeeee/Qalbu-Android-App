@@ -27,9 +27,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.error.AppError
-import app.kamy.saatApp.design.components.AlKhatibInlineError
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.components.SaatInlineError
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.SearchVerseResult
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
@@ -42,12 +42,12 @@ fun QuranSearchSectionLabel(
     Text(
         text = title.uppercase(),
         modifier = modifier.padding(
-            horizontal = AlKhatibSpacing.screenHorizontal,
+            horizontal = SaatSpacing.screenHorizontal,
             vertical = 10.dp
         ),
         style = MaterialTheme.typography.labelSmall,
         fontWeight = FontWeight.SemiBold,
-        color = AlKhatibColors.Slate500
+        color = SaatColors.Slate500
     )
 }
 
@@ -57,7 +57,7 @@ fun QuranSearchLoadingRow(modifier: Modifier = Modifier) {
         modifier = modifier
             .padding(vertical = 20.dp)
             .size(24.dp),
-        color = AlKhatibColors.DeepEmerald,
+        color = SaatColors.DeepEmerald,
         strokeWidth = 2.dp
     )
 }
@@ -70,10 +70,10 @@ fun QuranSearchErrorRow(
 ) {
     val display = error.rememberErrorDisplay(R.string.quran_search_failed)
     if (display != null) {
-        AlKhatibInlineError(
+        SaatInlineError(
             display = display,
             onRetry = onRetry,
-            modifier = modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+            modifier = modifier.padding(horizontal = SaatSpacing.screenHorizontal)
         )
     }
 }
@@ -152,7 +152,7 @@ private fun QuranSearchResultRow(
             .fillMaxWidth()
             .clickable(enabled = enabled, onClick = onClick)
             .padding(
-                horizontal = AlKhatibSpacing.screenHorizontal,
+                horizontal = SaatSpacing.screenHorizontal,
                 vertical = 14.dp
             ),
         verticalAlignment = Alignment.CenterVertically
@@ -163,9 +163,9 @@ private fun QuranSearchResultRow(
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = if (enabled) {
-                    if (emphasized) AlKhatibColors.DeepEmerald else MaterialTheme.colorScheme.onSurface
+                    if (emphasized) SaatColors.DeepEmerald else MaterialTheme.colorScheme.onSurface
                 } else {
-                    AlKhatibColors.Slate500
+                    SaatColors.Slate500
                 },
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -174,7 +174,7 @@ private fun QuranSearchResultRow(
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500,
+                color = SaatColors.Slate500,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
@@ -184,7 +184,7 @@ private fun QuranSearchResultRow(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = if (emphasized) AlKhatibColors.Teal else AlKhatibColors.Slate500,
+                tint = if (emphasized) SaatColors.Teal else SaatColors.Slate500,
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -199,13 +199,13 @@ fun QuranSearchEmptyState(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 56.dp),
+            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 56.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.MenuBook,
             contentDescription = null,
-            tint = AlKhatibColors.Teal.copy(alpha = 0.7f),
+            tint = SaatColors.Teal.copy(alpha = 0.7f),
             modifier = Modifier.size(28.dp)
         )
         Spacer(Modifier.height(14.dp))
@@ -229,7 +229,7 @@ fun QuranSearchEmptyState(
 @Composable
 fun QuranSearchResultDivider(modifier: Modifier = Modifier) {
     HorizontalDivider(
-        modifier = modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+        modifier = modifier.padding(horizontal = SaatSpacing.screenHorizontal),
         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
     )
 }

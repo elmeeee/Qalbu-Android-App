@@ -51,9 +51,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibEmptyState
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.components.SaatEmptyState
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.HifzEntry
 import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.domain.model.VerseBookmark
@@ -84,11 +84,11 @@ fun QuranBookmarksScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AlKhatibColors.ScreenBackground
+                    containerColor = SaatColors.ScreenBackground
                 )
             )
         },
-        containerColor = AlKhatibColors.ScreenBackground
+        containerColor = SaatColors.ScreenBackground
     ) { padding ->
         Column(
             modifier = Modifier
@@ -98,8 +98,8 @@ fun QuranBookmarksScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    horizontal = AlKhatibSpacing.screenHorizontal,
-                    vertical = AlKhatibSpacing.sm
+                    horizontal = SaatSpacing.screenHorizontal,
+                    vertical = SaatSpacing.sm
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -242,7 +242,7 @@ private fun LibraryEmptyState(
     title: String,
     body: String
 ) {
-    AlKhatibEmptyState(
+    SaatEmptyState(
         icon = icon,
         title = title,
         body = body,
@@ -259,7 +259,7 @@ private fun BookmarkRow(
 ) {
     LibraryItemCard(
         icon = Icons.Filled.Bookmark,
-        iconTint = AlKhatibColors.GoldDeep,
+        iconTint = SaatColors.GoldDeep,
         title = bookmark.surahLabel?.let { "$it ${bookmark.verseNumber}" }
             ?: "${bookmark.chapterNumber}:${bookmark.verseNumber}",
         subtitle = stringResource(R.string.verse_has_bookmark),
@@ -275,7 +275,7 @@ private fun NoteRow(
 ) {
     LibraryItemCard(
         icon = Icons.Filled.EditNote,
-        iconTint = AlKhatibColors.DeepEmerald,
+        iconTint = SaatColors.DeepEmerald,
         title = "${note.chapterNumber}:${note.verseNumber}",
         subtitle = note.text,
         badge = stringResource(R.string.verse_has_note),
@@ -290,14 +290,14 @@ private fun HifzRow(
 ) {
     val status = runCatching { HifzStatus.valueOf(entry.status) }.getOrDefault(HifzStatus.NONE)
     val (badge, tint) = when (status) {
-        HifzStatus.LEARNING -> stringResource(R.string.hifz_learning) to AlKhatibColors.Gold
-        HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized) to AlKhatibColors.DeepEmerald
+        HifzStatus.LEARNING -> stringResource(R.string.hifz_learning) to SaatColors.Gold
+        HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized) to SaatColors.DeepEmerald
         HifzStatus.NEEDS_REVIEW -> stringResource(R.string.hifz_review) to Color(0xFFC2410C)
-        HifzStatus.NONE -> "" to AlKhatibColors.Slate500
+        HifzStatus.NONE -> "" to SaatColors.Slate500
     }
     LibraryItemCard(
         icon = Icons.Filled.Psychology,
-        iconTint = AlKhatibColors.IndigoDeep,
+        iconTint = SaatColors.IndigoDeep,
         title = "${entry.chapterNumber}:${entry.verseNumber}",
         subtitle = stringResource(R.string.quran_library_hifz_row_hint),
         badge = badge,
@@ -320,7 +320,7 @@ private fun LibraryItemCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 1.dp
     ) {
         Row(
@@ -348,7 +348,7 @@ private fun LibraryItemCard(
                         text = title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = AlKhatibColors.Slate900
+                        color = SaatColors.Slate900
                     )
                     badge?.takeIf { it.isNotBlank() }?.let {
                         Text(
@@ -367,7 +367,7 @@ private fun LibraryItemCard(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -375,7 +375,7 @@ private fun LibraryItemCard(
             Icon(
                 Icons.Filled.ChevronRight,
                 contentDescription = null,
-                tint = AlKhatibColors.Slate500,
+                tint = SaatColors.Slate500,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -388,8 +388,8 @@ private fun HifzStatsRow(summary: QuranPersonalStore.HifzSummary) {
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.spacedBy(8.dp)
   ) {
-      HifzStatChip(stringResource(R.string.hifz_learning), summary.learning, AlKhatibColors.Gold)
-      HifzStatChip(stringResource(R.string.hifz_memorized), summary.memorized, AlKhatibColors.DeepEmerald)
+      HifzStatChip(stringResource(R.string.hifz_learning), summary.learning, SaatColors.Gold)
+      HifzStatChip(stringResource(R.string.hifz_memorized), summary.memorized, SaatColors.DeepEmerald)
       HifzStatChip(stringResource(R.string.hifz_review), summary.needsReview, Color(0xFFC2410C))
   }
 }

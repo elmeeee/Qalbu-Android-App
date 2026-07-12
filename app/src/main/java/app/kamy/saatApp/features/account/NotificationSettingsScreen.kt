@@ -37,10 +37,10 @@ import app.kamy.saatApp.infrastructure.notifications.AppNotificationCopy
 import app.kamy.saatApp.ui.permissions.hasAggressiveOemBatteryManagement
 import app.kamy.saatApp.ui.permissions.isIgnoringBatteryOptimizations
 import app.kamy.saatApp.ui.permissions.openBackgroundReliabilitySettings
-import app.kamy.saatApp.design.components.AlKhatibSettingsGroup
-import app.kamy.saatApp.design.components.AlKhatibSettingsNavigationRow
-import app.kamy.saatApp.design.components.AlKhatibSettingsToggleRow
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.components.SaatSettingsGroup
+import app.kamy.saatApp.design.components.SaatSettingsNavigationRow
+import app.kamy.saatApp.design.components.SaatSettingsToggleRow
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 @Composable
@@ -59,8 +59,8 @@ fun NotificationSettingsScreen(
             .background(MaterialTheme.colorScheme.background)
             .tabContentStatusBarInset()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.md),
-        verticalArrangement = Arrangement.spacedBy(AlKhatibSpacing.lg)
+            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(SaatSpacing.lg)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -85,12 +85,12 @@ fun NotificationSettingsScreen(
             text = stringResource(R.string.notifications_intro),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = AlKhatibSpacing.xs)
+            modifier = Modifier.padding(horizontal = SaatSpacing.xs)
         )
 
         NotificationSectionLabel(stringResource(R.string.section_quran))
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsToggleRow(
+        SaatSettingsGroup {
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.Notifications,
                 title = stringResource(R.string.daily_verse),
                 subtitle = stringResource(R.string.daily_verse_subtitle),
@@ -98,7 +98,7 @@ fun NotificationSettingsScreen(
                 onCheckedChange = vm::setDailyVerseEnabled
             )
             if (state.dailyVerseEnabled) {
-                AlKhatibSettingsNavigationRow(
+                SaatSettingsNavigationRow(
                     icon = Icons.Filled.Schedule,
                     title = stringResource(R.string.reminder_time),
                     subtitle = state.reminderTimeLabel.ifBlank { "7:00 AM" },
@@ -109,9 +109,9 @@ fun NotificationSettingsScreen(
         }
 
         NotificationSectionLabel(stringResource(R.string.section_prayer))
-        AlKhatibSettingsGroup {
+        SaatSettingsGroup {
             if (showBatterySettings) {
-                AlKhatibSettingsNavigationRow(
+                SaatSettingsNavigationRow(
                     icon = Icons.Filled.BatteryChargingFull,
                     title = stringResource(R.string.battery_opt_settings_title),
                     subtitle = stringResource(
@@ -132,7 +132,7 @@ fun NotificationSettingsScreen(
                 } else {
                     if (isIndoMalay) "Suara Bawaan HP" else "Default System Sound"
                 }
-                AlKhatibSettingsToggleRow(
+                SaatSettingsToggleRow(
                     icon = Icons.Filled.Notifications,
                     title = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
                     subtitle = sub,
@@ -142,7 +142,7 @@ fun NotificationSettingsScreen(
                     }
                 )
             }
-            AlKhatibSettingsToggleRow(
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.WbTwilight,
                 title = stringResource(R.string.imsak),
                 subtitle = stringResource(R.string.imsak_subtitle),
@@ -152,22 +152,22 @@ fun NotificationSettingsScreen(
         }
 
         NotificationSectionLabel(stringResource(R.string.section_night))
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsToggleRow(
+        SaatSettingsGroup {
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.Bedtime,
                 title = stringResource(R.string.midnight),
                 subtitle = stringResource(R.string.midnight_subtitle),
                 checked = state.midnightEnabled,
                 onCheckedChange = vm::setMidnightEnabled
             )
-            AlKhatibSettingsToggleRow(
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.Bedtime,
                 title = stringResource(R.string.first_third),
                 subtitle = stringResource(R.string.first_third_subtitle),
                 checked = state.firstThirdEnabled,
                 onCheckedChange = vm::setFirstThirdEnabled
             )
-            AlKhatibSettingsToggleRow(
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.Bedtime,
                 title = stringResource(R.string.last_third),
                 subtitle = stringResource(R.string.last_third_subtitle),
@@ -177,28 +177,28 @@ fun NotificationSettingsScreen(
         }
 
         NotificationSectionLabel(stringResource(R.string.section_sunnah))
-        AlKhatibSettingsGroup {
-            AlKhatibSettingsNavigationRow(
+        SaatSettingsGroup {
+            SaatSettingsNavigationRow(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
                 title = stringResource(R.string.surah_reminders_settings_title),
                 subtitle = stringResource(R.string.surah_reminders_settings_subtitle),
                 onClick = vm::openSurahRemindersSheet
             )
-            AlKhatibSettingsToggleRow(
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.Notifications,
                 title = stringResource(R.string.important_days_reminder),
                 subtitle = stringResource(R.string.important_days_reminder_subtitle),
                 checked = state.importantDaysReminderEnabled,
                 onCheckedChange = vm::setImportantDaysReminderEnabled
             )
-            AlKhatibSettingsToggleRow(
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.Notifications,
                 title = stringResource(R.string.fast_mon_thu),
                 subtitle = stringResource(R.string.fast_mon_thu_subtitle),
                 checked = state.monThuFastReminderEnabled,
                 onCheckedChange = vm::setMonThuFastReminderEnabled
             )
-            AlKhatibSettingsToggleRow(
+            SaatSettingsToggleRow(
                 icon = Icons.Filled.Notifications,
                 title = stringResource(R.string.dhuha_reminder),
                 subtitle = stringResource(R.string.dhuha_reminder_subtitle),
@@ -208,7 +208,7 @@ fun NotificationSettingsScreen(
             if (state.dhuhaReminderEnabled) {
                 val context = LocalContext.current
                 val isIndoMalay = state.appLanguage == app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN || state.appLanguage == app.kamy.saatApp.core.locale.AppLanguage.MALAY
-                AlKhatibSettingsNavigationRow(
+                SaatSettingsNavigationRow(
                     icon = Icons.Filled.Schedule,
                     title = if (isIndoMalay) "Waktu Pengingat Duha" else "Dhuha Reminder Time",
                     subtitle = state.dhuhaTimeLabel,
@@ -227,7 +227,7 @@ fun NotificationSettingsScreen(
             }
         }
 
-        Spacer(Modifier.height(AlKhatibSpacing.xl))
+        Spacer(Modifier.height(SaatSpacing.xl))
     }
 }
 
@@ -248,6 +248,6 @@ private fun NotificationSectionLabel(text: String) {
         style = MaterialTheme.typography.labelLarge,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(horizontal = AlKhatibSpacing.xs, vertical = AlKhatibSpacing.xs)
+        modifier = Modifier.padding(horizontal = SaatSpacing.xs, vertical = SaatSpacing.xs)
     )
 }

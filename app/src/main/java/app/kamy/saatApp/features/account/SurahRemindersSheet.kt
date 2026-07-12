@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.SurahReminder
@@ -66,7 +66,7 @@ fun SurahRemindersSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AlKhatibColors.OffWhite,
+        containerColor = SaatColors.OffWhite,
         dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
         Column(
@@ -84,18 +84,18 @@ fun SurahRemindersSheet(
                     text = if (isIndoMalay) "Pengingat Baca Surah" else "Surah Reminders",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
                 IconButton(
                     onClick = { showAddForm = true },
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.1f)
+                        containerColor = SaatColors.DeepEmerald.copy(alpha = 0.1f)
                     )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add Reminder",
-                        tint = AlKhatibColors.DeepEmerald
+                        tint = SaatColors.DeepEmerald
                     )
                 }
             }
@@ -107,7 +107,7 @@ fun SurahRemindersSheet(
                     "Configure recurring reminders to read your chosen Surahs (e.g. Yasin, Al-Kahf, Al-Mulk, etc.). Click card to edit."
                 },
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate700
+                color = SaatColors.Slate700
             )
 
             if (reminders.isEmpty()) {
@@ -120,7 +120,7 @@ fun SurahRemindersSheet(
                     Text(
                         text = if (isIndoMalay) "Belum ada pengingat kustom." else "No custom reminders set.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate500,
+                        color = SaatColors.Slate500,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -181,8 +181,8 @@ private fun SurahReminderItemRow(
             .fillMaxWidth()
             .clickable { onEdit() },
         shape = RoundedCornerShape(12.dp),
-        color = AlKhatibColors.PureWhite,
-        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey)
+        color = SaatColors.PureWhite,
+        border = BorderStroke(1.dp, SaatColors.SoftGrey)
     ) {
         Row(
             modifier = Modifier
@@ -195,7 +195,7 @@ private fun SurahReminderItemRow(
                     text = "Surah ${reminder.surahName}",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
                 Spacer(Modifier.height(4.dp))
                 val timeString = String.format("%02d.%02d", reminder.hour, reminder.minute)
@@ -203,7 +203,7 @@ private fun SurahReminderItemRow(
                 Text(
                     text = if (isIndoMalay) "Setiap hari $dayName pukul $timeString" else "Every $dayName at $timeString",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
 
@@ -211,8 +211,8 @@ private fun SurahReminderItemRow(
                 checked = reminder.enabled,
                 onCheckedChange = onToggle,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = AlKhatibColors.DeepEmerald,
-                    checkedTrackColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.3f)
+                    checkedThumbColor = SaatColors.DeepEmerald,
+                    checkedTrackColor = SaatColors.DeepEmerald.copy(alpha = 0.3f)
                 )
             )
 
@@ -222,7 +222,7 @@ private fun SurahReminderItemRow(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete Reminder",
-                    tint = AlKhatibColors.Danger
+                    tint = SaatColors.Danger
                 )
             }
         }
@@ -247,7 +247,7 @@ private fun AddEditSurahReminderDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = AlKhatibColors.PureWhite,
+            color = SaatColors.PureWhite,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
@@ -266,7 +266,7 @@ private fun AddEditSurahReminderDialog(
                     },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
 
                 // Surah Selector Trigger Row
@@ -274,7 +274,7 @@ private fun AddEditSurahReminderDialog(
                     Text(
                         text = if (isIndoMalay) "Pilih Surah:" else "Select Surah:",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                     Spacer(Modifier.height(4.dp))
                     Surface(
@@ -282,8 +282,8 @@ private fun AddEditSurahReminderDialog(
                             .fillMaxWidth()
                             .clickable { showSurahPicker = true },
                         shape = RoundedCornerShape(8.dp),
-                        color = AlKhatibColors.LightGrey,
-                        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey)
+                        color = SaatColors.LightGrey,
+                        border = BorderStroke(1.dp, SaatColors.SoftGrey)
                     ) {
                         Row(
                             modifier = Modifier
@@ -295,13 +295,13 @@ private fun AddEditSurahReminderDialog(
                             Text(
                                 text = "Surah ${SURAH_NAMES[selectedSurahIndex]}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = AlKhatibColors.Slate900,
+                                color = SaatColors.Slate900,
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
                                 text = if (isIndoMalay) "Ubah" else "Change",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = AlKhatibColors.DeepEmerald,
+                                color = SaatColors.DeepEmerald,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -313,7 +313,7 @@ private fun AddEditSurahReminderDialog(
                     Text(
                         text = if (isIndoMalay) "Hari:" else "Day:",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                     Spacer(Modifier.height(6.dp))
                     Row(
@@ -336,7 +336,7 @@ private fun AddEditSurahReminderDialog(
                                     .weight(1f)
                                     .height(38.dp)
                                     .background(
-                                        color = if (isSelected) AlKhatibColors.DeepEmerald else AlKhatibColors.LightGrey,
+                                        color = if (isSelected) SaatColors.DeepEmerald else SaatColors.LightGrey,
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .clickable { selectedWeekday = day },
@@ -344,7 +344,7 @@ private fun AddEditSurahReminderDialog(
                             ) {
                                 Text(
                                     text = label,
-                                    color = if (isSelected) AlKhatibColors.PureWhite else AlKhatibColors.Slate900,
+                                    color = if (isSelected) SaatColors.PureWhite else SaatColors.Slate900,
                                     style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -358,7 +358,7 @@ private fun AddEditSurahReminderDialog(
                     Text(
                         text = if (isIndoMalay) "Waktu:" else "Time:",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                     Spacer(Modifier.height(4.dp))
                     Surface(
@@ -377,8 +377,8 @@ private fun AddEditSurahReminderDialog(
                                 ).show()
                             },
                         shape = RoundedCornerShape(8.dp),
-                        color = AlKhatibColors.LightGrey,
-                        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey)
+                        color = SaatColors.LightGrey,
+                        border = BorderStroke(1.dp, SaatColors.SoftGrey)
                     ) {
                         Row(
                             modifier = Modifier
@@ -391,21 +391,21 @@ private fun AddEditSurahReminderDialog(
                                 Icon(
                                     imageVector = Icons.Default.AccessTime,
                                     contentDescription = "Time Icon",
-                                    tint = AlKhatibColors.Slate500,
+                                    tint = SaatColors.Slate500,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = String.format("%02d:%02d", hour, minute),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = AlKhatibColors.Slate900,
+                                    color = SaatColors.Slate900,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
                             Text(
                                 text = if (isIndoMalay) "Atur" else "Set",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = AlKhatibColors.DeepEmerald,
+                                color = SaatColors.DeepEmerald,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -422,7 +422,7 @@ private fun AddEditSurahReminderDialog(
                     TextButton(onClick = onDismiss) {
                         Text(
                             text = if (isIndoMalay) "Batal" else "Cancel",
-                            color = AlKhatibColors.Slate500
+                            color = SaatColors.Slate500
                         )
                     }
                     Spacer(Modifier.width(8.dp))
@@ -439,7 +439,7 @@ private fun AddEditSurahReminderDialog(
                             )
                             onSave(finalReminder)
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = AlKhatibColors.DeepEmerald)
+                        colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
                     ) {
                         Text(text = if (isIndoMalay) "Simpan" else "Save")
                     }
@@ -452,7 +452,7 @@ private fun AddEditSurahReminderDialog(
         Dialog(onDismissRequest = { showSurahPicker = false }) {
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = AlKhatibColors.PureWhite,
+                color = SaatColors.PureWhite,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(400.dp)
@@ -463,7 +463,7 @@ private fun AddEditSurahReminderDialog(
                         text = if (isIndoMalay) "Pilih Surah" else "Select Surah",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                     LazyColumn(modifier = Modifier.weight(1f)) {
@@ -478,9 +478,9 @@ private fun AddEditSurahReminderDialog(
                                     }
                                     .padding(vertical = 12.dp, horizontal = 8.dp),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = AlKhatibColors.Slate900
+                                color = SaatColors.Slate900
                             )
-                            HorizontalDivider(color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+                            HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
                         }
                     }
                 }

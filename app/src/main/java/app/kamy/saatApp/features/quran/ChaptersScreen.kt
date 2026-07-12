@@ -63,12 +63,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibErrorState
-import app.kamy.saatApp.design.components.AlKhatibPullToRefresh
+import app.kamy.saatApp.design.components.SaatErrorState
+import app.kamy.saatApp.design.components.SaatPullToRefresh
 import app.kamy.saatApp.design.components.ChapterRowSkeleton
-import app.kamy.saatApp.design.components.AlKhatibRevelationChip
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.components.SaatRevelationChip
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.QuranJuz
 import app.kamy.saatApp.domain.model.ReadingSession
@@ -158,25 +158,25 @@ fun ChaptersScreen(
                     )
                     repeat(10) { index ->
                         ChapterRowSkeleton(
-                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                         )
                         if (index < 9) {
                             HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
                                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                             )
                         }
                     }
                 }
             state.error != null && state.chapters.isEmpty() && errorDisplay != null ->
-                AlKhatibErrorState(
+                SaatErrorState(
                     display = errorDisplay,
                     onRetry = { vm.loadAll(force = true) },
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                        .padding(horizontal = SaatSpacing.screenHorizontal)
                 )
-            else -> AlKhatibPullToRefresh(
+            else -> SaatPullToRefresh(
                 isRefreshing = isPullRefreshing,
                 onRefresh = {
                     scope.launch {
@@ -233,8 +233,8 @@ fun ChaptersScreen(
                                 MyQuranLibraryCard(
                                     onClick = onOpenBookmarks,
                                     modifier = Modifier.padding(
-                                        horizontal = AlKhatibSpacing.screenHorizontal,
-                                        vertical = AlKhatibSpacing.sm
+                                        horizontal = SaatSpacing.screenHorizontal,
+                                        vertical = SaatSpacing.sm
                                     )
                                 )
                             }
@@ -247,8 +247,8 @@ fun ChaptersScreen(
                                             vm.continueReadingTarget()?.let { (c, v) -> onOpenChapter(c, v) }
                                         },
                                         modifier = Modifier.padding(
-                                            horizontal = AlKhatibSpacing.screenHorizontal,
-                                            vertical = AlKhatibSpacing.sm
+                                            horizontal = SaatSpacing.screenHorizontal,
+                                            vertical = SaatSpacing.sm
                                         )
                                     )
                                 }
@@ -293,10 +293,10 @@ fun ChaptersScreen(
                                             onOpenChapter(chapter, ayah)
                                             vm.clearSearch()
                                         },
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                        modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                     )
                                     HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                        modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
                                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                                     )
                                 }
@@ -353,7 +353,7 @@ fun ChaptersScreen(
                                         Surface(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+                                                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
                                             shape = RoundedCornerShape(16.dp),
                                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                                             border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
@@ -417,7 +417,7 @@ fun ChaptersScreen(
                                         chapter = chapter,
                                         isRead = chapter.id in state.readChapters,
                                         onClick = { onOpenChapter(chapter, null) },
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                        modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                     )
                                 }
                             }
@@ -425,11 +425,11 @@ fun ChaptersScreen(
                                 state.juzsLoading && state.juzs.isEmpty() -> {
                                     items(10, key = { "juz_skeleton_$it" }) { index ->
                                         ChapterRowSkeleton(
-                                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                         )
                                         if (index < 9) {
                                             HorizontalDivider(
-                                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                                modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
                                                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                                             )
                                         }
@@ -439,11 +439,11 @@ fun ChaptersScreen(
                                     item(key = "juz_error") {
                                         val juzErrorDisplay = state.juzsError.rememberErrorDisplay(R.string.juz_load_failed)
                                         if (juzErrorDisplay != null) {
-                                            AlKhatibErrorState(
+                                            SaatErrorState(
                                                 display = juzErrorDisplay,
                                                 onRetry = { vm.reloadJuzs() },
                                                 modifier = Modifier.padding(
-                                                    horizontal = AlKhatibSpacing.screenHorizontal,
+                                                    horizontal = SaatSpacing.screenHorizontal,
                                                     vertical = 24.dp
                                                 )
                                             )
@@ -456,7 +456,7 @@ fun ChaptersScreen(
                                             juz = juz,
                                             chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
                                             onClick = { onOpenJuz(juz.juzNumber, null) },
-                                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                         )
                                     }
                                 }
@@ -498,8 +498,8 @@ private fun QuranListHeader(
         modifier = modifier
             .tabContentStatusBarInset()
             .padding(
-                horizontal = AlKhatibSpacing.screenHorizontal,
-                vertical = AlKhatibSpacing.md
+                horizontal = SaatSpacing.screenHorizontal,
+                vertical = SaatSpacing.md
             )
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -509,7 +509,7 @@ private fun QuranListHeader(
                 color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.width(AlKhatibSpacing.sm))
+            Spacer(Modifier.width(SaatSpacing.sm))
             Text(
                 text = stringResource(R.string.quran_title),
                 style = MaterialTheme.typography.titleLarge,
@@ -535,7 +535,7 @@ private fun QuranListHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 18.dp, top = 4.dp)
         )
-        Spacer(Modifier.height(AlKhatibSpacing.sm))
+        Spacer(Modifier.height(SaatSpacing.sm))
         Box(
             modifier = Modifier
                 .height(2.dp)
@@ -549,7 +549,7 @@ private fun QuranListHeader(
                     )
                 )
         )
-        Spacer(Modifier.height(AlKhatibSpacing.md))
+        Spacer(Modifier.height(SaatSpacing.md))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -574,18 +574,18 @@ private fun QuranListHeader(
                     Text(
                         text = stringResource(R.string.cancel),
                         style = MaterialTheme.typography.labelLarge,
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
         }
         if (showSuggestions && searchEnabled) {
-            Spacer(Modifier.height(AlKhatibSpacing.sm))
+            Spacer(Modifier.height(SaatSpacing.sm))
             QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
         }
         if (showBrowseTabs) {
-            Spacer(Modifier.height(AlKhatibSpacing.md))
+            Spacer(Modifier.height(SaatSpacing.md))
             QuranBrowseTabs(
                 browseMode = browseMode,
                 onBrowseModeChange = onBrowseModeChange,
@@ -611,7 +611,7 @@ private fun QuranBrowseTabs(
                 Brush.linearGradient(
                     listOf(
                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        AlKhatibColors.SageMist.copy(alpha = 0.5f)
+                        SaatColors.SageMist.copy(alpha = 0.5f)
                     )
                 )
             )
@@ -659,7 +659,7 @@ private fun QuranBrowseTab(
                 if (selected) {
                     Modifier.background(
                         Brush.linearGradient(
-                            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
+                            listOf(SaatColors.DeepEmerald, SaatColors.TealDark)
                         )
                     )
                 } else {
@@ -690,17 +690,17 @@ private fun ContinueReadingCard(
         onClick = onTap,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, AlKhatibColors.Teal.copy(alpha = 0.2f))
+        border = BorderStroke(1.dp, SaatColors.Teal.copy(alpha = 0.2f))
     ) {
         Box(
             modifier = Modifier
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
-                            AlKhatibColors.MintWash.copy(alpha = 0.5f),
-                            AlKhatibColors.PureWhite
+                            SaatColors.MintWash.copy(alpha = 0.5f),
+                            SaatColors.PureWhite
                         )
                     )
                 )
@@ -713,13 +713,13 @@ private fun ContinueReadingCard(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(AlKhatibColors.Teal.copy(alpha = 0.12f)),
+                        .background(SaatColors.Teal.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Filled.Bookmark,
                         contentDescription = null,
-                        tint = AlKhatibColors.Teal,
+                        tint = SaatColors.Teal,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -730,7 +730,7 @@ private fun ContinueReadingCard(
                         style = MaterialTheme.typography.labelSmall.copy(
                             letterSpacing = 0.5.sp
                         ),
-                        color = AlKhatibColors.Teal,
+                        color = SaatColors.Teal,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(Modifier.height(2.dp))
@@ -738,7 +738,7 @@ private fun ContinueReadingCard(
                         text = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.Slate900,
+                        color = SaatColors.Slate900,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -746,14 +746,14 @@ private fun ContinueReadingCard(
                     Text(
                         text = stringResource(R.string.verse_number, session.verseNumber),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
                 Spacer(Modifier.width(8.dp))
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
-                    tint = AlKhatibColors.Teal.copy(alpha = 0.7f),
+                    tint = SaatColors.Teal.copy(alpha = 0.7f),
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -785,9 +785,9 @@ private fun ChapterRow(
                 .width(345.dp)
                 .height(104.dp),
             shape = RoundedCornerShape(16.dp),
-            color = AlKhatibColors.PureWhite,
+            color = SaatColors.PureWhite,
             shadowElevation = 1.dp,
-            border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+            border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
         ) {
             Row(
                 modifier = Modifier
@@ -810,7 +810,7 @@ private fun ChapterRow(
                             text = chapter.displayComplexName,
                             style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
                             fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.Slate900,
+                            color = SaatColors.Slate900,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -819,7 +819,7 @@ private fun ChapterRow(
                             Icon(
                                 imageVector = androidx.compose.material.icons.Icons.Default.Check,
                                 contentDescription = stringResource(R.string.khatam_completed),
-                                tint = AlKhatibColors.DeepEmerald,
+                                tint = SaatColors.DeepEmerald,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -828,7 +828,7 @@ private fun ChapterRow(
                         Text(
                             text = meaning,
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = AlKhatibColors.Slate500,
+                            color = SaatColors.Slate500,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(top = 2.dp)
@@ -840,7 +840,7 @@ private fun ChapterRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         if (chapter.revelationLabel.isNotEmpty()) {
-                            AlKhatibRevelationChip(
+                            SaatRevelationChip(
                                 label = chapter.revelationLabel,
                                 isMeccan = chapter.isMeccan
                             )
@@ -849,7 +849,7 @@ private fun ChapterRow(
                             Text(
                                 text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = AlKhatibColors.Slate500
+                                color = SaatColors.Slate500
                             )
                         }
                     }
@@ -887,9 +887,9 @@ private fun JuzRow(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(16.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -904,13 +904,13 @@ private fun JuzRow(
                     text = stringResource(R.string.juz_number, juz.juzNumber),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
                 startLabel?.let { label ->
                     Text(
                         text = stringResource(R.string.juz_starts_at, label),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate500,
+                        color = SaatColors.Slate500,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(top = 2.dp)
@@ -920,7 +920,7 @@ private fun JuzRow(
                     Text(
                         text = pluralStringResource(R.plurals.juz_verse_count, count, count),
                         style = MaterialTheme.typography.labelMedium,
-                        color = AlKhatibColors.Teal,
+                        color = SaatColors.Teal,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(top = 6.dp)
                     )
@@ -930,7 +930,7 @@ private fun JuzRow(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = AlKhatibColors.Teal.copy(alpha = 0.6f),
+                tint = SaatColors.Teal.copy(alpha = 0.6f),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -945,7 +945,7 @@ private fun ChapterNumberBadge(number: Int) {
             .clip(CircleShape)
             .background(
                 Brush.linearGradient(
-                    listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
+                    listOf(SaatColors.DeepEmerald, SaatColors.TealDark)
                 )
             ),
         contentAlignment = Alignment.Center

@@ -328,9 +328,9 @@ struct ChapterVersesView: View {
 
     private func headerIconButton(systemName: String, action: @escaping () -> Void) -> some View {
         let label = systemName == "chevron.left"
-            ? AlKhatibAccessibility.Reader.back
-            : AlKhatibAccessibility.Reader.settings
-        let hint = systemName == "gearshape.fill" ? AlKhatibAccessibility.Reader.settingsHint : nil
+            ? SaatAccessibility.Reader.back
+            : SaatAccessibility.Reader.settings
+        let hint = systemName == "gearshape.fill" ? SaatAccessibility.Reader.settingsHint : nil
         return Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 17, weight: .semibold))
@@ -339,7 +339,7 @@ struct ChapterVersesView: View {
                 .background(Circle().fill(Color.white.opacity(0.08)))
                 .overlay(Circle().stroke(Color.white.opacity(0.1), lineWidth: 1))
         }
-        .alKhatibAccessibility(label: label, hint: hint)
+        .SaatAccessibility(label: label, hint: hint)
     }
 
     private var sideActionButtons: some View {

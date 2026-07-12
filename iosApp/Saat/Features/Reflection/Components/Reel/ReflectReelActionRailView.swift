@@ -111,7 +111,7 @@ struct ReflectReelActionRailView: View {
         .buttonStyle(.plain)
         .disabled(isTogglingLike)
         .accessibilityLabel(
-            AlKhatibAccessibility.Reflect.like(
+            SaatAccessibility.Reflect.like(
                 isLiked: isLiked,
                 count: post.likesCount ?? 0
             )

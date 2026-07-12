@@ -105,7 +105,7 @@ struct ReflectVerseDetailSheetView: View {
                 if let arabicText = verse.displayText, arabicText.isEmpty == false {
                     VStack(spacing: 8) {
                         Text(arabicText)
-                            .font(AlKhatibTypography.quranArabic(size: 28))
+                            .font(SaatTypography.quranArabic(size: 28))
                             .multilineTextAlignment(.center)
                             .environment(\.layoutDirection, .rightToLeft)
                             .lineSpacing(12)

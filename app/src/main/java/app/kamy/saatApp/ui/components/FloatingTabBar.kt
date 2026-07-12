@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.NavigationBarShape
 import app.kamy.saatApp.ui.layout.FloatingNavBarMetrics
 import app.kamy.saatApp.ui.navigation.RootTab
@@ -64,8 +64,8 @@ fun FloatingTabBar(
                 elevation = 16.dp,
                 shape = NavigationBarShape,
                 clip = false,
-                ambientColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.12f),
-                spotColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+                ambientColor = SaatColors.DeepEmerald.copy(alpha = 0.12f),
+                spotColor = SaatColors.DeepEmerald.copy(alpha = 0.08f)
             )
             .clip(NavigationBarShape)
             .border(
@@ -73,7 +73,7 @@ fun FloatingTabBar(
                 brush = Brush.verticalGradient(
                     listOf(
                         Color.White.copy(alpha = 0.9f),
-                        AlKhatibColors.Teal.copy(alpha = 0.12f)
+                        SaatColors.Teal.copy(alpha = 0.12f)
                     )
                 ),
                 shape = NavigationBarShape
@@ -112,16 +112,16 @@ private fun FloatingTabItem(
     onClick: () -> Unit
 ) {
     val iconTint by animateColorAsState(
-        targetValue = if (selected) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
+        targetValue = if (selected) SaatColors.DeepEmerald else SaatColors.Slate500,
         animationSpec = spring(stiffness = 500f),
         label = "tab_icon"
     )
     val labelTint by animateColorAsState(
-        targetValue = if (selected) AlKhatibColors.DeepEmerald else Color.Transparent,
+        targetValue = if (selected) SaatColors.DeepEmerald else Color.Transparent,
         animationSpec = spring(stiffness = 500f),
         label = "tab_label"
     )
-    val pillColor = if (selected) AlKhatibColors.Teal.copy(alpha = 0.12f) else Color.Transparent
+    val pillColor = if (selected) SaatColors.Teal.copy(alpha = 0.12f) else Color.Transparent
 
     Column(
         modifier = Modifier
@@ -147,7 +147,7 @@ private fun FloatingTabItem(
                     .clip(CircleShape)
                     .border(
                         width = 1.dp,
-                        color = if (selected) AlKhatibColors.DeepEmerald else Color.Transparent,
+                        color = if (selected) SaatColors.DeepEmerald else Color.Transparent,
                         shape = CircleShape
                     )
             )

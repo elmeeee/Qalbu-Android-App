@@ -1,19 +1,19 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!--
         Base XML theme used by the Activity window before Compose attaches.
-        Compose owns the runtime theming via AlKhatibTheme.
+        Compose owns the runtime theming via SaatTheme.
     -->
-    <style name="Theme.AlKhatib" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Saat" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:statusBarColor">@color/al_khatib_screen_background</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@color/al_khatib_screen_background</item>
         <item name="android:windowBackground">@color/al_khatib_screen_background</item>
     </style>
 
-    <style name="Theme.AlKhatib.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.Saat.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
         <item name="windowSplashScreenIconBackgroundColor">@color/splash_background</item>
-        <item name="postSplashScreenTheme">@style/Theme.AlKhatib</item>
+        <item name="postSplashScreenTheme">@style/Theme.Saat</item>
     </style>
 </resources>

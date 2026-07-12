@@ -45,7 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.infrastructure.preferences.PrayerDayProgress
 import app.kamy.saatApp.infrastructure.preferences.PrayerTrackerStore
 import java.text.DateFormatSymbols
@@ -75,7 +75,7 @@ fun PrayerTrackerCalendarScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(SaatColors.ScreenBackground)
             .statusBarsPadding()
     ) {
         Row(
@@ -92,12 +92,12 @@ fun PrayerTrackerCalendarScreen(
                     text = stringResource(R.string.prayer_tracker_calendar_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
                 Text(
                     text = stringResource(R.string.prayer_tracker_calendar_subtitle),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
         }
@@ -117,7 +117,7 @@ fun PrayerTrackerCalendarScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 ChallengeStat(
-                    icon = { Icon(Icons.Filled.LocalFireDepartment, null, tint = AlKhatibColors.GoldDeep) },
+                    icon = { Icon(Icons.Filled.LocalFireDepartment, null, tint = SaatColors.GoldDeep) },
                     value = state.streak.toString(),
                     label = stringResource(R.string.prayer_streak_current)
                 )
@@ -144,7 +144,7 @@ fun PrayerTrackerCalendarScreen(
                 text = monthLabel,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
             IconButton(onClick = vm::nextMonth) {
                 Icon(Icons.Filled.ChevronRight, contentDescription = stringResource(R.string.next_month))
@@ -163,7 +163,7 @@ fun PrayerTrackerCalendarScreen(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelSmall,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -208,14 +208,14 @@ private fun ChallengeStat(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 modifier = Modifier.padding(start = if (icon != null) 4.dp else 0.dp)
             )
         }
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = AlKhatibColors.Slate500
+            color = SaatColors.Slate500
         )
     }
 }
@@ -235,22 +235,22 @@ private fun CalendarDayCell(
             .background(
                 when {
                     complete -> Brush.linearGradient(
-                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                        listOf(SaatColors.DeepEmerald, SaatColors.Teal)
                     )
                     partial -> Brush.linearGradient(
                         listOf(
-                            AlKhatibColors.Teal.copy(alpha = 0.25f),
-                            AlKhatibColors.Teal.copy(alpha = 0.12f)
+                            SaatColors.Teal.copy(alpha = 0.25f),
+                            SaatColors.Teal.copy(alpha = 0.12f)
                         )
                     )
                     else -> Brush.linearGradient(
-                        listOf(AlKhatibColors.LightGrey, AlKhatibColors.LightGrey)
+                        listOf(SaatColors.LightGrey, SaatColors.LightGrey)
                     )
                 }
             )
             .then(
                 if (isToday) {
-                    Modifier.border(2.dp, AlKhatibColors.GoldBright, RoundedCornerShape(10.dp))
+                    Modifier.border(2.dp, SaatColors.GoldBright, RoundedCornerShape(10.dp))
                 } else {
                     Modifier
                 }
@@ -264,8 +264,8 @@ private fun CalendarDayCell(
                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
                 color = when {
                     complete -> Color.White
-                    partial -> AlKhatibColors.DeepEmerald
-                    else -> AlKhatibColors.Slate500
+                    partial -> SaatColors.DeepEmerald
+                    else -> SaatColors.Slate500
                 }
             )
             if (complete) {
@@ -279,7 +279,7 @@ private fun CalendarDayCell(
                 Text(
                     text = "${progress.completedCount}/${progress.totalCount}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = AlKhatibColors.DeepEmerald,
+                    color = SaatColors.DeepEmerald,
                     fontWeight = FontWeight.Bold
                 )
             }

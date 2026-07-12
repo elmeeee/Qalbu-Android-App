@@ -79,7 +79,7 @@ struct SplashScreenView: View {
             Color.white.ignoresSafeArea()
             
             VStack {
-                Image("AlKhatibLogo")
+                Image("SaatLogo")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 180)

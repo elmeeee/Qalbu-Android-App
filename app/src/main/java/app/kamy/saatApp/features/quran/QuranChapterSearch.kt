@@ -58,8 +58,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.QuranChapter
 import java.text.Normalizer
 
@@ -431,7 +431,7 @@ fun QuranChapterSearchBar(
         animationSpec = tween(300),
         label = "border_alpha"
     )
-    val borderColor = if (isFocused) AlKhatibColors.DeepEmerald.copy(alpha = borderAlpha) else AlKhatibColors.SoftGrey
+    val borderColor = if (isFocused) SaatColors.DeepEmerald.copy(alpha = borderAlpha) else SaatColors.SoftGrey
 
     Surface(
         modifier = modifier
@@ -439,11 +439,11 @@ fun QuranChapterSearchBar(
             .shadow(
                 elevation = if (isFocused) 4.dp else 1.dp,
                 shape = RoundedCornerShape(24.dp),
-                ambientColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.08f),
-                spotColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.08f)
+                ambientColor = SaatColors.DeepEmerald.copy(alpha = 0.08f),
+                spotColor = SaatColors.DeepEmerald.copy(alpha = 0.08f)
             ),
         shape = RoundedCornerShape(24.dp),
-        color = if (isFocused) AlKhatibColors.PureWhite else AlKhatibColors.LightGrey,
+        color = if (isFocused) SaatColors.PureWhite else SaatColors.LightGrey,
         border = androidx.compose.foundation.BorderStroke(1.dp, borderColor)
     ) {
         Row(
@@ -455,7 +455,7 @@ fun QuranChapterSearchBar(
             Icon(
                 imageVector = Icons.Filled.Search,
                 contentDescription = null,
-                tint = if (isFocused) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
+                tint = if (isFocused) SaatColors.DeepEmerald else SaatColors.Slate500,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(Modifier.width(10.dp))
@@ -465,11 +465,11 @@ fun QuranChapterSearchBar(
                 enabled = enabled,
                 singleLine = true,
                 textStyle = TextStyle(
-                    color = AlKhatibColors.Slate900,
+                    color = SaatColors.Slate900,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium
                 ),
-                cursorBrush = SolidColor(AlKhatibColors.DeepEmerald),
+                cursorBrush = SolidColor(SaatColors.DeepEmerald),
                 interactionSource = interactionSource,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { onDismiss() }),
@@ -483,7 +483,7 @@ fun QuranChapterSearchBar(
                             Text(
                                 text = resolvedPlaceholder,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = AlKhatibColors.Slate500.copy(alpha = 0.7f),
+                                color = SaatColors.Slate500.copy(alpha = 0.7f),
                                 maxLines = 1
                             )
                         }
@@ -499,7 +499,7 @@ fun QuranChapterSearchBar(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = stringResource(R.string.clear_search_a11y),
-                        tint = AlKhatibColors.Slate500,
+                        tint = SaatColors.Slate500,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -523,7 +523,7 @@ fun QuranSearchSuggestionChips(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))

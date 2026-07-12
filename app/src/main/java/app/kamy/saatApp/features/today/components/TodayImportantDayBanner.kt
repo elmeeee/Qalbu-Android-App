@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLanguage
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.KhgtTodayInfo
 import app.kamy.saatApp.infrastructure.local.ImportantDayRegistry
 import app.kamy.saatApp.infrastructure.local.ImportantDayDetail
@@ -77,15 +77,15 @@ fun TodayImportantDayBanner(
             .background(
                 Brush.horizontalGradient(
                     colors = listOf(
-                        AlKhatibColors.PrayerCreamWarm.copy(alpha = 0.45f),
-                        AlKhatibColors.PrayerCream.copy(alpha = 0.25f)
+                        SaatColors.PrayerCreamWarm.copy(alpha = 0.45f),
+                        SaatColors.PrayerCream.copy(alpha = 0.25f)
                     )
                 )
             )
             .border(
                 BorderStroke(
                     1.dp,
-                    AlKhatibColors.GoldDeep.copy(alpha = 0.2f)
+                    SaatColors.GoldDeep.copy(alpha = 0.2f)
                 ),
                 RoundedCornerShape(16.dp)
             )
@@ -97,13 +97,13 @@ fun TodayImportantDayBanner(
             modifier = Modifier
                 .size(42.dp)
                 .clip(CircleShape)
-                .background(AlKhatibColors.GoldDeep.copy(alpha = 0.12f)),
+                .background(SaatColors.GoldDeep.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Filled.Event,
                 contentDescription = null,
-                tint = AlKhatibColors.GoldDeep,
+                tint = SaatColors.GoldDeep,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -119,13 +119,13 @@ fun TodayImportantDayBanner(
                     letterSpacing = 1.sp
                 ),
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.GoldDeep
+                color = SaatColors.GoldDeep
             )
             Text(
                 text = localizedTitle,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold,
-                color = AlKhatibColors.Slate900,
+                color = SaatColors.Slate900,
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
@@ -176,13 +176,13 @@ private fun ImportantDayDetailSheet(
                         letterSpacing = 1.2.sp
                     ),
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.GoldDeep
+                    color = SaatColors.GoldDeep
                 )
                 Text(
                     text = localizedTitle,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.ExtraBold,
-                    color = AlKhatibColors.Slate900,
+                    color = SaatColors.Slate900,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -193,9 +193,9 @@ private fun ImportantDayDetailSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(AlKhatibColors.SageMist.copy(alpha = 0.5f))
+                        .background(SaatColors.SageMist.copy(alpha = 0.5f))
                         .border(
-                            BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f)),
+                            BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f)),
                             RoundedCornerShape(12.dp)
                         )
                         .padding(14.dp)
@@ -206,7 +206,7 @@ private fun ImportantDayDetailSheet(
                         Icon(
                             imageVector = Icons.Filled.Info,
                             contentDescription = null,
-                            tint = AlKhatibColors.Teal,
+                            tint = SaatColors.Teal,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -214,13 +214,13 @@ private fun ImportantDayDetailSheet(
                             text = headers.second,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.Slate800
+                            color = SaatColors.Slate800
                         )
                     }
                     Text(
                         text = detail.description,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate700,
+                        color = SaatColors.Slate700,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
@@ -230,9 +230,9 @@ private fun ImportantDayDetailSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(AlKhatibColors.PrayerCream.copy(alpha = 0.5f))
+                        .background(SaatColors.PrayerCream.copy(alpha = 0.5f))
                         .border(
-                            BorderStroke(1.dp, AlKhatibColors.GoldDeep.copy(alpha = 0.15f)),
+                            BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.15f)),
                             RoundedCornerShape(12.dp)
                         )
                         .padding(14.dp)
@@ -243,7 +243,7 @@ private fun ImportantDayDetailSheet(
                         Icon(
                             imageVector = Icons.Filled.Favorite,
                             contentDescription = null,
-                            tint = AlKhatibColors.GoldDeep,
+                            tint = SaatColors.GoldDeep,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -251,13 +251,13 @@ private fun ImportantDayDetailSheet(
                             text = headers.third,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.GoldDeep
+                            color = SaatColors.GoldDeep
                         )
                     }
                     Text(
                         text = detail.sunnah,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate700,
+                        color = SaatColors.Slate700,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
@@ -266,7 +266,7 @@ private fun ImportantDayDetailSheet(
                     text = if (language == AppLanguage.ENGLISH) "No additional information available."
                            else "Informasi tambahan tidak tersedia.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
         }

@@ -55,8 +55,8 @@ import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.error.ErrorDisplay
 import app.kamy.saatApp.core.error.ErrorIcon
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import kotlinx.coroutines.delay
 
 // ─── Public entry-points ─────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ import kotlinx.coroutines.delay
  * Shows a large icon, title, API message (if present), fallback description, and a retry button.
  */
 @Composable
-fun AlKhatibErrorState(
+fun SaatErrorState(
     display: ErrorDisplay,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -88,34 +88,34 @@ fun AlKhatibErrorState(
             size = 56.dp
         )
 
-        Spacer(Modifier.height(AlKhatibSpacing.md))
+        Spacer(Modifier.height(SaatSpacing.md))
 
         // Title
         Text(
             text = display.title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.Slate900,
+            color = SaatColors.Slate900,
             textAlign = TextAlign.Center
         )
 
-        Spacer(Modifier.height(AlKhatibSpacing.sm))
+        Spacer(Modifier.height(SaatSpacing.sm))
 
         // Description — shows the API message when available (most actionable info)
         Text(
             text = display.description,
             style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             textAlign = TextAlign.Center
         )
 
         // API error type badge
         display.apiType?.let { type ->
-            Spacer(Modifier.height(AlKhatibSpacing.sm))
+            Spacer(Modifier.height(SaatSpacing.sm))
             ApiErrorTypeBadge(apiType = type, accentColor = accentColor)
         }
 
-        Spacer(Modifier.height(AlKhatibSpacing.lg))
+        Spacer(Modifier.height(SaatSpacing.lg))
 
         Button(
             onClick = onRetry,
@@ -143,13 +143,13 @@ fun AlKhatibErrorState(
  * Full-page error state for dark/gradient backgrounds (e.g. Reflect feed).
  */
 @Composable
-fun AlKhatibErrorStateDark(
+fun SaatErrorStateDark(
     display: ErrorDisplay,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     retryLabel: String = stringResource(R.string.try_again)
 ) {
-    val accentColor = AlKhatibColors.GoldBright
+    val accentColor = SaatColors.GoldBright
 
     ErrorStateContainer(
         modifier = modifier,
@@ -163,7 +163,7 @@ fun AlKhatibErrorStateDark(
             size = 56.dp
         )
 
-        Spacer(Modifier.height(AlKhatibSpacing.md))
+        Spacer(Modifier.height(SaatSpacing.md))
 
         Text(
             text = display.title,
@@ -173,7 +173,7 @@ fun AlKhatibErrorStateDark(
             textAlign = TextAlign.Center
         )
 
-        Spacer(Modifier.height(AlKhatibSpacing.sm))
+        Spacer(Modifier.height(SaatSpacing.sm))
 
         Text(
             text = display.description,
@@ -183,7 +183,7 @@ fun AlKhatibErrorStateDark(
         )
 
         display.apiType?.let { type ->
-            Spacer(Modifier.height(AlKhatibSpacing.sm))
+            Spacer(Modifier.height(SaatSpacing.sm))
             ApiErrorTypeBadge(
                 apiType = type,
                 accentColor = accentColor,
@@ -191,13 +191,13 @@ fun AlKhatibErrorStateDark(
             )
         }
 
-        Spacer(Modifier.height(AlKhatibSpacing.lg))
+        Spacer(Modifier.height(SaatSpacing.lg))
 
         Button(
             onClick = onRetry,
             colors = ButtonDefaults.buttonColors(
                 containerColor = accentColor,
-                contentColor = AlKhatibColors.ForestDeeper
+                contentColor = SaatColors.ForestDeeper
             ),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
@@ -217,7 +217,7 @@ fun AlKhatibErrorStateDark(
  * Compact error card — for embedding inside feature cards (e.g. Verse of Day).
  */
 @Composable
-fun AlKhatibErrorStateCompact(
+fun SaatErrorStateCompact(
     display: ErrorDisplay,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
@@ -229,9 +229,9 @@ fun AlKhatibErrorStateCompact(
             .fillMaxWidth()
             .background(accentColor.copy(alpha = 0.05f), RoundedCornerShape(14.dp))
             .border(1.dp, accentColor.copy(alpha = 0.16f), RoundedCornerShape(14.dp))
-            .padding(vertical = AlKhatibSpacing.md, horizontal = AlKhatibSpacing.md),
+            .padding(vertical = SaatSpacing.md, horizontal = SaatSpacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(AlKhatibSpacing.xs)
+        verticalArrangement = Arrangement.spacedBy(SaatSpacing.xs)
     ) {
         Icon(
             imageVector = display.icon.toImageVector(),
@@ -243,13 +243,13 @@ fun AlKhatibErrorStateCompact(
             text = display.title,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            color = AlKhatibColors.Slate900,
+            color = SaatColors.Slate900,
             textAlign = TextAlign.Center
         )
         Text(
             text = display.description,
             style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             textAlign = TextAlign.Center
         )
         display.apiType?.let { type ->
@@ -278,7 +278,7 @@ fun AlKhatibErrorStateCompact(
  * Shows error details prominently with a retry option.
  */
 @Composable
-fun AlKhatibInlineError(
+fun SaatInlineError(
     display: ErrorDisplay,
     onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -290,7 +290,7 @@ fun AlKhatibInlineError(
             .fillMaxWidth()
             .background(accentColor.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
             .border(1.dp, accentColor.copy(alpha = 0.18f), RoundedCornerShape(12.dp))
-            .padding(horizontal = AlKhatibSpacing.md, vertical = 12.dp),
+            .padding(horizontal = SaatSpacing.md, vertical = 12.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -314,17 +314,17 @@ fun AlKhatibInlineError(
                 text = display.title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Slate900
+                color = SaatColors.Slate900
             )
             Spacer(Modifier.height(2.dp))
             // Description carries the API message when present
             Text(
                 text = display.description,
                 style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
             display.apiType?.let { type ->
-                Spacer(Modifier.height(AlKhatibSpacing.xs))
+                Spacer(Modifier.height(SaatSpacing.xs))
                 ApiErrorTypeBadge(apiType = type, accentColor = accentColor)
             }
         }
@@ -372,7 +372,7 @@ private fun ErrorStateContainer(
                 .fillMaxWidth()
                 .background(background, RoundedCornerShape(20.dp))
                 .border(1.dp, border, RoundedCornerShape(20.dp))
-                .padding(horizontal = AlKhatibSpacing.xl, vertical = AlKhatibSpacing.xl),
+                .padding(horizontal = SaatSpacing.xl, vertical = SaatSpacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             content()

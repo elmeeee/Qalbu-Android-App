@@ -14,7 +14,7 @@ enum QuranVerseArabic {
     static func webArabicFontStack(embeddingTajweedWebFont: Bool) -> String {
         if embeddingTajweedWebFont {
             return """
-            'AlKhatibQuranWeb', 'KFGQPC HAFS Uthmanic Script', 'Amiri Quran', 'Scheherazade New', \
+            'SaatQuranWeb', 'KFGQPC HAFS Uthmanic Script', 'Amiri Quran', 'Scheherazade New', \
             'Geeza Pro', 'Noto Naskh Arabic', serif
             """
         }

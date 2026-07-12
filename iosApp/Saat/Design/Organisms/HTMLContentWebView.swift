@@ -82,7 +82,7 @@ struct HTMLContentWebView: UIViewRepresentable {
         let baseDirectory: URL?
         let embedFont: Bool
         if style.isVerseCard {
-            baseDirectory = AlKhatibTypography.verseArabicHTMLBaseDirectory()
+            baseDirectory = SaatTypography.verseArabicHTMLBaseDirectory()
             embedFont = rendersTajweedHTML && baseDirectory != nil
         } else {
             baseDirectory = nil
@@ -366,11 +366,11 @@ struct HTMLContentWebView: UIViewRepresentable {
         let lineHeight = QuranVerseArabic.webLineHeight
         let fontFace: String = {
             guard embedVerseWebFont else { return "" }
-            let file = AlKhatibTypography.verseWebFontRelativeFileName
+            let file = SaatTypography.verseWebFontRelativeFileName
             return """
 
             @font-face {
-              font-family: 'AlKhatibQuranWeb';
+              font-family: 'SaatQuranWeb';
               src: url('\(file)') format('truetype');
               font-weight: normal;
               font-style: normal;

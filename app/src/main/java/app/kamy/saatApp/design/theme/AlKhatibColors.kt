@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
 
-object AlKhatibColors {
+object SaatColors {
     // Primary variables
     var DeepEmerald by mutableStateOf(Color(0xFF0F4C3A))
     var Teal by mutableStateOf(Color(0xFF14806A))

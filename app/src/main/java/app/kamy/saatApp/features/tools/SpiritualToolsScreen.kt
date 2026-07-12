@@ -39,8 +39,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
@@ -63,77 +63,77 @@ fun SpiritualToolsScreen(
             R.string.qibla_title,
             R.string.qibla_account_subtitle,
             "qibla",
-            AlKhatibColors.DeepEmerald,
-            AlKhatibColors.Teal
+            SaatColors.DeepEmerald,
+            SaatColors.Teal
         ),
         SpiritualToolItem(
             Icons.Filled.AutoStories,
             R.string.doa_zikir_title,
             R.string.doa_zikir_account_subtitle,
             "doa-zikir",
-            AlKhatibColors.Teal,
-            AlKhatibColors.DeepEmerald
+            SaatColors.Teal,
+            SaatColors.DeepEmerald
         ),
         SpiritualToolItem(
             Icons.Filled.Favorite,
             R.string.dhikr_title,
             R.string.dhikr_account_subtitle,
             "dhikr",
-            AlKhatibColors.GoldDeep,
-            AlKhatibColors.Gold
+            SaatColors.GoldDeep,
+            SaatColors.Gold
         ),
         SpiritualToolItem(
             Icons.Filled.Calculate,
             R.string.zakat_title,
             R.string.zakat_account_subtitle,
             "zakat",
-            AlKhatibColors.IndigoAccent,
-            AlKhatibColors.Teal
+            SaatColors.IndigoAccent,
+            SaatColors.Teal
         ),
         SpiritualToolItem(
             Icons.Filled.FamilyRestroom,
             R.string.faraidh_title,
             R.string.faraidh_account_subtitle,
             "faraidh",
-            AlKhatibColors.GoldDeep,
-            AlKhatibColors.DeepEmerald
+            SaatColors.GoldDeep,
+            SaatColors.DeepEmerald
         ),
         SpiritualToolItem(
             Icons.Filled.NightsStay,
             R.string.qiyam_title,
             R.string.qiyam_account_subtitle,
             "qiyam",
-            AlKhatibColors.DeepEmerald,
-            AlKhatibColors.IndigoAccent
+            SaatColors.DeepEmerald,
+            SaatColors.IndigoAccent
         ),
         SpiritualToolItem(
             Icons.Filled.Shield,
             R.string.manzil_title,
             R.string.manzil_account_subtitle,
             "manzil",
-            AlKhatibColors.DeepEmerald,
-            AlKhatibColors.GoldDeep
+            SaatColors.DeepEmerald,
+            SaatColors.GoldDeep
         )
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(SaatColors.ScreenBackground)
             .tabContentStatusBarInset()
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                .padding(top = AlKhatibSpacing.md, bottom = AlKhatibSpacing.lg)
+                .padding(horizontal = SaatSpacing.screenHorizontal)
+                .padding(top = SaatSpacing.md, bottom = SaatSpacing.lg)
                 .clip(RoundedCornerShape(22.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.14f),
-                            AlKhatibColors.Teal.copy(alpha = 0.08f),
-                            AlKhatibColors.Gold.copy(alpha = 0.06f)
+                            SaatColors.DeepEmerald.copy(alpha = 0.14f),
+                            SaatColors.Teal.copy(alpha = 0.08f),
+                            SaatColors.Gold.copy(alpha = 0.06f)
                         )
                     )
                 )
@@ -141,8 +141,8 @@ fun SpiritualToolsScreen(
                     width = 1.dp,
                     brush = Brush.linearGradient(
                         listOf(
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.25f),
-                            AlKhatibColors.Teal.copy(alpha = 0.12f)
+                            SaatColors.DeepEmerald.copy(alpha = 0.25f),
+                            SaatColors.Teal.copy(alpha = 0.12f)
                         )
                     ),
                     shape = RoundedCornerShape(22.dp)
@@ -154,12 +154,12 @@ fun SpiritualToolsScreen(
                     text = stringResource(R.string.spiritual_tools_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
                 Text(
                     text = stringResource(R.string.spiritual_tools_tab_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     modifier = Modifier.padding(top = 6.dp)
                 )
             }
@@ -168,8 +168,8 @@ fun SpiritualToolsScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = AlKhatibSpacing.screenHorizontal,
-                end = AlKhatibSpacing.screenHorizontal,
+                start = SaatSpacing.screenHorizontal,
+                end = SaatSpacing.screenHorizontal,
                 bottom = floatingNavBottomPadding() + 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -201,10 +201,10 @@ private fun SpiritualToolCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(AlKhatibColors.PureWhite)
+            .background(SaatColors.PureWhite)
             .border(
                 width = 1.dp,
-                color = AlKhatibColors.SoftGrey.copy(alpha = 0.7f),
+                color = SaatColors.SoftGrey.copy(alpha = 0.7f),
                 shape = RoundedCornerShape(18.dp)
             )
             .clickable(onClick = onClick)
@@ -233,19 +233,19 @@ private fun SpiritualToolCard(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Slate800
+                color = SaatColors.Slate800
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500,
+                color = SaatColors.Slate500,
                 modifier = Modifier.padding(top = 3.dp)
             )
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = AlKhatibColors.Teal,
+            tint = SaatColors.Teal,
             modifier = Modifier.size(22.dp)
         )
     }
