@@ -36,7 +36,10 @@ final class TodayDiscoveryCoordinator {
             return
         }
 
-        let vm = TodayDiscoveryViewModel(content: container.content)
+        let vm = TodayDiscoveryViewModel(
+            content: container.content,
+            readingSessions: container.readingSessions
+        )
         discoveryViewModel = vm
         if tafsirPresenter == nil {
             tafsirPresenter = TafsirPresenter(content: container.content)

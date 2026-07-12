@@ -67,44 +67,58 @@ struct TodayDiscoveryView: View {
 
     @ViewBuilder
     private func discoveryShell(_ vm: TodayDiscoveryViewModel) -> some View {
-        VStack(spacing: 0) {
-            TodayDiscoveryHeaderView(
-                hijriDate: prayer.hijriDateLabel,
-                gregorianDate: prayer.gregorianDateLabel,
-                cityName: prayer.cityName,
-                avatarURL: verseState.userAvatarURL,
-                isLoggingIn: verseState.isLoggingIn,
-                onAccountTap: { verseState.requestAccount() }
+        ZStack {
+            LinearGradient(
+                colors: [Color.Token.panelGrey, Color.Token.panelGreyAlt, Color.Token.sageTint],
+                startPoint: .top,
+                endPoint: .bottom
             )
-            .background(Color.Token.panelGrey)
+            .ignoresSafeArea(edges: .bottom)
 
-            ZStack {
-                LinearGradient(
-                    colors: [Color.Token.panelGrey, Color.Token.panelGreyAlt, Color.Token.sageTint],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea(edges: .bottom)
-
-                ScrollView {
-                    VStack(spacing: 0) {
-                        prayerCard
-                        if let tracker {
-                            PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
-                                showingTrackerCalendar = true
-                            })
-                            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                            .padding(.top, 12)
+            ScrollView {
+                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    Section(header: headerView(vm: vm)) {
+                        VStack(spacing: 0) {
+                            if let khgt = coordinator?.dashboardViewModel?.khgtToday {
+                                TodayImportantDayBanner(info: khgt)
+                                    .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                                    .padding(.vertical, 4)
+                            }
+                            
+                            prayerCard
+                                .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                                .padding(.vertical, 4)
+                            
+                            if let tracker {
+                                PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
+                                    showingTrackerCalendar = true
+                                })
+                                .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                                .padding(.vertical, 8)
+                            }
+                            
+                            if let session = vm.continueReading {
+                                TodayContinueReadingCard(
+                                    session: session,
+                                    chapterName: vm.continueReadingChapterName,
+                                    onTap: {
+                                        // TODO: Open chapter reader
+                                    }
+                                )
+                                .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                                .padding(.vertical, 6)
+                            }
+                            
+                            verseSection(vm: vm)
                         }
-                        verseSection(vm: vm)
+                        .padding(.bottom, 24)
                     }
-                    .padding(.bottom, 24)
                 }
-                .scrollIndicators(.hidden)
-                .refreshable {
-                    await coordinator?.refreshToday(discovery: vm)
-                    tracker?.refresh()
-                }
+            }
+            .scrollIndicators(.hidden)
+            .refreshable {
+                await coordinator?.refreshToday(discovery: vm)
+                tracker?.refresh()
             }
         }
         .background(Color.Token.deepEmerald.ignoresSafeArea(edges: .top))
@@ -139,6 +153,19 @@ struct TodayDiscoveryView: View {
                 TafsirReaderSheet(presenter: presenter)
             }
         }
+    }
+
+    @ViewBuilder
+    private func headerView(vm: TodayDiscoveryViewModel) -> some View {
+        TodayDiscoveryHeaderView(
+            hijriDate: prayer.hijriDateLabel,
+            gregorianDate: prayer.gregorianDateLabel,
+            cityName: prayer.cityName,
+            avatarURL: verseState.userAvatarURL,
+            isLoggingIn: verseState.isLoggingIn,
+            onAccountTap: { verseState.requestAccount() }
+        )
+        .background(Color.Token.panelGrey)
     }
 
     @ViewBuilder

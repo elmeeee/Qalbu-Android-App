@@ -1,0 +1,23 @@
+<libraries>
+  <library
+      name=":@@:shared::debug"
+      jars="/Users/phincon/.gradle/caches/8.13/transforms/7968f6f7367555059e29abe05400e910/transformed/out/jars/classes.jar:/Users/phincon/.gradle/caches/8.13/transforms/7968f6f7367555059e29abe05400e910/transformed/out/jars/libs/R.jar"
+      resolved="Saat-Android:shared:unspecified"
+      folder="/Users/phincon/.gradle/caches/8.13/transforms/7968f6f7367555059e29abe05400e910/transformed/out"
+      manifest="AndroidManifest.xml"
+      resFolder="res"
+      assetsFolder="assets"
+      lintJar="lint.jar"
+      publicResources="public.txt"
+      symbolFile="R.txt"
+      externalAnnotations="annotations.zip"
+      proguardRules="proguard.txt"/>
+  <library
+      name="org.jetbrains.kotlin:kotlin-stdlib:2.0.21@jar"
+      jars="/Users/phincon/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.21/618b539767b4899b4660a83006e052b63f1db551/kotlin-stdlib-2.0.21.jar"
+      resolved="org.jetbrains.kotlin:kotlin-stdlib:2.0.21"/>
+  <library
+      name="org.jetbrains:annotations:13.0@jar"
+      jars="/Users/phincon/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar"
+      resolved="org.jetbrains:annotations:13.0"/>
+</libraries>

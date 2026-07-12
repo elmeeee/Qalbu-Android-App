@@ -21,6 +21,7 @@ final class PrayerDashboardViewModel: ObservableObject {
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var cityName: String? = nil
     @Published private(set) var hijriDate: String? = nil
+    @Published private(set) var khgtToday: KhgtTodayInfo? = nil
     
     private let controller: PrayerTimesController
     private var controllerCancellable: AnyCancellable?
@@ -42,6 +43,7 @@ final class PrayerDashboardViewModel: ObservableObject {
                     self.isLoading = self.controller.isLoading
                     self.cityName = self.controller.cityName
                     self.hijriDate = self.controller.hijriDateLabel
+                    self.khgtToday = LocalKhgtCalendar.shared.infoForDate(Date())
                     self.recalculate(at: Date())
                 }
             }
@@ -62,6 +64,7 @@ final class PrayerDashboardViewModel: ObservableObject {
                 self.recalculate(at: Date())
             }
         
+        self.khgtToday = LocalKhgtCalendar.shared.infoForDate(Date())
         recalculate(at: Date())
     }
     

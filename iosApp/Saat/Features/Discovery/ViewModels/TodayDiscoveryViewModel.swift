@@ -17,16 +17,24 @@ final class TodayDiscoveryViewModel {
     var isDetailLoading = false
     var recitations: [RecitationPayload] = []
     var selectedRecitationId: Int = 6
+    var continueReading: ReadingSession?
+    var continueReadingChapterName: String?
 
     private let content: QuranContentRepository
     private let shareComposer: TodayShareTextComposer
+    private let readingSessions: ReadingSessionRepository?
     private let defaults = UserDefaults.standard
     private var loadedTranslationId: Int?
     private var dailyAyahFetchGeneration = 0
 
-    init(content: QuranContentRepository, shareComposer: TodayShareTextComposer? = nil) {
+    init(
+        content: QuranContentRepository,
+        shareComposer: TodayShareTextComposer? = nil,
+        readingSessions: ReadingSessionRepository? = nil
+    ) {
         self.content = content
         self.shareComposer = shareComposer ?? TodayShareTextComposer(content: content)
+        self.readingSessions = readingSessions
     }
 
     func loadDailyAyahWithHadith() {
@@ -60,6 +68,23 @@ final class TodayDiscoveryViewModel {
         errorMessage = nil
         isDetailLoading = true
         await performDailyAyahFetch(clearDetailOnStart: false)
+    }
+
+    private func loadContinueReading() async {
+        guard let readingSessions = readingSessions else { return }
+        do {
+            if let session = try await readingSessions.fetchMostRecent() {
+                self.continueReading = session
+                // Fetch chapter name
+                if let chapter = try? await content.getChapters(language: AppLanguageManager.shared.currentLanguage.rawValue).first(where: { $0.id == session.chapterNumber }) {
+                    self.continueReadingChapterName = chapter.nameSimple
+                }
+            } else {
+                self.continueReading = nil
+            }
+        } catch {
+            self.continueReading = nil
+        }
     }
 
     func prefetchShareTextIfNeeded(for verse: RandomAyahPayload) async {
@@ -112,6 +137,8 @@ final class TodayDiscoveryViewModel {
             if let fetched = await recitationsTask, fetched.isEmpty == false {
                 recitations = fetched
             }
+            
+            await loadContinueReading()
 
             if let detail {
                 await DailyVerseNotificationCoordinator.refreshAfterDailyAyahLoaded(detail)
