@@ -97,23 +97,22 @@ struct FaraidhCalculatorView: View {
             // Header
             HStack {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                         .frame(width: 44, height: 44)
-                        .background(Circle().fill(Color.white))
                 }
                 
                 Text(languageManager.localize("tool_faraidh"))
                     .font(.title3.bold())
-                    .foregroundColor(Color.Token.deepEmerald)
+                    .foregroundColor(SaatTokens.Colors.deepEmerald)
                 
                 Spacer()
                 
                 Button(action: resetInputs) {
                     Image(systemName: "arrow.counterclockwise")
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                 }
                 .padding(.trailing, 8)
             }
@@ -133,7 +132,7 @@ struct FaraidhCalculatorView: View {
             
             // Contents
             ZStack {
-                Color.Token.offWhite.ignoresSafeArea()
+                SaatTokens.Colors.offWhite.ignoresSafeArea()
                 
                 if selectedTab == 0 {
                     formTab
@@ -152,10 +151,10 @@ struct FaraidhCalculatorView: View {
             VStack(spacing: 6) {
                 Text(title)
                     .font(.subheadline.weight(selectedTab == index ? .bold : .medium))
-                    .foregroundColor(selectedTab == index ? Color.Token.deepEmerald : .secondary)
+                    .foregroundColor(selectedTab == index ? SaatTokens.Colors.deepEmerald : .secondary)
                 
                 Rectangle()
-                    .fill(selectedTab == index ? Color.Token.deepEmerald : Color.clear)
+                    .fill(selectedTab == index ? SaatTokens.Colors.deepEmerald : Color.clear)
                     .frame(height: 3)
             }
         }
@@ -170,7 +169,7 @@ struct FaraidhCalculatorView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(languageManager.localize("faraidh_profile"))
                         .font(.headline)
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     TextField(languageManager.localize("faraidh_name"), text: $deceasedName)
                         .textFieldStyle(.roundedBorder)
@@ -204,7 +203,7 @@ struct FaraidhCalculatorView: View {
                     }
                     
                     Toggle(languageManager.localize("faraidh_out_wedlock"), isOn: $bornOutOfWedlock)
-                        .tint(Color.Token.deepEmerald)
+                        .tint(SaatTokens.Colors.deepEmerald)
                         .font(.subheadline)
                 }
                 .padding(16)
@@ -216,7 +215,7 @@ struct FaraidhCalculatorView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(languageManager.localize("faraidh_estate"))
                         .font(.headline)
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     VStack(spacing: 8) {
                         moneyTextField(languageManager.localize("faraidh_cash"), text: $cashSavings)
@@ -242,7 +241,7 @@ struct FaraidhCalculatorView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(languageManager.localize("faraidh_heirs"))
                         .font(.headline)
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     VStack(spacing: 10) {
                         if gender == .female {
@@ -283,7 +282,7 @@ struct FaraidhCalculatorView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Color.Token.deepEmerald)
+                        .background(SaatTokens.Colors.deepEmerald)
                         .cornerRadius(12)
                 }
                 .padding(.bottom, 24)
@@ -332,7 +331,7 @@ struct FaraidhCalculatorView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(languageManager.localize("faraidh_estate_summary"))
                         .font(.headline)
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     let comp = result.deceased.estate ?? FaraidhEstateCalculator.compute(input: EstateAssetInput())
                     
@@ -347,11 +346,11 @@ struct FaraidhCalculatorView: View {
                     HStack {
                         Text(languageManager.localize("faraidh_net_estate"))
                             .font(.subheadline.bold())
-                            .foregroundColor(Color.Token.deepEmerald)
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
                         Spacer()
                         Text("IDR \(formatCurrency(comp.netEstate))")
                             .font(.headline.bold())
-                            .foregroundColor(Color.Token.deepEmerald)
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
                     }
                 }
                 .padding(16)
@@ -363,14 +362,14 @@ struct FaraidhCalculatorView: View {
                 if let classical = result.classicalCase {
                     HStack(spacing: 8) {
                         Image(systemName: "star.fill")
-                            .foregroundColor(Color.Token.gold)
+                            .foregroundColor(SaatTokens.Colors.gold)
                         Text(String(format: languageManager.localize("faraidh_case_format"), classicalCaseName(classical)))
                             .font(.subheadline.bold())
-                            .foregroundColor(Color.Token.deepEmerald)
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
                         Spacer()
                     }
                     .padding(12)
-                    .background(Color.Token.gold.opacity(0.12))
+                    .background(SaatTokens.Colors.gold.opacity(0.12))
                     .cornerRadius(10)
                 }
                 
@@ -378,7 +377,7 @@ struct FaraidhCalculatorView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(languageManager.localize("faraidh_distributions"))
                         .font(.headline)
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     if result.activeShares.isEmpty {
                         Text(languageManager.localize("faraidh_fallback_baitulmal"))
@@ -389,7 +388,7 @@ struct FaraidhCalculatorView: View {
                         ForEach(result.activeShares, id: \.self) { share in
                             HStack(alignment: .top, spacing: 12) {
                                 Circle()
-                                    .fill(share.isAsabah ? Color.orange : Color.Token.deepEmerald)
+                                    .fill(share.isAsabah ? Color.orange : SaatTokens.Colors.deepEmerald)
                                     .frame(width: 10, height: 10)
                                     .padding(.top, 6)
                                 
@@ -410,7 +409,7 @@ struct FaraidhCalculatorView: View {
                                 VStack(alignment: .trailing, spacing: 4) {
                                     Text("IDR \(formatCurrency(share.cashAmount))")
                                         .font(.subheadline.bold())
-                                        .foregroundColor(Color.Token.deepEmerald)
+                                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                                     Text("\(share.fraction.toDisplayString()) (\(String(format: "%.1f", Double(truncating: share.percentage as NSNumber)))%)")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
@@ -473,7 +472,7 @@ struct FaraidhCalculatorView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(languageManager.localize("faraidh_blocked_heirs"))
                         .font(.headline)
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     if result.blockedHeirs.isEmpty {
                         Text(languageManager.localize("faraidh_no_blocked"))
@@ -513,7 +512,7 @@ struct FaraidhCalculatorView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text(languageManager.localize("faraidh_silsilah"))
                         .font(.headline)
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     ForEach(result.silsilah) { node in
                         HStack {
@@ -524,7 +523,7 @@ struct FaraidhCalculatorView: View {
                                 HStack {
                                     Text(nodeLabel(node.type))
                                         .font(.subheadline.weight(node.id == "deceased" ? .bold : .semibold))
-                                        .foregroundColor(node.id == "deceased" ? Color.Token.deepEmerald : .primary)
+                                        .foregroundColor(node.id == "deceased" ? SaatTokens.Colors.deepEmerald : .primary)
                                     
                                     if node.inherits {
                                         Image(systemName: "checkmark.circle.fill")

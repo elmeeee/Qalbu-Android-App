@@ -56,11 +56,11 @@ struct DoaZikirView: View {
                 VStack {
                     Spacer()
                     ProgressView()
-                        .tint(Color.Token.deepEmerald)
+                        .tint(SaatTokens.Colors.deepEmerald)
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.Token.screenBackground)
+                .background(SaatTokens.Colors.screenBackground)
             } else if viewModel.selectedSlug != nil && isDhikrCategory && activeTab == "mulai_dzikir" {
                 ZikirSessionContainer(
                     bundles: viewModel.dhikrBundles,
@@ -111,7 +111,7 @@ struct DoaZikirView: View {
                                         HStack {
                                             Text(title)
                                                 .font(.system(size: 14, weight: .bold))
-                                                .foregroundColor(Color.Token.tealDark)
+                                                .foregroundColor(SaatTokens.Colors.tealDark)
                                                 .padding(.leading, 4)
                                                 .padding(.top, 8)
                                             Spacer()
@@ -141,7 +141,7 @@ struct DoaZikirView: View {
                         .padding(.vertical, 16)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.Token.screenBackground)
+                    .background(SaatTokens.Colors.screenBackground)
                     
                     // Floating Start Dhikr Button
                     if viewModel.selectedSlug != nil && isDhikrCategory {
@@ -155,12 +155,12 @@ struct DoaZikirView: View {
                                 Text(language == "id" ? "Mulai Zikir" : "Start Dhikr")
                                     .font(.system(size: 15, weight: .bold))
                             }
-                            .foregroundColor(Color.Token.pureWhite)
+                            .foregroundColor(SaatTokens.Colors.pureWhite)
                             .padding(.horizontal, 22)
                             .padding(.vertical, 14)
                             .background(
                                 LinearGradient(
-                                    colors: [Color.Token.deepEmerald, Color.Token.teal],
+                                    colors: [SaatTokens.Colors.deepEmerald, SaatTokens.Colors.teal],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 )
@@ -205,15 +205,15 @@ struct DoaZikirTopBar: View {
     var body: some View {
         HStack(spacing: 8) {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundColor(Color.Token.deepEmerald)
+                Image(systemName: "arrow.left")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(SaatTokens.Colors.deepEmerald)
                     .frame(width: 44, height: 44)
             }
             
             Text(title)
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(Color.Token.deepEmerald)
+                .foregroundColor(SaatTokens.Colors.deepEmerald)
                 .lineLimit(1)
             
             Spacer()
@@ -236,36 +236,36 @@ struct CatalogRow: View {
                 // Kind icon container
                 ZStack {
                     RoundedRectangle(cornerRadius: 14)
-                        .fill(isDhikr ? Color.Token.deepEmerald.opacity(0.12) : Color.Token.amberWash)
+                        .fill(isDhikr ? SaatTokens.Colors.deepEmerald.opacity(0.12) : SaatTokens.Colors.amberWash)
                         .frame(width: 44, height: 44)
                     
                     Image(systemName: isDhikr ? "heart.fill" : "book.closed.fill")
                         .font(.system(size: 18))
-                        .foregroundColor(isDhikr ? Color.Token.deepEmerald : Color.Token.goldDeep)
+                        .foregroundColor(isDhikr ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.goldDeep)
                 }
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(Color.Token.slate800)
+                        .foregroundColor(SaatTokens.Colors.slate800)
                         .multilineTextAlignment(.leading)
                     
                     Text(kindLabel)
                         .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(Color.Token.slate500)
+                        .foregroundColor(SaatTokens.Colors.slate500)
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color.Token.teal)
+                    .foregroundColor(SaatTokens.Colors.teal)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 16)
             .background(
                 LinearGradient(
-                    colors: [Color.Token.pureWhite, Color.Token.mintWash.opacity(0.45)],
+                    colors: [SaatTokens.Colors.pureWhite, SaatTokens.Colors.mintWash.opacity(0.45)],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
@@ -275,7 +275,7 @@ struct CatalogRow: View {
                 RoundedRectangle(cornerRadius: 18)
                     .stroke(
                         LinearGradient(
-                            colors: [Color.Token.teal.opacity(0.35), Color.Token.softGrey.opacity(0.55)],
+                            colors: [SaatTokens.Colors.teal.opacity(0.35), SaatTokens.Colors.softGrey.opacity(0.55)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -300,7 +300,7 @@ struct PremiumDoaCard: View {
             Rectangle()
                 .fill(
                     LinearGradient(
-                        colors: [Color.Token.deepEmerald, Color.Token.teal, Color.Token.gold.opacity(0.6)],
+                        colors: [SaatTokens.Colors.deepEmerald, SaatTokens.Colors.teal, SaatTokens.Colors.gold.opacity(0.6)],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -311,7 +311,7 @@ struct PremiumDoaCard: View {
                 if !title.isEmpty {
                     Text(title)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                 }
                 
                 if !arabic.isEmpty {
@@ -321,10 +321,10 @@ struct PremiumDoaCard: View {
                             .font(.system(size: 24))
                             .multilineTextAlignment(.trailing)
                             .lineSpacing(10)
-                            .foregroundColor(Color.Token.slate900)
+                            .foregroundColor(SaatTokens.Colors.slate900)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 16)
-                            .background(Color.Token.deepEmerald.opacity(0.05))
+                            .background(SaatTokens.Colors.deepEmerald.opacity(0.05))
                             .cornerRadius(14)
                     }
                 }
@@ -333,40 +333,40 @@ struct PremiumDoaCard: View {
                     Text(latin)
                         .font(.system(size: 14, weight: .medium, design: .serif))
                         .italic()
-                        .foregroundColor(Color.Token.slate500)
+                        .foregroundColor(SaatTokens.Colors.slate500)
                         .lineSpacing(4)
                 }
                 
                 if !translation.isEmpty {
                     Text(translation)
                         .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(Color.Token.slate800)
+                        .foregroundColor(SaatTokens.Colors.slate800)
                         .lineSpacing(5)
                 }
                 
                 if let ref = reference {
                     HStack(spacing: 8) {
                         Circle()
-                            .fill(Color.Token.teal)
+                            .fill(SaatTokens.Colors.goldDeep)
                             .frame(width: 6, height: 6)
                         
                         Text(ref)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(Color.Token.slate500)
+                            .foregroundColor(SaatTokens.Colors.slate500)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(Color.Token.lightGrey.opacity(0.55))
+                    .background(SaatTokens.Colors.lightGrey.opacity(0.55))
                     .cornerRadius(10)
                 }
             }
             .padding(18)
         }
-        .background(Color.Token.pureWhite)
+        .background(SaatTokens.Colors.pureWhite)
         .cornerRadius(20)
         .overlay(
             RoundedRectangle(cornerRadius: 20)
-                .stroke(Color.Token.softGrey.opacity(0.75), lineWidth: 1)
+                .stroke(SaatTokens.Colors.softGrey.opacity(0.75), lineWidth: 1)
         )
     }
 }
@@ -410,10 +410,10 @@ struct ZikirSessionContainer: View {
             VStack {
                 Text(language == "id" ? "Zikir kosong" : "Dhikr is empty")
                     .font(.system(size: 16))
-                    .foregroundColor(Color.Token.slate500)
+                    .foregroundColor(SaatTokens.Colors.slate500)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.Token.screenBackground)
+            .background(SaatTokens.Colors.screenBackground)
         } else if isCompleted {
             ZikirCompletionView(
                 onReset: {
@@ -433,22 +433,22 @@ struct ZikirSessionContainer: View {
                     HStack {
                         Text(language == "id" ? "Dzikir \(currentItemIndex + 1) dari \(sessionItems.count)" : "Dhikr \(currentItemIndex + 1) of \(sessionItems.count)")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Color.Token.deepEmerald)
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
                         
                         Spacer()
                         
                         Text("\(Int(progressPercent * 100))%")
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(Color.Token.slate500)
+                            .foregroundColor(SaatTokens.Colors.slate500)
                     }
                     
                     GeometryReader { geo in
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 3)
-                                .fill(Color(hex: "#E2E8F0"))
+                                .fill(Color(white: 0.88)) // ≈ #E2E8F0
                             
                             RoundedRectangle(cornerRadius: 3)
-                                .fill(Color.Token.deepEmerald)
+                                .fill(SaatTokens.Colors.deepEmerald)
                                 .frame(width: geo.size.width * CGFloat(progressPercent))
                         }
                     }
@@ -456,7 +456,7 @@ struct ZikirSessionContainer: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .background(Color.Token.pureWhite)
+                .background(SaatTokens.Colors.pureWhite)
                 
                 Divider()
                 
@@ -467,7 +467,7 @@ struct ZikirSessionContainer: View {
                             if let bundleTitle = activeItem.bundleTitle, bundleTitle != selectedTitle {
                                 Text(bundleTitle)
                                     .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(Color.Token.teal)
+                                    .foregroundColor(SaatTokens.Colors.teal)
                                     .padding(.bottom, -8)
                             }
                             
@@ -476,10 +476,10 @@ struct ZikirSessionContainer: View {
                                     .font(.system(size: 26))
                                     .multilineTextAlignment(.trailing)
                                     .lineSpacing(10)
-                                    .foregroundColor(Color.Token.slate900)
+                                    .foregroundColor(SaatTokens.Colors.slate900)
                                     .frame(maxWidth: .infinity, alignment: .trailing)
                                     .padding(16)
-                                    .background(Color.Token.deepEmerald.opacity(0.05))
+                                    .background(SaatTokens.Colors.deepEmerald.opacity(0.05))
                                     .cornerRadius(16)
                             }
                             
@@ -487,14 +487,14 @@ struct ZikirSessionContainer: View {
                                 Text(activeItem.latin)
                                     .font(.system(size: 14, weight: .medium, design: .serif))
                                     .italic()
-                                    .foregroundColor(Color.Token.slate500)
+                                    .foregroundColor(SaatTokens.Colors.slate500)
                                     .lineSpacing(4)
                             }
                             
                             if !activeItem.translation.isEmpty {
                                 Text(activeItem.translation)
                                     .font(.system(size: 14, weight: .regular))
-                                    .foregroundColor(Color.Token.slate800)
+                                    .foregroundColor(SaatTokens.Colors.slate800)
                                     .lineSpacing(5)
                             }
                             
@@ -504,16 +504,16 @@ struct ZikirSessionContainer: View {
                             if let ref = referenceSource {
                                 HStack(spacing: 8) {
                                     Circle()
-                                        .fill(Color.Token.goldDeep)
+                                        .fill(SaatTokens.Colors.goldDeep)
                                         .frame(width: 8, height: 8)
                                     
                                     Text(ref)
                                         .font(.system(size: 12, weight: .medium))
-                                        .foregroundColor(Color.Token.slate800)
+                                        .foregroundColor(SaatTokens.Colors.slate800)
                                 }
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 10)
-                                .background(Color(hex: "#F1F5F9"))
+                                .background(Color(white: 0.94)) // ≈ #F1F5F9
                                 .cornerRadius(12)
                             }
                             
@@ -522,13 +522,13 @@ struct ZikirSessionContainer: View {
                                 .frame(height: 120)
                         }
                         .padding(20)
-                        .background(Color.Token.pureWhite)
+                        .background(SaatTokens.Colors.pureWhite)
                         .cornerRadius(24)
                         .overlay(
                             RoundedRectangle(cornerRadius: 24)
                                 .stroke(
                                     LinearGradient(
-                                        colors: [Color.Token.teal.opacity(0.25), Color.Token.gold.opacity(0.2)],
+                                        colors: [SaatTokens.Colors.teal.opacity(0.25), SaatTokens.Colors.gold.opacity(0.2)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     ),
@@ -544,7 +544,7 @@ struct ZikirSessionContainer: View {
                         ))
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.Token.screenBackground)
+                    .background(SaatTokens.Colors.screenBackground)
                     
                     // Floating Interactive Tasbih Counter
                     Button(action: {
@@ -577,7 +577,7 @@ struct ZikirSessionContainer: View {
                     }) {
                         Image(systemName: "arrow.left")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(currentItemIndex > 0 ? Color.Token.deepEmerald : Color.Token.slate500.opacity(0.3))
+                            .foregroundColor(currentItemIndex > 0 ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate500.opacity(0.3))
                             .frame(width: 44, height: 44)
                     }
                     .disabled(currentItemIndex == 0)
@@ -590,7 +590,7 @@ struct ZikirSessionContainer: View {
                     }) {
                         Image(systemName: "arrow.clockwise")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(Color.Token.slate500)
+                            .foregroundColor(SaatTokens.Colors.slate500)
                             .frame(width: 44, height: 44)
                     }
                     
@@ -602,13 +602,13 @@ struct ZikirSessionContainer: View {
                     }) {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color.Token.deepEmerald)
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
                             .frame(width: 44, height: 44)
                     }
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 8)
-                .background(Color.Token.pureWhite)
+                .background(SaatTokens.Colors.pureWhite)
             }
         }
     }
@@ -667,21 +667,21 @@ struct ZikirCompletionView: View {
                 // Heart completion badge
                 ZStack {
                     Circle()
-                        .fill(Color.Token.deepEmerald.opacity(0.1))
+                        .fill(SaatTokens.Colors.deepEmerald.opacity(0.1))
                         .frame(width: 120, height: 120)
                     
                     Image(systemName: "heart.fill")
                         .font(.system(size: 60))
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                 }
                 
                 Text("Alhamdulillah")
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(Color.Token.deepEmerald)
+                    .foregroundColor(SaatTokens.Colors.deepEmerald)
                 
                 Text(language == "id" ? "Anda telah menyelesaikan seluruh rangkaian zikir dengan baik. Semoga Allah menerima amal ibadah Anda." : "You have successfully completed the entire dhikr series. May Allah accept your worship.")
                     .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(Color.Token.slate800)
+                    .foregroundColor(SaatTokens.Colors.slate800)
                     .multilineTextAlignment(.center)
                     .lineSpacing(5)
                     .padding(.horizontal, 24)
@@ -694,10 +694,10 @@ struct ZikirCompletionView: View {
                 Button(action: onReset) {
                     Text(language == "id" ? "Ulangi Zikir" : "Repeat Dhikr")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(Color.Token.pureWhite)
+                        .foregroundColor(SaatTokens.Colors.pureWhite)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
-                        .background(Color.Token.deepEmerald)
+                        .background(SaatTokens.Colors.deepEmerald)
                         .cornerRadius(16)
                 }
                 
@@ -705,12 +705,12 @@ struct ZikirCompletionView: View {
                 Button(action: onClose) {
                     Text(language == "id" ? "Kembali ke Menu" : "Back to Menu")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.Token.deepEmerald, lineWidth: 1)
+                                .stroke(SaatTokens.Colors.deepEmerald, lineWidth: 1)
                         )
                 }
             }
@@ -718,7 +718,7 @@ struct ZikirCompletionView: View {
             .padding(.bottom, 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.Token.screenBackground)
+        .background(SaatTokens.Colors.screenBackground)
     }
 }
 

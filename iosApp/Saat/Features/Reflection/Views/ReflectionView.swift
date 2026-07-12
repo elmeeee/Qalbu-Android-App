@@ -116,12 +116,12 @@ struct ReflectionView: View {
     private var reflectReelGradient: some View {
         LinearGradient(
             colors: [
-                Color.Token.forestDark,
-                Color.Token.deepEmerald,
-                Color.Token.forestDeeper
+                SaatTokens.Colors.deepEmerald,
+                SaatTokens.Colors.tealDark,
+                SaatTokens.Colors.screenBackground
             ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
+            startPoint: .top,
+            endPoint: .bottom
         )
     }
 

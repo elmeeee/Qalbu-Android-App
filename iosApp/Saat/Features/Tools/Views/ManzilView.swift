@@ -66,9 +66,9 @@ struct ManzilView: View {
             // Header
             HStack {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                 }
                 .accessibilityLabel("Back")
                 
@@ -76,7 +76,7 @@ struct ManzilView: View {
                 
                 Text(languageManager.localize("tool_manzil"))
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color.Token.slate800)
+                    .foregroundColor(SaatTokens.Colors.slate800)
                 
                 Spacer()
                 
@@ -84,7 +84,7 @@ struct ManzilView: View {
                 Color.clear.frame(width: 20, height: 20)
             }
             .padding()
-            .background(Color.Token.pureWhite)
+            .background(SaatTokens.Colors.pureWhite)
             .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 2)
             
             ScrollView {
@@ -92,18 +92,9 @@ struct ManzilView: View {
                     // About Manzil Info Card
                     AboutManzilCard(isExpanded: $isAboutExpanded)
                     
-                    // Header text
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(languageManager.localize("manzil_quranic_protection"))
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(Color.Token.deepEmerald)
-                        
-                        Text(languageManager.localize("manzil_quranic_protection_sub"))
-                            .font(.system(size: 13))
-                            .foregroundColor(Color.Token.slate500)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)
+                    // Protection Header
+                    ManzilProtectionHeaderView()
+                        .padding(.horizontal, 4)
                     
                     // Sections list
                     ForEach(sections) { section in
@@ -119,7 +110,13 @@ struct ManzilView: View {
                 }
                 .padding()
             }
-            .background(Color.Token.screenBackground)
+            .background(
+                LinearGradient(
+                    colors: [SaatTokens.Colors.screenBackground, SaatTokens.Colors.sageMist, SaatTokens.Colors.prayerMint],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
         }
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .navigationBar)
@@ -191,18 +188,18 @@ struct AboutManzilCard: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(languageManager.localize("manzil_about"))
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(Color.Token.slate800)
+                            .foregroundColor(SaatTokens.Colors.slate800)
                         
                         Text(languageManager.localize("manzil_about_sub"))
                             .font(.system(size: 12))
-                            .foregroundColor(Color.Token.slate500)
+                            .foregroundColor(SaatTokens.Colors.slate500)
                     }
                     
                     Spacer()
                     
                     Image(systemName: "chevron.down")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color.Token.indigoAccent)
+                        .foregroundColor(SaatTokens.Colors.indigoAccent)
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
                 .padding(16)
@@ -218,11 +215,11 @@ struct AboutManzilCard: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(languageManager.localize("manzil_what_is"))
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(Color.Token.indigoDeep)
+                            .foregroundColor(SaatTokens.Colors.indigoDeep)
                         
                         Text(languageManager.localize("manzil_what_is_desc"))
                             .font(.system(size: 13))
-                            .foregroundColor(Color.Token.slate600)
+                            .foregroundColor(SaatTokens.Colors.slate600)
                             .lineSpacing(4)
                     }
                     
@@ -230,11 +227,11 @@ struct AboutManzilCard: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(languageManager.localize("manzil_fami"))
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(Color.Token.indigoDeep)
+                            .foregroundColor(SaatTokens.Colors.indigoDeep)
                         
                         Text(languageManager.localize("manzil_fami_desc"))
                             .font(.system(size: 13))
-                            .foregroundColor(Color.Token.slate600)
+                            .foregroundColor(SaatTokens.Colors.slate600)
                             .lineSpacing(4)
                     }
                     
@@ -242,7 +239,7 @@ struct AboutManzilCard: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(languageManager.localize("manzil_7day"))
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(Color.Token.indigoDeep)
+                            .foregroundColor(SaatTokens.Colors.indigoDeep)
                         
                         VStack(spacing: 0) {
                             // Header Row
@@ -255,10 +252,10 @@ struct AboutManzilCard: View {
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(Color.Token.slate500)
+                            .foregroundColor(SaatTokens.Colors.slate500)
                             .padding(.vertical, 6)
                             .padding(.horizontal, 8)
-                            .background(Color.Token.softGrey.opacity(0.3))
+                            .background(SaatTokens.Colors.softGrey.opacity(0.3))
                             
                             // Data Rows
                             ForEach(0..<manzilRows.count, id: \.self) { idx in
@@ -272,10 +269,10 @@ struct AboutManzilCard: View {
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                                 .font(.system(size: 12))
-                                .foregroundColor(Color.Token.slate700)
+                                .foregroundColor(SaatTokens.Colors.slate700)
                                 .padding(.vertical, 8)
                                 .padding(.horizontal, 8)
-                                .background(idx % 2 == 0 ? Color.clear : Color.Token.softGrey.opacity(0.15))
+                                .background(idx % 2 == 0 ? Color.clear : SaatTokens.Colors.softGrey.opacity(0.15))
                                 
                                 if idx < manzilRows.count - 1 {
                                     Divider()
@@ -285,7 +282,7 @@ struct AboutManzilCard: View {
                         .cornerRadius(8)
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 1)
+                                .stroke(SaatTokens.Colors.softGrey.opacity(0.5), lineWidth: 1)
                         )
                     }
                     
@@ -293,11 +290,11 @@ struct AboutManzilCard: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(languageManager.localize("manzil_how_to"))
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(Color.Token.indigoDeep)
+                            .foregroundColor(SaatTokens.Colors.indigoDeep)
                         
                         Text(languageManager.localize("manzil_how_to_desc"))
                             .font(.system(size: 13))
-                            .foregroundColor(Color.Token.slate600)
+                            .foregroundColor(SaatTokens.Colors.slate600)
                             .lineSpacing(4)
                     }
                     
@@ -305,7 +302,7 @@ struct AboutManzilCard: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(languageManager.localize("manzil_virtues"))
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(Color.Token.indigoDeep)
+                            .foregroundColor(SaatTokens.Colors.indigoDeep)
                         
                         let benefits = [
                             languageManager.localize("manzil_benefit_1"),
@@ -319,12 +316,12 @@ struct AboutManzilCard: View {
                             HStack(alignment: .top, spacing: 8) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 13))
-                                    .foregroundColor(Color.Token.deepEmerald)
+                                    .foregroundColor(SaatTokens.Colors.deepEmerald)
                                     .padding(.top, 2)
                                 
                                 Text(benefit)
                                     .font(.system(size: 13))
-                                    .foregroundColor(Color.Token.slate600)
+                                    .foregroundColor(SaatTokens.Colors.slate600)
                             }
                         }
                     }
@@ -333,12 +330,12 @@ struct AboutManzilCard: View {
                 .transition(.opacity)
             }
         }
-        .background(Color.Token.pureWhite)
+        .background(SaatTokens.Colors.pureWhite)
         .cornerRadius(18)
-        .shadow(color: Color.Token.indigoAccent.opacity(isExpanded ? 0.10 : 0.04), radius: isExpanded ? 6 : 3, x: 0, y: 2)
+        .shadow(color: SaatTokens.Colors.indigoAccent.opacity(isExpanded ? 0.10 : 0.04), radius: isExpanded ? 6 : 3, x: 0, y: 2)
         .overlay(
             RoundedRectangle(cornerRadius: 18)
-                .stroke(isExpanded ? Color.Token.indigoAccent.opacity(0.3) : Color.Token.softGrey.opacity(0.5), lineWidth: 1)
+                .stroke(isExpanded ? SaatTokens.Colors.indigoAccent.opacity(0.3) : SaatTokens.Colors.softGrey.opacity(0.5), lineWidth: 1)
         )
     }
 }
@@ -354,35 +351,73 @@ struct SectionCard: View {
     
     @ObservedObject private var languageManager = AppLanguageManager.shared
     
+    private var gradientPair: (Color, Color) {
+        let pairs = [
+            (SaatTokens.Colors.deepEmerald, SaatTokens.Colors.teal),
+            (SaatTokens.Colors.teal, SaatTokens.Colors.deepEmerald),
+            (SaatTokens.Colors.goldDeep, SaatTokens.Colors.gold),
+            (SaatTokens.Colors.teal, SaatTokens.Colors.goldDeep),
+            (SaatTokens.Colors.indigoAccent, SaatTokens.Colors.teal),
+            (SaatTokens.Colors.deepEmerald, SaatTokens.Colors.indigoAccent)
+        ]
+        let index = (section.id - 1) % pairs.count
+        return pairs[index]
+    }
+    
     var body: some View {
+        let accentStart = gradientPair.0
+        let accentEnd = gradientPair.1
+        
         VStack(alignment: .leading, spacing: 0) {
             Button(action: onTap) {
                 HStack(alignment: .top) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                isExpanded ?
+                                AnyShapeStyle(LinearGradient(colors: [accentStart, accentEnd], startPoint: .topLeading, endPoint: .bottomTrailing)) :
+                                AnyShapeStyle(LinearGradient(colors: [accentStart.opacity(0.14), accentEnd.opacity(0.08)], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            )
+                        Circle()
+                            .stroke(accentStart.opacity(isExpanded ? 0.6 : 0.22), lineWidth: 1)
+                        Text("\(section.id)")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(isExpanded ? .white : accentStart)
+                    }
+                    .frame(width: 38, height: 38)
+                    
                     VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: 8) {
-                            Text("\(section.id).")
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(Color.Token.deepEmerald)
-                            
-                            Text(section.title)
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(Color.Token.slate800)
-                        }
+                        Text(section.title)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(SaatTokens.Colors.slate800)
+                            .lineLimit(2)
                         
                         Text(languageManager.localize("manzil_sec_\(section.id)_desc"))
                             .font(.system(size: 12))
-                            .foregroundColor(Color.Token.slate500)
+                            .foregroundColor(isExpanded ? accentStart.opacity(0.85) : SaatTokens.Colors.slate500)
                             .lineLimit(isExpanded ? nil : 2)
                             .multilineTextAlignment(.leading)
                     }
+                    .padding(.leading, 6)
                     
                     Spacer()
                     
-                    Image(systemName: "chevron.down")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
-                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
-                        .padding(.top, 2)
+                    ZStack {
+                        if isExpanded {
+                            Circle()
+                                .fill(RadialGradient(colors: [accentStart.opacity(0.18), accentEnd.opacity(0.06)], center: .center, startRadius: 0, endRadius: 17))
+                                .frame(width: 34, height: 34)
+                            Circle()
+                                .stroke(accentStart.opacity(0.28), lineWidth: 1)
+                                .frame(width: 34, height: 34)
+                        }
+                        Image(systemName: "chevron.down")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(isExpanded ? accentStart : SaatTokens.Colors.teal)
+                            .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                    }
+                    .frame(width: 34, height: 34)
+                    .padding(.top, 2)
                 }
                 .padding(16)
             }
@@ -408,10 +443,10 @@ struct SectionCard: View {
                                 HStack {
                                     Text("\(languageManager.localize("verses")) \(verse.resolvedVerseNumber ?? 0)")
                                         .font(.system(size: 11, weight: .semibold))
-                                        .foregroundColor(Color.Token.slate400)
+                                        .foregroundColor(SaatTokens.Colors.slate400)
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 3)
-                                        .background(Color.Token.softGrey.opacity(0.3))
+                                        .background(SaatTokens.Colors.softGrey.opacity(0.3))
                                         .cornerRadius(4)
                                     
                                     Spacer()
@@ -431,7 +466,7 @@ struct SectionCard: View {
                                     Text(translit)
                                         .font(.system(size: 13, weight: .medium))
                                         .italic()
-                                        .foregroundColor(Color.Token.indigoAccent)
+                                        .foregroundColor(SaatTokens.Colors.indigoAccent)
                                         .lineSpacing(4)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .padding(.top, 4)
@@ -441,7 +476,7 @@ struct SectionCard: View {
                                 if let translation = verse.translations?.first?.text {
                                     Text(translation)
                                         .font(.system(size: 14))
-                                        .foregroundColor(Color.Token.slate600)
+                                        .foregroundColor(SaatTokens.Colors.slate600)
                                         .lineSpacing(4)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .padding(.top, 4)
@@ -458,12 +493,79 @@ struct SectionCard: View {
                 .transition(.opacity)
             }
         }
-        .background(Color.Token.pureWhite)
+        .background(SaatTokens.Colors.pureWhite)
         .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.02), radius: 3, x: 0, y: 1)
+        .shadow(color: isExpanded ? accentStart.opacity(0.14) : SaatTokens.Colors.slate800.opacity(0.06), radius: isExpanded ? 8 : 2, x: 0, y: isExpanded ? 4 : 1)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 1)
+                .stroke(isExpanded ? accentStart.opacity(0.35) : SaatTokens.Colors.softGrey.opacity(0.7), lineWidth: isExpanded ? 1.5 : 1)
         )
+    }
+}
+
+// MARK: - Manzil Protection Header Card
+struct ManzilProtectionHeaderView: View {
+    @ObservedObject private var languageManager = AppLanguageManager.shared
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [SaatTokens.Colors.deepEmerald, SaatTokens.Colors.tealDark, SaatTokens.Colors.emeraldRich],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            GeometryReader { geo in
+                Circle()
+                    .fill(Color.white.opacity(0.05))
+                    .frame(width: 120, height: 120)
+                    .position(x: geo.size.width - 20, y: 20)
+                
+                Circle()
+                    .fill(Color.white.opacity(0.04))
+                    .frame(width: 80, height: 80)
+                    .position(x: geo.size.width - 40, y: 60)
+            }
+            .clipped()
+            
+            VStack(spacing: 14) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white.opacity(0.15))
+                        Circle()
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1.5)
+                        Image(systemName: "shield.fill")
+                            .foregroundColor(.white)
+                            .font(.system(size: 26))
+                    }
+                    .frame(width: 52, height: 52)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(languageManager.localize("manzil_header_title"))
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Capsule()
+                            .fill(SaatTokens.Colors.goldBright.opacity(0.85))
+                            .frame(width: 40, height: 2)
+                    }
+                    Spacer()
+                }
+                
+                Divider()
+                    .background(Color.white.opacity(0.15))
+                
+                Text(languageManager.localize("manzil_header_body"))
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.85))
+                    .lineSpacing(4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 18)
+        }
+        .cornerRadius(24)
+        .shadow(color: SaatTokens.Colors.deepEmerald.opacity(0.25), radius: 12, x: 0, y: 6)
     }
 }

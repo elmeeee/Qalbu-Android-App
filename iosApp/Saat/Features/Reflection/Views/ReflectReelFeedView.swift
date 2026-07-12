@@ -1,11 +1,3 @@
-//
-//  ReflectReelFeedView.swift
-//  Saat
-//
-//  Created by Elmee on 25/04/2026.
-//  Copyright © 2026 Elmee. All rights reserved.
-//
-
 import SwiftUI
 
 struct ReflectReelFeedView: View {
@@ -15,17 +7,93 @@ struct ReflectReelFeedView: View {
 
     var body: some View {
         ZStack {
-            ReflectReelChrome.gradient
-                .ignoresSafeArea()
-
+            LinearGradient(
+                colors: [
+                    SaatTokens.Colors.deepEmerald,
+                    SaatTokens.Colors.tealDark,
+                    SaatTokens.Colors.screenBackground
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+            
             VStack(spacing: 0) {
-                ReflectFeedTabBarView(
-                    selection: viewModel.selectedSegment,
-                    onSelect: { viewModel.onSegmentChanged(to: $0) }
-                )
-
-                GeometryReader { geo in
-                    feedContent(pageHeight: geo.size.height, pageWidth: geo.size.width)
+                // Header
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(AppLanguageManager.shared.localize("nav_reflect"))
+                        .font(.system(size: 24, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text(AppLanguageManager.shared.localize("reflect_community"))
+                        .font(.system(size: 14))
+                        .foregroundColor(.white.opacity(0.72))
+                    
+                    Spacer().frame(height: 16)
+                    
+                    // Segmented Control
+                    ReflectFeedTabBarView(
+                        selection: viewModel.selectedSegment,
+                        onSelect: { viewModel.onSegmentChanged(to: $0) }
+                    )
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
+                .padding(.bottom, 12)
+                
+                // Content
+                ScrollView {
+                    LazyVStack(spacing: 14) {
+                        if viewModel.isLoading && viewModel.posts.isEmpty {
+                            ForEach(0..<3, id: \.self) { _ in
+                                // Skeleton
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.white.opacity(0.1))
+                                    .frame(height: 150)
+                            }
+                        } else if let error = viewModel.errorMessage, viewModel.posts.isEmpty {
+                            Text(error)
+                                .foregroundColor(.white)
+                                .padding()
+                        } else if viewModel.posts.isEmpty {
+                            Text(viewModel.selectedSegment == .mine ? AppLanguageManager.shared.localize("reflect_empty_mine") : AppLanguageManager.shared.localize("reflect_empty_all"))
+                                .foregroundColor(.white.opacity(0.75))
+                                .multilineTextAlignment(.center)
+                                .padding(40)
+                        } else {
+                            ForEach(viewModel.posts) { post in
+                                ReflectFeedPostCardView(
+                                    post: post,
+                                    currentUserId: container?.userSession.currentUserId,
+                                    isTogglingLike: viewModel.isTogglingLike(postId: post.id),
+                                    onToggleLike: { Task { await viewModel.toggleLike(for: post) } },
+                                    onTapVerse: { key in
+                                        Task {
+                                            await verseDetailViewModel.open(
+                                                verseKey: key,
+                                                content: container?.content
+                                            )
+                                        }
+                                    }
+                                )
+                                .onAppear {
+                                    viewModel.loadMoreIfNeeded(currentPost: post)
+                                }
+                            }
+                            
+                            if viewModel.isLoadingMore {
+                                ProgressView()
+                                    .tint(SaatTokens.Colors.goldBright)
+                                    .padding()
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 100)
+                }
+                .refreshable {
+                    await viewModel.loadPosts(refresh: true, force: true)
                 }
             }
         }
@@ -38,80 +106,6 @@ struct ReflectReelFeedView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(28)
-        }
-    }
-
-    @ViewBuilder
-    private func feedContent(pageHeight: CGFloat, pageWidth: CGFloat) -> some View {
-        ZStack {
-            if viewModel.isLoading && viewModel.posts.isEmpty {
-                ReflectReelLoadingStack(pageHeight: pageHeight)
-            } else if let error = viewModel.errorMessage, viewModel.posts.isEmpty {
-                ReflectReelErrorStateView(
-                    message: error,
-                    segment: viewModel.selectedSegment,
-                    retry: { viewModel.onSegmentChanged(to: viewModel.selectedSegment) }
-                )
-            } else if viewModel.posts.isEmpty {
-                ReflectReelEmptyStateView(segment: viewModel.selectedSegment)
-            } else {
-                reelPager(pageHeight: pageHeight, pageWidth: pageWidth)
-            }
-
-            if viewModel.isLoading && viewModel.posts.isEmpty == false {
-                VStack {
-                    ProgressView()
-                        .tint(.white)
-                        .padding(10)
-                        .background(.ultraThinMaterial)
-                        .clipShape(Capsule())
-                    Spacer()
-                }
-                .padding(.top, 8)
-            }
-
-            if viewModel.isLoadingMore {
-                VStack {
-                    Spacer()
-                    ProgressView()
-                        .tint(.white)
-                        .padding(.bottom, 24)
-                }
-            }
-        }
-    }
-
-    private func reelPager(pageHeight: CGFloat, pageWidth: CGFloat) -> some View {
-        TabView {
-            ForEach(viewModel.posts) { post in
-                ReflectReelPageView(
-                    post: post,
-                    pageHeight: pageHeight,
-                    isTogglingLike: viewModel.isTogglingLike(postId: post.id),
-                    onToggleLike: {
-                        Task { await viewModel.toggleLike(for: post) }
-                    },
-                    onTapVerse: { key in
-                        Task {
-                            await verseDetailViewModel.open(
-                                verseKey: key,
-                                content: container?.content
-                            )
-                        }
-                    }
-                )
-                .frame(width: pageWidth, height: pageHeight)
-                .tag(post.id)
-                .onAppear {
-                    viewModel.loadMoreIfNeeded(currentPost: post)
-                }
-            }
-        }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .scrollIndicators(.hidden)
-        .id(viewModel.selectedSegment)
-        .refreshable {
-            await viewModel.loadPosts(refresh: true, force: true)
         }
     }
 

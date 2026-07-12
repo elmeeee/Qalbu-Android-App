@@ -32,7 +32,7 @@ struct PrayerTrackerCalendarView: View {
     private var shiftedWeekdaySymbols: [String] {
         var localCalendar = Calendar.current
         localCalendar.locale = Locale(identifier: languageManager.currentLanguage.rawValue)
-        let symbols = localCalendar.veryShortWeekdaySymbols
+        let symbols = localCalendar.shortWeekdaySymbols
         let first = localCalendar.firstWeekday - 1
         return Array(symbols[first...] + symbols[..<first])
     }
@@ -66,140 +66,114 @@ struct PrayerTrackerCalendarView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            HStack {
+            HStack(spacing: 8) {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.slate800)
                 }
                 .accessibilityLabel("Back")
                 
-                Spacer()
-                
-                VStack(spacing: 2) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(languageManager.localize("prayer_tracker_history"))
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color.Token.slate800)
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     Text(languageManager.localize("prayer_tracker_history_sub"))
-                        .font(.system(size: 11))
-                        .foregroundColor(Color.Token.slate500)
+                        .font(.system(size: 13))
+                        .foregroundColor(SaatTokens.Colors.slate500)
                 }
                 
                 Spacer()
-                
-                Color.clear.frame(width: 20, height: 20)
             }
-            .padding()
-            .background(Color.Token.pureWhite)
-            .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 2)
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+            .background(SaatTokens.Colors.screenBackground)
             
             ScrollView {
                 VStack(spacing: 16) {
                     // Challenge stats card
-                    VStack(spacing: 16) {
-                        HStack {
-                            Spacer()
-                            
-                            VStack(spacing: 4) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "flame.fill")
-                                        .foregroundColor(Color.Token.goldDeep)
-                                        .font(.system(size: 18))
-                                    
-                                    Text("\(streak)")
-                                        .font(.system(size: 24, weight: .bold))
-                                        .foregroundColor(Color.Token.deepEmerald)
-                                }
+                    HStack {
+                        Spacer()
+                        
+                        VStack(spacing: 4) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "flame.fill")
+                                    .foregroundColor(SaatTokens.Colors.goldDeep)
+                                    .font(.system(size: 18))
                                 
-                                Text(languageManager.localize("current_streak"))
-                                    .font(.system(size: 11))
-                                    .foregroundColor(Color.Token.slate500)
+                                Text("\(streak)")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(SaatTokens.Colors.deepEmerald)
                             }
                             
-                            Spacer()
-                            
-                            Divider().frame(height: 35)
-                            
-                            Spacer()
-                            
-                            VStack(spacing: 4) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "trophy.fill")
-                                        .foregroundColor(Color.Token.goldDeep)
-                                        .font(.system(size: 16))
-                                    
-                                    Text("\(bestStreak)")
-                                        .font(.system(size: 24, weight: .bold))
-                                        .foregroundColor(Color.Token.deepEmerald)
-                                }
-                                
-                                Text(languageManager.localize("best_streak"))
-                                    .font(.system(size: 11))
-                                    .foregroundColor(Color.Token.slate500)
-                            }
-                            
-                            Spacer()
+                            Text(languageManager.localize("current_streak"))
+                                .font(.system(size: 11))
+                                .foregroundColor(SaatTokens.Colors.slate500)
                         }
                         
-                        // Next Challenge text
-                        let target = challengeTarget(for: streak)
+                        Spacer()
+                        
                         VStack(spacing: 4) {
-                            Text(String(format: languageManager.localize("next_challenge_target"), target))
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundColor(Color.Token.deepEmerald)
+                            HStack(spacing: 4) {
+                                Text("\(bestStreak)")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(SaatTokens.Colors.deepEmerald)
+                            }
                             
-                            ProgressView(value: min(Double(streak), Double(target)), total: Double(target))
-                                .tint(Color.Token.deepEmerald)
-                                .padding(.horizontal, 10)
+                            Text(languageManager.localize("best_streak"))
+                                .font(.system(size: 11))
+                                .foregroundColor(SaatTokens.Colors.slate500)
                         }
-                        .padding(.top, 4)
+                        
+                        Spacer()
                     }
-                    .padding(18)
-                    .background(Color.Token.pureWhite)
+                    .padding(16)
+                    .background(SaatTokens.Colors.pureWhite)
                     .cornerRadius(20)
                     .shadow(color: Color.black.opacity(0.02), radius: 6, x: 0, y: 2)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     .padding(.top, 12)
                     
                     // Month shifting controls
                     HStack {
                         Button(action: { shiftMonth(by: -1) }) {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(Color.Token.deepEmerald)
-                                .padding(8)
+                                .font(.system(size: 20))
+                                .foregroundColor(SaatTokens.Colors.slate800)
                         }
                         
                         Spacer()
                         
                         Text("\(monthName) \(String(currentYear))")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color.Token.slate800)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
                         
                         Spacer()
                         
                         Button(action: { shiftMonth(by: 1) }) {
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(Color.Token.deepEmerald)
-                                .padding(8)
+                                .font(.system(size: 20))
+                                .foregroundColor(SaatTokens.Colors.slate800)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
                     
-                    // Grid card
-                    VStack(spacing: 12) {
+                    // Grid
+                    VStack(spacing: 6) {
                         // Weekday Headers
                         HStack(spacing: 0) {
                             ForEach(0..<shiftedWeekdaySymbols.count, id: \.self) { index in
                                 Text(shiftedWeekdaySymbols[index])
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(Color.Token.slate400)
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(SaatTokens.Colors.slate500)
                                     .frame(maxWidth: .infinity)
                             }
                         }
-                        .padding(.horizontal, 4)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
                         
                         // Days grid
                         let grid = daysInMonthGrid
@@ -217,11 +191,9 @@ struct PrayerTrackerCalendarView: View {
                                     let partial = progress.completedCount > 0
                                     
                                     VStack {
-                                        Spacer()
-                                        
                                         Text("\(dayNum)")
-                                            .font(.system(size: 14, weight: isToday ? .bold : .semibold))
-                                            .foregroundColor(complete ? .white : (partial ? Color.Token.deepEmerald : Color.Token.slate500))
+                                            .font(.system(size: 14, weight: isToday ? .bold : .medium))
+                                            .foregroundColor(complete ? .white : (partial ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate500))
                                         
                                         if complete {
                                             Image(systemName: "checkmark")
@@ -230,12 +202,10 @@ struct PrayerTrackerCalendarView: View {
                                         } else if partial {
                                             Text("\(progress.completedCount)/\(progress.totalCount)")
                                                 .font(.system(size: 9, weight: .bold))
-                                                .foregroundColor(Color.Token.deepEmerald)
+                                                .foregroundColor(SaatTokens.Colors.deepEmerald)
                                         } else {
-                                            Spacer().frame(height: 11)
+                                            Spacer().frame(height: 11) // space for alignment
                                         }
-                                        
-                                        Spacer()
                                     }
                                     .frame(maxWidth: .infinity)
                                     .aspectRatio(1.0, contentMode: .fit)
@@ -243,21 +213,32 @@ struct PrayerTrackerCalendarView: View {
                                         Group {
                                             if complete {
                                                 LinearGradient(
-                                                    colors: [Color.Token.deepEmerald, Color.Token.teal],
+                                                    colors: [SaatTokens.Colors.deepEmerald, SaatTokens.Colors.teal],
                                                     startPoint: .topLeading,
                                                     endPoint: .bottomTrailing
                                                 )
                                             } else if partial {
-                                                Color.Token.teal.opacity(0.15)
+                                                LinearGradient(
+                                                    colors: [
+                                                        SaatTokens.Colors.teal.opacity(0.25),
+                                                        SaatTokens.Colors.teal.opacity(0.12)
+                                                    ],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
                                             } else {
-                                                Color.Token.softGrey.opacity(0.4)
+                                                LinearGradient(
+                                                    colors: [SaatTokens.Colors.lightGrey, SaatTokens.Colors.lightGrey],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
                                             }
                                         }
                                     )
                                     .cornerRadius(10)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 10)
-                                            .stroke(isToday ? Color.Token.goldDeep : Color.clear, lineWidth: 2)
+                                            .stroke(isToday ? SaatTokens.Colors.goldBright : Color.clear, lineWidth: 2)
                                     )
                                 } else {
                                     Color.clear
@@ -265,17 +246,14 @@ struct PrayerTrackerCalendarView: View {
                                 }
                             }
                         }
+                        .padding(.horizontal, 20)
                     }
-                    .padding(16)
-                    .background(Color.Token.pureWhite)
-                    .cornerRadius(18)
-                    .shadow(color: Color.black.opacity(0.02), radius: 6, x: 0, y: 2)
-                    .padding(.horizontal)
                 }
                 .padding(.bottom, 30)
             }
-            .background(Color.Token.screenBackground)
+            .background(SaatTokens.Colors.screenBackground)
         }
+        .background(SaatTokens.Colors.screenBackground)
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
@@ -302,12 +280,5 @@ struct PrayerTrackerCalendarView: View {
         let store = PrayerTrackerStore(appGroupIdentifier: container?.configuration.appGroupIdentifier)
         let key = store.dayKeyFor(date: date)
         return store.dayProgress(dayKey: key)
-    }
-    
-    private func challengeTarget(for streak: Int) -> Int {
-        if streak < 7 { return 7 }
-        if streak < 30 { return 30 }
-        if streak < 40 { return 40 }
-        return ((streak / 10) + 1) * 10
     }
 }

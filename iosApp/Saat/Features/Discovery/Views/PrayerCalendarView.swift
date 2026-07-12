@@ -8,6 +8,7 @@
 
 import SwiftUI
 import CoreLocation
+import Combine
 
 struct PrayerCalendarView: View {
     @Environment(\.dismiss) private var dismiss
@@ -64,35 +65,32 @@ struct PrayerCalendarView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            HStack {
+            HStack(spacing: 8) {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.slate800)
                 }
                 .accessibilityLabel("Back")
                 
-                Spacer()
-                
-                VStack(spacing: 2) {
-                    Text("Prayer Calendar")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color.Token.slate800)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(AppLanguageManager.shared.localize("prayer_calendar_title"))
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                     
                     if let city = prayerController.cityName {
                         Text(city)
-                            .font(.system(size: 11))
-                            .foregroundColor(Color.Token.slate500)
+                            .font(.system(size: 13))
+                            .foregroundColor(SaatTokens.Colors.slate500)
                     }
                 }
                 
                 Spacer()
-                
-                Color.clear.frame(width: 20, height: 20)
             }
-            .padding()
-            .background(Color.Token.pureWhite)
-            .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 2)
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+            .background(SaatTokens.Colors.screenBackground)
             
             ScrollView {
                 VStack(spacing: 16) {
@@ -100,47 +98,53 @@ struct PrayerCalendarView: View {
                     HStack {
                         Button(action: { shiftMonth(by: -1) }) {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(Color.Token.deepEmerald)
+                                .font(.system(size: 20))
+                                .foregroundColor(SaatTokens.Colors.slate800)
                                 .padding(8)
                         }
                         
                         Spacer()
                         
                         Text("\(monthName) \(String(currentYear))")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundColor(Color.Token.slate800)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(SaatTokens.Colors.slate800)
                         
                         Spacer()
                         
                         Button(action: { shiftMonth(by: 1) }) {
                             Image(systemName: "chevron.right")
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(Color.Token.deepEmerald)
+                                .font(.system(size: 20))
+                                .foregroundColor(SaatTokens.Colors.slate800)
                                 .padding(8)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 12)
+                    .padding(.horizontal, 16)
                     
-                    // Calendar grid card
-                    VStack(spacing: 12) {
+                    Text(AppLanguageManager.shared.localize("prayer_calendar_hint"))
+                        .font(.system(size: 13))
+                        .foregroundColor(SaatTokens.Colors.slate500)
+                        .padding(.horizontal, 24)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    // Calendar grid
+                    VStack(spacing: 4) {
                         // Weekday Headers
                         HStack(spacing: 0) {
                             ForEach(0..<shiftedWeekdaySymbols.count, id: \.self) { index in
                                 Text(shiftedWeekdaySymbols[index])
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(Color.Token.slate400)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(SaatTokens.Colors.slate500)
                                     .frame(maxWidth: .infinity)
                             }
                         }
-                        .padding(.horizontal, 4)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 4)
                         
                         // Days grid
                         let grid = daysInMonthGrid
-                        let columns = Array(repeating: GridItem(.flexible(), spacing: 0), count: 7)
+                        let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
                         
-                        LazyVGrid(columns: columns, spacing: 10) {
+                        LazyVGrid(columns: columns, spacing: 4) {
                             ForEach(0..<grid.count, id: \.self) { index in
                                 if let date = grid[index] {
                                     let dayNum = calendar.component(.day, from: date)
@@ -150,37 +154,44 @@ struct PrayerCalendarView: View {
                                     let isImportant = khgtInfo?.isImportantDay == true
                                     
                                     Button(action: { selectedDate = date }) {
-                                        VStack(spacing: 4) {
+                                        VStack(spacing: 2) {
                                             Text("\(dayNum)")
-                                                .font(.system(size: 15, weight: isSelected ? .bold : (isToday ? .bold : .semibold)))
-                                                .foregroundColor(isSelected ? .white : (isToday ? Color.Token.deepEmerald : Color.Token.slate800))
-                                                .frame(width: 32, height: 32)
-                                                .background(isSelected ? Color.Token.deepEmerald : (isToday ? Color.Token.deepEmerald.opacity(0.1) : Color.clear))
-                                                .clipShape(Circle())
+                                                .font(.system(size: 15, weight: (isSelected || isToday) ? .bold : .regular))
+                                                .foregroundColor(isSelected ? .white : (isToday ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate800))
                                             
-                                            // Tiny dot for important days
-                                            Circle()
-                                                .fill(isImportant ? Color.Token.goldDeep : Color.clear)
-                                                .frame(width: 4, height: 4)
+                                            if isImportant {
+                                                Circle()
+                                                    .fill(isSelected ? Color.white : SaatTokens.Colors.goldDeep)
+                                                    .frame(width: 4, height: 4)
+                                            }
                                         }
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .aspectRatio(1, contentMode: .fill)
+                                        .background(isSelected ? SaatTokens.Colors.deepEmerald : (isToday ? SaatTokens.Colors.deepEmerald.opacity(0.12) : SaatTokens.Colors.pureWhite))
+                                        .clipShape(Circle())
+                                        .overlay(
+                                            Group {
+                                                if isToday && !isSelected {
+                                                    Circle().stroke(SaatTokens.Colors.deepEmerald.opacity(0.35), lineWidth: 1)
+                                                }
+                                            }
+                                        )
+                                        .padding(3)
                                     }
                                     .buttonStyle(PlainButtonStyle())
                                 } else {
                                     Color.clear
-                                        .frame(height: 40)
+                                        .aspectRatio(1, contentMode: .fill)
                                 }
                             }
                         }
+                        .padding(.horizontal, 16)
                     }
-                    .padding(16)
-                    .background(Color.Token.pureWhite)
-                    .cornerRadius(18)
-                    .shadow(color: Color.black.opacity(0.02), radius: 6, x: 0, y: 2)
-                    .padding(.horizontal)
                     
                     if isLoading {
                         ProgressView()
                             .padding(.vertical, 30)
+                            .tint(SaatTokens.Colors.deepEmerald)
                     } else if let error = errorMessage {
                         VStack(spacing: 12) {
                             Text(error)
@@ -194,39 +205,25 @@ struct PrayerCalendarView: View {
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 8)
-                                    .background(Color.Token.deepEmerald)
+                                    .background(SaatTokens.Colors.deepEmerald)
                                     .cornerRadius(8)
                             }
                         }
                         .padding(.vertical, 20)
                     } else {
                         // Selected Day Info & Timings
-                        VStack(alignment: .leading, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 14) {
                             let khgt = LocalKhgtCalendar.shared.infoForDate(selectedDate)
                             
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text(selectedDateLabel())
-                                        .font(.system(size: 16, weight: .bold))
-                                        .foregroundColor(Color.Token.slate800)
-                                    
-                                    Spacer()
-                                    
-                                    if let pasaran = khgt?.pasaran {
-                                        Text(pasaran)
-                                            .font(.system(size: 12, weight: .semibold))
-                                            .foregroundColor(Color.Token.slate500)
-                                            .padding(.horizontal, 8)
-                                            .padding(.vertical, 3)
-                                            .background(Color.Token.softGrey.opacity(0.4))
-                                            .cornerRadius(4)
-                                    }
-                                }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(selectedDateLabel())
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(SaatTokens.Colors.slate900)
                                 
                                 if let hijri = khgt?.hijriLabel {
                                     Text(hijri)
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(Color.Token.deepEmerald)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(SaatTokens.Colors.slate500)
                                 }
                             }
                             
@@ -234,61 +231,66 @@ struct PrayerCalendarView: View {
                             if let event = khgt?.eventTitle {
                                 HStack(spacing: 10) {
                                     Image(systemName: "star.fill")
-                                        .foregroundColor(Color.Token.goldDeep)
+                                        .foregroundColor(SaatTokens.Colors.goldDeep)
                                         .font(.system(size: 14))
                                     
-                                    Text(event)
-                                        .font(.system(size: 13, weight: .semibold))
-                                        .foregroundColor(Color.Token.slate800)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(event)
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundColor(SaatTokens.Colors.slate800)
+                                        Text(khgt?.hijriLabel ?? "")
+                                            .font(.system(size: 11))
+                                            .foregroundColor(SaatTokens.Colors.slate500)
+                                    }
                                 }
                                 .padding(12)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color.Token.goldDeep.opacity(0.1))
+                                .background(SaatTokens.Colors.goldDeep.opacity(0.1))
                                 .cornerRadius(10)
                             }
                             
-                            // Prayer Timings List
-                            VStack(spacing: 0) {
-                                let list = prayerTimingsList()
-                                ForEach(0..<list.count, id: \.self) { idx in
-                                    let item = list[idx]
-                                    HStack {
-                                        Text(item.0)
-                                            .font(.system(size: 14, weight: .bold))
-                                            .foregroundColor(Color.Token.slate700)
-                                        
-                                        Spacer()
-                                        
-                                        Text(item.1)
-                                            .font(.system(size: 15, weight: .bold))
-                                            .foregroundColor(Color.Token.slate800)
-                                    }
-                                    .padding(.vertical, 12)
-                                    .padding(.horizontal, 16)
-                                    .background(idx % 2 == 0 ? Color.clear : Color.Token.softGrey.opacity(0.15))
-                                    
-                                    if idx < list.count - 1 {
-                                        Divider()
+                            // Prayer Timings Grid
+                            let list = prayerTimingsList()
+                            let gridRows = [
+                                [list[0], list[1], list[2]], // Fajr, Sunrise, Dhuhr
+                                [list[3], list[4], list[5]]  // Asr, Maghrib, Isha
+                            ]
+                            
+                            VStack(spacing: 8) {
+                                ForEach(0..<gridRows.count, id: \.self) { rowIndex in
+                                    HStack(spacing: 8) {
+                                        ForEach(0..<gridRows[rowIndex].count, id: \.self) { colIndex in
+                                            let item = gridRows[rowIndex][colIndex]
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text(item.0)
+                                                    .font(.system(size: 11))
+                                                    .foregroundColor(SaatTokens.Colors.slate500)
+                                                    .lineLimit(1)
+                                                
+                                                Text(item.1)
+                                                    .font(.system(size: 14, weight: .semibold))
+                                                    .foregroundColor(SaatTokens.Colors.slate900)
+                                            }
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 10)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .background(SaatTokens.Colors.pureWhite)
+                                            .cornerRadius(12)
+                                        }
                                     }
                                 }
                             }
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 1)
-                            )
                         }
-                        .padding()
-                        .background(Color.Token.pureWhite)
-                        .cornerRadius(18)
-                        .shadow(color: Color.black.opacity(0.02), radius: 6, x: 0, y: 2)
-                        .padding(.horizontal)
+                        .padding(16)
+                        .background(SaatTokens.Colors.lightGrey)
+                        .cornerRadius(20)
+                        .padding(.horizontal, 16)
                     }
                 }
                 .padding(.bottom, 30)
-            }
-            .background(Color.Token.screenBackground)
+            .background(SaatTokens.Colors.screenBackground)
         }
+        .background(SaatTokens.Colors.screenBackground)
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .task {

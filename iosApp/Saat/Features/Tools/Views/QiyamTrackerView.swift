@@ -158,9 +158,9 @@ struct QiyamTrackerView: View {
             // Header
             HStack {
                 Button(action: { dismiss() }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
                 }
                 .accessibilityLabel("Back")
                 
@@ -169,11 +169,11 @@ struct QiyamTrackerView: View {
                 VStack(spacing: 2) {
                     Text(languageManager.localize("tool_qiyam"))
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color.Token.slate800)
+                        .foregroundColor(SaatTokens.Colors.slate800)
                     
                     Text(languageManager.localize("qiyam_tracker_subtitle"))
                         .font(.system(size: 11))
-                        .foregroundColor(Color.Token.slate500)
+                        .foregroundColor(SaatTokens.Colors.slate500)
                 }
                 
                 Spacer()
@@ -181,7 +181,7 @@ struct QiyamTrackerView: View {
                 Color.clear.frame(width: 20, height: 20)
             }
             .padding()
-            .background(Color.Token.pureWhite)
+            .background(SaatTokens.Colors.pureWhite)
             .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 2)
             
             ScrollView {
@@ -204,7 +204,7 @@ struct QiyamTrackerView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text(languageManager.localize("qiyam_tracker_desc"))
                                 .font(.system(size: 13))
-                                .foregroundColor(Color.Token.slate500)
+                                .foregroundColor(SaatTokens.Colors.slate500)
                                 .lineSpacing(4)
                                 .padding(.horizontal, 4)
                             
@@ -214,18 +214,18 @@ struct QiyamTrackerView: View {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(languageManager.localize("qiyam_prayed_tonight"))
                                             .font(.system(size: 15, weight: .semibold))
-                                            .foregroundColor(Color.Token.deepEmerald)
+                                            .foregroundColor(SaatTokens.Colors.deepEmerald)
                                         
                                         Text(languageManager.localize("qiyam_private_tracker"))
                                             .font(.system(size: 12))
-                                            .foregroundColor(Color.Token.slate500)
+                                            .foregroundColor(SaatTokens.Colors.slate500)
                                     }
                                     
                                     Spacer()
                                     
                                     Toggle("", isOn: $loggedTonight)
                                         .labelsHidden()
-                                        .tint(Color.Token.deepEmerald)
+                                        .tint(SaatTokens.Colors.deepEmerald)
                                         .onChange(of: loggedTonight) { _, newValue in
                                             if newValue != QiyamTrackerStore.shared.isLogged() {
                                                 toggleTonight()
@@ -233,13 +233,9 @@ struct QiyamTrackerView: View {
                                         }
                                 }
                                 .padding(18)
-                                .background(Color.Token.pureWhite)
+                                .background(SaatTokens.Colors.prayerMint)
                                 .cornerRadius(16)
-                                .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 2)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 1)
-                                  )
+                                .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
@@ -249,14 +245,14 @@ struct QiyamTrackerView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text(languageManager.localize("qiyam_readings_desc"))
                                 .font(.system(size: 13))
-                                .foregroundColor(Color.Token.slate500)
+                                .foregroundColor(SaatTokens.Colors.slate500)
                                 .lineSpacing(4)
                                 .padding(.horizontal, 4)
                             
                             ForEach(QiyamGuideCategory.allCases) { category in
                                 Text(category.localizedName)
                                     .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(Color.Token.deepEmerald)
+                                    .foregroundColor(SaatTokens.Colors.deepEmerald)
                                     .padding(.top, 8)
                                     .padding(.horizontal, 4)
                                 
@@ -280,7 +276,7 @@ struct QiyamTrackerView: View {
                 }
                 .padding(.bottom, 30)
             }
-            .background(Color.Token.screenBackground)
+            .background(SaatTokens.Colors.screenBackground)
         }
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .navigationBar)
@@ -315,7 +311,7 @@ struct QiyamHeroCardView: View {
             HStack {
                 Image(systemName: "moon.stars.fill")
                     .font(.system(size: 24))
-                    .foregroundColor(Color.Token.goldDeep)
+                    .foregroundColor(SaatTokens.Colors.goldBright)
                 
                 Spacer().frame(width: 10)
                 
@@ -351,7 +347,7 @@ struct QiyamHeroCardView: View {
                             .foregroundColor(.white.opacity(0.6))
                         
                         Circle()
-                            .fill(day.logged ? Color.Token.goldDeep : (day.isToday ? Color.white.opacity(0.35) : Color.white.opacity(0.15)))
+                            .fill(day.logged ? SaatTokens.Colors.goldBright : (day.isToday ? Color.white.opacity(0.35) : Color.white.opacity(0.15)))
                             .frame(width: day.isToday ? 12 : 8, height: day.isToday ? 12 : 8)
                     }
                     Spacer()
@@ -362,7 +358,7 @@ struct QiyamHeroCardView: View {
         .padding(20)
         .background(
             LinearGradient(
-                colors: [Color(red: 0.05, green: 0.15, blue: 0.1), Color.Token.indigoDeep, Color.Token.slate900],
+                colors: [SaatTokens.Colors.emeraldNight, SaatTokens.Colors.indigoDeep, SaatTokens.Colors.forestDeeper],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -402,14 +398,14 @@ struct QiyamReadingRow: View {
                 HStack {
                     Text(reading.title)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color.Token.slate800)
+                        .foregroundColor(SaatTokens.Colors.slate800)
                         .multilineTextAlignment(.leading)
                     
                     Spacer()
                     
                     Image(systemName: "chevron.down")
                         .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(Color.Token.slate500)
+                        .foregroundColor(SaatTokens.Colors.slate500)
                         .rotationEffect(.degrees(isExpanded ? 180 : 0))
                 }
                 .padding(16)
@@ -424,7 +420,7 @@ struct QiyamReadingRow: View {
                     if let arabic = reading.arabic {
                         Text(arabic)
                             .font(.system(size: 20))
-                            .foregroundColor(Color.Token.deepEmerald)
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
                             .frame(maxWidth: .infinity, alignment: .trailing)
                             .multilineTextAlignment(.trailing)
                             .padding(.top, 4)
@@ -434,25 +430,25 @@ struct QiyamReadingRow: View {
                         Text(translit)
                             .font(.system(size: 13, weight: .regular))
                             .italic()
-                            .foregroundColor(Color.Token.teal)
+                            .foregroundColor(SaatTokens.Colors.teal)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     
                     Text(reading.body)
                         .font(.system(size: 13))
-                        .foregroundColor(Color.Token.slate800)
+                        .foregroundColor(SaatTokens.Colors.slate800)
                         .lineSpacing(4)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .padding(16)
             }
         }
-        .background(Color.Token.pureWhite)
+        .background(SaatTokens.Colors.pureWhite)
         .cornerRadius(14)
         .shadow(color: Color.black.opacity(0.02), radius: 3, x: 0, y: 1)
         .overlay(
             RoundedRectangle(cornerRadius: 14)
-                .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 1)
+                .stroke(SaatTokens.Colors.softGrey.opacity(0.5), lineWidth: 1)
         )
     }
 }
