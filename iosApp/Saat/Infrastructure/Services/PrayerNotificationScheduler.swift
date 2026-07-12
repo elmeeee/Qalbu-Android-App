@@ -9,8 +9,12 @@
 import Foundation
 import OSLog
 import UserNotifications
+import AlarmKit
+import SwiftUI
 
 private let prayerNotifLog = Logger(subsystem: "co.kamy.Saat", category: "PrayerNotifications")
+
+// MARK: - Notification Copy
 
 private enum PrayerNotificationCopy {
     private static let timeFormatter: DateFormatter = {
@@ -24,6 +28,11 @@ private enum PrayerNotificationCopy {
     static func title(for prayerName: String, at date: Date) -> String {
         let time = timeFormatter.string(from: date)
         return "It's time for \(prayerName) · \(time)"
+    }
+
+    static func alarmTitle(for prayerName: String, at date: Date) -> String {
+        let time = timeFormatter.string(from: date)
+        return "🕌 \(prayerName) · \(time)"
     }
 
     static func body(for prayerName: String) -> String {
@@ -45,6 +54,8 @@ private enum PrayerNotificationCopy {
         }
     }
 }
+
+// MARK: - Night Division
 
 struct NightDivisionEntry: Sendable {
     enum Kind: String, CaseIterable, Sendable {
@@ -78,14 +89,29 @@ struct NightDivisionEntry: Sendable {
     let date: Date
 }
 
+// MARK: - Scheduler
+
 @MainActor
 final class PrayerNotificationScheduler {
-    private let center = UNUserNotificationCenter.current()
+    private let notificationCenter = UNUserNotificationCenter.current()
     private let prayerPrefix = "Saat.prayer"
     private let nightPrefix = "Saat.night"
 
+    /// Persisted alarm IDs so we can cancel previously scheduled alarms.
+    private static let scheduledAlarmIDsKey = "Saat.scheduledAlarmIDs"
+
+    // MARK: - Authorization
+
+    /// Requests both standard notification permission (for night divisions)
+    /// and AlarmKit permission (for adzan prayer alarms).
     func requestAuthorizationIfNeeded() async -> Bool {
-        let settings = await center.notificationSettings()
+        let notifAuthorized = await requestNotificationAuth()
+        let alarmAuthorized = await requestAlarmAuth()
+        return notifAuthorized || alarmAuthorized
+    }
+
+    private func requestNotificationAuth() async -> Bool {
+        let settings = await notificationCenter.notificationSettings()
         switch settings.authorizationStatus {
         case .authorized, .provisional, .ephemeral:
             return true
@@ -93,14 +119,34 @@ final class PrayerNotificationScheduler {
             return false
         case .notDetermined:
             do {
-                return try await center.requestAuthorization(options: [.alert, .sound, .badge])
+                return try await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
             } catch {
+                prayerNotifLog.error("Failed requesting notification auth: \(error.localizedDescription, privacy: .public)")
                 return false
             }
         @unknown default:
             return false
         }
     }
+
+    private nonisolated func requestAlarmAuth() async -> Bool {
+        let manager = AlarmManager.shared
+        switch manager.authorizationState {
+        case .notDetermined:
+            do {
+                let state = try await manager.requestAuthorization()
+                return state == .authorized
+            } catch {
+                return false
+            }
+        case .authorized:
+            return true
+        default:
+            return false
+        }
+    }
+
+    // MARK: - Schedule
 
     func schedule(
         prayers: [PrayerEntry],
@@ -112,46 +158,50 @@ final class PrayerNotificationScheduler {
             return
         }
 
-        let pending = await center.pendingNotificationRequests()
-        let toCancel = pending.map(\.identifier).filter {
-            $0.hasPrefix(prayerPrefix) || $0.hasPrefix(nightPrefix)
-        }
-        if toCancel.isEmpty == false {
-            center.removePendingNotificationRequests(withIdentifiers: toCancel)
-        }
+        // --- Cancel previously scheduled alarms & notifications ---
+        await cancelPreviousAlarms()
+        await cancelPreviousNotifications()
 
         let now = Date()
         let calendar = Calendar.current
-        var scheduledCount = 0
+        var scheduledAlarmIDs: [String] = []
 
+        // --- Schedule prayer alarms via AlarmKit ---
         if options.adzanEnabled {
             for prayer in prayers {
                 for fireDate in Self.upcomingOccurrences(of: prayer.date, from: now, calendar: calendar) {
-                    let id = "\(prayerPrefix).\(prayer.name).\(Int(fireDate.timeIntervalSince1970))"
-                    await addNotification(
-                        identifier: id,
+                    let alarmId = "\(prayerPrefix).\(prayer.name).\(Int(fireDate.timeIntervalSince1970))"
+                    let success = await scheduleAlarm(
+                        id: alarmId,
                         fireDate: fireDate,
-                        title: PrayerNotificationCopy.title(for: prayer.name, at: fireDate),
-                        body: PrayerNotificationCopy.body(for: prayer.name)
+                        prayerName: prayer.name
                     )
-                    scheduledCount += 1
+                    if success {
+                        scheduledAlarmIDs.append(alarmId)
+                    }
                 }
             }
         }
 
+        // --- Imsak alarm via AlarmKit ---
         if options.imsakEnabled, let imsak = imsakEntry {
             for fireDate in Self.upcomingOccurrences(of: imsak.date, from: now, calendar: calendar) {
-                let id = "\(prayerPrefix).Imsak.\(Int(fireDate.timeIntervalSince1970))"
-                await addNotification(
-                    identifier: id,
+                let alarmId = "\(prayerPrefix).Imsak.\(Int(fireDate.timeIntervalSince1970))"
+                let success = await scheduleAlarm(
+                    id: alarmId,
                     fireDate: fireDate,
-                    title: PrayerNotificationCopy.title(for: "Imsak", at: fireDate),
-                    body: PrayerNotificationCopy.body(for: "Imsak")
+                    prayerName: "Imsak"
                 )
-                scheduledCount += 1
+                if success {
+                    scheduledAlarmIDs.append(alarmId)
+                }
             }
         }
 
+        // Persist scheduled alarm IDs for future cancellation
+        UserDefaults.standard.set(scheduledAlarmIDs, forKey: Self.scheduledAlarmIDsKey)
+
+        // --- Night divisions still use UNUserNotifications (less critical) ---
         for division in nightDivisions {
             let enabled: Bool = switch division.kind {
             case .midnight: options.midnightEnabled
@@ -162,28 +212,87 @@ final class PrayerNotificationScheduler {
 
             for fireDate in Self.upcomingOccurrences(of: division.date, from: now, calendar: calendar) {
                 let id = "\(nightPrefix).\(division.kind.rawValue).\(Int(fireDate.timeIntervalSince1970))"
-                await addNotification(
+                await addLocalNotification(
                     identifier: id,
                     fireDate: fireDate,
                     title: division.kind.notificationTitle,
                     body: division.kind.notificationBody
                 )
-                scheduledCount += 1
             }
         }
     }
 
-    private static func upcomingOccurrences(of date: Date, from now: Date, calendar: Calendar) -> [Date] {
-        if date > now {
-            return [date]
+    // MARK: - AlarmKit Scheduling
+
+    private func scheduleAlarm(
+        id: String,
+        fireDate: Date,
+        prayerName: String
+    ) async -> Bool {
+        // Build the alarm presentation
+        let titleString = PrayerNotificationCopy.alarmTitle(for: prayerName, at: fireDate)
+        let alert = AlarmPresentation.Alert(
+            title: LocalizedStringResource(stringLiteral: titleString),
+            stopButton: AlarmButton(
+                text: "Dismiss",
+                textColor: .green,
+                systemImageName: "checkmark.circle"
+            )
+        )
+
+        let attributes = AlarmAttributes<EmptyAlarmMetadata>(
+            presentation: AlarmPresentation(alert: alert),
+            tintColor: .green
+        )
+
+        let configuration = AlarmManager.AlarmConfiguration(
+            schedule: .fixed(fireDate),
+            attributes: attributes
+        )
+
+        do {
+            // Use a deterministic UUID from the string id for stable identity
+            let alarmUUID = UUID(uuidString: stableUUID(from: id)) ?? UUID()
+            _ = try await AlarmManager.shared.schedule(id: alarmUUID, configuration: configuration)
+            prayerNotifLog.info("Scheduled AlarmKit alarm for \(prayerName, privacy: .public) at \(fireDate, privacy: .public)")
+            return true
+        } catch {
+            prayerNotifLog.error("Failed scheduling AlarmKit alarm for \(prayerName, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            return false
         }
-        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: date), tomorrow > now else {
-            return []
-        }
-        return [tomorrow]
     }
 
-    private func addNotification(
+    // MARK: - Cancellation
+
+    private func cancelPreviousAlarms() async {
+        guard let savedIDs = UserDefaults.standard.stringArray(forKey: Self.scheduledAlarmIDsKey) else {
+            return
+        }
+        for idString in savedIDs {
+            let uuid = UUID(uuidString: stableUUID(from: idString)) ?? UUID()
+            do {
+                try AlarmManager.shared.cancel(id: uuid)
+            } catch {
+                // Alarm may have already fired or been dismissed — not an error
+                prayerNotifLog.debug("Could not cancel alarm \(idString, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            }
+        }
+        UserDefaults.standard.removeObject(forKey: Self.scheduledAlarmIDsKey)
+    }
+
+    private func cancelPreviousNotifications() async {
+        let pending = await notificationCenter.pendingNotificationRequests()
+        let toCancel = pending.map(\.identifier).filter {
+            $0.hasPrefix(prayerPrefix) || $0.hasPrefix(nightPrefix)
+        }
+        if toCancel.isEmpty == false {
+            notificationCenter.removePendingNotificationRequests(withIdentifiers: toCancel)
+        }
+    }
+
+    // MARK: - UNNotification (Night Divisions)
+
+    private func addLocalNotification(
         identifier: String,
         fireDate: Date,
         title: String,
@@ -192,18 +301,7 @@ final class PrayerNotificationScheduler {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
-        let soundName = UserDefaults.standard.string(forKey: "selected_adhan_sound") ?? "default"
-        if soundName == "default" {
-            content.sound = .default
-        } else {
-            if Bundle.main.url(forResource: soundName, withExtension: "mp3") != nil {
-                content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: "\(soundName).mp3"))
-            } else if Bundle.main.url(forResource: soundName, withExtension: "mp3", subdirectory: "adhan") != nil {
-                content.sound = UNNotificationSound(named: UNNotificationSoundName(rawValue: "adhan/\(soundName).mp3"))
-            } else {
-                content.sound = .default
-            }
-        }
+        content.sound = .default
 
         var comps = Calendar.current.dateComponents(
             [.year, .month, .day, .hour, .minute],
@@ -217,9 +315,31 @@ final class PrayerNotificationScheduler {
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
         do {
-            try await center.add(request)
+            try await notificationCenter.add(request)
         } catch {
             prayerNotifLog.error("Failed scheduling \(identifier, privacy: .public): \(error.localizedDescription, privacy: .public)")
         }
+    }
+
+    // MARK: - Helpers
+
+    private static func upcomingOccurrences(of date: Date, from now: Date, calendar: Calendar) -> [Date] {
+        if date > now {
+            return [date]
+        }
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: date), tomorrow > now else {
+            return []
+        }
+        return [tomorrow]
+    }
+
+    /// Produces a deterministic UUID v5-style string from an arbitrary identifier string.
+    /// This ensures the same prayer+timestamp always maps to the same UUID for reliable cancellation.
+    private func stableUUID(from string: String) -> String {
+        var hash = string.hashValue
+        // Construct a UUID-format string from the hash
+        let bytes = withUnsafeBytes(of: &hash) { Array($0) }
+        let padded = bytes + Array(repeating: UInt8(0), count: max(0, 16 - bytes.count))
+        return NSUUID(uuidBytes: padded).uuidString
     }
 }

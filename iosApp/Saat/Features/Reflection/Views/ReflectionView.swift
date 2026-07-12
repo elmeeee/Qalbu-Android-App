@@ -91,7 +91,10 @@ struct ReflectionView: View {
             reelBootLoading
         case .feed:
             if let feedViewModel = tabViewModel.feedViewModel {
-                ReflectReelFeedView(viewModel: feedViewModel)
+                ReflectReelFeedView(
+                    viewModel: feedViewModel,
+                    currentUserId: verseState.userId
+                )
             } else if tabViewModel.canShowReflectFeed, let container {
                 reelBootLoading
                     .task { tabViewModel.prepareFeedIfNeeded(container: container) }

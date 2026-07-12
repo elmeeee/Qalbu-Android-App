@@ -45,7 +45,7 @@ struct ReflectFeedPostCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Header: Avatar, Name, Date
             HStack(alignment: .center, spacing: 12) {
-                AsyncImage(url: URL(string: post.author?.avatarUrls ?? "")) { phase in
+                AsyncImage(url: post.author?.avatarURL) { phase in
                     switch phase {
                     case .empty:
                         Circle().fill(SaatTokens.Colors.softGrey.opacity(0.5))
@@ -53,7 +53,7 @@ struct ReflectFeedPostCardView: View {
                         image.resizable().aspectRatio(contentMode: .fill)
                     case .failure:
                         Circle().fill(SaatTokens.Colors.softGrey.opacity(0.5))
-                        Image(systemName: "person.fill").foregroundColor(SaatTokens.Colors.slate400)
+                        Image(systemName: "person.fill").foregroundColor(SaatTokens.Colors.slate500)
                     @unknown default:
                         EmptyView()
                     }
@@ -128,7 +128,7 @@ struct ReflectFeedPostCardView: View {
                     ForEach(tags.prefix(4), id: \.self) { tag in
                         Text("#\(tag)")
                             .font(.system(size: 12))
-                            .foregroundColor(SaatTokens.Colors.slate600)
+                            .foregroundColor(SaatTokens.Colors.mintWash)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
                             .background(SaatTokens.Colors.slate800.opacity(0.08))

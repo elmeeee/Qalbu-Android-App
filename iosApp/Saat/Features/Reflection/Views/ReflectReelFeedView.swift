@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ReflectReelFeedView: View {
     @Bindable var viewModel: ReflectionViewModel
+    let currentUserId: String?
     @Environment(\.appContainer) private var container
     @State private var verseDetailViewModel = VerseDetailViewModel()
 
@@ -65,7 +66,7 @@ struct ReflectReelFeedView: View {
                             ForEach(viewModel.posts) { post in
                                 ReflectFeedPostCardView(
                                     post: post,
-                                    currentUserId: container?.userSession.currentUserId,
+                                    currentUserId: currentUserId,
                                     isTogglingLike: viewModel.isTogglingLike(postId: post.id),
                                     onToggleLike: { Task { await viewModel.toggleLike(for: post) } },
                                     onTapVerse: { key in

@@ -34,5 +34,7 @@
 		<string>location</string>
 		<string>fetch</string>
 	</array>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>Saat uses alarms to notify you at prayer times with the beautiful sound of the Adhan.</string>
 </dict>
 </plist>
