@@ -28,12 +28,11 @@
 	<string>$(QF_OAUTH_TOKEN_URL)</string>
 	<key>QF_VERSES_WEB_BASE</key>
 	<string>$(QF_VERSES_WEB_BASE)</string>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
 		<string>location</string>
+		<string>fetch</string>
 	</array>
 </dict>
 </plist>

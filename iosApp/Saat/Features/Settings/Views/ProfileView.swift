@@ -499,7 +499,7 @@ struct ProfileView: View {
                 Button {
                     if let url = URL(
                         string:
-                            "https://elmee.my/saat/terms?lang=\(languageManager.currentLanguage.tag)"
+                            "https://elmee.my/saat/terms?lang=\(languageManager.currentLanguage.rawValue)"
                     ) {
                         UIApplication.shared.open(url)
                     }
