@@ -21,6 +21,7 @@ enum SaatTokens {
         static let pureWhite = Color(hex: 0xFFFF_FFFF)
         static let softGrey = Color(hex: 0xFFE5_E7EB)
         static let lightGrey = Color(hex: 0xFFF3_F4F6)
+        static let slate400 = Color(hex: 0xFF94_A3B8)
         static let slate500 = Color(hex: 0xFF64_748B)
         static let slate600 = Color(hex: 0xFF47_5569)
         static let slate700 = Color(hex: 0xFF33_4155)
