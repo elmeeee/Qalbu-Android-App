@@ -275,12 +275,7 @@ struct ChaptersView: View {
                                 QuranChapterRow(chapter: chapter)
                             }
                             .buttonStyle(.plain)
-
-                            if index < displayed.count - 1 {
-                                Divider()
-                                    .opacity(0.3)
-                                    .padding(.leading, 56)
-                            }
+                            .padding(.vertical, 4)
                         }
                     }
                 }
@@ -323,12 +318,7 @@ struct ChaptersView: View {
                             JuzRow(juz: juz, chapter: chapter)
                         }
                         .buttonStyle(.plain)
-                        
-                        if index < vm.juzs.count - 1 {
-                            Divider()
-                                .opacity(0.3)
-                                .padding(.leading, 56)
-                        }
+                        .padding(.vertical, 4)
                     }
                 }
             }
@@ -417,7 +407,7 @@ private struct QuranChapterRow: View {
     let chapter: QuranChapter
 
     var body: some View {
-        HStack(alignment: .center, spacing: 14) {
+        HStack(alignment: .center, spacing: 16) {
             ZStack {
                 Circle()
                     .fill(
@@ -436,40 +426,22 @@ private struct QuranChapterRow: View {
             .frame(width: 36, height: 36)
 
             VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(chapter.displayComplexName)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .fixedSize(horizontal: false, vertical: true)
-
-                        if chapter.displayTranslatedName.isEmpty == false {
-                            Text(chapter.displayTranslatedName)
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .lineLimit(2)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    if let arabic = chapter.nameArabic, arabic.isEmpty == false {
-                        Text(arabic)
-                            .font(.system(size: 18, weight: .medium))
-                            .foregroundColor(Color.Token.deepEmerald)
-                            .multilineTextAlignment(.trailing)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                            .layoutPriority(1)
-                            .environment(\.layoutDirection, .rightToLeft)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .fill(Color.Token.deepEmerald.opacity(0.06))
-                            )
-                    }
+                HStack(alignment: .center, spacing: 10) {
+                    Text(chapter.displayComplexName)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(Color.Token.slate900)
+                        .lineLimit(1)
                 }
+
+                if chapter.displayTranslatedName.isEmpty == false {
+                    Text(chapter.displayTranslatedName)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Color.Token.slate500)
+                        .lineLimit(1)
+                        .padding(.top, 2)
+                }
+
+                Spacer().frame(height: 8)
 
                 HStack(spacing: 8) {
                     ChapterRevelationBadge(chapter: chapter)
@@ -480,15 +452,29 @@ private struct QuranChapterRow: View {
                             : AppLanguageManager.shared.localize("verses")
                         Text("\(count) \(label)")
                             .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: true, vertical: false)
+                            .foregroundColor(Color.Token.slate500)
                     }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Spacer(minLength: 8)
+            
+            Image(chapter.isMeccan ? "mecca" : "medina")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 52, height: 52)
         }
-        .padding(.vertical, 12)
-        .contentShape(Rectangle())
+        .padding(.horizontal, 16)
+        .frame(maxWidth: .infinity)
+        .frame(height: 104)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 1)
+        )
         .accessibilityElement(children: .combine)
         .accessibilityLabel(chapter.spokenAccessibilitySummary)
         .accessibilityHint("Open surah to read and listen")
@@ -500,12 +486,12 @@ private struct JuzRow: View {
     let chapter: QuranChapter?
 
     var body: some View {
-        HStack(alignment: .center, spacing: 14) {
+        HStack(alignment: .center, spacing: 16) {
             ZStack {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.Token.gold, Color.Token.goldDeep],
+                            colors: [Color.Token.deepEmerald, Color.Token.tealDark],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
@@ -518,32 +504,44 @@ private struct JuzRow: View {
             }
             .frame(width: 36, height: 36)
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .top, spacing: 10) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("\(AppLanguageManager.shared.localize("juz")) \(juz.juzNumber)")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(AppLanguageManager.shared.localize("juz")) \(juz.juzNumber)")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(Color.Token.slate900)
 
-                        if let start = juz.startChapterAndAyah() {
-                            let surahName = chapter?.displayComplexName ?? "Surah \(start.0)"
-                            Text("\(AppLanguageManager.shared.localize("starts_at")) \(surahName) • \(AppLanguageManager.shared.localize("verse_singular")) \(start.1)")
-                                .font(.system(size: 13, weight: .medium))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                if let start = juz.startChapterAndAyah() {
+                    let surahName = chapter?.displayComplexName ?? "Surah \(start.0)"
+                    Text("\(AppLanguageManager.shared.localize("starts_at")) \(surahName) • \(AppLanguageManager.shared.localize("verse_singular")) \(start.1)")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color.Token.slate500)
+                        .lineLimit(1)
+                        .padding(.top, 2)
                 }
 
                 if let count = juz.versesCount {
                     Text("\(count) \(AppLanguageManager.shared.localize("verses"))")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color.Token.teal)
+                        .padding(.top, 6)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Spacer(minLength: 8)
+            
+            Image(systemName: "arrow.forward")
+                .font(.system(size: 20))
+                .foregroundColor(Color.Token.teal.opacity(0.6))
         }
+        .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .contentShape(Rectangle())
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.05), radius: 1, x: 0, y: 1)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 1)
+        )
     }
 }
