@@ -6,13 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		36825E302FED073F007D0D9D /* ProwlCore in Frameworks */ = {isa = PBXBuildFile; productRef = 36825E2F2FED073F007D0D9D /* ProwlCore */; };
-		36825E322FED073F007D0D9D /* ProwlGRPC in Frameworks */ = {isa = PBXBuildFile; productRef = 36825E312FED073F007D0D9D /* ProwlGRPC */; };
-		36825E342FED073F007D0D9D /* ProwlKit in Frameworks */ = {isa = PBXBuildFile; productRef = 36825E332FED073F007D0D9D /* ProwlKit */; };
-		36825E362FED073F007D0D9D /* ProwlUI in Frameworks */ = {isa = PBXBuildFile; productRef = 36825E352FED073F007D0D9D /* ProwlUI */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		3600CD332F9C5793001EC262 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -76,10 +69,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				36825E342FED073F007D0D9D /* ProwlKit in Frameworks */,
-				36825E362FED073F007D0D9D /* ProwlUI in Frameworks */,
-				36825E302FED073F007D0D9D /* ProwlCore in Frameworks */,
-				36825E322FED073F007D0D9D /* ProwlGRPC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,10 +141,6 @@
 			);
 			name = Saat;
 			packageProductDependencies = (
-				36825E2F2FED073F007D0D9D /* ProwlCore */,
-				36825E312FED073F007D0D9D /* ProwlGRPC */,
-				36825E332FED073F007D0D9D /* ProwlKit */,
-				36825E352FED073F007D0D9D /* ProwlUI */,
 			);
 			productName = Saat;
 			productReference = 3600CD252F9C5791001EC262 /* Saat.app */;
@@ -240,7 +225,6 @@
 			mainGroup = 3600CD1C2F9C5791001EC262;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				36825E2E2FED073F007D0D9D /* XCRemoteSwiftPackageReference "prowlkit-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3600CD262F9C5791001EC262 /* Products */;
@@ -700,40 +684,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		36825E2E2FED073F007D0D9D /* XCRemoteSwiftPackageReference "prowlkit-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ProwlLabs/prowlkit-ios.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.4;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		36825E2F2FED073F007D0D9D /* ProwlCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 36825E2E2FED073F007D0D9D /* XCRemoteSwiftPackageReference "prowlkit-ios" */;
-			productName = ProwlCore;
-		};
-		36825E312FED073F007D0D9D /* ProwlGRPC */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 36825E2E2FED073F007D0D9D /* XCRemoteSwiftPackageReference "prowlkit-ios" */;
-			productName = ProwlGRPC;
-		};
-		36825E332FED073F007D0D9D /* ProwlKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 36825E2E2FED073F007D0D9D /* XCRemoteSwiftPackageReference "prowlkit-ios" */;
-			productName = ProwlKit;
-		};
-		36825E352FED073F007D0D9D /* ProwlUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 36825E2E2FED073F007D0D9D /* XCRemoteSwiftPackageReference "prowlkit-ios" */;
-			productName = ProwlUI;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3600CD1D2F9C5791001EC262 /* Project object */;
 }

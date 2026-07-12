@@ -7,7 +7,6 @@
 //
 
 import SwiftUI
-import ProwlKit
 import UserNotifications
 
 @main
@@ -15,7 +14,6 @@ struct SaatApp: App {
     private let appContainer: AppContainer
 
     init() {
-        Prowl.start()
         UNUserNotificationCenter.current().delegate = PrayerNotificationCenterDelegate.shared
         self.appContainer = AppContainer()
         _ = SaatTypography.verseArabicHTMLBaseDirectory()
