@@ -1,0 +1,10 @@
+app.kamy.saatapp.shared-pngs-0 /Users/phincon/Documents/QalbuAndroid/shared/build/generated/res/pngs/release
+app.kamy.saatapp.shared-resValues-1 /Users/phincon/Documents/QalbuAndroid/shared/build/generated/res/resValues/release
+app.kamy.saatapp.shared-updated_navigation_xml-2 /Users/phincon/Documents/QalbuAndroid/shared/build/generated/updated_navigation_xml/release
+app.kamy.saatapp.shared-mergeReleaseResources-3 /Users/phincon/Documents/QalbuAndroid/shared/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
+app.kamy.saatapp.shared-mergeReleaseResources-4 /Users/phincon/Documents/QalbuAndroid/shared/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+app.kamy.saatapp.shared-release-5 /Users/phincon/Documents/QalbuAndroid/shared/build/intermediates/merged_res/release/mergeReleaseResources
+app.kamy.saatapp.shared-androidMain-6 /Users/phincon/Documents/QalbuAndroid/shared/src/androidMain/res
+app.kamy.saatapp.shared-androidRelease-7 /Users/phincon/Documents/QalbuAndroid/shared/src/androidRelease/res
+app.kamy.saatapp.shared-main-8 /Users/phincon/Documents/QalbuAndroid/shared/src/main/res
+app.kamy.saatapp.shared-release-9 /Users/phincon/Documents/QalbuAndroid/shared/src/release/res
