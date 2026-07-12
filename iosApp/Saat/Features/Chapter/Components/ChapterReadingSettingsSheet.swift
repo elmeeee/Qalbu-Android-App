@@ -85,7 +85,7 @@ struct ChapterReadingSettingsSheet: View {
                         .disabled(isApplyingPreferences)
                     }
                 } header: {
-                    Text(languageManager.localize("reciter") ?? "Reciter")
+                    Text(languageManager.localize("reciter"))
                 }
 
                 Section {
@@ -103,24 +103,24 @@ struct ChapterReadingSettingsSheet: View {
                     }
                     .padding(.vertical, 4)
                 } header: {
-                    Text(languageManager.localize("text_size") ?? "Text Display")
+                    Text(languageManager.localize("text_size"))
                 }
 
                 Section {
                     Toggle(isOn: $showTranslation) {
-                        Label(languageManager.localize("show_translation") ?? "Show Translation", systemImage: "character.book.closed.fill")
+                        Label(languageManager.localize("show_translation"), systemImage: "character.book.closed.fill")
                             .foregroundColor(Color.Token.deepEmerald)
                     }
                     .tint(Color.Token.deepEmerald)
 
                     Toggle(isOn: $showTransliteration) {
-                        Label(languageManager.localize("show_transliteration") ?? "Tampilkan Latin", systemImage: "abc")
+                        Label(languageManager.localize("show_transliteration"), systemImage: "abc")
                             .foregroundColor(Color.Token.deepEmerald)
                     }
                     .tint(Color.Token.deepEmerald)
 
                     Toggle(isOn: $isMemorizationMode) {
-                        Label(languageManager.localize("memorization_mode") ?? "Mode Hafalan", systemImage: "brain.headlight")
+                        Label(languageManager.localize("memorization_mode"), systemImage: "brain.headlight")
                             .foregroundColor(Color.Token.deepEmerald)
                     }
                     .tint(Color.Token.deepEmerald)
@@ -130,7 +130,7 @@ struct ChapterReadingSettingsSheet: View {
 
                 Section {
                     Toggle(isOn: $isContinuousPlay) {
-                        Label(languageManager.localize("continuous_play") ?? "Putar Berkelanjutan", systemImage: "arrow.forward.to.line.circle.fill")
+                        Label(languageManager.localize("continuous_play"), systemImage: "arrow.forward.to.line.circle.fill")
                             .foregroundColor(Color.Token.deepEmerald)
                     }
                     .tint(Color.Token.deepEmerald)

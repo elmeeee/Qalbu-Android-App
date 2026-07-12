@@ -121,7 +121,7 @@ struct TodayDiscoveryView: View {
                 tracker?.refresh()
             }
         }
-        .background(Color.Token.deepEmerald.ignoresSafeArea(edges: .top))
+        .background(Color.Token.panelGrey.ignoresSafeArea(edges: .top))
         .navigationDestination(isPresented: $showingPrayerCalendar) {
             PrayerCalendarView().environmentObject(prayer)
         }

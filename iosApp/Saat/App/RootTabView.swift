@@ -31,46 +31,47 @@ struct RootTabView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Color(SaatTokens.Colors.screenBackground)
-                .ignoresSafeArea()
+        TabView(selection: $selectedTab) {
+            NavigationStack(path: $todayNavigationPath) {
+                TodayDiscoveryView(verseState: verseState)
+                    .toolbar(.hidden, for: .navigationBar)
+            }
+            .tabItem {
+                Label("Today", systemImage: selectedTab == .today ? "sun.max.fill" : "sun.max")
+            }
+            .tag(Tab.today)
 
-            // Main Content Area
-            Group {
-                switch selectedTab {
-                case .today:
-                    NavigationStack(path: $todayNavigationPath) {
-                        TodayDiscoveryView(verseState: verseState)
-                            .toolbar(.hidden, for: .navigationBar)
-                    }
-                case .journey:
-                    ChaptersView()
-                case .tools:
-                    NavigationStack {
-                        SpiritualToolsView()
-                    }
-                case .reflect:
-                    ReflectionView(
-                        verseState: verseState,
-                        isTabSelected: selectedTab == .reflect
-                    )
-                case .account:
-                    NavigationStack {
-                        ProfileView(preferSystemNavigationTitle: true, verseState: verseState)
-                            .environment(\.appContainer, container)
-                    }
+            ChaptersView()
+                .tabItem {
+                    Label("Quran", systemImage: selectedTab == .journey ? "book.fill" : "book")
                 }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .tag(Tab.journey)
 
-            // Audio Bar & Tab Bar
-            VStack(spacing: 0) {
-                // TODO: Wire up actual audio player state from container
-                // FloatingAudioBar(isPlaying: false, trackTitle: "Al-Fatihah", trackSubtitle: "Ayah 1", reciterName: "Mishari", onToggle: {}, onDismiss: {}, onOpenPlayback: nil)
-                //     .padding(.bottom, SaatTokens.Metrics.floatingAudioBarBottomGap)
-
-                FloatingTabBar(selectedTab: $selectedTab, avatarUrl: nil)
+            NavigationStack {
+                SpiritualToolsView()
             }
+            .tabItem {
+                Label("Tools", systemImage: selectedTab == .tools ? "square.grid.2x2.fill" : "square.grid.2x2")
+            }
+            .tag(Tab.tools)
+
+            ReflectionView(
+                verseState: verseState,
+                isTabSelected: selectedTab == .reflect
+            )
+            .tabItem {
+                Label("Reflect", systemImage: selectedTab == .reflect ? "pencil" : "pencil.line")
+            }
+            .tag(Tab.reflect)
+
+            NavigationStack {
+                ProfileView(preferSystemNavigationTitle: true, verseState: verseState)
+                    .environment(\.appContainer, container)
+            }
+            .tabItem {
+                Label("Account", systemImage: selectedTab == .account ? "person.fill" : "person")
+            }
+            .tag(Tab.account)
         }
         .environmentObject(prayerController)
         .onChangeWithFallback(of: verseState.shouldNavigateToReflect) { shouldNavigate in
