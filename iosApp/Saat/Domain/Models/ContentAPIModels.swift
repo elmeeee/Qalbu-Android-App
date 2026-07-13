@@ -165,15 +165,66 @@ private extension String {
 extension String {
     func strippingHTMLToPlainText() -> String {
         guard containsHTMLMarkup else { return self }
-        guard let data = data(using: .utf8) else { return self }
-        let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
-            .documentType: NSAttributedString.DocumentType.html,
-            .characterEncoding: String.Encoding.utf8.rawValue
-        ]
-        if let attributed = try? NSAttributedString(data: data, options: options, documentAttributes: nil) {
-            return attributed.string
+        var result = self
+        
+        // 1. Remove all HTML tags: <[^>]+>
+        if let regex = try? NSRegularExpression(pattern: "<[^>]+>", options: []) {
+            let range = NSRange(result.startIndex..., in: result)
+            result = regex.stringByReplacingMatches(in: result, options: [], range: range, withTemplate: "")
         }
-        return self
+        
+        // 2. Decode HTML Entities
+        result = result.decodingHTMLEntities()
+        
+        return result
+    }
+    
+    func decodingHTMLEntities() -> String {
+        var result = self
+        
+        // Map common HTML entities
+        let entities = [
+            "&quot;": "\"",
+            "&amp;": "&",
+            "&apos;": "'",
+            "&#39;": "'",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&nbsp;": " ",
+            "&#160;": " "
+        ]
+        
+        for (entity, replacement) in entities {
+            result = result.replacingOccurrences(of: entity, with: replacement)
+        }
+        
+        // Match numeric character references: &#(\d+);
+        if let regex = try? NSRegularExpression(pattern: "&#(\\d+);", options: []) {
+            let matches = regex.matches(in: result, options: [], range: NSRange(result.startIndex..., in: result))
+            for match in matches.reversed() {
+                if let charRange = Range(match.range(at: 1), in: result),
+                   let code = Int(result[charRange]),
+                   let unicodeScalar = UnicodeScalar(code),
+                   let fullRange = Range(match.range, in: result) {
+                    result.replaceSubrange(fullRange, with: String(unicodeScalar))
+                }
+            }
+        }
+        
+        // Match hexadecimal character references: &#[xX]([0-9a-fA-F]+);
+        if let regex = try? NSRegularExpression(pattern: "&#[xX]([0-9a-fA-F]+);", options: []) {
+            let matches = regex.matches(in: result, options: [], range: NSRange(result.startIndex..., in: result))
+            for match in matches.reversed() {
+                if let charRange = Range(match.range(at: 1), in: result),
+                   let code = Int(result[charRange], radix: 16),
+                   let unicodeScalar = UnicodeScalar(code),
+                   let fullRange = Range(match.range, in: result) {
+                    result.replaceSubrange(fullRange, with: String(unicodeScalar))
+                }
+            }
+        }
+        
+        return result
     }
 }
 
@@ -211,15 +262,7 @@ struct TafsirPayload: Decodable, Sendable {
     }
 
     var textStrippingHTML: String? {
-        guard let text = text, let data = text.data(using: .utf8) else { return text }
-        if let attr = try? NSAttributedString(
-            data: data,
-            options: [.documentType: NSAttributedString.DocumentType.html],
-            documentAttributes: nil
-        ) {
-            return attr.string
-        }
-        return text
+        return text?.strippingHTMLToPlainText()
     }
 }
 
