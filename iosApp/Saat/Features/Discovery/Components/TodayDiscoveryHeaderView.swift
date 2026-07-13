@@ -152,7 +152,6 @@ struct TodayDiscoveryHeaderView: View {
                 )
             )
             .frame(height: 0.5)
-            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
     }
 }
 

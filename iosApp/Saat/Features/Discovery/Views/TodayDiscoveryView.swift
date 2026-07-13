@@ -76,57 +76,51 @@ struct TodayDiscoveryView: View {
             )
             .ignoresSafeArea()
 
-            ScrollView {
-                LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
-                    Section(header: headerView(vm: vm)) {
-                        VStack(spacing: 0) {
-                            if let khgt = coordinator?.dashboardViewModel?.khgtToday {
-                                TodayImportantDayBanner(info: khgt)
-                                    .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                                    .padding(.vertical, 4)
-                            }
-                            
-                            prayerCard
+            VStack(spacing: 0) {
+                headerView(vm: vm)
+
+                ScrollView {
+                    VStack(spacing: 0) {
+                        if let khgt = coordinator?.dashboardViewModel?.khgtToday {
+                            TodayImportantDayBanner(info: khgt)
                                 .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
                                 .padding(.vertical, 4)
-                            
-                            if let tracker {
-                                PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
-                                    showingTrackerCalendar = true
-                                })
-                                .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                                .padding(.vertical, 8)
-                            }
-                            
-                            if let session = vm.continueReading {
-                                TodayContinueReadingCard(
-                                    session: session,
-                                    chapterName: vm.continueReadingChapterName,
-                                    onTap: {
-                                        // TODO: Open chapter reader
-                                    }
-                                )
-                                .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                                .padding(.vertical, 6)
-                            }
-                            
-                            verseSection(vm: vm)
                         }
-                        .padding(.bottom, 24)
+
+                        prayerCard
+                            .padding(.vertical, 4)
+
+                        if let tracker {
+                            PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
+                                showingTrackerCalendar = true
+                            })
+                            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                            .padding(.vertical, 8)
+                        }
+
+                        if let session = vm.continueReading {
+                            TodayContinueReadingCard(
+                                session: session,
+                                chapterName: vm.continueReadingChapterName,
+                                onTap: {
+                                    // TODO: Open chapter reader
+                                }
+                            )
+                            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                            .padding(.vertical, 6)
+                        }
+
+                        verseSection(vm: vm)
                     }
+                    .padding(.top, 8)
+                    .padding(.bottom, 24)
+                }
+                .scrollIndicators(.hidden)
+                .refreshable {
+                    await coordinator?.refreshToday(discovery: vm)
+                    tracker?.refresh()
                 }
             }
-            .scrollIndicators(.hidden)
-            .refreshable {
-                await coordinator?.refreshToday(discovery: vm)
-                tracker?.refresh()
-            }
-
-            // Top Status Bar Mask
-            Color.Token.panelGrey
-                .frame(height: 1)
-                .ignoresSafeArea(edges: .top)
-                .allowsHitTesting(false)
         }
         .navigationDestination(isPresented: $showingPrayerCalendar) {
             PrayerCalendarView().environmentObject(prayer)
