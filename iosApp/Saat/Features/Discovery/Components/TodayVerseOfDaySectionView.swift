@@ -76,7 +76,7 @@ struct TodayVerseOfDayCardView: View {
             // Header: Title, Subtitle & Day Pill + Share
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(AppLanguageManager.shared.localize("today_quran_title"))
+                    Text(AppLanguageManager.shared.localize("verse_of_the_day"))
                         .font(.system(size: 20, weight: .bold))
                         .foregroundColor(Color.Token.deepEmerald)
                     
@@ -138,7 +138,7 @@ struct TodayVerseOfDayCardView: View {
 
             // Transliteration / Latin Block
             if let latinText = verse.transliteration, latinText.isEmpty == false {
-                Text(latinText)
+                Text(latinText.strippingHTMLToPlainText())
                     .font(.system(size: 14, weight: .medium, design: .serif))
                     .foregroundColor(Color.Token.deepEmerald.opacity(0.85))
                     .italic()
@@ -163,7 +163,7 @@ struct TodayVerseOfDayCardView: View {
                let text = translation.text,
                text.isEmpty == false {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(text)
+                    Text(text.strippingHTMLToPlainText())
                         .font(.system(size: 15, weight: .regular))
                         .lineSpacing(5)
                         .foregroundColor(Color.Token.slate800)

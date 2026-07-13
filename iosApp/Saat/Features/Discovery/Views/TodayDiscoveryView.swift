@@ -182,15 +182,12 @@ struct TodayDiscoveryView: View {
             isLoggingIn: verseState.isLoggingIn,
             onAccountTap: { verseState.requestAccount() }
         )
-        .background(Color.Token.panelGrey)
+        .background(Color.Token.panelGrey.ignoresSafeArea(edges: .top))
     }
 
     @ViewBuilder
     private func verseSection(vm: TodayDiscoveryViewModel) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            TodayVerseOfDaySectionHeaderView(verseKey: vm.detail?.verseKey)
-                .padding(.top, 2)
-
             if let detail = vm.detail {
                 TodayVerseOfDayCardView(
                     verse: detail,

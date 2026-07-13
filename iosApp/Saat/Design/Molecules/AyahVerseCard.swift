@@ -42,7 +42,7 @@ struct AyahVerseCard: View {
                 if let translation = verse.translations?.first,
                    let text = translation.text,
                    text.isEmpty == false {
-                    Text(text)
+                    Text(text.strippingHTMLToPlainText())
                         .font(.system(size: 16))
                         .lineSpacing(3)
                         .foregroundStyle(.primary)

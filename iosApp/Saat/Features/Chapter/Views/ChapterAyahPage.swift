@@ -43,7 +43,7 @@ struct ChapterAyahPage: View {
               text.isEmpty == false else {
             return nil
         }
-        return text
+        return text.strippingHTMLToPlainText()
     }
 
     private var translationFontSize: CGFloat {

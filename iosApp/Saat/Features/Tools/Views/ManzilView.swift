@@ -463,7 +463,7 @@ struct SectionCard: View {
                                 
                                 // Transliteration (Latin)
                                 if let translit = verse.transliteration, !translit.isEmpty {
-                                    Text(translit)
+                                    Text(translit.strippingHTMLToPlainText())
                                         .font(.system(size: 13, weight: .medium))
                                         .italic()
                                         .foregroundColor(SaatTokens.Colors.indigoAccent)
@@ -474,7 +474,7 @@ struct SectionCard: View {
                                 
                                 // Translation
                                 if let translation = verse.translations?.first?.text {
-                                    Text(translation)
+                                    Text(translation.strippingHTMLToPlainText())
                                         .font(.system(size: 14))
                                         .foregroundColor(SaatTokens.Colors.slate600)
                                         .lineSpacing(4)

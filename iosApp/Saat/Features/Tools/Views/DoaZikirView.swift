@@ -338,7 +338,7 @@ struct PremiumDoaCard: View {
                 }
                 
                 if !translation.isEmpty {
-                    Text(translation)
+                    Text(translation.strippingHTMLToPlainText())
                         .font(.system(size: 14, weight: .regular))
                         .foregroundColor(SaatTokens.Colors.slate800)
                         .lineSpacing(5)
@@ -492,7 +492,7 @@ struct ZikirSessionContainer: View {
                             }
                             
                             if !activeItem.translation.isEmpty {
-                                Text(activeItem.translation)
+                                Text(activeItem.translation.strippingHTMLToPlainText())
                                     .font(.system(size: 14, weight: .regular))
                                     .foregroundColor(SaatTokens.Colors.slate800)
                                     .lineSpacing(5)

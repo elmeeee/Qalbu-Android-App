@@ -83,6 +83,7 @@ extension RandomAyahPayload {
         }
         if includeTranslation,
            let text = translations?.first?.text?
+            .strippingHTMLToPlainText()
             .trimmingCharacters(in: .whitespacesAndNewlines),
            text.isEmpty == false {
             parts.append("Translation: \(text)")

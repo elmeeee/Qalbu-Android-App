@@ -46,7 +46,7 @@ final class TodayShareTextComposer {
     func quickReflectionText(for verse: RandomAyahPayload) -> String {
         let verseKey = resolvedAyahKey(for: verse) ?? verse.verseKey
         let arabic = verse.displayText ?? ""
-        let translation = verse.translations?.first?.text
+        let translation = verse.translations?.first?.text?.strippingHTMLToPlainText()
         let tafsir: String? = {
             guard let verseKey else { return nil }
             let cached = shareTafsirCache[verseKey] ?? ""
@@ -68,7 +68,7 @@ final class TodayShareTextComposer {
 
         let verseKey = resolvedAyahKey(for: verse) ?? verse.verseKey
         let arabic = verse.displayText ?? ""
-        let translation = verse.translations?.first?.text
+        let translation = verse.translations?.first?.text?.strippingHTMLToPlainText()
         let tafsir = await loadTafsirForShare(ayahKey: verseKey)
 
         let reflection = await generatePersonalizedReflection(

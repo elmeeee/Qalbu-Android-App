@@ -119,7 +119,7 @@ struct ChapterVersesView: View {
                     surahName: currentSurahName,
                     verseNumber: verse.resolvedVerseNumber ?? 1,
                     verseText: verse.displayText ?? verse.textUthmani ?? "",
-                    translationText: verse.translations?.first?.text ?? "",
+                    translationText: (verse.translations?.first?.text ?? "").strippingHTMLToPlainText(),
                     verseKey: verse.verseKey ?? "",
                     contentRepository: container?.content
                 )
