@@ -11,7 +11,6 @@ import Foundation
 enum ReflectEndpoint: QFEndpoint {
     case profile
     case activityDays
-    case posts
 
     var route: QFApiClient.RequestRoute { .user }
     var method: QFHTTPMethod { .get }
@@ -22,8 +21,6 @@ enum ReflectEndpoint: QFEndpoint {
             return AppEndpoints.Reflect.userProfile
         case .activityDays:
             return AppEndpoints.Reflect.activityDays
-        case .posts:
-            return AppEndpoints.Reflect.posts
         }
     }
 

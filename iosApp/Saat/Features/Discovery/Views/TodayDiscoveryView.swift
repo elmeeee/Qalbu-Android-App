@@ -68,9 +68,9 @@ struct TodayDiscoveryView: View {
 
     @ViewBuilder
     private func discoveryShell(_ vm: TodayDiscoveryViewModel) -> some View {
-        ZStack {
+        ZStack(alignment: .top) {
             LinearGradient(
-                colors: [Color.Token.panelGrey, Color.Token.panelGreyAlt, Color.Token.sageTint],
+                colors: [Color.Token.panelGrey, Color.Token.panelGreyAlt, Color.Token.screenBackground],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -121,8 +121,13 @@ struct TodayDiscoveryView: View {
                 await coordinator?.refreshToday(discovery: vm)
                 tracker?.refresh()
             }
+
+            // Top Status Bar Mask
+            Color.Token.panelGrey
+                .frame(height: 1)
+                .ignoresSafeArea(edges: .top)
+                .allowsHitTesting(false)
         }
-        .background(Color.Token.panelGrey.ignoresSafeArea())
         .navigationDestination(isPresented: $showingPrayerCalendar) {
             PrayerCalendarView().environmentObject(prayer)
         }

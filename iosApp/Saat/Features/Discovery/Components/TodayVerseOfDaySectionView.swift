@@ -121,7 +121,6 @@ struct TodayVerseOfDayCardView: View {
                     payload: verse,
                     includeTranslationInAccessibility: showTranslation
                 )
-                .fixedSize(horizontal: false, vertical: true)
                 .padding(.vertical, 14)
                 .padding(.horizontal, 16)
             }

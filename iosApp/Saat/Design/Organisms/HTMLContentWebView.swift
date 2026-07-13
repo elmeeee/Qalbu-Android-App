@@ -58,6 +58,9 @@ struct HTMLContentWebView: UIViewRepresentable {
         if #available(iOS 15.0, *) {
             webView.underPageBackgroundColor = .clear
         }
+        if style.isVerseCard {
+            webView.overrideUserInterfaceStyle = (style == .verseCardOnDark) ? .dark : .light
+        }
         webView.navigationDelegate = context.coordinator
         context.coordinator.webViewRef = webView
         configureScroll(webView, style: style)
@@ -73,6 +76,9 @@ struct HTMLContentWebView: UIViewRepresentable {
         webView.scrollView.backgroundColor = .clear
         if #available(iOS 15.0, *) {
             webView.underPageBackgroundColor = .clear
+        }
+        if style.isVerseCard {
+            webView.overrideUserInterfaceStyle = (style == .verseCardOnDark) ? .dark : .light
         }
         configureScroll(webView, style: style)
         applyVerseCardInteractionPolicy(webView, style: style)
@@ -315,7 +321,7 @@ struct HTMLContentWebView: UIViewRepresentable {
             style.isVerseCard ? "light" : "light dark"
         let colorSchemeCSS: String =
             style.isVerseCard
-            ? ":root { color-scheme: light only; }"
+            ? ":root { color-scheme: only light; }"
             : ":root { color-scheme: light dark; }"
 
         return """
