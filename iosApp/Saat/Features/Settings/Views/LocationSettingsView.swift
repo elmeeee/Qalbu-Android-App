@@ -39,7 +39,7 @@ struct LocationSettingsView: View {
                 Toggle(isOn: $useManualLocation) {
                     Text(languageManager.localize("set_manually"))
                 }
-                .onChange(of: useManualLocation) { _ in
+                .onChange(of: useManualLocation) { oldValue, newValue in
                     triggerRefresh()
                 }
             }

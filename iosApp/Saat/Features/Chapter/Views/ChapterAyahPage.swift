@@ -88,7 +88,7 @@ struct ChapterAyahPage: View {
                         // ── Arabic WebBlock ───────────────────────────
                         AyahArabicWebBlock(
                             payload: verse,
-                            style: .verseCardOnDark,
+                            style: .verseCard,
                             fontScale: effectiveFontScale,
                             measuredHeight: $arabicMeasuredHeight,
                             includeTranslationInAccessibility: showTranslation
@@ -119,7 +119,7 @@ struct ChapterAyahPage: View {
                         }
 
                         if showTransliteration, let latinText = verse.transliteration, latinText.isEmpty == false {
-                            Text(latinText)
+                            Text(latinText.strippingHTMLToPlainText())
                                 .font(.system(size: CGFloat(15 * effectiveFontScale), weight: .medium, design: .serif))
                                 .foregroundColor(Color.Token.slate800)
                                 .multilineTextAlignment(.center)

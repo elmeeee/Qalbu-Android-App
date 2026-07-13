@@ -369,7 +369,7 @@ struct OnboardingView: View {
         manager.requestWhenInUseAuthorization()
     }
     
-    private func requestNotificationPermission(completion: @escaping () -> Void) {
+    private func requestNotificationPermission(completion: @escaping @Sendable () -> Void) {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in
             completion()
         }

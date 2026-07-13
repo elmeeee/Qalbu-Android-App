@@ -427,7 +427,7 @@ struct QiyamReadingRow: View {
                     }
                     
                     if let translit = reading.transliteration {
-                        Text(translit)
+                        Text(translit.strippingHTMLToPlainText())
                             .font(.system(size: 13, weight: .regular))
                             .italic()
                             .foregroundColor(SaatTokens.Colors.teal)

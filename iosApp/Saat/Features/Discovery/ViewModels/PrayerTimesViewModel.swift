@@ -444,12 +444,15 @@ final class PrayerTimesController: NSObject, ObservableObject, CLLocationManager
     }
 
     nonisolated private static func reverseGeocode(location: CLLocation) async -> ReverseGeocodeResult {
+        guard let request = MKReverseGeocodingRequest(location: location) else {
+            return ReverseGeocodeResult(cityName: nil, countryCode: nil)
+        }
         do {
-            let placemarks = try await CLGeocoder().reverseGeocodeLocation(location)
-            let placemark = placemarks.first
+            let mapItems = try await request.mapItems
+            let representation = mapItems.first?.addressRepresentations
             return ReverseGeocodeResult(
-                cityName: placemark?.locality,
-                countryCode: placemark?.isoCountryCode
+                cityName: representation?.cityName,
+                countryCode: representation?.region?.identifier
             )
         } catch {
             return ReverseGeocodeResult(cityName: nil, countryCode: nil)
