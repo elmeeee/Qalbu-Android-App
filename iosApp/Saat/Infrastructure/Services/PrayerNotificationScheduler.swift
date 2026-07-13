@@ -11,6 +11,8 @@ import OSLog
 import UserNotifications
 import AlarmKit
 import SwiftUI
+import CryptoKit
+import ActivityKit
 
 private let prayerNotifLog = Logger(subsystem: "co.kamy.Saat", category: "PrayerNotifications")
 
@@ -245,9 +247,13 @@ final class PrayerNotificationScheduler {
             tintColor: .green
         )
 
+        let soundName = UserDefaults.standard.string(forKey: "selected_adhan_sound") ?? "default"
+        let alertSound: AlertConfiguration.AlertSound = soundName == "default" ? .default : .named("\(soundName).mp3")
+
         let configuration = AlarmManager.AlarmConfiguration(
             schedule: .fixed(fireDate),
-            attributes: attributes
+            attributes: attributes,
+            sound: alertSound
         )
 
         do {
@@ -333,13 +339,12 @@ final class PrayerNotificationScheduler {
         return [tomorrow]
     }
 
-    /// Produces a deterministic UUID v5-style string from an arbitrary identifier string.
+    /// Produces a deterministic UUID from an arbitrary identifier string.
     /// This ensures the same prayer+timestamp always maps to the same UUID for reliable cancellation.
     private func stableUUID(from string: String) -> String {
-        var hash = string.hashValue
-        // Construct a UUID-format string from the hash
-        let bytes = withUnsafeBytes(of: &hash) { Array($0) }
-        let padded = bytes + Array(repeating: UInt8(0), count: max(0, 16 - bytes.count))
-        return NSUUID(uuidBytes: padded).uuidString
+        let inputData = Data(string.utf8)
+        let hashed = Insecure.MD5.hash(data: inputData)
+        let bytes = Array(hashed)
+        return NSUUID(uuidBytes: bytes).uuidString
     }
 }

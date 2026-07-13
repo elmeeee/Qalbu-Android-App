@@ -508,6 +508,8 @@ class AppLanguageManager: ObservableObject {
         "greeting_afternoon": [.english: "Good Afternoon", .indonesian: "Selamat Siang", .malay: "Selamat Tengah Hari"],
         "greeting_evening": [.english: "Good Evening", .indonesian: "Selamat Malam", .malay: "Selamat Malam"],
         "locating": [.english: "Locating...", .indonesian: "Mencari Lokasi...", .malay: "Mencari Lokasi..."],
+        "prayer_allow_location": [.english: "Allow location to see prayer times", .indonesian: "Izinkan lokasi untuk melihat waktu shalat", .malay: "Benarkan lokasi untuk melihat waktu solat"],
+        "location_failed": [.english: "Could not determine location", .indonesian: "Tidak dapat menentukan lokasi", .malay: "Tidak dapat menentukan lokasi"],
         "loading": [.english: "Loading...", .indonesian: "Memuat...", .malay: "Memuatkan..."],
         "reflection_signin_prompt": [.english: "Sign in to Reflect", .indonesian: "Masuk untuk Menulis Refleksi", .malay: "Log Masuk untuk Menulis Refleksi"],
         "reflection_placeholder": [.english: "Write your reflection here...", .indonesian: "Tulis refleksi Anda di sini...", .malay: "Tulis refleksi anda di sini..."],

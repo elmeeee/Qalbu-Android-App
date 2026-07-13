@@ -12,6 +12,7 @@ struct TodayDiscoveryHeaderView: View {
     let hijriDate: String?
     let gregorianDate: String?
     let cityName: String?
+    let locationStatus: String?
     let avatarURL: URL?
     let isLoggingIn: Bool
     let onAccountTap: () -> Void
@@ -104,13 +105,13 @@ struct TodayDiscoveryHeaderView: View {
                     )
                 )
 
-            Text(cityName ?? "Locating…")
+            Text(cityName ?? locationStatus ?? "Locating…")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Color.Token.deepEmerald)
                 .lineLimit(1)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(SaatAccessibility.Today.location), \(cityName ?? "")")
+        .accessibilityLabel("\(SaatAccessibility.Today.location), \(cityName ?? locationStatus ?? "")")
     }
 
     private var todayBadge: some View {

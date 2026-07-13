@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct TodayDiscoveryView: View {
     @Environment(\.appContainer) private var container
@@ -73,7 +74,7 @@ struct TodayDiscoveryView: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .ignoresSafeArea(edges: .bottom)
+            .ignoresSafeArea()
 
             ScrollView {
                 LazyVStack(spacing: 0, pinnedViews: [.sectionHeaders]) {
@@ -121,7 +122,7 @@ struct TodayDiscoveryView: View {
                 tracker?.refresh()
             }
         }
-        .background(Color.Token.panelGrey.ignoresSafeArea(edges: .top))
+        .background(Color.Token.panelGrey.ignoresSafeArea())
         .navigationDestination(isPresented: $showingPrayerCalendar) {
             PrayerCalendarView().environmentObject(prayer)
         }
@@ -155,12 +156,28 @@ struct TodayDiscoveryView: View {
         }
     }
 
-    @ViewBuilder
     private func headerView(vm: TodayDiscoveryViewModel) -> some View {
-        TodayDiscoveryHeaderView(
+        let locationStatus: String? = {
+            if prayer.cityName != nil {
+                return nil
+            }
+            let authStatus = CLLocationManager().authorizationStatus
+            if authStatus == .notDetermined {
+                return AppLanguageManager.shared.localize("prayer_allow_location")
+            } else if authStatus == .denied || authStatus == .restricted {
+                return AppLanguageManager.shared.localize("location_failed")
+            } else if prayer.isLoading {
+                return AppLanguageManager.shared.localize("locating")
+            } else {
+                return AppLanguageManager.shared.localize("locating")
+            }
+        }()
+
+        return TodayDiscoveryHeaderView(
             hijriDate: prayer.hijriDateLabel,
             gregorianDate: prayer.gregorianDateLabel,
             cityName: prayer.cityName,
+            locationStatus: locationStatus,
             avatarURL: verseState.userAvatarURL,
             isLoggingIn: verseState.isLoggingIn,
             onAccountTap: { verseState.requestAccount() }
