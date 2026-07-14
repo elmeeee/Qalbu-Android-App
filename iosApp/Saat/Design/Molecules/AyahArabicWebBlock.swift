@@ -16,6 +16,7 @@ struct AyahArabicWebBlock: View {
     var fontScale: Double = 1.0
     var measuredHeight: Binding<CGFloat>?
     var includeTranslationInAccessibility: Bool = false
+    var onTajweedTap: ((TajweedType) -> Void)? = nil
 
     @State private var webHeight: CGFloat = placeholderHeight
 
@@ -25,14 +26,15 @@ struct AyahArabicWebBlock: View {
             style: style,
             rendersTajweedHTML: true,
             fontScale: fontScale,
-            contentHeight: $webHeight
+            contentHeight: $webHeight,
+            onTajweedTap: onTajweedTap
         )
         .frame(maxWidth: .infinity, alignment: .top)
         .frame(height: webHeight)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(payload.spokenAccessibilitySummary(includeTranslation: includeTranslationInAccessibility))
         .accessibilityAddTraits(.isStaticText)
-        .allowsHitTesting(false)
+        .allowsHitTesting(onTajweedTap != nil)
         .animation(nil, value: webHeight)
         .id(stableId)
         .onChangeWithFallback(of: reloadKey) { _ in

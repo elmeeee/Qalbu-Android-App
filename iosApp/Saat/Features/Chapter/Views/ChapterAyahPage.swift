@@ -24,6 +24,7 @@ struct ChapterAyahPage: View {
     @State private var arabicMeasuredHeight: CGFloat = 120
     @State private var layoutScale: Double = 1.0
     @State private var isRevealed = false
+    @State private var selectedTajweedRule: TajweedType? = nil
 
     private let contentSpacing: CGFloat = 16
     private let minimumLayoutScale: Double = 0.68
@@ -67,94 +68,14 @@ struct ChapterAyahPage: View {
 
                 VStack(alignment: .center, spacing: 0) {
                     VStack(spacing: contentSpacing) {
+                        memorizationEyeButton
 
-                        // ── Memorization Eye ─────────────────────────
-                        if isMemorizationMode {
-                            Button {
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                    isRevealed.toggle()
-                                }
-                            } label: {
-                                Image(systemName: isRevealed ? "eye.fill" : "eye.slash.fill")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(Color.Token.goldBright)
-                                    .padding(6)
-                                    .background(Circle().fill(Color.Token.gold.opacity(0.12)))
-                                    .overlay(Circle().stroke(Color.Token.gold.opacity(0.25), lineWidth: 1))
-                            }
-                            .padding(.top, 4)
+                        arabicBlockView
+
+                        if showTransliteration, let latinText = verse.transliteration, !latinText.isEmpty {
+                            transliterationBlockView(latinText: latinText)
                         }
 
-                        // ── Arabic WebBlock ───────────────────────────
-                        AyahArabicWebBlock(
-                            payload: verse,
-                            style: .verseCard,
-                            fontScale: effectiveFontScale,
-                            measuredHeight: $arabicMeasuredHeight,
-                            includeTranslationInAccessibility: showTranslation
-                        )
-                        .padding(.horizontal, 8)
-                        .blur(radius: (isMemorizationMode && !isRevealed) ? 20 : 0)
-                        .overlay {
-                            if isMemorizationMode && !isRevealed {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "eye.slash.fill")
-                                        .font(.system(size: 11))
-                                    Text(AppLanguageManager.shared.currentLanguage == .english ? "Tap to reveal" : "Ketuk untuk melihat")
-                                        .font(.caption2.weight(.bold))
-                                }
-                                .foregroundColor(Color.Token.goldBright.opacity(0.85))
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(Capsule().fill(Color.black.opacity(0.35)))
-                            }
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            if isMemorizationMode {
-                                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                    isRevealed.toggle()
-                                }
-                            }
-                        }
-
-                        if showTransliteration, let latinText = verse.transliteration, latinText.isEmpty == false {
-                            Text(latinText.strippingHTMLToPlainText())
-                                .font(.system(size: CGFloat(15 * effectiveFontScale), weight: .medium, design: .serif))
-                                .foregroundColor(Color.Token.slate800)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 20)
-                                .padding(.vertical, 10)
-                                .frame(maxWidth: .infinity)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 14)
-                                        .fill(Color.Token.lightGrey.opacity(0.45))
-                                )
-                                .blur(radius: (isMemorizationMode && !isRevealed) ? 12 : 0)
-                                .overlay {
-                                    if isMemorizationMode && !isRevealed {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "eye.slash.fill")
-                                                .font(.system(size: 11))
-                                            Text(AppLanguageManager.shared.currentLanguage == .english ? "Tap to reveal" : "Ketuk untuk melihat")
-                                                .font(.caption2.weight(.bold))
-                                        }
-                                        .foregroundColor(Color.Token.goldBright.opacity(0.85))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 5)
-                                        .background(Capsule().fill(Color.black.opacity(0.35)))
-                                    }
-                                }
-                                .onTapGesture {
-                                    if isMemorizationMode {
-                                        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                                            isRevealed.toggle()
-                                        }
-                                    }
-                                }
-                        }
-
-                        // ── Translation ───────────────────────────────
                         if let translationText {
                             Text(justifiedTranslation(translationText))
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -217,7 +138,6 @@ struct ChapterAyahPage: View {
                 }
             }
 
-            // Tap feedback overlay
             if hasAudio {
                 Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
                     .font(.system(size: 64))
@@ -228,6 +148,111 @@ struct ChapterAyahPage: View {
             }
         }
         .clipped()
+        .sheet(item: $selectedTajweedRule) { rule in
+            TajweedInfoSheet(rule: rule)
+                .presentationDetents([.medium])
+        }
+    }
+
+    @ViewBuilder
+    private var memorizationEyeButton: some View {
+        if isMemorizationMode {
+            Button {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    isRevealed.toggle()
+                }
+            } label: {
+                Image(systemName: isRevealed ? "eye.fill" : "eye.slash.fill")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundColor(Color.Token.goldBright)
+                    .padding(6)
+                    .background(Circle().fill(Color.Token.gold.opacity(0.12)))
+                    .overlay(Circle().stroke(Color.Token.gold.opacity(0.25), lineWidth: 1))
+            }
+            .padding(.top, 4)
+        }
+    }
+
+    @ViewBuilder
+    private var arabicBlockView: some View {
+        AyahArabicWebBlock(
+            payload: verse,
+            style: .verseCard,
+            fontScale: effectiveFontScale,
+            measuredHeight: $arabicMeasuredHeight,
+            includeTranslationInAccessibility: showTranslation,
+            onTajweedTap: { rule in
+                selectedTajweedRule = rule
+            }
+        )
+        .padding(.horizontal, 8)
+        .blur(radius: (isMemorizationMode && !isRevealed) ? 20 : 0)
+        .overlay {
+            if isMemorizationMode && !isRevealed {
+                HStack(spacing: 4) {
+                    Image(systemName: "eye.slash.fill")
+                        .font(.system(size: 11))
+                    Text(AppLanguageManager.shared.currentLanguage == .english ? "Tap to reveal" : "Ketuk untuk melihat")
+                        .font(.caption2.weight(.bold))
+                }
+                .foregroundColor(Color.Token.goldBright.opacity(0.85))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Capsule().fill(Color.black.opacity(0.35)))
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if isMemorizationMode {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    isRevealed.toggle()
+                }
+            }
+        }
+    }
+
+    private func transliterationAttributedString(for latinText: String) -> AttributedString {
+        if let parsed = try? AttributedString(markdown: latinText.htmlToMarkdown()) {
+            return parsed
+        }
+        return AttributedString(latinText.strippingHTMLToPlainText())
+    }
+
+    @ViewBuilder
+    private func transliterationBlockView(latinText: String) -> some View {
+        Text(transliterationAttributedString(for: latinText))
+            .font(.system(size: CGFloat(15 * effectiveFontScale), weight: .medium, design: .serif))
+            .foregroundColor(Color.Token.slate800)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 14)
+                    .fill(Color.Token.lightGrey.opacity(0.45))
+            )
+            .blur(radius: (isMemorizationMode && !isRevealed) ? 12 : 0)
+            .overlay {
+                if isMemorizationMode && !isRevealed {
+                    HStack(spacing: 4) {
+                        Image(systemName: "eye.slash.fill")
+                            .font(.system(size: 11))
+                        Text(AppLanguageManager.shared.currentLanguage == .english ? "Tap to reveal" : "Ketuk untuk melihat")
+                            .font(.caption2.weight(.bold))
+                    }
+                    .foregroundColor(Color.Token.goldBright.opacity(0.85))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Capsule().fill(Color.black.opacity(0.35)))
+                }
+            }
+            .onTapGesture {
+                if isMemorizationMode {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        isRevealed.toggle()
+                    }
+                }
+            }
     }
 
     private var ornamentDot: some View {

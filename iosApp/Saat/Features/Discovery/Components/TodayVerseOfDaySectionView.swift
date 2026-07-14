@@ -137,7 +137,7 @@ struct TodayVerseOfDayCardView: View {
 
             // Transliteration / Latin Block
             if let latinText = verse.transliteration, latinText.isEmpty == false {
-                Text(latinText.strippingHTMLToPlainText())
+                Text(transliterationAttributedString(for: latinText))
                     .font(.system(size: 14, weight: .medium, design: .serif))
                     .foregroundColor(Color.Token.deepEmerald.opacity(0.85))
                     .italic()
@@ -291,6 +291,13 @@ struct TodayVerseOfDayCardView: View {
             )
         }
         .buttonStyle(PillPressStyle())
+    }
+
+    private func transliterationAttributedString(for latinText: String) -> AttributedString {
+        if let parsed = try? AttributedString(markdown: latinText.htmlToMarkdown()) {
+            return parsed
+        }
+        return AttributedString(latinText.strippingHTMLToPlainText())
     }
 }
 

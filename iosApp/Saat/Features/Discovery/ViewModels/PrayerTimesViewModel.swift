@@ -48,6 +48,8 @@ final class PrayerTimesController: NSObject, ObservableObject, CLLocationManager
     @Published var calculationMethod: PrayerCalculationMethod
     @Published var dailyPrayers: [PrayerEntry] = []
     @Published var sunriseDate: Date?
+    @Published var locationTimeZone: TimeZone? = nil
+    private var lastGeocodedLocation: CLLocation? = nil
 
     var nextPrayerName: String?  { nextPrayer?.name }
     var nextPrayerDate: Date?    { nextPrayer?.date }
@@ -258,14 +260,6 @@ final class PrayerTimesController: NSObject, ObservableObject, CLLocationManager
             cityName = Self.coordinateLabel(for: location)
         }
 
-        Task { @MainActor in
-            let geocode = await Self.reverseGeocode(location: location)
-            if let label = geocode.cityName, label.isEmpty == false {
-                cityName = label
-            }
-            await autoDetectCalculationMethodIfNeeded(countryCode: geocode.countryCode)
-        }
-
         Task { await fetchPrayerTimes(for: location, bypassDedupe: false) }
     }
 
@@ -296,12 +290,25 @@ final class PrayerTimesController: NSObject, ObservableObject, CLLocationManager
             return
         }
 
+        // 1. Geocode if timezone is not yet resolved for this location
+        if locationTimeZone == nil || lastGeocodedLocation == nil || lastGeocodedLocation!.distance(from: location) > 1000 {
+            let geocode = await Self.reverseGeocode(location: location)
+            if let label = geocode.cityName, label.isEmpty == false {
+                cityName = label
+            }
+            locationTimeZone = geocode.timeZone
+            lastGeocodedLocation = location
+            await autoDetectCalculationMethodIfNeeded(countryCode: geocode.countryCode)
+        }
+
         let lat = location.coordinate.latitude
         let lon = location.coordinate.longitude
 
         let now = Date()
         let calendar = Calendar.current
-        let tzOffset = Double(TimeZone.current.secondsFromGMT(for: now)) / 3600.0
+        
+        let tz = locationTimeZone ?? TimeZone.current
+        let tzOffset = Double(tz.secondsFromGMT(for: now)) / 3600.0
 
         let localTimings = LocalPrayerTimesCalculator.calculate(
             date: now,
@@ -441,21 +448,23 @@ final class PrayerTimesController: NSObject, ObservableObject, CLLocationManager
     private struct ReverseGeocodeResult: Sendable {
         let cityName: String?
         let countryCode: String?
+        let timeZone: TimeZone?
     }
 
     nonisolated private static func reverseGeocode(location: CLLocation) async -> ReverseGeocodeResult {
         guard let request = MKReverseGeocodingRequest(location: location) else {
-            return ReverseGeocodeResult(cityName: nil, countryCode: nil)
+            return ReverseGeocodeResult(cityName: nil, countryCode: nil, timeZone: nil)
         }
         do {
             let mapItems = try await request.mapItems
             let representation = mapItems.first?.addressRepresentations
             return ReverseGeocodeResult(
                 cityName: representation?.cityName,
-                countryCode: representation?.region?.identifier
+                countryCode: representation?.region?.identifier,
+                timeZone: mapItems.first?.timeZone
             )
         } catch {
-            return ReverseGeocodeResult(cityName: nil, countryCode: nil)
+            return ReverseGeocodeResult(cityName: nil, countryCode: nil, timeZone: nil)
         }
     }
 

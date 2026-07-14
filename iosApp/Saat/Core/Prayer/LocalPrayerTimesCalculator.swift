@@ -16,8 +16,9 @@ struct LocalPrayerTimesCalculator {
         timezoneOffset: Double,
         method: PrayerCalculationMethod
     ) -> [String: Date] {
-        let calendar = Calendar.current
         let timeZone = TimeZone(secondsFromGMT: Int(timezoneOffset * 3600.0)) ?? .current
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
         var comps = calendar.dateComponents([.year, .month, .day], from: date)
         comps.timeZone = timeZone
         

@@ -102,6 +102,9 @@ final class PrayerNotificationScheduler {
     /// Persisted alarm IDs so we can cancel previously scheduled alarms.
     private static let scheduledAlarmIDsKey = "Saat.scheduledAlarmIDs"
 
+    private var lastTask: Task<Void, Never>? = nil
+    private var currentTaskID: UUID = UUID()
+
     // MARK: - Authorization
 
     /// Requests both standard notification permission (for night divisions)
@@ -156,6 +159,34 @@ final class PrayerNotificationScheduler {
         nightDivisions: [NightDivisionEntry],
         options: PrayerNotificationPreferences.ScheduleOptions
     ) async {
+        let myID = UUID()
+        currentTaskID = myID
+        
+        let previousTask = lastTask
+        let newTask = Task { @MainActor in
+            _ = await previousTask?.result
+            
+            guard currentTaskID == myID else {
+                return
+            }
+            
+            await performSchedule(
+                prayers: prayers,
+                imsakEntry: imsakEntry,
+                nightDivisions: nightDivisions,
+                options: options
+            )
+        }
+        lastTask = newTask
+        await newTask.value
+    }
+
+    private func performSchedule(
+        prayers: [PrayerEntry],
+        imsakEntry: PrayerEntry?,
+        nightDivisions: [NightDivisionEntry],
+        options: PrayerNotificationPreferences.ScheduleOptions
+    ) async {
         guard await requestAuthorizationIfNeeded() else {
             return
         }
@@ -165,7 +196,8 @@ final class PrayerNotificationScheduler {
         await cancelPreviousNotifications()
 
         let now = Date()
-        let calendar = Calendar.current
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone.current
         var scheduledAlarmIDs: [String] = []
 
         // --- Schedule prayer alarms via AlarmKit ---

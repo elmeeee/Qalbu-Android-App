@@ -56,7 +56,7 @@ struct PrayerDashboardCard: View {
             .shadow(color: viewModel.activeTheme == .daylight ? Color.Token.deepEmerald.opacity(0.08) : Color.black.opacity(0.3), radius: 15, x: 0, y: 8)
             .padding(.top, 78)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
         .animation(.spring(response: 0.5, dampingFraction: 0.8, blendDuration: 0), value: viewModel.activeTheme)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(prayerSpokenSummary)

@@ -71,6 +71,7 @@ struct AdhanVoiceSelectionSheet: View {
                                 Button(action: {
                                     selectedSoundName = option.fileName
                                     UserDefaults.standard.set(option.fileName, forKey: "selected_adhan_sound")
+                                    NotificationCenter.default.post(name: PrayerNotificationPreferences.didChangeNotification, object: nil)
                                 }) {
                                     HStack(spacing: 12) {
                                         Image(systemName: selectedSoundName == option.fileName ? "checkmark.circle.fill" : "circle")

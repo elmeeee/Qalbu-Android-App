@@ -76,50 +76,49 @@ struct TodayDiscoveryView: View {
             )
             .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                headerView(vm: vm)
-
-                ScrollView {
-                    VStack(spacing: 0) {
-                        if let khgt = coordinator?.dashboardViewModel?.khgtToday {
-                            TodayImportantDayBanner(info: khgt)
-                                .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                                .padding(.vertical, 4)
-                        }
-
-                        prayerCard
+            ScrollView {
+                VStack(spacing: 0) {
+                    if let khgt = coordinator?.dashboardViewModel?.khgtToday {
+                        TodayImportantDayBanner(info: khgt)
+                            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
                             .padding(.vertical, 4)
-
-                        if let tracker {
-                            PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
-                                showingTrackerCalendar = true
-                            })
-                            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                            .padding(.vertical, 8)
-                        }
-
-                        if let session = vm.continueReading {
-                            TodayContinueReadingCard(
-                                session: session,
-                                chapterName: vm.continueReadingChapterName,
-                                onTap: {
-                                    // TODO: Open chapter reader
-                                }
-                            )
-                            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                            .padding(.vertical, 6)
-                        }
-
-                        verseSection(vm: vm)
                     }
-                    .padding(.top, 8)
-                    .padding(.bottom, 24)
+
+                    prayerCard
+                        .padding(.vertical, 4)
+
+                    if let tracker {
+                        PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
+                            showingTrackerCalendar = true
+                        })
+                        .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                        .padding(.vertical, 8)
+                    }
+
+                    if let session = vm.continueReading {
+                        TodayContinueReadingCard(
+                            session: session,
+                            chapterName: vm.continueReadingChapterName,
+                            onTap: {
+                                // TODO: Open chapter reader
+                            }
+                        )
+                        .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                        .padding(.vertical, 6)
+                    }
+
+                    verseSection(vm: vm)
                 }
-                .scrollIndicators(.hidden)
-                .refreshable {
-                    await coordinator?.refreshToday(discovery: vm)
-                    tracker?.refresh()
-                }
+                .padding(.top, 8)
+                .padding(.bottom, 24)
+            }
+            .scrollIndicators(.hidden)
+            .refreshable {
+                await coordinator?.refreshToday(discovery: vm)
+                tracker?.refresh()
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                headerView(vm: vm)
             }
         }
         .navigationDestination(isPresented: $showingPrayerCalendar) {

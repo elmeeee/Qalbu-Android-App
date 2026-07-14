@@ -9,5 +9,5 @@
 import CoreGraphics
 
 enum TodayDiscoveryLayout {
-    static let horizontalInset: CGFloat = 32
+    static let horizontalInset: CGFloat = 16
 }

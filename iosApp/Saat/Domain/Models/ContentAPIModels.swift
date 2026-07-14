@@ -51,9 +51,12 @@ struct RandomAyahPayload: Decodable, Sendable {
         let markerHtml = QuranAyahEndBadge.html(forAyahNumber: effectiveAyahNumber)
         let spacer = markerHtml.isEmpty ? "" : " "
 
-        guard let raw = textUthmaniTajweed?
-            .trimmingCharacters(in: .whitespacesAndNewlines),
-           raw.isEmpty == false else {
+        let raw: String
+        if let tajweedText = textUthmaniTajweed?.trimmingCharacters(in: .whitespacesAndNewlines), !tajweedText.isEmpty {
+            raw = tajweedText
+        } else if let plainText = textUthmani?.trimmingCharacters(in: .whitespacesAndNewlines), !plainText.isEmpty {
+            raw = TajweedEngine.applyTajweedToHTML(plainText)
+        } else {
             return "<div dir=\"rtl\" lang=\"ar\"></div>"
         }
 
@@ -225,6 +228,19 @@ extension String {
         }
         
         return result
+    }
+
+    func htmlToMarkdown() -> String {
+        var text = self
+        text = text.replacingOccurrences(of: "<i>", with: "*", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "</i>", with: "*", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "<em>", with: "*", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "</em>", with: "*", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "<b>", with: "**", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "</b>", with: "**", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "<strong>", with: "**", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "</strong>", with: "**", options: .caseInsensitive)
+        return text.strippingHTMLToPlainText()
     }
 }
 

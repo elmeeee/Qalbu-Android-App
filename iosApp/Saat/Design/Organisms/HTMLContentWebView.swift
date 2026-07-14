@@ -30,27 +30,37 @@ struct HTMLContentWebView: UIViewRepresentable {
     var rendersTajweedHTML: Bool = false
     var fontScale: Double = 1.0
     var contentHeight: Binding<CGFloat>?
+    var onTajweedTap: ((TajweedType) -> Void)? = nil
 
     init(
         htmlFragment: String,
         style: HTMLContentStyle = .article,
         rendersTajweedHTML: Bool = false,
         fontScale: Double = 1.0,
-        contentHeight: Binding<CGFloat>? = nil
+        contentHeight: Binding<CGFloat>? = nil,
+        onTajweedTap: ((TajweedType) -> Void)? = nil
     ) {
         self.htmlFragment = htmlFragment
         self.style = style
         self.rendersTajweedHTML = rendersTajweedHTML
         self.fontScale = fontScale
         self.contentHeight = contentHeight
+        self.onTajweedTap = onTajweedTap
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(heightBinding: contentHeight, style: style)
+        let coord = Coordinator(heightBinding: contentHeight, style: style)
+        coord.onTajweedTap = onTajweedTap
+        return coord
     }
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
+        if rendersTajweedHTML {
+            let controller = WKUserContentController()
+            controller.add(context.coordinator, name: "tajweedTap")
+            config.userContentController = controller
+        }
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.isOpaque = false
         webView.backgroundColor = .clear
@@ -71,6 +81,7 @@ struct HTMLContentWebView: UIViewRepresentable {
     func updateUIView(_ webView: WKWebView, context: Context) {
         context.coordinator.heightBinding = contentHeight
         context.coordinator.style = style
+        context.coordinator.onTajweedTap = onTajweedTap
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
@@ -116,6 +127,7 @@ struct HTMLContentWebView: UIViewRepresentable {
         let html = Self.document(
             from: htmlFragment,
             style: style,
+            rendersTajweedHTML: rendersTajweedHTML,
             embedVerseWebFont: embedFont,
             fontScale: fontScale
         )
@@ -138,10 +150,17 @@ struct HTMLContentWebView: UIViewRepresentable {
 
     private func applyVerseCardInteractionPolicy(_ webView: WKWebView, style: HTMLContentStyle) {
         guard style.isVerseCard else { return }
-        webView.isUserInteractionEnabled = false
+        if rendersTajweedHTML {
+            webView.isUserInteractionEnabled = true
+            webView.scrollView.isUserInteractionEnabled = true
+            webView.scrollView.isScrollEnabled = false
+            webView.scrollView.bounces = false
+        } else {
+            webView.isUserInteractionEnabled = false
+            webView.scrollView.isUserInteractionEnabled = false
+        }
         webView.clipsToBounds = false
         webView.scrollView.clipsToBounds = false
-        webView.scrollView.isUserInteractionEnabled = false
         webView.scrollView.showsVerticalScrollIndicator = false
         webView.scrollView.showsHorizontalScrollIndicator = false
     }
@@ -171,15 +190,23 @@ struct HTMLContentWebView: UIViewRepresentable {
         webView.scrollView.frame = CGRect(origin: .zero, size: size)
     }
 
-    final class Coordinator: NSObject, WKNavigationDelegate {
+    final class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
         weak var webViewRef: WKWebView?
         var heightBinding: Binding<CGFloat>?
         var style: HTMLContentStyle
+        var onTajweedTap: ((TajweedType) -> Void)? = nil
         fileprivate var lastSignature: ContentLoadSignature?
 
         init(heightBinding: Binding<CGFloat>?, style: HTMLContentStyle) {
             self.heightBinding = heightBinding
             self.style = style
+        }
+
+        func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            guard message.name == "tajweedTap",
+                  let body = message.body as? String,
+                  let type = TajweedType(rawValue: body) else { return }
+            onTajweedTap?(type)
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -270,6 +297,7 @@ struct HTMLContentWebView: UIViewRepresentable {
     private static func document(
         from raw: String,
         style: HTMLContentStyle,
+        rendersTajweedHTML: Bool,
         embedVerseWebFont: Bool = false,
         fontScale: Double = 1.0
     ) -> String {
@@ -280,6 +308,7 @@ struct HTMLContentWebView: UIViewRepresentable {
         return wrappedFragment(
             trimmed,
             style: style,
+            rendersTajweedHTML: rendersTajweedHTML,
             embedVerseWebFont: embedVerseWebFont,
             fontScale: fontScale
         )
@@ -288,6 +317,7 @@ struct HTMLContentWebView: UIViewRepresentable {
     private static func wrappedFragment(
         _ body: String,
         style: HTMLContentStyle,
+        rendersTajweedHTML: Bool,
         embedVerseWebFont: Bool,
         fontScale: Double
     ) -> String {
@@ -324,6 +354,27 @@ struct HTMLContentWebView: UIViewRepresentable {
             ? ":root { color-scheme: only light; }"
             : ":root { color-scheme: light dark; }"
 
+        let script = rendersTajweedHTML ? """
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var classes = ['ghunnah', 'idgham_wo_ghunnah', 'idgham_ghunnah', 'idgham_mimi', 'iqlab', 'ikhafa', 'ikhafa_shafawi', 'qalaqah'];
+            classes.forEach(function(cls) {
+                var selector = '.' + cls + ', [class*="' + cls + '"]';
+                document.querySelectorAll(selector).forEach(function(el) {
+                    el.style.cursor = 'pointer';
+                    el.style.webkitTapHighlightColor = 'rgba(0,0,0,0.15)';
+                    el.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.tajweedTap) {
+                            window.webkit.messageHandlers.tajweedTap.postMessage(cls);
+                        }
+                    });
+                });
+            });
+        });
+        </script>
+        """ : ""
+
         return """
         <!DOCTYPE html>
         <html lang="\(lang)" dir="\(dir)">
@@ -341,7 +392,7 @@ struct HTMLContentWebView: UIViewRepresentable {
             \(prose)
           </style>
         </head>
-        <body>\(verseCardBodyMarkup(body, style: style))</body>
+        <body>\(verseCardBodyMarkup(body, style: style))\(script)</body>
         </html>
         """
     }
