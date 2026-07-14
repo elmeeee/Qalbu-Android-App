@@ -487,7 +487,7 @@ internal final class LocalQuranDataSource: Sendable {
             textImlaei: nil,
             textUthmani: text,
             textUthmaniSimple: nil,
-            textUthmaniTajweed: text, // local db "text" is clean uthmani
+            textUthmaniTajweed: nil, // local db "text" is clean uthmani, TajweedEngine will generate it on the fly
             textQpcHafs: nil,
             textQpcNastaleeqHafs: nil,
             textQpcNastaleeq: nil,

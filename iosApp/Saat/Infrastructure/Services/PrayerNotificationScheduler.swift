@@ -203,6 +203,16 @@ final class PrayerNotificationScheduler {
         // --- Schedule prayer alarms via AlarmKit ---
         if options.adzanEnabled {
             for prayer in prayers {
+                let enabledForThisPrayer: Bool = switch prayer.name {
+                case "Fajr": options.fajrEnabled
+                case "Dhuhr": options.dhuhrEnabled
+                case "Asr": options.asrEnabled
+                case "Maghrib": options.maghribEnabled
+                case "Isha": options.ishaEnabled
+                default: true
+                }
+                guard enabledForThisPrayer else { continue }
+
                 for fireDate in Self.upcomingOccurrences(of: prayer.date, from: now, calendar: calendar) {
                     let alarmId = "\(prayerPrefix).\(prayer.name).\(Int(fireDate.timeIntervalSince1970))"
                     let success = await scheduleAlarm(

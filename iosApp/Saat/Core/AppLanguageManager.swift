@@ -244,7 +244,14 @@ class AppLanguageManager: ObservableObject {
         "onboarding_widgets_subtitle": [.english: "Pin custom widgets to your home screen to see today's verse and countdowns to the next prayer times.", .indonesian: "Sematkan widget khusus di layar beranda untuk memantau ayat pilihan hari ini dan hitung mundur waktu shalat.", .malay: "Sematkan widget khas di skrin utama untuk memantau ayat pilihan hari ini dan hitung mundur waktu solat."],
         "onboarding_get_started": [.english: "Get Started", .indonesian: "Mulai Sekarang", .malay: "Mula Sekarang"],
         "onboarding_continue": [.english: "Continue", .indonesian: "Lanjutkan", .malay: "Teruskan"],
-        "onboarding_step": [.english: "Step %d of 4", .indonesian: "Langkah %d dari 4", .malay: "Langkah %d dari 4"],
+        "onboarding_step": [.english: "Step %d of 5", .indonesian: "Langkah %d dari 5", .malay: "Langkah %d dari 5"],
+        "onboarding_location_search_not_found": [.english: "Could not find that place. Try a nearby city.", .indonesian: "Tidak dapat menemukan tempat tersebut. Coba kota terdekat.", .malay: "Tidak dapat mencari tempat tersebut. Cuba bandar terdekat."],
+        "onboarding_location_city_hint": [.english: "City name (e.g. Jakarta)", .indonesian: "Nama kota (mis. Jakarta)", .malay: "Nama bandar (mis. Kuala Lumpur)"],
+        "onboarding_prayer_config_title": [.english: "Prayer Alerts", .indonesian: "Notifikasi Shalat", .malay: "Notifikasi Solat"],
+        "onboarding_prayer_config_body": [.english: "Choose which prayers play the Adzan sound. Those turned off will use the default notification sound.", .indonesian: "Pilih shalat mana yang membunyikan suara Adzan. Yang dimatikan akan menggunakan suara notifikasi bawaan.", .malay: "Pilih solat mana yang membunyikan suara Azan. Yang dimatikan akan menggunakan bunyi notifikasi lalai."],
+        "onboarding_skip": [.english: "Skip", .indonesian: "Lewati", .malay: "Langkau"],
+        "onboarding_skip_location": [.english: "I'll type my city instead", .indonesian: "Saya akan mengetik kota saya", .malay: "Saya akan menaip bandar saya"],
+        "onboarding_skip_notifications": [.english: "Not now", .indonesian: "Jangan sekarang", .malay: "Bukan sekarang"],
         
         // Qibla Finder
         "qibla_ar_mode": [.english: "AR Mode", .indonesian: "Mode AR", .malay: "Mod AR"],

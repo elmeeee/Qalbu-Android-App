@@ -38,8 +38,8 @@ struct RandomAyahPayload: Decodable, Sendable {
     let transliteration: String?
     
     var displayText: String? {
-        guard let raw = textUthmaniTajweed?
-            .trimmingCharacters(in: .whitespacesAndNewlines),
+        let rawSource = textUthmaniTajweed ?? textUthmani
+        guard let raw = rawSource?.trimmingCharacters(in: .whitespacesAndNewlines),
            raw.isEmpty == false else {
             return nil
         }
