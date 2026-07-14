@@ -426,6 +426,7 @@ struct OnboardingView: View {
                 step = 5
             }
         default:
+            PrayerNotificationPreferences.notifyDidChange()
             hasCompletedOnboarding = true
         }
     }
