@@ -103,19 +103,14 @@ struct OnboardingView: View {
                 .font(.caption.weight(.bold))
                 .foregroundColor(.white.opacity(0.75))
             
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
+            HStack(spacing: 8) {
+                ForEach(0..<5, id: \.self) { index in
+                    let isCompletedOrCurrent = index < step
                     RoundedRectangle(cornerRadius: 3)
-                        .fill(Color.white.opacity(0.2))
+                        .fill(isCompletedOrCurrent ? Color(hex: "#D4A017") : Color.white.opacity(0.2))
                         .frame(height: 6)
-                    
-                    RoundedRectangle(cornerRadius: 3)
-                        .fill(Color(hex: "#D4A017")) // GoldBright
-                        .frame(width: geo.size.width * CGFloat(step) / 5.0, height: 6)
-                        .animation(.spring(), value: step)
                 }
             }
-            .frame(height: 6)
         }
     }
     
@@ -351,7 +346,25 @@ struct OnboardingView: View {
     }
     
     private var bottomControls: some View {
-        VStack(spacing: 12) {
+        HStack(spacing: 12) {
+            if step > 1 {
+                Button {
+                    handleSecondaryAction()
+                } label: {
+                    Text(secondaryButtonTitle)
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(hex: "#D4A017").opacity(0.65), lineWidth: 1)
+                        )
+                        .foregroundColor(Color(hex: "#D4A017"))
+                }
+                .buttonStyle(.plain)
+                .disabled(isRequestingLocation || savingLocation)
+            }
+            
             Button {
                 handlePrimaryAction()
             } label: {
@@ -366,19 +379,6 @@ struct OnboardingView: View {
             .buttonStyle(.plain)
             .disabled(isRequestingLocation || savingLocation)
             .opacity((isRequestingLocation || savingLocation) ? 0.6 : 1.0)
-            
-            if step > 1 {
-                Button {
-                    handleSecondaryAction()
-                } label: {
-                    Text(secondaryButtonTitle)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(Color(hex: "#D4A017")) // GoldBright
-                        .padding(.vertical, 8)
-                }
-                .buttonStyle(.plain)
-                .disabled(isRequestingLocation || savingLocation)
-            }
         }
     }
     
@@ -394,8 +394,8 @@ struct OnboardingView: View {
     
     private var secondaryButtonTitle: String {
         switch step {
-        case 2: return languageManager.localize("onboarding_location_skip")
-        case 3: return languageManager.localize("onboarding_notifications_skip")
+        case 2: return languageManager.localize("onboarding_skip_location")
+        case 3: return languageManager.localize("onboarding_skip_notifications")
         case 4: return languageManager.localize("onboarding_skip")
         default: return ""
         }
