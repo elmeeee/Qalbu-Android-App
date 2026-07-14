@@ -54,6 +54,7 @@ struct ChapterReadingSettingsSheet: View {
     @AppStorage("chapterReaderShowTransliteration") private var showTransliteration = true
     @AppStorage("chapterReaderMemorizationMode") private var isMemorizationMode = false
     @AppStorage("chapterReaderContinuousPlay") private var isContinuousPlay = true
+    @AppStorage("chapterReaderShowTajweed") private var showTajweed = true
 
     private let fontScaleRange: ClosedRange<Double> = 0.85 ... 1.35
 
@@ -115,6 +116,12 @@ struct ChapterReadingSettingsSheet: View {
 
                     Toggle(isOn: $showTransliteration) {
                         Label(languageManager.localize("show_transliteration"), systemImage: "abc")
+                            .foregroundColor(Color.Token.deepEmerald)
+                    }
+                    .tint(Color.Token.deepEmerald)
+
+                    Toggle(isOn: $showTajweed) {
+                        Label(languageManager.localize("show_tajweed"), systemImage: "paintpalette.fill")
                             .foregroundColor(Color.Token.deepEmerald)
                     }
                     .tint(Color.Token.deepEmerald)

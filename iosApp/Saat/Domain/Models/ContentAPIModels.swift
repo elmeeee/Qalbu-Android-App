@@ -70,6 +70,19 @@ struct RandomAyahPayload: Decodable, Sendable {
         return "<div dir=\"rtl\" lang=\"ar\">\(body)\(spacer)\(markerHtml)</div>"
     }
 
+    func plainArabicWebHTMLFragment() -> String {
+        let markerHtml = QuranAyahEndBadge.html(forAyahNumber: effectiveAyahNumber)
+        let spacer = markerHtml.isEmpty ? "" : " "
+
+        let rawSource = textUthmaniTajweed ?? textUthmani
+        guard let raw = rawSource?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else {
+            return "<div dir=\"rtl\" lang=\"ar\"></div>"
+        }
+        // Strip all HTML tags to get plain Uthmani text
+        let plain = raw.strippingHTMLToPlainText()
+        return "<div dir=\"rtl\" lang=\"ar\">\(plain)\(spacer)\(markerHtml)</div>"
+    }
+
     var chapterNumber: Int? {
         guard let vk = verseKey?.split(separator: ":").first else { return nil }
         return Int(String(vk))

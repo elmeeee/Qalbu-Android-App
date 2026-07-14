@@ -173,11 +173,17 @@ struct HTMLContentWebView: UIViewRepresentable {
         if webView.bounds.width >= 1 {
             return webView.bounds.width
         }
-        if let superviewWidth = webView.superview?.bounds.width, superviewWidth >= 1 {
-            return superviewWidth
+        // Walk the entire ancestor chain looking for the first view with a known width
+        var ancestor: UIView? = webView.superview
+        while let view = ancestor {
+            if view.bounds.width >= 1 {
+                return view.bounds.width
+            }
+            ancestor = view.superview
         }
+        // Last resort: use screen width minus typical horizontal padding
         if let screen = webView.window?.windowScene?.screen {
-            let horizontalInset: CGFloat = 72
+            let horizontalInset: CGFloat = 56 // 16 outer + 12 inner on each side = 56
             return max(screen.bounds.width - horizontalInset, 1)
         }
         return nil
@@ -446,35 +452,46 @@ struct HTMLContentWebView: UIViewRepresentable {
                   font-family: inherit;
                 }
             """
+            // Colors match Android TajweedEngine color map exactly:
+            // IKHFA=#9400A8(purple), QALQALAH=#DD0008(red), GHUNNA=#FF7E1E(orange),
+            // IQLAB=#26BFFD(cyan), IDGHAM_WITH_GHUNNA=#169200(green),
+            // IDGHAM_WITHOUT_GHUNNA=#A1A1A1(grey), IDGHAM_MIMI=#169200(green),
+            // IKHFA_SYAFAWI=#D500B7(pink)
             if onDark {
                 return base + """
-                .ghunnah, [class*="ghunnah"] { color: #81C784; }
+                .ghunnah, [class*="ghunnah"] { color: #FFB74D; }
                 .slnt, [class*="slnt"] { color: #B0BEC5; }
                 .madda_normal, [class*="madda_normal"] { color: #9FA8DA; }
                 .madda_permissible, [class*="madda_permissible"] { color: #CE93D8; }
                 .madda_obligatory, [class*="madda_obligatory"] { color: #E1BEE7; }
-                .qalaqah, [class*="qalaqah"] { color: #FFAB91; }
-                .idgham_ghunnah, [class*="idgham_ghunnah"] { color: #80CBC4; }
-                .ikhafa, [class*="ikhafa"], .ikhafa_shafawi, [class*="ikhafa_shafawi"] { color: #80DEEA; }
+                .qalaqah, [class*="qalaqah"] { color: #EF9A9A; }
+                .idgham_ghunnah, [class*="idgham_ghunnah"] { color: #A5D6A7; }
+                .idgham_mimi, [class*="idgham_mimi"] { color: #A5D6A7; }
+                .idgham_wo_ghunnah, [class*="idgham_wo_ghunnah"] { color: #E0E0E0; }
+                .ikhafa, [class*="ikhafa"] { color: #CE93D8; }
+                .ikhafa_shafawi, [class*="ikhafa_shafawi"] { color: #F48FB1; }
                 .ham_wasl, [class*="ham_wasl"] { color: #AED581; }
                 .laam_shamsiyah, [class*="laam_shamsiyah"] { color: #FFCC80; }
                 .laam_qamariyah, [class*="laam_qamariyah"] { color: #CE93D8; }
-                .iqlab, [class*="iqlab"] { color: #80CBC4; }
+                .iqlab, [class*="iqlab"] { color: #80DEEA; }
                 """
             }
             return base + """
-                .ghunnah, [class*="ghunnah"] { color: #2E7D32; }
+                .ghunnah, [class*="ghunnah"] { color: #FF7E1E; }
                 .slnt, [class*="slnt"] { color: #5C6F7A; }
                 .madda_normal, [class*="madda_normal"] { color: #3949AB; }
                 .madda_permissible, [class*="madda_permissible"] { color: #6A1B9A; }
                 .madda_obligatory, [class*="madda_obligatory"] { color: #7B1FA2; }
-                .qalaqah, [class*="qalaqah"] { color: #D84315; }
-                .idgham_ghunnah, [class*="idgham_ghunnah"] { color: #00897B; }
-                .ikhafa, [class*="ikhafa"], .ikhafa_shafawi, [class*="ikhafa_shafawi"] { color: #00838F; }
+                .qalaqah, [class*="qalaqah"] { color: #DD0008; }
+                .idgham_ghunnah, [class*="idgham_ghunnah"] { color: #169200; }
+                .idgham_mimi, [class*="idgham_mimi"] { color: #169200; }
+                .idgham_wo_ghunnah, [class*="idgham_wo_ghunnah"] { color: #A1A1A1; }
+                .ikhafa, [class*="ikhafa"] { color: #9400A8; }
+                .ikhafa_shafawi, [class*="ikhafa_shafawi"] { color: #D500B7; }
                 .ham_wasl, [class*="ham_wasl"] { color: #558B2F; }
                 .laam_shamsiyah, [class*="laam_shamsiyah"] { color: #E65100; }
                 .laam_qamariyah, [class*="laam_qamariyah"] { color: #6A1B9A; }
-                .iqlab, [class*="iqlab"] { color: #00897B; }
+                .iqlab, [class*="iqlab"] { color: #26BFFD; }
                 """
         }()
         return """

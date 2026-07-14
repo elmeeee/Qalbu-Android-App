@@ -14,6 +14,7 @@ struct AyahArabicWebBlock: View {
     let payload: RandomAyahPayload
     var style: HTMLContentStyle = .verseCard
     var fontScale: Double = 1.0
+    var showTajweed: Bool = true
     var measuredHeight: Binding<CGFloat>?
     var includeTranslationInAccessibility: Bool = false
     var onTajweedTap: ((TajweedType) -> Void)? = nil
@@ -22,19 +23,19 @@ struct AyahArabicWebBlock: View {
 
     var body: some View {
         HTMLContentWebView(
-            htmlFragment: payload.tajweedWebHTMLFragment(),
+            htmlFragment: htmlFragment,
             style: style,
-            rendersTajweedHTML: true,
+            rendersTajweedHTML: showTajweed,
             fontScale: fontScale,
             contentHeight: $webHeight,
-            onTajweedTap: onTajweedTap
+            onTajweedTap: showTajweed ? onTajweedTap : nil
         )
         .frame(maxWidth: .infinity, alignment: .top)
         .frame(height: webHeight)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(payload.spokenAccessibilitySummary(includeTranslation: includeTranslationInAccessibility))
         .accessibilityAddTraits(.isStaticText)
-        .allowsHitTesting(onTajweedTap != nil)
+        .allowsHitTesting(showTajweed && onTajweedTap != nil)
         .animation(nil, value: webHeight)
         .id(stableId)
         .onChangeWithFallback(of: reloadKey) { _ in
@@ -43,6 +44,14 @@ struct AyahArabicWebBlock: View {
         }
         .onChangeWithFallback(of: webHeight) { height in
             measuredHeight?.wrappedValue = height
+        }
+    }
+
+    private var htmlFragment: String {
+        if showTajweed {
+            return payload.tajweedWebHTMLFragment()
+        } else {
+            return payload.plainArabicWebHTMLFragment()
         }
     }
 
@@ -55,10 +64,10 @@ struct AyahArabicWebBlock: View {
         } else {
             base = "ayah"
         }
-        return "\(base)-tajweed-\(style)-\(fontScale)"
+        return "\(base)-tajweed-\(showTajweed)-\(style)-\(fontScale)"
     }
 
     private var reloadKey: String {
-        "\(payload.verseKey ?? "")-\(fontScale)"
+        "\(payload.verseKey ?? "")-\(showTajweed)-\(fontScale)"
     }
 }

@@ -26,6 +26,8 @@ struct ChapterAyahPage: View {
     @State private var isRevealed = false
     @State private var selectedTajweedRule: TajweedType? = nil
 
+    @AppStorage("chapterReaderShowTajweed") private var showTajweed = true
+
     private let contentSpacing: CGFloat = 16
     private let minimumLayoutScale: Double = 0.68
 
@@ -179,6 +181,7 @@ struct ChapterAyahPage: View {
             payload: verse,
             style: .verseCard,
             fontScale: effectiveFontScale,
+            showTajweed: showTajweed,
             measuredHeight: $arabicMeasuredHeight,
             includeTranslationInAccessibility: showTranslation,
             onTajweedTap: { rule in
