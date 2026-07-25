@@ -52,8 +52,10 @@ import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.ui.components.FloatingAudioBar
 import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
 import app.kamy.saatApp.ui.components.FloatingTabBar
+import app.kamy.saatApp.ui.components.ForceUpdateSheet
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.navigation.RootTab
+import app.kamy.saatApp.infrastructure.update.AppUpdateManager
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -98,6 +100,9 @@ fun RootScreen(
     val authService = entryPoint.authorizationService()
     val userSession = entryPoint.userSession()
     val avatarUrl by userSession.avatarUrl.collectAsState()
+
+    val updateInfo = remember { AppUpdateManager.checkUpdate(context) }
+    var showForceUpdateSheet by remember { mutableStateOf(updateInfo.isUpdateAvailable) }
 
     val navController = rememberNavController()
     LaunchedEffect(pendingDeepLinkRoute) {
@@ -330,6 +335,13 @@ fun RootScreen(
                     }
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
+
+        if (showForceUpdateSheet) {
+            ForceUpdateSheet(
+                updateInfo = updateInfo,
+                onDismiss = { showForceUpdateSheet = false }
             )
         }
     }

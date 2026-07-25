@@ -431,10 +431,21 @@ class ChapterReaderViewModel @Inject constructor(
         val chapterNum = page.chapterNumber ?: s.chapterNumber
         page.resolvedVerseNumber?.let { logScrollPosition(chapterNum, it) }
 
-        // Auto-mark chapter as read when user reaches the last verse
+        // Track last read Juz and VerseKey for Khatam progress
+        val jNum = page.juzNumber ?: s.juzNumber
+        val vKey = page.verseKey
+        if (jNum != null && vKey != null) {
+            QuranPersonalStore.updateLastReadJuz(appContext, jNum, vKey)
+        }
+
+        // Auto-mark chapter or juz as read when user reaches the last verse
         val isLastVerse = !s.hasMore && index == s.verses.size - 1
-        if (isLastVerse && s.juzNumber == null) {
-            QuranPersonalStore.markChapterRead(appContext, chapterNum)
+        if (isLastVerse) {
+            if (s.juzNumber != null) {
+                QuranPersonalStore.markJuzRead(appContext, s.juzNumber)
+            } else {
+                QuranPersonalStore.markChapterRead(appContext, chapterNum)
+            }
         }
     }
 

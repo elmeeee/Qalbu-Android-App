@@ -422,6 +422,13 @@
     <string name="hadith_empty_detail">Tiada rujukan hadis dipautkan kepada ayat ini lagi.</string>
     <string name="hadith_book_number">Kitab %1$s</string>
     <string name="juz_number">Juz %1$d</string>
+    <string name="khatam_progress">%1$d / 30 Juz dibaca</string>
+    <string name="khatam_completed">✓</string>
+    <string name="khatam_progress_title">Progress Khatam</string>
+    <string name="khatam_last_read">Terakhir dibaca: Juz %1$d · Ayat %2$d</string>
+    <string name="force_update_title">Kemaskini Baru Tersedia</string>
+    <string name="force_update_desc">Versi baharu Qalbu kini tersedia di Play Store. Sila kemaskini untuk meneruskan pengalaman membaca Al-Quran dan ibadah terbaik.</string>
+    <string name="force_update_button">Kemaskini Sekarang</string>
     <string name="ai_label">AI</string>
     <string name="clear_search_a11y">Kosongkan carian</string>
     <string name="session_expired">Sesi tamat. Log masuk semula dari Akaun.</string>
@@ -632,4 +639,9 @@
     <string name="coach_mark_today_verse_desc">Dengar bacaan murottal, baca tafsir, dan kongsi inspirasi Al-Quran harian dengan bantuan AI.</string>
     <string name="coach_mark_quran_menu_title">Menu Tindakan Ayat</string>
     <string name="coach_mark_quran_menu_desc">Ketuk untuk mengakses Penanda Buku, Nota, Hifz hafalan, Tafsir, dan perkongsian audio.</string>
+
+    <!-- Force Update -->
+    <string name="force_update_subtitle">Versi baharu Qalbu kini tersedia</string>
+    <string name="force_update_later_button">Mungkin Nanti</string>
+    <string name="force_update_version_info">Versi Baharu: %1$s</string>
 </resources>

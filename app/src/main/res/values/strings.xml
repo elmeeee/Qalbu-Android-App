@@ -436,9 +436,13 @@
     <string name="tafsir_empty_detail">This verse doesn\'t include tafsir text for this source yet.</string>
     <string name="hadith_empty_detail">No hadith references are linked to this verse yet.</string>
     <string name="hadith_book_number">Book %1$s</string>
-    <string name="khatam_progress">%1$d / 114 Surahs read</string>
+    <string name="khatam_progress">%1$d / 30 Juz read</string>
     <string name="khatam_completed">✓</string>
     <string name="khatam_progress_title">Khatam Progress</string>
+    <string name="khatam_last_read">Last read: Juz %1$d · Ayah %2$d</string>
+    <string name="force_update_title">Update Available</string>
+    <string name="force_update_desc">A new version of Qalbu is available on the Play Store. Please update to continue enjoying the best Quran reading experience.</string>
+    <string name="force_update_button">Update Now</string>
     <string name="share_as_image">Share as Image</string>
     <string name="share_verse_image_chooser">Share verse image via…</string>
     <string name="juz_number">Juz %1$d</string>
@@ -630,7 +634,7 @@
     <string name="tahajud_qunut_arabic">اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ، وَعَافِنِي فِيمَنْ عَافَيْتَ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيْتَ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ</string>
     <string name="tahajud_qunut_translit">Allāhumma ihdinī fīman hadayta, wa ʿāfinī fīman ʿāfayta, wa tawallanī fīman tawallayta, wa bārik lī fīmā aʿṭayta</string>
     <string name="tahajud_dhikr_title">Dhikr after prayer</string>
-    <string name="tahajud_dhikr_body">After salam: Astaghfirullah ×3, Allahumma antas salam…, then 33× SubhanAllah, 33× Alhamdulillah, 34× Allahu Akbar (or combined to 100).</string>
+    <string name="tahajud_dhikr_body">After salam: Astaghfirullah ×3, Allahumma antas salam…, then 33× SubhanAllah, 33× Alhamdulillah, 33× Allahu Akbar.</string>
     <string name="tahajud_dua_title">Personal dua</string>
     <string name="tahajud_dua_body">The last third of the night is when Allah descends (in a manner befitting Him) and answers dua. Ask for forgiveness, guidance, family, and the ummah. Speak from the heart in any language.</string>
     <string name="qibla_account_subtitle">AR camera or 3D compass to Kaaba</string>
@@ -1143,4 +1147,9 @@
     <string name="coach_mark_today_verse_desc">Listen to recitation, read tafsir, and share daily Qur\'anic inspiration with AI.</string>
     <string name="coach_mark_quran_menu_title">Verse Actions Menu</string>
     <string name="coach_mark_quran_menu_desc">Tap to access Bookmark, Notes, Hifz memorization tracker, Tafsir, and audio sharing.</string>
+
+    <!-- Force Update -->
+    <string name="force_update_subtitle">A new version of Qalbu is available</string>
+    <string name="force_update_later_button">Maybe Later</string>
+    <string name="force_update_version_info">New Version: %1$s</string>
 </resources>

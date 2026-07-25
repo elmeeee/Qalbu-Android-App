@@ -341,78 +341,97 @@ fun ChaptersScreen(
                                     QuranSearchEmptyState(query = activeQuery)
                                 }
                             }
-                        } else when (state.browseMode) {
-                            QuranBrowseMode.SURAH -> {
-                                item(key = "khatam_header") {
-                                    val readCount = state.readChapters.size
-                                    if (readCount > 0) {
-                                        val totalChapters = 114
-                                        val progressFraction = readCount.toFloat() / totalChapters.toFloat()
-                                        val percentage = (progressFraction * 100).toInt()
-                                        
-                                        Surface(
+                        } else {
+                            item(key = "khatam_header") {
+                                val readCount = state.readJuzs.size
+                                val totalJuzs = 30
+                                val progressFraction = readCount.toFloat() / totalJuzs.toFloat()
+                                val percentage = (progressFraction * 100).toInt()
+                                
+                                Surface(
+                                    onClick = {
+                                        val targetJuz = state.lastReadJuz ?: 1
+                                        val targetKey = state.lastReadVerseKey
+                                        onOpenJuz(targetJuz, targetKey)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = androidx.compose.material.icons.Icons.Default.Bookmark,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.khatam_progress_title),
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                            Text(
+                                                text = "$percentage%",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                        Spacer(Modifier.height(10.dp))
+                                        androidx.compose.material3.LinearProgressIndicator(
+                                            progress = { progressFraction },
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
-                                            shape = RoundedCornerShape(16.dp),
-                                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                                .height(8.dp)
+                                                .clip(RoundedCornerShape(4.dp)),
+                                            color = MaterialTheme.colorScheme.primary,
+                                            trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                        )
+                                        Spacer(Modifier.height(8.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Column(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(16.dp)
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Row(
-                                                        verticalAlignment = Alignment.CenterVertically,
-                                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                                    ) {
-                                                        Icon(
-                                                            imageVector = androidx.compose.material.icons.Icons.Default.Bookmark,
-                                                            contentDescription = null,
-                                                            tint = MaterialTheme.colorScheme.primary,
-                                                            modifier = Modifier.size(18.dp)
-                                                        )
-                                                        Text(
-                                                            text = stringResource(R.string.khatam_progress_title),
-                                                            style = MaterialTheme.typography.titleSmall,
-                                                            fontWeight = FontWeight.Bold,
-                                                            color = MaterialTheme.colorScheme.onSurface
-                                                        )
-                                                    }
-                                                    Text(
-                                                        text = "$percentage%",
-                                                        style = MaterialTheme.typography.titleMedium,
-                                                        fontWeight = FontWeight.ExtraBold,
-                                                        color = MaterialTheme.colorScheme.primary
-                                                    )
-                                                }
-                                                Spacer(Modifier.height(10.dp))
-                                                androidx.compose.material3.LinearProgressIndicator(
-                                                    progress = { progressFraction },
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .height(8.dp)
-                                                        .clip(RoundedCornerShape(4.dp)),
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                                )
-                                                Spacer(Modifier.height(8.dp))
+                                            Text(
+                                                text = stringResource(R.string.khatam_progress, readCount),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            state.lastReadJuz?.let { juz ->
+                                                val ayahNum = state.lastReadVerseKey?.substringAfter(":")?.toIntOrNull() ?: 1
                                                 Text(
-                                                    text = stringResource(R.string.khatam_progress, readCount),
+                                                    text = stringResource(R.string.khatam_last_read, juz, ayahNum),
                                                     style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    color = MaterialTheme.colorScheme.primary
                                                 )
                                             }
                                         }
                                     }
                                 }
-                                items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
+                            }
+                            when (state.browseMode) {
+                                QuranBrowseMode.SURAH -> {
+                                    items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
                                     ChapterRow(
                                         chapter = chapter,
                                         isRead = chapter.id in state.readChapters,
@@ -455,12 +474,14 @@ fun ChaptersScreen(
                                         JuzRow(
                                             juz = juz,
                                             chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
+                                            isRead = juz.juzNumber in state.readJuzs,
                                             onClick = { onOpenJuz(juz.juzNumber, null) },
                                             modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                         )
                                     }
                                 }
                             }
+                        }
                         }
                     }
                     }
@@ -872,6 +893,7 @@ private fun ChapterRow(
 private fun JuzRow(
     juz: QuranJuz,
     chapter: QuranChapter?,
+    isRead: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -900,12 +922,23 @@ private fun JuzRow(
             ChapterNumberBadge(number = juz.juzNumber)
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.juz_number, juz.juzNumber),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.Slate900
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.juz_number, juz.juzNumber),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
+                    )
+                    if (isRead) {
+                        Spacer(Modifier.width(6.dp))
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.Check,
+                            contentDescription = stringResource(R.string.khatam_completed),
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
                 startLabel?.let { label ->
                     Text(
                         text = stringResource(R.string.juz_starts_at, label),
