@@ -438,6 +438,19 @@ class ChapterReaderViewModel @Inject constructor(
         }
     }
 
+    fun onPageSettled(index: Int) {
+        val s = _state.value
+        if (index !in s.verses.indices) return
+        val page = s.verses[index]
+        val audioState = audioPlayer.state.value
+        if (audioState.isPlaying && audioState.currentUrl != null) {
+            val targetKey = page.verseKey
+            if (targetKey != null && targetKey != audioState.trackSubtitle) {
+                playAyahAtIndex(index, page)
+            }
+        }
+    }
+
     private fun logCurrentVerseReading(force: Boolean = false) {
         val s = _state.value
         val index = s.currentVerseIndex.coerceIn(0, (s.verses.size - 1).coerceAtLeast(0))

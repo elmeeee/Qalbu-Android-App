@@ -201,11 +201,14 @@ fun ChapterReaderScreen(
     val loadErrorDisplay = state.error.rememberErrorDisplay(R.string.verses_load_failed)
 
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
+        snapshotFlow { pagerState.currentPage to pagerState.isScrollInProgress }
             .distinctUntilChanged()
-            .collect { page ->
+            .collect { (page, isScrolling) ->
                 vm.onPageChanged(page)
                 vm.loadMoreIfNeeded(page)
+                if (!isScrolling) {
+                    vm.onPageSettled(page)
+                }
             }
     }
 
@@ -775,13 +778,30 @@ private fun SaatAyahPage(
                             null
                         } else {
                             val prog = (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
-                            val totalChars = words.sumOf { it.length }.coerceAtLeast(1)
-                            val targetChars = (prog * totalChars).toInt()
-                            var accum = 0
+                            val weights = words.mapIndexed { index, word ->
+                                var weight = word.length.toFloat().coerceAtLeast(1f)
+                                if (word.contains('ٓ') || word.contains('ۤ') || word.contains('ۧ') || word.contains('ۨ') || word.contains('\u0653') || word.contains('\u06E4')) {
+                                    weight += 8.0f
+                                }
+                                if (word.contains('ّ') || word.contains('\u0651')) {
+                                    if (word.contains('ن') || word.contains('م')) {
+                                        weight += 4.0f
+                                    } else {
+                                        weight += 2.0f
+                                    }
+                                }
+                                if (index == words.lastIndex && words.size > 1) {
+                                    weight *= 1.25f
+                                }
+                                weight
+                            }
+                            val totalWeight = weights.sum().coerceAtLeast(1f)
+                            val targetWeight = prog * totalWeight
+                            var accum = 0f
                             var foundIndex = 0
                             for (i in words.indices) {
-                                accum += words[i].length
-                                if (targetChars <= accum) {
+                                accum += weights[i]
+                                if (targetWeight <= accum) {
                                     foundIndex = i
                                     break
                                 }

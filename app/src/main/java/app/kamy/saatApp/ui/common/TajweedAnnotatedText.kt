@@ -47,7 +47,7 @@ fun buildTajweedAnnotatedString(
                 val match = matches[activeWordIndex]
                 addStyle(
                     style = SpanStyle(
-                        background = SaatColors.GoldBright.copy(alpha = 0.35f)
+                        color = Color(0xFF0D9488)
                     ),
                     start = match.range.first,
                     end = match.range.last + 1
