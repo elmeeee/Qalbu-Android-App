@@ -111,15 +111,19 @@ class OnboardingViewModel @Inject constructor(
     fun onLocationPermissionResult(granted: Boolean) {
         if (granted) {
             locationPrefs.setMode(LocationMode.GPS)
+            nextStep()
             viewModelScope.launch {
-                val loc = locationProvider.currentLocation()
-                if (loc != null) {
-                    val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
-                    val label = geocode.cityName
-                        ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
-                    locationPrefs.saveActiveLabel(label)
+                try {
+                    val loc = locationProvider.currentLocation()
+                    if (loc != null) {
+                        val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
+                        val label = geocode.cityName
+                            ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
+                        locationPrefs.saveActiveLabel(label)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-                nextStep()
             }
         } else {
             _state.update {
