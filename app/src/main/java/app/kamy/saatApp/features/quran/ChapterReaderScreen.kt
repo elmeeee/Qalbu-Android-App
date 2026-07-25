@@ -161,6 +161,7 @@ fun ChapterReaderScreen(
     val verseMenuExpanded = remember { mutableStateOf(false) }
     val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
     val showImageShareSheet = remember { mutableStateOf(false) }
+    var hasScrolledToInitial by remember { mutableStateOf(false) }
 
     val s = state
     val verseCount = s.verses.size
@@ -201,7 +202,7 @@ fun ChapterReaderScreen(
     }
 
     LaunchedEffect(verseCount, initialVerseNumber, initialVerseKey) {
-        if (verseCount == 0) return@LaunchedEffect
+        if (verseCount == 0 || hasScrolledToInitial) return@LaunchedEffect
         val idx = when {
             !initialVerseKey.isNullOrBlank() ->
                 state.verses.indexOfFirst { it.verseKey == initialVerseKey }
@@ -209,8 +210,13 @@ fun ChapterReaderScreen(
                 state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
             else -> -1
         }
-        if (idx >= 0 && pagerState.currentPage != idx) {
-            pagerState.scrollToPage(idx)
+        if (idx >= 0) {
+            if (pagerState.currentPage != idx) {
+                pagerState.scrollToPage(idx)
+            }
+            hasScrolledToInitial = true
+        } else if (initialVerseKey.isNullOrBlank() && initialVerseNumber == null) {
+            hasScrolledToInitial = true
         }
     }
 
@@ -232,6 +238,14 @@ fun ChapterReaderScreen(
                     val verses = vm.state.value.verses
                     if (event.index in verses.indices) {
                         pagerState.animateScrollToPage(event.index)
+                    }
+                }
+                is ReaderEvent.AutoAdvanceToPage -> {
+                    val verses = vm.state.value.verses
+                    if (event.nextIndex in verses.indices) {
+                        if (pagerState.currentPage == event.previousIndex) {
+                            pagerState.animateScrollToPage(event.nextIndex)
+                        }
                     }
                 }
             }

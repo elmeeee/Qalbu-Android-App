@@ -224,7 +224,7 @@ class ChapterReaderViewModel @Inject constructor(
         if (nextIndex in verses.indices) {
             val nextPage = verses[nextIndex]
             playAyahAtIndex(nextIndex, nextPage)
-            _events.tryEmit(ReaderEvent.AnimateToPage(nextIndex))
+            _events.tryEmit(ReaderEvent.AutoAdvanceToPage(lastIndex, nextIndex))
         }
     }
 
@@ -904,4 +904,5 @@ class ChapterReaderViewModel @Inject constructor(
 
 sealed interface ReaderEvent {
     data class AnimateToPage(val index: Int) : ReaderEvent
+    data class AutoAdvanceToPage(val previousIndex: Int, val nextIndex: Int) : ReaderEvent
 }
