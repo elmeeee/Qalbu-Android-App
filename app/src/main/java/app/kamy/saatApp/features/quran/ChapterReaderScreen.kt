@@ -131,6 +131,7 @@ import app.kamy.saatApp.ui.components.CoachMarkOverlay
 import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
 import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
+import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -143,6 +144,7 @@ fun ChapterReaderScreen(
 ) {
     val vm: ChapterReaderViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+    val audioPlaybackState by vm.audioPlaybackState.collectAsState()
 
     val context = LocalContext.current
     DisposableEffect(Unit) {
@@ -332,6 +334,7 @@ fun ChapterReaderScreen(
                         audioBarVisible = audioBarVisible,
                         personalDataRevision = state.personalDataRevision,
                         showBismillahPre = pageIndex == 0 && state.bismillahPre,
+                        audioPlaybackState = audioPlaybackState,
                         onPlay = { vm.onTapAyah(pageIndex) },
                         onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null,
                         onTajweedClick = { activeTajweedType.value = it }
@@ -634,6 +637,7 @@ private fun SaatAyahPage(
     audioBarVisible: Boolean,
     personalDataRevision: Int,
     showBismillahPre: Boolean,
+    audioPlaybackState: AudioPlaybackState? = null,
     onPlay: () -> Unit,
     onContentScroll: (() -> Unit)? = null,
     onTajweedClick: (TajweedType) -> Unit
@@ -764,6 +768,28 @@ private fun SaatAyahPage(
                 }
                 else -> {
                     val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) (verse.textIndopak ?: verse.textUthmani) else verse.textUthmani
+                    val isPlayingThisVerse = audioPlaybackState != null && audioPlaybackState.isPlaying && audioPlaybackState.trackSubtitle == verse.verseKey && audioPlaybackState.currentUrl != null
+                    val words = remember(textToRender) { textToRender?.split("\\s+".toRegex())?.filter { it.isNotBlank() } ?: emptyList() }
+                    val activeWordIndex = remember(isPlayingThisVerse, audioPlaybackState?.progress, words) {
+                        if (!isPlayingThisVerse || words.isEmpty()) {
+                            null
+                        } else {
+                            val prog = (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
+                            val totalChars = words.sumOf { it.length }.coerceAtLeast(1)
+                            val targetChars = (prog * totalChars).toInt()
+                            var accum = 0
+                            var foundIndex = 0
+                            for (i in words.indices) {
+                                accum += words[i].length
+                                if (targetChars <= accum) {
+                                    foundIndex = i
+                                    break
+                                }
+                                foundIndex = i
+                            }
+                            foundIndex
+                        }
+                    }
                     TajweedHtmlView(
                         textUthmani = textToRender ?: "",
                         ayahNumber = verse.resolvedVerseNumber,
@@ -771,6 +797,7 @@ private fun SaatAyahPage(
                         compact = true,
                         textAlign = TajweedTextAlign.Justify,
                         isTajweedEnabled = isTajweedEnabled,
+                        activeWordIndex = activeWordIndex,
                         onTajweedClick = onTajweedClick,
                         modifier = Modifier.fillMaxWidth()
                     )

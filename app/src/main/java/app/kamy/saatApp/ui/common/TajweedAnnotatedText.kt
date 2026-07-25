@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.text.HtmlCompat
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.features.quran.tajweed.TajweedEngine
 
 private val tajweedTagRegex = Regex(
@@ -27,7 +28,8 @@ fun buildTajweedAnnotatedString(
     baseColor: Color = Color(0xFF0F172A),
     markerFontSize: TextUnit = TextUnit.Unspecified,
     markerFontFamily: FontFamily? = null,
-    isTajweedEnabled: Boolean = true
+    isTajweedEnabled: Boolean = true,
+    activeWordIndex: Int? = null
 ): AnnotatedString {
     val body = textUthmani?.sanitizeTajweedArabicHtml().orEmpty()
     if (body.isEmpty()) return AnnotatedString("")
@@ -39,6 +41,19 @@ fun buildTajweedAnnotatedString(
 
     val built = buildAnnotatedString {
         append(tajweedAnnotated)
+        if (activeWordIndex != null && activeWordIndex >= 0) {
+            val matches = Regex("\\S+").findAll(tajweedAnnotated.text).toList()
+            if (activeWordIndex in matches.indices) {
+                val match = matches[activeWordIndex]
+                addStyle(
+                    style = SpanStyle(
+                        background = SaatColors.GoldBright.copy(alpha = 0.35f)
+                    ),
+                    start = match.range.first,
+                    end = match.range.last + 1
+                )
+            }
+        }
         ayahNumber?.takeIf { it > 0 }?.let {
             appendAyahEndMarker(it, markerFontSize, markerFontFamily)
         }

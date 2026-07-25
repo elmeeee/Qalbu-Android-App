@@ -40,20 +40,22 @@ fun TajweedHtmlView(
     compact: Boolean = false,
     textAlign: TajweedTextAlign = TajweedTextAlign.Center,
     isTajweedEnabled: Boolean = true,
+    activeWordIndex: Int? = null,
     onTajweedClick: ((TajweedType) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val lineHeightMultiplier = if (compact) 2.05f else 2.35f
     val fontSize = fontSizeSp.sp
     val markerFontSize = (fontSizeSp * 0.58f).sp
-    val annotated = remember(textUthmani, ayahNumber, textColor, markerFontSize, isTajweedEnabled) {
+    val annotated = remember(textUthmani, ayahNumber, textColor, markerFontSize, isTajweedEnabled, activeWordIndex) {
         buildTajweedAnnotatedString(
             textUthmani = textUthmani,
             ayahNumber = ayahNumber,
             baseColor = textColor,
             markerFontSize = markerFontSize,
             markerFontFamily = TajweedFontFamily,
-            isTajweedEnabled = isTajweedEnabled
+            isTajweedEnabled = isTajweedEnabled,
+            activeWordIndex = activeWordIndex
         )
     }
 

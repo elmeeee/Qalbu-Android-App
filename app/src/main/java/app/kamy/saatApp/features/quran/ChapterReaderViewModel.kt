@@ -19,6 +19,7 @@ import app.kamy.saatApp.domain.model.ArabicTextType
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.audio.AudioQueueItem
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
+import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
 import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
@@ -123,6 +124,7 @@ class ChapterReaderViewModel @Inject constructor(
         )
     )
     val state: StateFlow<ChapterReaderUiState> = _state.asStateFlow()
+    val audioPlaybackState: StateFlow<AudioPlaybackState> = audioPlayer.state
 
     private val _events = MutableSharedFlow<ReaderEvent>(extraBufferCapacity = 1)
     val events = _events.asSharedFlow()

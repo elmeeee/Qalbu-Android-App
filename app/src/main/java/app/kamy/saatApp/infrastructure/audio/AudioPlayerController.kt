@@ -39,7 +39,8 @@ data class AudioPlaybackState(
     val activeIndex: Int? = null,
     val queue: List<AudioQueueItem> = emptyList(),
     val chapterNumber: Int? = null,
-    val ayahNumber: Int? = null
+    val ayahNumber: Int? = null,
+    val currentPositionMs: Long = 0L
 ) {
     val hasReaderNavigation: Boolean = chapterNumber != null && chapterNumber > 0
 }
@@ -106,9 +107,9 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
                     val dur = player.duration.coerceAtLeast(0L)
                     val pos = player.currentPosition.coerceAtLeast(0L)
                     val progress = if (dur > 0L) (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f) else 0f
-                    _state.value = _state.value.copy(progress = progress, durationMs = dur)
+                    _state.value = _state.value.copy(progress = progress, durationMs = dur, currentPositionMs = pos)
                 }
-                delay(250L)
+                delay(100L)
             }
         }
     }
