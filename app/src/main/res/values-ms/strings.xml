@@ -613,4 +613,23 @@
     <string name="delete_account">Padam Akaun</string>
     <string name="onboarding_prayer_config_title">Notifikasi Solat</string>
     <string name="onboarding_prayer_config_body">Pilih solat mana yang menggunakan suara Azan. Jika dimatikan, akan menggunakan suara notifikasi standard.</string>
+
+    <!-- Coach Mark -->
+    <string name="coach_mark_skip">Langkau</string>
+    <string name="coach_mark_next">Seterusnya</string>
+    <string name="coach_mark_finish">Selesai</string>
+    <string name="coach_mark_today_location_title">Lokasi &amp; Tarikh</string>
+    <string name="coach_mark_today_location_desc">Pantau waktu solat dengan tepat mengikut bandar dan tarikh semasa anda.</string>
+    <string name="coach_mark_today_khgt_title">Hari-Hari Penting Islam</string>
+    <string name="coach_mark_today_khgt_desc">Dapatkan maklumat mengenai tarikh dan peristiwa penting dalam kalendar Islam.</string>
+    <string name="coach_mark_today_prayer_title">Jadual Solat</string>
+    <string name="coach_mark_today_prayer_desc">Pantau jadual solat harian, kiraan mundur ke solat seterusnya, dan arah kiblat.</string>
+    <string name="coach_mark_today_tracker_title">Penjejak Ibadah Harian</string>
+    <string name="coach_mark_today_tracker_desc">Catat ibadah harian anda, dari solat wajib, sunnah, hingga puasa dengan mudah.</string>
+    <string name="coach_mark_today_continue_title">Teruskan Membaca</string>
+    <string name="coach_mark_today_continue_desc">Sambung sesi bacaan Al-Quran tepat pada ayat terakhir yang anda baca.</string>
+    <string name="coach_mark_today_verse_title">Ayat Hari Ini</string>
+    <string name="coach_mark_today_verse_desc">Dengar bacaan murottal, baca tafsir, dan kongsi inspirasi Al-Quran harian dengan bantuan AI.</string>
+    <string name="coach_mark_quran_menu_title">Menu Tindakan Ayat</string>
+    <string name="coach_mark_quran_menu_desc">Ketuk untuk mengakses Penanda Buku, Nota, Hifz hafalan, Tafsir, dan perkongsian audio.</string>
 </resources>

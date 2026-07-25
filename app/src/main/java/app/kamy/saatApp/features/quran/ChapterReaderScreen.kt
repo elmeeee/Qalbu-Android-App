@@ -79,6 +79,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -155,6 +156,7 @@ fun ChapterReaderScreen(
     val onboardingStore = remember { ReaderOnboardingStore.from(context) }
     var showScrollHint by remember { mutableStateOf(!onboardingStore.hasShownScrollHint()) }
     val coachMarkState = rememberCoachMarkState()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         if (!onboardingStore.hasShownQuranCoachMark()) {
@@ -243,20 +245,24 @@ fun ChapterReaderScreen(
         }
     }
 
-    LaunchedEffect(vm, pagerState) {
+    LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
                 is ReaderEvent.AnimateToPage -> {
                     val verses = vm.state.value.verses
                     if (event.index in verses.indices) {
-                        pagerState.animateScrollToPage(event.index)
+                        scope.launch {
+                            runCatching { pagerState.animateScrollToPage(event.index) }
+                        }
                     }
                 }
                 is ReaderEvent.AutoAdvanceToPage -> {
                     val verses = vm.state.value.verses
                     if (event.nextIndex in verses.indices) {
-                        if (pagerState.currentPage == event.previousIndex) {
-                            pagerState.animateScrollToPage(event.nextIndex)
+                        if (kotlin.math.abs(pagerState.currentPage - event.previousIndex) <= 1) {
+                            scope.launch {
+                                runCatching { pagerState.animateScrollToPage(event.nextIndex) }
+                            }
                         }
                     }
                 }
@@ -292,7 +298,6 @@ fun ChapterReaderScreen(
                 )
             }
         } else if (state.verses.isNotEmpty()) {
-            val scope = androidx.compose.runtime.rememberCoroutineScope()
             VerticalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
@@ -396,8 +401,8 @@ fun ChapterReaderScreen(
                     .coachMarkTarget(
                         coachMarkState,
                         0,
-                        "Menu Ayat",
-                        "Ketuk di sini untuk menyimpan ayat, menandai, dan fitur lainnya."
+                        R.string.coach_mark_quran_menu_title,
+                        R.string.coach_mark_quran_menu_desc
                     ),
                 onBookmark = {
                     verseMenuExpanded.value = false

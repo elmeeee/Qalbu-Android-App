@@ -321,13 +321,27 @@ fun TodayScreen(
                         hijriLabel = prayerState.hijriLabel,
                         gregorianLabel = prayerState.gregorianLabel,
                         onLocationClick = prayerVm::openLocationSheet,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .coachMarkTarget(
+                                coachMarkState,
+                                0,
+                                R.string.coach_mark_today_location_title,
+                                R.string.coach_mark_today_location_desc
+                            )
                     )
                 }
                     item(key = "khgt_banner") {
                         TodayImportantDayBanner(
                             info = prayerState.khgtToday,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp, vertical = 4.dp)
+                                .coachMarkTarget(
+                                    coachMarkState,
+                                    1,
+                                    R.string.coach_mark_today_khgt_title,
+                                    R.string.coach_mark_today_khgt_desc
+                                )
                         )
                     }
                     item(key = "prayer_card") {
@@ -339,9 +353,9 @@ fun TodayScreen(
                                 .padding(horizontal = 20.dp, vertical = 4.dp)
                                 .coachMarkTarget(
                                     coachMarkState,
-                                    0,
-                                    "Jadwal Shalat",
-                                    "Pantau jadwal shalat harian sesuai dengan lokasimu saat ini."
+                                    2,
+                                    R.string.coach_mark_today_prayer_title,
+                                    R.string.coach_mark_today_prayer_desc
                                 )
                         )
                     }
@@ -356,9 +370,9 @@ fun TodayScreen(
                                 .padding(horizontal = 20.dp, vertical = 8.dp)
                                 .coachMarkTarget(
                                     coachMarkState,
-                                    1,
-                                    "Daily Tracker",
-                                    "Catat ibadah harianmu, dari shalat wajib, sunnah, hingga puasa."
+                                    3,
+                                    R.string.coach_mark_today_tracker_title,
+                                    R.string.coach_mark_today_tracker_desc
                                 )
                         )
                     }
@@ -371,7 +385,14 @@ fun TodayScreen(
                                 onTap = {
                                     onOpenChapterReader(session.chapterNumber, session.verseNumber)
                                 },
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp, vertical = 6.dp)
+                                    .coachMarkTarget(
+                                        coachMarkState,
+                                        4,
+                                        R.string.coach_mark_today_continue_title,
+                                        R.string.coach_mark_today_continue_desc
+                                    )
                             )
                         }
                     }
@@ -414,7 +435,14 @@ fun TodayScreen(
                             aiShareLoading = todayState.aiShareLoading,
                             onAiShare = { todayVm.openAiShare() },
                             onTafsir = { todayVm.openTafsir() },
-                            onRetry = { scope.launch { todayVm.refreshContent(refreshTranslation = true) } }
+                            onRetry = { scope.launch { todayVm.refreshContent(refreshTranslation = true) } },
+                            modifier = Modifier
+                                .coachMarkTarget(
+                                    coachMarkState,
+                                    5,
+                                    R.string.coach_mark_today_verse_title,
+                                    R.string.coach_mark_today_verse_desc
+                                )
                         )
                     }
             }

@@ -650,4 +650,23 @@
     <string name="privacy_policy_effective">Berlaku Sejak: 1 Juli 2026</string>
     <string name="terms_effective">Berlaku Sejak: 1 Juli 2026</string>
     <string name="delete_account">Hapus Akun</string>
+
+    <!-- Coach Mark -->
+    <string name="coach_mark_skip">Lewati</string>
+    <string name="coach_mark_next">Lanjut</string>
+    <string name="coach_mark_finish">Selesai</string>
+    <string name="coach_mark_today_location_title">Lokasi &amp; Tanggal</string>
+    <string name="coach_mark_today_location_desc">Pantau waktu shalat secara akurat sesuai dengan kota dan tanggal saat ini.</string>
+    <string name="coach_mark_today_khgt_title">Hari-Hari Penting Islam</string>
+    <string name="coach_mark_today_khgt_desc">Dapatkan informasi mengenai tanggal dan peristiwa penting dalam kalender Islam.</string>
+    <string name="coach_mark_today_prayer_title">Jadwal Shalat</string>
+    <string name="coach_mark_today_prayer_desc">Pantau jadwal shalat harian, hitung mundur ke waktu shalat berikutnya, dan arah kiblat.</string>
+    <string name="coach_mark_today_tracker_title">Tracker Ibadah Harian</string>
+    <string name="coach_mark_today_tracker_desc">Catat ibadah harianmu, dari shalat wajib, sunnah, hingga puasa dengan mudah.</string>
+    <string name="coach_mark_today_continue_title">Lanjutkan Membaca</string>
+    <string name="coach_mark_today_continue_desc">Lanjutkan sesi tilawah Al-Quran tepat di ayat terakhir yang kamu baca.</string>
+    <string name="coach_mark_today_verse_title">Ayat Hari Ini</string>
+    <string name="coach_mark_today_verse_desc">Dengarkan murottal, baca tafsir, dan bagikan inspirasi Al-Quran harian dengan bantuan AI.</string>
+    <string name="coach_mark_quran_menu_title">Menu Aksi Ayat</string>
+    <string name="coach_mark_quran_menu_desc">Ketuk untuk mengakses Bookmark, Catatan, Hifz hafalan, Tafsir, dan membagikan audio.</string>
 </resources>
