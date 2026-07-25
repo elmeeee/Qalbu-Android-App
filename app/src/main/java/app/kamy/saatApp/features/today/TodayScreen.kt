@@ -81,6 +81,9 @@ import app.kamy.saatApp.features.today.components.TodayVerseOfDaySection
 import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
 import app.kamy.saatApp.features.share.AiShareSheet
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.ui.layout.floatingNavAndAudioBottomPadding
@@ -131,10 +134,20 @@ fun TodayScreen(
     val shareReflectionLabel = stringResource(R.string.share_reflection)
     val profileStillLoading = stringResource(R.string.profile_still_loading)
     val verseOfDayTitle = stringResource(R.string.verse_of_day)
-    val onboardingComplete = remember { OnboardingStore.from(context).isComplete() }
-    val permissionsHandledInOnboarding = remember { OnboardingStore.from(context).permissionsHandledInOnboarding() }
+    val onboardingStore = remember { OnboardingStore.from(context) }
+    val onboardingComplete = remember { onboardingStore.isComplete() }
+    val permissionsHandledInOnboarding = remember { onboardingStore.permissionsHandledInOnboarding() }
     val hasManualLocation = remember {
         LocationPreferencesStore.from(context).mode() == LocationMode.MANUAL
+    }
+    
+    val coachMarkState = rememberCoachMarkState()
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownHomeCoachMark()) {
+            kotlinx.coroutines.delay(1000)
+            coachMarkState.show()
+            onboardingStore.markHomeCoachMarkShown()
+        }
     }
 
     suspend fun showNotificationSettingsSnackbar() {
@@ -322,7 +335,14 @@ fun TodayScreen(
                             state = prayerState,
                             onRetry = { scope.launch { prayerVm.refresh(force = true) } },
                             onOpenCalendar = onOpenPrayerCalendar,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp, vertical = 4.dp)
+                                .coachMarkTarget(
+                                    coachMarkState,
+                                    0,
+                                    "Jadwal Shalat",
+                                    "Pantau jadwal shalat harian sesuai dengan lokasimu saat ini."
+                                )
                         )
                     }
 
@@ -332,7 +352,14 @@ fun TodayScreen(
                             onTogglePrayer = trackerVm::togglePrayer,
                             onToggleOptional = trackerVm::toggleOptionalHabit,
                             onOpenCalendar = onOpenTrackerCalendar,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp, vertical = 8.dp)
+                                .coachMarkTarget(
+                                    coachMarkState,
+                                    1,
+                                    "Daily Tracker",
+                                    "Catat ibadah harianmu, dari shalat wajib, sunnah, hingga puasa."
+                                )
                         )
                     }
 
@@ -458,6 +485,7 @@ fun TodayScreen(
             }
         }
     )
+    CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable

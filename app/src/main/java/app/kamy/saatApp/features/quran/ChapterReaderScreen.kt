@@ -126,6 +126,9 @@ import app.kamy.saatApp.ui.common.TajweedTextAlign
 import app.kamy.saatApp.ui.common.TransliterationView
 import app.kamy.saatApp.ui.common.toVerseTranslationPlainText
 import app.kamy.saatApp.infrastructure.preferences.ReaderOnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
 import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -151,6 +154,15 @@ fun ChapterReaderScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val onboardingStore = remember { ReaderOnboardingStore.from(context) }
     var showScrollHint by remember { mutableStateOf(!onboardingStore.hasShownScrollHint()) }
+    val coachMarkState = rememberCoachMarkState()
+
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownQuranCoachMark()) {
+            kotlinx.coroutines.delay(1000)
+            coachMarkState.show()
+            onboardingStore.markQuranCoachMarkShown()
+        }
+    }
 
     fun dismissScrollHint() {
         if (!showScrollHint) return
@@ -380,7 +392,13 @@ fun ChapterReaderScreen(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
-                    .padding(end = 10.dp, bottom = readerActionsBottom),
+                    .padding(end = 10.dp, bottom = readerActionsBottom)
+                    .coachMarkTarget(
+                        coachMarkState,
+                        0,
+                        "Menu Ayat",
+                        "Ketuk di sini untuk menyimpan ayat, menandai, dan fitur lainnya."
+                    ),
                 onBookmark = {
                     verseMenuExpanded.value = false
                     vm.toggleBookmark(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
@@ -595,6 +613,7 @@ fun ChapterReaderScreen(
             )
         }
     }
+    CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable
