@@ -62,9 +62,27 @@
         </activity>
 
         <!--
+            Dedicated lightweight Activity for the adhan full-screen alarm overlay.
+            showWhenLocked + turnScreenOn are the reliable way to appear above the lock
+            screen on API 27+ without requiring FLAG_DISMISS_KEYGUARD.
+            excludeFromRecents keeps it out of the recent-apps switcher.
+            singleInstance ensures only one alarm screen exists at a time.
+        -->
+        <activity
+            android:name=".AdhanAlarmActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:theme="@style/Theme.Saat"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+
+        <!--
             AppAuth's RedirectUriReceiverActivity catches the OAuth callback.
             Scheme must match QF_OAUTH_APP_CALLBACK_URL ("Saat://oauth/callback").
         -->
+
         <activity
             android:name="net.openid.appauth.RedirectUriReceiverActivity"
             android:exported="true"

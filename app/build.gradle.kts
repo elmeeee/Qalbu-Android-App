@@ -86,7 +86,7 @@ android {
             buildConfigField("String", "QF_ALADHAN_ROOT", "\"https://api.aladhan.com\"")
             buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "1")
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
-            buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "qwen/qwen3-32b")}\"")
+            buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "openai/gpt-oss-20b")}\"")
         }
         release {
             isMinifyEnabled = true
@@ -121,7 +121,7 @@ android {
             buildConfigField("String", "QF_ALADHAN_ROOT", "\"https://api.aladhan.com\"")
             buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "1")
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
-            buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "qwen/qwen3-32b")}\"")
+            buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "openai/gpt-oss-20b")}\"")
         }
     }
 

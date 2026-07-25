@@ -22,6 +22,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import app.kamy.saatApp.AdhanAlarmActivity
 import app.kamy.saatApp.MainActivity
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLocale
@@ -256,16 +257,17 @@ class AdhanPlaybackService : Service() {
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .apply {
-                val fullScreenIntent = Intent(this@AdhanPlaybackService, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    putExtra("from_adhan_full_screen", true)
-                    putExtra("adhan_title", title.ifBlank { getString(R.string.adhan_playback_title) })
-                    putExtra("adhan_body", body.ifBlank { getString(R.string.adhan_playback_body) })
-                }
+                // Use AdhanAlarmActivity — a lightweight dedicated alarm screen.
+                // Request code must differ from the contentIntent above (which uses 0)
+                // to prevent Android from deduplicating the PendingIntents and stripping extras.
                 val fullScreenPendingIntent = PendingIntent.getActivity(
                     this@AdhanPlaybackService,
-                    0,
-                    fullScreenIntent,
+                    NOTIFICATION_ID + 1_000, // unique request code — NEVER 0
+                    AdhanAlarmActivity.intent(
+                        context = this@AdhanPlaybackService,
+                        title = title.ifBlank { getString(R.string.adhan_playback_title) },
+                        body = body.ifBlank { getString(R.string.adhan_playback_body) }
+                    ),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
                 setFullScreenIntent(fullScreenPendingIntent, true)

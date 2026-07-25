@@ -2,9 +2,7 @@ package app.kamy.saatApp
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,8 +26,6 @@ import javax.inject.Inject
 import androidx.compose.runtime.collectAsState
 import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
 import app.kamy.saatApp.infrastructure.review.AppReviewManager
-import app.kamy.saatApp.ui.adhan.AdhanFullScreenOverlay
-import app.kamy.saatApp.infrastructure.audio.AdhanStopReceiver
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -38,7 +34,6 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var themePreferencesStore: ThemePreferencesStore
 
     private val deepLinkRoute = mutableStateOf<String?>(null)
-    private var currentIntent by mutableStateOf<Intent?>(null)
 
     override fun attachBaseContext(newBase: Context) {
         val language = AppLanguageStore.from(newBase).current()
@@ -50,49 +45,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AppReviewManager.recordAppLaunch(applicationContext)
 
-        if (intent.getBooleanExtra("from_adhan_full_screen", false)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                setShowWhenLocked(true)
-                setTurnScreenOn(true)
-            } else {
-                @Suppress("DEPRECATION")
-                window.addFlags(
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                )
-            }
-        }
-
-        currentIntent = intent
-
         enableEdgeToEdge()
         val needsOnboarding = !onboardingStore.isComplete()
         setContent {
-            val resolvedIntent = currentIntent ?: intent
-            val isAdhanFullScreen = resolvedIntent.getBooleanExtra("from_adhan_full_screen", false)
-            val adhanTitle = resolvedIntent.getStringExtra("adhan_title") ?: ""
-            val adhanBody = resolvedIntent.getStringExtra("adhan_body") ?: ""
-
-            var showGreetingSplash by rememberSaveable { mutableStateOf(true) }
-            var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
             val pendingRoute by deepLinkRoute
             val currentTheme by themePreferencesStore.themeFlow.collectAsState(initial = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
 
+            var showGreetingSplash by rememberSaveable { mutableStateOf(true) }
+            var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
+
             SaatTheme(theme = currentTheme) {
-                if (isAdhanFullScreen) {
-                    AdhanFullScreenOverlay(
-                        title = adhanTitle,
-                        body = adhanBody,
-                        onStopClick = {
-                            sendBroadcast(Intent(this@MainActivity, AdhanStopReceiver::class.java).apply {
-                                action = AdhanStopReceiver.ACTION_STOP
-                            })
-                            finish()
-                        }
-                    )
-                } else {
-                    when {
+                when {
                     showGreetingSplash -> AppSplashScreen(onFinished = { showGreetingSplash = false })
                     showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })
                     else -> {
@@ -105,7 +68,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-            }
         }
     }
 
@@ -113,20 +75,5 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         deepLinkRoute.value = DeepLinkRoutes.fromIntent(intent)
-        currentIntent = intent
-
-        if (intent.getBooleanExtra("from_adhan_full_screen", false)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                setShowWhenLocked(true)
-                setTurnScreenOn(true)
-            } else {
-                @Suppress("DEPRECATION")
-                window.addFlags(
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                )
-            }
-        }
     }
 }
