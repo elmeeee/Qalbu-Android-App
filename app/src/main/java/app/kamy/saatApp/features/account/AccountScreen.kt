@@ -110,6 +110,7 @@ import android.webkit.WebViewClient
 import androidx.compose.ui.viewinterop.AndroidView
 import app.kamy.saatApp.domain.adhan.AdhanVoice
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
+import app.kamy.saatApp.domain.adhan.FajrAdhanVoice
 import app.kamy.saatApp.domain.model.QFTranslation
 import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.saatApp.domain.prayer.PrayerMethodOption
@@ -301,9 +302,12 @@ fun AccountScreen(
     if (state.showAdhanSheet) {
         AdhanVoiceSheet(
             selected = state.selectedAdhanVoice,
+            selectedFajr = state.selectedFajrVoice,
             previewingVoiceId = state.previewingAdhanVoiceId,
             onSelect = vm::selectAdhanVoice,
+            onSelectFajr = vm::selectFajrVoice,
             onPreview = vm::toggleAdhanPreview,
+            onPreviewFajr = vm::toggleFajrPreview,
             onDismiss = vm::closeAdhanSheet
         )
     }
@@ -1096,9 +1100,12 @@ private fun PrayerMethodSheet(
 @Composable
 private fun AdhanVoiceSheet(
     selected: AdhanVoice,
+    selectedFajr: FajrAdhanVoice,
     previewingVoiceId: String?,
     onSelect: (AdhanVoice) -> Unit,
+    onSelectFajr: (FajrAdhanVoice) -> Unit,
     onPreview: (AdhanVoice) -> Unit,
+    onPreviewFajr: (FajrAdhanVoice) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -1115,79 +1122,109 @@ private fun AdhanVoiceSheet(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
+
+            // ── Fajr (Subuh) section ──────────────────────────────────────────
             Text(
-                stringResource(R.string.adhan_voice_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
+                stringResource(R.string.subuh_fajr),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            SaatCard(
-                modifier = Modifier.fillMaxWidth(),
-                style = SaatCardStyle.Filled,
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-            ) {
-                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        stringResource(R.string.subuh_fajr),
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        AdhanVoiceCatalog.fajrDisplayName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        stringResource(R.string.adhan_fajr_fixed_note),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                FajrAdhanVoice.selectable.forEach { voice ->
+                    val isSelected = voice == selectedFajr
+                    val isPreviewing = previewingVoiceId == voice.id
+                    AdhanVoiceRow(
+                        displayName = voice.displayName,
+                        isDefault = voice == FajrAdhanVoice.DEFAULT,
+                        isSelected = isSelected,
+                        isPreviewing = isPreviewing,
+                        onClick = { onSelectFajr(voice) },
+                        onPreview = { onPreviewFajr(voice) }
                     )
                 }
             }
+
+            // ── Other prayers section ─────────────────────────────────────────
+            Text(
+                stringResource(R.string.adhan_voice_subtitle),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(360.dp),
+                    .height(320.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 items(AdhanVoice.selectable, key = { it.id }) { voice ->
                     val isSelected = voice == selected
                     val isPreviewing = previewingVoiceId == voice.id
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
-                            )
-                            .clickable { onSelect(voice) }
-                            .padding(horizontal = 8.dp, vertical = 10.dp)
-                    ) {
-                        Column(Modifier.weight(1f).padding(horizontal = 6.dp)) {
-                            Text(voice.displayName, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium)
-                            if (voice == AdhanVoice.DEFAULT) {
-                                Text(
-                                    stringResource(R.string.default_label),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                        IconButton(onClick = { onPreview(voice) }) {
-                            val stopPreviewLabel = stringResource(R.string.stop_preview)
-                            val previewAdhanLabel = stringResource(R.string.preview_adhan)
-                            Icon(
-                                imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                                contentDescription = if (isPreviewing) stopPreviewLabel else previewAdhanLabel,
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-                        }
-                        if (isSelected) {
-                            Text("✓", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 8.dp))
-                        }
-                    }
+                    AdhanVoiceRow(
+                        displayName = voice.displayName,
+                        isDefault = voice == AdhanVoice.DEFAULT,
+                        isSelected = isSelected,
+                        isPreviewing = isPreviewing,
+                        onClick = { onSelect(voice) },
+                        onPreview = { onPreview(voice) }
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AdhanVoiceRow(
+    displayName: String,
+    isDefault: Boolean,
+    isSelected: Boolean,
+    isPreviewing: Boolean,
+    onClick: () -> Unit,
+    onPreview: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(
+                if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 10.dp)
+    ) {
+        Column(Modifier.weight(1f).padding(horizontal = 6.dp)) {
+            Text(
+                displayName,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Medium
+            )
+            if (isDefault) {
+                Text(
+                    stringResource(R.string.default_label),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        IconButton(onClick = { onPreview() }) {
+            val stopPreviewLabel = stringResource(R.string.stop_preview)
+            val previewAdhanLabel = stringResource(R.string.preview_adhan)
+            Icon(
+                imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                contentDescription = if (isPreviewing) stopPreviewLabel else previewAdhanLabel,
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
+        if (isSelected) {
+            Text(
+                "✓",
+                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(end = 8.dp)
+            )
         }
     }
 }

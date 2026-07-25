@@ -336,7 +336,6 @@ struct ProfileView: View {
         switch selectedAdhanSound {
         case "default": return languageManager.localize("system_default")
         case "adhan_ust_daeng_syawal_indonesia": return "Ust. Daeng Syawal (ID)"
-        case "adhan_ustaz_sadid_ahmad_dahri_singapore": return "Ust. Sadid Ahmad Dahri (SG)"
         case "adhan_omar_hisham_al_arabi": return "Omar Hisham Al Arabi"
         case "adhan_sheikh_abdul_karim_malaysia": return "Sheikh Abdul Karim (MY)"
         case "adhan_fajr_mishary_alafasy": return "Mishary Alafasy (Fajr)"

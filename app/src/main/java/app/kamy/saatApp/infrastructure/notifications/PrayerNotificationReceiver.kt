@@ -34,8 +34,10 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         var adhanPlaying = false
         var adhanRawRes: Int? = null
         if (shouldPlayAdhan && !prayerName.isNullOrBlank()) {
-            val voice = AdhanPreferencesStore.from(appContext).currentVoice()
-            val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice)
+            val store = AdhanPreferencesStore.from(appContext)
+            val voice = store.currentVoice()
+            val fajrVoice = store.currentFajrVoice()
+            val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice, fajrVoice)
             adhanRawRes = rawRes
             adhanPlaying = AdhanPlaybackService.start(
                 context = appContext,

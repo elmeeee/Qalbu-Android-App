@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.domain.adhan.AdhanVoice
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
+import app.kamy.saatApp.domain.adhan.FajrAdhanVoice
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.domain.model.QFTranslation
 import app.kamy.saatApp.domain.model.UserProfilePayload
@@ -106,6 +107,7 @@ data class AccountUiState(
     val prayerMadhab: app.kamy.saatApp.domain.prayer.PrayerMadhab = app.kamy.saatApp.domain.prayer.PrayerMadhab.SHAFI,
     val showMadhabSheet: Boolean = false,
     val selectedAdhanVoice: AdhanVoice = AdhanVoice.DEFAULT,
+    val selectedFajrVoice: FajrAdhanVoice = FajrAdhanVoice.DEFAULT,
     val previewingAdhanVoiceId: String? = null,
     val showFollowersSheet: Boolean = false,
     val followers: List<UserProfilePayload> = emptyList(),
@@ -237,6 +239,11 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             adhanPrefs.selectedVoice.collect { voice ->
                 _state.update { it.copy(selectedAdhanVoice = voice) }
+            }
+        }
+        viewModelScope.launch {
+            adhanPrefs.selectedFajrVoice.collect { voice ->
+                _state.update { it.copy(selectedFajrVoice = voice) }
             }
         }
         viewModelScope.launch {
@@ -664,7 +671,16 @@ class AccountViewModel @Inject constructor(
         adhanPreviewPlayer.stop()
     }
 
+    fun selectFajrVoice(voice: FajrAdhanVoice) {
+        adhanPrefs.setFajrVoice(voice)
+        adhanPreviewPlayer.stop()
+    }
+
     fun toggleAdhanPreview(voice: AdhanVoice) {
+        adhanPreviewPlayer.togglePreview(voice.id, AdhanVoiceCatalog.rawResForPreview(voice))
+    }
+
+    fun toggleFajrPreview(voice: FajrAdhanVoice) {
         adhanPreviewPlayer.togglePreview(voice.id, AdhanVoiceCatalog.rawResForPreview(voice))
     }
 

@@ -154,7 +154,6 @@
     <string name="adhan_playback_body">Memainkan panggilan solat</string>
     <string name="adhan_stop">Hentikan azan</string>
     <string name="adhan_voice_subtitle">Zohor, Asar, Maghrib &amp; Isyak</string>
-    <string name="adhan_fajr_fixed_note">Subuh sentiasa menggunakan Mishary Rashid Alafasy dan tidak boleh ditukar.</string>
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Benarkan penggera tepat supaya azan dan peringatan solat sampai tepat masa.</string>
     <string name="exact_alarm_rationale_title">Peringatan solat tepat masa</string>
