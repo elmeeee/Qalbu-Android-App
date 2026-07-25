@@ -16,12 +16,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbTwilight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,8 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import app.kamy.saatApp.BuildConfig
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.PrayerType
+import app.kamy.saatApp.infrastructure.audio.AdhanPlaybackService
 import app.kamy.saatApp.infrastructure.notifications.AppNotificationCopy
 import app.kamy.saatApp.ui.permissions.hasAggressiveOemBatteryManagement
 import app.kamy.saatApp.ui.permissions.isIgnoringBatteryOptimizations
@@ -41,6 +45,8 @@ import app.kamy.saatApp.design.components.SaatSettingsGroup
 import app.kamy.saatApp.design.components.SaatSettingsNavigationRow
 import app.kamy.saatApp.design.components.SaatSettingsToggleRow
 import app.kamy.saatApp.design.theme.SaatSpacing
+import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
+import app.kamy.saatApp.infrastructure.preferences.AdhanPreferencesStore
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 @Composable
@@ -149,6 +155,31 @@ fun NotificationSettingsScreen(
                 checked = state.imsakEnabled,
                 onCheckedChange = vm::setImsakEnabled
             )
+        }
+
+        // Debug-only: test adhan full-screen intent without waiting for prayer time.
+        if (BuildConfig.DEBUG) {
+            NotificationSectionLabel("🐞 Debug")
+            SaatSettingsGroup {
+                val ctx = LocalContext.current
+                SaatSettingsNavigationRow(
+                    icon = Icons.Filled.BugReport,
+                    title = "Test Adzan Alarm (Full Screen)",
+                    subtitle = "Simulasi adzan seperti alarm nyata",
+                    onClick = {
+                        val store = AdhanPreferencesStore.from(ctx)
+                        val voice = store.currentVoice()
+                        val fajrVoice = store.currentFajrVoice()
+                        val rawRes = AdhanVoiceCatalog.rawResForPrayer("Maghrib", voice, fajrVoice)
+                        AdhanPlaybackService.start(
+                            context = ctx,
+                            rawRes = rawRes,
+                            title = "Maghrib • (Test)",
+                            body = "Waktunya salat Maghrib"
+                        )
+                    }
+                )
+            }
         }
 
         NotificationSectionLabel(stringResource(R.string.section_night))
