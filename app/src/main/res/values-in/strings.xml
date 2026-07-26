@@ -148,14 +148,14 @@
     <string name="channel_sunnah">Bacaan sunnah</string>
     <string name="channel_sunnah_desc">Pengingat bacaan surah mingguan</string>
 
-    <string name="prayer_notif_title">Saatnya %1$s · %2$s</string>
-    <string name="prayer_body_fajr">Dunia masih tidur. Anda belum tentu.</string>
-    <string name="prayer_body_dhuhr">Berhenti sejenak. Sholat. Lalu lanjutkan.</string>
-    <string name="prayer_body_asr">Malaikat menyaksikan. Jangan lewatkan sholat ini.</string>
-    <string name="prayer_body_maghrib">Matahari baru terbenam. Sholat ini tidak bisa ditunda.</string>
-    <string name="prayer_body_isha">Akhiri hari dengan cara yang benar.</string>
-    <string name="prayer_body_imsak">Persiapkan puasa. Fajar sudah dekat.</string>
-    <string name="prayer_body_default">Sekarang saatnya sholat %1$s.</string>
+    <string name="prayer_notif_title">%1$s • %2$s</string>
+    <string name="prayer_body_fajr">SAATnya shalat Subuh</string>
+    <string name="prayer_body_dhuhr">SAATnya shalat Dzuhur</string>
+    <string name="prayer_body_asr">SAATnya shalat Ashar</string>
+    <string name="prayer_body_maghrib">SAATnya shalat Maghrib</string>
+    <string name="prayer_body_isha">SAATnya shalat Isya</string>
+    <string name="prayer_body_imsak">SAATnya Imsak</string>
+    <string name="prayer_body_default">SAATnya shalat %1$s</string>
     <string name="night_midnight_title">🌙 Tengah Malam</string>
     <string name="night_midnight_body">Malam sudah setengah. Sholat Witir sebelum tidur — jangan sampai terlewat.</string>
     <string name="night_first_third_title">🌃 Malam Dimulai</string>

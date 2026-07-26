@@ -47,6 +47,7 @@ import app.kamy.saatApp.design.components.SaatSettingsToggleRow
 import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.saatApp.infrastructure.preferences.AdhanPreferencesStore
+import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 @Composable
@@ -171,11 +172,14 @@ fun NotificationSettingsScreen(
                         val voice = store.currentVoice()
                         val fajrVoice = store.currentFajrVoice()
                         val rawRes = AdhanVoiceCatalog.rawResForPrayer("Maghrib", voice, fajrVoice)
+                        val locationLabel = LocationPreferencesStore.from(ctx).displayLabel() ?: "Jakarta"
+                        val maghribName = AppNotificationCopy.prayerDisplayName(ctx, "Maghrib")
+                        val bodyText = AppNotificationCopy.prayerBody(ctx, "Maghrib")
                         AdhanPlaybackService.start(
                             context = ctx,
                             rawRes = rawRes,
-                            title = "Maghrib • (Test)",
-                            body = "Waktunya salat Maghrib"
+                            title = "$maghribName • $locationLabel",
+                            body = bodyText
                         )
                     }
                 )
