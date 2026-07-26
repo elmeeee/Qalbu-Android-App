@@ -342,146 +342,148 @@ fun ChaptersScreen(
                                 }
                             }
                         } else {
-                            item(key = "khatam_header") {
-                                val readCount = state.readJuzs.size
-                                val totalJuzs = 30
-                                val progressFraction = readCount.toFloat() / totalJuzs.toFloat()
-                                val percentage = (progressFraction * 100).toInt()
-                                
-                                Surface(
-                                    onClick = {
-                                        val targetJuz = state.lastReadJuz ?: 1
-                                        val targetKey = state.lastReadVerseKey
-                                        onOpenJuz(targetJuz, targetKey)
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
-                                    shape = RoundedCornerShape(16.dp),
-                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = androidx.compose.material.icons.Icons.Default.Bookmark,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.khatam_progress_title),
-                                                    style = MaterialTheme.typography.titleSmall,
-                                                    fontWeight = FontWeight.Bold,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                            }
-                                            Text(
-                                                text = "$percentage%",
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.ExtraBold,
-                                                color = MaterialTheme.colorScheme.primary
-                                            )
-                                        }
-                                        Spacer(Modifier.height(10.dp))
-                                        androidx.compose.material3.LinearProgressIndicator(
-                                            progress = { progressFraction },
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(8.dp)
-                                                .clip(RoundedCornerShape(4.dp)),
-                                            color = MaterialTheme.colorScheme.primary,
-                                            trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                        )
-                                        Spacer(Modifier.height(8.dp))
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                text = stringResource(R.string.khatam_progress, readCount),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                            state.lastReadJuz?.let { juz ->
-                                                val ayahNum = state.lastReadVerseKey?.substringAfter(":")?.toIntOrNull() ?: 1
-                                                Text(
-                                                    text = stringResource(R.string.khatam_last_read, juz, ayahNum),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    fontWeight = FontWeight.SemiBold,
-                                                    color = MaterialTheme.colorScheme.primary
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                             when (state.browseMode) {
                                 QuranBrowseMode.SURAH -> {
                                     items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
-                                    ChapterRow(
-                                        chapter = chapter,
-                                        isRead = chapter.id in state.readChapters,
-                                        onClick = { onOpenChapter(chapter, null) },
-                                        modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
-                                    )
-                                }
-                            }
-                            QuranBrowseMode.JUZ -> when {
-                                state.juzsLoading && state.juzs.isEmpty() -> {
-                                    items(10, key = { "juz_skeleton_$it" }) { index ->
-                                        ChapterRowSkeleton(
+                                        ChapterRow(
+                                            chapter = chapter,
+                                            isRead = chapter.id in state.readChapters,
+                                            onClick = { onOpenChapter(chapter, null) },
                                             modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                         )
-                                        if (index < 9) {
-                                            HorizontalDivider(
-                                                modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
-                                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-                                            )
-                                        }
                                     }
                                 }
-                                state.juzsError != null && state.juzs.isEmpty() -> {
-                                    item(key = "juz_error") {
-                                        val juzErrorDisplay = state.juzsError.rememberErrorDisplay(R.string.juz_load_failed)
-                                        if (juzErrorDisplay != null) {
-                                            SaatErrorState(
-                                                display = juzErrorDisplay,
-                                                onRetry = { vm.reloadJuzs() },
-                                                modifier = Modifier.padding(
-                                                    horizontal = SaatSpacing.screenHorizontal,
-                                                    vertical = 24.dp
+                                QuranBrowseMode.JUZ -> {
+                                    item(key = "khatam_header") {
+                                        val readCount = state.readJuzs.size
+                                        val totalJuzs = 30
+                                        val progressFraction = readCount.toFloat() / totalJuzs.toFloat()
+                                        val percentage = (progressFraction * 100).toInt()
+                                        
+                                        Surface(
+                                            onClick = {
+                                                val targetJuz = state.lastReadJuz ?: 1
+                                                val targetKey = state.lastReadVerseKey
+                                                onOpenJuz(targetJuz, targetKey)
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
+                                            shape = RoundedCornerShape(16.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                                            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp)
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = androidx.compose.material.icons.Icons.Default.Bookmark,
+                                                            contentDescription = null,
+                                                            tint = MaterialTheme.colorScheme.primary,
+                                                            modifier = Modifier.size(18.dp)
+                                                        )
+                                                        Text(
+                                                            text = stringResource(R.string.khatam_progress_title),
+                                                            style = MaterialTheme.typography.titleSmall,
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = MaterialTheme.colorScheme.onSurface
+                                                        )
+                                                    }
+                                                    Text(
+                                                        text = "$percentage%",
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                        fontWeight = FontWeight.ExtraBold,
+                                                        color = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
+                                                Spacer(Modifier.height(10.dp))
+                                                androidx.compose.material3.LinearProgressIndicator(
+                                                    progress = { progressFraction },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(8.dp)
+                                                        .clip(RoundedCornerShape(4.dp)),
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                                                 )
-                                            )
+                                                Spacer(Modifier.height(8.dp))
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.khatam_progress, readCount),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    state.lastReadJuz?.let { juz ->
+                                                        val ayahNum = state.lastReadVerseKey?.substringAfter(":")?.toIntOrNull() ?: 1
+                                                        Text(
+                                                            text = stringResource(R.string.khatam_last_read, juz, ayahNum),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.primary
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    when {
+                                        state.juzsLoading && state.juzs.isEmpty() -> {
+                                            items(10, key = { "juz_skeleton_$it" }) { index ->
+                                                ChapterRowSkeleton(
+                                                    modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
+                                                )
+                                                if (index < 9) {
+                                                    HorizontalDivider(
+                                                        modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
+                                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        state.juzsError != null && state.juzs.isEmpty() -> {
+                                            item(key = "juz_error") {
+                                                val juzErrorDisplay = state.juzsError.rememberErrorDisplay(R.string.juz_load_failed)
+                                                if (juzErrorDisplay != null) {
+                                                    SaatErrorState(
+                                                        display = juzErrorDisplay,
+                                                        onRetry = { vm.reloadJuzs() },
+                                                        modifier = Modifier.padding(
+                                                            horizontal = SaatSpacing.screenHorizontal,
+                                                            vertical = 24.dp
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        else -> {
+                                            items(state.juzs, key = { "juz_${it.juzNumber}" }) { juz ->
+                                                JuzRow(
+                                                    juz = juz,
+                                                    chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
+                                                    isRead = juz.juzNumber in state.readJuzs,
+                                                    onClick = { onOpenJuz(juz.juzNumber, null) },
+                                                    modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
+                                                )
+                                            }
                                         }
                                     }
                                 }
-                                else -> {
-                                    items(state.juzs, key = { "juz_${it.juzNumber}" }) { juz ->
-                                        JuzRow(
-                                            juz = juz,
-                                            chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
-                                            isRead = juz.juzNumber in state.readJuzs,
-                                            onClick = { onOpenJuz(juz.juzNumber, null) },
-                                            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
-                                        )
-                                    }
-                                }
                             }
-                        }
                         }
                     }
                     }
