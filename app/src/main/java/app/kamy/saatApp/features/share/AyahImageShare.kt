@@ -207,7 +207,7 @@ object AyahImageShare {
         canvas.drawCircle(circleCenterX, circleCenterY, circleRadius, ringPaint)
 
         // Draw App Icon
-        val iconDrawable = context.resources.getDrawable(R.drawable.splash_icon_adaptive, context.theme).mutate()
+        val iconDrawable = context.resources.getDrawable(R.drawable.splash_icon_display, context.theme).mutate()
         iconDrawable.setBounds(iconX, iconY, iconX + iconSize, iconY + iconSize)
         iconDrawable.draw(canvas)
 

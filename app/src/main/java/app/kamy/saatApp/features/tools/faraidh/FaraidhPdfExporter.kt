@@ -692,7 +692,7 @@ object FaraidhPdfExporter {
     }
 
     private fun loadLogo(context: Context): Bitmap? =
-        runCatching { BitmapFactory.decodeResource(context.resources, R.drawable.splash_screen_saat) }.getOrNull()
+        runCatching { BitmapFactory.decodeResource(context.resources, R.drawable.splash_icon_display) }.getOrNull()
 
     private fun currencyFormat(language: AppLanguage) = NumberFormat.getNumberInstance(localeFor(language)).apply {
         minimumFractionDigits = 2
