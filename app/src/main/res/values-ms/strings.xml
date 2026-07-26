@@ -157,8 +157,9 @@
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Benarkan penggera tepat supaya azan dan peringatan solat sampai tepat masa.</string>
     <string name="exact_alarm_rationale_title">Peringatan solat tepat masa</string>
-    <string name="fullscreen_intent_rationale">Benarkan akses skrin penuh supaya azan dapat menghidupkan skrin anda apabila tiba waktu solat.</string>
-    <string name="fullscreen_intent_rationale_title">Azan Skrin Penuh</string>
+    <string name="fullscreen_intent_rationale">"SĀAT" Ingin Memaparkan Azan Skrin Penuh Apabila Skrin Dikunci.</string>
+    <string name="fullscreen_intent_rationale_title">Paparan Azan Skrin Penuh</string>
+    <string name="action_dont_allow">Jangan Benarkan</string>
     <string name="battery_opt_snackbar_message">Pada sesetengah telefon, benarkan bateri tanpa had supaya azan berfungsi apabila aplikasi ditutup.</string>
     <string name="battery_opt_snackbar_oem_message">Pada telefon %1$s: set SĀAT ke Tanpa had dan dayakan autostart supaya azan berfungsi di latar belakang.</string>
     <string name="battery_opt_settings_title">Latar belakang &amp; bateri</string>

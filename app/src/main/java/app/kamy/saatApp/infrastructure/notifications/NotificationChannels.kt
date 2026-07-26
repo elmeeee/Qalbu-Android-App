@@ -89,6 +89,8 @@ object NotificationChannels {
                 description = context.getString(R.string.adhan_playback_body)
                 setSound(null, null)
                 enableVibration(false)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+                setBypassDnd(true)
             }
         )
         manager.createNotificationChannel(

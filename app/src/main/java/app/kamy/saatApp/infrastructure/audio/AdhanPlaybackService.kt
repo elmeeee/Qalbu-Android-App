@@ -77,6 +77,15 @@ class AdhanPlaybackService : Service() {
                 startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body))
                 acquireWakeLock()
                 startAdhan(rawRes, title, body)
+                runCatching {
+                    startActivity(
+                        AdhanAlarmActivity.intent(
+                            context = this,
+                            title = title.ifBlank { getString(R.string.adhan_playback_title) },
+                            body = body.ifBlank { getString(R.string.adhan_playback_body) }
+                        )
+                    )
+                }
             }
         }
         return START_NOT_STICKY
@@ -253,7 +262,7 @@ class AdhanPlaybackService : Service() {
                 )
             )
             .setOngoing(true)
-            .setSilent(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .apply {

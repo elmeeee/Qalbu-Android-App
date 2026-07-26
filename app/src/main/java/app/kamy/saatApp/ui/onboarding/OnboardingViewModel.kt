@@ -13,6 +13,8 @@ import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.SavedManualLocation
+import app.kamy.saatApp.ui.permissions.canUseFullScreenIntent
+import app.kamy.saatApp.ui.permissions.openFullScreenIntentSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -139,6 +141,9 @@ class OnboardingViewModel @Inject constructor(
     fun onNotificationPermissionResult() {
         onboardingStore.markNotificationsHandled()
         DailyVerseNotificationScheduler.reschedule(appContext)
+        if (!appContext.canUseFullScreenIntent()) {
+            runCatching { appContext.openFullScreenIntentSettings() }
+        }
         nextStep()
     }
 

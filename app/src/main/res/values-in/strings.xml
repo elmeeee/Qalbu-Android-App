@@ -177,8 +177,9 @@
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Izinkan alarm tepat agar adzan dan pengingat sholat tiba tepat waktu.</string>
     <string name="exact_alarm_rationale_title">Pengingat sholat tepat waktu</string>
-    <string name="fullscreen_intent_rationale">Izinkan akses layar penuh agar adzan dapat langsung menyalakan layar Anda saat tiba waktu sholat.</string>
-    <string name="fullscreen_intent_rationale_title">Adzan Layar Penuh</string>
+    <string name="fullscreen_intent_rationale">"SĀAT" Ingin Menampilkan Azan Layar Penuh Saat Layar HP Terkunci.</string>
+    <string name="fullscreen_intent_rationale_title">Tampilkan Azan Layar Penuh</string>
+    <string name="action_dont_allow">Jangan Izinkan</string>
     <string name="battery_opt_snackbar_message">Di beberapa HP, izinkan baterai tanpa batas agar adzan berjalan saat app ditutup.</string>
     <string name="battery_opt_snackbar_oem_message">Di HP %1$s: set SĀAT ke Tanpa batas dan aktifkan autostart agar adzan berjalan di latar belakang.</string>
     <string name="battery_opt_settings_title">Latar belakang &amp; baterai</string>
