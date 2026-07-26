@@ -56,6 +56,7 @@ class AdhanAlarmActivity : ComponentActivity() {
 
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
         val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
+        val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
 
         enableEdgeToEdge()
 
@@ -70,6 +71,7 @@ class AdhanAlarmActivity : ComponentActivity() {
                 AdhanFullScreenOverlay(
                     title = title,
                     body = body,
+                    prayerName = prayerName,
                     onStopClick = {
                         sendBroadcast(
                             AdhanStopReceiver.intent(this@AdhanAlarmActivity)
@@ -84,14 +86,23 @@ class AdhanAlarmActivity : ComponentActivity() {
     companion object {
         const val EXTRA_TITLE = "adhan_alarm_title"
         const val EXTRA_BODY = "adhan_alarm_body"
+        const val EXTRA_PRAYER_NAME = "adhan_alarm_prayer_name"
 
-        fun intent(context: Context, title: String, body: String): Intent =
+        fun intent(
+            context: Context,
+            title: String,
+            body: String,
+            prayerName: String? = null
+        ): Intent =
             Intent(context, AdhanAlarmActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_BODY, body)
+                if (!prayerName.isNullOrBlank()) {
+                    putExtra(EXTRA_PRAYER_NAME, prayerName)
+                }
             }
     }
 }

@@ -26,6 +26,7 @@ import kotlin.random.Random
 fun AdhanFullScreenOverlay(
     title: String,
     body: String,
+    prayerName: String? = null,
     onStopClick: () -> Unit
 ) {
     var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
@@ -38,7 +39,9 @@ fun AdhanFullScreenOverlay(
         }
     }
 
-    val backgroundRes = remember { R.drawable.bg_intent }
+    val backgroundRes = remember(prayerName, title) {
+        resolveAdhanBackgroundRes(prayerName = prayerName, title = title)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -109,6 +112,31 @@ fun AdhanFullScreenOverlay(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
+        }
+    }
+}
+
+fun resolveAdhanBackgroundRes(
+    prayerName: String? = null,
+    title: String = ""
+): Int {
+    val query = (prayerName.orEmpty() + " " + title).lowercase(Locale.ROOT)
+    return when {
+        query.contains("fajr") || query.contains("subuh") -> R.drawable.bg_intent_fajr
+        query.contains("dhuhr") || query.contains("dhur") || query.contains("dzuhur") || query.contains("zuhur") || query.contains("zohor") -> R.drawable.bg_intent_dhur
+        query.contains("asr") || query.contains("ashar") || query.contains("asar") -> R.drawable.bg_intent_asr
+        query.contains("maghrib") || query.contains("magrib") -> R.drawable.bg_intent_maghrib
+        query.contains("isha") || query.contains("isya") || query.contains("isyak") -> R.drawable.bg_intent_isha
+        else -> {
+            val cal = Calendar.getInstance()
+            when (cal.get(Calendar.HOUR_OF_DAY)) {
+                in 3..5 -> R.drawable.bg_intent_fajr
+                in 11..13 -> R.drawable.bg_intent_dhur
+                in 14..17 -> R.drawable.bg_intent_asr
+                in 18..19 -> R.drawable.bg_intent_maghrib
+                in 20..23, in 0..2 -> R.drawable.bg_intent_isha
+                else -> R.drawable.bg_intent
+            }
         }
     }
 }

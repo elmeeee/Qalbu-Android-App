@@ -183,7 +183,8 @@ fun NotificationSettingsScreen(
                             context = ctx,
                             rawRes = rawRes,
                             title = "$maghribName • $locationLabel",
-                            body = bodyText
+                            body = bodyText,
+                            prayerName = "Maghrib"
                         )
                     },
                     showDivider = false

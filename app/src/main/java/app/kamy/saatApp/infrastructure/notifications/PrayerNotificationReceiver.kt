@@ -44,7 +44,8 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 rawRes = rawRes,
                 title = title,
                 body = body,
-                notificationId = notificationId
+                notificationId = notificationId,
+                prayerName = prayerName
             )
         }
 

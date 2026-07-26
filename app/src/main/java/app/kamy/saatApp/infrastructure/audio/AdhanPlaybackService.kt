@@ -72,9 +72,10 @@ class AdhanPlaybackService : Service() {
                 linkedNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
                 val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
+                val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
                 val rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0)
                 NotificationChannels.ensureAll(this)
-                startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body))
+                startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body, prayerName))
                 acquireWakeLock()
                 startAdhan(rawRes, title, body)
                 runCatching {
@@ -82,7 +83,8 @@ class AdhanPlaybackService : Service() {
                         AdhanAlarmActivity.intent(
                             context = this,
                             title = title.ifBlank { getString(R.string.adhan_playback_title) },
-                            body = body.ifBlank { getString(R.string.adhan_playback_body) }
+                            body = body.ifBlank { getString(R.string.adhan_playback_body) },
+                            prayerName = prayerName
                         )
                     )
                 }
@@ -246,7 +248,7 @@ class AdhanPlaybackService : Service() {
         linkedNotificationId = -1
     }
 
-    private fun buildForegroundNotification(title: String, body: String) =
+    private fun buildForegroundNotification(title: String, body: String, prayerName: String? = null) =
         NotificationCompat.Builder(this, NotificationChannels.ADHAN_PLAYBACK)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(title.ifBlank { getString(R.string.adhan_playback_title) })
@@ -275,7 +277,8 @@ class AdhanPlaybackService : Service() {
                     AdhanAlarmActivity.intent(
                         context = this@AdhanPlaybackService,
                         title = title.ifBlank { getString(R.string.adhan_playback_title) },
-                        body = body.ifBlank { getString(R.string.adhan_playback_body) }
+                        body = body.ifBlank { getString(R.string.adhan_playback_body) },
+                        prayerName = prayerName
                     ),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
@@ -314,6 +317,7 @@ class AdhanPlaybackService : Service() {
         private const val EXTRA_RAW_RES = "raw_res"
         private const val EXTRA_TITLE = "title"
         private const val EXTRA_BODY = "body"
+        private const val EXTRA_PRAYER_NAME = "prayer_name"
         private const val EXTRA_NOTIFICATION_ID = AdhanStopReceiver.EXTRA_NOTIFICATION_ID
         const val ACTION_STOP = AdhanStopReceiver.ACTION_STOP
 
@@ -322,12 +326,16 @@ class AdhanPlaybackService : Service() {
             @RawRes rawRes: Int,
             title: String,
             body: String,
-            notificationId: Int = -1
+            notificationId: Int = -1,
+            prayerName: String? = null
         ): Boolean {
             val intent = Intent(context, AdhanPlaybackService::class.java).apply {
                 putExtra(EXTRA_RAW_RES, rawRes)
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_BODY, body)
+                if (!prayerName.isNullOrBlank()) {
+                    putExtra(EXTRA_PRAYER_NAME, prayerName)
+                }
                 if (notificationId >= 0) {
                     putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                 }
