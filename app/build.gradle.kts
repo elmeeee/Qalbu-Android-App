@@ -197,9 +197,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
 
-    // OAuth (PKCE)
-    implementation(libs.appauth)
-
     // Media3 ExoPlayer for recitation playback
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)

@@ -243,12 +243,7 @@ fun ChapterReaderScreen(
         verseMenuExpanded.value = false
     }
 
-    LaunchedEffect(state.publishMessage) {
-        state.publishMessage?.let { msg ->
-            snackbarHostState.showSnackbar(msg)
-            vm.clearPublishMessage()
-        }
-    }
+
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
@@ -591,8 +586,6 @@ fun ChapterReaderScreen(
         loading = state.aiShareLoading,
         draft = state.aiShareDraft,
         error = state.aiShareError,
-        isPublishing = state.isPublishing,
-        showPublish = vm.isSignedIn(),
         onDismiss = { vm.dismissAiShare() },
         onDraftChange = vm::updateAiShareDraft,
         onRegenerate = vm::regenerateAiShare,
@@ -602,8 +595,7 @@ fun ChapterReaderScreen(
                 putExtra(Intent.EXTRA_TEXT, draft)
             }
             context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_reflection)))
-        },
-        onPublish = { vm.publishAiReflection() }
+        }
     )
 
     if (showImageShareSheet.value) {

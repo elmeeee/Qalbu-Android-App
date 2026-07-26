@@ -39,6 +39,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
 import app.kamy.saatApp.domain.model.ReadingSession
+import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.design.theme.SaatColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -270,12 +271,7 @@ fun TodayScreen(
         }
     }
 
-    LaunchedEffect(todayState.publishToast) {
-        todayState.publishToast?.let {
-            snackbarHostState.showSnackbar(it)
-            todayVm.clearPublishToast()
-        }
-    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         SaatPullToRefresh(
@@ -490,8 +486,6 @@ fun TodayScreen(
         loading = todayState.aiShareLoading,
         draft = todayState.aiShareDraft,
         error = todayState.aiShareError,
-        isPublishing = todayState.isPublishing,
-        showPublish = todayVm.isSignedIn(),
         onDismiss = { todayVm.dismissAiShare() },
         onDraftChange = todayVm::updateAiShareDraft,
         onRegenerate = todayVm::regenerateAiShare,
@@ -501,16 +495,6 @@ fun TodayScreen(
                 putExtra(Intent.EXTRA_TEXT, draft)
             }
             context.startActivity(Intent.createChooser(intent, shareReflectionLabel))
-        },
-        onPublish = {
-            val authorId = todayState.profile?.id
-            if (authorId.isNullOrBlank()) {
-                scope.launch {
-                    snackbarHostState.showSnackbar(profileStillLoading)
-                }
-            } else {
-                todayVm.publishReflectionToReflect(authorId)
-            }
         }
     )
     CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })

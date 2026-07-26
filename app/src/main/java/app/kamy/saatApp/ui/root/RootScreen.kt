@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -41,14 +40,10 @@ import app.kamy.saatApp.features.tools.SpiritualToolsScreen
 import app.kamy.saatApp.features.tools.ZakatCalculatorScreen
 import app.kamy.saatApp.features.tools.faraidh.FaraidhCalculatorScreen
 import app.kamy.saatApp.features.quran.QuranBookmarksScreen
-import app.kamy.saatApp.features.reflect.ReflectScreen
 import app.kamy.saatApp.features.today.PrayerCalendarScreen
 import app.kamy.saatApp.features.today.PrayerTrackerCalendarScreen
 import app.kamy.saatApp.features.today.TodayScreen
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
-import app.kamy.saatApp.infrastructure.audio.parseVerseKey
-import app.kamy.saatApp.infrastructure.auth.OAuthService
-import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.ui.components.FloatingAudioBar
 import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
 import app.kamy.saatApp.ui.components.FloatingTabBar
@@ -60,15 +55,11 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import net.openid.appauth.AuthorizationService
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
 interface RootEntryPoint {
     fun audioPlayer(): AudioPlayerController
-    fun oauthService(): OAuthService
-    fun authorizationService(): AuthorizationService
-    fun userSession(): UserSession
 }
 
 internal fun shouldShowBottomBar(
@@ -96,10 +87,6 @@ fun RootScreen(
     }
     val audioPlayer = entryPoint.audioPlayer()
     val audioState by audioPlayer.state.collectAsState()
-    val oauthService = entryPoint.oauthService()
-    val authService = entryPoint.authorizationService()
-    val userSession = entryPoint.userSession()
-    val avatarUrl by userSession.avatarUrl.collectAsState()
 
     val updateInfo = remember { AppUpdateManager.checkUpdate(context) }
     var showForceUpdateSheet by remember { mutableStateOf(updateInfo.isUpdateAvailable) }
@@ -159,23 +146,6 @@ fun RootScreen(
             }
             composable("prayer/tracker/calendar") {
                 PrayerTrackerCalendarScreen(onBack = { navController.popBackStack() })
-            }
-            composable(
-                route = RootTab.Reflect.route,
-                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
-                exitTransition = { fadeOut(tween(180)) },
-                popEnterTransition = { fadeIn(tween(220)) },
-                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
-            ) {
-                ReflectScreen(
-                    onSignIn = { navController.navigate(RootTab.Account.route) },
-                    onOpenVerse = { verseKey ->
-                        val (chapter, ayah) = parseVerseKey(verseKey) ?: return@ReflectScreen
-                        navController.navigate("quran/reader/$chapter?ayah=$ayah") {
-                            launchSingleTop = true
-                        }
-                    }
-                )
             }
             composable(
                 route = RootTab.Quran.route,
@@ -287,8 +257,6 @@ fun RootScreen(
                 popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
             ) {
                 AccountScreen(
-                    oauthService = oauthService,
-                    authService = authService,
                     onBack = null,
                     onAccountDetailScreenChanged = { isAccountDetailScreen = it }
                 )
@@ -322,7 +290,6 @@ fun RootScreen(
         if (showBottomBar) {
             FloatingTabBar(
                 selectedRoute = currentRoute,
-                avatarUrl = avatarUrl,
                 onTabSelected = { tab ->
                     if (currentRoute != tab.route) {
                         navController.navigate(tab.route) {

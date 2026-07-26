@@ -15,14 +15,11 @@ import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.infrastructure.network.NetworkMonitor
 import app.kamy.saatApp.domain.quran.DailyVerseOccasion
 import app.kamy.saatApp.infrastructure.quran.DailyVerseLoader
-import app.kamy.saatApp.domain.model.UserProfilePayload
 import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.domain.model.TafsirPayload
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
-import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.repository.ContentRepository
-import app.kamy.saatApp.infrastructure.repository.ReflectRepository
 import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
 import app.kamy.saatApp.domain.model.ReadingSession
 import android.util.Log
@@ -53,11 +50,6 @@ data class TodayUiState(
     val tafsir: TafsirPayload? = null,
     val tafsirError: AppError? = null,
     val showTafsir: Boolean = false,
-    val isPublishing: Boolean = false,
-    val publishToast: String? = null,
-    val publishToastIsError: Boolean = false,
-    val profile: UserProfilePayload? = null,
-    val profileLoading: Boolean = false,
     val aiShareVisible: Boolean = false,
     val aiShareLoading: Boolean = false,
     val aiShareDraft: String = "",
@@ -75,9 +67,7 @@ data class TodayUiState(
 class TodayViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val contentRepository: ContentRepository,
-    private val reflectRepository: ReflectRepository,
     private val shareComposer: VerseShareTextComposer,
-    private val userSession: UserSession,
     private val translationStore: TranslationPreferencesStore,
     private val dailyVerseLoader: DailyVerseLoader,
     private val readingSessions: ReadingSessionRepository
@@ -96,13 +86,7 @@ class TodayViewModel @Inject constructor(
             )
         }
         loadDailyAyahWithRecitations()
-        loadProfile()
         loadContinueReading()
-        viewModelScope.launch {
-            userSession.isSignedIn.collect { signedIn ->
-                if (signedIn) loadProfile() else _state.update { it.copy(profile = null) }
-            }
-        }
         viewModelScope.launch {
             translationStore.translationId.drop(1).collect {
                 _state.update { it.copy(translationId = translationStore.currentTranslationId()) }
@@ -143,20 +127,7 @@ class TodayViewModel @Inject constructor(
         }
     }
 
-    private fun loadProfile() {
-        if (!userSession.isSignedIn.value) return
-        _state.update { it.copy(profileLoading = true) }
-        viewModelScope.launch {
-            try {
-                val p = reflectRepository.fetchMyProfile()
-                userSession.updateAvatarUrl(p.preferredAvatarUrl)
-                _state.update { it.copy(profile = p, profileLoading = false) }
-            } catch (t: Throwable) {
-                userSession.invalidateIfAuthenticationFailure(t)
-                _state.update { it.copy(profileLoading = false, profile = null) }
-            }
-        }
-    }
+
 
     fun loadDailyAyahWithRecitations(refreshTranslation: Boolean = false) {
         viewModelScope.launch { refreshContent(refreshTranslation) }
@@ -203,7 +174,6 @@ class TodayViewModel @Inject constructor(
                 }
             }
             loadContinueReading()
-            loadProfile()
         } catch (t: Throwable) {
             _state.update { it.copy(isLoading = false, error = t.toAppError(), isOfflineData = false) }
         }
@@ -310,45 +280,4 @@ class TodayViewModel @Inject constructor(
             }
         }
     }
-
-    fun publishReflectionToReflect(authorId: String, idempotencyKeyDate: Date = Date()) {
-        val verse = _state.value.verse ?: return
-        val verseKey = verse.verseKey ?: return
-        val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(idempotencyKeyDate)
-        val idempotencyKey = "reflect:$verseKey:$dayKey"
-
-        viewModelScope.launch {
-            val body = _state.value.aiShareDraft.trim().ifBlank {
-                shareComposer.quickReflectionText(verse, _state.value.verseReferenceLabel)
-            }
-            if (body.isBlank()) return@launch
-            _state.update { it.copy(isPublishing = true, publishToast = null) }
-            try {
-                reflectRepository.createReflectionPost(body, verseKey, authorId, idempotencyKey)
-                _state.update {
-                    it.copy(
-                        isPublishing = false,
-                        publishToast = appContext.getString(R.string.published_to_reflect),
-                        publishToastIsError = false,
-                        aiShareVisible = false
-                    )
-                }
-            } catch (t: Throwable) {
-                userSession.invalidateIfAuthenticationFailure(t)
-                _state.update {
-                    it.copy(
-                        isPublishing = false,
-                        publishToast = t.userFacingAuthOrApiMessage(appContext),
-                        publishToastIsError = true
-                    )
-                }
-            }
-        }
-    }
-
-    fun clearPublishToast() {
-        _state.update { it.copy(publishToast = null) }
-    }
-
-    fun isSignedIn(): Boolean = userSession.isSignedIn.value
 }

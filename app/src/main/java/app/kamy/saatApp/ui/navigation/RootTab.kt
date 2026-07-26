@@ -3,13 +3,11 @@ package app.kamy.saatApp.ui.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.outlined.GridView
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -24,12 +22,6 @@ enum class RootTab(
         labelRes = app.kamy.saatApp.R.string.nav_today,
         selectedIcon = Icons.Filled.WbSunny,
         unselectedIcon = Icons.Outlined.WbSunny
-    ),
-    Reflect(
-        route = "reflect",
-        labelRes = app.kamy.saatApp.R.string.nav_reflect,
-        selectedIcon = Icons.Filled.Edit,
-        unselectedIcon = Icons.Outlined.Edit
     ),
     Quran(
         route = "quran",
@@ -46,13 +38,13 @@ enum class RootTab(
     Account(
         route = "account",
         labelRes = app.kamy.saatApp.R.string.nav_account,
-        selectedIcon = Icons.Filled.AccountCircle,
-        unselectedIcon = Icons.Outlined.AccountCircle
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings
     );
 
     companion object {
         val Default = Today
 
-        val mainTabs: List<RootTab> = listOf(Today, Quran, Tools, Reflect, Account)
+        val mainTabs: List<RootTab> = listOf(Today, Quran, Tools, Account)
     }
 }

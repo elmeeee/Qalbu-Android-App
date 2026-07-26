@@ -45,13 +45,10 @@ fun AiShareSheet(
     loading: Boolean,
     draft: String,
     error: AppError?,
-    isPublishing: Boolean,
-    showPublish: Boolean,
     onDismiss: () -> Unit,
     onDraftChange: (String) -> Unit,
     onRegenerate: () -> Unit,
-    onShare: (String) -> Unit,
-    onPublish: (() -> Unit)?
+    onShare: (String) -> Unit
 ) {
     if (!visible) return
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -157,25 +154,7 @@ fun AiShareSheet(
                     Text(stringResource(R.string.share), modifier = Modifier.padding(start = 6.dp))
                 }
             }
-            if (showPublish && onPublish != null) {
-                Button(
-                    onClick = onPublish,
-                    enabled = draft.isNotBlank() && !loading && !isPublishing,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (isPublishing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(end = 8.dp),
-                            strokeWidth = 2.dp
-                        )
-                    }
-                    val publishingLabel = stringResource(R.string.publishing)
-                    val publishLabel = stringResource(R.string.publish_to_reflect)
-                    Text(
-                        if (isPublishing) publishingLabel else publishLabel
-                    )
-                }
-            }
+
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.align(Alignment.CenterHorizontally)

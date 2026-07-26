@@ -50,7 +50,6 @@
                 <data android:scheme="saat" android:host="quran" />
                 <data android:scheme="saat" android:host="mushaf" />
                 <data android:scheme="saat" android:host="today" />
-                <data android:scheme="saat" android:host="reflect" />
                 <data android:scheme="saat" android:host="bookmarks" />
                 <data android:scheme="saat" android:host="qibla" />
                 <data android:scheme="saat" android:host="dhikr" />
@@ -77,26 +76,6 @@
             android:launchMode="singleInstance"
             android:theme="@style/Theme.Saat"
             android:windowSoftInputMode="stateAlwaysHidden" />
-
-        <!--
-            AppAuth's RedirectUriReceiverActivity catches the OAuth callback.
-            Scheme must match QF_OAUTH_APP_CALLBACK_URL ("Saat://oauth/callback").
-        -->
-
-        <activity
-            android:name="net.openid.appauth.RedirectUriReceiverActivity"
-            android:exported="true"
-            tools:node="replace">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="Saat"
-                    android:host="oauth"
-                    android:path="/callback" />
-            </intent-filter>
-        </activity>
 
         <receiver
             android:name=".infrastructure.notifications.DailyVerseNotificationReceiver"

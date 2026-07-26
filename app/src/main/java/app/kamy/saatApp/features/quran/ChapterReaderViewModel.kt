@@ -26,7 +26,6 @@ import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.repository.ContentRepository
 import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
-import app.kamy.saatApp.infrastructure.repository.ReflectRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -109,8 +108,6 @@ class ChapterReaderViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,
     private val shareComposer: VerseShareTextComposer,
-    private val reflectRepository: ReflectRepository,
-    private val userSession: UserSession,
     private val translationStore: TranslationPreferencesStore,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -622,8 +619,6 @@ class ChapterReaderViewModel @Inject constructor(
         const val HADITH_PAGE_LIMIT = 4
     }
 
-    fun isSignedIn(): Boolean = userSession.isSignedIn.value
-
     fun openAiShare(verseIndex: Int) {
         if (verseIndex !in _state.value.verses.indices) return
         _state.update {
@@ -676,70 +671,7 @@ class ChapterReaderViewModel @Inject constructor(
         }
     }
 
-    fun publishAiReflection() {
-        if (!userSession.isSignedIn.value) {
-            _state.update { it.copy(publishMessage = appContext.getString(R.string.sign_in_to_publish_account)) }
-            return
-        }
-        val index = _state.value.aiShareVerseIndex ?: return
-        val verse = _state.value.verses.getOrNull(index) ?: return
-        val verseKey = verse.verseKey ?: return
-        val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-        val idempotencyKey = "reflect:$verseKey:$dayKey"
-        val reference = verse.referenceLabel(chapterDisplayNameFor(verse))
 
-        viewModelScope.launch {
-            val body = _state.value.aiShareDraft.trim().ifBlank {
-                shareComposer.quickReflectionText(verse, reference)
-            }
-            if (body.isBlank()) return@launch
-            _state.update { it.copy(isPublishing = true, publishMessage = null) }
-            val authorId = try {
-                reflectRepository.fetchMyProfile().id
-            } catch (t: Throwable) {
-                userSession.invalidateIfAuthenticationFailure(t)
-                _state.update {
-                    it.copy(
-                        isPublishing = false,
-                        publishMessage = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
-                        else appContext.getString(R.string.profile_load_failed)
-                    )
-                }
-                return@launch
-            }
-            if (authorId.isNullOrBlank()) {
-                _state.update {
-                    it.copy(isPublishing = false, publishMessage = appContext.getString(R.string.profile_load_failed))
-                }
-                return@launch
-            }
-            runCatching {
-                reflectRepository.createReflectionPost(body, verseKey, authorId, idempotencyKey)
-            }.onSuccess {
-                _state.update {
-                    it.copy(
-                        isPublishing = false,
-                        publishMessage = appContext.getString(R.string.published_to_reflect),
-                        aiShareVisible = false,
-                        aiShareVerseIndex = null,
-                        aiShareDraft = ""
-                    )
-                }
-            }.onFailure { t ->
-                userSession.invalidateIfAuthenticationFailure(t)
-                _state.update {
-                    it.copy(
-                        isPublishing = false,
-                        publishMessage = t.userFacingAuthOrApiMessage(appContext)
-                    )
-                }
-            }
-        }
-    }
-
-    fun clearPublishMessage() {
-        _state.update { it.copy(publishMessage = null) }
-    }
 
     fun audioQueueItems(): List<AudioQueueItem> = _state.value.verses.mapNotNull { v ->
         val url = v.audio?.url ?: return@mapNotNull null

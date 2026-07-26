@@ -49,7 +49,6 @@ fun FloatingTabBar(
     selectedRoute: String?,
     onTabSelected: (RootTab) -> Unit,
     modifier: Modifier = Modifier,
-    avatarUrl: String? = null,
     tabs: List<RootTab> = RootTab.mainTabs
 ) {
     Surface(
@@ -96,7 +95,6 @@ fun FloatingTabBar(
                 FloatingTabItem(
                     tab = tab,
                     selected = selected,
-                    avatarUrl = if (tab == RootTab.Account) avatarUrl else null,
                     onClick = { onTabSelected(tab) }
                 )
             }
@@ -108,7 +106,6 @@ fun FloatingTabBar(
 private fun FloatingTabItem(
     tab: RootTab,
     selected: Boolean,
-    avatarUrl: String?,
     onClick: () -> Unit
 ) {
     val iconTint by animateColorAsState(
@@ -137,28 +134,12 @@ private fun FloatingTabItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        if (avatarUrl != null) {
-            AsyncImage(
-                model = avatarUrl,
-                contentDescription = stringResource(tab.labelRes),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(21.dp)
-                    .clip(CircleShape)
-                    .border(
-                        width = 1.dp,
-                        color = if (selected) SaatColors.DeepEmerald else Color.Transparent,
-                        shape = CircleShape
-                    )
-            )
-        } else {
-            Icon(
-                imageVector = if (selected) tab.selectedIcon else tab.unselectedIcon,
-                contentDescription = stringResource(tab.labelRes),
-                tint = iconTint,
-                modifier = Modifier.size(21.dp)
-            )
-        }
+        Icon(
+            imageVector = if (selected) tab.selectedIcon else tab.unselectedIcon,
+            contentDescription = stringResource(tab.labelRes),
+            tint = iconTint,
+            modifier = Modifier.size(21.dp)
+        )
         if (selected) {
             Text(
                 text = stringResource(tab.labelRes),

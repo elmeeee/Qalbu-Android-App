@@ -53,7 +53,7 @@
     <string name="nav_today">Hari Ini</string>
     <string name="nav_reflect">Refleksi</string>
     <string name="nav_quran">Al-Quran</string>
-    <string name="nav_account">Akun</string>
+    <string name="nav_account">Pengaturan</string>
 
     <string name="back">Kembali</string>
     <string name="loading">Memuat…</string>
