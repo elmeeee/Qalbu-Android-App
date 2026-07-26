@@ -20,19 +20,25 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbTwilight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.BuildConfig
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.PrayerType
@@ -59,6 +65,61 @@ fun NotificationSettingsScreen(
     val context = LocalContext.current
     val showBatterySettings = hasAggressiveOemBatteryManagement()
     val batteryUnrestricted = context.isIgnoringBatteryOptimizations()
+    var showTestAdhanDialog by remember { mutableStateOf(false) }
+
+    if (showTestAdhanDialog) {
+        val testPrayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+        AlertDialog(
+            onDismissRequest = { showTestAdhanDialog = false },
+            title = {
+                Text(
+                    text = "Pilih Waktu Shalat (Test Adzan)",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    testPrayers.forEach { prayerKey ->
+                        val displayName = AppNotificationCopy.prayerDisplayName(context, prayerKey)
+                        TextButton(
+                            onClick = {
+                                showTestAdhanDialog = false
+                                val store = AdhanPreferencesStore.from(context)
+                                val voice = store.currentVoice()
+                                val fajrVoice = store.currentFajrVoice()
+                                val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerKey, voice, fajrVoice)
+                                val locationLabel = LocationPreferencesStore.from(context).displayLabel() ?: "Jakarta"
+                                val bodyText = AppNotificationCopy.prayerBody(context, prayerKey)
+                                AdhanPlaybackService.start(
+                                    context = context,
+                                    rawRes = rawRes,
+                                    title = "$displayName • $locationLabel",
+                                    body = bodyText,
+                                    prayerName = prayerKey
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = displayName,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { showTestAdhanDialog = false }) {
+                    Text(stringResource(android.R.string.cancel))
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -166,27 +227,11 @@ fun NotificationSettingsScreen(
         if (BuildConfig.DEBUG) {
             NotificationSectionLabel("🐞 Debug")
             SaatSettingsGroup {
-                val ctx = LocalContext.current
                 SaatSettingsNavigationRow(
                     icon = Icons.Filled.BugReport,
                     title = "Test Adzan Alarm (Full Screen)",
-                    subtitle = "Simulasi adzan seperti alarm nyata",
-                    onClick = {
-                        val store = AdhanPreferencesStore.from(ctx)
-                        val voice = store.currentVoice()
-                        val fajrVoice = store.currentFajrVoice()
-                        val rawRes = AdhanVoiceCatalog.rawResForPrayer("Maghrib", voice, fajrVoice)
-                        val locationLabel = LocationPreferencesStore.from(ctx).displayLabel() ?: "Jakarta"
-                        val maghribName = AppNotificationCopy.prayerDisplayName(ctx, "Maghrib")
-                        val bodyText = AppNotificationCopy.prayerBody(ctx, "Maghrib")
-                        AdhanPlaybackService.start(
-                            context = ctx,
-                            rawRes = rawRes,
-                            title = "$maghribName • $locationLabel",
-                            body = bodyText,
-                            prayerName = "Maghrib"
-                        )
-                    },
+                    subtitle = "Pilih waktu shalat untuk simulasi adzan",
+                    onClick = { showTestAdhanDialog = true },
                     showDivider = false
                 )
             }
