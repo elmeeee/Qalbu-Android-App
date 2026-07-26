@@ -2,7 +2,7 @@
 <resources>
     <color name="al_khatib_deep_emerald">#FF064E3B</color>
     <color name="al_khatib_screen_background">#FFF8FAFC</color>
-    <color name="splash_background">#FFFFFF</color>
+    <color name="splash_background">#F4F5F0</color>
     <color name="al_khatib_emerald_night">#FF022C22</color>
     <color name="al_khatib_off_white">#FFF9F9F8</color>
 </resources>

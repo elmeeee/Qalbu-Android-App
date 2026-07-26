@@ -102,17 +102,18 @@ fun NotificationSettingsScreen(
                 title = stringResource(R.string.daily_verse),
                 subtitle = stringResource(R.string.daily_verse_subtitle),
                 checked = state.dailyVerseEnabled,
-                onCheckedChange = vm::setDailyVerseEnabled
+                onCheckedChange = vm::setDailyVerseEnabled,
+                showDivider = state.dailyVerseEnabled
             )
             if (state.dailyVerseEnabled) {
                 SaatSettingsNavigationRow(
                     icon = Icons.Filled.Schedule,
                     title = stringResource(R.string.reminder_time),
                     subtitle = state.reminderTimeLabel.ifBlank { "7:00 AM" },
-                    onClick = { vm.toggleNotifTimeSheet(true) }
+                    onClick = { vm.toggleNotifTimeSheet(true) },
+                    showDivider = false
                 )
             }
-
         }
 
         NotificationSectionLabel(stringResource(R.string.section_prayer))
@@ -128,10 +129,11 @@ fun NotificationSettingsScreen(
                             R.string.battery_opt_settings_subtitle
                         }
                     ),
-                    onClick = { context.openBackgroundReliabilitySettings() }
+                    onClick = { context.openBackgroundReliabilitySettings() },
+                    showDivider = true
                 )
             }
-            PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { prayer ->
+            PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEachIndexed { idx, prayer ->
                 val isAdzanSoundEnabled = state.isPrayerNotificationEnabled(prayer)
                 val isIndoMalay = state.appLanguage == app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN || state.appLanguage == app.kamy.saatApp.core.locale.AppLanguage.MALAY
                 val sub = if (isAdzanSoundEnabled) {
@@ -146,7 +148,8 @@ fun NotificationSettingsScreen(
                     checked = isAdzanSoundEnabled,
                     onCheckedChange = { enabled ->
                         vm.setPrayerNotificationEnabled(prayer, enabled)
-                    }
+                    },
+                    showDivider = true
                 )
             }
             SaatSettingsToggleRow(
@@ -154,7 +157,8 @@ fun NotificationSettingsScreen(
                 title = stringResource(R.string.imsak),
                 subtitle = stringResource(R.string.imsak_subtitle),
                 checked = state.imsakEnabled,
-                onCheckedChange = vm::setImsakEnabled
+                onCheckedChange = vm::setImsakEnabled,
+                showDivider = false
             )
         }
 
@@ -181,7 +185,8 @@ fun NotificationSettingsScreen(
                             title = "$maghribName • $locationLabel",
                             body = bodyText
                         )
-                    }
+                    },
+                    showDivider = false
                 )
             }
         }
@@ -193,21 +198,24 @@ fun NotificationSettingsScreen(
                 title = stringResource(R.string.midnight),
                 subtitle = stringResource(R.string.midnight_subtitle),
                 checked = state.midnightEnabled,
-                onCheckedChange = vm::setMidnightEnabled
+                onCheckedChange = vm::setMidnightEnabled,
+                showDivider = true
             )
             SaatSettingsToggleRow(
                 icon = Icons.Filled.Bedtime,
                 title = stringResource(R.string.first_third),
                 subtitle = stringResource(R.string.first_third_subtitle),
                 checked = state.firstThirdEnabled,
-                onCheckedChange = vm::setFirstThirdEnabled
+                onCheckedChange = vm::setFirstThirdEnabled,
+                showDivider = true
             )
             SaatSettingsToggleRow(
                 icon = Icons.Filled.Bedtime,
                 title = stringResource(R.string.last_third),
                 subtitle = stringResource(R.string.last_third_subtitle),
                 checked = state.tahajudEnabled,
-                onCheckedChange = vm::setTahajudEnabled
+                onCheckedChange = vm::setTahajudEnabled,
+                showDivider = false
             )
         }
 
@@ -217,7 +225,8 @@ fun NotificationSettingsScreen(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
                 title = stringResource(R.string.surah_reminders_settings_title),
                 subtitle = stringResource(R.string.surah_reminders_settings_subtitle),
-                onClick = vm::openSurahRemindersSheet
+                onClick = vm::openSurahRemindersSheet,
+                showDivider = false
             )
             SaatSettingsToggleRow(
                 icon = Icons.Filled.Notifications,
