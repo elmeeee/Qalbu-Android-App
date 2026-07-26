@@ -31,7 +31,17 @@ import androidx.compose.runtime.getValue
  *              as a full-screen intent → adhan audio + this overlay.
  * Toggle OFF → regular notification only, no adhan audio, this Activity is never started.
  */
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import app.kamy.saatApp.infrastructure.audio.AdhanPlaybackService
+
 class AdhanAlarmActivity : ComponentActivity() {
+
+    private val stopReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            finish()
+        }
+    }
 
     override fun attachBaseContext(newBase: Context) {
         val language = AppLanguageStore.from(newBase).current()
@@ -40,6 +50,17 @@ class AdhanAlarmActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val filter = IntentFilter().apply {
+            addAction(AdhanPlaybackService.ACTION_ADHAN_STOPPED)
+            addAction(AdhanStopReceiver.ACTION_STOP)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(stopReceiver, filter, RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("DEPRECATION")
+            registerReceiver(stopReceiver, filter)
+        }
 
         // Show above the lock screen and turn the screen on — mandatory for alarm-style UX.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -81,6 +102,11 @@ class AdhanAlarmActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        runCatching { unregisterReceiver(stopReceiver) }
+        super.onDestroy()
     }
 
     companion object {

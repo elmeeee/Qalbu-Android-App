@@ -236,6 +236,7 @@ class AdhanPlaybackService : Service() {
     }
 
     private fun releaseAndStop() {
+        runCatching { sendBroadcast(Intent(ACTION_ADHAN_STOPPED).setPackage(packageName)) }
         cancelLinkedNotifications()
         releasePlayer()
         releaseWakeLock()
@@ -320,6 +321,7 @@ class AdhanPlaybackService : Service() {
         private const val EXTRA_PRAYER_NAME = "prayer_name"
         private const val EXTRA_NOTIFICATION_ID = AdhanStopReceiver.EXTRA_NOTIFICATION_ID
         const val ACTION_STOP = AdhanStopReceiver.ACTION_STOP
+        const val ACTION_ADHAN_STOPPED = "app.kamy.saatApp.action.ADHAN_STOPPED"
 
         fun start(
             context: Context,
