@@ -159,7 +159,7 @@ fun AyahImageShareSheet(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .clip(CircleShape)
-                                    .background(Color(android.graphics.Color.parseColor(selectedTemplate.logoBackdropColor)))
+                                    .background(Color.White)
                                     .border(0.5.dp, tBorderColor, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {

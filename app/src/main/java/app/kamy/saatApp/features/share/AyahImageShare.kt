@@ -185,7 +185,7 @@ object AyahImageShare {
 
         // Draw circular shield under App Icon to make it pop
         val logoBackdropPaint = Paint().apply {
-            color = Color.parseColor(template.logoBackdropColor)
+            color = Color.WHITE
             style = Paint.Style.FILL
             isAntiAlias = true
         }
