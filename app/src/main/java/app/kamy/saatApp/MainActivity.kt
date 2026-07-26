@@ -19,7 +19,6 @@ import app.kamy.saatApp.ui.permissions.ExactAlarmPermissionGate
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.ui.onboarding.OnboardingScreen
 import app.kamy.saatApp.ui.root.RootScreen
-import app.kamy.saatApp.ui.splash.AppSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -51,12 +50,10 @@ class MainActivity : ComponentActivity() {
             val pendingRoute by deepLinkRoute
             val currentTheme by themePreferencesStore.themeFlow.collectAsState(initial = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
 
-            var showGreetingSplash by rememberSaveable { mutableStateOf(true) }
             var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
 
             SaatTheme(theme = currentTheme) {
                 when {
-                    showGreetingSplash -> AppSplashScreen(onFinished = { showGreetingSplash = false })
                     showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })
                     else -> {
                         ExactAlarmPermissionGate()
