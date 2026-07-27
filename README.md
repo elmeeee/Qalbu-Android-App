@@ -90,7 +90,7 @@ graph TD
     UC -->|Operates on| Entities
     UC -->|Calls| RepoSpec
     
-    RepoImpl ..|>|Implements| RepoSpec
+    RepoImpl -.->|Implements| RepoSpec
     RepoImpl -->|Fetches Data| RemoteDS
     RepoImpl -->|Persists Data| LocalDS
     RepoImpl -->|Calculates Times| AdhanLib
