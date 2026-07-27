@@ -3,6 +3,6 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/splash_icon_display" />
+            android:src="@drawable/launch_screen_bg" />
     </item>
 </layer-list>

@@ -88,7 +88,9 @@ fun FloatingAudioBar(
                 val audioLabel = stringResource(R.string.audio)
                 IconButton(onClick = onToggle) {
                     Icon(
-                        imageVector = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        painter = androidx.compose.ui.res.painterResource(
+                            if (state.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+                        ),
                         contentDescription = if (state.isPlaying) pauseLabel else audioLabel,
                         tint = androidx.compose.ui.graphics.Color.White,
                         modifier = Modifier.size(28.dp)

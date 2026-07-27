@@ -934,7 +934,7 @@ private fun ReaderVerseActionsMenu(
                 ReaderActionPill(
                     icon = {
                         Icon(
-                            Icons.Filled.AutoAwesome,
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_ai),
                             contentDescription = null,
                             tint = SaatColors.Gold,
                             modifier = Modifier.size(17.dp)
@@ -961,7 +961,7 @@ private fun ReaderVerseActionsMenu(
                     ReaderActionPill(
                         icon = {
                             Icon(
-                                Icons.AutoMirrored.Filled.MenuBook,
+                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_tafsir),
                                 contentDescription = null,
                                 tint = SaatColors.IndigoAccent,
                                 modifier = Modifier.size(17.dp)

@@ -164,9 +164,9 @@ fun AyahImageShareSheet(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.splash_icon_display),
+                                    painter = painterResource(R.drawable.saat_app_icon),
                                     contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
+                                    modifier = Modifier.size(20.dp),
                                     tint = Color.Unspecified
                                 )
                             }

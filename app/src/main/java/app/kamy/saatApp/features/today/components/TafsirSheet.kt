@@ -62,7 +62,7 @@ fun TafsirSheet(
             ReaderSheetTopBar(title = stringResource(R.string.tafsir), onDone = onDismiss)
             VerseContextHeader(
                 verseReference = verseReference,
-                icon = Icons.AutoMirrored.Filled.MenuBook,
+                iconRes = R.drawable.ic_tafsir,
                 subtitle = when {
                     isLoading -> null
                     tafsir?.resourceName != null -> tafsir.resourceName

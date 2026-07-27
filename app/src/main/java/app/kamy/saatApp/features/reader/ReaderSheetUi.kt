@@ -130,7 +130,8 @@ fun ReaderSheetTopBar(
 @Composable
 fun VerseContextHeader(
     verseReference: String,
-    icon: ImageVector,
+    icon: ImageVector? = null,
+    @androidx.annotation.DrawableRes iconRes: Int? = null,
     subtitle: String?
 ) {
     val thisVerseLabel = stringResource(R.string.this_verse)
@@ -147,12 +148,21 @@ fun VerseContextHeader(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = SaatColors.DeepEmerald.copy(alpha = 0.88f),
-            modifier = Modifier.size(28.dp)
-        )
+        if (iconRes != null) {
+            Icon(
+                painter = androidx.compose.ui.res.painterResource(iconRes),
+                contentDescription = null,
+                tint = SaatColors.DeepEmerald.copy(alpha = 0.88f),
+                modifier = Modifier.size(28.dp)
+            )
+        } else if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = SaatColors.DeepEmerald.copy(alpha = 0.88f),
+                modifier = Modifier.size(28.dp)
+            )
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = verseReference.ifBlank { thisVerseLabel },

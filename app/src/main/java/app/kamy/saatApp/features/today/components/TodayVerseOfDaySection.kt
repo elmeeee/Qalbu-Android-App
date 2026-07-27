@@ -225,29 +225,21 @@ fun TodayVerseOfDaySection(
                         .padding(horizontal = 14.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    val pauseLabel = stringResource(R.string.pause)
-                    val audioLabel = stringResource(R.string.audio)
-                    val tafsirLabel = stringResource(R.string.tafsir)
-                    val aiLabel = stringResource(R.string.ai_label)
-
                     VerseActionButton(
-                        icon = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        label = if (isPlaying) pauseLabel else audioLabel,
+                        iconRes = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
                         tint = SaatColors.DeepEmerald,
                         onClick = onPlayAudio,
                         modifier = Modifier.weight(1f)
                     )
                     VerseActionButton(
-                        icon = Icons.Filled.AutoAwesome,
-                        label = if (aiShareLoading) "…" else aiLabel,
+                        iconRes = R.drawable.ic_ai,
                         tint = SaatColors.GoldDeep,
                         onClick = onAiShare,
                         modifier = Modifier.weight(1f)
                     )
                     if (LocalQuranConfig.supportsTafsir(translationId)) {
                         VerseActionButton(
-                            icon = Icons.AutoMirrored.Filled.MenuBook,
-                            label = tafsirLabel,
+                            iconRes = R.drawable.ic_tafsir,
                             tint = SaatColors.IndigoAccent,
                             onClick = onTafsir,
                             modifier = Modifier.weight(1f)
@@ -301,8 +293,7 @@ private fun OccasionChip(label: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun VerseActionButton(
-    icon: ImageVector,
-    label: String,
+    @androidx.annotation.DrawableRes iconRes: Int,
     tint: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -314,19 +305,15 @@ private fun VerseActionButton(
         color = tint.copy(alpha = 0.08f),
         border = BorderStroke(1.dp, tint.copy(alpha = 0.25f))
     ) {
-        Column(
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 6.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        Box(
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 6.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = label, tint = tint, modifier = Modifier.size(20.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = tint,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+            Icon(
+                painter = androidx.compose.ui.res.painterResource(iconRes),
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(22.dp)
             )
         }
     }

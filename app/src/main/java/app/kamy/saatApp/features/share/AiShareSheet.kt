@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -67,9 +68,10 @@ fun AiShareSheet(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    Icons.Filled.AutoAwesome,
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_ai),
                     contentDescription = null,
-                    tint = SaatColors.DeepEmerald
+                    tint = SaatColors.GoldDeep,
+                    modifier = Modifier.size(24.dp)
                 )
                 Text(
                     text = stringResource(R.string.ai_reflection),
