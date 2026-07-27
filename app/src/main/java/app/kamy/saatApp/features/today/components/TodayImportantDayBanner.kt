@@ -101,7 +101,7 @@ fun TodayImportantDayBanner(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Filled.Event,
+                painter = androidx.compose.ui.res.painterResource(R.drawable.month_icon),
                 contentDescription = null,
                 tint = SaatColors.GoldDeep,
                 modifier = Modifier.size(20.dp)

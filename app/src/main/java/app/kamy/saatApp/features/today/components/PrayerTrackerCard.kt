@@ -140,7 +140,7 @@ fun PrayerTrackerCard(
                 }
                 IconButton(onClick = onOpenCalendar, modifier = Modifier.size(36.dp)) {
                     Icon(
-                        Icons.Filled.CalendarMonth,
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.month_icon),
                         contentDescription = stringResource(R.string.prayer_tracker_open_calendar),
                         tint = SaatColors.Teal,
                         modifier = Modifier.size(20.dp)

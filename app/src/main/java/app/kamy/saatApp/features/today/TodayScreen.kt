@@ -41,6 +41,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
 import app.kamy.saatApp.domain.model.ReadingSession
@@ -513,69 +515,72 @@ private fun TodayContinueReadingCard(
     onTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onTap,
+    Box(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = Color.White,
-        shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, Color(0xFFF0F2F6))
+        contentAlignment = Alignment.Center
     ) {
-        Box(
+        Surface(
+            onClick = onTap,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(110.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color.White)
+                .width(349.dp)
+                .height(90.dp),
+            shape = RoundedCornerShape(20.dp),
+            color = Color.White,
+            shadowElevation = 2.dp,
+            border = BorderStroke(1.dp, Color(0xFFF0F2F6))
         ) {
-            Image(
-                painter = painterResource(R.drawable.last_read_icon),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                alignment = Alignment.BottomEnd,
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .height(95.dp)
-                    .padding(end = 4.dp)
-            )
-
-            Column(
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .padding(start = 20.dp, top = 16.dp, bottom = 16.dp, end = 120.dp),
-                verticalArrangement = Arrangement.Center
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White)
             ) {
-                Text(
-                    text = stringResource(R.string.today_continue_reading_title),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = Color(0xFF1E293B),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                Image(
+                    painter = painterResource(R.drawable.last_read_icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .offset(x = 231.dp, y = 22.dp)
+                        .size(width = 116.dp, height = 69.dp)
                 )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber),
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    ),
-                    color = Color(0xFF0F172A),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal
-                    ),
-                    color = Color(0xFF7E84A3),
-                    maxLines = 1
-                )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 20.dp, end = 125.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.today_continue_reading_title),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color(0xFF1E293B),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber),
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = Color(0xFF0F172A),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal
+                        ),
+                        color = Color(0xFF7E84A3),
+                        maxLines = 1
+                    )
+                }
             }
         }
     }
