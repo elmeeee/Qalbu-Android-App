@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 
@@ -98,7 +98,7 @@ fun MyQuranLibraryCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 2.dp
     ) {
         Row(
@@ -114,8 +114,8 @@ fun MyQuranLibraryCard(
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                AlKhatibColors.DeepEmerald.copy(alpha = 0.18f),
-                                AlKhatibColors.GoldDeep.copy(alpha = 0.14f)
+                                SaatColors.DeepEmerald.copy(alpha = 0.18f),
+                                SaatColors.GoldDeep.copy(alpha = 0.14f)
                             )
                         )
                     ),
@@ -124,7 +124,7 @@ fun MyQuranLibraryCard(
                 Icon(
                     Icons.Filled.Bookmark,
                     contentDescription = null,
-                    tint = AlKhatibColors.GoldDeep,
+                    tint = SaatColors.GoldDeep,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -134,13 +134,13 @@ fun MyQuranLibraryCard(
                     text = stringResource(R.string.quran_library_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.quran_library_subtitle),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     lineHeight = 18.sp
                 )
                 if (counts.total > 0) {
@@ -149,17 +149,17 @@ fun MyQuranLibraryCard(
                         LibraryCountChip(
                             icon = Icons.Filled.Bookmark,
                             count = counts.bookmarks,
-                            tint = AlKhatibColors.GoldDeep
+                            tint = SaatColors.GoldDeep
                         )
                         LibraryCountChip(
                             icon = Icons.AutoMirrored.Filled.Notes,
                             count = counts.notes,
-                            tint = AlKhatibColors.DeepEmerald
+                            tint = SaatColors.DeepEmerald
                         )
                         LibraryCountChip(
                             icon = Icons.Filled.Psychology,
                             count = counts.hifz,
-                            tint = AlKhatibColors.IndigoDeep
+                            tint = SaatColors.IndigoDeep
                         )
                     }
                 }
@@ -167,7 +167,7 @@ fun MyQuranLibraryCard(
             Icon(
                 Icons.Filled.ChevronRight,
                 contentDescription = null,
-                tint = AlKhatibColors.Slate500,
+                tint = SaatColors.Slate500,
                 modifier = Modifier.size(22.dp)
             )
         }
@@ -211,14 +211,14 @@ fun QuranLibraryHero(
             .background(
                 Brush.linearGradient(
                     listOf(
-                        AlKhatibColors.DeepEmerald.copy(alpha = 0.12f),
-                        AlKhatibColors.GoldDeep.copy(alpha = 0.08f)
+                        SaatColors.DeepEmerald.copy(alpha = 0.12f),
+                        SaatColors.GoldDeep.copy(alpha = 0.08f)
                     )
                 )
             )
             .border(
                 width = 1.dp,
-                color = AlKhatibColors.DeepEmerald.copy(alpha = 0.12f),
+                color = SaatColors.DeepEmerald.copy(alpha = 0.12f),
                 shape = RoundedCornerShape(20.dp)
             )
             .padding(18.dp)
@@ -227,13 +227,13 @@ fun QuranLibraryHero(
             text = stringResource(R.string.quran_library_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.Slate900
+            color = SaatColors.Slate900
         )
         Spacer(Modifier.height(6.dp))
         Text(
             text = stringResource(R.string.quran_library_subtitle),
             style = MaterialTheme.typography.bodyMedium,
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             lineHeight = 22.sp
         )
         Spacer(Modifier.height(16.dp))
@@ -245,21 +245,21 @@ fun QuranLibraryHero(
                 icon = Icons.Filled.Bookmark,
                 label = stringResource(R.string.bookmarks_title),
                 count = counts.bookmarks,
-                tint = AlKhatibColors.GoldDeep,
+                tint = SaatColors.GoldDeep,
                 modifier = Modifier.weight(1f)
             )
             LibraryFeaturePill(
                 icon = Icons.AutoMirrored.Filled.Notes,
                 label = stringResource(R.string.notes_title),
                 count = counts.notes,
-                tint = AlKhatibColors.DeepEmerald,
+                tint = SaatColors.DeepEmerald,
                 modifier = Modifier.weight(1f)
             )
             LibraryFeaturePill(
                 icon = Icons.Filled.Psychology,
                 label = stringResource(R.string.hifz_title),
                 count = counts.hifz,
-                tint = AlKhatibColors.IndigoDeep,
+                tint = SaatColors.IndigoDeep,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -278,21 +278,21 @@ fun QuranLibraryLegend(modifier: Modifier = Modifier) {
             text = stringResource(R.string.quran_library_legend),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.SemiBold,
-            color = AlKhatibColors.Slate800
+            color = SaatColors.Slate800
         )
         LegendRow(
             icon = Icons.Filled.Bookmark,
-            tint = AlKhatibColors.GoldDeep,
+            tint = SaatColors.GoldDeep,
             text = stringResource(R.string.quran_library_intro_bookmarks)
         )
         LegendRow(
             icon = Icons.Filled.EditNote,
-            tint = AlKhatibColors.DeepEmerald,
+            tint = SaatColors.DeepEmerald,
             text = stringResource(R.string.quran_library_intro_notes)
         )
         LegendRow(
             icon = Icons.Filled.Psychology,
-            tint = AlKhatibColors.IndigoDeep,
+            tint = SaatColors.IndigoDeep,
             text = stringResource(R.string.quran_library_intro_hifz)
         )
     }
@@ -320,7 +320,7 @@ private fun LegendRow(
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             lineHeight = 18.sp,
             modifier = Modifier.weight(1f)
         )
@@ -348,12 +348,12 @@ private fun LibraryFeaturePill(
             text = count.toString(),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.Slate900
+            color = SaatColors.Slate900
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -389,7 +389,7 @@ fun VersePersonalBadges(
             VerseBadge(
                 icon = Icons.Filled.Bookmark,
                 label = stringResource(R.string.verse_has_bookmark),
-                tint = AlKhatibColors.GoldDeep,
+                tint = SaatColors.GoldDeep,
                 compact = compact
             )
             Spacer(Modifier.width(6.dp))
@@ -398,15 +398,15 @@ fun VersePersonalBadges(
             VerseBadge(
                 icon = Icons.Filled.EditNote,
                 label = stringResource(R.string.verse_has_note),
-                tint = AlKhatibColors.DeepEmerald,
+                tint = SaatColors.DeepEmerald,
                 compact = compact
             )
             Spacer(Modifier.width(6.dp))
         }
         if (hifzStatus != HifzStatus.NONE) {
             val (label, tint) = when (hifzStatus) {
-                HifzStatus.LEARNING -> stringResource(R.string.hifz_learning) to AlKhatibColors.Gold
-                HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized) to AlKhatibColors.DeepEmerald
+                HifzStatus.LEARNING -> stringResource(R.string.hifz_learning) to SaatColors.Gold
+                HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized) to SaatColors.DeepEmerald
                 HifzStatus.NEEDS_REVIEW -> stringResource(R.string.hifz_review) to Color(0xFFC2410C)
                 HifzStatus.NONE -> "" to Color.Transparent
             }

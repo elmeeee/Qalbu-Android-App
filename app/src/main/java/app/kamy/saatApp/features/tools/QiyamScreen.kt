@@ -56,8 +56,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.features.tools.qiyam.TahajudGuide
 import app.kamy.saatApp.features.tools.qiyam.TahajudGuideCategory
 import app.kamy.saatApp.features.tools.qiyam.TahajudReading
@@ -88,13 +88,13 @@ fun QiyamScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(SaatColors.ScreenBackground)
             .tabContentStatusBarInset()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
@@ -109,7 +109,7 @@ fun QiyamScreen(onBack: () -> Unit) {
                 Text(
                     text = stringResource(R.string.qiyam_premium_subtitle),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
         }
@@ -124,13 +124,13 @@ fun QiyamScreen(onBack: () -> Unit) {
 
             TabRow(
                 selectedTabIndex = selectedTab,
-                containerColor = AlKhatibColors.ScreenBackground,
-                contentColor = AlKhatibColors.DeepEmerald,
+                containerColor = SaatColors.ScreenBackground,
+                contentColor = SaatColors.DeepEmerald,
                 indicator = { tabPositions ->
                     if (selectedTab < tabPositions.size) {
                         TabRowDefaults.SecondaryIndicator(
                             modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                            color = AlKhatibColors.DeepEmerald
+                            color = SaatColors.DeepEmerald
                         )
                     }
                 }
@@ -175,7 +175,7 @@ private fun QiyamHeroCard(
                 .fillMaxWidth()
                 .background(
                     Brush.linearGradient(
-                        listOf(AlKhatibColors.EmeraldNight, AlKhatibColors.IndigoDeep, AlKhatibColors.ForestDeeper)
+                        listOf(SaatColors.EmeraldNight, SaatColors.IndigoDeep, SaatColors.ForestDeeper)
                     )
                 )
                 .padding(20.dp)
@@ -185,14 +185,14 @@ private fun QiyamHeroCard(
                     Icon(
                         Icons.Default.NightsStay,
                         contentDescription = null,
-                        tint = AlKhatibColors.GoldBright,
+                        tint = SaatColors.GoldBright,
                         modifier = Modifier.size(28.dp)
                     )
                     Spacer(Modifier.size(10.dp))
                     Text(
                         text = stringResource(R.string.qiyam_explain),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.PureWhite.copy(alpha = 0.9f)
+                        color = SaatColors.PureWhite.copy(alpha = 0.9f)
                     )
                 }
 
@@ -224,7 +224,7 @@ private fun QiyamHeroCard(
                             Text(
                                 text = day.weekdayShort,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = AlKhatibColors.PureWhite.copy(alpha = 0.6f)
+                                color = SaatColors.PureWhite.copy(alpha = 0.6f)
                             )
                             Spacer(Modifier.height(6.dp))
                             Box(
@@ -233,9 +233,9 @@ private fun QiyamHeroCard(
                                     .clip(CircleShape)
                                     .background(
                                         when {
-                                            day.logged -> AlKhatibColors.GoldBright
-                                            day.isToday -> AlKhatibColors.PureWhite.copy(0.35f)
-                                            else -> AlKhatibColors.PureWhite.copy(0.15f)
+                                            day.logged -> SaatColors.GoldBright
+                                            day.isToday -> SaatColors.PureWhite.copy(0.35f)
+                                            else -> SaatColors.PureWhite.copy(0.15f)
                                         }
                                     )
                             )
@@ -254,12 +254,12 @@ private fun QiyamStatBlock(value: String, label: String) {
             text = value,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.PureWhite
+            color = SaatColors.PureWhite
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = AlKhatibColors.PureWhite.copy(alpha = 0.65f)
+            color = SaatColors.PureWhite.copy(alpha = 0.65f)
         )
     }
 }
@@ -277,12 +277,12 @@ private fun QiyamTrackerTab(
         Text(
             text = stringResource(R.string.qiyam_explain_detail),
             style = MaterialTheme.typography.bodyMedium,
-            color = AlKhatibColors.Slate500
+            color = SaatColors.Slate500
         )
 
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = AlKhatibColors.PrayerMint,
+            color = SaatColors.PrayerMint,
             shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -302,12 +302,12 @@ private fun QiyamTrackerTab(
                         text = stringResource(R.string.qiyam_tonight_label),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = AlKhatibColors.DeepEmerald
+                        color = SaatColors.DeepEmerald
                     )
                     Text(
                         text = stringResource(R.string.qiyam_tonight_hint),
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
                 Switch(
@@ -317,8 +317,8 @@ private fun QiyamTrackerTab(
                         if (!loggedTonight) confirmHaptic()
                     },
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = AlKhatibColors.PureWhite,
-                        checkedTrackColor = AlKhatibColors.DeepEmerald
+                        checkedThumbColor = SaatColors.PureWhite,
+                        checkedTrackColor = SaatColors.DeepEmerald
                     )
                 )
             }
@@ -335,7 +335,7 @@ private fun QiyamGuideTab() {
         Text(
             text = stringResource(R.string.tahajud_guide_intro),
             style = MaterialTheme.typography.bodyMedium,
-            color = AlKhatibColors.Slate500
+            color = SaatColors.Slate500
         )
 
         TahajudGuideCategory.entries.forEach { category ->
@@ -343,7 +343,7 @@ private fun QiyamGuideTab() {
                 text = categoryTitle(category),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 modifier = Modifier.padding(top = 8.dp)
             )
             TahajudGuide.byCategory(category).forEach { reading ->
@@ -366,7 +366,7 @@ private fun TahajudReadingCard(reading: TahajudReading) {
     var expanded by remember { mutableStateOf(false) }
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 1.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -387,7 +387,7 @@ private fun TahajudReadingCard(reading: TahajudReading) {
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                     contentDescription = null,
-                    tint = AlKhatibColors.Slate500
+                    tint = SaatColors.Slate500
                 )
             }
             AnimatedVisibility(
@@ -403,7 +403,7 @@ private fun TahajudReadingCard(reading: TahajudReading) {
                                 fontSize = 22.sp,
                                 lineHeight = 36.sp
                             ),
-                            color = AlKhatibColors.DeepEmerald,
+                            color = SaatColors.DeepEmerald,
                             textAlign = TextAlign.End,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -413,7 +413,7 @@ private fun TahajudReadingCard(reading: TahajudReading) {
                         Text(
                             text = stringResource(translitRes),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = AlKhatibColors.Teal,
+                            color = SaatColors.Teal,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                         )
                         Spacer(Modifier.height(8.dp))
@@ -421,7 +421,7 @@ private fun TahajudReadingCard(reading: TahajudReading) {
                     Text(
                         text = stringResource(reading.bodyRes),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate800
+                        color = SaatColors.Slate800
                     )
                 }
             }

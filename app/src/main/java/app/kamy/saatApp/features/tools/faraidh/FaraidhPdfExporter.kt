@@ -79,8 +79,8 @@ object FaraidhPdfExporter {
         val locale = localeFor(language)
 
         loadLogo(context)?.let { logo ->
-            ctx.canvas.drawBitmap(logo.scale(64, 64, filter = true), MARGIN, ctx.y, null)
-            ctx.y += 72f
+            ctx.canvas.drawBitmap(logo.scale(20, 20, filter = true), MARGIN, ctx.y, null)
+            ctx.y += 28f
         }
 
         drawLine(ctx, paints.title, "SĀAT — ${t(language, "Laporan Faraidh", "Laporan Faraidh", "Faraidh Report")}")
@@ -692,7 +692,7 @@ object FaraidhPdfExporter {
     }
 
     private fun loadLogo(context: Context): Bitmap? =
-        runCatching { BitmapFactory.decodeResource(context.resources, R.drawable.splash_screen_saat) }.getOrNull()
+        runCatching { BitmapFactory.decodeResource(context.resources, R.drawable.saat_app_icon) }.getOrNull()
 
     private fun currencyFormat(language: AppLanguage) = NumberFormat.getNumberInstance(localeFor(language)).apply {
         minimumFractionDigits = 2

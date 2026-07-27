@@ -13,14 +13,14 @@ import javax.inject.Singleton
 
 @Singleton
 class TranslationPreferencesStore @Inject constructor(
-    @ApplicationContext context: Context
+    @ApplicationContext private val context: Context
 ) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     private val _translationId = MutableStateFlow(loadTranslationId())
     val translationId: StateFlow<Int> = _translationId.asStateFlow()
 
-    private val _translationName = MutableStateFlow(prefs.getString(KEY_NAME, "").orEmpty())
+    private val _translationName = MutableStateFlow(loadTranslationName())
     val translationName: StateFlow<String> = _translationName.asStateFlow()
 
     private val _showTranslation = MutableStateFlow(prefs.getBoolean(KEY_SHOW, true))
@@ -79,8 +79,17 @@ class TranslationPreferencesStore @Inject constructor(
 
     private fun loadTranslationId(): Int {
         val saved = prefs.getInt(KEY_ID, 0)
-        val raw = if (saved > 0) saved else AppConfig.defaultTranslationId
-        return LocalQuranConfig.normalizeTranslationId(raw)
+        if (saved > 0) return LocalQuranConfig.normalizeTranslationId(saved)
+        val lang = AppLanguageStore.from(context).current()
+        return LocalQuranConfig.translationForAppLanguage(lang).id
+    }
+
+    private fun loadTranslationName(): String {
+        val saved = prefs.getString(KEY_NAME, "").orEmpty()
+        if (saved.isNotBlank()) return saved
+        val id = loadTranslationId()
+        val match = LocalQuranConfig.translations.find { it.id == id }
+        return match?.authorName?.ifBlank { match.name } ?: match?.name ?: "Kementerian Agama RI"
     }
 
     private fun loadRecitationId(): Int {

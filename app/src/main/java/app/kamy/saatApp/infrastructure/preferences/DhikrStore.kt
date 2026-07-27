@@ -27,7 +27,7 @@ object DhikrStore {
         ),
         DhikrPreset(
             "allahuakbar", "dhikr_allahuakbar", "اللَّهُ أَكْبَرُ",
-            "dhikr_translit_allahuakbar", "dhikr_meaning_allahuakbar", 34
+            "dhikr_translit_allahuakbar", "dhikr_meaning_allahuakbar", 33
         ),
         DhikrPreset(
             "istighfar", "dhikr_istighfar", "أَسْتَغْفِرُ اللَّهَ",

@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.core.error.AppError
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.TafsirPayload
 import app.kamy.saatApp.features.reader.ReaderEmptyState
 import app.kamy.saatApp.features.reader.ReaderErrorState
@@ -62,7 +62,7 @@ fun TafsirSheet(
             ReaderSheetTopBar(title = stringResource(R.string.tafsir), onDone = onDismiss)
             VerseContextHeader(
                 verseReference = verseReference,
-                icon = Icons.AutoMirrored.Filled.MenuBook,
+                iconRes = R.drawable.ic_tafsir,
                 subtitle = when {
                     isLoading -> null
                     tafsir?.resourceName != null -> tafsir.resourceName
@@ -99,7 +99,7 @@ private fun TafsirBody(rawHtml: String) {
     } else {
         Text(
             text = rawHtml.stripHtmlTags(),
-            color = AlKhatibColors.Slate900,
+            color = SaatColors.Slate900,
             style = MaterialTheme.typography.bodyLarge.copy(
                 lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.35f
             ),

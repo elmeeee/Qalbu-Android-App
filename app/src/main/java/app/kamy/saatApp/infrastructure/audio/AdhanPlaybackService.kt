@@ -22,6 +22,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import app.kamy.saatApp.AdhanAlarmActivity
 import app.kamy.saatApp.MainActivity
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLocale
@@ -71,11 +72,40 @@ class AdhanPlaybackService : Service() {
                 linkedNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
                 val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
+                val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
                 val rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0)
                 NotificationChannels.ensureAll(this)
-                startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body))
+                val fgSuccess = runCatching {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                        startForeground(
+                            NOTIFICATION_ID,
+                            buildForegroundNotification(title, body, prayerName),
+                            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                        )
+                    } else {
+                        startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body, prayerName))
+                    }
+                }.isSuccess
+                if (!fgSuccess) {
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
                 acquireWakeLock()
                 startAdhan(rawRes, title, body)
+                runCatching {
+                    startActivity(
+                        AdhanAlarmActivity.intent(
+                            context = this,
+                            title = title.ifBlank { getString(R.string.adhan_playback_title) },
+                            body = body.ifBlank { getString(R.string.adhan_playback_body) },
+                            prayerName = prayerName
+                        )
+                    )
+                }
+            }
+            else -> {
+                stopSelf()
+                return START_NOT_STICKY
             }
         }
         return START_NOT_STICKY
@@ -224,6 +254,7 @@ class AdhanPlaybackService : Service() {
     }
 
     private fun releaseAndStop() {
+        runCatching { sendBroadcast(Intent(ACTION_ADHAN_STOPPED).setPackage(packageName)) }
         cancelLinkedNotifications()
         releasePlayer()
         releaseWakeLock()
@@ -236,7 +267,7 @@ class AdhanPlaybackService : Service() {
         linkedNotificationId = -1
     }
 
-    private fun buildForegroundNotification(title: String, body: String) =
+    private fun buildForegroundNotification(title: String, body: String, prayerName: String? = null) =
         NotificationCompat.Builder(this, NotificationChannels.ADHAN_PLAYBACK)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(title.ifBlank { getString(R.string.adhan_playback_title) })
@@ -252,20 +283,22 @@ class AdhanPlaybackService : Service() {
                 )
             )
             .setOngoing(true)
-            .setSilent(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .apply {
-                val fullScreenIntent = Intent(this@AdhanPlaybackService, MainActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    putExtra("from_adhan_full_screen", true)
-                    putExtra("adhan_title", title.ifBlank { getString(R.string.adhan_playback_title) })
-                    putExtra("adhan_body", body.ifBlank { getString(R.string.adhan_playback_body) })
-                }
+                // Use AdhanAlarmActivity — a lightweight dedicated alarm screen.
+                // Request code must differ from the contentIntent above (which uses 0)
+                // to prevent Android from deduplicating the PendingIntents and stripping extras.
                 val fullScreenPendingIntent = PendingIntent.getActivity(
                     this@AdhanPlaybackService,
-                    0,
-                    fullScreenIntent,
+                    NOTIFICATION_ID + 1_000, // unique request code — NEVER 0
+                    AdhanAlarmActivity.intent(
+                        context = this@AdhanPlaybackService,
+                        title = title.ifBlank { getString(R.string.adhan_playback_title) },
+                        body = body.ifBlank { getString(R.string.adhan_playback_body) },
+                        prayerName = prayerName
+                    ),
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
                 setFullScreenIntent(fullScreenPendingIntent, true)
@@ -303,20 +336,26 @@ class AdhanPlaybackService : Service() {
         private const val EXTRA_RAW_RES = "raw_res"
         private const val EXTRA_TITLE = "title"
         private const val EXTRA_BODY = "body"
+        private const val EXTRA_PRAYER_NAME = "prayer_name"
         private const val EXTRA_NOTIFICATION_ID = AdhanStopReceiver.EXTRA_NOTIFICATION_ID
         const val ACTION_STOP = AdhanStopReceiver.ACTION_STOP
+        const val ACTION_ADHAN_STOPPED = "app.kamy.saatApp.action.ADHAN_STOPPED"
 
         fun start(
             context: Context,
             @RawRes rawRes: Int,
             title: String,
             body: String,
-            notificationId: Int = -1
+            notificationId: Int = -1,
+            prayerName: String? = null
         ): Boolean {
             val intent = Intent(context, AdhanPlaybackService::class.java).apply {
                 putExtra(EXTRA_RAW_RES, rawRes)
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_BODY, body)
+                if (!prayerName.isNullOrBlank()) {
+                    putExtra(EXTRA_PRAYER_NAME, prayerName)
+                }
                 if (notificationId >= 0) {
                     putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                 }

@@ -49,8 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.features.tools.dhikr.PremiumTasbihCounter
 import app.kamy.saatApp.infrastructure.preferences.DhikrPreset
 import app.kamy.saatApp.infrastructure.preferences.DhikrStore
@@ -84,7 +84,7 @@ fun DhikrScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    listOf(AlKhatibColors.ScreenBackground, AlKhatibColors.SageMist, AlKhatibColors.PrayerMint)
+                    listOf(SaatColors.ScreenBackground, SaatColors.SageMist, SaatColors.PrayerMint)
                 )
             )
             .tabContentStatusBarInset()
@@ -92,7 +92,7 @@ fun DhikrScreen(onBack: () -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
@@ -107,7 +107,7 @@ fun DhikrScreen(onBack: () -> Unit) {
                 Text(
                     text = stringResource(R.string.dhikr_premium_subtitle),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
         }
@@ -125,8 +125,8 @@ fun DhikrScreen(onBack: () -> Unit) {
                     },
                     label = { Text(dhikrLabel(context, item)) },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = AlKhatibColors.DeepEmerald,
-                        selectedLabelColor = AlKhatibColors.PureWhite
+                        selectedContainerColor = SaatColors.DeepEmerald,
+                        selectedLabelColor = SaatColors.PureWhite
                     )
                 )
             }
@@ -166,7 +166,7 @@ fun DhikrScreen(onBack: () -> Unit) {
             Text(
                 text = stringResource(R.string.dhikr_tap_hint),
                 style = MaterialTheme.typography.labelSmall,
-                color = AlKhatibColors.Slate500.copy(alpha = 0.7f),
+                color = SaatColors.Slate500.copy(alpha = 0.7f),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 8.dp)
@@ -193,11 +193,11 @@ private fun DhikrReadingCard(preset: DhikrPreset) {
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
         shape = RoundedCornerShape(20.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 4.dp,
         border = BorderStroke(
             1.dp,
-            Brush.linearGradient(listOf(AlKhatibColors.Teal.copy(0.25f), AlKhatibColors.Gold.copy(0.2f)))
+            Brush.linearGradient(listOf(SaatColors.Teal.copy(0.25f), SaatColors.Gold.copy(0.2f)))
         )
     ) {
         Column(
@@ -208,20 +208,20 @@ private fun DhikrReadingCard(preset: DhikrPreset) {
             Text(
                 text = preset.arabic,
                 style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp, lineHeight = 44.sp),
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = dhikrString(context, preset.transliterationResKey),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Teal,
+                color = SaatColors.Teal,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = dhikrString(context, preset.meaningResKey),
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500,
+                color = SaatColors.Slate500,
                 textAlign = TextAlign.Center
             )
         }
@@ -247,13 +247,13 @@ private fun DhikrStatsRow(
             Text(
                 text = stringResource(R.string.dhikr_session_progress, progress),
                 style = MaterialTheme.typography.labelMedium,
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = stringResource(R.string.dhikr_total, lifetime),
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
         }
         TextButton(onClick = onReset) {

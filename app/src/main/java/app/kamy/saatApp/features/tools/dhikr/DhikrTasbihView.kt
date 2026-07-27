@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -86,7 +86,7 @@ fun PremiumTasbihCounter(
             if (progress > 0f) {
                 drawArc(
                     brush = Brush.sweepGradient(
-                        listOf(AlKhatibColors.GoldDeep, AlKhatibColors.Teal, AlKhatibColors.GoldBright)
+                        listOf(SaatColors.GoldDeep, SaatColors.Teal, SaatColors.GoldBright)
                     ),
                     startAngle = -90f,
                     sweepAngle = 360f * progress,
@@ -112,15 +112,15 @@ fun PremiumTasbihCounter(
                 }
                 if (active) {
                     drawCircle(
-                        color = AlKhatibColors.GoldDeep.copy(alpha = 0.25f),
+                        color = SaatColors.GoldDeep.copy(alpha = 0.25f),
                         radius = r * 2.4f,
                         center = Offset(x, y)
                     )
                 }
                 drawCircle(
                     color = when {
-                        isImam -> AlKhatibColors.DeepEmerald
-                        filled -> AlKhatibColors.GoldDeep
+                        isImam -> SaatColors.DeepEmerald
+                        filled -> SaatColors.GoldDeep
                         else -> Color(0xFFCBD5E1)
                     },
                     radius = r,
@@ -132,11 +132,11 @@ fun PremiumTasbihCounter(
         Surface(
             modifier = Modifier.size(counterSize * 0.68f),
             shape = CircleShape,
-            color = AlKhatibColors.PureWhite,
+            color = SaatColors.PureWhite,
             shadowElevation = 6.dp,
             border = androidx.compose.foundation.BorderStroke(
                 1.5.dp,
-                Brush.linearGradient(listOf(AlKhatibColors.Teal.copy(0.35f), AlKhatibColors.Gold.copy(0.35f)))
+                Brush.linearGradient(listOf(SaatColors.Teal.copy(0.35f), SaatColors.Gold.copy(0.35f)))
             )
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -145,20 +145,20 @@ fun PremiumTasbihCounter(
                         count.toString(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.Slate900,
+                        color = SaatColors.Slate900,
                         fontSize = 18.sp
                     )
                     Text(
                         subtitle,
                         style = MaterialTheme.typography.labelSmall,
-                        color = AlKhatibColors.Slate500,
+                        color = SaatColors.Slate500,
                         fontSize = 9.sp
                     )
                     if (round > 0) {
                         Text(
                             "×$round",
                             style = MaterialTheme.typography.labelSmall,
-                            color = AlKhatibColors.Teal,
+                            color = SaatColors.Teal,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.clip(CircleShape),
                             fontSize = 8.sp

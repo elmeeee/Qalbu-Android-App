@@ -96,10 +96,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibEmptyState
-import app.kamy.saatApp.design.components.AlKhatibPartialBottomSheet
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.components.SaatEmptyState
+import app.kamy.saatApp.design.components.SaatPartialBottomSheet
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.ui.layout.ContentScale
 import app.kamy.saatApp.domain.faraidh.EstateAssetInput
@@ -228,7 +228,7 @@ fun FaraidhCalculatorScreen(
     }
 
     if (state.showInputSheet) {
-        AlKhatibPartialBottomSheet(
+        SaatPartialBottomSheet(
             onDismiss = { vm.toggleInputSheet(false) },
             maxHeightFraction = 0.92f,
             scrollContent = false
@@ -251,13 +251,13 @@ fun FaraidhCalculatorScreen(
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        containerColor = AlKhatibColors.ScreenBackground,
+        containerColor = SaatColors.ScreenBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (hasResult) {
                 Surface(
                     shadowElevation = 12.dp,
-                    color = AlKhatibColors.PureWhite,
+                    color = SaatColors.PureWhite,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(
@@ -275,10 +275,10 @@ fun FaraidhCalculatorScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 12.dp),
+                            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = AlKhatibColors.DeepEmerald,
+                            containerColor = SaatColors.DeepEmerald,
                             contentColor = Color.White
                         ),
                         enabled = !state.pdfExporting
@@ -376,14 +376,14 @@ private fun FaraidhHeader(
                 .height(3.dp)
                 .background(
                     Brush.horizontalGradient(
-                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal, AlKhatibColors.Gold.copy(alpha = 0.6f))
+                        listOf(SaatColors.DeepEmerald, SaatColors.Teal, SaatColors.Gold.copy(alpha = 0.6f))
                     )
                 )
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 10.dp),
+                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
@@ -394,25 +394,25 @@ private fun FaraidhHeader(
                     text = stringResource(R.string.faraidh_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
                 Text(
                     text = stringResource(R.string.faraidh_subtitle_short),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
             IconButton(onClick = onScenarios) {
-                Icon(Icons.Filled.FolderOpen, contentDescription = stringResource(R.string.faraidh_saved_scenarios), tint = AlKhatibColors.Teal)
+                Icon(Icons.Filled.FolderOpen, contentDescription = stringResource(R.string.faraidh_saved_scenarios), tint = SaatColors.Teal)
             }
             IconButton(onClick = onSave) {
-                Icon(Icons.Filled.Save, contentDescription = stringResource(R.string.faraidh_save_scenario), tint = AlKhatibColors.Teal)
+                Icon(Icons.Filled.Save, contentDescription = stringResource(R.string.faraidh_save_scenario), tint = SaatColors.Teal)
             }
             IconButton(onClick = onReset) {
-                Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.faraidh_reset), tint = AlKhatibColors.Teal)
+                Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.faraidh_reset), tint = SaatColors.Teal)
             }
             IconButton(onClick = onInfo) {
-                Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.faraidh_tooltip_title), tint = AlKhatibColors.Teal)
+                Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.faraidh_tooltip_title), tint = SaatColors.Teal)
             }
         }
     }
@@ -431,10 +431,10 @@ private fun FaraidhStatusStrip(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+            .padding(horizontal = SaatSpacing.screenHorizontal)
             .padding(bottom = 10.dp),
         shape = RoundedCornerShape(20.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 2.dp
     ) {
         Row(
@@ -444,8 +444,8 @@ private fun FaraidhStatusStrip(
                     1.dp,
                     Brush.linearGradient(
                         listOf(
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.2f),
-                            AlKhatibColors.Teal.copy(alpha = 0.1f)
+                            SaatColors.DeepEmerald.copy(alpha = 0.2f),
+                            SaatColors.Teal.copy(alpha = 0.1f)
                         )
                     ),
                     RoundedCornerShape(20.dp)
@@ -457,13 +457,13 @@ private fun FaraidhStatusStrip(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(AlKhatibColors.MintWash),
+                    .background(SaatColors.MintWash),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     if (hasResult) Icons.Filled.CheckCircle else Icons.Outlined.Calculate,
                     contentDescription = null,
-                    tint = AlKhatibColors.DeepEmerald,
+                    tint = SaatColors.DeepEmerald,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -472,7 +472,7 @@ private fun FaraidhStatusStrip(
                 Text(
                     text = deceasedName.ifBlank { stringResource(R.string.faraidh_node_deceased) },
                     style = MaterialTheme.typography.labelMedium,
-                    color = AlKhatibColors.DeepEmerald,
+                    color = SaatColors.DeepEmerald,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -481,7 +481,7 @@ private fun FaraidhStatusStrip(
                     text = if (estateValue > BigDecimal.ZERO) currency.format(estateValue) else "—",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
                 Text(
                     text = when {
@@ -490,18 +490,18 @@ private fun FaraidhStatusStrip(
                         else -> stringResource(R.string.faraidh_status_heirs_only, heirCount)
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
             OutlinedButton(
                 onClick = onEdit,
                 shape = RoundedCornerShape(12.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, AlKhatibColors.Teal.copy(alpha = 0.4f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SaatColors.Teal.copy(alpha = 0.4f)),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
-                Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(16.dp), tint = AlKhatibColors.DeepEmerald)
+                Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(16.dp), tint = SaatColors.DeepEmerald)
                 Spacer(Modifier.width(4.dp))
-                Text(stringResource(R.string.faraidh_edit), style = MaterialTheme.typography.labelMedium, color = AlKhatibColors.DeepEmerald)
+                Text(stringResource(R.string.faraidh_edit), style = MaterialTheme.typography.labelMedium, color = SaatColors.DeepEmerald)
             }
         }
     }
@@ -520,18 +520,18 @@ private fun FaraidhPillTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(scroll)
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+            .padding(horizontal = SaatSpacing.screenHorizontal)
             .padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         tabs.forEach { (index, labelRes, icon) ->
             val selected = selectedTab == index
             val bg by animateColorAsState(
-                if (selected) AlKhatibColors.DeepEmerald else AlKhatibColors.LightGrey,
+                if (selected) SaatColors.DeepEmerald else SaatColors.LightGrey,
                 label = "tabBg"
             )
             val fg by animateColorAsState(
-                if (selected) Color.White else AlKhatibColors.Slate500,
+                if (selected) Color.White else SaatColors.Slate500,
                 label = "tabFg"
             )
             Surface(
@@ -580,28 +580,28 @@ private fun FaraidhInputSheetContent(
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(scroll)
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+            .padding(horizontal = SaatSpacing.screenHorizontal)
             .padding(bottom = 28.dp)
     ) {
         Text(
             stringResource(R.string.faraidh_input_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = AlKhatibColors.Slate900
+            color = SaatColors.Slate900
         )
         Text(
             stringResource(R.string.faraidh_input_hint),
             style = MaterialTheme.typography.bodyMedium,
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
         )
 
-        Text(stringResource(R.string.faraidh_step_madhhab), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.DeepEmerald)
+        Text(stringResource(R.string.faraidh_step_madhhab), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = SaatColors.DeepEmerald)
         Spacer(Modifier.height(8.dp))
         FaraidhMadhhabPicker(selected = state.madhhab, onSelect = onMadhhabChange)
 
         Spacer(Modifier.height(20.dp))
-        Text(stringResource(R.string.faraidh_step_estate_detail), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.DeepEmerald)
+        Text(stringResource(R.string.faraidh_step_estate_detail), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = SaatColors.DeepEmerald)
         Spacer(Modifier.height(8.dp))
         FaraidhEstateInputSection(
             estate = state.estate,
@@ -612,7 +612,7 @@ private fun FaraidhInputSheetContent(
         )
 
         Spacer(Modifier.height(12.dp))
-        Text(stringResource(R.string.faraidh_step_profile), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.DeepEmerald)
+        Text(stringResource(R.string.faraidh_step_profile), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = SaatColors.DeepEmerald)
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = state.names.deceasedName,
@@ -622,24 +622,24 @@ private fun FaraidhInputSheetContent(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             shape = RoundedCornerShape(14.dp),
-            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AlKhatibColors.Teal, focusedLabelColor = AlKhatibColors.DeepEmerald)
+            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = SaatColors.Teal, focusedLabelColor = SaatColors.DeepEmerald)
         )
 
         Spacer(Modifier.height(16.dp))
-        Text(stringResource(R.string.faraidh_deceased_gender), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.DeepEmerald)
+        Text(stringResource(R.string.faraidh_deceased_gender), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = SaatColors.DeepEmerald)
         Spacer(Modifier.height(8.dp))
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
             SegmentedButton(
                 selected = state.gender == DeceasedGender.MALE,
                 onClick = { onGenderChange(DeceasedGender.MALE) },
                 shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = Color.White)
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = SaatColors.DeepEmerald, activeContentColor = Color.White)
             ) { Text(stringResource(R.string.faraidh_gender_male)) }
             SegmentedButton(
                 selected = state.gender == DeceasedGender.FEMALE,
                 onClick = { onGenderChange(DeceasedGender.FEMALE) },
                 shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                colors = SegmentedButtonDefaults.colors(activeContainerColor = AlKhatibColors.DeepEmerald, activeContentColor = Color.White)
+                colors = SegmentedButtonDefaults.colors(activeContainerColor = SaatColors.DeepEmerald, activeContentColor = Color.White)
             ) { Text(stringResource(R.string.faraidh_gender_female)) }
         }
 
@@ -647,8 +647,8 @@ private fun FaraidhInputSheetContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(AlKhatibColors.PureWhite, RoundedCornerShape(12.dp))
-                .border(1.dp, AlKhatibColors.SoftGrey, RoundedCornerShape(12.dp))
+                .background(SaatColors.PureWhite, RoundedCornerShape(12.dp))
+                .border(1.dp, SaatColors.SoftGrey, RoundedCornerShape(12.dp))
                 .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -657,13 +657,13 @@ private fun FaraidhInputSheetContent(
                     text = stringResource(R.string.faraidh_born_out_of_wedlock_label),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
                     text = stringResource(R.string.faraidh_born_out_of_wedlock_desc),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -672,13 +672,13 @@ private fun FaraidhInputSheetContent(
                 onCheckedChange = onBornOutOfWedlockChange,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
-                    checkedTrackColor = AlKhatibColors.DeepEmerald
+                    checkedTrackColor = SaatColors.DeepEmerald
                 )
             )
         }
 
         Spacer(Modifier.height(20.dp))
-        Text(stringResource(R.string.faraidh_step_heirs), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.DeepEmerald)
+        Text(stringResource(R.string.faraidh_step_heirs), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.SemiBold, color = SaatColors.DeepEmerald)
         Spacer(Modifier.height(10.dp))
 
         HeirSection(
@@ -738,7 +738,7 @@ private fun FaraidhInputSheetContent(
             onClick = onDone,
             modifier = Modifier.fillMaxWidth().height(52.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = AlKhatibColors.DeepEmerald)
+            colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
         ) {
             Text(stringResource(R.string.faraidh_done), fontWeight = FontWeight.SemiBold)
         }
@@ -752,13 +752,13 @@ private fun HeirSection(title: String, icon: ImageVector, content: @Composable (
             .fillMaxWidth()
             .padding(bottom = 10.dp),
         shape = RoundedCornerShape(16.dp),
-        color = AlKhatibColors.ScreenBackground
+        color = SaatColors.ScreenBackground
     ) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = AlKhatibColors.Teal, modifier = Modifier.size(18.dp))
+                Icon(icon, contentDescription = null, tint = SaatColors.Teal, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(title, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.Slate800)
+                Text(title, fontWeight = FontWeight.SemiBold, color = SaatColors.Slate800)
             }
             Spacer(Modifier.height(6.dp))
             content()
@@ -790,7 +790,7 @@ private fun NamedHeirStepper(
                     .padding(start = 8.dp, bottom = 6.dp),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = AlKhatibColors.Teal)
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = SaatColors.Teal)
             )
         }
     }
@@ -804,28 +804,28 @@ private fun HeirStepperRow(label: String, count: Int, min: Int = 0, max: Int = 9
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(if (active) AlKhatibColors.PrayerMint else AlKhatibColors.PureWhite)
+            .background(if (active) SaatColors.PrayerMint else SaatColors.PureWhite)
             .border(
                 1.dp,
-                if (active) AlKhatibColors.Teal.copy(alpha = 0.35f) else AlKhatibColors.SoftGrey.copy(alpha = 0.6f),
+                if (active) SaatColors.Teal.copy(alpha = 0.35f) else SaatColors.SoftGrey.copy(alpha = 0.6f),
                 RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = AlKhatibColors.Slate800)
+        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = SaatColors.Slate800)
         IconButton(onClick = { onChange((count - 1).coerceAtLeast(min)) }, modifier = Modifier.size(32.dp)) {
-            Icon(Icons.Filled.Remove, contentDescription = null, tint = AlKhatibColors.Slate500, modifier = Modifier.size(18.dp))
+            Icon(Icons.Filled.Remove, contentDescription = null, tint = SaatColors.Slate500, modifier = Modifier.size(18.dp))
         }
         Text(
             "$count",
             modifier = Modifier.width(28.dp),
             textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold,
-            color = if (active) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500
+            color = if (active) SaatColors.DeepEmerald else SaatColors.Slate500
         )
         IconButton(onClick = { onChange((count + 1).coerceAtMost(max)) }, modifier = Modifier.size(32.dp)) {
-            Icon(Icons.Filled.Add, contentDescription = null, tint = AlKhatibColors.DeepEmerald, modifier = Modifier.size(18.dp))
+            Icon(Icons.Filled.Add, contentDescription = null, tint = SaatColors.DeepEmerald, modifier = Modifier.size(18.dp))
         }
     }
 }
@@ -856,7 +856,7 @@ private fun FaraidhBreakdownTab(
         )
         else -> LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             item {
@@ -887,9 +887,9 @@ private fun FaraidhBreakdownTab(
                 item {
                     Spacer(Modifier.height(6.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.Block, contentDescription = null, tint = AlKhatibColors.Danger, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Outlined.Block, contentDescription = null, tint = SaatColors.Danger, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text(stringResource(R.string.faraidh_blocked_heirs), fontWeight = FontWeight.Bold, color = AlKhatibColors.Slate800)
+                        Text(stringResource(R.string.faraidh_blocked_heirs), fontWeight = FontWeight.Bold, color = SaatColors.Slate800)
                     }
                 }
                 items(result.blockedHeirs, key = { "${it.type}_${it.reason}" }) { blocked ->
@@ -907,7 +907,7 @@ private fun EstateHeroCard(deceasedName: String, estate: String, distributed: St
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(Brush.linearGradient(listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark, AlKhatibColors.ForestDark)))
+            .background(Brush.linearGradient(listOf(SaatColors.DeepEmerald, SaatColors.TealDark, SaatColors.ForestDark)))
             .padding(20.dp)
     ) {
         Column {
@@ -946,9 +946,9 @@ private fun BreakdownTableHeader() {
             .padding(horizontal = 4.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(stringResource(R.string.faraidh_col_heir), style = MaterialTheme.typography.labelSmall, color = AlKhatibColors.Slate500, modifier = Modifier.weight(1.2f))
-        Text(stringResource(R.string.faraidh_fraction), style = MaterialTheme.typography.labelSmall, color = AlKhatibColors.Slate500, modifier = Modifier.weight(0.7f), textAlign = TextAlign.Center)
-        Text(stringResource(R.string.faraidh_amount), style = MaterialTheme.typography.labelSmall, color = AlKhatibColors.Slate500, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
+        Text(stringResource(R.string.faraidh_col_heir), style = MaterialTheme.typography.labelSmall, color = SaatColors.Slate500, modifier = Modifier.weight(1.2f))
+        Text(stringResource(R.string.faraidh_fraction), style = MaterialTheme.typography.labelSmall, color = SaatColors.Slate500, modifier = Modifier.weight(0.7f), textAlign = TextAlign.Center)
+        Text(stringResource(R.string.faraidh_amount), style = MaterialTheme.typography.labelSmall, color = SaatColors.Slate500, modifier = Modifier.weight(1f), textAlign = TextAlign.End)
     }
 }
 
@@ -965,26 +965,26 @@ private fun HeirShareCard(share: HeirShare, names: FaraidhParticipantNames, curr
 
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 1.dp,
-        modifier = Modifier.border(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
+        modifier = Modifier.border(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(roleLabel, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.Slate900, style = MaterialTheme.typography.labelMedium)
+                    Text(roleLabel, fontWeight = FontWeight.SemiBold, color = SaatColors.Slate900, style = MaterialTheme.typography.labelMedium)
                     Text(
                         personNames.joinToString(", "),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         stringResource(R.string.faraidh_heads, share.headCount),
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
                 ShareTypeBadge(isAsabah = share.isAsabah)
@@ -993,23 +993,23 @@ private fun HeirShareCard(share: HeirShare, names: FaraidhParticipantNames, curr
             LinearProgressIndicator(
                 progress = { percentFloat },
                 modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                color = AlKhatibColors.Teal,
-                trackColor = AlKhatibColors.MintWash,
+                color = SaatColors.Teal,
+                trackColor = SaatColors.MintWash,
                 strokeCap = StrokeCap.Round
             )
             Spacer(Modifier.height(10.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
                 Column {
-                    Text(share.fraction.toDisplayString(), fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald, fontSize = 18.sp)
-                    Text(formatFaraidhPercent(share.percentage), style = MaterialTheme.typography.labelSmall, color = AlKhatibColors.Slate500)
+                    Text(share.fraction.toDisplayString(), fontWeight = FontWeight.Bold, color = SaatColors.DeepEmerald, fontSize = 18.sp)
+                    Text(formatFaraidhPercent(share.percentage), style = MaterialTheme.typography.labelSmall, color = SaatColors.Slate500)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(currency.format(share.cashAmount), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = AlKhatibColors.Slate900)
+                    Text(currency.format(share.cashAmount), fontWeight = FontWeight.Bold, fontSize = 18.sp, color = SaatColors.Slate900)
                     perHead?.let {
                         Text(
                             stringResource(R.string.faraidh_per_head, currency.format(it)),
                             style = MaterialTheme.typography.labelSmall,
-                            color = AlKhatibColors.Slate500
+                            color = SaatColors.Slate500
                         )
                     }
                 }
@@ -1021,8 +1021,8 @@ private fun HeirShareCard(share: HeirShare, names: FaraidhParticipantNames, curr
 @Composable
 private fun ShareTypeBadge(isAsabah: Boolean) {
     val label = if (isAsabah) stringResource(R.string.faraidh_badge_asabah) else stringResource(R.string.faraidh_badge_furud)
-    val bg = if (isAsabah) AlKhatibColors.AmberWash else AlKhatibColors.MintWash
-    val fg = if (isAsabah) AlKhatibColors.GoldDeep else AlKhatibColors.DeepEmerald
+    val bg = if (isAsabah) SaatColors.AmberWash else SaatColors.MintWash
+    val fg = if (isAsabah) SaatColors.GoldDeep else SaatColors.DeepEmerald
     Surface(shape = RoundedCornerShape(8.dp), color = bg) {
         Text(label, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp), style = MaterialTheme.typography.labelSmall, color = fg, fontWeight = FontWeight.SemiBold)
     }
@@ -1042,10 +1042,10 @@ private fun AdjustmentBanner(result: FaraidhResult) {
         }
         FaraidhAdjustment.NONE -> "" to ""
     }
-    Surface(shape = RoundedCornerShape(16.dp), color = AlKhatibColors.AmberWash, modifier = Modifier.border(1.dp, AlKhatibColors.Gold.copy(alpha = 0.35f), RoundedCornerShape(16.dp))) {
+    Surface(shape = RoundedCornerShape(16.dp), color = SaatColors.AmberWash, modifier = Modifier.border(1.dp, SaatColors.Gold.copy(alpha = 0.35f), RoundedCornerShape(16.dp))) {
         Column(Modifier.padding(14.dp)) {
-            Text(title, fontWeight = FontWeight.Bold, color = AlKhatibColors.GoldDeep)
-            Text(body, style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.GoldDeep.copy(alpha = 0.85f), modifier = Modifier.padding(top = 4.dp))
+            Text(title, fontWeight = FontWeight.Bold, color = SaatColors.GoldDeep)
+            Text(body, style = MaterialTheme.typography.bodySmall, color = SaatColors.GoldDeep.copy(alpha = 0.85f), modifier = Modifier.padding(top = 4.dp))
         }
     }
 }
@@ -1068,14 +1068,14 @@ private fun ClassicalCaseBanner(classicalCase: ClassicalCase) {
     }
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = AlKhatibColors.Teal.copy(alpha = 0.10f),
-        modifier = Modifier.border(1.dp, AlKhatibColors.Teal.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+        color = SaatColors.Teal.copy(alpha = 0.10f),
+        modifier = Modifier.border(1.dp, SaatColors.Teal.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
     ) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .background(AlKhatibColors.Teal, CircleShape)
+                        .background(SaatColors.Teal, CircleShape)
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
@@ -1086,10 +1086,10 @@ private fun ClassicalCaseBanner(classicalCase: ClassicalCase) {
                     )
                 }
                 Spacer(Modifier.width(8.dp))
-                Text(name, fontWeight = FontWeight.Bold, color = AlKhatibColors.TealDark)
+                Text(name, fontWeight = FontWeight.Bold, color = SaatColors.TealDark)
             }
             Spacer(Modifier.height(6.dp))
-            Text(desc, style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.Slate700)
+            Text(desc, style = MaterialTheme.typography.bodySmall, color = SaatColors.Slate700)
         }
     }
 }
@@ -1100,17 +1100,17 @@ private fun BlockedHeirCard(blocked: app.kamy.saatApp.domain.faraidh.BlockedHeir
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(AlKhatibColors.LightGrey)
+            .background(SaatColors.LightGrey)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(Modifier.size(36.dp).background(AlKhatibColors.Danger.copy(alpha = 0.12f), CircleShape), contentAlignment = Alignment.Center) {
-            Icon(Icons.Outlined.Block, contentDescription = null, tint = AlKhatibColors.Danger, modifier = Modifier.size(18.dp))
+        Box(Modifier.size(36.dp).background(SaatColors.Danger.copy(alpha = 0.12f), CircleShape), contentAlignment = Alignment.Center) {
+            Icon(Icons.Outlined.Block, contentDescription = null, tint = SaatColors.Danger, modifier = Modifier.size(18.dp))
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text("${heirTypeLabel(blocked.type)} ×${blocked.headCount}", fontWeight = FontWeight.Medium, color = AlKhatibColors.Slate800)
-            Text(blockingReasonLabel(blocked.reason), style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.Slate500)
+            Text("${heirTypeLabel(blocked.type)} ×${blocked.headCount}", fontWeight = FontWeight.Medium, color = SaatColors.Slate800)
+            Text(blockingReasonLabel(blocked.reason), style = MaterialTheme.typography.bodySmall, color = SaatColors.Slate500)
         }
     }
 }
@@ -1134,7 +1134,7 @@ private fun FaraidhSilsilahTab(
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp)
+        contentPadding = PaddingValues(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp)
     ) {
         item { SilsilahLegend() }
         item {
@@ -1174,13 +1174,13 @@ private fun SilsilahLegend() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(AlKhatibColors.LightGrey)
+            .background(SaatColors.LightGrey)
             .padding(12.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        LegendDot(color = AlKhatibColors.Teal, label = stringResource(R.string.faraidh_status_inherits))
-        LegendDot(color = AlKhatibColors.Danger, label = stringResource(R.string.faraidh_status_blocked))
-        LegendDot(color = AlKhatibColors.Slate500, label = stringResource(R.string.faraidh_status_absent))
+        LegendDot(color = SaatColors.Teal, label = stringResource(R.string.faraidh_status_inherits))
+        LegendDot(color = SaatColors.Danger, label = stringResource(R.string.faraidh_status_blocked))
+        LegendDot(color = SaatColors.Slate500, label = stringResource(R.string.faraidh_status_absent))
     }
 }
 
@@ -1189,7 +1189,7 @@ private fun LegendDot(color: Color, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(8.dp).background(color, CircleShape))
         Spacer(Modifier.width(6.dp))
-        Text(label, style = MaterialTheme.typography.labelSmall, color = AlKhatibColors.Slate500)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = SaatColors.Slate500)
     }
 }
 
@@ -1197,15 +1197,15 @@ private fun LegendDot(color: Color, label: String) {
 private fun FaraidhGlossaryTab(glossary: List<FaraidhGlossaryItem>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
-            Text(stringResource(R.string.faraidh_glossary_intro), style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.Slate500)
+            Text(stringResource(R.string.faraidh_glossary_intro), style = MaterialTheme.typography.bodySmall, color = SaatColors.Slate500)
         }
         if (glossary.isEmpty()) {
             item {
-                Text(stringResource(R.string.faraidh_empty_glossary), style = MaterialTheme.typography.bodyMedium, color = AlKhatibColors.Slate500)
+                Text(stringResource(R.string.faraidh_empty_glossary), style = MaterialTheme.typography.bodyMedium, color = SaatColors.Slate500)
             }
         } else {
             items(glossary, key = { it.id }) { term ->
@@ -1220,21 +1220,21 @@ private fun FaraidhGlossaryTab(glossary: List<FaraidhGlossaryItem>) {
 private fun GlossaryCard(term: FaraidhGlossaryItem) {
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = AlKhatibColors.PureWhite,
-        modifier = Modifier.border(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
+        color = SaatColors.PureWhite,
+        modifier = Modifier.border(1.dp, SaatColors.SoftGrey.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text(term.title, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald, style = MaterialTheme.typography.titleSmall)
+            Text(term.title, fontWeight = FontWeight.Bold, color = SaatColors.DeepEmerald, style = MaterialTheme.typography.titleSmall)
             term.arabic?.let { arabic ->
                 Text(
                     arabic,
                     modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                     textAlign = TextAlign.End,
                     style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Rtl, fontSize = 18.sp),
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
             }
-            Text(term.body, style = MaterialTheme.typography.bodyMedium, color = AlKhatibColors.Slate800, lineHeight = 22.sp, modifier = Modifier.padding(top = 8.dp))
+            Text(term.body, style = MaterialTheme.typography.bodyMedium, color = SaatColors.Slate800, lineHeight = 22.sp, modifier = Modifier.padding(top = 8.dp))
         }
     }
 }
@@ -1267,11 +1267,11 @@ private fun FaraidhDalilTab(
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
-            Text(stringResource(R.string.faraidh_dalil_intro), style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.Slate500)
+            Text(stringResource(R.string.faraidh_dalil_intro), style = MaterialTheme.typography.bodySmall, color = SaatColors.Slate500)
         }
         items(proofs, key = { it.id }) { proof ->
             DalilCard(proof, onOpenVerse, onOpenUrl)
@@ -1289,34 +1289,34 @@ private fun DalilCard(proof: FaraidhProofItem, onOpenVerse: (Int, Int) -> Unit, 
     }
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = AlKhatibColors.PureWhite,
-        modifier = Modifier.border(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
+        color = SaatColors.PureWhite,
+        modifier = Modifier.border(1.dp, SaatColors.SoftGrey.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
     ) {
         Column(Modifier.padding(16.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Surface(shape = RoundedCornerShape(8.dp), color = AlKhatibColors.MintWash) {
-                    Text(kindLabel, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp), style = MaterialTheme.typography.labelSmall, color = AlKhatibColors.DeepEmerald, fontWeight = FontWeight.SemiBold)
+                Surface(shape = RoundedCornerShape(8.dp), color = SaatColors.MintWash) {
+                    Text(kindLabel, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp), style = MaterialTheme.typography.labelSmall, color = SaatColors.DeepEmerald, fontWeight = FontWeight.SemiBold)
                 }
                 when (proof.kind) {
                     FaraidhProofKind.QURAN -> {
                         if (proof.surah != null && proof.ayah != null) {
                             TextButton(onClick = { onOpenVerse(proof.surah, proof.ayah) }) {
-                                Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null, modifier = Modifier.size(16.dp), tint = AlKhatibColors.Teal)
+                                Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null, modifier = Modifier.size(16.dp), tint = SaatColors.Teal)
                                 Spacer(Modifier.width(4.dp))
-                                Text(proof.title, color = AlKhatibColors.Teal)
+                                Text(proof.title, color = SaatColors.Teal)
                             }
-                        } else Text(proof.title, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald)
+                        } else Text(proof.title, fontWeight = FontWeight.Bold, color = SaatColors.DeepEmerald)
                     }
                     FaraidhProofKind.HADITH -> {
                         proof.externalUrl?.let { url ->
                             TextButton(onClick = { onOpenUrl(url) }) {
-                                Text(proof.title, color = AlKhatibColors.BlueLink)
+                                Text(proof.title, color = SaatColors.BlueLink)
                                 Spacer(Modifier.width(4.dp))
-                                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp), tint = AlKhatibColors.BlueLink)
+                                Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp), tint = SaatColors.BlueLink)
                             }
-                        } ?: Text(proof.title, fontWeight = FontWeight.Bold, color = AlKhatibColors.DeepEmerald)
+                        } ?: Text(proof.title, fontWeight = FontWeight.Bold, color = SaatColors.DeepEmerald)
                     }
-                    FaraidhProofKind.NOTE -> Text(proof.title, fontWeight = FontWeight.Bold, color = AlKhatibColors.GoldDeep)
+                    FaraidhProofKind.NOTE -> Text(proof.title, fontWeight = FontWeight.Bold, color = SaatColors.GoldDeep)
                 }
             }
             proof.arabic?.let { arabic ->
@@ -1325,12 +1325,12 @@ private fun DalilCard(proof: FaraidhProofItem, onOpenVerse: (Int, Int) -> Unit, 
                     modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
                     textAlign = TextAlign.End,
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp, textDirection = TextDirection.Rtl, lineHeight = 32.sp),
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
-                HorizontalDivider(color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+                HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
                 Spacer(Modifier.height(8.dp))
             }
-            Text(proof.body, style = MaterialTheme.typography.bodyMedium, color = AlKhatibColors.Slate800, lineHeight = 22.sp)
+            Text(proof.body, style = MaterialTheme.typography.bodyMedium, color = SaatColors.Slate800, lineHeight = 22.sp)
         }
     }
 }
@@ -1343,7 +1343,7 @@ private fun EmptyState(
     cta: String,
     onCta: () -> Unit
 ) {
-    AlKhatibEmptyState(
+    SaatEmptyState(
         icon = icon,
         title = title,
         body = body,

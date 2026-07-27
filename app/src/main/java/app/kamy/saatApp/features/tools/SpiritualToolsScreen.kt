@@ -1,5 +1,6 @@
 package app.kamy.saatApp.features.tools
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,13 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.FamilyRestroom
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,18 +28,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 private data class SpiritualToolItem(
-    val icon: ImageVector,
+    @DrawableRes val iconRes: Int,
     val titleRes: Int,
     val subtitleRes: Int,
     val route: String,
@@ -59,81 +53,81 @@ fun SpiritualToolsScreen(
 ) {
     val tools = listOf(
         SpiritualToolItem(
-            Icons.Filled.Explore,
+            R.drawable.ic_qibla,
             R.string.qibla_title,
             R.string.qibla_account_subtitle,
             "qibla",
-            AlKhatibColors.DeepEmerald,
-            AlKhatibColors.Teal
+            SaatColors.DeepEmerald,
+            SaatColors.Teal
         ),
         SpiritualToolItem(
-            Icons.Filled.AutoStories,
+            R.drawable.ic_dua,
             R.string.doa_zikir_title,
             R.string.doa_zikir_account_subtitle,
             "doa-zikir",
-            AlKhatibColors.Teal,
-            AlKhatibColors.DeepEmerald
+            SaatColors.Teal,
+            SaatColors.DeepEmerald
         ),
         SpiritualToolItem(
-            Icons.Filled.Favorite,
+            R.drawable.ic_dhikr,
             R.string.dhikr_title,
             R.string.dhikr_account_subtitle,
             "dhikr",
-            AlKhatibColors.GoldDeep,
-            AlKhatibColors.Gold
+            SaatColors.GoldDeep,
+            SaatColors.Gold
         ),
         SpiritualToolItem(
-            Icons.Filled.Calculate,
+            R.drawable.ic_zakat,
             R.string.zakat_title,
             R.string.zakat_account_subtitle,
             "zakat",
-            AlKhatibColors.IndigoAccent,
-            AlKhatibColors.Teal
+            SaatColors.IndigoAccent,
+            SaatColors.Teal
         ),
         SpiritualToolItem(
-            Icons.Filled.FamilyRestroom,
+            R.drawable.ic_zakat,
             R.string.faraidh_title,
             R.string.faraidh_account_subtitle,
             "faraidh",
-            AlKhatibColors.GoldDeep,
-            AlKhatibColors.DeepEmerald
+            SaatColors.GoldDeep,
+            SaatColors.DeepEmerald
         ),
         SpiritualToolItem(
-            Icons.Filled.NightsStay,
+            R.drawable.ic_qiyam,
             R.string.qiyam_title,
             R.string.qiyam_account_subtitle,
             "qiyam",
-            AlKhatibColors.DeepEmerald,
-            AlKhatibColors.IndigoAccent
+            SaatColors.DeepEmerald,
+            SaatColors.IndigoAccent
         ),
         SpiritualToolItem(
-            Icons.Filled.Shield,
+            R.drawable.ic_manzil,
             R.string.manzil_title,
             R.string.manzil_account_subtitle,
             "manzil",
-            AlKhatibColors.DeepEmerald,
-            AlKhatibColors.GoldDeep
+            SaatColors.DeepEmerald,
+            SaatColors.GoldDeep
         )
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(SaatColors.ScreenBackground)
             .tabContentStatusBarInset()
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                .padding(top = AlKhatibSpacing.md, bottom = AlKhatibSpacing.lg)
+                .padding(horizontal = SaatSpacing.screenHorizontal)
+                .padding(top = SaatSpacing.md, bottom = SaatSpacing.lg)
                 .clip(RoundedCornerShape(22.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.14f),
-                            AlKhatibColors.Teal.copy(alpha = 0.08f),
-                            AlKhatibColors.Gold.copy(alpha = 0.06f)
+                            SaatColors.DeepEmerald.copy(alpha = 0.14f),
+                            SaatColors.Teal.copy(alpha = 0.08f),
+                            SaatColors.Gold.copy(alpha = 0.06f)
                         )
                     )
                 )
@@ -141,8 +135,8 @@ fun SpiritualToolsScreen(
                     width = 1.dp,
                     brush = Brush.linearGradient(
                         listOf(
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.25f),
-                            AlKhatibColors.Teal.copy(alpha = 0.12f)
+                            SaatColors.DeepEmerald.copy(alpha = 0.25f),
+                            SaatColors.Teal.copy(alpha = 0.12f)
                         )
                     ),
                     shape = RoundedCornerShape(22.dp)
@@ -154,12 +148,12 @@ fun SpiritualToolsScreen(
                     text = stringResource(R.string.spiritual_tools_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
                 Text(
                     text = stringResource(R.string.spiritual_tools_tab_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     modifier = Modifier.padding(top = 6.dp)
                 )
             }
@@ -168,15 +162,15 @@ fun SpiritualToolsScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = AlKhatibSpacing.screenHorizontal,
-                end = AlKhatibSpacing.screenHorizontal,
+                start = SaatSpacing.screenHorizontal,
+                end = SaatSpacing.screenHorizontal,
                 bottom = floatingNavBottomPadding() + 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(tools, key = { it.route }) { tool ->
                 SpiritualToolCard(
-                    icon = tool.icon,
+                    iconRes = tool.iconRes,
                     title = stringResource(tool.titleRes),
                     subtitle = stringResource(tool.subtitleRes),
                     accentStart = tool.accentStart,
@@ -190,7 +184,7 @@ fun SpiritualToolsScreen(
 
 @Composable
 private fun SpiritualToolCard(
-    icon: ImageVector,
+    @DrawableRes iconRes: Int,
     title: String,
     subtitle: String,
     accentStart: androidx.compose.ui.graphics.Color,
@@ -201,10 +195,10 @@ private fun SpiritualToolCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(AlKhatibColors.PureWhite)
+            .background(SaatColors.PureWhite)
             .border(
                 width = 1.dp,
-                color = AlKhatibColors.SoftGrey.copy(alpha = 0.7f),
+                color = SaatColors.SoftGrey.copy(alpha = 0.7f),
                 shape = RoundedCornerShape(18.dp)
             )
             .clickable(onClick = onClick)
@@ -221,7 +215,7 @@ private fun SpiritualToolCard(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                icon,
+                painter = painterResource(iconRes),
                 contentDescription = null,
                 tint = accentStart,
                 modifier = Modifier.size(24.dp)
@@ -233,19 +227,19 @@ private fun SpiritualToolCard(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Slate800
+                color = SaatColors.Slate800
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500,
+                color = SaatColors.Slate500,
                 modifier = Modifier.padding(top = 3.dp)
             )
         }
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = AlKhatibColors.Teal,
+            tint = SaatColors.Teal,
             modifier = Modifier.size(22.dp)
         )
     }

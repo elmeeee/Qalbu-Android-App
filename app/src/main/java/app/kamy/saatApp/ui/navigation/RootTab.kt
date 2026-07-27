@@ -1,58 +1,43 @@
 package app.kamy.saatApp.ui.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material.icons.outlined.GridView
-import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.WbSunny
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import app.kamy.saatApp.R
 
 enum class RootTab(
     val route: String,
-    val labelRes: Int,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector
+    @StringRes val labelRes: Int,
+    @DrawableRes val selectedIconRes: Int,
+    @DrawableRes val unselectedIconRes: Int
 ) {
     Today(
         route = "today",
-        labelRes = app.kamy.saatApp.R.string.nav_today,
-        selectedIcon = Icons.Filled.WbSunny,
-        unselectedIcon = Icons.Outlined.WbSunny
-    ),
-    Reflect(
-        route = "reflect",
-        labelRes = app.kamy.saatApp.R.string.nav_reflect,
-        selectedIcon = Icons.Filled.Edit,
-        unselectedIcon = Icons.Outlined.Edit
+        labelRes = R.string.nav_home,
+        selectedIconRes = R.drawable.ic_home_on,
+        unselectedIconRes = R.drawable.ic_home_off
     ),
     Quran(
         route = "quran",
-        labelRes = app.kamy.saatApp.R.string.nav_quran,
-        selectedIcon = Icons.AutoMirrored.Filled.MenuBook,
-        unselectedIcon = Icons.AutoMirrored.Outlined.MenuBook
+        labelRes = R.string.nav_quran,
+        selectedIconRes = R.drawable.ic_quran_on,
+        unselectedIconRes = R.drawable.ic_quran_off
     ),
     Tools(
         route = "tools",
-        labelRes = app.kamy.saatApp.R.string.nav_tools,
-        selectedIcon = Icons.Filled.GridView,
-        unselectedIcon = Icons.Outlined.GridView
+        labelRes = R.string.nav_spiritual,
+        selectedIconRes = R.drawable.ic_spritual_on,
+        unselectedIconRes = R.drawable.ic_spritual_off
     ),
     Account(
         route = "account",
-        labelRes = app.kamy.saatApp.R.string.nav_account,
-        selectedIcon = Icons.Filled.AccountCircle,
-        unselectedIcon = Icons.Outlined.AccountCircle
+        labelRes = R.string.nav_setting,
+        selectedIconRes = R.drawable.ic_setting_on,
+        unselectedIconRes = R.drawable.ic_setting_off
     );
 
     companion object {
         val Default = Today
 
-        val mainTabs: List<RootTab> = listOf(Today, Quran, Tools, Reflect, Account)
+        val mainTabs: List<RootTab> = listOf(Today, Quran, Tools, Account)
     }
 }

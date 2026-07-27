@@ -1,8 +1,14 @@
 package app.kamy.saatApp.features.today.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,10 +42,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +57,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.OptionalWorshipHabit
 import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.features.today.OptionalHabitUiItem
@@ -65,13 +76,18 @@ fun PrayerTrackerCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    var isExpanded by remember { mutableStateOf(false) }
+    val arrowRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "arrowRotation"
+    )
 
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = Color.White,
         shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
     ) {
         Column(
             Modifier
@@ -79,7 +95,9 @@ fun PrayerTrackerCard(
                 .padding(horizontal = 14.dp, vertical = 12.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(Modifier.weight(1f)) {
@@ -87,7 +105,7 @@ fun PrayerTrackerCard(
                         text = stringResource(R.string.prayer_tracker_title),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald
+                        color = SaatColors.DeepEmerald
                     )
                     Text(
                         text = stringResource(
@@ -96,20 +114,20 @@ fun PrayerTrackerCard(
                             state.todayProgress.totalCount
                         ),
                         style = MaterialTheme.typography.labelSmall,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
                 Row(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(AlKhatibColors.AmberWash)
+                        .background(SaatColors.AmberWash)
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         Icons.Filled.LocalFireDepartment,
                         contentDescription = null,
-                        tint = AlKhatibColors.DeepEmerald,
+                        tint = SaatColors.DeepEmerald,
                         modifier = Modifier.size(14.dp)
                     )
                     Text(
@@ -117,61 +135,81 @@ fun PrayerTrackerCard(
                         modifier = Modifier.padding(start = 4.dp),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald
+                        color = SaatColors.DeepEmerald
                     )
                 }
                 IconButton(onClick = onOpenCalendar, modifier = Modifier.size(36.dp)) {
                     Icon(
-                        Icons.Filled.CalendarMonth,
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.month_icon),
                         contentDescription = stringResource(R.string.prayer_tracker_open_calendar),
-                        tint = AlKhatibColors.Teal,
+                        tint = SaatColors.Teal,
                         modifier = Modifier.size(20.dp)
+                    )
+                }
+                IconButton(onClick = { isExpanded = !isExpanded }, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        Icons.Filled.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = SaatColors.Slate500,
+                        modifier = Modifier
+                            .size(22.dp)
+                            .rotate(arrowRotation)
                     )
                 }
             }
 
             Spacer(Modifier.height(10.dp))
 
+            // Progress bar stays ALWAYS VISIBLE
             LinearProgressIndicator(
                 progress = { state.todayProgress.fraction },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp)),
-                color = AlKhatibColors.Teal,
-                trackColor = AlKhatibColors.LightGrey,
+                color = SaatColors.Teal,
+                trackColor = SaatColors.LightGrey,
                 strokeCap = StrokeCap.Round
             )
 
-            Spacer(Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            // Chips section expands/collapses smoothly
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
             ) {
-                PrayerTrackerStore.TRACKED_PRAYERS.forEach { prayer ->
-                    val done = state.completedPrayers.contains(prayer)
-                    val enabled = done || prayer in state.availablePrayers
-                    PrayerCheckChip(
-                        label = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
-                        completed = done,
-                        enabled = enabled,
-                        onClick = { onTogglePrayer(prayer) }
-                    )
-                }
-            }
+                Column(Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.height(12.dp))
 
-            if (state.optionalHabits.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    state.optionalHabits.forEach { item ->
-                        OptionalHabitChip(
-                            item = item,
-                            onClick = { onToggleOptional(item.habit) }
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        PrayerTrackerStore.TRACKED_PRAYERS.forEach { prayer ->
+                            val done = state.completedPrayers.contains(prayer)
+                            val enabled = done || prayer in state.availablePrayers
+                            PrayerCheckChip(
+                                label = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
+                                completed = done,
+                                enabled = enabled,
+                                onClick = { onTogglePrayer(prayer) }
+                            )
+                        }
+                    }
+
+                    if (state.optionalHabits.isNotEmpty()) {
+                        Spacer(Modifier.height(12.dp))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            state.optionalHabits.forEach { item ->
+                                OptionalHabitChip(
+                                    item = item,
+                                    onClick = { onToggleOptional(item.habit) }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -184,8 +222,8 @@ private fun OptionalHabitChip(
     item: OptionalHabitUiItem,
     onClick: () -> Unit
 ) {
-    val bg = if (item.completed) AlKhatibColors.DeepEmerald.copy(alpha = 0.12f) else AlKhatibColors.LightGrey
-    val border = if (item.completed) AlKhatibColors.DeepEmerald else AlKhatibColors.SoftGrey
+    val bg = if (item.completed) SaatColors.DeepEmerald.copy(alpha = 0.12f) else SaatColors.LightGrey
+    val border = if (item.completed) SaatColors.DeepEmerald else SaatColors.SoftGrey
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
@@ -195,19 +233,17 @@ private fun OptionalHabitChip(
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (item.completed) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = null,
-                tint = AlKhatibColors.DeepEmerald,
-                modifier = Modifier.size(14.dp)
-            )
-            Spacer(Modifier.width(4.dp))
-        }
+        Icon(
+            Icons.Filled.Check,
+            contentDescription = null,
+            tint = if (item.completed) SaatColors.DeepEmerald else Color.Transparent,
+            modifier = Modifier.size(14.dp)
+        )
+        Spacer(Modifier.width(4.dp))
         Text(
             text = stringResource(item.labelRes),
             style = MaterialTheme.typography.labelSmall,
-            color = if (item.completed) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
+            color = if (item.completed) SaatColors.DeepEmerald else SaatColors.Slate800,
             fontWeight = if (item.completed) FontWeight.SemiBold else FontWeight.Normal
         )
     }
@@ -223,26 +259,26 @@ private fun PrayerCheckChip(
     val performTapHaptic = rememberTapHaptic()
     val bg by animateColorAsState(
         targetValue = when {
-            completed -> AlKhatibColors.DeepEmerald
+            completed -> SaatColors.DeepEmerald
             enabled -> Color.Transparent
-            else -> AlKhatibColors.LightGrey.copy(alpha = 0.35f)
+            else -> SaatColors.LightGrey.copy(alpha = 0.35f)
         },
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
         label = "chipBg"
     )
     val borderColor by animateColorAsState(
         targetValue = when {
-            completed -> AlKhatibColors.DeepEmerald
-            enabled -> AlKhatibColors.SoftGrey
-            else -> AlKhatibColors.SoftGrey.copy(alpha = 0.45f)
+            completed -> SaatColors.DeepEmerald
+            enabled -> SaatColors.SoftGrey
+            else -> SaatColors.SoftGrey.copy(alpha = 0.45f)
         },
         label = "chipBorder"
     )
     val labelColor by animateColorAsState(
         targetValue = when {
-            completed -> AlKhatibColors.DeepEmerald
-            enabled -> AlKhatibColors.Slate500
-            else -> AlKhatibColors.Slate500.copy(alpha = 0.45f)
+            completed -> SaatColors.DeepEmerald
+            enabled -> SaatColors.Slate500
+            else -> SaatColors.Slate500.copy(alpha = 0.45f)
         },
         label = "chipLabel"
     )
@@ -271,7 +307,7 @@ private fun PrayerCheckChip(
                     if (completed) {
                         Modifier.background(
                             Brush.linearGradient(
-                                listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                                listOf(SaatColors.DeepEmerald, SaatColors.Teal)
                             )
                         )
                     } else {

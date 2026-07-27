@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -63,12 +64,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibErrorState
-import app.kamy.saatApp.design.components.AlKhatibPullToRefresh
+import app.kamy.saatApp.design.components.SaatErrorState
+import app.kamy.saatApp.design.components.SaatPullToRefresh
 import app.kamy.saatApp.design.components.ChapterRowSkeleton
-import app.kamy.saatApp.design.components.AlKhatibRevelationChip
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.components.SaatRevelationChip
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.QuranJuz
 import app.kamy.saatApp.domain.model.ReadingSession
@@ -158,25 +159,25 @@ fun ChaptersScreen(
                     )
                     repeat(10) { index ->
                         ChapterRowSkeleton(
-                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                         )
                         if (index < 9) {
                             HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
                                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                             )
                         }
                     }
                 }
             state.error != null && state.chapters.isEmpty() && errorDisplay != null ->
-                AlKhatibErrorState(
+                SaatErrorState(
                     display = errorDisplay,
                     onRetry = { vm.loadAll(force = true) },
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                        .padding(horizontal = SaatSpacing.screenHorizontal)
                 )
-            else -> AlKhatibPullToRefresh(
+            else -> SaatPullToRefresh(
                 isRefreshing = isPullRefreshing,
                 onRefresh = {
                     scope.launch {
@@ -229,14 +230,16 @@ fun ChaptersScreen(
                         contentPadding = PaddingValues(bottom = listBottomPadding)
                     ) {
                         if (!isSearching && state.browseMode == QuranBrowseMode.SURAH) {
-                            item(key = "bookmarks_link") {
-                                MyQuranLibraryCard(
-                                    onClick = onOpenBookmarks,
-                                    modifier = Modifier.padding(
-                                        horizontal = AlKhatibSpacing.screenHorizontal,
-                                        vertical = AlKhatibSpacing.sm
+                            if (state.hasBookmarks) {
+                                item(key = "bookmarks_link") {
+                                    MyQuranLibraryCard(
+                                        onClick = onOpenBookmarks,
+                                        modifier = Modifier.padding(
+                                            horizontal = SaatSpacing.screenHorizontal,
+                                            vertical = SaatSpacing.sm
+                                        )
                                     )
-                                )
+                                }
                             }
                             state.continueReading?.let { session ->
                                 item(key = "continue_reading") {
@@ -247,8 +250,8 @@ fun ChaptersScreen(
                                             vm.continueReadingTarget()?.let { (c, v) -> onOpenChapter(c, v) }
                                         },
                                         modifier = Modifier.padding(
-                                            horizontal = AlKhatibSpacing.screenHorizontal,
-                                            vertical = AlKhatibSpacing.sm
+                                            horizontal = SaatSpacing.screenHorizontal,
+                                            vertical = SaatSpacing.sm
                                         )
                                     )
                                 }
@@ -293,10 +296,10 @@ fun ChaptersScreen(
                                             onOpenChapter(chapter, ayah)
                                             vm.clearSearch()
                                         },
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                        modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                     )
                                     HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                                        modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
                                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
                                     )
                                 }
@@ -341,19 +344,34 @@ fun ChaptersScreen(
                                     QuranSearchEmptyState(query = activeQuery)
                                 }
                             }
-                        } else when (state.browseMode) {
-                            QuranBrowseMode.SURAH -> {
-                                item(key = "khatam_header") {
-                                    val readCount = state.readChapters.size
-                                    if (readCount > 0) {
-                                        val totalChapters = 114
-                                        val progressFraction = readCount.toFloat() / totalChapters.toFloat()
+                        } else {
+                            when (state.browseMode) {
+                                QuranBrowseMode.SURAH -> {
+                                    items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
+                                        ChapterRow(
+                                            chapter = chapter,
+                                            isRead = chapter.id in state.readChapters,
+                                            onClick = { onOpenChapter(chapter, null) },
+                                            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
+                                        )
+                                    }
+                                }
+                                QuranBrowseMode.JUZ -> {
+                                    item(key = "khatam_header") {
+                                        val readCount = state.readJuzs.size
+                                        val totalJuzs = 30
+                                        val progressFraction = readCount.toFloat() / totalJuzs.toFloat()
                                         val percentage = (progressFraction * 100).toInt()
                                         
                                         Surface(
+                                            onClick = {
+                                                val targetJuz = state.lastReadJuz ?: 1
+                                                val targetKey = state.lastReadVerseKey
+                                                onOpenJuz(targetJuz, targetKey)
+                                            },
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+                                                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
                                             shape = RoundedCornerShape(16.dp),
                                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
                                             border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
@@ -403,61 +421,69 @@ fun ChaptersScreen(
                                                     trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                                                 )
                                                 Spacer(Modifier.height(8.dp))
-                                                Text(
-                                                    text = stringResource(R.string.khatam_progress, readCount),
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(R.string.khatam_progress, readCount),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                    )
+                                                    state.lastReadJuz?.let { juz ->
+                                                        val ayahNum = state.lastReadVerseKey?.substringAfter(":")?.toIntOrNull() ?: 1
+                                                        Text(
+                                                            text = stringResource(R.string.khatam_last_read, juz, ayahNum),
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            color = MaterialTheme.colorScheme.primary
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
-                                    ChapterRow(
-                                        chapter = chapter,
-                                        isRead = chapter.id in state.readChapters,
-                                        onClick = { onOpenChapter(chapter, null) },
-                                        modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                                    )
-                                }
-                            }
-                            QuranBrowseMode.JUZ -> when {
-                                state.juzsLoading && state.juzs.isEmpty() -> {
-                                    items(10, key = { "juz_skeleton_$it" }) { index ->
-                                        ChapterRowSkeleton(
-                                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                                        )
-                                        if (index < 9) {
-                                            HorizontalDivider(
-                                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-                                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
-                                            )
-                                        }
-                                    }
-                                }
-                                state.juzsError != null && state.juzs.isEmpty() -> {
-                                    item(key = "juz_error") {
-                                        val juzErrorDisplay = state.juzsError.rememberErrorDisplay(R.string.juz_load_failed)
-                                        if (juzErrorDisplay != null) {
-                                            AlKhatibErrorState(
-                                                display = juzErrorDisplay,
-                                                onRetry = { vm.reloadJuzs() },
-                                                modifier = Modifier.padding(
-                                                    horizontal = AlKhatibSpacing.screenHorizontal,
-                                                    vertical = 24.dp
+                                    when {
+                                        state.juzsLoading && state.juzs.isEmpty() -> {
+                                            items(10, key = { "juz_skeleton_$it" }) { index ->
+                                                ChapterRowSkeleton(
+                                                    modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                                 )
-                                            )
+                                                if (index < 9) {
+                                                    HorizontalDivider(
+                                                        modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
+                                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)
+                                                    )
+                                                }
+                                            }
                                         }
-                                    }
-                                }
-                                else -> {
-                                    items(state.juzs, key = { "juz_${it.juzNumber}" }) { juz ->
-                                        JuzRow(
-                                            juz = juz,
-                                            chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
-                                            onClick = { onOpenJuz(juz.juzNumber, null) },
-                                            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
-                                        )
+                                        state.juzsError != null && state.juzs.isEmpty() -> {
+                                            item(key = "juz_error") {
+                                                val juzErrorDisplay = state.juzsError.rememberErrorDisplay(R.string.juz_load_failed)
+                                                if (juzErrorDisplay != null) {
+                                                    SaatErrorState(
+                                                        display = juzErrorDisplay,
+                                                        onRetry = { vm.reloadJuzs() },
+                                                        modifier = Modifier.padding(
+                                                            horizontal = SaatSpacing.screenHorizontal,
+                                                            vertical = 24.dp
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        else -> {
+                                            items(state.juzs, key = { "juz_${it.juzNumber}" }) { juz ->
+                                                JuzRow(
+                                                    juz = juz,
+                                                    chapter = juz.firstChapterNumber()?.let { vm.chapterForNumber(it) },
+                                                    isRead = juz.juzNumber in state.readJuzs,
+                                                    onClick = { onOpenJuz(juz.juzNumber, null) },
+                                                    modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -498,8 +524,8 @@ private fun QuranListHeader(
         modifier = modifier
             .tabContentStatusBarInset()
             .padding(
-                horizontal = AlKhatibSpacing.screenHorizontal,
-                vertical = AlKhatibSpacing.md
+                horizontal = SaatSpacing.screenHorizontal,
+                vertical = SaatSpacing.md
             )
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -509,7 +535,7 @@ private fun QuranListHeader(
                 color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(Modifier.width(AlKhatibSpacing.sm))
+            Spacer(Modifier.width(SaatSpacing.sm))
             Text(
                 text = stringResource(R.string.quran_title),
                 style = MaterialTheme.typography.titleLarge,
@@ -535,7 +561,7 @@ private fun QuranListHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 18.dp, top = 4.dp)
         )
-        Spacer(Modifier.height(AlKhatibSpacing.sm))
+        Spacer(Modifier.height(SaatSpacing.sm))
         Box(
             modifier = Modifier
                 .height(2.dp)
@@ -549,7 +575,7 @@ private fun QuranListHeader(
                     )
                 )
         )
-        Spacer(Modifier.height(AlKhatibSpacing.md))
+        Spacer(Modifier.height(SaatSpacing.md))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -574,18 +600,18 @@ private fun QuranListHeader(
                     Text(
                         text = stringResource(R.string.cancel),
                         style = MaterialTheme.typography.labelLarge,
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
             }
         }
         if (showSuggestions && searchEnabled) {
-            Spacer(Modifier.height(AlKhatibSpacing.sm))
+            Spacer(Modifier.height(SaatSpacing.sm))
             QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
         }
         if (showBrowseTabs) {
-            Spacer(Modifier.height(AlKhatibSpacing.md))
+            Spacer(Modifier.height(SaatSpacing.md))
             QuranBrowseTabs(
                 browseMode = browseMode,
                 onBrowseModeChange = onBrowseModeChange,
@@ -611,7 +637,7 @@ private fun QuranBrowseTabs(
                 Brush.linearGradient(
                     listOf(
                         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        AlKhatibColors.SageMist.copy(alpha = 0.5f)
+                        SaatColors.SageMist.copy(alpha = 0.5f)
                     )
                 )
             )
@@ -659,7 +685,7 @@ private fun QuranBrowseTab(
                 if (selected) {
                     Modifier.background(
                         Brush.linearGradient(
-                            listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
+                            listOf(SaatColors.DeepEmerald, SaatColors.TealDark)
                         )
                     )
                 } else {
@@ -686,76 +712,72 @@ private fun ContinueReadingCard(
     onTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onTap,
+    Box(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        color = AlKhatibColors.PureWhite,
-        shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, AlKhatibColors.Teal.copy(alpha = 0.2f))
+        contentAlignment = Alignment.Center
     ) {
-        Box(
+        Surface(
+            onClick = onTap,
             modifier = Modifier
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            AlKhatibColors.MintWash.copy(alpha = 0.5f),
-                            AlKhatibColors.PureWhite
-                        )
-                    )
-                )
+                .width(349.dp)
+                .height(90.dp),
+            shape = RoundedCornerShape(20.dp),
+            color = Color.White,
+            shadowElevation = 2.dp,
+            border = BorderStroke(1.dp, Color(0xFFF0F2F6))
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White)
             ) {
-                Box(
+                Image(
+                    painter = painterResource(R.drawable.last_read_icon),
+                    contentDescription = null,
                     modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(AlKhatibColors.Teal.copy(alpha = 0.12f)),
-                    contentAlignment = Alignment.Center
+                        .offset(x = 231.dp, y = 22.dp)
+                        .size(width = 116.dp, height = 69.dp)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 20.dp, end = 125.dp),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        Icons.Filled.Bookmark,
-                        contentDescription = null,
-                        tint = AlKhatibColors.Teal,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                Spacer(Modifier.width(14.dp))
-                Column(Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.continue_reading).uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            letterSpacing = 0.5.sp
+                        text = stringResource(R.string.today_continue_reading_title),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
                         ),
-                        color = AlKhatibColors.Teal,
-                        fontWeight = FontWeight.Bold
+                        color = Color(0xFF1E293B),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
                         text = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.Slate900,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = Color(0xFF0F172A),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(Modifier.height(1.dp))
+                    Spacer(Modifier.height(2.dp))
                     Text(
-                        text = stringResource(R.string.verse_number, session.verseNumber),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate500
+                        text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal
+                        ),
+                        color = Color(0xFF7E84A3),
+                        maxLines = 1
                     )
                 }
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = AlKhatibColors.Teal.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
-                )
             }
         }
     }
@@ -785,9 +807,9 @@ private fun ChapterRow(
                 .width(345.dp)
                 .height(104.dp),
             shape = RoundedCornerShape(16.dp),
-            color = AlKhatibColors.PureWhite,
+            color = SaatColors.PureWhite,
             shadowElevation = 1.dp,
-            border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+            border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
         ) {
             Row(
                 modifier = Modifier
@@ -810,7 +832,7 @@ private fun ChapterRow(
                             text = chapter.displayComplexName,
                             style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
                             fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.Slate900,
+                            color = SaatColors.Slate900,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -819,7 +841,7 @@ private fun ChapterRow(
                             Icon(
                                 imageVector = androidx.compose.material.icons.Icons.Default.Check,
                                 contentDescription = stringResource(R.string.khatam_completed),
-                                tint = AlKhatibColors.DeepEmerald,
+                                tint = SaatColors.DeepEmerald,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -828,7 +850,7 @@ private fun ChapterRow(
                         Text(
                             text = meaning,
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = AlKhatibColors.Slate500,
+                            color = SaatColors.Slate500,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.padding(top = 2.dp)
@@ -840,7 +862,7 @@ private fun ChapterRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         if (chapter.revelationLabel.isNotEmpty()) {
-                            AlKhatibRevelationChip(
+                            SaatRevelationChip(
                                 label = chapter.revelationLabel,
                                 isMeccan = chapter.isMeccan
                             )
@@ -849,7 +871,7 @@ private fun ChapterRow(
                             Text(
                                 text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = AlKhatibColors.Slate500
+                                color = SaatColors.Slate500
                             )
                         }
                     }
@@ -872,6 +894,7 @@ private fun ChapterRow(
 private fun JuzRow(
     juz: QuranJuz,
     chapter: QuranChapter?,
+    isRead: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -887,9 +910,9 @@ private fun JuzRow(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(16.dp),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -900,17 +923,28 @@ private fun JuzRow(
             ChapterNumberBadge(number = juz.juzNumber)
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.juz_number, juz.juzNumber),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate900
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.juz_number, juz.juzNumber),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
+                    )
+                    if (isRead) {
+                        Spacer(Modifier.width(6.dp))
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.Check,
+                            contentDescription = stringResource(R.string.khatam_completed),
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
                 startLabel?.let { label ->
                     Text(
                         text = stringResource(R.string.juz_starts_at, label),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate500,
+                        color = SaatColors.Slate500,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(top = 2.dp)
@@ -920,7 +954,7 @@ private fun JuzRow(
                     Text(
                         text = pluralStringResource(R.plurals.juz_verse_count, count, count),
                         style = MaterialTheme.typography.labelMedium,
-                        color = AlKhatibColors.Teal,
+                        color = SaatColors.Teal,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(top = 6.dp)
                     )
@@ -930,7 +964,7 @@ private fun JuzRow(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = AlKhatibColors.Teal.copy(alpha = 0.6f),
+                tint = SaatColors.Teal.copy(alpha = 0.6f),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -940,21 +974,22 @@ private fun JuzRow(
 @Composable
 private fun ChapterNumberBadge(number: Int) {
     Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .background(
-                Brush.linearGradient(
-                    listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.TealDark)
-                )
-            ),
+        modifier = Modifier.size(38.dp),
         contentAlignment = Alignment.Center
     ) {
+        Icon(
+            painter = painterResource(R.drawable.frame_number_icon),
+            contentDescription = null,
+            tint = SaatColors.Teal,
+            modifier = Modifier.fillMaxSize()
+        )
         Text(
             text = number.toString(),
-            style = MaterialTheme.typography.labelMedium,
-            color = Color.White,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontSize = if (number >= 100) 11.sp else 12.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            color = SaatColors.Slate900
         )
     }
 }

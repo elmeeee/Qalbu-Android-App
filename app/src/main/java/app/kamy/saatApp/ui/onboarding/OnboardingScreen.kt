@@ -42,8 +42,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.PrayerType
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -81,14 +81,14 @@ fun OnboardingScreen(
                 Text(
                     text = stringResource(R.string.onboarding_location_rationale_title),
                     style = MaterialTheme.typography.titleLarge,
-                    color = AlKhatibColors.Slate900
+                    color = SaatColors.Slate900
                 )
             },
             text = {
                 Text(
                     text = stringResource(R.string.onboarding_location_rationale_body),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate700
+                    color = SaatColors.Slate700
                 )
             },
             confirmButton = {
@@ -105,7 +105,7 @@ fun OnboardingScreen(
                 ) {
                     Text(
                         text = stringResource(android.R.string.ok),
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -116,7 +116,7 @@ fun OnboardingScreen(
                 ) {
                     Text(
                         text = stringResource(android.R.string.cancel),
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
             },
@@ -130,12 +130,12 @@ fun OnboardingScreen(
             .fillMaxSize()
             .background(
                 Brush.linearGradient(
-                    listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.ForestDeeper)
+                    listOf(SaatColors.DeepEmerald, SaatColors.ForestDeeper)
                 )
             )
             .statusBarsPadding()
             .navigationBarsPadding()
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = AlKhatibSpacing.lg),
+            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.lg),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -148,7 +148,7 @@ fun OnboardingScreen(
             LinearProgressIndicator(
                 progress = { stepIndex / 5f },
                 modifier = Modifier.fillMaxWidth(),
-                color = AlKhatibColors.GoldBright,
+                color = SaatColors.GoldBright,
                 trackColor = Color.White.copy(alpha = 0.2f)
             )
         }
@@ -208,10 +208,10 @@ fun OnboardingScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.savingLocation,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AlKhatibColors.GoldBright,
-                    contentColor = AlKhatibColors.DeepEmerald,
-                    disabledContainerColor = AlKhatibColors.GoldBright.copy(alpha = 0.4f),
-                    disabledContentColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.5f)
+                    containerColor = SaatColors.GoldBright,
+                    contentColor = SaatColors.DeepEmerald,
+                    disabledContainerColor = SaatColors.GoldBright.copy(alpha = 0.4f),
+                    disabledContentColor = SaatColors.DeepEmerald.copy(alpha = 0.5f)
                 )
             ) {
                 Text(
@@ -236,7 +236,7 @@ fun OnboardingScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    labelColor = AlKhatibColors.GoldBright
+                    labelColor = SaatColors.GoldBright
                 ) {
                     Text(
                         when (state.step) {
@@ -254,7 +254,7 @@ fun OnboardingScreen(
 
 @Composable
 private fun WelcomeStep() {
-    Text("☪", style = MaterialTheme.typography.displayMedium, color = AlKhatibColors.GoldBright)
+    Text("☪", style = MaterialTheme.typography.displayMedium, color = SaatColors.GoldBright)
     Spacer(Modifier.height(16.dp))
     Text(
         text = stringResource(R.string.onboarding_welcome_title),
@@ -306,11 +306,11 @@ private fun LocationStep(
         colors = OutlinedTextFieldDefaults.colors(
             focusedTextColor = Color.White,
             unfocusedTextColor = Color.White,
-            focusedBorderColor = AlKhatibColors.GoldBright,
+            focusedBorderColor = SaatColors.GoldBright,
             unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
-            focusedLabelColor = AlKhatibColors.GoldBright,
+            focusedLabelColor = SaatColors.GoldBright,
             unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-            cursorColor = AlKhatibColors.GoldBright,
+            cursorColor = SaatColors.GoldBright,
             errorBorderColor = MaterialTheme.colorScheme.error,
             errorLabelColor = MaterialTheme.colorScheme.error,
             errorSupportingTextColor = Color.White.copy(alpha = 0.9f)
@@ -433,8 +433,8 @@ private fun PrayerNotificationsStep(
                     checked = checked,
                     onCheckedChange = { onToggle(type, it) },
                     colors = androidx.compose.material3.SwitchDefaults.colors(
-                        checkedThumbColor = AlKhatibColors.DeepEmerald,
-                        checkedTrackColor = AlKhatibColors.GoldBright,
+                        checkedThumbColor = SaatColors.DeepEmerald,
+                        checkedTrackColor = SaatColors.GoldBright,
                         uncheckedThumbColor = Color.White,
                         uncheckedTrackColor = Color.White.copy(alpha = 0.3f),
                         uncheckedBorderColor = Color.Transparent

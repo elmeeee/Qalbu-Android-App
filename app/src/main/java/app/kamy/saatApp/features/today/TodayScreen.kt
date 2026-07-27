@@ -36,10 +36,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
 import app.kamy.saatApp.domain.model.ReadingSession
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.domain.model.RecitationPayload
+import app.kamy.saatApp.design.theme.SaatColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +69,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import app.kamy.saatApp.design.components.AlKhatibPullToRefresh
+import app.kamy.saatApp.design.components.SaatPullToRefresh
 import app.kamy.saatApp.ui.permissions.areAppNotificationsEnabled
 import app.kamy.saatApp.ui.permissions.canScheduleExactAlarms
 import app.kamy.saatApp.ui.permissions.hasAggressiveOemBatteryManagement
@@ -81,6 +89,9 @@ import app.kamy.saatApp.features.today.components.TodayVerseOfDaySection
 import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
 import app.kamy.saatApp.features.share.AiShareSheet
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.ui.layout.floatingNavAndAudioBottomPadding
@@ -131,10 +142,20 @@ fun TodayScreen(
     val shareReflectionLabel = stringResource(R.string.share_reflection)
     val profileStillLoading = stringResource(R.string.profile_still_loading)
     val verseOfDayTitle = stringResource(R.string.verse_of_day)
-    val onboardingComplete = remember { OnboardingStore.from(context).isComplete() }
-    val permissionsHandledInOnboarding = remember { OnboardingStore.from(context).permissionsHandledInOnboarding() }
+    val onboardingStore = remember { OnboardingStore.from(context) }
+    val onboardingComplete = remember { onboardingStore.isComplete() }
+    val permissionsHandledInOnboarding = remember { onboardingStore.permissionsHandledInOnboarding() }
     val hasManualLocation = remember {
         LocationPreferencesStore.from(context).mode() == LocationMode.MANUAL
+    }
+    
+    val coachMarkState = rememberCoachMarkState()
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownHomeCoachMark()) {
+            kotlinx.coroutines.delay(1000)
+            coachMarkState.show()
+            onboardingStore.markHomeCoachMarkShown()
+        }
     }
 
     suspend fun showNotificationSettingsSnackbar() {
@@ -257,15 +278,10 @@ fun TodayScreen(
         }
     }
 
-    LaunchedEffect(todayState.publishToast) {
-        todayState.publishToast?.let {
-            snackbarHostState.showSnackbar(it)
-            todayVm.clearPublishToast()
-        }
-    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AlKhatibPullToRefresh(
+        SaatPullToRefresh(
             isRefreshing = isPullRefreshing,
             onRefresh = {
                 scope.launch {
@@ -292,8 +308,8 @@ fun TodayScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
-                contentPadding = PaddingValues(bottom = listBottomPadding),
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
+                contentPadding = PaddingValues(top = 4.dp, bottom = listBottomPadding + 12.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(14.dp)
             ) {
                 stickyHeader(key = "today_header") {
                     TodayHeader(
@@ -308,88 +324,131 @@ fun TodayScreen(
                         hijriLabel = prayerState.hijriLabel,
                         gregorianLabel = prayerState.gregorianLabel,
                         onLocationClick = prayerVm::openLocationSheet,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .coachMarkTarget(
+                                coachMarkState,
+                                0,
+                                R.string.coach_mark_today_location_title,
+                                R.string.coach_mark_today_location_desc
+                            )
                     )
                 }
-                    item(key = "khgt_banner") {
-                        TodayImportantDayBanner(
-                            info = prayerState.khgtToday,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                        )
-                    }
-                    item(key = "prayer_card") {
-                        PrayerDashboardCard(
-                            state = prayerState,
-                            onRetry = { scope.launch { prayerVm.refresh(force = true) } },
-                            onOpenCalendar = onOpenPrayerCalendar,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                        )
-                    }
-
-                    item(key = "prayer_tracker") {
-                        PrayerTrackerCard(
-                            state = trackerState,
-                            onTogglePrayer = trackerVm::togglePrayer,
-                            onToggleOptional = trackerVm::toggleOptionalHabit,
-                            onOpenCalendar = onOpenTrackerCalendar,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                        )
-                    }
-
-                    todayState.continueReading?.let { session ->
-                        item(key = "continue_reading") {
-                            TodayContinueReadingCard(
-                                session = session,
-                                chapterName = todayState.continueReadingChapterName,
-                                onTap = {
-                                    onOpenChapterReader(session.chapterNumber, session.verseNumber)
-                                },
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
+                item(key = "khgt_banner") {
+                    TodayImportantDayBanner(
+                        info = prayerState.khgtToday,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                1,
+                                R.string.coach_mark_today_khgt_title,
+                                R.string.coach_mark_today_khgt_desc
                             )
-                        }
-                    }
+                    )
+                }
+                item(key = "prayer_card") {
+                    PrayerDashboardCard(
+                        state = prayerState,
+                        onRetry = { scope.launch { prayerVm.refresh(force = true) } },
+                        onOpenCalendar = onOpenPrayerCalendar,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                2,
+                                R.string.coach_mark_today_prayer_title,
+                                R.string.coach_mark_today_prayer_desc
+                            )
+                    )
+                }
 
-                    item(key = "quran_of_day") {
-                        TodayVerseOfDaySection(
-                            verse = todayState.verse,
-                            referenceLabel = todayState.verseReferenceLabel,
-                            translationId = todayState.translationId,
-                            showTranslation = todayState.showTranslation,
-                            showTransliteration = todayState.showTransliteration,
-                            occasion = todayState.verseOccasion,
-                            isLoading = todayState.isLoading,
-                            error = todayState.error,
-                            isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
-                            reciterName = todayState.recitations
-                                .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
-                                ?.displayName,
-                            onReciterClick = todayVm::openReciterSheet,
-                            onPlayAudio = {
-                                val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
-                                if (audioPlayer.isPlayingUrl(url)) {
-                                    audioPlayer.toggle()
-                                } else {
-                                    val surahTitle = todayState.verseReferenceLabel
-                                        ?.substringBefore(" - ")
-                                        ?.trim()
-                                        .orEmpty()
-                                        .ifBlank { verseOfDayTitle }
-                                    audioPlayer.playVerse(
-                                        url = url,
-                                        surahTitle = surahTitle,
-                                        ayahLabel = todayState.verse?.verseKey.orEmpty(),
-                                        reciterName = todayState.recitations
-                                            .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
-                                            ?.displayName.orEmpty()
-                                    )
-                                }
+                item(key = "prayer_tracker") {
+                    PrayerTrackerCard(
+                        state = trackerState,
+                        onTogglePrayer = trackerVm::togglePrayer,
+                        onToggleOptional = trackerVm::toggleOptionalHabit,
+                        onOpenCalendar = onOpenTrackerCalendar,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                3,
+                                R.string.coach_mark_today_tracker_title,
+                                R.string.coach_mark_today_tracker_desc
+                            )
+                    )
+                }
+
+                todayState.continueReading?.let { session ->
+                    item(key = "continue_reading") {
+                        TodayContinueReadingCard(
+                            session = session,
+                            chapterName = todayState.continueReadingChapterName,
+                            onTap = {
+                                onOpenChapterReader(session.chapterNumber, session.verseNumber)
                             },
-                            aiShareLoading = todayState.aiShareLoading,
-                            onAiShare = { todayVm.openAiShare() },
-                            onTafsir = { todayVm.openTafsir() },
-                            onRetry = { scope.launch { todayVm.refreshContent(refreshTranslation = true) } }
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp)
+                                .coachMarkTarget(
+                                    coachMarkState,
+                                    4,
+                                    R.string.coach_mark_today_continue_title,
+                                    R.string.coach_mark_today_continue_desc
+                                )
                         )
                     }
+                }
+
+                item(key = "quran_of_day") {
+                    TodayVerseOfDaySection(
+                        verse = todayState.verse,
+                        referenceLabel = todayState.verseReferenceLabel,
+                        translationId = todayState.translationId,
+                        showTranslation = todayState.showTranslation,
+                        showTransliteration = todayState.showTransliteration,
+                        occasion = todayState.verseOccasion,
+                        isLoading = todayState.isLoading,
+                        error = todayState.error,
+                        isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
+                        reciterName = todayState.recitations
+                            .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
+                            ?.displayName,
+                        onReciterClick = todayVm::openReciterSheet,
+                        onPlayAudio = {
+                            val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
+                            if (audioPlayer.isPlayingUrl(url)) {
+                                audioPlayer.toggle()
+                            } else {
+                                val surahTitle = todayState.verseReferenceLabel
+                                    ?.substringBefore(" - ")
+                                    ?.trim()
+                                    .orEmpty()
+                                    .ifBlank { verseOfDayTitle }
+                                audioPlayer.playVerse(
+                                    url = url,
+                                    surahTitle = surahTitle,
+                                    ayahLabel = todayState.verse?.verseKey.orEmpty(),
+                                    reciterName = todayState.recitations
+                                        .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
+                                        ?.displayName.orEmpty()
+                                )
+                            }
+                        },
+                        aiShareLoading = todayState.aiShareLoading,
+                        onAiShare = { todayVm.openAiShare() },
+                        onTafsir = { todayVm.openTafsir() },
+                        onRetry = { scope.launch { todayVm.refreshContent(refreshTranslation = true) } },
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                5,
+                                R.string.coach_mark_today_verse_title,
+                                R.string.coach_mark_today_verse_desc
+                            )
+                    )
+                }
             }
         }
 
@@ -435,8 +494,6 @@ fun TodayScreen(
         loading = todayState.aiShareLoading,
         draft = todayState.aiShareDraft,
         error = todayState.aiShareError,
-        isPublishing = todayState.isPublishing,
-        showPublish = todayVm.isSignedIn(),
         onDismiss = { todayVm.dismissAiShare() },
         onDraftChange = todayVm::updateAiShareDraft,
         onRegenerate = todayVm::regenerateAiShare,
@@ -446,18 +503,9 @@ fun TodayScreen(
                 putExtra(Intent.EXTRA_TEXT, draft)
             }
             context.startActivity(Intent.createChooser(intent, shareReflectionLabel))
-        },
-        onPublish = {
-            val authorId = todayState.profile?.id
-            if (authorId.isNullOrBlank()) {
-                scope.launch {
-                    snackbarHostState.showSnackbar(profileStillLoading)
-                }
-            } else {
-                todayVm.publishReflectionToReflect(authorId)
-            }
         }
     )
+    CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable
@@ -467,76 +515,72 @@ private fun TodayContinueReadingCard(
     onTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onTap,
+    Box(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        color = AlKhatibColors.PureWhite,
-        shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, AlKhatibColors.Teal.copy(alpha = 0.2f))
+        contentAlignment = Alignment.Center
     ) {
-        Box(
+        Surface(
+            onClick = onTap,
             modifier = Modifier
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            AlKhatibColors.MintWash.copy(alpha = 0.5f),
-                            AlKhatibColors.PureWhite
-                        )
-                    )
-                )
+                .width(349.dp)
+                .height(90.dp),
+            shape = RoundedCornerShape(20.dp),
+            color = Color.White,
+            shadowElevation = 2.dp,
+            border = BorderStroke(1.dp, Color(0xFFF0F2F6))
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White)
             ) {
-                Box(
+                Image(
+                    painter = painterResource(R.drawable.last_read_icon),
+                    contentDescription = null,
                     modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(AlKhatibColors.Teal.copy(alpha = 0.12f)),
-                    contentAlignment = Alignment.Center
+                        .offset(x = 231.dp, y = 22.dp)
+                        .size(width = 116.dp, height = 69.dp)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 20.dp, end = 125.dp),
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        Icons.Filled.Bookmark,
-                        contentDescription = null,
-                        tint = AlKhatibColors.Teal,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                Spacer(Modifier.width(14.dp))
-                Column(Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.continue_reading).uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            letterSpacing = 0.5.sp
+                        text = stringResource(R.string.today_continue_reading_title),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold
                         ),
-                        color = AlKhatibColors.Teal,
-                        fontWeight = FontWeight.Bold
+                        color = Color(0xFF1E293B),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
                         text = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.Slate900,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = Color(0xFF0F172A),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(Modifier.height(1.dp))
+                    Spacer(Modifier.height(2.dp))
                     Text(
-                        text = stringResource(R.string.ayah_number, session.verseNumber),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate500
+                        text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal
+                        ),
+                        color = Color(0xFF7E84A3),
+                        maxLines = 1
                     )
                 }
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = AlKhatibColors.Teal.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
-                )
             }
         }
     }

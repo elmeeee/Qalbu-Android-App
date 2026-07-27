@@ -1,6 +1,7 @@
 package app.kamy.saatApp.features.today
 
 import android.content.Context
+import android.text.format.DateFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.R
@@ -138,7 +139,9 @@ class PrayerDashboardViewModel @Inject constructor(
     }
 
     private suspend fun refreshInternal() {
-        _state.update { it.copy(isLoading = true, error = null) }
+        if (_state.value.timings.isEmpty()) {
+            _state.update { it.copy(isLoading = true, error = null) }
+        }
         when (val resolved = resolveLocation()) {
             LocationResolveResult.NeedsPermission -> {
                 _state.update {
@@ -474,7 +477,18 @@ class PrayerDashboardViewModel @Inject constructor(
         PrayerType.ISHA -> strings.getString(R.string.prayer_isha)
     }
 
-    fun formatPrayerTime(date: Date): String = timeFormatter.format(date)
+    fun formatPrayerTime(date: Date): String {
+        val sysSetting = try {
+            android.provider.Settings.System.getString(appContext.contentResolver, android.provider.Settings.System.TIME_12_24)
+        } catch (e: Exception) { null }
+        val is24Hour = when (sysSetting) {
+            "24" -> true
+            "12" -> false
+            else -> DateFormat.is24HourFormat(appContext) || DateFormat.is24HourFormat(appContext.applicationContext) || true
+        }
+        val pattern = if (is24Hour) "HH.mm" else "hh.mm a"
+        return SimpleDateFormat(pattern, Locale.getDefault()).format(date)
+    }
 
     private companion object {
         private const val REFRESH_COALESCE_MS = 8_000L

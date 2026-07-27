@@ -32,13 +32,13 @@ android {
         applicationId = "app.kamy.saatApp"
         minSdk = 29
         targetSdk = 36
-        versionCode = 2
+        versionCode = 3
         versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // OAuth callback host/scheme used by AppAuth's RedirectUriReceiverActivity manifest placeholder.
-        manifestPlaceholders["appAuthRedirectScheme"] = "alkhatib"
+        manifestPlaceholders["appAuthRedirectScheme"] = "Saat"
     }
 
     signingConfigs {
@@ -70,7 +70,7 @@ android {
             buildConfigField("String", "QF_OAUTH_TOKEN_URL", "\"https://oauth2.quran.foundation/oauth2/token\"")
             buildConfigField("String", "QF_OAUTH_AUTHORIZE_URL", "\"https://oauth2.quran.foundation/oauth2/auth\"")
             buildConfigField("String", "QF_OAUTH_CALLBACK_URL", "\"https://elmee.my/oauth/callback\"")
-            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"alkhatib://oauth/callback\"")
+            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"Saat://oauth/callback\"")
             buildConfigField("String", "QF_OAUTH_CLIENT_ID", "\"9fd71c6c-efb4-406e-84d0-ff39f186ca9b\"")
             buildConfigField(
                 "String",
@@ -86,7 +86,7 @@ android {
             buildConfigField("String", "QF_ALADHAN_ROOT", "\"https://api.aladhan.com\"")
             buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "1")
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
-            buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "qwen/qwen3-32b")}\"")
+            buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "openai/gpt-oss-20b")}\"")
         }
         release {
             isMinifyEnabled = true
@@ -105,7 +105,7 @@ android {
             buildConfigField("String", "QF_OAUTH_TOKEN_URL", "\"https://oauth2.quran.foundation/oauth2/token\"")
             buildConfigField("String", "QF_OAUTH_AUTHORIZE_URL", "\"https://oauth2.quran.foundation/oauth2/auth\"")
             buildConfigField("String", "QF_OAUTH_CALLBACK_URL", "\"https://elmee.my/oauth/callback\"")
-            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"alkhatib://oauth/callback\"")
+            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"Saat://oauth/callback\"")
             buildConfigField("String", "QF_OAUTH_CLIENT_ID", "\"9fd71c6c-efb4-406e-84d0-ff39f186ca9b\"")
             buildConfigField(
                 "String",
@@ -121,7 +121,7 @@ android {
             buildConfigField("String", "QF_ALADHAN_ROOT", "\"https://api.aladhan.com\"")
             buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "1")
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
-            buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "qwen/qwen3-32b")}\"")
+            buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "openai/gpt-oss-20b")}\"")
         }
     }
 
@@ -196,9 +196,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
-
-    // OAuth (PKCE)
-    implementation(libs.appauth)
 
     // Media3 ExoPlayer for recitation playback
     implementation(libs.androidx.media3.exoplayer)

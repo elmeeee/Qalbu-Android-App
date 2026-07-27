@@ -12,7 +12,7 @@ import app.kamy.saatApp.R
 val TajweedFontFamily = FontFamily(Font(R.font.lpmq))
 
 
-val AlKhatibTypography: Typography = Typography(
+val SaatTypography: Typography = Typography(
     displayLarge = TextStyle(fontSize = 57.sp, lineHeight = 64.sp, fontWeight = FontWeight.Normal),
     displayMedium = TextStyle(fontSize = 45.sp, lineHeight = 52.sp, fontWeight = FontWeight.Normal),
     headlineLarge = TextStyle(fontSize = 32.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold),

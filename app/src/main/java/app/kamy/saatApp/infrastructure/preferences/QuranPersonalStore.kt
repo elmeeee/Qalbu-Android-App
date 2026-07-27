@@ -81,15 +81,45 @@ object QuranPersonalStore {
     // ── Khatam tracker ────────────────────────────────────────────────
 
     @Serializable
-    private data class KhatamList(val chapters: List<Int> = emptyList())
+    private data class KhatamList(
+        val chapters: List<Int> = emptyList(),
+        val juzs: List<Int> = emptyList(),
+        val lastReadJuz: Int? = null,
+        val lastReadVerseKey: String? = null
+    )
 
     fun readChapters(context: Context): Set<Int> =
         loadList(context, KEY_KHATAM, KhatamList()).chapters.toSet()
 
     fun markChapterRead(context: Context, chapterNumber: Int) {
-        val current = readChapters(context).toMutableSet()
+        val data = loadList(context, KEY_KHATAM, KhatamList())
+        val current = data.chapters.toMutableSet()
         if (current.add(chapterNumber)) {
-            saveList(context, KEY_KHATAM, KhatamList(current.toList()))
+            saveList(context, KEY_KHATAM, data.copy(chapters = current.toList()))
+        }
+    }
+
+    fun readJuzs(context: Context): Set<Int> =
+        loadList(context, KEY_KHATAM, KhatamList()).juzs.toSet()
+
+    fun markJuzRead(context: Context, juzNumber: Int) {
+        val data = loadList(context, KEY_KHATAM, KhatamList())
+        val current = data.juzs.toMutableSet()
+        if (current.add(juzNumber)) {
+            saveList(context, KEY_KHATAM, data.copy(juzs = current.toList()))
+        }
+    }
+
+    fun lastReadJuz(context: Context): Int? =
+        loadList(context, KEY_KHATAM, KhatamList()).lastReadJuz
+
+    fun lastReadVerseKey(context: Context): String? =
+        loadList(context, KEY_KHATAM, KhatamList()).lastReadVerseKey
+
+    fun updateLastReadJuz(context: Context, juzNumber: Int, verseKey: String) {
+        val data = loadList(context, KEY_KHATAM, KhatamList())
+        if (data.lastReadJuz != juzNumber || data.lastReadVerseKey != verseKey) {
+            saveList(context, KEY_KHATAM, data.copy(lastReadJuz = juzNumber, lastReadVerseKey = verseKey))
         }
     }
 

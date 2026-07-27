@@ -41,10 +41,13 @@
     <string name="madhab_hanafi">Hanafi</string>
     <string name="madhab_settings_title">Mazhab Perhitungan</string>
     <string name="madhab_settings_subtitle">Tukar mazhab perhitungan waktu solat</string>
-    <string name="nav_today">Hari Ini</string>
+    <string name="nav_today">Laman Utama</string>
+    <string name="nav_home">Laman Utama</string>
     <string name="nav_reflect">Refleksi</string>
+    <string name="nav_spiritual">Spiritual</string>
     <string name="nav_quran">Al-Quran</string>
-    <string name="nav_account">Akaun</string>
+    <string name="nav_account">Tetapan</string>
+    <string name="nav_setting">Tetapan</string>
     <string name="back">Kembali</string>
     <string name="loading">Memuatkan…</string>
     <string name="signed_in">Sudah log masuk</string>
@@ -130,14 +133,14 @@
     <string name="channel_prayer_desc">Azan dan peringatan solat malam</string>
     <string name="channel_sunnah">Bacaan sunnah</string>
     <string name="channel_sunnah_desc">Peringatan bacaan surah mingguan</string>
-    <string name="prayer_notif_title">Saatnya %1$s · %2$s</string>
-    <string name="prayer_body_fajr">Dunia masih tidur. Anda belum tentu.</string>
-    <string name="prayer_body_dhuhr">Berhenti seketika. Solat. Kemudian sambung.</string>
-    <string name="prayer_body_asr">Malaikat menyaksikan. Jangan lepaskan solat ini.</string>
-    <string name="prayer_body_maghrib">Matahari baru terbenam. Solat ini tidak boleh ditangguh.</string>
-    <string name="prayer_body_isha">Akhiri hari dengan cara yang betul.</string>
-    <string name="prayer_body_imsak">Sediakan puasa. Subuh sudah hampir.</string>
-    <string name="prayer_body_default">Kini saatnya solat %1$s.</string>
+    <string name="prayer_notif_title">%1$s • %2$s</string>
+    <string name="prayer_body_fajr">SAATnya solat Subuh</string>
+    <string name="prayer_body_dhuhr">SAATnya solat Zohor</string>
+    <string name="prayer_body_asr">SAATnya solat Asar</string>
+    <string name="prayer_body_maghrib">SAATnya solat Maghrib</string>
+    <string name="prayer_body_isha">SAATnya solat Isyak</string>
+    <string name="prayer_body_imsak">SAATnya Imsak</string>
+    <string name="prayer_body_default">SAATnya solat %1$s</string>
     <string name="night_midnight_title">🌙 Tengah Malam</string>
     <string name="night_midnight_body">Malam sudah separuh. Solat Witir sebelum tidur — jangan biarkan terlepas.</string>
     <string name="night_first_third_title">🌃 Malam Bermula</string>
@@ -154,12 +157,12 @@
     <string name="adhan_playback_body">Memainkan panggilan solat</string>
     <string name="adhan_stop">Hentikan azan</string>
     <string name="adhan_voice_subtitle">Zohor, Asar, Maghrib &amp; Isyak</string>
-    <string name="adhan_fajr_fixed_note">Subuh sentiasa menggunakan Mishary Rashid Alafasy dan tidak boleh ditukar.</string>
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Benarkan penggera tepat supaya azan dan peringatan solat sampai tepat masa.</string>
     <string name="exact_alarm_rationale_title">Peringatan solat tepat masa</string>
-    <string name="fullscreen_intent_rationale">Benarkan akses skrin penuh supaya azan dapat menghidupkan skrin anda apabila tiba waktu solat.</string>
-    <string name="fullscreen_intent_rationale_title">Azan Skrin Penuh</string>
+    <string name="fullscreen_intent_rationale">"SĀAT" Ingin Memaparkan Azan Skrin Penuh Apabila Skrin Dikunci.</string>
+    <string name="fullscreen_intent_rationale_title">Paparan Azan Skrin Penuh</string>
+    <string name="action_dont_allow">Jangan Benarkan</string>
     <string name="battery_opt_snackbar_message">Pada sesetengah telefon, benarkan bateri tanpa had supaya azan berfungsi apabila aplikasi ditutup.</string>
     <string name="battery_opt_snackbar_oem_message">Pada telefon %1$s: set SĀAT ke Tanpa had dan dayakan autostart supaya azan berfungsi di latar belakang.</string>
     <string name="battery_opt_settings_title">Latar belakang &amp; bateri</string>
@@ -283,6 +286,8 @@
     <string name="one_surah_found">1 surah dijumpai</string>
     <string name="surahs_found">%1$d surah dijumpai</string>
     <string name="continue_reading">Teruskan bacaan</string>
+    <string name="today_continue_reading_title">Teruskan Bacaan Al-Quran</string>
+    <string name="today_continue_reading_verse">Ayat %1$d</string>
     <string name="surah_number">Surah %1$d</string>
     <string name="ayah_number">Ayat %1$d</string>
     <string name="ayah_label">Ayat %1$s</string>
@@ -422,6 +427,13 @@
     <string name="hadith_empty_detail">Tiada rujukan hadis dipautkan kepada ayat ini lagi.</string>
     <string name="hadith_book_number">Kitab %1$s</string>
     <string name="juz_number">Juz %1$d</string>
+    <string name="khatam_progress">%1$d / 30 Juz dibaca</string>
+    <string name="khatam_completed">✓</string>
+    <string name="khatam_progress_title">Progress Khatam</string>
+    <string name="khatam_last_read">Terakhir dibaca: Juz %1$d · Ayat %2$d</string>
+    <string name="force_update_title">Kemaskini Baru Tersedia</string>
+    <string name="force_update_desc">Versi baharu Qalbu kini tersedia di Play Store. Sila kemaskini untuk meneruskan pengalaman membaca Al-Quran dan ibadah terbaik.</string>
+    <string name="force_update_button">Kemaskini Sekarang</string>
     <string name="ai_label">AI</string>
     <string name="clear_search_a11y">Kosongkan carian</string>
     <string name="session_expired">Sesi tamat. Log masuk semula dari Akaun.</string>
@@ -613,4 +625,42 @@
     <string name="delete_account">Padam Akaun</string>
     <string name="onboarding_prayer_config_title">Notifikasi Solat</string>
     <string name="onboarding_prayer_config_body">Pilih solat mana yang menggunakan suara Azan. Jika dimatikan, akan menggunakan suara notifikasi standard.</string>
+
+    <!-- Coach Mark -->
+    <string name="coach_mark_skip">Langkau</string>
+    <string name="coach_mark_next">Seterusnya</string>
+    <string name="coach_mark_finish">Selesai</string>
+    <string name="coach_mark_today_location_title">Lokasi &amp; Tarikh</string>
+    <string name="coach_mark_today_location_desc">Pantau waktu solat dengan tepat mengikut bandar dan tarikh semasa anda.</string>
+    <string name="coach_mark_today_khgt_title">Hari-Hari Penting Islam</string>
+    <string name="coach_mark_today_khgt_desc">Dapatkan maklumat mengenai tarikh dan peristiwa penting dalam kalendar Islam.</string>
+    <string name="coach_mark_today_prayer_title">Jadual Solat</string>
+    <string name="coach_mark_today_prayer_desc">Pantau jadual solat harian, kiraan mundur ke solat seterusnya, dan arah kiblat.</string>
+    <string name="coach_mark_today_tracker_title">Penjejak Ibadah Harian</string>
+    <string name="coach_mark_today_tracker_desc">Catat ibadah harian anda, dari solat wajib, sunnah, hingga puasa dengan mudah.</string>
+    <string name="coach_mark_today_continue_title">Teruskan Membaca</string>
+    <string name="coach_mark_today_continue_desc">Sambung sesi bacaan Al-Quran tepat pada ayat terakhir yang anda baca.</string>
+    <string name="coach_mark_today_verse_title">Ayat Hari Ini</string>
+    <string name="coach_mark_today_verse_desc">Dengar bacaan murottal, baca tafsir, dan kongsi inspirasi Al-Quran harian dengan bantuan AI.</string>
+    <string name="coach_mark_quran_menu_title">Menu Tindakan Ayat</string>
+    <string name="coach_mark_quran_menu_desc">Ketuk untuk mengakses Penanda Buku, Nota, Hifz hafalan, Tafsir, dan perkongsian audio.</string>
+
+    <!-- Force Update -->
+    <string name="force_update_subtitle">Versi baharu Qalbu kini tersedia</string>
+    <string name="force_update_later_button">Mungkin Nanti</string>
+    <string name="force_update_version_info">Versi Baharu: %1$s</string>
+
+    <!-- Settings & App Info -->
+    <string name="app_tagline">SĀAT • Teman Ibadah Harian</string>
+    <string name="app_version_format">Versi %1$s</string>
+    <string name="app_version_subtitle_format">Versi %1$s • Waktu Solat &amp; Al-Quran</string>
+    <string name="battery_unrestricted">Aman</string>
+    <string name="battery_optimized">Optimasi HP</string>
+    <string name="sound_mode_adhan">Suara Azan</string>
+    <string name="sound_mode_system">Bunyi Bawaan Telefon</string>
+    <string name="test_adhan_title">Ujian Azan Alarm (Skrin Penuh)</string>
+    <string name="test_adhan_subtitle">Pilih waktu solat untuk simulasi azan</string>
+    <string name="select_test_prayer">Pilih Waktu Solat (Ujian Azan)</string>
+    <string name="dhuha_reminder_time_title">Masa Peringatan Dhuha</string>
+    <string name="notification_settings_footer">Tetapan Pemberitahuan &amp; Azan</string>
 </resources>

@@ -47,9 +47,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibErrorState
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.components.SaatErrorState
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.infrastructure.repository.PrayerCalendarDay
 import app.kamy.saatApp.features.today.components.TodayImportantDayBanner
 import app.kamy.saatApp.domain.model.KhgtTodayInfo
@@ -103,7 +103,7 @@ fun PrayerCalendarScreen(
                             text = stringResource(R.string.prayer_calendar_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = AlKhatibColors.DeepEmerald
+                            color = SaatColors.DeepEmerald
                         )
                         state.cityName?.let { city ->
                             Text(
@@ -119,7 +119,7 @@ fun PrayerCalendarScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 8.dp),
+                        .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { vm.shiftMonth(-1) }) {
@@ -138,7 +138,7 @@ fun PrayerCalendarScreen(
                 }
                 Text(
                     text = stringResource(R.string.prayer_calendar_hint),
-                    modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
+                    modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -154,17 +154,17 @@ fun PrayerCalendarScreen(
                         .padding(padding),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = AlKhatibColors.DeepEmerald)
+                    CircularProgressIndicator(color = SaatColors.DeepEmerald)
                 }
             }
             errorDisplay != null && state.days.isEmpty() -> {
-                AlKhatibErrorState(
+                SaatErrorState(
                     display = errorDisplay,
                     onRetry = vm::retry,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                        .padding(horizontal = SaatSpacing.screenHorizontal)
                 )
             }
             else -> {
@@ -186,19 +186,19 @@ fun PrayerCalendarScreen(
                         onSelectDay = vm::selectDay,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                            .padding(horizontal = SaatSpacing.screenHorizontal)
                     )
 
                     when {
                         selectedDayData != null -> {
                             SelectedDayPrayerCard(
                                 day = selectedDayData,
-                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                             )
                         }
                         state.isLoading -> {
                             SelectedDayLoadingCard(
-                                modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal)
+                                modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                             )
                         }
                     }
@@ -281,7 +281,7 @@ private fun WeekdayHeaderRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 4.dp)
+            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 4.dp)
     ) {
         labels.forEach { label ->
             Text(
@@ -305,13 +305,13 @@ private fun CalendarDayCell(
     onClick: () -> Unit
 ) {
     val background = when {
-        isSelected -> AlKhatibColors.DeepEmerald
-        isToday -> AlKhatibColors.DeepEmerald.copy(alpha = 0.12f)
+        isSelected -> SaatColors.DeepEmerald
+        isToday -> SaatColors.DeepEmerald.copy(alpha = 0.12f)
         else -> MaterialTheme.colorScheme.surface
     }
     val textColor = when {
         isSelected -> androidx.compose.ui.graphics.Color.White
-        isToday -> AlKhatibColors.DeepEmerald
+        isToday -> SaatColors.DeepEmerald
         else -> MaterialTheme.colorScheme.onSurface
     }
     Box(
@@ -322,7 +322,7 @@ private fun CalendarDayCell(
             .background(background)
             .then(
                 if (isToday && !isSelected) {
-                    Modifier.border(1.dp, AlKhatibColors.DeepEmerald.copy(alpha = 0.35f), CircleShape)
+                    Modifier.border(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.35f), CircleShape)
                 } else Modifier
             )
             .clickable(onClick = onClick),
@@ -344,7 +344,7 @@ private fun CalendarDayCell(
                     modifier = Modifier
                         .size(4.dp)
                         .clip(CircleShape)
-                        .background(if (isSelected) androidx.compose.ui.graphics.Color.White else AlKhatibColors.GoldDeep)
+                        .background(if (isSelected) androidx.compose.ui.graphics.Color.White else SaatColors.GoldDeep)
                 )
             }
         }
@@ -356,7 +356,7 @@ private fun SelectedDayLoadingCard(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = AlKhatibColors.LightGrey
+        color = SaatColors.LightGrey
     ) {
         Column(
             Modifier
@@ -365,7 +365,7 @@ private fun SelectedDayLoadingCard(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CircularProgressIndicator(
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 modifier = Modifier.size(28.dp),
                 strokeWidth = 2.5.dp
             )
@@ -373,7 +373,7 @@ private fun SelectedDayLoadingCard(modifier: Modifier = Modifier) {
             Text(
                 text = stringResource(R.string.prayer_calendar_loading_day),
                 style = MaterialTheme.typography.bodySmall,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
         }
     }
@@ -387,20 +387,20 @@ private fun SelectedDayPrayerCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = AlKhatibColors.LightGrey
+        color = SaatColors.LightGrey
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(
                 text = day.gregorianLabel,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.Slate900
+                color = SaatColors.Slate900
             )
             day.hijriLabel?.let {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
@@ -472,7 +472,7 @@ private fun PrayerTimeTile(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = AlKhatibColors.Slate500,
+            color = SaatColors.Slate500,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -480,7 +480,7 @@ private fun PrayerTimeTile(
             text = time,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            color = AlKhatibColors.Slate900,
+            color = SaatColors.Slate900,
             modifier = Modifier.padding(top = 4.dp)
         )
     }

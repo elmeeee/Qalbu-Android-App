@@ -42,11 +42,14 @@
     <string name="madhab_hanafi">Hanafi</string>
     <string name="madhab_settings_title">Calculation School (Madhab)</string>
     <string name="madhab_settings_subtitle">Change school for prayer times calculation</string>
-    <string name="nav_today">Today</string>
+    <string name="nav_today">Home</string>
+    <string name="nav_home">Home</string>
     <string name="nav_reflect">Reflect</string>
-    <string name="nav_tools">Tools</string>
+    <string name="nav_tools">Spiritual</string>
+    <string name="nav_spiritual">Spiritual</string>
     <string name="nav_quran">Quran</string>
-    <string name="nav_account">Account</string>
+    <string name="nav_account">Setting</string>
+    <string name="nav_setting">Setting</string>
     <string name="back">Back</string>
     <string name="loading">Loading…</string>
     <string name="signed_in">Signed in</string>
@@ -132,14 +135,14 @@
     <string name="channel_sunnah_desc">Weekly surah reading reminders</string>
     <string name="channel_adhan_alert">Adhan alert</string>
     <string name="channel_adhan_alert_desc">Plays adhan when full playback cannot start</string>
-    <string name="prayer_notif_title">It\'s time for %1$s · %2$s</string>
-    <string name="prayer_body_fajr">The world is still asleep. You don\'t have to be.</string>
-    <string name="prayer_body_dhuhr">Pause. Pray. Then carry on.</string>
-    <string name="prayer_body_asr">The angels are witnessing. Don\'t let this one pass.</string>
-    <string name="prayer_body_maghrib">The sun just set. This one can\'t wait.</string>
-    <string name="prayer_body_isha">End your day the right way.</string>
-    <string name="prayer_body_imsak">Prepare for your fast. The dawn is near.</string>
-    <string name="prayer_body_default">It is now time for the %1$s prayer.</string>
+    <string name="prayer_notif_title">%1$s • %2$s</string>
+    <string name="prayer_body_fajr">It\'s SAAT for Fajr prayer</string>
+    <string name="prayer_body_dhuhr">It\'s SAAT for Dhuhr prayer</string>
+    <string name="prayer_body_asr">It\'s SAAT for Asr prayer</string>
+    <string name="prayer_body_maghrib">It\'s SAAT for Maghrib prayer</string>
+    <string name="prayer_body_isha">It\'s SAAT for Isha prayer</string>
+    <string name="prayer_body_imsak">It\'s SAAT for Imsak</string>
+    <string name="prayer_body_default">It\'s SAAT for %1$s prayer</string>
     <string name="night_midnight_title">🌙 Midnight</string>
     <string name="night_midnight_body">The night is halfway through. Pray Witr before you sleep — don\'t let it slip away.</string>
     <string name="night_first_third_title">🌃 The Night Begins</string>
@@ -156,12 +159,12 @@
     <string name="adhan_playback_body">Playing the call to prayer</string>
     <string name="adhan_stop">Stop adhan</string>
     <string name="adhan_voice_subtitle">Dhuhr, Asr, Maghrib &amp; Isha</string>
-    <string name="adhan_fajr_fixed_note">Subuh (Fajr) always uses Mishary Rashid Alafasy and cannot be changed.</string>
     <string name="recitation_notification_channel">Quran recitation</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
     <string name="exact_alarm_rationale_title">Prayer reminders on time</string>
-    <string name="fullscreen_intent_rationale">Allow full screen access so the adhan can wake up your screen when it\'s time to pray.</string>
-    <string name="fullscreen_intent_rationale_title">Full screen adhan</string>
+    <string name="fullscreen_intent_rationale">"SĀAT" Would Like to Display Full-Screen Adhan Alarms When Screen Is Locked.</string>
+    <string name="fullscreen_intent_rationale_title">Full-Screen Adhan Alarm</string>
+    <string name="action_dont_allow">Don\'t Allow</string>
     <string name="action_later">Later</string>
     <string name="battery_opt_snackbar_message">On some phones, allow unrestricted battery so adhan works when the app is closed.</string>
     <string name="battery_opt_snackbar_oem_message">On %1$s phones: set SĀAT to Unrestricted and enable autostart so adhan works in the background.</string>
@@ -286,6 +289,8 @@
     <string name="one_surah_found">1 surah found</string>
     <string name="surahs_found">%1$d surahs found</string>
     <string name="continue_reading">Continue reading</string>
+    <string name="today_continue_reading_title">Continue Read Qur’an</string>
+    <string name="today_continue_reading_verse">Verse %1$d</string>
     <string name="surah_number">Surah %1$d</string>
     <string name="verse_number">Verse %1$d</string>
     <string name="verse_key_label">Verse %1$s</string>
@@ -436,9 +441,13 @@
     <string name="tafsir_empty_detail">This verse doesn\'t include tafsir text for this source yet.</string>
     <string name="hadith_empty_detail">No hadith references are linked to this verse yet.</string>
     <string name="hadith_book_number">Book %1$s</string>
-    <string name="khatam_progress">%1$d / 114 Surahs read</string>
+    <string name="khatam_progress">%1$d / 30 Juz read</string>
     <string name="khatam_completed">✓</string>
     <string name="khatam_progress_title">Khatam Progress</string>
+    <string name="khatam_last_read">Last read: Juz %1$d · Ayah %2$d</string>
+    <string name="force_update_title">Update Available</string>
+    <string name="force_update_desc">A new version of Qalbu is available on the Play Store. Please update to continue enjoying the best Quran reading experience.</string>
+    <string name="force_update_button">Update Now</string>
     <string name="share_as_image">Share as Image</string>
     <string name="share_verse_image_chooser">Share verse image via…</string>
     <string name="juz_number">Juz %1$d</string>
@@ -630,7 +639,7 @@
     <string name="tahajud_qunut_arabic">اللَّهُمَّ اهْدِنِي فِيمَنْ هَدَيْتَ، وَعَافِنِي فِيمَنْ عَافَيْتَ، وَتَوَلَّنِي فِيمَنْ تَوَلَّيْتَ، وَبَارِكْ لِي فِيمَا أَعْطَيْتَ</string>
     <string name="tahajud_qunut_translit">Allāhumma ihdinī fīman hadayta, wa ʿāfinī fīman ʿāfayta, wa tawallanī fīman tawallayta, wa bārik lī fīmā aʿṭayta</string>
     <string name="tahajud_dhikr_title">Dhikr after prayer</string>
-    <string name="tahajud_dhikr_body">After salam: Astaghfirullah ×3, Allahumma antas salam…, then 33× SubhanAllah, 33× Alhamdulillah, 34× Allahu Akbar (or combined to 100).</string>
+    <string name="tahajud_dhikr_body">After salam: Astaghfirullah ×3, Allahumma antas salam…, then 33× SubhanAllah, 33× Alhamdulillah, 33× Allahu Akbar.</string>
     <string name="tahajud_dua_title">Personal dua</string>
     <string name="tahajud_dua_body">The last third of the night is when Allah descends (in a manner befitting Him) and answers dua. Ask for forgiveness, guidance, family, and the ummah. Speak from the heart in any language.</string>
     <string name="qibla_account_subtitle">AR camera or 3D compass to Kaaba</string>
@@ -1124,4 +1133,42 @@
     <string name="delete_account">Delete Account</string>
     <string name="onboarding_prayer_config_title">Prayer Alerts</string>
     <string name="onboarding_prayer_config_body">Choose which prayers play the Adzan sound. Those turned off will use the default notification sound.</string>
+
+    <!-- Coach Mark -->
+    <string name="coach_mark_skip">Skip</string>
+    <string name="coach_mark_next">Next</string>
+    <string name="coach_mark_finish">Finish</string>
+    <string name="coach_mark_today_location_title">Location &amp; Date</string>
+    <string name="coach_mark_today_location_desc">Track prayer times accurately based on your current city and date.</string>
+    <string name="coach_mark_today_khgt_title">Important Islamic Days</string>
+    <string name="coach_mark_today_khgt_desc">Stay informed about upcoming significant Islamic dates and events.</string>
+    <string name="coach_mark_today_prayer_title">Prayer Schedule</string>
+    <string name="coach_mark_today_prayer_desc">Monitor your daily prayer times, countdown to the next prayer, and qibla direction.</string>
+    <string name="coach_mark_today_tracker_title">Daily Worship Tracker</string>
+    <string name="coach_mark_today_tracker_desc">Log your daily prayers, sunnah prayers, and fasting effortlessly.</string>
+    <string name="coach_mark_today_continue_title">Continue Reading</string>
+    <string name="coach_mark_today_continue_desc">Resume your Quran reading session right where you left off.</string>
+    <string name="coach_mark_today_verse_title">Verse of the Day</string>
+    <string name="coach_mark_today_verse_desc">Listen to recitation, read tafsir, and share daily Qur\'anic inspiration with AI.</string>
+    <string name="coach_mark_quran_menu_title">Verse Actions Menu</string>
+    <string name="coach_mark_quran_menu_desc">Tap to access Bookmark, Notes, Hifz memorization tracker, Tafsir, and audio sharing.</string>
+
+    <!-- Force Update -->
+    <string name="force_update_subtitle">A new version of Qalbu is available</string>
+    <string name="force_update_later_button">Maybe Later</string>
+    <string name="force_update_version_info">New Version: %1$s</string>
+    
+    <!-- Settings & App Info -->
+    <string name="app_tagline">SĀAT • Daily Worship Companion</string>
+    <string name="app_version_format">Version %1$s</string>
+    <string name="app_version_subtitle_format">Version %1$s • Prayer Times &amp; Al-Quran</string>
+    <string name="battery_unrestricted">Unrestricted</string>
+    <string name="battery_optimized">Battery Saver</string>
+    <string name="sound_mode_adhan">Adhan Voice</string>
+    <string name="sound_mode_system">Default System Sound</string>
+    <string name="test_adhan_title">Test Adhan Alarm (Full Screen)</string>
+    <string name="test_adhan_subtitle">Select prayer time for adhan simulation</string>
+    <string name="select_test_prayer">Select Prayer Time (Test Adhan)</string>
+    <string name="dhuha_reminder_time_title">Dhuha Reminder Time</string>
+    <string name="notification_settings_footer">Notification &amp; Adhan Settings</string>
 </resources>

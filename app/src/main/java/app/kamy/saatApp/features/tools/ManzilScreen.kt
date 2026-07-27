@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.displayTransliteration
 import app.kamy.saatApp.domain.model.transliterationUsesHtml
@@ -90,9 +90,9 @@ fun ManzilScreen(
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        AlKhatibColors.ScreenBackground,
-                        AlKhatibColors.SageMist,
-                        AlKhatibColors.PrayerMint
+                        SaatColors.ScreenBackground,
+                        SaatColors.SageMist,
+                        SaatColors.PrayerMint
                     )
                 )
             )
@@ -109,7 +109,7 @@ fun ManzilScreen(
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back),
-                    tint = AlKhatibColors.DeepEmerald
+                    tint = SaatColors.DeepEmerald
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
@@ -117,12 +117,12 @@ fun ManzilScreen(
                     text = stringResource(R.string.manzil_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
                 Text(
                     text = stringResource(R.string.manzil_subtitle),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
         }
@@ -207,16 +207,16 @@ private fun ManzilInfoCard() {
             .shadow(
                 elevation = if (expanded) 6.dp else 2.dp,
                 shape = RoundedCornerShape(18.dp),
-                ambientColor = AlKhatibColors.IndigoAccent.copy(alpha = 0.10f),
-                spotColor = AlKhatibColors.IndigoAccent.copy(alpha = 0.14f),
+                ambientColor = SaatColors.IndigoAccent.copy(alpha = 0.10f),
+                spotColor = SaatColors.IndigoAccent.copy(alpha = 0.14f),
                 clip = false
             )
             .clip(RoundedCornerShape(18.dp))
-            .background(AlKhatibColors.PureWhite)
+            .background(SaatColors.PureWhite)
             .border(
                 width = if (expanded) 1.5.dp else 1.dp,
-                color = if (expanded) AlKhatibColors.IndigoAccent.copy(alpha = 0.30f)
-                else AlKhatibColors.SoftGrey.copy(alpha = 0.7f),
+                color = if (expanded) SaatColors.IndigoAccent.copy(alpha = 0.30f)
+                else SaatColors.SoftGrey.copy(alpha = 0.7f),
                 shape = RoundedCornerShape(18.dp)
             )
             .animateContentSize(animationSpec = spring(
@@ -238,13 +238,13 @@ private fun ManzilInfoCard() {
                     .clip(CircleShape)
                     .background(
                         if (expanded)
-                            Brush.linearGradient(listOf(AlKhatibColors.IndigoAccent, AlKhatibColors.Teal))
+                            Brush.linearGradient(listOf(SaatColors.IndigoAccent, SaatColors.Teal))
                         else
-                            Brush.linearGradient(listOf(AlKhatibColors.IndigoAccent.copy(0.14f), AlKhatibColors.Teal.copy(0.08f)))
+                            Brush.linearGradient(listOf(SaatColors.IndigoAccent.copy(0.14f), SaatColors.Teal.copy(0.08f)))
                     )
                     .border(
                         width = 1.dp,
-                        color = AlKhatibColors.IndigoAccent.copy(alpha = if (expanded) 0.6f else 0.22f),
+                        color = SaatColors.IndigoAccent.copy(alpha = if (expanded) 0.6f else 0.22f),
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
@@ -252,7 +252,7 @@ private fun ManzilInfoCard() {
                 Icon(
                     Icons.Filled.Info,
                     contentDescription = null,
-                    tint = if (expanded) AlKhatibColors.PureWhite else AlKhatibColors.IndigoAccent,
+                    tint = if (expanded) SaatColors.PureWhite else SaatColors.IndigoAccent,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -262,12 +262,12 @@ private fun ManzilInfoCard() {
                     text = stringResource(R.string.manzil_info_title),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = AlKhatibColors.Slate800
+                    color = SaatColors.Slate800
                 )
                 Text(
                     text = stringResource(R.string.manzil_info_subtitle),
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (expanded) AlKhatibColors.IndigoAccent.copy(0.85f) else AlKhatibColors.Slate500,
+                    color = if (expanded) SaatColors.IndigoAccent.copy(0.85f) else SaatColors.Slate500,
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
@@ -278,7 +278,7 @@ private fun ManzilInfoCard() {
                 Icon(
                     Icons.Filled.ExpandMore,
                     contentDescription = null,
-                    tint = if (expanded) AlKhatibColors.IndigoAccent else AlKhatibColors.Teal,
+                    tint = if (expanded) SaatColors.IndigoAccent else SaatColors.Teal,
                     modifier = Modifier
                         .size(22.dp)
                         .graphicsLayer { rotationZ = chevronRotation }
@@ -291,7 +291,7 @@ private fun ManzilInfoCard() {
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
             ) {
                 HorizontalDivider(
-                    color = AlKhatibColors.IndigoAccent.copy(alpha = 0.10f),
+                    color = SaatColors.IndigoAccent.copy(alpha = 0.10f),
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
@@ -299,7 +299,7 @@ private fun ManzilInfoCard() {
                 Text(
                     text = stringResource(R.string.manzil_info_definition),
                     style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                    color = AlKhatibColors.Slate700
+                    color = SaatColors.Slate700
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -312,14 +312,14 @@ private fun ManzilInfoCard() {
                         .background(
                             Brush.horizontalGradient(
                                 listOf(
-                                    AlKhatibColors.IndigoAccent.copy(alpha = 0.09f),
-                                    AlKhatibColors.Teal.copy(alpha = 0.07f)
+                                    SaatColors.IndigoAccent.copy(alpha = 0.09f),
+                                    SaatColors.Teal.copy(alpha = 0.07f)
                                 )
                             )
                         )
                         .border(
                             1.dp,
-                            AlKhatibColors.IndigoAccent.copy(alpha = 0.18f),
+                            SaatColors.IndigoAccent.copy(alpha = 0.18f),
                             RoundedCornerShape(14.dp)
                         )
                         .padding(horizontal = 14.dp, vertical = 12.dp)
@@ -333,21 +333,21 @@ private fun ManzilInfoCard() {
                                 fontWeight = FontWeight.Normal
                             ),
                             textAlign = TextAlign.End,
-                            color = AlKhatibColors.Slate900,
+                            color = SaatColors.Slate900,
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
                             text = stringResource(R.string.manzil_fami_label),
                             style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
-                            color = AlKhatibColors.IndigoAccent,
+                            color = SaatColors.IndigoAccent,
                             fontWeight = FontWeight.SemiBold
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = stringResource(R.string.manzil_fami_desc),
                             style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
-                            color = AlKhatibColors.Slate500
+                            color = SaatColors.Slate500
                         )
                     }
                 }
@@ -359,7 +359,7 @@ private fun ManzilInfoCard() {
                     text = stringResource(R.string.manzil_table_title),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald,
+                    color = SaatColors.DeepEmerald,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
@@ -368,28 +368,28 @@ private fun ManzilInfoCard() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
-                        .background(AlKhatibColors.DeepEmerald)
+                        .background(SaatColors.DeepEmerald)
                         .padding(horizontal = 10.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.manzil_col_manzil),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.PureWhite,
+                        color = SaatColors.PureWhite,
                         modifier = Modifier.weight(1.5f)
                     )
                     Text(
                         text = stringResource(R.string.manzil_col_juz),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.PureWhite,
+                        color = SaatColors.PureWhite,
                         modifier = Modifier.weight(1.2f)
                     )
                     Text(
                         text = stringResource(R.string.manzil_col_surah),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.PureWhite,
+                        color = SaatColors.PureWhite,
                         modifier = Modifier.weight(2.3f)
                     )
                 }
@@ -406,8 +406,8 @@ private fun ManzilInfoCard() {
                                 else Modifier
                             )
                             .background(
-                                if (isEven) AlKhatibColors.MintWash.copy(alpha = 0.55f)
-                                else AlKhatibColors.PureWhite
+                                if (isEven) SaatColors.MintWash.copy(alpha = 0.55f)
+                                else SaatColors.PureWhite
                             )
                             .padding(horizontal = 10.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -416,25 +416,25 @@ private fun ManzilInfoCard() {
                             text = manzil,
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = AlKhatibColors.DeepEmerald,
+                            color = SaatColors.DeepEmerald,
                             modifier = Modifier.weight(1.5f)
                         )
                         Text(
                             text = juz,
                             style = MaterialTheme.typography.bodySmall,
-                            color = AlKhatibColors.Slate700,
+                            color = SaatColors.Slate700,
                             modifier = Modifier.weight(1.2f)
                         )
                         Text(
                             text = surah,
                             style = MaterialTheme.typography.bodySmall,
-                            color = AlKhatibColors.Slate700,
+                            color = SaatColors.Slate700,
                             modifier = Modifier.weight(2.3f)
                         )
                     }
                     if (idx < manzilRows.lastIndex) {
                         HorizontalDivider(
-                            color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f),
+                            color = SaatColors.SoftGrey.copy(alpha = 0.5f),
                             thickness = 0.5.dp
                         )
                     }
@@ -447,7 +447,7 @@ private fun ManzilInfoCard() {
                     Icon(
                         Icons.AutoMirrored.Filled.MenuBook,
                         contentDescription = null,
-                        tint = AlKhatibColors.GoldDeep,
+                        tint = SaatColors.GoldDeep,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(8.dp))
@@ -455,14 +455,14 @@ private fun ManzilInfoCard() {
                         text = stringResource(R.string.manzil_how_title),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald
+                        color = SaatColors.DeepEmerald
                     )
                 }
                 Spacer(Modifier.height(8.dp))
                 Text(
                     text = stringResource(R.string.manzil_how_body),
                     style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                    color = AlKhatibColors.Slate700
+                    color = SaatColors.Slate700
                 )
 
                 Spacer(Modifier.height(12.dp))
@@ -472,7 +472,7 @@ private fun ManzilInfoCard() {
                     text = stringResource(R.string.manzil_benefits_title),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald,
+                    color = SaatColors.DeepEmerald,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
                 val benefits = stringResource(R.string.manzil_benefits_list).split("|")
@@ -486,13 +486,13 @@ private fun ManzilInfoCard() {
                                 .padding(top = 6.dp)
                                 .size(6.dp)
                                 .clip(CircleShape)
-                                .background(AlKhatibColors.GoldDeep)
+                                .background(SaatColors.GoldDeep)
                         )
                         Spacer(Modifier.width(10.dp))
                         Text(
                             text = benefit.trim(),
                             style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
-                            color = AlKhatibColors.Slate700
+                            color = SaatColors.Slate700
                         )
                     }
                 }
@@ -511,17 +511,17 @@ private fun ManzilProtectionHeader(modifier: Modifier = Modifier) {
             .shadow(
                 elevation = 12.dp,
                 shape = RoundedCornerShape(24.dp),
-                ambientColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.18f),
-                spotColor = AlKhatibColors.DeepEmerald.copy(alpha = 0.25f),
+                ambientColor = SaatColors.DeepEmerald.copy(alpha = 0.18f),
+                spotColor = SaatColors.DeepEmerald.copy(alpha = 0.25f),
                 clip = false
             )
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.linearGradient(
                     colorStops = arrayOf(
-                        0.0f to AlKhatibColors.DeepEmerald,
-                        0.55f to AlKhatibColors.TealDark,
-                        1.0f to AlKhatibColors.EmeraldRich
+                        0.0f to SaatColors.DeepEmerald,
+                        0.55f to SaatColors.TealDark,
+                        1.0f to SaatColors.EmeraldRich
                     )
                 )
             )
@@ -532,7 +532,7 @@ private fun ManzilProtectionHeader(modifier: Modifier = Modifier) {
                 .align(Alignment.TopEnd)
                 .size(120.dp)
                 .clip(CircleShape)
-                .background(AlKhatibColors.PureWhite.copy(alpha = 0.05f))
+                .background(SaatColors.PureWhite.copy(alpha = 0.05f))
         )
         Box(
             modifier = Modifier
@@ -540,7 +540,7 @@ private fun ManzilProtectionHeader(modifier: Modifier = Modifier) {
                 .padding(top = 20.dp, end = 20.dp)
                 .size(80.dp)
                 .clip(CircleShape)
-                .background(AlKhatibColors.PureWhite.copy(alpha = 0.04f))
+                .background(SaatColors.PureWhite.copy(alpha = 0.04f))
         )
 
         Column(
@@ -554,10 +554,10 @@ private fun ManzilProtectionHeader(modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .size(52.dp)
                         .clip(CircleShape)
-                        .background(AlKhatibColors.PureWhite.copy(alpha = 0.15f))
+                        .background(SaatColors.PureWhite.copy(alpha = 0.15f))
                         .border(
                             width = 1.5.dp,
-                            color = AlKhatibColors.PureWhite.copy(alpha = 0.30f),
+                            color = SaatColors.PureWhite.copy(alpha = 0.30f),
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
@@ -565,7 +565,7 @@ private fun ManzilProtectionHeader(modifier: Modifier = Modifier) {
                     Icon(
                         Icons.Filled.Shield,
                         contentDescription = null,
-                        tint = AlKhatibColors.PureWhite,
+                        tint = SaatColors.PureWhite,
                         modifier = Modifier.size(26.dp)
                     )
                 }
@@ -575,7 +575,7 @@ private fun ManzilProtectionHeader(modifier: Modifier = Modifier) {
                         text = stringResource(R.string.manzil_header_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.PureWhite
+                        color = SaatColors.PureWhite
                     )
                     Spacer(Modifier.height(2.dp))
                     // Decorative gold accent line
@@ -584,21 +584,21 @@ private fun ManzilProtectionHeader(modifier: Modifier = Modifier) {
                             .width(40.dp)
                             .height(2.dp)
                             .clip(RoundedCornerShape(999.dp))
-                            .background(AlKhatibColors.GoldBright.copy(alpha = 0.85f))
+                            .background(SaatColors.GoldBright.copy(alpha = 0.85f))
                     )
                 }
             }
             Spacer(Modifier.height(14.dp))
             // Subtle divider
             HorizontalDivider(
-                color = AlKhatibColors.PureWhite.copy(alpha = 0.15f),
+                color = SaatColors.PureWhite.copy(alpha = 0.15f),
                 thickness = 1.dp
             )
             Spacer(Modifier.height(12.dp))
             Text(
                 text = stringResource(R.string.manzil_header_body),
                 style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
-                color = AlKhatibColors.PureWhite.copy(alpha = 0.85f),
+                color = SaatColors.PureWhite.copy(alpha = 0.85f),
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -619,12 +619,12 @@ private fun ManzilSectionCard(
     index: Int
 ) {
     val gradientPairs = listOf(
-        AlKhatibColors.DeepEmerald to AlKhatibColors.Teal,
-        AlKhatibColors.Teal to AlKhatibColors.DeepEmerald,
-        AlKhatibColors.GoldDeep to AlKhatibColors.Gold,
-        AlKhatibColors.Teal to AlKhatibColors.GoldDeep,
-        AlKhatibColors.IndigoAccent to AlKhatibColors.Teal,
-        AlKhatibColors.DeepEmerald to AlKhatibColors.IndigoAccent
+        SaatColors.DeepEmerald to SaatColors.Teal,
+        SaatColors.Teal to SaatColors.DeepEmerald,
+        SaatColors.GoldDeep to SaatColors.Gold,
+        SaatColors.Teal to SaatColors.GoldDeep,
+        SaatColors.IndigoAccent to SaatColors.Teal,
+        SaatColors.DeepEmerald to SaatColors.IndigoAccent
     )
     val (accentStart, accentEnd) = gradientPairs[index % gradientPairs.size]
 
@@ -656,16 +656,16 @@ private fun ManzilSectionCard(
             .shadow(
                 elevation = if (expanded) 8.dp else 2.dp,
                 shape = RoundedCornerShape(18.dp),
-                ambientColor = if (expanded) accentStart.copy(alpha = 0.14f) else AlKhatibColors.Slate800.copy(alpha = 0.06f),
-                spotColor = if (expanded) accentStart.copy(alpha = 0.18f) else AlKhatibColors.Slate800.copy(alpha = 0.08f),
+                ambientColor = if (expanded) accentStart.copy(alpha = 0.14f) else SaatColors.Slate800.copy(alpha = 0.06f),
+                spotColor = if (expanded) accentStart.copy(alpha = 0.18f) else SaatColors.Slate800.copy(alpha = 0.08f),
                 clip = false
             )
             .clip(RoundedCornerShape(18.dp))
-            .background(AlKhatibColors.PureWhite)
+            .background(SaatColors.PureWhite)
             .border(
                 width = if (expanded) 1.5.dp else 1.dp,
                 color = if (expanded) accentStart.copy(alpha = 0.35f)
-                else AlKhatibColors.SoftGrey.copy(alpha = 0.7f),
+                else SaatColors.SoftGrey.copy(alpha = 0.7f),
                 shape = RoundedCornerShape(18.dp)
             )
             .animateContentSize(animationSpec = ManzilExpandSpec)
@@ -705,7 +705,7 @@ private fun ManzilSectionCard(
                     text = sectionNumber.toString(),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (expanded) AlKhatibColors.PureWhite else accentStart
+                    color = if (expanded) SaatColors.PureWhite else accentStart
                 )
             }
             Spacer(Modifier.width(14.dp))
@@ -714,13 +714,13 @@ private fun ManzilSectionCard(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = AlKhatibColors.Slate800,
+                    color = SaatColors.Slate800,
                     maxLines = 2
                 )
                 Text(
                     text = verseRangeLabel,
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (expanded) accentStart.copy(alpha = 0.85f) else AlKhatibColors.Slate500,
+                    color = if (expanded) accentStart.copy(alpha = 0.85f) else SaatColors.Slate500,
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
@@ -758,7 +758,7 @@ private fun ManzilSectionCard(
                 Icon(
                     Icons.Filled.ExpandMore,
                     contentDescription = null,
-                    tint = if (expanded) accentStart else AlKhatibColors.Teal,
+                    tint = if (expanded) accentStart else SaatColors.Teal,
                     modifier = Modifier
                         .size(22.dp)
                         .graphicsLayer { rotationZ = chevronRotation }
@@ -781,7 +781,7 @@ private fun ManzilSectionCard(
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = AlKhatibColors.Slate700,
+                    color = SaatColors.Slate700,
                     lineHeight = 22.sp
                 )
 
@@ -796,7 +796,7 @@ private fun ManzilSectionCard(
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(28.dp),
-                            color = AlKhatibColors.DeepEmerald,
+                            color = SaatColors.DeepEmerald,
                             strokeWidth = 2.5.dp
                         )
                     }
@@ -804,13 +804,13 @@ private fun ManzilSectionCard(
                     Text(
                         text = stringResource(R.string.manzil_verses_unavailable),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 } else {
                     verses.forEachIndexed { verseIndex, verse ->
                         if (verseIndex > 0) {
                             Spacer(Modifier.height(16.dp))
-                            HorizontalDivider(color = AlKhatibColors.SoftGrey.copy(alpha = 0.5f))
+                            HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
                             Spacer(Modifier.height(16.dp))
                         }
                         ManzilVerseBlock(verse = verse, translationId = translationId)
@@ -834,14 +834,14 @@ private fun ManzilVerseBlock(
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            AlKhatibColors.DeepEmerald.copy(alpha = 0.07f),
-                            AlKhatibColors.Teal.copy(alpha = 0.03f)
+                            SaatColors.DeepEmerald.copy(alpha = 0.07f),
+                            SaatColors.Teal.copy(alpha = 0.03f)
                         )
                     )
                 )
                 .border(
                     width = 1.dp,
-                    color = AlKhatibColors.DeepEmerald.copy(alpha = 0.08f),
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.08f),
                     shape = RoundedCornerShape(14.dp)
                 )
                 .padding(horizontal = 12.dp, vertical = 14.dp)
@@ -860,7 +860,7 @@ private fun ManzilVerseBlock(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(AlKhatibColors.LightGrey.copy(alpha = 0.45f))
+                    .background(SaatColors.LightGrey.copy(alpha = 0.45f))
                     .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 TransliterationView(
@@ -879,7 +879,7 @@ private fun ManzilVerseBlock(
                     text = stringResource(R.string.manzil_meaning_label),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = AlKhatibColors.Teal
+                    color = SaatColors.Teal
                 )
                 ManzilTranslationView(text = normalized)
             }
@@ -900,7 +900,7 @@ private fun ManzilTranslationView(text: String) {
             Text(
                 text = plain,
                 style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
-                color = AlKhatibColors.Slate800,
+                color = SaatColors.Slate800,
                 textAlign = TextAlign.Justify,
                 modifier = Modifier.fillMaxWidth()
             )

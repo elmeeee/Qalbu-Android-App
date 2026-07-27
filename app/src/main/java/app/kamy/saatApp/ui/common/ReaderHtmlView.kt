@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -189,7 +189,7 @@ private class AutoHeightReaderWebView(
 }
 
 fun wrapReaderProseHtml(body: String): String {
-    val emerald = AlKhatibColors.DeepEmerald.value.toInt() and 0xFFFFFF
+    val emerald = SaatColors.DeepEmerald.value.toInt() and 0xFFFFFF
     val hex = String.format("#%06X", emerald)
     val css = """
         html, body {

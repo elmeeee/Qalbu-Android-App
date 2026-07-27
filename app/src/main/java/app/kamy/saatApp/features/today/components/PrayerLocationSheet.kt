@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,12 +50,12 @@ fun PrayerLocationSheet(
                 text = stringResource(R.string.location_settings_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
             Text(
                 text = stringResource(R.string.location_settings_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
             OutlinedTextField(
                 value = query,

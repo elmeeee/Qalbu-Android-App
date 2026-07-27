@@ -39,7 +39,6 @@ object DeepLinkRoutes {
             }
             "mushaf" -> RootTab.Quran.route
             "today" -> RootTab.Today.route
-            "reflect" -> RootTab.Reflect.route
             "bookmarks" -> "quran/bookmarks"
             "qibla" -> "tools/qibla"
             "dhikr" -> "tools/dhikr"

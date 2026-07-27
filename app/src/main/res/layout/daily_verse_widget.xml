@@ -6,33 +6,39 @@
     android:background="@drawable/widget_prayer_background"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:padding="14dp">
+    android:padding="16dp">
 
-    <View
-        android:layout_width="36dp"
-        android:layout_height="3dp"
-        android:background="@drawable/widget_accent_bar" />
-
-    <TextView
-        android:id="@+id/verse_widget_label"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:letterSpacing="0.08"
-        android:textAllCaps="true"
-        android:textColor="#E8D5A3"
-        android:textSize="10sp"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="28dp"
+            android:layout_height="3dp"
+            android:background="@drawable/widget_accent_bar" />
+
+        <TextView
+            android:id="@+id/verse_widget_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:letterSpacing="0.08"
+            android:textAllCaps="true"
+            android:textColor="#F59E0B"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/verse_widget_reference"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:ellipsize="end"
-        android:maxLines="1"
+        android:maxLines="2"
         android:textColor="#FFFFFF"
-        android:textSize="15sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView
@@ -40,12 +46,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:ellipsize="end"
         android:gravity="end"
-        android:maxLines="2"
+        android:maxLines="5"
         android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textDirection="rtl" />
+        android:textDirection="rtl"
+        android:textSize="17sp" />
 
     <TextView
         android:id="@+id/verse_widget_excerpt"
@@ -53,10 +58,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:alpha="0.9"
-        android:ellipsize="end"
         android:lineSpacingExtra="2dp"
-        android:maxLines="3"
-        android:textColor="#D9FFFFFF"
+        android:maxLines="6"
+        android:textColor="#E2E8F0"
         android:textSize="12sp" />
 
 </LinearLayout>

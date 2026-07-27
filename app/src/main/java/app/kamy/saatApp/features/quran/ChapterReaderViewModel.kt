@@ -19,13 +19,13 @@ import app.kamy.saatApp.domain.model.ArabicTextType
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.audio.AudioQueueItem
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
+import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
 import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.repository.ContentRepository
 import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
-import app.kamy.saatApp.infrastructure.repository.ReflectRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -108,8 +108,6 @@ class ChapterReaderViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
     private val readingSessions: ReadingSessionRepository,
     private val shareComposer: VerseShareTextComposer,
-    private val reflectRepository: ReflectRepository,
-    private val userSession: UserSession,
     private val translationStore: TranslationPreferencesStore,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -123,6 +121,7 @@ class ChapterReaderViewModel @Inject constructor(
         )
     )
     val state: StateFlow<ChapterReaderUiState> = _state.asStateFlow()
+    val audioPlaybackState: StateFlow<AudioPlaybackState> = audioPlayer.state
 
     private val _events = MutableSharedFlow<ReaderEvent>(extraBufferCapacity = 1)
     val events = _events.asSharedFlow()
@@ -224,7 +223,7 @@ class ChapterReaderViewModel @Inject constructor(
         if (nextIndex in verses.indices) {
             val nextPage = verses[nextIndex]
             playAyahAtIndex(nextIndex, nextPage)
-            _events.tryEmit(ReaderEvent.AnimateToPage(nextIndex))
+            _events.tryEmit(ReaderEvent.AutoAdvanceToPage(lastIndex, nextIndex))
         }
     }
 
@@ -429,10 +428,34 @@ class ChapterReaderViewModel @Inject constructor(
         val chapterNum = page.chapterNumber ?: s.chapterNumber
         page.resolvedVerseNumber?.let { logScrollPosition(chapterNum, it) }
 
-        // Auto-mark chapter as read when user reaches the last verse
+        // Track last read Juz and VerseKey for Khatam progress
+        val jNum = page.juzNumber ?: s.juzNumber
+        val vKey = page.verseKey
+        if (jNum != null && vKey != null) {
+            QuranPersonalStore.updateLastReadJuz(appContext, jNum, vKey)
+        }
+
+        // Auto-mark chapter or juz as read when user reaches the last verse
         val isLastVerse = !s.hasMore && index == s.verses.size - 1
-        if (isLastVerse && s.juzNumber == null) {
-            QuranPersonalStore.markChapterRead(appContext, chapterNum)
+        if (isLastVerse) {
+            if (s.juzNumber != null) {
+                QuranPersonalStore.markJuzRead(appContext, s.juzNumber)
+            } else {
+                QuranPersonalStore.markChapterRead(appContext, chapterNum)
+            }
+        }
+    }
+
+    fun onPageSettled(index: Int) {
+        val s = _state.value
+        if (index !in s.verses.indices) return
+        val page = s.verses[index]
+        val audioState = audioPlayer.state.value
+        if (audioState.isPlaying && audioState.currentUrl != null) {
+            val targetKey = page.verseKey
+            if (targetKey != null && targetKey != audioState.trackSubtitle) {
+                playAyahAtIndex(index, page)
+            }
         }
     }
 
@@ -596,8 +619,6 @@ class ChapterReaderViewModel @Inject constructor(
         const val HADITH_PAGE_LIMIT = 4
     }
 
-    fun isSignedIn(): Boolean = userSession.isSignedIn.value
-
     fun openAiShare(verseIndex: Int) {
         if (verseIndex !in _state.value.verses.indices) return
         _state.update {
@@ -650,70 +671,7 @@ class ChapterReaderViewModel @Inject constructor(
         }
     }
 
-    fun publishAiReflection() {
-        if (!userSession.isSignedIn.value) {
-            _state.update { it.copy(publishMessage = appContext.getString(R.string.sign_in_to_publish_account)) }
-            return
-        }
-        val index = _state.value.aiShareVerseIndex ?: return
-        val verse = _state.value.verses.getOrNull(index) ?: return
-        val verseKey = verse.verseKey ?: return
-        val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-        val idempotencyKey = "reflect:$verseKey:$dayKey"
-        val reference = verse.referenceLabel(chapterDisplayNameFor(verse))
 
-        viewModelScope.launch {
-            val body = _state.value.aiShareDraft.trim().ifBlank {
-                shareComposer.quickReflectionText(verse, reference)
-            }
-            if (body.isBlank()) return@launch
-            _state.update { it.copy(isPublishing = true, publishMessage = null) }
-            val authorId = try {
-                reflectRepository.fetchMyProfile().id
-            } catch (t: Throwable) {
-                userSession.invalidateIfAuthenticationFailure(t)
-                _state.update {
-                    it.copy(
-                        isPublishing = false,
-                        publishMessage = if (t.isAuthenticationFailure()) appContext.getString(R.string.session_expired)
-                        else appContext.getString(R.string.profile_load_failed)
-                    )
-                }
-                return@launch
-            }
-            if (authorId.isNullOrBlank()) {
-                _state.update {
-                    it.copy(isPublishing = false, publishMessage = appContext.getString(R.string.profile_load_failed))
-                }
-                return@launch
-            }
-            runCatching {
-                reflectRepository.createReflectionPost(body, verseKey, authorId, idempotencyKey)
-            }.onSuccess {
-                _state.update {
-                    it.copy(
-                        isPublishing = false,
-                        publishMessage = appContext.getString(R.string.published_to_reflect),
-                        aiShareVisible = false,
-                        aiShareVerseIndex = null,
-                        aiShareDraft = ""
-                    )
-                }
-            }.onFailure { t ->
-                userSession.invalidateIfAuthenticationFailure(t)
-                _state.update {
-                    it.copy(
-                        isPublishing = false,
-                        publishMessage = t.userFacingAuthOrApiMessage(appContext)
-                    )
-                }
-            }
-        }
-    }
-
-    fun clearPublishMessage() {
-        _state.update { it.copy(publishMessage = null) }
-    }
 
     fun audioQueueItems(): List<AudioQueueItem> = _state.value.verses.mapNotNull { v ->
         val url = v.audio?.url ?: return@mapNotNull null
@@ -904,4 +862,5 @@ class ChapterReaderViewModel @Inject constructor(
 
 sealed interface ReaderEvent {
     data class AnimateToPage(val index: Int) : ReaderEvent
+    data class AutoAdvanceToPage(val previousIndex: Int, val nextIndex: Int) : ReaderEvent
 }

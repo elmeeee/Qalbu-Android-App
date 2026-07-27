@@ -3,11 +3,9 @@ package app.kamy.saatApp.di
 import app.kamy.saatApp.infrastructure.network.AlAdhanApi
 import app.kamy.saatApp.infrastructure.network.AuthV1Api
 import app.kamy.saatApp.infrastructure.network.ContentApi
-import app.kamy.saatApp.infrastructure.network.ReflectApi
 import app.kamy.saatApp.infrastructure.network.api.AlAdhanApiService
 import app.kamy.saatApp.infrastructure.network.api.AuthV1ApiService
 import app.kamy.saatApp.infrastructure.network.api.ContentApiService
-import app.kamy.saatApp.infrastructure.network.api.ReflectApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -23,11 +21,6 @@ object ApiModule {
     @Provides
     @Singleton
     fun provideContentApi(@ContentApi retrofit: Retrofit): ContentApiService =
-        retrofit.create()
-
-    @Provides
-    @Singleton
-    fun provideReflectApi(@ReflectApi retrofit: Retrofit): ReflectApiService =
         retrofit.create()
 
     @Provides

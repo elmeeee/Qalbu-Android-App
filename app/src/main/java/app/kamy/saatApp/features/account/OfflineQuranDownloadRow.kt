@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.config.LocalQuranConfig
-import app.kamy.saatApp.design.components.AlKhatibSettingsNavigationRow
+import app.kamy.saatApp.design.components.SaatSettingsNavigationRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import app.kamy.saatApp.infrastructure.offline.MurottalOfflineStore
@@ -40,7 +40,7 @@ fun OfflineQuranDownloadRow() {
         else -> stringResource(R.string.offline_murottal_subtitle_short)
     }
 
-    AlKhatibSettingsNavigationRow(
+    SaatSettingsNavigationRow(
         icon = Icons.AutoMirrored.Filled.MenuBook,
         title = stringResource(R.string.offline_murottal_title),
         subtitle = subtitle,

@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @Composable
 fun OfflineBanner(
@@ -30,21 +30,21 @@ fun OfflineBanner(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(AlKhatibColors.AmberWash)
+            .background(SaatColors.AmberWash)
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = Icons.Outlined.CloudOff,
             contentDescription = null,
-            tint = AlKhatibColors.GoldDeep,
+            tint = SaatColors.GoldDeep,
             modifier = Modifier.size(18.dp)
         )
         Text(
             text = message,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
-            color = AlKhatibColors.GoldDeep,
+            color = SaatColors.GoldDeep,
             modifier = Modifier.padding(start = 10.dp)
         )
     }

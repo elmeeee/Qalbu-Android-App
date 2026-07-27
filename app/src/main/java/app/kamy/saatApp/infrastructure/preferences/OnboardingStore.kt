@@ -24,11 +24,18 @@ class OnboardingStore @Inject constructor(
     fun permissionsHandledInOnboarding(): Boolean =
         prefs.getBoolean(KEY_PERMISSIONS_HANDLED, false)
 
+    fun hasShownHomeCoachMark(): Boolean = prefs.getBoolean(KEY_HOME_COACH_MARK, false)
+
+    fun markHomeCoachMarkShown() {
+        prefs.edit().putBoolean(KEY_HOME_COACH_MARK, true).apply()
+    }
+
     companion object {
         fun from(context: Context): OnboardingStore = OnboardingStore(context.applicationContext)
 
         private const val PREFS = "saat_onboarding"
         private const val KEY_COMPLETE = "complete"
         private const val KEY_PERMISSIONS_HANDLED = "permissions_handled"
+        private const val KEY_HOME_COACH_MARK = "home_coach_mark_shown"
     }
 }

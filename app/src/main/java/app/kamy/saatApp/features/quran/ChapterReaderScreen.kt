@@ -79,6 +79,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -101,14 +102,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.components.AlKhatibPartialBottomSheet
+import app.kamy.saatApp.design.components.SaatPartialBottomSheet
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.features.share.AiShareSheet
 import androidx.compose.material.icons.filled.Forum
 import app.kamy.saatApp.domain.model.HifzStatus
-import app.kamy.saatApp.design.components.AlKhatibErrorState
+import app.kamy.saatApp.design.components.SaatErrorState
 import app.kamy.saatApp.core.config.LocalQuranConfig
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.displayTransliteration
@@ -126,7 +127,11 @@ import app.kamy.saatApp.ui.common.TajweedTextAlign
 import app.kamy.saatApp.ui.common.TransliterationView
 import app.kamy.saatApp.ui.common.toVerseTranslationPlainText
 import app.kamy.saatApp.infrastructure.preferences.ReaderOnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
 import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
+import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -139,6 +144,7 @@ fun ChapterReaderScreen(
 ) {
     val vm: ChapterReaderViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
+    val audioPlaybackState by vm.audioPlaybackState.collectAsState()
 
     val context = LocalContext.current
     DisposableEffect(Unit) {
@@ -151,6 +157,16 @@ fun ChapterReaderScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val onboardingStore = remember { ReaderOnboardingStore.from(context) }
     var showScrollHint by remember { mutableStateOf(!onboardingStore.hasShownScrollHint()) }
+    val coachMarkState = rememberCoachMarkState()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownQuranCoachMark()) {
+            kotlinx.coroutines.delay(1000)
+            coachMarkState.show()
+            onboardingStore.markQuranCoachMarkShown()
+        }
+    }
 
     fun dismissScrollHint() {
         if (!showScrollHint) return
@@ -161,6 +177,7 @@ fun ChapterReaderScreen(
     val verseMenuExpanded = remember { mutableStateOf(false) }
     val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
     val showImageShareSheet = remember { mutableStateOf(false) }
+    var hasScrolledToInitial by remember { mutableStateOf(false) }
 
     val s = state
     val verseCount = s.verses.size
@@ -184,11 +201,14 @@ fun ChapterReaderScreen(
     val loadErrorDisplay = state.error.rememberErrorDisplay(R.string.verses_load_failed)
 
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }
+        snapshotFlow { pagerState.currentPage to pagerState.isScrollInProgress }
             .distinctUntilChanged()
-            .collect { page ->
+            .collect { (page, isScrolling) ->
                 vm.onPageChanged(page)
                 vm.loadMoreIfNeeded(page)
+                if (!isScrolling) {
+                    vm.onPageSettled(page)
+                }
             }
     }
 
@@ -201,7 +221,7 @@ fun ChapterReaderScreen(
     }
 
     LaunchedEffect(verseCount, initialVerseNumber, initialVerseKey) {
-        if (verseCount == 0) return@LaunchedEffect
+        if (verseCount == 0 || hasScrolledToInitial) return@LaunchedEffect
         val idx = when {
             !initialVerseKey.isNullOrBlank() ->
                 state.verses.indexOfFirst { it.verseKey == initialVerseKey }
@@ -209,8 +229,13 @@ fun ChapterReaderScreen(
                 state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
             else -> -1
         }
-        if (idx >= 0 && pagerState.currentPage != idx) {
-            pagerState.scrollToPage(idx)
+        if (idx >= 0) {
+            if (pagerState.currentPage != idx) {
+                pagerState.scrollToPage(idx)
+            }
+            hasScrolledToInitial = true
+        } else if (initialVerseKey.isNullOrBlank() && initialVerseNumber == null) {
+            hasScrolledToInitial = true
         }
     }
 
@@ -218,20 +243,27 @@ fun ChapterReaderScreen(
         verseMenuExpanded.value = false
     }
 
-    LaunchedEffect(state.publishMessage) {
-        state.publishMessage?.let { msg ->
-            snackbarHostState.showSnackbar(msg)
-            vm.clearPublishMessage()
-        }
-    }
 
-    LaunchedEffect(vm, pagerState) {
+
+    LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
                 is ReaderEvent.AnimateToPage -> {
                     val verses = vm.state.value.verses
                     if (event.index in verses.indices) {
-                        pagerState.animateScrollToPage(event.index)
+                        scope.launch {
+                            runCatching { pagerState.animateScrollToPage(event.index) }
+                        }
+                    }
+                }
+                is ReaderEvent.AutoAdvanceToPage -> {
+                    val verses = vm.state.value.verses
+                    if (event.nextIndex in verses.indices) {
+                        if (kotlin.math.abs(pagerState.currentPage - event.previousIndex) <= 1) {
+                            scope.launch {
+                                runCatching { pagerState.animateScrollToPage(event.nextIndex) }
+                            }
+                        }
                     }
                 }
             }
@@ -241,7 +273,7 @@ fun ChapterReaderScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground)
+            .background(SaatColors.ScreenBackground)
     ) {
         if (state.isLoading && state.verses.isEmpty()) {
             Box(
@@ -249,7 +281,7 @@ fun ChapterReaderScreen(
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
             }
         } else if (state.error != null && state.verses.isEmpty() && loadErrorDisplay != null) {
@@ -260,13 +292,12 @@ fun ChapterReaderScreen(
                     .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
-                AlKhatibErrorState(
+                SaatErrorState(
                     display = loadErrorDisplay,
                     onRetry = { vm.loadInitial() }
                 )
             }
         } else if (state.verses.isNotEmpty()) {
-            val scope = androidx.compose.runtime.rememberCoroutineScope()
             VerticalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
@@ -301,6 +332,7 @@ fun ChapterReaderScreen(
                         audioBarVisible = audioBarVisible,
                         personalDataRevision = state.personalDataRevision,
                         showBismillahPre = pageIndex == 0 && state.bismillahPre,
+                        audioPlaybackState = audioPlaybackState,
                         onPlay = { vm.onTapAyah(pageIndex) },
                         onContentScroll = if (pageIndex == 0) ::dismissScrollHint else null,
                         onTajweedClick = { activeTajweedType.value = it }
@@ -317,7 +349,7 @@ fun ChapterReaderScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            AlKhatibColors.ScreenBackground.copy(alpha = 0.95f),
+                            SaatColors.ScreenBackground.copy(alpha = 0.95f),
                             Color.Transparent
                         )
                     )
@@ -334,7 +366,7 @@ fun ChapterReaderScreen(
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back),
-                        tint = AlKhatibColors.Slate900
+                        tint = SaatColors.Slate900
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -342,7 +374,7 @@ fun ChapterReaderScreen(
                     Icon(
                         Icons.Filled.Settings,
                         contentDescription = stringResource(R.string.reading_settings_a11y),
-                        tint = AlKhatibColors.Slate900
+                        tint = SaatColors.Slate900
                     )
                 }
             }
@@ -366,7 +398,13 @@ fun ChapterReaderScreen(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
-                    .padding(end = 10.dp, bottom = readerActionsBottom),
+                    .padding(end = 10.dp, bottom = readerActionsBottom)
+                    .coachMarkTarget(
+                        coachMarkState,
+                        0,
+                        R.string.coach_mark_quran_menu_title,
+                        R.string.coach_mark_quran_menu_desc
+                    ),
                 onBookmark = {
                     verseMenuExpanded.value = false
                     vm.toggleBookmark(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
@@ -408,7 +446,7 @@ fun ChapterReaderScreen(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                AlKhatibColors.ScreenBackground.copy(alpha = 0.92f)
+                                SaatColors.ScreenBackground.copy(alpha = 0.92f)
                             )
                         )
                     )
@@ -423,7 +461,7 @@ fun ChapterReaderScreen(
                     text = surahTitle,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate900,
+                    color = SaatColors.Slate900,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -448,7 +486,7 @@ fun ChapterReaderScreen(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.labelLarge,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -548,8 +586,6 @@ fun ChapterReaderScreen(
         loading = state.aiShareLoading,
         draft = state.aiShareDraft,
         error = state.aiShareError,
-        isPublishing = state.isPublishing,
-        showPublish = vm.isSignedIn(),
         onDismiss = { vm.dismissAiShare() },
         onDraftChange = vm::updateAiShareDraft,
         onRegenerate = vm::regenerateAiShare,
@@ -559,8 +595,7 @@ fun ChapterReaderScreen(
                 putExtra(Intent.EXTRA_TEXT, draft)
             }
             context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_reflection)))
-        },
-        onPublish = { vm.publishAiReflection() }
+        }
     )
 
     if (showImageShareSheet.value) {
@@ -581,6 +616,7 @@ fun ChapterReaderScreen(
             )
         }
     }
+    CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable
@@ -596,6 +632,7 @@ private fun SaatAyahPage(
     audioBarVisible: Boolean,
     personalDataRevision: Int,
     showBismillahPre: Boolean,
+    audioPlaybackState: AudioPlaybackState? = null,
     onPlay: () -> Unit,
     onContentScroll: (() -> Unit)? = null,
     onTajweedClick: (TajweedType) -> Unit
@@ -692,7 +729,7 @@ private fun SaatAyahPage(
                 Text(
                     text = "﷽",
                     fontSize = (38 * fontScale).sp,
-                    color = AlKhatibColors.DeepEmerald,
+                    color = SaatColors.DeepEmerald,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
                 )
@@ -703,7 +740,7 @@ private fun SaatAyahPage(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp)
-                            .background(AlKhatibColors.SoftGrey.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                            .background(SaatColors.SoftGrey.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -711,14 +748,14 @@ private fun SaatAyahPage(
                                 text = stringResource(R.string.hifz_recall_prompt),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
-                                color = AlKhatibColors.Slate800,
+                                color = SaatColors.Slate800,
                                 textAlign = TextAlign.Center
                             )
                             Spacer(Modifier.height(6.dp))
                             Text(
                                 text = stringResource(R.string.hifz_tap_to_reveal),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = AlKhatibColors.Slate500,
+                                color = SaatColors.Slate500,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -726,6 +763,45 @@ private fun SaatAyahPage(
                 }
                 else -> {
                     val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) (verse.textIndopak ?: verse.textUthmani) else verse.textUthmani
+                    val isPlayingThisVerse = audioPlaybackState != null && audioPlaybackState.isPlaying && audioPlaybackState.trackSubtitle == verse.verseKey && audioPlaybackState.currentUrl != null
+                    val words = remember(textToRender) { textToRender?.split("\\s+".toRegex())?.filter { it.isNotBlank() } ?: emptyList() }
+                    val activeWordIndex = remember(isPlayingThisVerse, audioPlaybackState?.progress, words) {
+                        if (!isPlayingThisVerse || words.isEmpty()) {
+                            null
+                        } else {
+                            val prog = (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
+                            val weights = words.mapIndexed { index, word ->
+                                var weight = word.length.toFloat().coerceAtLeast(1f)
+                                if (word.contains('ٓ') || word.contains('ۤ') || word.contains('ۧ') || word.contains('ۨ') || word.contains('\u0653') || word.contains('\u06E4')) {
+                                    weight += 8.0f
+                                }
+                                if (word.contains('ّ') || word.contains('\u0651')) {
+                                    if (word.contains('ن') || word.contains('م')) {
+                                        weight += 4.0f
+                                    } else {
+                                        weight += 2.0f
+                                    }
+                                }
+                                if (index == words.lastIndex && words.size > 1) {
+                                    weight *= 1.25f
+                                }
+                                weight
+                            }
+                            val totalWeight = weights.sum().coerceAtLeast(1f)
+                            val targetWeight = prog * totalWeight
+                            var accum = 0f
+                            var foundIndex = 0
+                            for (i in words.indices) {
+                                accum += weights[i]
+                                if (targetWeight <= accum) {
+                                    foundIndex = i
+                                    break
+                                }
+                                foundIndex = i
+                            }
+                            foundIndex
+                        }
+                    }
                     TajweedHtmlView(
                         textUthmani = textToRender ?: "",
                         ayahNumber = verse.resolvedVerseNumber,
@@ -733,6 +809,7 @@ private fun SaatAyahPage(
                         compact = true,
                         textAlign = TajweedTextAlign.Justify,
                         isTajweedEnabled = isTajweedEnabled,
+                        activeWordIndex = activeWordIndex,
                         onTajweedClick = onTajweedClick,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -746,7 +823,7 @@ private fun SaatAyahPage(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(AlKhatibColors.LightGrey.copy(alpha = 0.45f))
+                            .background(SaatColors.LightGrey.copy(alpha = 0.45f))
                             .padding(horizontal = 12.dp, vertical = 10.dp)
                     ) {
                         TransliterationView(
@@ -767,7 +844,7 @@ private fun SaatAyahPage(
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.35f
                             ),
-                            color = AlKhatibColors.Slate800,
+                            color = SaatColors.Slate800,
                             textAlign = TextAlign.Justify,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -816,14 +893,14 @@ private fun ReaderVerseActionsMenu(
                         Icon(
                             if (bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
                             contentDescription = null,
-                            tint = AlKhatibColors.GoldDeep,
+                            tint = SaatColors.GoldDeep,
                             modifier = Modifier.size(17.dp)
                         )
                     },
                     label = stringResource(
                         if (bookmarked) R.string.remove_bookmark else R.string.bookmark
                     ),
-                    accent = AlKhatibColors.GoldDeep,
+                    accent = SaatColors.GoldDeep,
                     onClick = onBookmark
                 )
                 ReaderActionPill(
@@ -831,14 +908,14 @@ private fun ReaderVerseActionsMenu(
                         Icon(
                             Icons.Filled.EditNote,
                             contentDescription = null,
-                            tint = if (hasNote) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate500,
+                            tint = if (hasNote) SaatColors.DeepEmerald else SaatColors.Slate500,
                             modifier = Modifier.size(17.dp)
                         )
                     },
                     label = stringResource(
                         if (hasNote) R.string.verse_note_edit else R.string.verse_note
                     ),
-                    accent = AlKhatibColors.DeepEmerald,
+                    accent = SaatColors.DeepEmerald,
                     onClick = onNote
                 )
                 ReaderActionPill(
@@ -857,14 +934,14 @@ private fun ReaderVerseActionsMenu(
                 ReaderActionPill(
                     icon = {
                         Icon(
-                            Icons.Filled.AutoAwesome,
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_ai),
                             contentDescription = null,
-                            tint = AlKhatibColors.Gold,
+                            tint = SaatColors.Gold,
                             modifier = Modifier.size(17.dp)
                         )
                     },
                     label = stringResource(R.string.ai_label),
-                    accent = AlKhatibColors.Gold,
+                    accent = SaatColors.Gold,
                     onClick = onAiShare
                 )
                 ReaderActionPill(
@@ -872,26 +949,26 @@ private fun ReaderVerseActionsMenu(
                         Icon(
                             Icons.Filled.Share,
                             contentDescription = null,
-                            tint = AlKhatibColors.DeepEmerald,
+                            tint = SaatColors.DeepEmerald,
                             modifier = Modifier.size(17.dp)
                         )
                     },
                     label = stringResource(R.string.share_as_image),
-                    accent = AlKhatibColors.DeepEmerald,
+                    accent = SaatColors.DeepEmerald,
                     onClick = onShareImage
                 )
                 if (showTafsir) {
                     ReaderActionPill(
                         icon = {
                             Icon(
-                                Icons.AutoMirrored.Filled.MenuBook,
+                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_tafsir),
                                 contentDescription = null,
-                                tint = AlKhatibColors.IndigoAccent,
+                                tint = SaatColors.IndigoAccent,
                                 modifier = Modifier.size(17.dp)
                             )
                         },
                         label = stringResource(R.string.tafsir),
-                        accent = AlKhatibColors.IndigoAccent,
+                        accent = SaatColors.IndigoAccent,
                         onClick = onTafsir
                     )
                 }
@@ -900,12 +977,12 @@ private fun ReaderVerseActionsMenu(
                         Icon(
                             Icons.Filled.Forum,
                             contentDescription = null,
-                            tint = AlKhatibColors.Teal,
+                            tint = SaatColors.Teal,
                             modifier = Modifier.size(17.dp)
                         )
                     },
                     label = stringResource(R.string.hadith),
-                    accent = AlKhatibColors.Teal,
+                    accent = SaatColors.Teal,
                     onClick = onHadith
                 )
             }
@@ -917,7 +994,7 @@ private fun ReaderVerseActionsMenu(
                 .clip(CircleShape)
                 .background(
                     Brush.linearGradient(
-                        listOf(AlKhatibColors.DeepEmerald, AlKhatibColors.Teal)
+                        listOf(SaatColors.DeepEmerald, SaatColors.Teal)
                     )
                 )
                 .clickable(onClick = onToggle)
@@ -926,7 +1003,7 @@ private fun ReaderVerseActionsMenu(
             Surface(
                 onClick = onToggle,
                 shape = CircleShape,
-                color = AlKhatibColors.PureWhite,
+                color = SaatColors.PureWhite,
                 shadowElevation = if (expanded) 2.dp else 8.dp,
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -936,7 +1013,7 @@ private fun ReaderVerseActionsMenu(
                     Icon(
                         imageVector = if (expanded) Icons.Filled.Close else Icons.Filled.AutoStories,
                         contentDescription = if (expanded) closeActionsLabel else studyToolsLabel,
-                        tint = if (expanded) AlKhatibColors.Slate800 else AlKhatibColors.DeepEmerald,
+                        tint = if (expanded) SaatColors.Slate800 else SaatColors.DeepEmerald,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -956,7 +1033,7 @@ private fun ReaderActionPill(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = AlKhatibColors.PureWhite,
+        color = SaatColors.PureWhite,
         shadowElevation = 6.dp,
         modifier = Modifier
             .widthIn(min = 156.dp)
@@ -984,7 +1061,7 @@ private fun ReaderActionPill(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Slate800,
+                color = SaatColors.Slate800,
                 maxLines = 2
             )
         }
@@ -1005,7 +1082,7 @@ private fun ReaderSettingsSheet(
     onToggleHifzMode: (Boolean) -> Unit,
     onArabicTextTypeChange: (ArabicTextType) -> Unit
 ) {
-    AlKhatibPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.65f) {
+    SaatPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.65f) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -1020,8 +1097,8 @@ private fun ReaderSettingsSheet(
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                AlKhatibColors.DeepEmerald.copy(alpha = 0.14f),
-                                AlKhatibColors.Teal.copy(alpha = 0.07f)
+                                SaatColors.DeepEmerald.copy(alpha = 0.14f),
+                                SaatColors.Teal.copy(alpha = 0.07f)
                             )
                         )
                     )
@@ -1031,12 +1108,12 @@ private fun ReaderSettingsSheet(
                     stringResource(R.string.reading_settings),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
                 Text(
                     stringResource(R.string.font_size_subtitle),
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -1049,8 +1126,8 @@ private fun ReaderSettingsSheet(
                         valueRange = 0.85f..2.0f,
                         steps = 11,
                         colors = androidx.compose.material3.SliderDefaults.colors(
-                            thumbColor = AlKhatibColors.Teal,
-                            activeTrackColor = AlKhatibColors.DeepEmerald
+                            thumbColor = SaatColors.Teal,
+                            activeTrackColor = SaatColors.DeepEmerald
                         )
                     )
                 }
@@ -1088,13 +1165,13 @@ private fun ReaderSettingsSheet(
             Text(
                 stringResource(R.string.reciter),
                 style = MaterialTheme.typography.labelLarge,
-                color = AlKhatibColors.Slate500,
+                color = SaatColors.Slate500,
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp)
             )
             if (state.recitations.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    color = AlKhatibColors.DeepEmerald
+                    color = SaatColors.DeepEmerald
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
@@ -1123,15 +1200,15 @@ private fun ReaderSettingToggleRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(AlKhatibColors.LightGrey.copy(alpha = 0.55f))
+            .background(SaatColors.LightGrey.copy(alpha = 0.55f))
             .padding(horizontal = 14.dp, vertical = 12.dp)
     ) {
         if (content != null) {
-            Text(title, color = AlKhatibColors.Slate900, fontWeight = FontWeight.Medium)
+            Text(title, color = SaatColors.Slate900, fontWeight = FontWeight.Medium)
             content()
         } else if (checked != null && onCheckedChange != null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, modifier = Modifier.weight(1f), color = AlKhatibColors.Slate900)
+                Text(title, modifier = Modifier.weight(1f), color = SaatColors.Slate900)
                 Switch(checked = checked, onCheckedChange = onCheckedChange)
             }
         }
@@ -1152,7 +1229,7 @@ private fun ReciterRow(
                 .clip(RoundedCornerShape(10.dp))
                 .clickable(onClick = onClick)
                 .background(
-                    if (selected) AlKhatibColors.DeepEmerald.copy(alpha = 0.1f)
+                    if (selected) SaatColors.DeepEmerald.copy(alpha = 0.1f)
                     else Color.Transparent
                 )
                 .padding(horizontal = 12.dp, vertical = 14.dp)
@@ -1160,18 +1237,18 @@ private fun ReciterRow(
             Text(
                 text = recitation.displayName,
                 modifier = Modifier.weight(1f),
-                color = AlKhatibColors.Slate900,
+                color = SaatColors.Slate900,
                 style = MaterialTheme.typography.bodyLarge
             )
             if (selected) {
-                Text("✓", color = AlKhatibColors.DeepEmerald, fontWeight = FontWeight.Bold)
+                Text("✓", color = SaatColors.DeepEmerald, fontWeight = FontWeight.Bold)
             }
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(AlKhatibColors.SoftGrey)
+                .background(SaatColors.SoftGrey)
         )
     }
 }
@@ -1185,10 +1262,10 @@ private fun hifzStatusLabel(status: HifzStatus): String = when (status) {
 }
 
 private fun hifzStatusColor(status: HifzStatus): Color = when (status) {
-    HifzStatus.NONE -> AlKhatibColors.Slate500
-    HifzStatus.LEARNING -> AlKhatibColors.IndigoAccent
-    HifzStatus.MEMORIZED -> AlKhatibColors.DeepEmerald
-    HifzStatus.NEEDS_REVIEW -> AlKhatibColors.GoldDeep
+    HifzStatus.NONE -> SaatColors.Slate500
+    HifzStatus.LEARNING -> SaatColors.IndigoAccent
+    HifzStatus.MEMORIZED -> SaatColors.DeepEmerald
+    HifzStatus.NEEDS_REVIEW -> SaatColors.GoldDeep
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1211,37 +1288,37 @@ private fun HifzPickerSheet(
                 text = stringResource(R.string.hifz_picker_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
             Text(
                 text = stringResource(R.string.hifz_picker_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
             HifzPickerOption(
                 title = stringResource(R.string.hifz_learning),
                 subtitle = stringResource(R.string.hifz_learning_desc),
                 selected = currentStatus == HifzStatus.LEARNING,
-                color = AlKhatibColors.IndigoAccent,
+                color = SaatColors.IndigoAccent,
                 onClick = { onSelect(HifzStatus.LEARNING) }
             )
             HifzPickerOption(
                 title = stringResource(R.string.hifz_memorized),
                 subtitle = stringResource(R.string.hifz_memorized_desc),
                 selected = currentStatus == HifzStatus.MEMORIZED,
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 onClick = { onSelect(HifzStatus.MEMORIZED) }
             )
             HifzPickerOption(
                 title = stringResource(R.string.hifz_review),
                 subtitle = stringResource(R.string.hifz_review_desc),
                 selected = currentStatus == HifzStatus.NEEDS_REVIEW,
-                color = AlKhatibColors.GoldDeep,
+                color = SaatColors.GoldDeep,
                 onClick = { onSelect(HifzStatus.NEEDS_REVIEW) }
             )
             if (currentStatus != HifzStatus.NONE) {
                 TextButton(onClick = { onSelect(HifzStatus.NONE) }) {
-                    Text(stringResource(R.string.hifz_clear), color = AlKhatibColors.Danger)
+                    Text(stringResource(R.string.hifz_clear), color = SaatColors.Danger)
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -1261,14 +1338,14 @@ private fun HifzPickerOption(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(if (selected) color.copy(alpha = 0.12f) else AlKhatibColors.SoftGrey.copy(alpha = 0.25f))
+            .background(if (selected) color.copy(alpha = 0.12f) else SaatColors.SoftGrey.copy(alpha = 0.25f))
             .clickable(onClick = onClick)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
-            Text(title, fontWeight = FontWeight.SemiBold, color = AlKhatibColors.Slate900)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = AlKhatibColors.Slate500)
+            Text(title, fontWeight = FontWeight.SemiBold, color = SaatColors.Slate900)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = SaatColors.Slate500)
         }
         if (selected) {
             Text("✓", color = color, fontWeight = FontWeight.Bold)
@@ -1299,7 +1376,7 @@ private fun VerseNoteSheet(
                 text = stringResource(R.string.verse_note),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
             androidx.compose.material3.OutlinedTextField(
                 value = draft,
@@ -1316,7 +1393,7 @@ private fun VerseNoteSheet(
             ) {
                 if (hasExistingNote) {
                     TextButton(onClick = onDelete) {
-                        Text(stringResource(R.string.delete_note), color = AlKhatibColors.Danger)
+                        Text(stringResource(R.string.delete_note), color = SaatColors.Danger)
                     }
                 } else {
                     Spacer(Modifier.width(1.dp))
@@ -1355,7 +1432,7 @@ private fun ReaderScrollHint(
         modifier = modifier
             .graphicsLayer { translationY = bounce },
         shape = RoundedCornerShape(20.dp),
-        color = AlKhatibColors.DeepEmerald.copy(alpha = 0.94f),
+        color = SaatColors.DeepEmerald.copy(alpha = 0.94f),
         shadowElevation = 8.dp
     ) {
         Text(
@@ -1381,7 +1458,7 @@ private fun TajweedInfoSheet(
         TajweedDetailProvider.getDetail(type, languageCode)
     }
 
-    AlKhatibPartialBottomSheet(
+    SaatPartialBottomSheet(
         onDismiss = onDismiss,
         maxHeightFraction = 0.85f
     ) {
@@ -1411,13 +1488,13 @@ private fun TajweedInfoSheet(
                     Text(
                         text = detail.title,
                         style = MaterialTheme.typography.titleLarge,
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Hukum Tajwid" else "Tajweed Rule",
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
             }
@@ -1428,14 +1505,14 @@ private fun TajweedInfoSheet(
                 text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Huruf Tajwid" else "Letters",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.Slate800
+                color = SaatColors.Slate800
             )
             Spacer(modifier = Modifier.height(8.dp))
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                color = AlKhatibColors.LightGrey,
-                border = androidx.compose.foundation.BorderStroke(1.dp, AlKhatibColors.SoftGrey)
+                color = SaatColors.LightGrey,
+                border = androidx.compose.foundation.BorderStroke(1.dp, SaatColors.SoftGrey)
             ) {
                 Box(
                     modifier = Modifier
@@ -1461,13 +1538,13 @@ private fun TajweedInfoSheet(
                 text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Pengertian" else "Definition",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.Slate800
+                color = SaatColors.Slate800
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = detail.description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate700,
+                color = SaatColors.Slate700,
                 lineHeight = 22.sp
             )
 
@@ -1477,13 +1554,13 @@ private fun TajweedInfoSheet(
                 text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Cara Membaca" else "How to Read",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.Slate800
+                color = SaatColors.Slate800
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = detail.howToRead,
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate700,
+                color = SaatColors.Slate700,
                 lineHeight = 22.sp
             )
 
@@ -1494,7 +1571,7 @@ private fun TajweedInfoSheet(
                     text = if (languageCode == "in" || languageCode == "id" || languageCode == "ms") "Contoh Bacaan" else "Examples",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Slate800
+                    color = SaatColors.Slate800
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -1504,8 +1581,8 @@ private fun TajweedInfoSheet(
                             .fillMaxWidth()
                             .padding(bottom = 8.dp),
                         shape = RoundedCornerShape(12.dp),
-                        color = AlKhatibColors.PureWhite,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, AlKhatibColors.SoftGrey)
+                        color = SaatColors.PureWhite,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, SaatColors.SoftGrey)
                     ) {
                         Column(
                             modifier = Modifier
@@ -1525,7 +1602,7 @@ private fun TajweedInfoSheet(
                                         style = MaterialTheme.typography.titleLarge.copy(
                                             fontFamily = TajweedFontFamily,
                                             fontSize = 28.sp,
-                                            color = AlKhatibColors.Slate900
+                                            color = SaatColors.Slate900
                                         )
                                     )
                                 }
@@ -1538,7 +1615,7 @@ private fun TajweedInfoSheet(
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     fontStyle = FontStyle.Italic,
                                     fontWeight = FontWeight.Medium,
-                                    color = AlKhatibColors.DeepEmerald
+                                    color = SaatColors.DeepEmerald
                                 )
                             )
 
@@ -1547,7 +1624,7 @@ private fun TajweedInfoSheet(
                             Text(
                                 text = example.explanation,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = AlKhatibColors.Slate500,
+                                color = SaatColors.Slate500,
                                 lineHeight = 16.sp
                             )
                         }
@@ -1570,7 +1647,7 @@ private fun NextSurahTransitionPage(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(AlKhatibColors.ScreenBackground),
+            .background(SaatColors.ScreenBackground),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -1581,7 +1658,7 @@ private fun NextSurahTransitionPage(
             Icon(
                 imageVector = Icons.Filled.AutoStories,
                 contentDescription = null,
-                tint = AlKhatibColors.DeepEmerald,
+                tint = SaatColors.DeepEmerald,
                 modifier = Modifier.size(64.dp)
             )
             Text(
@@ -1591,7 +1668,7 @@ private fun NextSurahTransitionPage(
                     "Selesai membaca Surah ${currentSurahName ?: ""}"
                 },
                 style = MaterialTheme.typography.titleMedium,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
             Text(
                 text = if (isJuz) {
@@ -1601,13 +1678,13 @@ private fun NextSurahTransitionPage(
                 },
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.Slate900,
+                color = SaatColors.Slate900,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(8.dp))
             Button(
                 onClick = onTriggerTransition,
-                colors = ButtonDefaults.buttonColors(containerColor = AlKhatibColors.DeepEmerald),
+                colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(

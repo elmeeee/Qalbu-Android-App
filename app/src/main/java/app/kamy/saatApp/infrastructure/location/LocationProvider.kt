@@ -37,10 +37,14 @@ class LocationProvider @Inject constructor(
         if (!hasAnyPermission()) return null
         val client = LocationServices.getFusedLocationProviderClient(context)
         repeat(4) { attempt ->
-            val location = client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null).await()
-                ?: client.lastLocation.await()
-            if (location != null) {
-                return UserLocation(location.latitude, location.longitude)
+            try {
+                val location = client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null).await()
+                    ?: client.lastLocation.await()
+                if (location != null) {
+                    return UserLocation(location.latitude, location.longitude)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
             if (attempt < 3) delay(750L)
         }

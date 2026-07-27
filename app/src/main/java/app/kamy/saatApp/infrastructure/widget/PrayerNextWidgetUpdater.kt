@@ -26,12 +26,14 @@ object PrayerNextWidgetUpdater {
     internal fun buildViews(context: Context, snapshot: PrayerWidgetSnapshot?): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.prayer_next_widget)
         if (snapshot == null) {
-            views.setTextViewText(R.id.prayer_next_city, context.getString(R.string.app_name))
-            views.setTextViewText(R.id.prayer_next_hijri, "")
+            val displayCity = app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore.from(context).displayLabel()
+                ?: context.getString(R.string.app_name)
+            views.setTextViewText(R.id.prayer_next_city, displayCity)
+            views.setTextViewText(R.id.prayer_next_hijri, context.getString(R.string.prayer_schedule))
             views.setTextViewText(R.id.prayer_next_label, context.getString(R.string.prayer_widget_next_title))
             views.setTextViewText(R.id.prayer_next_name, context.getString(R.string.prayer_widget_empty))
             views.setTextViewText(R.id.prayer_next_countdown, "--:--")
-            views.setTextViewText(R.id.prayer_next_subtitle, "")
+            views.setTextViewText(R.id.prayer_next_subtitle, context.getString(R.string.prayer_widget_empty))
         } else {
             views.setTextViewText(R.id.prayer_next_city, snapshot.cityLabel)
             views.setTextViewText(

@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.core.error.AppError
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.HadithReference
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,7 +110,7 @@ fun HadithSheet(
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(20.dp),
                                         strokeWidth = 2.dp,
-                                        color = AlKhatibColors.DeepEmerald
+                                        color = SaatColors.DeepEmerald
                                     )
                                 } else {
                                     Text(stringResource(R.string.load_more), fontWeight = FontWeight.SemiBold)
@@ -142,14 +142,14 @@ private fun HadithCard(item: HadithDisplayItem) {
                 text = item.sourceName,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.DeepEmerald,
+                color = SaatColors.DeepEmerald,
                 modifier = Modifier.weight(1f)
             )
             item.referenceLabel?.let { ref ->
                 Text(
                     text = ref,
                     style = MaterialTheme.typography.labelMedium,
-                    color = AlKhatibColors.Slate500,
+                    color = SaatColors.Slate500,
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -159,13 +159,13 @@ private fun HadithCard(item: HadithDisplayItem) {
                 text = chapter,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = AlKhatibColors.Gold
+                color = SaatColors.Gold
             )
         }
         Text(
             text = item.body,
             style = MaterialTheme.typography.bodyLarge,
-            color = AlKhatibColors.Slate900,
+            color = SaatColors.Slate900,
             lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.35f,
             modifier = Modifier.fillMaxWidth()
         )
@@ -177,13 +177,13 @@ private fun HadithCard(item: HadithDisplayItem) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
                     contentDescription = null,
-                    tint = AlKhatibColors.DeepEmerald.copy(alpha = 0.85f),
+                    tint = SaatColors.DeepEmerald.copy(alpha = 0.85f),
                     modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = line,
                     style = MaterialTheme.typography.bodySmall,
-                    color = AlKhatibColors.DeepEmerald.copy(alpha = 0.85f),
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.85f),
                     modifier = Modifier.fillMaxWidth()
                 )
             }

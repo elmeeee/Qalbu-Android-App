@@ -55,7 +55,7 @@ import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.share.VerseShareTextComposer.Companion.fullArabicForShare
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,13 +91,13 @@ fun AyahImageShareSheet(
                     Icon(
                         Icons.Filled.Image,
                         contentDescription = null,
-                        tint = AlKhatibColors.DeepEmerald
+                        tint = SaatColors.DeepEmerald
                     )
                     Text(
                         text = stringResource(R.string.share_as_image),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
@@ -159,14 +159,14 @@ fun AyahImageShareSheet(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .clip(CircleShape)
-                                    .background(Color(android.graphics.Color.parseColor(selectedTemplate.logoBackdropColor)))
+                                    .background(Color.White)
                                     .border(0.5.dp, tBorderColor, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.splash_icon_adaptive),
+                                    painter = painterResource(R.drawable.saat_app_icon),
                                     contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
+                                    modifier = Modifier.size(20.dp),
                                     tint = Color.Unspecified
                                 )
                             }
@@ -285,7 +285,7 @@ fun AyahImageShareSheet(
                                 .background(itemBgColor)
                                 .border(
                                     width = if (isSelected) 3.dp else 1.5.dp,
-                                    color = if (isSelected) AlKhatibColors.DeepEmerald else itemBorderColor,
+                                    color = if (isSelected) SaatColors.DeepEmerald else itemBorderColor,
                                     shape = CircleShape
                                 ),
                             contentAlignment = Alignment.Center
@@ -295,7 +295,7 @@ fun AyahImageShareSheet(
                                     modifier = Modifier
                                         .size(24.dp)
                                         .clip(CircleShape)
-                                        .background(AlKhatibColors.DeepEmerald),
+                                        .background(SaatColors.DeepEmerald),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -313,7 +313,7 @@ fun AyahImageShareSheet(
                             text = template.displayName,
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) AlKhatibColors.DeepEmerald else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (isSelected) SaatColors.DeepEmerald else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         )
                     }
@@ -327,7 +327,7 @@ fun AyahImageShareSheet(
                     .fillMaxWidth()
                     .padding(top = 8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AlKhatibColors.DeepEmerald,
+                    containerColor = SaatColors.DeepEmerald,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp)

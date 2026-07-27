@@ -13,41 +13,41 @@ import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
 import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
 
 @Composable
-fun AlKhatibTheme(
+fun SaatTheme(
     theme: AppThemeColor = AppThemeColor.EMERALD,
     content: @Composable () -> Unit
 ) {
-    // Synchronize AlKhatibColors state with theme
-    AlKhatibColors.applyTheme(theme)
+    // Synchronize SaatColors state with theme
+    SaatColors.applyTheme(theme)
 
     val dynamicColors = lightColorScheme(
-        primary = AlKhatibColors.DeepEmerald,
-        onPrimary = AlKhatibColors.OffWhite,
-        primaryContainer = AlKhatibColors.SageTint,
-        onPrimaryContainer = AlKhatibColors.ForestDeeper,
-        secondary = AlKhatibColors.Teal,
-        onSecondary = AlKhatibColors.OffWhite,
-        secondaryContainer = AlKhatibColors.MintWash,
-        onSecondaryContainer = AlKhatibColors.EmeraldRich,
-        tertiary = AlKhatibColors.Gold,
-        onTertiary = AlKhatibColors.OffWhite,
-        tertiaryContainer = AlKhatibColors.AmberWash,
-        onTertiaryContainer = AlKhatibColors.GoldDeep,
-        background = AlKhatibColors.OffWhite,
-        onBackground = AlKhatibColors.Slate900,
-        surface = AlKhatibColors.PureWhite,
-        onSurface = AlKhatibColors.Slate900,
-        surfaceVariant = AlKhatibColors.LightGrey,
-        onSurfaceVariant = AlKhatibColors.Slate500,
-        surfaceContainerLowest = AlKhatibColors.PureWhite,
-        surfaceContainerLow = AlKhatibColors.SageMist,
-        surfaceContainer = AlKhatibColors.PanelGreyAlt,
-        surfaceContainerHigh = AlKhatibColors.PanelGrey,
-        surfaceContainerHighest = AlKhatibColors.SoftGrey,
-        outline = AlKhatibColors.SoftGrey,
-        outlineVariant = AlKhatibColors.PanelGrey,
-        error = AlKhatibColors.Danger,
-        onError = AlKhatibColors.OffWhite
+        primary = SaatColors.DeepEmerald,
+        onPrimary = SaatColors.OffWhite,
+        primaryContainer = SaatColors.SageTint,
+        onPrimaryContainer = SaatColors.ForestDeeper,
+        secondary = SaatColors.Teal,
+        onSecondary = SaatColors.OffWhite,
+        secondaryContainer = SaatColors.MintWash,
+        onSecondaryContainer = SaatColors.EmeraldRich,
+        tertiary = SaatColors.Gold,
+        onTertiary = SaatColors.OffWhite,
+        tertiaryContainer = SaatColors.AmberWash,
+        onTertiaryContainer = SaatColors.GoldDeep,
+        background = SaatColors.OffWhite,
+        onBackground = SaatColors.Slate900,
+        surface = SaatColors.PureWhite,
+        onSurface = SaatColors.Slate900,
+        surfaceVariant = SaatColors.LightGrey,
+        onSurfaceVariant = SaatColors.Slate500,
+        surfaceContainerLowest = SaatColors.PureWhite,
+        surfaceContainerLow = SaatColors.SageMist,
+        surfaceContainer = SaatColors.PanelGreyAlt,
+        surfaceContainerHigh = SaatColors.PanelGrey,
+        surfaceContainerHighest = SaatColors.SoftGrey,
+        outline = SaatColors.SoftGrey,
+        outlineVariant = SaatColors.PanelGrey,
+        error = SaatColors.Danger,
+        onError = SaatColors.OffWhite
     )
 
     val view = LocalView.current
@@ -60,8 +60,8 @@ fun AlKhatibTheme(
 
     MaterialTheme(
         colorScheme = dynamicColors,
-        typography = AlKhatibTypography,
-        shapes = AlKhatibShapes,
+        typography = SaatTypography,
+        shapes = SaatShapes,
         content = content
     )
 }

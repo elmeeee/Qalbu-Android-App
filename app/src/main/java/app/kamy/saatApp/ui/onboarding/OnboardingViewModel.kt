@@ -13,6 +13,8 @@ import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.SavedManualLocation
+import app.kamy.saatApp.ui.permissions.canUseFullScreenIntent
+import app.kamy.saatApp.ui.permissions.openFullScreenIntentSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -111,15 +113,19 @@ class OnboardingViewModel @Inject constructor(
     fun onLocationPermissionResult(granted: Boolean) {
         if (granted) {
             locationPrefs.setMode(LocationMode.GPS)
+            nextStep()
             viewModelScope.launch {
-                val loc = locationProvider.currentLocation()
-                if (loc != null) {
-                    val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
-                    val label = geocode.cityName
-                        ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
-                    locationPrefs.saveActiveLabel(label)
+                try {
+                    val loc = locationProvider.currentLocation()
+                    if (loc != null) {
+                        val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
+                        val label = geocode.cityName
+                            ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
+                        locationPrefs.saveActiveLabel(label)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-                nextStep()
             }
         } else {
             _state.update {
@@ -135,6 +141,9 @@ class OnboardingViewModel @Inject constructor(
     fun onNotificationPermissionResult() {
         onboardingStore.markNotificationsHandled()
         DailyVerseNotificationScheduler.reschedule(appContext)
+        if (!appContext.canUseFullScreenIntent()) {
+            runCatching { appContext.openFullScreenIntentSettings() }
+        }
         nextStep()
     }
 

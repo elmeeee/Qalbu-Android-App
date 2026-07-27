@@ -42,8 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.AlKhatibColors
-import app.kamy.saatApp.design.theme.AlKhatibSpacing
+import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.util.Calendar
 
@@ -108,7 +108,7 @@ fun TodayHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = AlKhatibSpacing.screenHorizontal, vertical = 14.dp),
+                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -150,7 +150,7 @@ fun TodayHeader(
                             "$prefix${gregorianLabel.orEmpty()}"
                         }
                     }
-                    val textColor = if (targetShowHijri) AlKhatibColors.DeepEmerald else Color.Black
+                    val textColor = if (targetShowHijri) SaatColors.DeepEmerald else Color.Black
 
                     Text(
                         text = dateText,
@@ -201,12 +201,6 @@ fun TodayHeader(
                 }
             }
         }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = AlKhatibSpacing.screenHorizontal),
-            thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
-        )
     }
 }
 

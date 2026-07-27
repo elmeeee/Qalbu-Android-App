@@ -1,0 +1,227 @@
+//
+//  ChapterVersesViewModel.swift
+//  Saat
+//
+//  Created by Elmee on 25/04/2026.
+//  Copyright © 2026 Elmee. All rights reserved.
+//
+
+import Foundation
+import Observation
+
+@MainActor
+@Observable
+final class ChapterVersesViewModel {
+    static let defaultRecitationId = 6
+    private static let recitationStorageKey = "chapterReaderRecitationId"
+
+    let chapter: QuranChapter?
+    let juzNumber: Int?
+
+    var verses: [RandomAyahPayload] = []
+    var isLoading = false
+    var isLoadingMore = false
+    var isPreparingPlayAll = false
+    var isReloadingContent = false
+    var errorMessage: String?
+    var recitations: [RecitationPayload] = []
+    var selectedRecitationId: Int
+    var chapterLookup: [Int: String] = [:]
+
+    var surahDisplayTitle: String {
+        if let j = juzNumber {
+            return "Juz \(j)"
+        }
+        return chapter?.displayComplexName ?? ""
+    }
+    var reciterDisplayName: String {
+        recitations.first(where: { $0.identifiableId == selectedRecitationId })?.displayName ?? ""
+    }
+
+    private let content: QuranContentRepository
+    private let language: String
+    private var nextPage = 1
+    private var hasMorePages = true
+
+    init(chapter: QuranChapter?, juzNumber: Int?, content: QuranContentRepository) {
+        self.chapter = chapter
+        self.juzNumber = juzNumber
+        self.content = content
+        self.language = AppLanguageManager.shared.currentLanguage.rawValue
+        let saved = UserDefaults.standard.integer(forKey: Self.recitationStorageKey)
+        selectedRecitationId = saved > 0 ? saved : Self.defaultRecitationId
+    }
+
+    func loadInitial() async {
+        guard isLoading == false else { return }
+        isLoading = true
+        errorMessage = nil
+        verses = []
+        nextPage = 1
+        hasMorePages = true
+        defer { isLoading = false }
+
+        if let allChapters = try? await content.getChapters(language: language) {
+            var lookup: [Int: String] = [:]
+            for ch in allChapters {
+                lookup[ch.id] = ch.displayComplexName
+            }
+            self.chapterLookup = lookup
+        }
+
+        await fetchPage(1, append: false)
+        await loadRecitationsIfNeeded()
+    }
+
+    func loadRecitationsIfNeeded() async {
+        guard recitations.isEmpty else { return }
+        if let fetched = try? await content.getRecitations().recitations {
+            recitations = fetched
+            if recitations.contains(where: { $0.identifiableId == selectedRecitationId }) == false,
+               let first = recitations.first?.identifiableId {
+                selectedRecitationId = first
+            }
+        }
+    }
+
+    func applyContentPreferencesChange() async {
+        guard isReloadingContent == false else { return }
+        UserDefaults.standard.set(selectedRecitationId, forKey: Self.recitationStorageKey)
+        isReloadingContent = true
+        defer { isReloadingContent = false }
+
+        let targetCount = max(verses.count, 1)
+        var accumulated: [RandomAyahPayload] = []
+        var page = 1
+        var stillHasMore = true
+
+        repeat {
+            do {
+                let response: VersesByChapterResponse
+                if let j = juzNumber {
+                    response = try await content.getVersesByJuz(
+                        juzNumber: j,
+                        recitationId: selectedRecitationId,
+                        page: page,
+                        perPage: 50
+                    )
+                } else if let ch = chapter {
+                    response = try await content.getVersesByChapter(
+                        chapterNumber: ch.id,
+                        recitationId: selectedRecitationId,
+                        page: page,
+                        perPage: 50
+                    )
+                } else {
+                    return
+                }
+                accumulated.append(contentsOf: response.verses)
+                if response.pagination?.hasNextPage == true,
+                   let next = response.pagination?.nextPage {
+                    page = next
+                    stillHasMore = true
+                } else {
+                    stillHasMore = false
+                }
+            } catch {
+                if accumulated.isEmpty {
+                    errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+                }
+                return
+            }
+        } while stillHasMore && accumulated.count < targetCount
+
+        verses = accumulated
+        nextPage = page
+        hasMorePages = stillHasMore
+    }
+
+    func ensureAllVersesLoaded() async {
+        while hasMorePages {
+            await fetchPage(nextPage, append: true)
+        }
+    }
+
+    func audioQueueItems() -> [AudioQueueItem] {
+        return verses.compactMap { verse in
+            guard let url = verse.audio?.url, url.isEmpty == false else { return nil }
+            return AudioQueueItem(url: url, subtitle: ayahSubtitle(for: verse))
+        }
+    }
+
+    /// Builds a queue starting from the verse with the given `listIdentity`.
+    /// Returns `(items, startIndex)` so the caller can pass both to `playSequence`.
+    func audioQueueItems(from verseIdentity: String) -> (items: [AudioQueueItem], startIndex: Int) {
+        let allItems = audioQueueItems()
+        // Find the index of the verse in the playable-items list
+        guard let verseIndex = verses.firstIndex(where: { $0.listIdentity == verseIdentity }),
+              let url = verses[verseIndex].audio?.url else {
+            return (allItems, 0)
+        }
+        let normalizedURL = AppEndpoints.URLBuilder.absoluteVerseMediaURLString(from: url)
+        let queueStartIndex = allItems.firstIndex { item in
+            AppEndpoints.URLBuilder.absoluteVerseMediaURLString(from: item.url) == normalizedURL
+        } ?? 0
+        return (allItems, queueStartIndex)
+    }
+
+    func ayahSubtitle(for verse: RandomAyahPayload) -> String {
+        if let number = verse.verseNumber {
+            return "\(number)"
+        }
+        if let key = verse.verseKey {
+            return ShareVerseCard.humanLabel(for: key)
+        }
+        return "Ayah"
+    }
+
+    func loadMoreIfNeeded(currentVerse: RandomAyahPayload?) async {
+        guard hasMorePages, isLoadingMore == false, isLoading == false else { return }
+        guard let currentVerse else { return }
+        guard let last = verses.last, last.listIdentity == currentVerse.listIdentity else {
+            return
+        }
+        isLoadingMore = true
+        defer { isLoadingMore = false }
+        await fetchPage(nextPage, append: true)
+    }
+
+    private func fetchPage(_ page: Int, append: Bool) async {
+        do {
+            let response: VersesByChapterResponse
+            if let j = juzNumber {
+                response = try await content.getVersesByJuz(
+                    juzNumber: j,
+                    recitationId: selectedRecitationId,
+                    page: page,
+                    perPage: 50
+                )
+            } else if let ch = chapter {
+                response = try await content.getVersesByChapter(
+                    chapterNumber: ch.id,
+                    recitationId: selectedRecitationId,
+                    page: page,
+                    perPage: 50
+                )
+            } else {
+                return
+            }
+            if append {
+                verses.append(contentsOf: response.verses)
+            } else {
+                verses = response.verses
+            }
+            if response.pagination?.hasNextPage == true,
+               let next = response.pagination?.nextPage {
+                nextPage = next
+                hasMorePages = true
+            } else {
+                hasMorePages = false
+            }
+        } catch {
+            if append == false {
+                errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
+        }
+    }
+}

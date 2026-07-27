@@ -16,3 +16,4 @@ local.properties
 keystore/
 *.jks
 *.keystore
+iosApp/Config/Secrets.xcconfig

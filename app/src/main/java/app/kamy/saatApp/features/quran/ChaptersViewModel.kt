@@ -52,7 +52,11 @@ data class ChaptersUiState(
     val searchLoading: Boolean = false,
     val searchError: AppError? = null,
     val isOfflineData: Boolean = false,
-    val readChapters: Set<Int> = emptySet()
+    val readChapters: Set<Int> = emptySet(),
+    val readJuzs: Set<Int> = emptySet(),
+    val lastReadJuz: Int? = null,
+    val lastReadVerseKey: String? = null,
+    val hasBookmarks: Boolean = false
 )
 
 @HiltViewModel
@@ -103,11 +107,19 @@ class ChaptersViewModel @Inject constructor(
     }
 
     suspend fun refresh(force: Boolean = true) {
-        _state.update { it.copy(isLoading = true, error = null) }
+        if (_state.value.chapters.isEmpty()) {
+            _state.update { it.copy(isLoading = true, error = null) }
+        }
         try {
             val chapters = contentRepository.getChapters(force)
             val continueReading = runCatching { readingSessions.fetchMostRecent() }.getOrNull()
             val readChapters = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.readChapters(appContext)
+            val readJuzs = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.readJuzs(appContext)
+            val lastReadJuz = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.lastReadJuz(appContext)
+            val lastReadVerseKey = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.lastReadVerseKey(appContext)
+            val hasBookmarks = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.bookmarks(appContext).isNotEmpty() ||
+                app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.notes(appContext).isNotEmpty() ||
+                app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.hifzEntries(appContext).isNotEmpty()
             _state.update {
                 it.copy(
                     isLoading = false,
@@ -115,7 +127,11 @@ class ChaptersViewModel @Inject constructor(
                     continueReading = continueReading,
                     error = null,
                     isOfflineData = true,
-                    readChapters = readChapters
+                    readChapters = readChapters,
+                    readJuzs = readJuzs,
+                    lastReadJuz = lastReadJuz,
+                    lastReadVerseKey = lastReadVerseKey,
+                    hasBookmarks = hasBookmarks
                 )
             }
             recomputeLocalSearch()

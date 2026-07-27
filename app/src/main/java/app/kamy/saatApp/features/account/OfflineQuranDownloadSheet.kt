@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.config.LocalQuranConfig
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.infrastructure.offline.MurottalDownloadProgress
@@ -121,20 +121,20 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                 text = stringResource(R.string.offline_murottal_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = AlKhatibColors.DeepEmerald
+                color = SaatColors.DeepEmerald
             )
             Spacer(Modifier.height(4.dp))
             Text(
                 text = stringResource(R.string.offline_murottal_subtitle, overallDownloaded),
                 style = MaterialTheme.typography.bodyMedium,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
             Spacer(Modifier.height(12.dp))
 
             Text(
                 text = stringResource(R.string.offline_murottal_reciter),
                 style = MaterialTheme.typography.labelMedium,
-                color = AlKhatibColors.Slate500
+                color = SaatColors.Slate500
             )
             Spacer(Modifier.height(6.dp))
             LazyColumn(
@@ -151,7 +151,7 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                     ) {
                         Text(
                             text = recitation.displayName,
-                            color = if (selected) AlKhatibColors.DeepEmerald else AlKhatibColors.Slate800,
+                            color = if (selected) SaatColors.DeepEmerald else SaatColors.Slate800,
                             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
                         )
                     }
@@ -248,14 +248,14 @@ fun OfflineQuranDownloadSheet(onDismiss: () -> Unit) {
                             p.overallDownloaded
                         ),
                         style = MaterialTheme.typography.bodySmall,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
             }
 
             errorMessage?.let {
                 Spacer(Modifier.height(8.dp))
-                Text(text = it, color = AlKhatibColors.Danger, style = MaterialTheme.typography.bodySmall)
+                Text(text = it, color = SaatColors.Danger, style = MaterialTheme.typography.bodySmall)
             }
 
             Spacer(Modifier.height(16.dp))

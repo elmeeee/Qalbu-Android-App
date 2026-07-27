@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 
 /**
  * Renders transliteration text (Latin/Roman) in a native Compose Text.
@@ -75,7 +75,7 @@ fun TransliterationView(
             fontStyle = FontStyle.Italic,
             lineHeight = 24.sp
         ),
-        color = AlKhatibColors.Slate500,
+        color = SaatColors.Slate500,
         textAlign = textAlign,
         softWrap = true,
         modifier = contentModifier.padding(vertical = 2.dp)

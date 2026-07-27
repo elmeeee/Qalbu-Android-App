@@ -1,0 +1,316 @@
+//
+//  ReflectionView.swift
+//  Saat
+//
+//  Created by Elmee on 25/04/2026.
+//  Copyright © 2026 Elmee. All rights reserved.
+//
+
+import SwiftUI
+
+struct ReflectionView: View {
+    @Environment(\.appContainer) private var container
+    @State private var tabViewModel = ReflectionTabViewModel()
+    @State private var shareToast = ""
+    @State private var showShareToast = false
+    @State private var shareToastIsError = false
+
+    let verseState: TodayVerseState
+    var isTabSelected: Bool = false
+
+    var body: some View {
+        ZStack {
+            background
+                .ignoresSafeArea()
+
+            screenContent
+                .animation(nil, value: tabViewModel.screen)
+
+            shareToastOverlay
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .qfUserSessionDidChange)) { _ in
+            Task { @MainActor in
+                tabViewModel.sync(verseState: verseState)
+                await tabViewModel.handleSessionChange(
+                    container: container,
+                    verseState: verseState,
+                    isTabSelected: isTabSelected
+                )
+            }
+        }
+        .onChange(of: verseState.isLoggedIn) { _, loggedIn in
+            Task {
+                await tabViewModel.handleLoggedInChange(
+                    container: container,
+                    verseState: verseState,
+                    isTabSelected: isTabSelected,
+                    loggedIn: loggedIn
+                )
+            }
+        }
+        .task(id: isTabSelected) {
+            guard isTabSelected, let container else { return }
+            tabViewModel.sync(verseState: verseState)
+            await tabViewModel.openTab(container: container, verseState: verseState)
+        }
+        .onChange(of: verseState.feedNeedsRefresh) { _, needsRefresh in
+            guard needsRefresh, verseState.isLoggedIn else { return }
+            tabViewModel.feedViewModel?.showMyPostsAfterPublish()
+            verseState.didRefreshFeed()
+        }
+        .onChange(of: verseState.shouldNavigateToReflect) { _, shouldNavigate in
+            if shouldNavigate {
+                verseState.didNavigateToReflect()
+                verseState.preparedShareText = nil
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .reflectDidPost)) { _ in
+            guard verseState.isLoggedIn else { return }
+            tabViewModel.feedViewModel?.showMyPostsAfterPublish()
+        }
+        .onAppear {
+            tabViewModel.sync(verseState: verseState)
+            if let container, verseState.isLoggedIn {
+                tabViewModel.prepareFeedIfNeeded(container: container)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var screenContent: some View {
+        switch tabViewModel.screen {
+        case .signIn:
+            SignInPromptView(
+                title: AppLanguageManager.shared.localize("sign_in_to_reflect"),
+                message: AppLanguageManager.shared.localize("quran_reflect_desc"),
+                isLoading: verseState.isLoggingIn
+            ) {
+                Task { await verseState.signIn(container: container) }
+            }
+        case .bootLoading:
+            reelBootLoading
+        case .feed:
+            if let feedViewModel = tabViewModel.feedViewModel {
+                ReflectReelFeedView(
+                    viewModel: feedViewModel,
+                    currentUserId: verseState.userId
+                )
+            } else if tabViewModel.canShowReflectFeed, let container {
+                reelBootLoading
+                    .task { tabViewModel.prepareFeedIfNeeded(container: container) }
+            } else {
+                reelBootLoading
+            }
+        case .sessionLoading:
+            sessionResolvingPlaceholder
+        }
+    }
+
+    @ViewBuilder
+    private var background: some View {
+        switch tabViewModel.screen {
+        case .feed, .bootLoading:
+            reflectReelGradient
+        case .signIn, .sessionLoading:
+            Color.Token.offWhite
+        }
+    }
+
+    private var reflectReelGradient: some View {
+        LinearGradient(
+            colors: [
+                SaatTokens.Colors.deepEmerald,
+                SaatTokens.Colors.tealDark,
+                SaatTokens.Colors.screenBackground
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
+    private var sessionResolvingPlaceholder: some View {
+        VStack(spacing: 16) {
+            Spacer(minLength: 24)
+            ProgressView()
+                .tint(Color.Token.deepEmerald)
+                .scaleEffect(1.1)
+            Text("Loading…")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 24)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var reelBootLoading: some View {
+        ZStack {
+            reflectReelGradient
+                .ignoresSafeArea()
+            ProgressView()
+                .tint(.white)
+                .scaleEffect(1.1)
+        }
+    }
+
+    @ViewBuilder
+    private var shareToastOverlay: some View {
+        if showShareToast {
+            HStack(spacing: 8) {
+                Image(systemName: shareToastIsError ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                Text(shareToast)
+                    .font(.subheadline.bold())
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 11)
+            .background(.ultraThinMaterial)
+            .background(shareToastIsError ? Color.red.opacity(0.3) : Color.Token.deepEmerald.opacity(0.3))
+            .foregroundColor(.white)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(.white.opacity(0.15), lineWidth: 0.5))
+            .shadow(color: Color.black.opacity(0.25), radius: 6, y: 2)
+            .padding(.top, 56)
+            .frame(maxHeight: .infinity, alignment: .top)
+            .transition(.move(edge: .top).combined(with: .opacity))
+            .zIndex(1)
+        }
+    }
+}
+
+struct ShareReflectionSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let verseState: TodayVerseState
+    let vm: ReflectionViewModel
+    let onComplete: (String, Bool) -> Void
+
+    @State private var text = ""
+    @State private var verseKey = ""
+    @State private var verseLabel = ""
+    @State private var isPosting = false
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.Token.offWhite.ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 16) {
+                        verseBanner
+                        editorCard
+
+                        if let e = vm.shareError {
+                            Text(e)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+
+                        Button {
+                            Task { await post() }
+                        } label: {
+                            HStack(spacing: 8) {
+                                if isPosting {
+                                    ProgressView().tint(.white)
+                                }
+                                Text(AppLanguageManager.shared.localize("post_reflection"))
+                                    .font(.headline)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color.Token.deepEmerald, Color.Token.tealDark],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                            )
+                            .foregroundColor(.white)
+                        }
+                        .buttonStyle(PillPressStyle())
+                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).count < 6 || isPosting)
+                        .opacity(text.trimmingCharacters(in: .whitespacesAndNewlines).count < 6 ? 0.5 : 1.0)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 32)
+                }
+            }
+            .navigationTitle(AppLanguageManager.shared.localize("reflect_on_verse"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+            .toolbarBackground(Color.Token.pureWhite, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+        }
+        .onAppear {
+            if let preparedText = verseState.preparedShareText,
+               let preparedKey = verseState.activeVerseKey {
+                text = preparedText
+                verseKey = preparedKey
+                verseLabel = verseState.activeVerseLabel ?? preparedKey
+            } else if let key = verseState.activeVerseKey,
+                      let label = verseState.activeVerseLabel {
+                verseKey = key
+                verseLabel = label
+            }
+            vm.prepareShareReflection(body: text, verseKey: verseKey)
+        }
+    }
+
+    private var verseBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "book.closed.fill")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Color.Token.gold)
+                Text(verseLabel.isEmpty ? "Quran verse" : verseLabel)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(Color.Token.deepEmerald)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.Token.deepEmerald.opacity(0.15))
+            )
+        }
+    }
+
+    private var editorCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(AppLanguageManager.shared.localize("your_reflection"))
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.secondary)
+
+            TextEditor(text: $text)
+                .frame(minHeight: 160)
+                .padding(10)
+                .scrollContentBackground(.hidden)
+                .background(Color.Token.pureWhite)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.Token.deepEmerald.opacity(0.15), lineWidth: 1)
+                )
+        }
+    }
+
+    private func post() async {
+        isPosting = true
+        defer { isPosting = false }
+        guard let authorId = verseState.userId, authorId.isEmpty == false else {
+            onComplete("Please sign in to publish a reflection.", true)
+            dismiss()
+            return
+        }
+        let message = await vm.postShareReflection(authorId: authorId)
+        let isError = vm.shareError != nil
+        onComplete(message, isError)
+        dismiss()
+    }
+}

@@ -10,6 +10,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
+
 object AppNotificationCopy {
 
     private fun localized(context: Context): Context =
@@ -17,8 +19,10 @@ object AppNotificationCopy {
 
     fun prayerTitle(context: Context, prayerName: String, fireAtMillis: Long): String {
         val ctx = localized(context)
-        val time = SimpleDateFormat("HH.mm", Locale.getDefault()).format(Date(fireAtMillis))
-        return ctx.getString(R.string.prayer_notif_title, prayerDisplayName(ctx, prayerName), time)
+        val locationLabel = LocationPreferencesStore.from(ctx).displayLabel()
+        val prayerDisp = prayerDisplayName(ctx, prayerName)
+        val locationOrTime = locationLabel ?: SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(fireAtMillis))
+        return ctx.getString(R.string.prayer_notif_title, prayerDisp, locationOrTime)
     }
 
     fun prayerBody(context: Context, prayerName: String): String {

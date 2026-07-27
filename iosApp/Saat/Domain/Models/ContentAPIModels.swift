@@ -1,0 +1,628 @@
+//
+//  ContentAPIModels.swift
+//  Saat
+//
+//  Created by Elmee on 25/04/2026.
+//  Copyright © 2026 Elmee. All rights reserved.
+//
+
+import Foundation
+internal import UIKit
+
+struct RandomAyahResponse: Decodable, Sendable {
+    let verse: RandomAyahPayload?
+}
+
+struct SingleVerseResponse: Decodable, Sendable {
+    let verse: RandomAyahPayload?
+}
+
+struct RandomAyahPayload: Decodable, Sendable {
+    let id: Int?
+    let verseNumber: Int?
+    let verseKey: String?
+    let textIndopak: String?
+    let textImlaeiSimple: String?
+    let textImlaei: String?
+    let textUthmani: String?
+    let textUthmaniSimple: String?
+    let textUthmaniTajweed: String?
+    let textQpcHafs: String?
+    let textQpcNastaleeqHafs: String?
+    let textQpcNastaleeq: String?
+    let textIndopakNastaleeq: String?
+    let pageNumber: Int?
+    let juzNumber: Int?
+    let audio: AudioPayload?
+    let translations: [InlineTranslation]?
+    let transliteration: String?
+    
+    var displayText: String? {
+        let rawSource = textUthmaniTajweed ?? textUthmani
+        guard let raw = rawSource?.trimmingCharacters(in: .whitespacesAndNewlines),
+           raw.isEmpty == false else {
+            return nil
+        }
+        let text = raw.containsHTMLMarkup ? raw.strippingHTMLToPlainText() : raw
+        return text.normalizedForQuranRenderingPreservingResponse()
+    }
+
+    func tajweedWebHTMLFragment() -> String {
+        let markerHtml = QuranAyahEndBadge.html(forAyahNumber: effectiveAyahNumber)
+        let spacer = markerHtml.isEmpty ? "" : " "
+
+        let raw: String
+        if let tajweedText = textUthmaniTajweed?.trimmingCharacters(in: .whitespacesAndNewlines), !tajweedText.isEmpty {
+            raw = tajweedText
+        } else if let plainText = textUthmani?.trimmingCharacters(in: .whitespacesAndNewlines), !plainText.isEmpty {
+            raw = TajweedEngine.applyTajweedToHTML(plainText)
+        } else {
+            return "<div dir=\"rtl\" lang=\"ar\"></div>"
+        }
+
+        var body = raw
+        if raw.containsAyahEndSpanMarkup {
+            let stripped = raw.strippingHTMLSpansMatchingClassEnd
+            if stripped.isEmpty == false {
+                body = stripped
+            }
+        }
+        return "<div dir=\"rtl\" lang=\"ar\">\(body)\(spacer)\(markerHtml)</div>"
+    }
+
+    func plainArabicWebHTMLFragment() -> String {
+        let markerHtml = QuranAyahEndBadge.html(forAyahNumber: effectiveAyahNumber)
+        let spacer = markerHtml.isEmpty ? "" : " "
+
+        let rawSource = textUthmaniTajweed ?? textUthmani
+        guard let raw = rawSource?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty else {
+            return "<div dir=\"rtl\" lang=\"ar\"></div>"
+        }
+        // Strip all HTML tags to get plain Uthmani text
+        let plain = raw.strippingHTMLToPlainText()
+        return "<div dir=\"rtl\" lang=\"ar\">\(plain)\(spacer)\(markerHtml)</div>"
+    }
+
+    var chapterNumber: Int? {
+        guard let vk = verseKey?.split(separator: ":").first else { return nil }
+        return Int(String(vk))
+    }
+
+    var resolvedVerseNumber: Int? {
+        if let n = verseNumber, n > 0 { return n }
+        guard let vk = verseKey?.split(separator: ":").last else { return nil }
+        return Int(String(vk)).flatMap { $0 > 0 ? $0 : nil }
+    }
+
+    private var effectiveAyahNumber: Int? {
+        resolvedVerseNumber
+    }
+
+    var listIdentity: String {
+        if let verseKey, verseKey.isEmpty == false { return verseKey }
+        if let id { return "id-\(id)" }
+        if let verseNumber { return "ayah-\(verseNumber)" }
+        return "verse-\(verseNumber ?? 0)"
+    }
+}
+
+private enum QuranAyahEndBadge {
+    
+    static let rosette = "\u{06DD}"
+    static func easternArabicIndicDigits(_ value: Int) -> String {
+        let table = ["\u{0660}", "\u{0661}", "\u{0662}", "\u{0663}", "\u{0664}", "\u{0665}", "\u{0666}", "\u{0667}", "\u{0668}", "\u{0669}"]
+        guard value > 0 else { return table[0] }
+        var n = value
+        var chars: [String] = []
+        while n > 0 {
+            chars.append(table[n % 10])
+            n /= 10
+        }
+        return chars.reversed().joined()
+    }
+
+    static func html(forAyahNumber n: Int?) -> String {
+        guard let n, n > 0 else { return "" }
+        let digits = easternArabicIndicDigits(n)
+        return """
+        <span lang="ar" dir="rtl" class="ayah-end-symbol" aria-label="Ayah \(n)">
+            <span class="ayah-end-rosette" aria-hidden="true">\(rosette)</span><span class="ayah-end-number">\(digits)</span>
+        </span>
+        """
+    }
+
+    static func appendNativeMarker(to arabic: String, ayahNumber: Int?) -> String {
+        guard let n = ayahNumber, n > 0 else { return arabic }
+        return "\(arabic) \(rosette)\u{200C}\(easternArabicIndicDigits(n))"
+    }
+}
+
+private extension String {
+    var strippingHTMLSpansMatchingClassEnd: String {
+        let pattern = #"<span\b[^>]*\bclass\s*=\s*['"]?\s*end\s*['"]?[^>]*>[\s\S]*?</span>"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+            return self
+        }
+        let range = NSRange(startIndex..., in: self)
+        return regex.stringByReplacingMatches(in: self, options: [], range: range, withTemplate: "").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    var containsHTMLMarkup: Bool {
+        range(of: #"<[a-zA-Z][^>]*>"#, options: .regularExpression) != nil
+    }
+
+    var containsAyahEndSpanMarkup: Bool {
+        if localizedCaseInsensitiveContains("class=\"end\"") { return true }
+        if localizedCaseInsensitiveContains("class='end'") { return true }
+        return range(of: #"class\s*=\s*['"]?\s*end\b"#, options: [.regularExpression, .caseInsensitive]) != nil
+    }
+
+    var htmlEscapedForWebBody: String {
+        var out = ""
+        out.reserveCapacity(count)
+        for scalar in unicodeScalars {
+            switch scalar {
+            case "&": out += "&amp;"
+            case "<": out += "&lt;"
+            case ">": out += "&gt;"
+            default: out.unicodeScalars.append(scalar)
+            }
+        }
+        return out
+    }
+
+    func normalizedForQuranRenderingPreservingResponse() -> String {
+        precomposedStringWithCanonicalMapping
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+    }
+}
+
+extension String {
+    func strippingHTMLToPlainText() -> String {
+        guard containsHTMLMarkup else { return self }
+        var result = self
+        
+        // 1. Remove all HTML tags: <[^>]+>
+        if let regex = try? NSRegularExpression(pattern: "<[^>]+>", options: []) {
+            let range = NSRange(result.startIndex..., in: result)
+            result = regex.stringByReplacingMatches(in: result, options: [], range: range, withTemplate: "")
+        }
+        
+        // 2. Decode HTML Entities
+        result = result.decodingHTMLEntities()
+        
+        return result
+    }
+    
+    func decodingHTMLEntities() -> String {
+        var result = self
+        
+        // Map common HTML entities
+        let entities = [
+            "&quot;": "\"",
+            "&amp;": "&",
+            "&apos;": "'",
+            "&#39;": "'",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&nbsp;": " ",
+            "&#160;": " "
+        ]
+        
+        for (entity, replacement) in entities {
+            result = result.replacingOccurrences(of: entity, with: replacement)
+        }
+        
+        // Match numeric character references: &#(\d+);
+        if let regex = try? NSRegularExpression(pattern: "&#(\\d+);", options: []) {
+            let matches = regex.matches(in: result, options: [], range: NSRange(result.startIndex..., in: result))
+            for match in matches.reversed() {
+                if let charRange = Range(match.range(at: 1), in: result),
+                   let code = Int(result[charRange]),
+                   let unicodeScalar = UnicodeScalar(code),
+                   let fullRange = Range(match.range, in: result) {
+                    result.replaceSubrange(fullRange, with: String(unicodeScalar))
+                }
+            }
+        }
+        
+        // Match hexadecimal character references: &#[xX]([0-9a-fA-F]+);
+        if let regex = try? NSRegularExpression(pattern: "&#[xX]([0-9a-fA-F]+);", options: []) {
+            let matches = regex.matches(in: result, options: [], range: NSRange(result.startIndex..., in: result))
+            for match in matches.reversed() {
+                if let charRange = Range(match.range(at: 1), in: result),
+                   let code = Int(result[charRange], radix: 16),
+                   let unicodeScalar = UnicodeScalar(code),
+                   let fullRange = Range(match.range, in: result) {
+                    result.replaceSubrange(fullRange, with: String(unicodeScalar))
+                }
+            }
+        }
+        
+        return result
+    }
+
+    func htmlToMarkdown() -> String {
+        var text = self
+        text = text.replacingOccurrences(of: "<i>", with: "*", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "</i>", with: "*", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "<em>", with: "*", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "</em>", with: "*", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "<b>", with: "**", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "</b>", with: "**", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "<strong>", with: "**", options: .caseInsensitive)
+        text = text.replacingOccurrences(of: "</strong>", with: "**", options: .caseInsensitive)
+        return text.strippingHTMLToPlainText()
+    }
+}
+
+struct InlineTranslation: Decodable, Sendable {
+    let id: Int?
+    let resourceId: Int?
+    let text: String?
+    let resourceName: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, text
+        case resourceId
+        case resourceName
+    }
+}
+
+struct AudioPayload: Decodable, Sendable {
+    let url: String?
+}
+
+struct TafsirResponse: Decodable, Sendable {
+    let tafsir: TafsirPayload?
+}
+
+struct TafsirPayload: Decodable, Sendable {
+    let id: Int?
+    let text: String?
+    let resourceId: Int?
+    let resourceName: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case id, text
+        case resourceId
+        case resourceName
+    }
+
+    var textStrippingHTML: String? {
+        return text?.strippingHTMLToPlainText()
+    }
+}
+
+struct HadithsByAyahResponse: Codable, Sendable {
+    let hadiths: [HadithReference]?
+    let page: Int?
+    let limit: Int?
+    let hasMore: Bool?
+    let language: String?
+    let direction: String?
+}
+
+struct HadithReference: Codable, Sendable {
+    let urn: Int?
+    let collection: String?
+    let bookNumber: String?
+    let chapterId: String?
+    let hadithNumber: String?
+    let name: String?
+    let hadith: [HadithText]?
+}
+
+struct HadithText: Codable, Sendable {
+    let lang: String?
+    let chapterNumber: String?
+    let chapterTitle: String?
+    let body: String?
+    let urn: Int?
+    let grades: [HadithGrade]?
+}
+
+struct HadithGrade: Codable, Sendable {
+    let gradedBy: String?
+    let grade: String?
+}
+
+struct RecitationsResponse: Decodable, Sendable {
+    let recitations: [RecitationPayload]?
+}
+
+struct RecitationPayload: Decodable, Sendable {
+    let id: Int?
+    let reciterName: String?
+    let translatedName: RecitationTranslatedName?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case reciterName
+        case translatedName
+    }
+
+    var identifiableId: Int { id ?? 0 }
+
+    var displayName: String {
+        return translatedName?.name ?? reciterName ?? "Reciter \(identifiableId)"
+    }
+}
+
+struct RecitationTranslatedName: Decodable, Sendable {
+    let name: String?
+}
+
+struct ChaptersResponse: Decodable, Sendable {
+    let chapters: [QuranChapter]
+
+    enum CodingKeys: String, CodingKey {
+        case chapters
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        chapters = (try? c.decode([QuranChapter].self, forKey: .chapters)) ?? []
+    }
+}
+
+struct QuranChapter: Decodable, Sendable, Identifiable, Hashable {
+    let id: Int
+    let revelationPlace: String?
+    let revelationOrder: Int?
+    let bismillahPre: Bool?
+    let pages: [Int]?
+    let nameSimple: String?
+    let nameComplex: String?
+    let nameArabic: String?
+    let versesCount: Int?
+    let translatedName: ChapterTranslatedName?
+
+    init(
+        id: Int,
+        revelationPlace: String?,
+        revelationOrder: Int? = nil,
+        bismillahPre: Bool? = nil,
+        pages: [Int]?,
+        nameSimple: String?,
+        nameComplex: String?,
+        nameArabic: String?,
+        versesCount: Int?,
+        translatedName: ChapterTranslatedName?
+    ) {
+        self.id = id
+        self.revelationPlace = revelationPlace
+        self.revelationOrder = revelationOrder
+        self.bismillahPre = bismillahPre
+        self.pages = pages
+        self.nameSimple = nameSimple
+        self.nameComplex = nameComplex
+        self.nameArabic = nameArabic
+        self.versesCount = versesCount
+        self.translatedName = translatedName
+    }
+
+    var displayComplexName: String {
+        if let nameComplex, nameComplex.isEmpty == false { return nameComplex }
+        if let nameSimple, nameSimple.isEmpty == false { return nameSimple }
+        return "Chapter \(id)"
+    }
+
+    var displayTranslatedName: String {
+        translatedName?.name ?? ""
+    }
+
+    var displayTitle: String {
+        let translated = displayTranslatedName
+        if translated.isEmpty == false { return translated }
+        return displayComplexName
+    }
+
+    var versesCountLabel: String? {
+        guard let versesCount else { return nil }
+        return versesCount == 1 ? "1 ayah" : "\(versesCount) ayahs"
+    }
+
+    var revelationLabel: String {
+        guard let raw = revelationPlace?.trimmingCharacters(in: .whitespacesAndNewlines),
+              raw.isEmpty == false else {
+            return ""
+        }
+        switch raw.lowercased() {
+        case "makkah", "mecca":
+            return "Makkah"
+        case "madinah", "medina":
+            return "Madinah"
+        default:
+            return raw.capitalized
+        }
+    }
+
+    var isMeccan: Bool {
+        switch revelationPlace?.lowercased() {
+        case "makkah", "mecca": true
+        default: false
+        }
+    }
+}
+
+struct ChapterTranslatedName: Decodable, Sendable, Hashable {
+    let languageName: String?
+    let name: String?
+    
+    init(languageName: String?, name: String?) {
+        self.languageName = languageName
+        self.name = name
+    }
+}
+
+struct VersesByChapterResponse: Decodable, Sendable {
+    let verses: [RandomAyahPayload]
+    let pagination: ContentPagination?
+
+    init(verses: [RandomAyahPayload], pagination: ContentPagination? = nil) {
+        self.verses = verses
+        self.pagination = pagination
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case verses, pagination
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        verses = (try? c.decode([RandomAyahPayload].self, forKey: .verses)) ?? []
+        pagination = try? c.decode(ContentPagination.self, forKey: .pagination)
+    }
+}
+
+struct ContentPagination: Decodable, Sendable {
+    let perPage: Int?
+    let currentPage: Int?
+    let nextPage: Int?
+    let totalPages: Int?
+    let totalRecords: Int?
+
+    init(
+        perPage: Int?,
+        currentPage: Int?,
+        nextPage: Int?,
+        totalPages: Int?,
+        totalRecords: Int?
+    ) {
+        self.perPage = perPage
+        self.currentPage = currentPage
+        self.nextPage = nextPage
+        self.totalPages = totalPages
+        self.totalRecords = totalRecords
+    }
+
+
+    var hasNextPage: Bool {
+        guard let nextPage, let currentPage else { return false }
+        return nextPage > currentPage
+    }
+}
+
+struct QFTranslation: Decodable, Identifiable, Hashable, Sendable {
+    let id: Int
+    let name: String
+    let authorName: String
+    let slug: String?
+    let languageName: String
+    let translatedName: TranslatedName?
+
+    struct TranslatedName: Decodable, Hashable, Sendable {
+        let name: String
+        let languageName: String
+    }
+
+    init(
+        id: Int,
+        name: String,
+        authorName: String,
+        slug: String?,
+        languageName: String,
+        translatedName: TranslatedName?
+    ) {
+        self.id = id
+        self.name = name
+        self.authorName = authorName
+        self.slug = slug
+        self.languageName = languageName
+        self.translatedName = translatedName
+    }
+}
+
+struct TranslationsResponse: Decodable, Sendable {
+    let translations: [QFTranslation]
+}
+
+struct QuranJuz: Decodable, Sendable, Identifiable, Hashable {
+    let id: Int
+    let juzNumber: Int
+    let verseMapping: [String: String]?
+    let firstVerseId: Int?
+    let lastVerseId: Int?
+    let versesCount: Int?
+    
+    init(
+        id: Int,
+        juzNumber: Int,
+        verseMapping: [String: String]?,
+        firstVerseId: Int? = nil,
+        lastVerseId: Int? = nil,
+        versesCount: Int? = nil
+    ) {
+        self.id = id
+        self.juzNumber = juzNumber
+        self.verseMapping = verseMapping
+        self.firstVerseId = firstVerseId
+        self.lastVerseId = lastVerseId
+        self.versesCount = versesCount
+    }
+
+    var displayJuzNumber: Int { juzNumber }
+
+    func startChapterAndAyah() -> (Int, Int)? {
+        guard let verseMapping, !verseMapping.isEmpty else { return nil }
+        let chapters = verseMapping.keys.compactMap { Int($0) }
+        guard let minChapter = chapters.min() else { return nil }
+        guard let range = verseMapping[String(minChapter)] else { return nil }
+        let parts = range.split(separator: "-")
+        let startAyahStr = parts.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let startAyah = Int(startAyahStr) ?? 1
+        return (minChapter, startAyah)
+    }
+
+    func firstChapterNumber() -> Int? {
+        guard let verseMapping else { return nil }
+        return verseMapping.keys.compactMap { Int($0) }.min()
+    }
+}
+
+struct PagesLookupResponse: Decodable, Sendable {
+    let lookupRange: LookupRange?
+    let pages: [String: PageInfo]?
+    let totalPage: Int?
+    
+    init(
+        lookupRange: LookupRange? = nil,
+        pages: [String: PageInfo]? = nil,
+        totalPage: Int? = nil
+    ) {
+        self.lookupRange = lookupRange
+        self.pages = pages
+        self.totalPage = totalPage
+    }
+}
+
+struct LookupRange: Decodable, Sendable {
+    let from: String
+    let to: String
+    
+    init(from: String, to: String) {
+        self.from = from
+        self.to = to
+    }
+}
+
+struct PageInfo: Decodable, Sendable {
+    let from: String
+    let to: String
+    let firstVerseKey: String?
+    let lastVerseKey: String?
+    
+    init(
+        from: String,
+        to: String,
+        firstVerseKey: String? = nil,
+        lastVerseKey: String? = nil
+    ) {
+        self.from = from
+        self.to = to
+        self.firstVerseKey = firstVerseKey
+        self.lastVerseKey = lastVerseKey
+    }
+}

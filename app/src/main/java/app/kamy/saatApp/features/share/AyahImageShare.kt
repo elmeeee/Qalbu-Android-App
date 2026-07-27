@@ -185,16 +185,16 @@ object AyahImageShare {
 
         // Draw circular shield under App Icon to make it pop
         val logoBackdropPaint = Paint().apply {
-            color = Color.parseColor(template.logoBackdropColor)
+            color = Color.WHITE
             style = Paint.Style.FILL
             isAntiAlias = true
         }
-        val iconSize = 96
+        val iconSize = 40
         val iconX = (width - iconSize) / 2
         val iconY = 100
         val circleCenterX = (width / 2).toFloat()
         val circleCenterY = (iconY + iconSize / 2).toFloat()
-        val circleRadius = (iconSize / 2 + 16).toFloat()
+        val circleRadius = (iconSize / 2 + 8).toFloat()
         canvas.drawCircle(circleCenterX, circleCenterY, circleRadius, logoBackdropPaint)
 
         // Draw elegant thin ring around the shield
@@ -207,7 +207,7 @@ object AyahImageShare {
         canvas.drawCircle(circleCenterX, circleCenterY, circleRadius, ringPaint)
 
         // Draw App Icon
-        val iconDrawable = context.resources.getDrawable(R.drawable.splash_icon_adaptive, context.theme).mutate()
+        val iconDrawable = context.resources.getDrawable(R.drawable.saat_app_icon, context.theme).mutate()
         iconDrawable.setBounds(iconX, iconY, iconX + iconSize, iconY + iconSize)
         iconDrawable.draw(canvas)
 

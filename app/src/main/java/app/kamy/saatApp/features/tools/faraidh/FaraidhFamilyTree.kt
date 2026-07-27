@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import app.kamy.saatApp.design.theme.AlKhatibColors
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.faraidh.SilsilahNode
 import java.text.NumberFormat
 
@@ -111,7 +111,7 @@ private fun TreeLevelRow(
 
 @Composable
 private fun VerticalConnector() {
-    val color = AlKhatibColors.Teal.copy(alpha = 0.4f)
+    val color = SaatColors.Teal.copy(alpha = 0.4f)
     Canvas(
         modifier = Modifier
             .width(16.dp)
@@ -132,19 +132,19 @@ private fun TreeNodeCard(
     compact: Boolean = false
 ) {
     val border = when {
-        isDeceased -> AlKhatibColors.Gold
-        node.blocked -> AlKhatibColors.Danger.copy(alpha = 0.5f)
-        node.inherits -> AlKhatibColors.Teal.copy(alpha = 0.6f)
-        else -> AlKhatibColors.SoftGrey
+        isDeceased -> SaatColors.Gold
+        node.blocked -> SaatColors.Danger.copy(alpha = 0.5f)
+        node.inherits -> SaatColors.Teal.copy(alpha = 0.6f)
+        else -> SaatColors.SoftGrey
     }
     val bg = when {
-        isDeceased -> AlKhatibColors.DeepEmerald
-        node.blocked -> AlKhatibColors.LightGrey
-        node.inherits -> AlKhatibColors.PrayerMint
-        else -> AlKhatibColors.PureWhite
+        isDeceased -> SaatColors.DeepEmerald
+        node.blocked -> SaatColors.LightGrey
+        node.inherits -> SaatColors.PrayerMint
+        else -> SaatColors.PureWhite
     }
-    val titleColor = if (isDeceased) Color.White else AlKhatibColors.Slate900
-    val subColor = if (isDeceased) Color.White.copy(alpha = 0.85f) else AlKhatibColors.Slate500
+    val titleColor = if (isDeceased) Color.White else SaatColors.Slate900
+    val subColor = if (isDeceased) Color.White.copy(alpha = 0.85f) else SaatColors.Slate500
 
     Surface(
         modifier = Modifier.width(if (isDeceased) 160.dp else if (compact) 120.dp else 140.dp),
@@ -159,14 +159,14 @@ private fun TreeNodeCard(
         ) {
             if (!isDeceased) {
                 val capsuleBg = when {
-                    node.blocked -> AlKhatibColors.Danger.copy(alpha = 0.1f)
-                    node.inherits -> AlKhatibColors.Teal.copy(alpha = 0.1f)
-                    else -> AlKhatibColors.SoftGrey.copy(alpha = 0.5f)
+                    node.blocked -> SaatColors.Danger.copy(alpha = 0.1f)
+                    node.inherits -> SaatColors.Teal.copy(alpha = 0.1f)
+                    else -> SaatColors.SoftGrey.copy(alpha = 0.5f)
                 }
                 val capsuleFg = when {
-                    node.blocked -> AlKhatibColors.Danger
-                    node.inherits -> AlKhatibColors.Teal
-                    else -> AlKhatibColors.Slate500
+                    node.blocked -> SaatColors.Danger
+                    node.inherits -> SaatColors.Teal
+                    else -> SaatColors.Slate500
                 }
                 Surface(
                     shape = RoundedCornerShape(6.dp),
@@ -187,7 +187,7 @@ private fun TreeNodeCard(
             } else {
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = AlKhatibColors.Gold.copy(alpha = 0.2f),
+                    color = SaatColors.Gold.copy(alpha = 0.2f),
                     modifier = Modifier.padding(bottom = 6.dp)
                 ) {
                     Text(
@@ -195,7 +195,7 @@ private fun TreeNodeCard(
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.GoldBright,
+                        color = SaatColors.GoldBright,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
@@ -217,7 +217,7 @@ private fun TreeNodeCard(
                     text = node.shareFraction,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
-                    color = AlKhatibColors.Teal,
+                    color = SaatColors.Teal,
                     textAlign = TextAlign.Center
                 )
                 node.sharePercentage?.let { pct ->
@@ -225,7 +225,7 @@ private fun TreeNodeCard(
                         text = pct,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = AlKhatibColors.Slate500
+                        color = SaatColors.Slate500
                     )
                 }
                 node.shareAmount?.let { amt ->
@@ -235,7 +235,7 @@ private fun TreeNodeCard(
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
-                        color = AlKhatibColors.DeepEmerald,
+                        color = SaatColors.DeepEmerald,
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -247,14 +247,14 @@ private fun TreeNodeCard(
                     text = "Dihijab",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
-                    color = AlKhatibColors.Danger
+                    color = SaatColors.Danger
                 )
             } else if (!isDeceased) {
                 Spacer(Modifier.height(6.dp))
                 Text(
                     text = "Non-waris",
                     style = MaterialTheme.typography.labelSmall,
-                    color = AlKhatibColors.Slate500
+                    color = SaatColors.Slate500
                 )
             }
         }

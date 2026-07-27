@@ -34,11 +34,37 @@ class RecitationPlaybackService : MediaSessionService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val player = runCatching { playbackEngine.player }.getOrNull()
+        val isPlaying = player?.playWhenReady == true || player?.isPlaying == true
+
+        // On Android 15+, starting restricted foreground services from BOOT_COMPLETED
+        // or background system restart (intent == null when idle) causes a crash.
+        if (intent == null && !isPlaying) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         // startForegroundService() requires startForeground() within ~5s. Media3 updates this
         // notification once playback metadata is available; until then, show a placeholder.
-        startForeground(NOTIFICATION_ID, buildPlaceholderNotification())
-        return super.onStartCommand(intent, flags, startId)
+        val fgStarted = runCatching {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    buildPlaceholderNotification(),
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, buildPlaceholderNotification())
+            }
+        }.isSuccess
+        if (!fgStarted && !isPlaying) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        super.onStartCommand(intent, flags, startId)
+        return START_NOT_STICKY
     }
+
 
     @OptIn(UnstableApi::class)
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession =
