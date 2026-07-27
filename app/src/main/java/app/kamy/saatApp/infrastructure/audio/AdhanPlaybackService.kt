@@ -75,7 +75,13 @@ class AdhanPlaybackService : Service() {
                 val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
                 val rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0)
                 NotificationChannels.ensureAll(this)
-                startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body, prayerName))
+                val fgSuccess = runCatching {
+                    startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body, prayerName))
+                }.isSuccess
+                if (!fgSuccess) {
+                    stopSelf()
+                    return START_NOT_STICKY
+                }
                 acquireWakeLock()
                 startAdhan(rawRes, title, body)
                 runCatching {
@@ -88,6 +94,10 @@ class AdhanPlaybackService : Service() {
                         )
                     )
                 }
+            }
+            else -> {
+                stopSelf()
+                return START_NOT_STICKY
             }
         }
         return START_NOT_STICKY

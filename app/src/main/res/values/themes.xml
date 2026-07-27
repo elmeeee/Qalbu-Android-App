@@ -4,9 +4,9 @@
         Compose owns the runtime theming via SaatTheme.
     -->
     <style name="Theme.Saat" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@color/al_khatib_screen_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:navigationBarColor">@color/al_khatib_screen_background</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowBackground">@color/al_khatib_screen_background</item>
     </style>
 

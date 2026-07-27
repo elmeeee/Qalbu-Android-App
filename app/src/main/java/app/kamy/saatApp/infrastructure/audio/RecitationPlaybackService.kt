@@ -46,8 +46,12 @@ class RecitationPlaybackService : MediaSessionService() {
 
         // startForegroundService() requires startForeground() within ~5s. Media3 updates this
         // notification once playback metadata is available; until then, show a placeholder.
-        runCatching {
+        val fgStarted = runCatching {
             startForeground(NOTIFICATION_ID, buildPlaceholderNotification())
+        }.isSuccess
+        if (!fgStarted && !isPlaying) {
+            stopSelf()
+            return START_NOT_STICKY
         }
         super.onStartCommand(intent, flags, startId)
         return START_NOT_STICKY
