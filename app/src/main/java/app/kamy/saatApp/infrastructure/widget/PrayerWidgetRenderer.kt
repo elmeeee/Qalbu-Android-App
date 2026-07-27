@@ -33,12 +33,16 @@ data class PrayerWidgetSnapshot(
 
 object PrayerWidgetRenderer {
 
-    fun snapshot(context: Context): PrayerWidgetSnapshot? {
-        val bundle = PrayerScheduleCache.load(context) ?: return null
+    fun snapshot(context: Context): PrayerWidgetSnapshot {
+        val bundle = PrayerScheduleCache.load(context)
+        if (bundle == null) {
+            app.kamy.saatApp.infrastructure.notifications.PrayerNotificationCoordinator.rescheduleFromCache(context)
+            return fallbackSnapshot(context)
+        }
         val meta = PrayerScheduleCache.loadMeta(context)
         val now = System.currentTimeMillis()
         val prayers = bundle.adzanPrayers.sortedBy { it.fireAtMillis }
-        if (prayers.isEmpty()) return null
+        if (prayers.isEmpty()) return fallbackSnapshot(context)
 
         val cityLabel = meta?.cityLabel
             ?: LocationPreferencesStore.from(context).displayLabel()
@@ -126,5 +130,22 @@ object PrayerWidgetRenderer {
         } else {
             "%02d:%02d".format(minutes, seconds)
         }
+    }
+
+    private fun fallbackSnapshot(context: Context): PrayerWidgetSnapshot {
+        val cityLabel = LocationPreferencesStore.from(context).displayLabel()
+            ?: context.getString(R.string.prayer_schedule)
+        return PrayerWidgetSnapshot(
+            brandLabel = "SĀAT",
+            cityLabel = cityLabel,
+            hijriLabel = null,
+            gregorianLabel = null,
+            nextPrayerLabel = context.getString(R.string.prayer_widget_next_title),
+            nextPrayerName = context.getString(R.string.prayer_fajr),
+            countdown = "--:--",
+            countdownCompact = "--:--",
+            nextPrayerTime = "--:--",
+            slots = emptyList()
+        )
     }
 }
