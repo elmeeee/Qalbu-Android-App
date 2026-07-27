@@ -77,9 +77,7 @@ fun TodayVerseOfDaySection(
 ) {
     val errorDisplay = error.rememberErrorDisplay(R.string.verse_of_day_load_failed)
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.md)
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(
             modifier = Modifier

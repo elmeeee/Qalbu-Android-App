@@ -47,6 +47,8 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Gavel
+import app.kamy.saatApp.core.config.LocalQuranConfig
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
 import app.kamy.saatApp.domain.prayer.PrayerMadhab
 import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
@@ -316,107 +318,140 @@ private fun AccountSettingsContent(
         packageInfo?.versionName ?: "1.0.0"
     }
 
+    val defaultTranslatorName = remember(state.appLanguage) {
+        LocalQuranConfig.translationForAppLanguage(state.appLanguage).authorName
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .tabContentStatusBarInset()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.md),
-        verticalArrangement = Arrangement.spacedBy(SaatSpacing.md)
     ) {
-        if (onBack != null) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+        // Sticky Header bar staying fixed at top
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 1.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .tabContentStatusBarInset()
+                    .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 14.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back),
+                                tint = SaatColors.DeepEmerald
+                            )
+                        }
+                        Spacer(Modifier.width(8.dp))
+                    }
+                    Text(
+                        text = stringResource(R.string.nav_account),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = SaatColors.DeepEmerald
+                    )
+                }
             }
         }
 
-        Text(
-            text = stringResource(R.string.nav_account),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(start = 2.dp, top = 4.dp, bottom = 4.dp)
-        )
+        // Scrollable Settings Content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(
+                    start = SaatSpacing.screenHorizontal,
+                    end = SaatSpacing.screenHorizontal,
+                    top = 12.dp,
+                    bottom = floatingNavBottomPadding() + 24.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(SaatSpacing.md)
+        ) {
+            // 1. General Settings
+            SettingsSectionLabel(stringResource(R.string.general))
+            SaatSettingsGroup {
+                SaatSettingsNavigationRow(
+                    icon = Icons.Filled.Translate,
+                    title = stringResource(R.string.language_settings_title),
+                    subtitle = stringResource(state.appLanguage.labelRes),
+                    onClick = { vm.openLanguageSheet() },
+                    showDivider = true
+                )
+                SaatSettingsNavigationRow(
+                    icon = Icons.Filled.TextFields,
+                    title = stringResource(R.string.font_size),
+                    subtitle = stringResource(R.string.font_size_subtitle),
+                    onClick = { vm.openFontScale() },
+                    showDivider = false
+                )
+            }
 
-        // 1. General Settings
-        SettingsSectionLabel(stringResource(R.string.general))
-        SaatSettingsGroup {
-            SaatSettingsNavigationRow(
-                icon = Icons.Filled.Translate,
-                title = stringResource(R.string.language_settings_title),
-                subtitle = stringResource(state.appLanguage.labelRes),
-                onClick = { vm.openLanguageSheet() },
-                showDivider = true
-            )
-            SaatSettingsNavigationRow(
-                icon = Icons.Filled.TextFields,
-                title = stringResource(R.string.font_size),
-                subtitle = stringResource(R.string.font_size_subtitle),
-                onClick = { vm.openFontScale() },
-                showDivider = false
-            )
-        }
+            Spacer(modifier = Modifier.height(4.dp))
 
-        Spacer(modifier = Modifier.height(4.dp))
+            // 2. Prayer & Adhan Settings
+            SettingsSectionLabel(stringResource(R.string.prayer_settings))
+            SaatSettingsGroup {
+                SaatSettingsNavigationRow(
+                    icon = Icons.Filled.Schedule,
+                    title = stringResource(R.string.prayer_calculation_method),
+                    subtitle = state.prayerMethod.organization,
+                    onClick = { vm.togglePrayerSheet(true) },
+                    showDivider = true
+                )
+                SaatSettingsNavigationRow(
+                    icon = Icons.Filled.Gavel,
+                    title = stringResource(R.string.madhab_settings_title),
+                    subtitle = stringResource(state.prayerMadhab.displayNameRes),
+                    onClick = { vm.openMadhabSheet() },
+                    showDivider = true
+                )
+                SaatSettingsNavigationRow(
+                    icon = Icons.AutoMirrored.Filled.VolumeUp,
+                    title = stringResource(R.string.adhan_voice),
+                    subtitle = state.selectedAdhanVoice.displayName,
+                    onClick = { vm.openAdhanSheet() },
+                    showDivider = false
+                )
+            }
 
-        // 2. Prayer & Adhan Settings
-        SettingsSectionLabel(stringResource(R.string.prayer_settings))
-        SaatSettingsGroup {
-            SaatSettingsNavigationRow(
-                icon = Icons.Filled.Schedule,
-                title = stringResource(R.string.prayer_calculation_method),
-                subtitle = state.prayerMethod.organization,
-                onClick = { vm.togglePrayerSheet(true) },
-                showDivider = true
-            )
-            SaatSettingsNavigationRow(
-                icon = Icons.Filled.Gavel,
-                title = stringResource(R.string.madhab_settings_title),
-                subtitle = stringResource(state.prayerMadhab.displayNameRes),
-                onClick = { vm.openMadhabSheet() },
-                showDivider = true
-            )
-            SaatSettingsNavigationRow(
-                icon = Icons.AutoMirrored.Filled.VolumeUp,
-                title = stringResource(R.string.adhan_voice),
-                subtitle = state.selectedAdhanVoice.displayName,
-                onClick = { vm.openAdhanSheet() },
-                showDivider = false
-            )
-        }
+            Spacer(modifier = Modifier.height(4.dp))
 
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // 3. Quran & Reading Settings
-        SettingsSectionLabel(stringResource(R.string.reading_settings))
-        SaatSettingsGroup {
-            SaatSettingsToggleRow(
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                title = stringResource(R.string.show_translation),
-                checked = state.showTranslation,
-                onCheckedChange = vm::setShowTranslation,
-                showDivider = true
-            )
-            SaatSettingsToggleRow(
-                icon = Icons.Filled.TextFields,
-                title = stringResource(R.string.show_transliteration),
-                checked = state.showTransliteration,
-                onCheckedChange = vm::setShowTransliteration,
-                showDivider = true
-            )
-            SaatSettingsNavigationRow(
-                icon = Icons.Filled.Translate,
-                title = stringResource(R.string.translator),
-                subtitle = state.selectedTranslationName.ifBlank { stringResource(R.string.translator_hint) },
-                onClick = { vm.openTranslator() },
-                showDivider = false
-            )
-        }
+            // 3. Quran & Reading Settings
+            SettingsSectionLabel(stringResource(R.string.reading_settings))
+            SaatSettingsGroup {
+                SaatSettingsToggleRow(
+                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                    title = stringResource(R.string.show_translation),
+                    checked = state.showTranslation,
+                    onCheckedChange = vm::setShowTranslation,
+                    showDivider = true
+                )
+                SaatSettingsToggleRow(
+                    icon = Icons.Filled.TextFields,
+                    title = stringResource(R.string.show_transliteration),
+                    checked = state.showTransliteration,
+                    onCheckedChange = vm::setShowTransliteration,
+                    showDivider = true
+                )
+                SaatSettingsNavigationRow(
+                    icon = Icons.Filled.Translate,
+                    title = stringResource(R.string.translator),
+                    subtitle = state.selectedTranslationName.ifBlank { defaultTranslatorName },
+                    onClick = { vm.openTranslator() },
+                    showDivider = false
+                )
+            }
 
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -467,6 +502,7 @@ private fun AccountSettingsContent(
 
         Spacer(Modifier.height(floatingNavBottomPadding()))
     }
+}
 }
 
 

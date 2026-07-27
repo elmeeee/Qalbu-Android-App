@@ -1,8 +1,14 @@
 package app.kamy.saatApp.features.today.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,10 +42,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
@@ -65,6 +76,11 @@ fun PrayerTrackerCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    var isExpanded by remember { mutableStateOf(false) }
+    val arrowRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "arrowRotation"
+    )
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -79,7 +95,9 @@ fun PrayerTrackerCard(
                 .padding(horizontal = 14.dp, vertical = 12.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(Modifier.weight(1f)) {
@@ -128,10 +146,21 @@ fun PrayerTrackerCard(
                         modifier = Modifier.size(20.dp)
                     )
                 }
+                IconButton(onClick = { isExpanded = !isExpanded }, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        Icons.Filled.KeyboardArrowDown,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        tint = SaatColors.Slate500,
+                        modifier = Modifier
+                            .size(22.dp)
+                            .rotate(arrowRotation)
+                    )
+                }
             }
 
             Spacer(Modifier.height(10.dp))
 
+            // Progress bar stays ALWAYS VISIBLE
             LinearProgressIndicator(
                 progress = { state.todayProgress.fraction },
                 modifier = Modifier
@@ -143,35 +172,44 @@ fun PrayerTrackerCard(
                 strokeCap = StrokeCap.Round
             )
 
-            Spacer(Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            // Chips section expands/collapses smoothly
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
             ) {
-                PrayerTrackerStore.TRACKED_PRAYERS.forEach { prayer ->
-                    val done = state.completedPrayers.contains(prayer)
-                    val enabled = done || prayer in state.availablePrayers
-                    PrayerCheckChip(
-                        label = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
-                        completed = done,
-                        enabled = enabled,
-                        onClick = { onTogglePrayer(prayer) }
-                    )
-                }
-            }
+                Column(Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.height(12.dp))
 
-            if (state.optionalHabits.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    state.optionalHabits.forEach { item ->
-                        OptionalHabitChip(
-                            item = item,
-                            onClick = { onToggleOptional(item.habit) }
-                        )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        PrayerTrackerStore.TRACKED_PRAYERS.forEach { prayer ->
+                            val done = state.completedPrayers.contains(prayer)
+                            val enabled = done || prayer in state.availablePrayers
+                            PrayerCheckChip(
+                                label = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
+                                completed = done,
+                                enabled = enabled,
+                                onClick = { onTogglePrayer(prayer) }
+                            )
+                        }
+                    }
+
+                    if (state.optionalHabits.isNotEmpty()) {
+                        Spacer(Modifier.height(12.dp))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            state.optionalHabits.forEach { item ->
+                                OptionalHabitChip(
+                                    item = item,
+                                    onClick = { onToggleOptional(item.habit) }
+                                )
+                            }
+                        }
                     }
                 }
             }

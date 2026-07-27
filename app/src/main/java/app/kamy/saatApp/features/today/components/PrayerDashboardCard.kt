@@ -1,5 +1,6 @@
 package app.kamy.saatApp.features.today.components
 
+import android.text.format.DateFormat
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -34,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -95,9 +97,13 @@ fun PrayerDashboardCard(
     val targetPrayer = state.nextPrayer ?: state.activePrayer ?: PrayerType.DHUHR
     val cardDrawable = getPrayerCardDrawable(targetPrayer)
 
+    val context = LocalContext.current
+    val is24Hour = DateFormat.is24HourFormat(context)
+
     val nextPrayerEntry = state.timings.find { it.type == targetPrayer }
     val formattedTime = nextPrayerEntry?.date?.let {
-        SimpleDateFormat("hh:mm a", Locale.getDefault()).format(it)
+        val pattern = if (is24Hour) "HH.mm" else "hh.mm a"
+        SimpleDateFormat(pattern, Locale.getDefault()).format(it)
     } ?: ""
 
     Column(
@@ -157,30 +163,26 @@ fun PrayerDashboardCard(
                                 Text(
                                     text = headline.label,
                                     color = Color.White.copy(alpha = 0.9f),
-                                    fontSize = 12.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium
                                 )
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    text = headline.title,
+                                    color = Color.White,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                if (formattedTime.isNotBlank()) {
                                     Text(
-                                        text = headline.title,
+                                        text = formattedTime,
                                         color = Color.White,
-                                        fontSize = 22.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1
                                     )
-                                    if (formattedTime.isNotBlank()) {
-                                        Text(
-                                            text = formattedTime,
-                                            color = Color.White,
-                                            fontSize = 22.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            maxLines = 1
-                                        )
-                                    }
                                 }
                             }
 
@@ -249,6 +251,8 @@ private data class PrayerHeadline(
 
 @Composable
 private fun rememberHeadline(state: PrayerUiState): PrayerHeadline {
+    val context = LocalContext.current
+    val is24Hour = DateFormat.is24HourFormat(context)
     val nextLabel = stringResource(R.string.prayer_widget_next_label)
     val inProgress = stringResource(R.string.prayer_widget_in_progress)
     val schedule = stringResource(R.string.prayer_schedule)
@@ -273,7 +277,8 @@ private fun rememberHeadline(state: PrayerUiState): PrayerHeadline {
         state.nextPrayer,
         state.countdownSubtitle,
         state.timings,
-        state.khgtToday?.eventTitle
+        state.khgtToday?.eventTitle,
+        is24Hour
     ) {
         when {
             state.needsPermission -> PrayerHeadline(
@@ -289,7 +294,8 @@ private fun rememberHeadline(state: PrayerUiState): PrayerHeadline {
             state.nextPrayer != null -> {
                 val prayerName = name(state.nextPrayer!!)
                 val time = state.timings.find { it.type == state.nextPrayer }?.date?.let {
-                    SimpleDateFormat("HH:mm", Locale.getDefault()).format(it)
+                    val pattern = if (is24Hour) "HH:mm" else "hh:mm a"
+                    SimpleDateFormat(pattern, Locale.getDefault()).format(it)
                 } ?: "--:--"
                 PrayerHeadline(
                     label = nextLabel,
@@ -313,8 +319,11 @@ private fun SchedulePrayerSlot(
     isActive: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val is24Hour = DateFormat.is24HourFormat(context)
     val timeText = entry?.date?.let {
-        SimpleDateFormat("HH:mm", Locale.getDefault()).format(it)
+        val pattern = if (is24Hour) "HH:mm" else "hh:mm a"
+        SimpleDateFormat(pattern, Locale.getDefault()).format(it)
     } ?: "--:--"
 
     val iconRes = getPrayerIconRes(type, isActive)

@@ -201,12 +201,6 @@ fun TodayHeader(
                 }
             }
         }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal),
-            thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
-        )
     }
 }
 

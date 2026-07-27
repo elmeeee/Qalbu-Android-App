@@ -301,8 +301,8 @@ fun TodayScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
-                contentPadding = PaddingValues(bottom = listBottomPadding),
-                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
+                contentPadding = PaddingValues(top = 4.dp, bottom = listBottomPadding + 12.dp),
+                verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(14.dp)
             ) {
                 stickyHeader(key = "today_header") {
                     TodayHeader(
@@ -327,120 +327,121 @@ fun TodayScreen(
                             )
                     )
                 }
-                    item(key = "khgt_banner") {
-                        TodayImportantDayBanner(
-                            info = prayerState.khgtToday,
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp, vertical = 4.dp)
-                                .coachMarkTarget(
-                                    coachMarkState,
-                                    1,
-                                    R.string.coach_mark_today_khgt_title,
-                                    R.string.coach_mark_today_khgt_desc
-                                )
-                        )
-                    }
-                    item(key = "prayer_card") {
-                        PrayerDashboardCard(
-                            state = prayerState,
-                            onRetry = { scope.launch { prayerVm.refresh(force = true) } },
-                            onOpenCalendar = onOpenPrayerCalendar,
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp, vertical = 4.dp)
-                                .coachMarkTarget(
-                                    coachMarkState,
-                                    2,
-                                    R.string.coach_mark_today_prayer_title,
-                                    R.string.coach_mark_today_prayer_desc
-                                )
-                        )
-                    }
-
-                    item(key = "prayer_tracker") {
-                        PrayerTrackerCard(
-                            state = trackerState,
-                            onTogglePrayer = trackerVm::togglePrayer,
-                            onToggleOptional = trackerVm::toggleOptionalHabit,
-                            onOpenCalendar = onOpenTrackerCalendar,
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp, vertical = 8.dp)
-                                .coachMarkTarget(
-                                    coachMarkState,
-                                    3,
-                                    R.string.coach_mark_today_tracker_title,
-                                    R.string.coach_mark_today_tracker_desc
-                                )
-                        )
-                    }
-
-                    todayState.continueReading?.let { session ->
-                        item(key = "continue_reading") {
-                            TodayContinueReadingCard(
-                                session = session,
-                                chapterName = todayState.continueReadingChapterName,
-                                onTap = {
-                                    onOpenChapterReader(session.chapterNumber, session.verseNumber)
-                                },
-                                modifier = Modifier
-                                    .padding(horizontal = 20.dp, vertical = 6.dp)
-                                    .coachMarkTarget(
-                                        coachMarkState,
-                                        4,
-                                        R.string.coach_mark_today_continue_title,
-                                        R.string.coach_mark_today_continue_desc
-                                    )
+                item(key = "khgt_banner") {
+                    TodayImportantDayBanner(
+                        info = prayerState.khgtToday,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                1,
+                                R.string.coach_mark_today_khgt_title,
+                                R.string.coach_mark_today_khgt_desc
                             )
-                        }
-                    }
+                    )
+                }
+                item(key = "prayer_card") {
+                    PrayerDashboardCard(
+                        state = prayerState,
+                        onRetry = { scope.launch { prayerVm.refresh(force = true) } },
+                        onOpenCalendar = onOpenPrayerCalendar,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                2,
+                                R.string.coach_mark_today_prayer_title,
+                                R.string.coach_mark_today_prayer_desc
+                            )
+                    )
+                }
 
-                    item(key = "quran_of_day") {
-                        TodayVerseOfDaySection(
-                            verse = todayState.verse,
-                            referenceLabel = todayState.verseReferenceLabel,
-                            translationId = todayState.translationId,
-                            showTranslation = todayState.showTranslation,
-                            showTransliteration = todayState.showTransliteration,
-                            occasion = todayState.verseOccasion,
-                            isLoading = todayState.isLoading,
-                            error = todayState.error,
-                            isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
-                            reciterName = todayState.recitations
-                                .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
-                                ?.displayName,
-                            onReciterClick = todayVm::openReciterSheet,
-                            onPlayAudio = {
-                                val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
-                                if (audioPlayer.isPlayingUrl(url)) {
-                                    audioPlayer.toggle()
-                                } else {
-                                    val surahTitle = todayState.verseReferenceLabel
-                                        ?.substringBefore(" - ")
-                                        ?.trim()
-                                        .orEmpty()
-                                        .ifBlank { verseOfDayTitle }
-                                    audioPlayer.playVerse(
-                                        url = url,
-                                        surahTitle = surahTitle,
-                                        ayahLabel = todayState.verse?.verseKey.orEmpty(),
-                                        reciterName = todayState.recitations
-                                            .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
-                                            ?.displayName.orEmpty()
-                                    )
-                                }
+                item(key = "prayer_tracker") {
+                    PrayerTrackerCard(
+                        state = trackerState,
+                        onTogglePrayer = trackerVm::togglePrayer,
+                        onToggleOptional = trackerVm::toggleOptionalHabit,
+                        onOpenCalendar = onOpenTrackerCalendar,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                3,
+                                R.string.coach_mark_today_tracker_title,
+                                R.string.coach_mark_today_tracker_desc
+                            )
+                    )
+                }
+
+                todayState.continueReading?.let { session ->
+                    item(key = "continue_reading") {
+                        TodayContinueReadingCard(
+                            session = session,
+                            chapterName = todayState.continueReadingChapterName,
+                            onTap = {
+                                onOpenChapterReader(session.chapterNumber, session.verseNumber)
                             },
-                            aiShareLoading = todayState.aiShareLoading,
-                            onAiShare = { todayVm.openAiShare() },
-                            onTafsir = { todayVm.openTafsir() },
-                            onRetry = { scope.launch { todayVm.refreshContent(refreshTranslation = true) } },
                             modifier = Modifier
+                                .padding(horizontal = 20.dp)
                                 .coachMarkTarget(
                                     coachMarkState,
-                                    5,
-                                    R.string.coach_mark_today_verse_title,
-                                    R.string.coach_mark_today_verse_desc
+                                    4,
+                                    R.string.coach_mark_today_continue_title,
+                                    R.string.coach_mark_today_continue_desc
                                 )
                         )
                     }
+                }
+
+                item(key = "quran_of_day") {
+                    TodayVerseOfDaySection(
+                        verse = todayState.verse,
+                        referenceLabel = todayState.verseReferenceLabel,
+                        translationId = todayState.translationId,
+                        showTranslation = todayState.showTranslation,
+                        showTransliteration = todayState.showTransliteration,
+                        occasion = todayState.verseOccasion,
+                        isLoading = todayState.isLoading,
+                        error = todayState.error,
+                        isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
+                        reciterName = todayState.recitations
+                            .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
+                            ?.displayName,
+                        onReciterClick = todayVm::openReciterSheet,
+                        onPlayAudio = {
+                            val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
+                            if (audioPlayer.isPlayingUrl(url)) {
+                                audioPlayer.toggle()
+                            } else {
+                                val surahTitle = todayState.verseReferenceLabel
+                                    ?.substringBefore(" - ")
+                                    ?.trim()
+                                    .orEmpty()
+                                    .ifBlank { verseOfDayTitle }
+                                audioPlayer.playVerse(
+                                    url = url,
+                                    surahTitle = surahTitle,
+                                    ayahLabel = todayState.verse?.verseKey.orEmpty(),
+                                    reciterName = todayState.recitations
+                                        .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
+                                        ?.displayName.orEmpty()
+                                )
+                            }
+                        },
+                        aiShareLoading = todayState.aiShareLoading,
+                        onAiShare = { todayVm.openAiShare() },
+                        onTafsir = { todayVm.openTafsir() },
+                        onRetry = { scope.launch { todayVm.refreshContent(refreshTranslation = true) } },
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                5,
+                                R.string.coach_mark_today_verse_title,
+                                R.string.coach_mark_today_verse_desc
+                            )
+                    )
+                }
             }
         }
 

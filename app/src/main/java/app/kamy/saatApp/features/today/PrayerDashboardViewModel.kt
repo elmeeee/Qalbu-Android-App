@@ -1,6 +1,7 @@
 package app.kamy.saatApp.features.today
 
 import android.content.Context
+import android.text.format.DateFormat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.R
@@ -474,7 +475,11 @@ class PrayerDashboardViewModel @Inject constructor(
         PrayerType.ISHA -> strings.getString(R.string.prayer_isha)
     }
 
-    fun formatPrayerTime(date: Date): String = timeFormatter.format(date)
+    fun formatPrayerTime(date: Date): String {
+        val is24Hour = DateFormat.is24HourFormat(appContext)
+        val pattern = if (is24Hour) "HH:mm" else "hh:mm a"
+        return SimpleDateFormat(pattern, Locale.getDefault()).format(date)
+    }
 
     private companion object {
         private const val REFRESH_COALESCE_MS = 8_000L
