@@ -315,7 +315,7 @@ private fun AccountSettingsContent(
         }
     }
     val appVersion = remember(packageInfo) {
-        packageInfo?.versionName ?: "1.0.0"
+        packageInfo?.versionName ?: "1.0.1"
     }
 
     val defaultTranslatorName = remember(state.appLanguage) {
@@ -1051,7 +1051,7 @@ fun AboutDeveloperSheet(onDismiss: () -> Unit) {
             }
         }
         val appVersion = remember(packageInfo) {
-            packageInfo?.versionName ?: "1.0.0"
+            packageInfo?.versionName ?: "1.0.1"
         }
 
         Column(
