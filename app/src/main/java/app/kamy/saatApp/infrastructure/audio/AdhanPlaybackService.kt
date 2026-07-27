@@ -76,7 +76,15 @@ class AdhanPlaybackService : Service() {
                 val rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0)
                 NotificationChannels.ensureAll(this)
                 val fgSuccess = runCatching {
-                    startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body, prayerName))
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                        startForeground(
+                            NOTIFICATION_ID,
+                            buildForegroundNotification(title, body, prayerName),
+                            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                        )
+                    } else {
+                        startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body, prayerName))
+                    }
                 }.isSuccess
                 if (!fgSuccess) {
                     stopSelf()
