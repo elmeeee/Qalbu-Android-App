@@ -123,10 +123,10 @@ fun RootScreen(
         ) {
             composable(
                 route = RootTab.Today.route,
-                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
-                exitTransition = { fadeOut(tween(180)) },
-                popEnterTransition = { fadeIn(tween(220)) },
-                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+                enterTransition = { fadeIn(tween(140)) },
+                exitTransition = { fadeOut(tween(100)) },
+                popEnterTransition = { fadeIn(tween(140)) },
+                popExitTransition = { fadeOut(tween(100)) }
             ) {
                 TodayScreen(
                     audioPlayer = audioPlayer,
@@ -149,10 +149,10 @@ fun RootScreen(
             }
             composable(
                 route = RootTab.Quran.route,
-                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
-                exitTransition = { fadeOut(tween(180)) },
-                popEnterTransition = { fadeIn(tween(220)) },
-                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+                enterTransition = { fadeIn(tween(140)) },
+                exitTransition = { fadeOut(tween(100)) },
+                popEnterTransition = { fadeIn(tween(140)) },
+                popExitTransition = { fadeOut(tween(100)) }
             ) {
                 ChaptersScreen(
                     onOpenChapter = { chapter, initialVerse ->
@@ -177,10 +177,10 @@ fun RootScreen(
             }
             composable(
                 route = RootTab.Tools.route,
-                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
-                exitTransition = { fadeOut(tween(180)) },
-                popEnterTransition = { fadeIn(tween(220)) },
-                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+                enterTransition = { fadeIn(tween(140)) },
+                exitTransition = { fadeOut(tween(100)) },
+                popEnterTransition = { fadeIn(tween(140)) },
+                popExitTransition = { fadeOut(tween(100)) }
             ) {
                 SpiritualToolsScreen(
                     onOpenTool = { tool ->
@@ -251,10 +251,10 @@ fun RootScreen(
             }
             composable(
                 route = RootTab.Account.route,
-                enterTransition = { fadeIn(tween(220)) + slideInHorizontally(tween(220)) { it / 8 } },
-                exitTransition = { fadeOut(tween(180)) },
-                popEnterTransition = { fadeIn(tween(220)) },
-                popExitTransition = { fadeOut(tween(180)) + slideOutHorizontally(tween(220)) { it / 8 } }
+                enterTransition = { fadeIn(tween(140)) },
+                exitTransition = { fadeOut(tween(100)) },
+                popEnterTransition = { fadeIn(tween(140)) },
+                popExitTransition = { fadeOut(tween(100)) }
             ) {
                 AccountScreen(
                     onBack = null,

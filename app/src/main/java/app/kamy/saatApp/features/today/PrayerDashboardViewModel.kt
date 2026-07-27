@@ -139,7 +139,9 @@ class PrayerDashboardViewModel @Inject constructor(
     }
 
     private suspend fun refreshInternal() {
-        _state.update { it.copy(isLoading = true, error = null) }
+        if (_state.value.timings.isEmpty()) {
+            _state.update { it.copy(isLoading = true, error = null) }
+        }
         when (val resolved = resolveLocation()) {
             LocationResolveResult.NeedsPermission -> {
                 _state.update {

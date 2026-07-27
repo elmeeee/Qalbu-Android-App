@@ -113,7 +113,7 @@ private fun FloatingTabItem(
                 role = Role.Tab,
                 onClick = onClick
             )
-            .animateContentSize(animationSpec = spring(stiffness = 400f))
+            .animateContentSize(animationSpec = spring(stiffness = 800f))
             .padding(
                 horizontal = if (selected) 20.dp else 16.dp,
                 vertical = 12.dp
@@ -132,8 +132,8 @@ private fun FloatingTabItem(
 
         AnimatedVisibility(
             visible = selected,
-            enter = fadeIn(animationSpec = spring(stiffness = 500f)),
-            exit = fadeOut(animationSpec = spring(stiffness = 500f))
+            enter = fadeIn(animationSpec = spring(stiffness = 800f)),
+            exit = fadeOut(animationSpec = spring(stiffness = 800f))
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Spacer(modifier = Modifier.width(8.dp))

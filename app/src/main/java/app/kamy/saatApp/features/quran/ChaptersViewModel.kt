@@ -107,7 +107,9 @@ class ChaptersViewModel @Inject constructor(
     }
 
     suspend fun refresh(force: Boolean = true) {
-        _state.update { it.copy(isLoading = true, error = null) }
+        if (_state.value.chapters.isEmpty()) {
+            _state.update { it.copy(isLoading = true, error = null) }
+        }
         try {
             val chapters = contentRepository.getChapters(force)
             val continueReading = runCatching { readingSessions.fetchMostRecent() }.getOrNull()
