@@ -117,7 +117,7 @@ fun CoachMarkOverlay(
             drawRect(Color.Black.copy(alpha = 0.8f))
 
             val padding = 4.dp.toPx()
-            val corner = 16.dp.toPx()
+            val corner = 20.dp.toPx()
             drawRoundRect(
                 color = Color.Transparent,
                 topLeft = Offset(target.bounds.left - padding, target.bounds.top - padding),
