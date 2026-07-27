@@ -219,8 +219,8 @@ fun PrayerDashboardCard(
             ) {
                 PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEachIndexed { index, type ->
                     val entry = slotEntries[index]
-                    // Highlight active ONLY when the current time is within that prayer's active time period
-                    val isActive = entry?.type == state.activePrayer
+                    // Highlight active ONLY when timings are loaded and entry matches activePrayer
+                    val isActive = !state.isLoading && state.timings.isNotEmpty() && entry != null && state.activePrayer != null && entry.type == state.activePrayer
                     SchedulePrayerSlot(
                         type = type,
                         entry = entry,
