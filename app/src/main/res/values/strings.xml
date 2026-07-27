@@ -1157,4 +1157,18 @@
     <string name="force_update_subtitle">A new version of Qalbu is available</string>
     <string name="force_update_later_button">Maybe Later</string>
     <string name="force_update_version_info">New Version: %1$s</string>
+    
+    <!-- Settings & App Info -->
+    <string name="app_tagline">SĀAT • Daily Worship Companion</string>
+    <string name="app_version_format">Version %1$s</string>
+    <string name="app_version_subtitle_format">Version %1$s • Prayer Times &amp; Al-Quran</string>
+    <string name="battery_unrestricted">Unrestricted</string>
+    <string name="battery_optimized">Battery Saver</string>
+    <string name="sound_mode_adhan">Adhan Voice</string>
+    <string name="sound_mode_system">Default System Sound</string>
+    <string name="test_adhan_title">Test Adhan Alarm (Full Screen)</string>
+    <string name="test_adhan_subtitle">Select prayer time for adhan simulation</string>
+    <string name="select_test_prayer">Select Prayer Time (Test Adhan)</string>
+    <string name="dhuha_reminder_time_title">Dhuha Reminder Time</string>
+    <string name="notification_settings_footer">Notification &amp; Adhan Settings</string>
 </resources>

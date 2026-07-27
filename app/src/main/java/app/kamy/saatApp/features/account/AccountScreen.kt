@@ -96,6 +96,7 @@ import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -379,62 +380,88 @@ private fun AccountSettingsContent(
             verticalArrangement = Arrangement.spacedBy(SaatSpacing.md)
         ) {
             // 1. General Settings
-            SettingsSectionLabel(stringResource(R.string.general))
+            SettingsSectionLabel(
+                text = stringResource(R.string.general),
+                accentColor = Color(0xFF085E43)
+            )
             SaatSettingsGroup {
                 SaatSettingsNavigationRow(
                     icon = Icons.Filled.Translate,
                     title = stringResource(R.string.language_settings_title),
                     subtitle = stringResource(state.appLanguage.labelRes),
+                    valueBadge = stringResource(state.appLanguage.labelRes),
                     onClick = { vm.openLanguageSheet() },
+                    iconTint = Color(0xFF085E43),
+                    iconBgColor = Color(0xFFE6F3EE),
                     showDivider = true
                 )
                 SaatSettingsNavigationRow(
                     icon = Icons.Filled.TextFields,
                     title = stringResource(R.string.font_size),
                     subtitle = stringResource(R.string.font_size_subtitle),
+                    valueBadge = "${(state.fontScale * 100).toInt()}%",
                     onClick = { vm.openFontScale() },
+                    iconTint = Color(0xFF085E43),
+                    iconBgColor = Color(0xFFE6F3EE),
                     showDivider = false
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             // 2. Prayer & Adhan Settings
-            SettingsSectionLabel(stringResource(R.string.prayer_settings))
+            SettingsSectionLabel(
+                text = stringResource(R.string.prayer_settings),
+                accentColor = Color(0xFFD97706)
+            )
             SaatSettingsGroup {
                 SaatSettingsNavigationRow(
                     icon = Icons.Filled.Schedule,
                     title = stringResource(R.string.prayer_calculation_method),
                     subtitle = state.prayerMethod.organization,
+                    valueBadge = state.prayerMethod.name,
                     onClick = { vm.togglePrayerSheet(true) },
+                    iconTint = Color(0xFFD97706),
+                    iconBgColor = Color(0xFFFFF7ED),
                     showDivider = true
                 )
                 SaatSettingsNavigationRow(
                     icon = Icons.Filled.Gavel,
                     title = stringResource(R.string.madhab_settings_title),
                     subtitle = stringResource(state.prayerMadhab.displayNameRes),
+                    valueBadge = stringResource(state.prayerMadhab.displayNameRes),
                     onClick = { vm.openMadhabSheet() },
+                    iconTint = Color(0xFFD97706),
+                    iconBgColor = Color(0xFFFFF7ED),
                     showDivider = true
                 )
                 SaatSettingsNavigationRow(
                     icon = Icons.AutoMirrored.Filled.VolumeUp,
                     title = stringResource(R.string.adhan_voice),
                     subtitle = state.selectedAdhanVoice.displayName,
+                    valueBadge = state.selectedAdhanVoice.displayName,
                     onClick = { vm.openAdhanSheet() },
+                    iconTint = Color(0xFFD97706),
+                    iconBgColor = Color(0xFFFFF7ED),
                     showDivider = false
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             // 3. Quran & Reading Settings
-            SettingsSectionLabel(stringResource(R.string.reading_settings))
+            SettingsSectionLabel(
+                text = stringResource(R.string.reading_settings),
+                accentColor = Color(0xFF0D9488)
+            )
             SaatSettingsGroup {
                 SaatSettingsToggleRow(
                     icon = Icons.AutoMirrored.Filled.MenuBook,
                     title = stringResource(R.string.show_translation),
                     checked = state.showTranslation,
                     onCheckedChange = vm::setShowTranslation,
+                    iconTint = Color(0xFF0D9488),
+                    iconBgColor = Color(0xFFF0FDFA),
                     showDivider = true
                 )
                 SaatSettingsToggleRow(
@@ -442,90 +469,217 @@ private fun AccountSettingsContent(
                     title = stringResource(R.string.show_transliteration),
                     checked = state.showTransliteration,
                     onCheckedChange = vm::setShowTransliteration,
+                    iconTint = Color(0xFF0D9488),
+                    iconBgColor = Color(0xFFF0FDFA),
                     showDivider = true
                 )
                 SaatSettingsNavigationRow(
                     icon = Icons.Filled.Translate,
                     title = stringResource(R.string.translator),
                     subtitle = state.selectedTranslationName.ifBlank { defaultTranslatorName },
+                    valueBadge = if (state.selectedTranslationName.isNotBlank()) state.selectedTranslationName else null,
                     onClick = { vm.openTranslator() },
+                    iconTint = Color(0xFF0D9488),
+                    iconBgColor = Color(0xFFF0FDFA),
                     showDivider = false
                 )
             }
 
-        Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
-        // 4. Notifications & Reminders
-        SettingsSectionLabel(stringResource(R.string.notifications))
-        SaatSettingsGroup {
-            SaatSettingsNavigationRow(
-                icon = Icons.Filled.Notifications,
-                title = stringResource(R.string.reminders),
-                subtitle = vm.notificationSummary(state),
-                onClick = onOpenNotifications,
-                showDivider = false
+            // 4. Notifications & Reminders
+            SettingsSectionLabel(
+                text = stringResource(R.string.notifications),
+                accentColor = Color(0xFF6366F1)
             )
+            SaatSettingsGroup {
+                SaatSettingsNavigationRow(
+                    icon = Icons.Filled.Notifications,
+                    title = stringResource(R.string.reminders),
+                    subtitle = vm.notificationSummary(state),
+                    onClick = onOpenNotifications,
+                    iconTint = Color(0xFF6366F1),
+                    iconBgColor = Color(0xFFEEF2FF),
+                    showDivider = false
+                )
+            }
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            // 5. About & Info
+            SettingsSectionLabel(
+                text = stringResource(R.string.about),
+                accentColor = Color(0xFF64748B)
+            )
+            SaatSettingsGroup {
+                SaatSettingsNavigationRow(
+                    icon = Icons.Outlined.Info,
+                    title = stringResource(R.string.about_developer),
+                    subtitle = stringResource(R.string.app_version_format, appVersion),
+                    valueBadge = "v$appVersion",
+                    onClick = onOpenAboutDeveloper,
+                    iconTint = Color(0xFF64748B),
+                    iconBgColor = Color(0xFFF1F5F9),
+                    showDivider = true
+                )
+                SaatSettingsNavigationRow(
+                    icon = Icons.Outlined.Shield,
+                    title = stringResource(R.string.privacy_policy),
+                    subtitle = stringResource(R.string.privacy_policy_effective),
+                    onClick = onOpenPrivacyPolicy,
+                    iconTint = Color(0xFF64748B),
+                    iconBgColor = Color(0xFFF1F5F9),
+                    showDivider = true
+                )
+                SaatSettingsNavigationRow(
+                    icon = Icons.Outlined.Gavel,
+                    title = stringResource(R.string.terms_and_conditions),
+                    subtitle = stringResource(R.string.terms_effective),
+                    onClick = onOpenTerms,
+                    iconTint = Color(0xFF64748B),
+                    iconBgColor = Color(0xFFF1F5F9),
+                    showDivider = false
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Bottom App Branding Footer
+            AppFooterCard(appVersion = appVersion)
+
+            Spacer(Modifier.height(floatingNavBottomPadding()))
         }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // 5. About & Developer Info
-        SettingsSectionLabel(stringResource(R.string.about))
-        SaatSettingsGroup {
-            SaatSettingsNavigationRow(
-                icon = Icons.Outlined.Info,
-                title = stringResource(R.string.about_developer),
-                subtitle = "Versi $appVersion",
-                onClick = onOpenAboutDeveloper,
-                showDivider = true
-            )
-            SaatSettingsNavigationRow(
-                icon = Icons.Outlined.Shield,
-                title = stringResource(R.string.privacy_policy),
-                subtitle = stringResource(R.string.privacy_policy_effective),
-                onClick = onOpenPrivacyPolicy,
-                showDivider = true
-            )
-            SaatSettingsNavigationRow(
-                icon = Icons.Outlined.Gavel,
-                title = stringResource(R.string.terms_and_conditions),
-                subtitle = stringResource(R.string.terms_effective),
-                onClick = onOpenTerms,
-                showDivider = false
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Bottom App Branding Footer
-        AppFooterCard(appVersion = appVersion)
-
-        Spacer(Modifier.height(floatingNavBottomPadding()))
     }
 }
-}
-
-
 
 @Composable
-private fun SettingsSectionLabel(text: String) {
+private fun SettingsHeroHeader(
+    appVersion: String,
+    appLanguage: AppLanguage,
+    prayerMethod: PrayerCalculationMethod
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(22.dp)),
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SaatColors.PrimaryVerticalGradient)
+                .padding(horizontal = 20.dp, vertical = 20.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.22f))
+                            .border(1.5.dp, Color.White.copy(alpha = 0.45f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Settings,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column {
+                        Text(
+                            text = "Sāat Settings",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Versi $appVersion • Waktu Shalat & Al-Qur'an",
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                            color = Color.White.copy(alpha = 0.88f)
+                        )
+                    }
+                }
+
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.22f),
+                    thickness = 1.dp
+                )
+
+                // Quick Status Badges
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.22f)
+                    ) {
+                        Text(
+                            text = "🌐 " + stringResource(appLanguage.labelRes),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.22f),
+                        modifier = Modifier.weight(1f, fill = false)
+                    ) {
+                        Text(
+                            text = "🕋 " + prayerMethod.organization,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsSectionLabel(
+    text: String,
+    accentColor: Color = MaterialTheme.colorScheme.primary
+) {
     Row(
-        modifier = Modifier.padding(start = 2.dp, bottom = 8.dp, top = 4.dp),
+        modifier = Modifier.padding(start = 2.dp, bottom = 6.dp, top = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .width(3.dp)
+                .width(4.dp)
                 .height(16.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(MaterialTheme.colorScheme.primary)
+                .background(accentColor)
         )
         Spacer(Modifier.width(10.dp))
         Text(
             text = text,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -1601,18 +1755,33 @@ fun TermsAndConditionsScreen(
 
 @Composable
 private fun AppFooterCard(appVersion: String) {
-    Column(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(top = 8.dp, bottom = 12.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
     ) {
-        Text(
-            text = "SĀAT • Versi $appVersion",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 18.dp, horizontal = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.app_tagline),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = SaatColors.DeepEmerald
+            )
+            Text(
+                text = stringResource(R.string.app_version_format, appVersion),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            )
+        }
     }
 }
 

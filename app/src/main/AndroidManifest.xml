@@ -144,18 +144,6 @@
         </receiver>
 
         <receiver
-            android:name=".infrastructure.widget.PrayerTimesWidgetProvider"
-            android:exported="true"
-            android:label="@string/prayer_widget_schedule_title">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/prayer_times_widget_info" />
-        </receiver>
-
-        <receiver
             android:name=".infrastructure.widget.PrayerNextWidgetProvider"
             android:exported="true"
             android:label="@string/prayer_widget_next_title">
@@ -165,18 +153,6 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_next_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".infrastructure.widget.glance.PrayerNextGlanceWidgetReceiver"
-            android:exported="true"
-            android:label="Next Prayer (Glance)">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/prayer_next_glance_widget_info" />
         </receiver>
 
         <service

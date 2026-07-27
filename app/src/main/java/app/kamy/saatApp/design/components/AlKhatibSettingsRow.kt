@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun SaatSettingsGroup(
@@ -40,12 +42,13 @@ fun SaatSettingsGroup(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(
             width = 1.dp,
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)
-        )
+        ),
+        shadowElevation = 0.5.dp
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -59,7 +62,8 @@ fun SaatSettingsGroup(
 fun SaatSettingsNavigationRow(
     icon: ImageVector,
     title: String,
-    subtitle: String,
+    subtitle: String = "",
+    valueBadge: String? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     iconTint: Color = MaterialTheme.colorScheme.primary,
@@ -71,14 +75,14 @@ fun SaatSettingsNavigationRow(
             modifier = modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Icon Container
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(iconBgColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -86,7 +90,7 @@ fun SaatSettingsNavigationRow(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconTint,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
@@ -101,7 +105,7 @@ fun SaatSettingsNavigationRow(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 if (subtitle.isNotBlank()) {
@@ -110,26 +114,49 @@ fun SaatSettingsNavigationRow(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            if (!valueBadge.isNullOrBlank()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = iconBgColor.copy(alpha = 0.6f),
+                    modifier = Modifier
+                        .padding(end = 2.dp)
+                        .widthIn(max = 120.dp)
+                ) {
+                    Text(
+                        text = valueBadge,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = iconTint,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
             // Right Chevron Arrow
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
                 modifier = Modifier.size(20.dp)
             )
         }
 
         if (showDivider) {
             HorizontalDivider(
-                modifier = Modifier.padding(start = 66.dp, end = 16.dp),
+                modifier = Modifier.padding(start = 70.dp, end = 16.dp),
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f),
                 thickness = 0.8.dp
             )
@@ -154,14 +181,14 @@ fun SaatSettingsToggleRow(
             modifier = modifier
                 .fillMaxWidth()
                 .clickable { onCheckedChange(!checked) }
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Icon Container
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(iconBgColor),
                 contentAlignment = Alignment.Center
             ) {
@@ -169,7 +196,7 @@ fun SaatSettingsToggleRow(
                     imageVector = icon,
                     contentDescription = null,
                     tint = iconTint,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
@@ -184,7 +211,7 @@ fun SaatSettingsToggleRow(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 if (!subtitle.isNullOrBlank()) {
@@ -193,7 +220,7 @@ fun SaatSettingsToggleRow(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
@@ -207,14 +234,15 @@ fun SaatSettingsToggleRow(
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = MaterialTheme.colorScheme.primary,
-                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                    uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    uncheckedBorderColor = Color.Transparent
                 )
             )
         }
 
         if (showDivider) {
             HorizontalDivider(
-                modifier = Modifier.padding(start = 66.dp, end = 16.dp),
+                modifier = Modifier.padding(start = 70.dp, end = 16.dp),
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.18f),
                 thickness = 0.8.dp
             )
