@@ -211,8 +211,8 @@ private fun SurahReminderItemRow(
                 checked = reminder.enabled,
                 onCheckedChange = onToggle,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = SaatColors.DeepEmerald,
-                    checkedTrackColor = SaatColors.DeepEmerald.copy(alpha = 0.3f)
+                    checkedThumbColor = SaatColors.PureWhite,
+                    checkedTrackColor = SaatColors.DeepEmerald
                 )
             )
 

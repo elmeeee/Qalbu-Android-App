@@ -232,14 +232,6 @@ fun AccountScreen(
         )
     }
 
-    // Theme selection sheet
-    if (state.showThemeSheet) {
-        ThemeSelectionSheet(
-            selected = state.appTheme,
-            onSelect = vm::setAppTheme,
-            onDismiss = vm::closeThemeSheet
-        )
-    }
 
     // Madhab selection sheet
     if (state.showMadhabSheet) {
@@ -366,13 +358,6 @@ private fun AccountSettingsContent(
                 title = stringResource(R.string.font_size),
                 subtitle = stringResource(R.string.font_size_subtitle),
                 onClick = { vm.openFontScale() },
-                showDivider = true
-            )
-            SaatSettingsNavigationRow(
-                icon = Icons.Filled.Palette,
-                title = stringResource(R.string.theme_settings_title),
-                subtitle = stringResource(state.appTheme.displayNameRes),
-                onClick = { vm.openThemeSheet() },
                 showDivider = false
             )
         }

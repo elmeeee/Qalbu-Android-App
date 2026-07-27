@@ -41,10 +41,13 @@
     <string name="madhab_hanafi">Hanafi</string>
     <string name="madhab_settings_title">Mazhab Perhitungan</string>
     <string name="madhab_settings_subtitle">Tukar mazhab perhitungan waktu solat</string>
-    <string name="nav_today">Hari Ini</string>
+    <string name="nav_today">Laman Utama</string>
+    <string name="nav_home">Laman Utama</string>
     <string name="nav_reflect">Refleksi</string>
+    <string name="nav_spiritual">Spiritual</string>
     <string name="nav_quran">Al-Quran</string>
     <string name="nav_account">Tetapan</string>
+    <string name="nav_setting">Tetapan</string>
     <string name="back">Kembali</string>
     <string name="loading">Memuatkan…</string>
     <string name="signed_in">Sudah log masuk</string>

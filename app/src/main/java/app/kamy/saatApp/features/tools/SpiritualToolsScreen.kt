@@ -1,5 +1,6 @@
 package app.kamy.saatApp.features.tools
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,13 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.FamilyRestroom
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,7 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,7 +39,7 @@ import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 private data class SpiritualToolItem(
-    val icon: ImageVector,
+    @DrawableRes val iconRes: Int,
     val titleRes: Int,
     val subtitleRes: Int,
     val route: String,
@@ -59,7 +53,7 @@ fun SpiritualToolsScreen(
 ) {
     val tools = listOf(
         SpiritualToolItem(
-            Icons.Filled.Explore,
+            R.drawable.ic_qibla,
             R.string.qibla_title,
             R.string.qibla_account_subtitle,
             "qibla",
@@ -67,7 +61,7 @@ fun SpiritualToolsScreen(
             SaatColors.Teal
         ),
         SpiritualToolItem(
-            Icons.Filled.AutoStories,
+            R.drawable.ic_dua,
             R.string.doa_zikir_title,
             R.string.doa_zikir_account_subtitle,
             "doa-zikir",
@@ -75,7 +69,7 @@ fun SpiritualToolsScreen(
             SaatColors.DeepEmerald
         ),
         SpiritualToolItem(
-            Icons.Filled.Favorite,
+            R.drawable.ic_dhikr,
             R.string.dhikr_title,
             R.string.dhikr_account_subtitle,
             "dhikr",
@@ -83,7 +77,7 @@ fun SpiritualToolsScreen(
             SaatColors.Gold
         ),
         SpiritualToolItem(
-            Icons.Filled.Calculate,
+            R.drawable.ic_zakat,
             R.string.zakat_title,
             R.string.zakat_account_subtitle,
             "zakat",
@@ -91,7 +85,7 @@ fun SpiritualToolsScreen(
             SaatColors.Teal
         ),
         SpiritualToolItem(
-            Icons.Filled.FamilyRestroom,
+            R.drawable.ic_zakat,
             R.string.faraidh_title,
             R.string.faraidh_account_subtitle,
             "faraidh",
@@ -99,7 +93,7 @@ fun SpiritualToolsScreen(
             SaatColors.DeepEmerald
         ),
         SpiritualToolItem(
-            Icons.Filled.NightsStay,
+            R.drawable.ic_qiyam,
             R.string.qiyam_title,
             R.string.qiyam_account_subtitle,
             "qiyam",
@@ -107,7 +101,7 @@ fun SpiritualToolsScreen(
             SaatColors.IndigoAccent
         ),
         SpiritualToolItem(
-            Icons.Filled.Shield,
+            R.drawable.ic_manzil,
             R.string.manzil_title,
             R.string.manzil_account_subtitle,
             "manzil",
@@ -176,7 +170,7 @@ fun SpiritualToolsScreen(
         ) {
             items(tools, key = { it.route }) { tool ->
                 SpiritualToolCard(
-                    icon = tool.icon,
+                    iconRes = tool.iconRes,
                     title = stringResource(tool.titleRes),
                     subtitle = stringResource(tool.subtitleRes),
                     accentStart = tool.accentStart,
@@ -190,7 +184,7 @@ fun SpiritualToolsScreen(
 
 @Composable
 private fun SpiritualToolCard(
-    icon: ImageVector,
+    @DrawableRes iconRes: Int,
     title: String,
     subtitle: String,
     accentStart: androidx.compose.ui.graphics.Color,
@@ -221,7 +215,7 @@ private fun SpiritualToolCard(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                icon,
+                painter = painterResource(iconRes),
                 contentDescription = null,
                 tint = accentStart,
                 modifier = Modifier.size(24.dp)
