@@ -195,15 +195,13 @@ private fun OptionalHabitChip(
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (item.completed) {
-            Icon(
-                Icons.Filled.Check,
-                contentDescription = null,
-                tint = SaatColors.DeepEmerald,
-                modifier = Modifier.size(14.dp)
-            )
-            Spacer(Modifier.width(4.dp))
-        }
+        Icon(
+            Icons.Filled.Check,
+            contentDescription = null,
+            tint = if (item.completed) SaatColors.DeepEmerald else Color.Transparent,
+            modifier = Modifier.size(14.dp)
+        )
+        Spacer(Modifier.width(4.dp))
         Text(
             text = stringResource(item.labelRes),
             style = MaterialTheme.typography.labelSmall,

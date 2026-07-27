@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -217,16 +219,22 @@ fun PrayerDashboardCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEachIndexed { index, type ->
-                    val entry = slotEntries[index]
-                    // Highlight active ONLY when timings are loaded and entry matches activePrayer
-                    val isActive = !state.isLoading && state.timings.isNotEmpty() && entry != null && state.activePrayer != null && entry.type == state.activePrayer
-                    SchedulePrayerSlot(
-                        type = type,
-                        entry = entry,
-                        isActive = isActive,
-                        modifier = Modifier.weight(1f)
-                    )
+                if (state.isLoading && state.timings.isEmpty()) {
+                    repeat(5) {
+                        SchedulePrayerSlotSkeleton(modifier = Modifier.weight(1f))
+                    }
+                } else {
+                    PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEachIndexed { index, type ->
+                        val entry = slotEntries[index]
+                        // Highlight active ONLY when timings are loaded and entry matches activePrayer
+                        val isActive = !state.isLoading && state.timings.isNotEmpty() && entry != null && state.activePrayer != null && entry.type == state.activePrayer
+                        SchedulePrayerSlot(
+                            type = type,
+                            entry = entry,
+                            isActive = isActive,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
         }
@@ -382,6 +390,39 @@ private fun PrayerCardLoading() {
                 .height(52.dp),
             shape = RoundedCornerShape(14.dp)
         )
+    }
+}
+
+@Composable
+private fun SchedulePrayerSlotSkeleton(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .padding(vertical = 6.dp, horizontal = 2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            SaatSkeletonOnDark(
+                modifier = Modifier
+                    .width(28.dp)
+                    .height(10.dp)
+            )
+            SaatSkeletonOnDark(
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+            )
+            SaatSkeletonOnDark(
+                modifier = Modifier
+                    .width(32.dp)
+                    .height(12.dp)
+            )
+        }
     }
 }
 
