@@ -76,6 +76,17 @@ private fun getPrayerIconRes(type: PrayerType, isActive: Boolean): Int {
     }
 }
 
+private fun android.content.Context.is24HourClock(): Boolean {
+    val systemSetting = try {
+        android.provider.Settings.System.getString(contentResolver, android.provider.Settings.System.TIME_12_24)
+    } catch (e: Exception) { null }
+    return when (systemSetting) {
+        "24" -> true
+        "12" -> false
+        else -> DateFormat.is24HourFormat(this)
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrayerDashboardCard(
@@ -98,7 +109,7 @@ fun PrayerDashboardCard(
     val cardDrawable = getPrayerCardDrawable(targetPrayer)
 
     val context = LocalContext.current
-    val is24Hour = DateFormat.is24HourFormat(context)
+    val is24Hour = context.is24HourClock()
 
     val nextPrayerEntry = state.timings.find { it.type == targetPrayer }
     val formattedTime = nextPrayerEntry?.date?.let {
@@ -252,7 +263,7 @@ private data class PrayerHeadline(
 @Composable
 private fun rememberHeadline(state: PrayerUiState): PrayerHeadline {
     val context = LocalContext.current
-    val is24Hour = DateFormat.is24HourFormat(context)
+    val is24Hour = context.is24HourClock()
     val nextLabel = stringResource(R.string.prayer_widget_next_label)
     val inProgress = stringResource(R.string.prayer_widget_in_progress)
     val schedule = stringResource(R.string.prayer_schedule)
@@ -294,9 +305,9 @@ private fun rememberHeadline(state: PrayerUiState): PrayerHeadline {
             state.nextPrayer != null -> {
                 val prayerName = name(state.nextPrayer!!)
                 val time = state.timings.find { it.type == state.nextPrayer }?.date?.let {
-                    val pattern = if (is24Hour) "HH:mm" else "hh:mm a"
+                    val pattern = if (is24Hour) "HH.mm" else "hh.mm a"
                     SimpleDateFormat(pattern, Locale.getDefault()).format(it)
-                } ?: "--:--"
+                } ?: "--.--"
                 PrayerHeadline(
                     label = nextLabel,
                     title = prayerName,
@@ -320,11 +331,11 @@ private fun SchedulePrayerSlot(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val is24Hour = DateFormat.is24HourFormat(context)
+    val is24Hour = context.is24HourClock()
     val timeText = entry?.date?.let {
-        val pattern = if (is24Hour) "HH:mm" else "hh:mm a"
+        val pattern = if (is24Hour) "HH.mm" else "hh.mm a"
         SimpleDateFormat(pattern, Locale.getDefault()).format(it)
-    } ?: "--:--"
+    } ?: "--.--"
 
     val iconRes = getPrayerIconRes(type, isActive)
 
