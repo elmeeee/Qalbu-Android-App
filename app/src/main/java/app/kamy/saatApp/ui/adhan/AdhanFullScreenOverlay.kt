@@ -135,7 +135,7 @@ fun resolveAdhanBackgroundRes(
                 in 14..17 -> R.drawable.bg_intent_asr
                 in 18..19 -> R.drawable.bg_intent_maghrib
                 in 20..23, in 0..2 -> R.drawable.bg_intent_isha
-                else -> R.drawable.bg_intent
+                else -> R.drawable.bg_intent_fajr
             }
         }
     }
