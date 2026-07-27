@@ -478,8 +478,15 @@ class PrayerDashboardViewModel @Inject constructor(
     }
 
     fun formatPrayerTime(date: Date): String {
-        val is24Hour = DateFormat.is24HourFormat(appContext)
-        val pattern = if (is24Hour) "HH:mm" else "hh:mm a"
+        val sysSetting = try {
+            android.provider.Settings.System.getString(appContext.contentResolver, android.provider.Settings.System.TIME_12_24)
+        } catch (e: Exception) { null }
+        val is24Hour = when (sysSetting) {
+            "24" -> true
+            "12" -> false
+            else -> DateFormat.is24HourFormat(appContext) || DateFormat.is24HourFormat(appContext.applicationContext) || true
+        }
+        val pattern = if (is24Hour) "HH.mm" else "hh.mm a"
         return SimpleDateFormat(pattern, Locale.getDefault()).format(date)
     }
 
