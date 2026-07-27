@@ -55,7 +55,8 @@ data class ChaptersUiState(
     val readChapters: Set<Int> = emptySet(),
     val readJuzs: Set<Int> = emptySet(),
     val lastReadJuz: Int? = null,
-    val lastReadVerseKey: String? = null
+    val lastReadVerseKey: String? = null,
+    val hasBookmarks: Boolean = false
 )
 
 @HiltViewModel
@@ -114,6 +115,9 @@ class ChaptersViewModel @Inject constructor(
             val readJuzs = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.readJuzs(appContext)
             val lastReadJuz = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.lastReadJuz(appContext)
             val lastReadVerseKey = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.lastReadVerseKey(appContext)
+            val hasBookmarks = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.bookmarks(appContext).isNotEmpty() ||
+                app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.notes(appContext).isNotEmpty() ||
+                app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.hifzEntries(appContext).isNotEmpty()
             _state.update {
                 it.copy(
                     isLoading = false,
@@ -124,7 +128,8 @@ class ChaptersViewModel @Inject constructor(
                     readChapters = readChapters,
                     readJuzs = readJuzs,
                     lastReadJuz = lastReadJuz,
-                    lastReadVerseKey = lastReadVerseKey
+                    lastReadVerseKey = lastReadVerseKey,
+                    hasBookmarks = hasBookmarks
                 )
             }
             recomputeLocalSearch()

@@ -309,6 +309,8 @@
     <string name="one_surah_found">1 surah ditemukan</string>
     <string name="surahs_found">%1$d surah ditemukan</string>
     <string name="continue_reading">Lanjutkan baca</string>
+    <string name="today_continue_reading_title">Lanjut Baca Qur’an</string>
+    <string name="today_continue_reading_verse">Ayat %1$d</string>
     <string name="surah_number">Surah %1$d</string>
     <string name="ayah_number">Ayat %1$d</string>
     <string name="ayah_label">Ayat %1$s</string>

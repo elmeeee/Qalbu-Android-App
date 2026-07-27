@@ -289,6 +289,8 @@
     <string name="one_surah_found">1 surah found</string>
     <string name="surahs_found">%1$d surahs found</string>
     <string name="continue_reading">Continue reading</string>
+    <string name="today_continue_reading_title">Continue Read Qur’an</string>
+    <string name="today_continue_reading_verse">Verse %1$d</string>
     <string name="surah_number">Surah %1$d</string>
     <string name="verse_number">Verse %1$d</string>
     <string name="verse_key_label">Verse %1$s</string>

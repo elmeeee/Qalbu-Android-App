@@ -77,14 +77,17 @@ private fun getPrayerIconRes(type: PrayerType, isActive: Boolean): Int {
 }
 
 private fun android.content.Context.is24HourClock(): Boolean {
-    val systemSetting = try {
+    val sysSetting = try {
         android.provider.Settings.System.getString(contentResolver, android.provider.Settings.System.TIME_12_24)
     } catch (e: Exception) { null }
-    return when (systemSetting) {
-        "24" -> true
-        "12" -> false
-        else -> DateFormat.is24HourFormat(this)
+    if (sysSetting == "24") return true
+    if (sysSetting == "12") return false
+
+    val timeFormat = DateFormat.getTimeFormat(this)
+    if (timeFormat is SimpleDateFormat) {
+        return !timeFormat.toPattern().contains("a")
     }
+    return DateFormat.is24HourFormat(this)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

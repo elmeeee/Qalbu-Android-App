@@ -36,6 +36,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
 import app.kamy.saatApp.domain.model.ReadingSession
@@ -511,72 +516,65 @@ private fun TodayContinueReadingCard(
     Surface(
         onClick = onTap,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        color = SaatColors.PureWhite,
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White,
         shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, SaatColors.Teal.copy(alpha = 0.2f))
+        border = BorderStroke(1.dp, Color(0xFFF0F2F6))
     ) {
         Box(
             modifier = Modifier
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            SaatColors.MintWash.copy(alpha = 0.5f),
-                            SaatColors.PureWhite
-                        )
-                    )
-                )
+                .fillMaxWidth()
+                .height(110.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color.White)
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Image(
+                painter = painterResource(R.drawable.last_read_icon),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.BottomEnd,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .height(95.dp)
+                    .padding(end = 4.dp)
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 20.dp, top = 16.dp, bottom = 16.dp, end = 120.dp),
+                verticalArrangement = Arrangement.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(SaatColors.Teal.copy(alpha = 0.12f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        Icons.Filled.Bookmark,
-                        contentDescription = null,
-                        tint = SaatColors.Teal,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                Spacer(Modifier.width(14.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.continue_reading).uppercase(),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            letterSpacing = 0.5.sp
-                        ),
-                        color = SaatColors.Teal,
+                Text(
+                    text = stringResource(R.string.today_continue_reading_title),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        text = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.Slate900,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(1.dp))
-                    Text(
-                        text = stringResource(R.string.ayah_number, session.verseNumber),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = SaatColors.Slate500
-                    )
-                }
-                Spacer(Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = SaatColors.Teal.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
+                    ),
+                    color = Color(0xFF1E293B),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber),
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                    color = Color(0xFF0F172A),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Normal
+                    ),
+                    color = Color(0xFF7E84A3),
+                    maxLines = 1
                 )
             }
         }
