@@ -56,10 +56,10 @@ import java.util.Locale
 @DrawableRes
 private fun getPrayerCardDrawable(type: PrayerType?): Int {
     return when (type) {
-        PrayerType.FAJR -> R.drawable.fajr_card
+        PrayerType.FAJR -> R.drawable.dhur_asr_card
         PrayerType.DHUHR, PrayerType.ASR -> R.drawable.dhur_asr_card
-        PrayerType.MAGHRIB -> R.drawable.maghrib_card
-        PrayerType.ISHA -> R.drawable.isha_card
+        PrayerType.MAGHRIB -> R.drawable.dhur_asr_card
+        PrayerType.ISHA -> R.drawable.dhur_asr_card
         else -> R.drawable.dhur_asr_card
     }
 }
