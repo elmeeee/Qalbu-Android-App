@@ -736,8 +736,8 @@ private fun ContinueReadingCard(
                     painter = painterResource(R.drawable.last_read_icon),
                     contentDescription = null,
                     modifier = Modifier
-                        .offset(x = 231.dp, y = 22.dp)
-                        .size(width = 116.dp, height = 69.dp)
+                        .offset(x = 254.dp, y = 26.dp)
+                        .size(width = 82.dp, height = 50.dp)
                 )
 
                 Column(

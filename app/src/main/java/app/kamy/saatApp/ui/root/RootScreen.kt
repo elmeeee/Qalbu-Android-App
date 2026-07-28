@@ -123,8 +123,9 @@ fun RootScreen(
     val isReaderRoute = currentRoute?.startsWith("quran/reader") == true ||
         currentRoute?.startsWith("quran/juz") == true
     var isAccountDetailScreen by rememberSaveable { mutableStateOf(false) }
-    val showBottomBar = shouldShowBottomBar(currentRoute, isAccountDetailScreen)
-    val showAudioBar = audioState.currentUrl != null
+    var isTanyaSaatOpen by remember { mutableStateOf(false) }
+    val showBottomBar = shouldShowBottomBar(currentRoute, isAccountDetailScreen) && !isTanyaSaatOpen
+    val showAudioBar = audioState.currentUrl != null && !isTanyaSaatOpen
     val audioBarBottomPadding = if (showBottomBar) {
         floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
     } else {
@@ -157,7 +158,8 @@ fun RootScreen(
                     },
                     onOpenChapterReader = { chapter, ayah ->
                         navController.navigate("quran/reader/${chapter}?ayah=${ayah}") { launchSingleTop = true }
-                    }
+                    },
+                    onTanyaSaatOpenChanged = { isTanyaSaatOpen = it }
                 )
             }
             composable("prayer/calendar") {
@@ -315,10 +317,9 @@ fun RootScreen(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.40f),
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.85f),
-                                MaterialTheme.colorScheme.background,
-                                MaterialTheme.colorScheme.background
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.15f),
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.45f),
+                                MaterialTheme.colorScheme.background.copy(alpha = 0.70f)
                             )
                         )
                     )

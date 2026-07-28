@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -117,108 +118,100 @@ fun TanyaSaatFullScreen(
                 .fillMaxSize()
                 .tabContentStatusBarInset()
         ) {
-            // ── Top Header Bar ────────────────────────────────────────────────
+            // ── Top Header & Single-Line Horizontal Chips Bar ───────────────────
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White,
                 shadowElevation = 2.dp
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = Color(0xFF1C1C1E)
-                        )
-                    }
-
-                    Box(
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
                         modifier = Modifier
-                            .size(42.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(SaatColors.DeepEmerald, Color(0xFF0D9488))
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.saat_ai_icon),
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(Color.White),
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.tanya_saat_ai_title),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color(0xFF1C1C1E)
-                        )
-                        Text(
-                            text = stringResource(R.string.tanya_saat_ai_subtitle),
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = Color(0xFF8E8E93)
-                        )
-                    }
-                }
-            }
-
-            // ── Quick Mood Chips Container ────────────────────────────────────
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.tanya_saat_welcome_msg),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                    color = Color(0xFF64748B),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SaatMood.defaultList.forEach { mood ->
-                        val isSelected = state.activeMood?.id == mood.id
-                        Surface(
-                            onClick = { onMoodSelected(mood) },
-                            shape = RoundedCornerShape(22.dp),
-                            color = if (isSelected) SaatColors.DeepEmerald else Color(0xFFF1F5F3),
-                            border = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE2E8F0)),
-                            shadowElevation = if (isSelected) 3.dp else 0.dp
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.size(36.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back),
+                                tint = Color(0xFF1C1C1E)
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(SaatColors.DeepEmerald, Color(0xFF0D9488))
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.saat_ai_icon),
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(Color.White),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.tanya_saat_ai_title),
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = Color(0xFF1C1C1E)
+                            )
+                            Text(
+                                text = stringResource(R.string.tanya_saat_ai_subtitle),
+                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                color = Color(0xFF8E8E93)
+                            )
+                        }
+                    }
+
+                    // ── Single-Line Horizontal Scroll Chips ────────────────────
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        items(SaatMood.defaultList, key = { it.id }) { mood ->
+                            val isSelected = state.activeMood?.id == mood.id
+                            Surface(
+                                onClick = { onMoodSelected(mood) },
+                                shape = RoundedCornerShape(20.dp),
+                                color = if (isSelected) SaatColors.DeepEmerald else Color(0xFFF1F5F3),
+                                border = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                                shadowElevation = if (isSelected) 2.dp else 0.dp
                             ) {
-                                Text(text = mood.iconEmoji, fontSize = 14.sp)
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = stringResource(mood.labelRes),
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                    color = if (isSelected) Color.White else Color(0xFF1E293B)
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = mood.iconEmoji, fontSize = 13.sp)
+                                    Spacer(modifier = Modifier.width(5.dp))
+                                    Text(
+                                        text = stringResource(mood.labelRes),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                        color = if (isSelected) Color.White else Color(0xFF1E293B)
+                                    )
+                                }
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(2.dp))
                 }
             }
 

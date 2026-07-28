@@ -310,9 +310,6 @@ class ChapterReaderViewModel @Inject constructor(
                     ) 
                 }
                 tryScrollToPendingVerse()
-                if (pendingScrollVerseKey == null && !initialScrollPending) {
-                    logCurrentVerseReading(force = true)
-                }
                 refreshPersonalVerseState(restoredIndex)
 
                 if (autoPlayAfterLoad) {

@@ -106,7 +106,8 @@ fun TodayScreen(
     audioPlayer: AudioPlayerController,
     onOpenPrayerCalendar: () -> Unit = {},
     onOpenTrackerCalendar: () -> Unit = {},
-    onOpenChapterReader: (Int, Int) -> Unit = { _, _ -> }
+    onOpenChapterReader: (Int, Int) -> Unit = { _, _ -> },
+    onTanyaSaatOpenChanged: (Boolean) -> Unit = {}
 ) {
     val todayVm: TodayViewModel = hiltViewModel()
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
@@ -122,6 +123,10 @@ fun TodayScreen(
     val scope = rememberCoroutineScope()
     var isPullRefreshing by remember { mutableStateOf(false) }
     val listBottomPadding = floatingNavAndAudioBottomPadding(audioState.currentUrl != null)
+
+    LaunchedEffect(tanyaSaatState.isSheetVisible) {
+        onTanyaSaatOpenChanged(tanyaSaatState.isSheetVisible)
+    }
 
     val locationPermissions = rememberMultiplePermissionsState(
         listOf(
@@ -566,8 +571,8 @@ private fun TodayContinueReadingCard(
                     painter = painterResource(R.drawable.last_read_icon),
                     contentDescription = null,
                     modifier = Modifier
-                        .offset(x = 231.dp, y = 22.dp)
-                        .size(width = 116.dp, height = 69.dp)
+                        .offset(x = 254.dp, y = 26.dp)
+                        .size(width = 82.dp, height = 50.dp)
                 )
 
                 Column(
