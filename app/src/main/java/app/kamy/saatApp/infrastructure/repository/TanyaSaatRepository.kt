@@ -132,7 +132,7 @@ class TanyaSaatRepository @Inject constructor(
 
         return """
             You are "Sahabat Sāat", an exceptionally wise, warm, empathetic, and knowledgeable Islamic spiritual companion inside the Sāat app.
-            Your task is to listen attentively to ANY question, feeling, or life situation shared by the user (such as looking for a job/career, joblessness, marriage/jodoh, anxiety, grief, sadness, financial struggles, exams, health/illness, family, or general life guidance).
+            Your task is to listen attentively to ANY question, feeling, or life situation shared by the user. This includes emotional support, life guidance, and general Islamic questions such as aqidah, worship, prophets, Quran, hadith, adab, halal-haram basics, duas, and Islamic definitions.
 
             CORE INSTRUCTIONS:
             1. First answer the user's actual question directly in 4 to 6 sentences. Be practical, emotionally intelligent, and specific to the user's situation.
@@ -168,7 +168,7 @@ class TanyaSaatRepository @Inject constructor(
 
     private suspend fun createDynamicDatabaseFallback(userQuery: String, lang: AppLanguage): SaatChatMessage {
         val q = userQuery.lowercase()
-        val (chap, ayah) = when {
+        val reference = when {
             q.contains("kerja") || q.contains("job") || q.contains("karir") || q.contains("career") ||
             q.contains("rezeki") || q.contains("rejeki") || q.contains("usaha") || q.contains("interview") ||
             q.contains("gaji") || q.contains("bisnis") -> Pair(65, 3)
@@ -199,39 +199,38 @@ class TanyaSaatRepository @Inject constructor(
 
             q.contains("dosa") || q.contains("tobat") || q.contains("taubat") || q.contains("ampun") -> Pair(39, 53)
 
-            else -> {
-                val fallbackPool = listOf(
-                    Pair(2, 186), Pair(94, 5), Pair(3, 139), Pair(8, 30),
-                    Pair(62, 10), Pair(9, 129), Pair(35, 2), Pair(57, 22),
-                    Pair(93, 5), Pair(2, 153), Pair(65, 2)
-                )
-                val idx = (userQuery.hashCode() and 0x7FFFFFFF) % fallbackPool.size
-                fallbackPool[idx]
-            }
+            isReligiousKnowledgeQuestion(q) -> null
+            else -> null
         }
 
-        val key = "$chap:$ayah"
-        val verse = runCatching { contentRepository.getVerseByKey(key) }.getOrNull()
-        val chapters = runCatching { contentRepository.getChapters() }.getOrNull().orEmpty()
-        val chapterMeta = chapters.firstOrNull { it.id == chap }
+        val verseData = reference?.let { (chap, ayah) ->
+            val key = "$chap:$ayah"
+            val verse = runCatching { contentRepository.getVerseByKey(key) }.getOrNull()
+            val chapters = runCatching { contentRepository.getChapters() }.getOrNull().orEmpty()
+            val chapterMeta = chapters.firstOrNull { it.id == chap }
 
-        val verseData = if (verse != null) {
-            val uthmani = verse.textUthmani.orEmpty()
-            val indopak = verse.textIndopak.orEmpty()
-            val arabic = uthmani.ifBlank { indopak }
-            val translation = verse.translations?.firstOrNull()?.text.orEmpty()
+            if (verse != null) {
+                val uthmani = verse.textUthmani.orEmpty()
+                val indopak = verse.textIndopak.orEmpty()
+                val arabic = uthmani.ifBlank { indopak }
+                val translation = verse.translations?.firstOrNull()?.text.orEmpty()
 
-            SaatVerseCardData(
-                chapterNumber = chap,
-                verseNumber = ayah,
-                surahName = chapterMeta?.nameSimple ?: "Surah $chap",
-                arabicText = arabic,
-                translationText = translation,
-                verseKey = key
-            )
-        } else null
+                SaatVerseCardData(
+                    chapterNumber = chap,
+                    verseNumber = ayah,
+                    surahName = chapterMeta?.nameSimple ?: "Surah $chap",
+                    arabicText = arabic,
+                    translationText = translation,
+                    verseKey = key
+                )
+            } else null
+        }
 
-        val messageText = createDirectFallbackAnswer(q, lang)
+        val messageText = if (isReligiousKnowledgeQuestion(q)) {
+            createReligiousKnowledgeFallbackAnswer(q, lang)
+        } else {
+            createDirectFallbackAnswer(q, lang)
+        }
 
         return SaatChatMessage(
             id = UUID.randomUUID().toString(),
@@ -240,6 +239,82 @@ class TanyaSaatRepository @Inject constructor(
             verseData = verseData,
             doaData = null
         )
+    }
+
+    private fun isReligiousKnowledgeQuestion(query: String): Boolean =
+        query.startsWith("apa itu ") ||
+            query.startsWith("siapa itu ") ||
+            query.startsWith("what is ") ||
+            query.startsWith("who is ") ||
+            query.startsWith("jelaskan ") ||
+            query.startsWith("explain ") ||
+            listOf(
+                "nabi", "rasul", "tauhid", "syirik", "iman", "ihsan", "islam", "takwa",
+                "shalat", "solat", "wudhu", "tayamum", "zakat", "puasa", "saum", "haji", "umrah",
+                "quran", "alquran", "al-quran", "hadith", "hadis", "sunnah", "doa", "dzikir", "zikir",
+                "malaikat", "akhirat", "kiamat", "surga", "syurga", "neraka", "halal", "haram",
+                "aqidah", "akidah", "fiqih", "fiqh", "sirah", "seerah"
+            ).any { query.contains(it) }
+
+    private fun createReligiousKnowledgeFallbackAnswer(query: String, lang: AppLanguage): String = when {
+        query.contains("nabi") || query.contains("rasul") ->
+            when (lang) {
+                AppLanguage.INDONESIAN ->
+                    "Dalam Islam, nabi adalah hamba pilihan Allah yang menerima wahyu untuk membimbing manusia, sedangkan rasul adalah nabi yang juga diutus membawa risalah kepada kaumnya. Semua rasul adalah nabi, tetapi tidak semua nabi adalah rasul. Kalau kamu mau, setelah ini kita bisa bahas perbedaan nabi dan rasul dengan contoh-contohnya."
+                AppLanguage.ENGLISH ->
+                    "In Islam, a prophet is a chosen servant of Allah who receives revelation to guide people, while a messenger is a prophet who is specifically sent with a message to a people. Every messenger is a prophet, but not every prophet is a messenger. If you want, we can continue with examples of the difference between prophets and messengers."
+                AppLanguage.MALAY ->
+                    "Dalam Islam, nabi ialah hamba pilihan Allah yang menerima wahyu untuk membimbing manusia, manakala rasul ialah nabi yang juga diutus membawa risalah kepada kaumnya. Setiap rasul ialah nabi, tetapi bukan setiap nabi itu rasul. Jika anda mahu, kita boleh sambung dengan contoh perbezaan nabi dan rasul."
+            }
+
+        query.contains("tauhid") || query.contains("syirik") ->
+            when (lang) {
+                AppLanguage.INDONESIAN ->
+                    "Tauhid adalah mengesakan Allah dalam ibadah, keyakinan, dan penghambaan, serta meyakini bahwa hanya Allah yang paling berhak disembah. Lawannya adalah syirik, yaitu memberi tandingan kepada Allah dalam hal yang menjadi kekhususan-Nya. Kalau kamu mau, saya bisa lanjut jelaskan pembagian tauhid dengan bahasa yang sederhana."
+                AppLanguage.ENGLISH ->
+                    "Tawhid means affirming the oneness of Allah in worship, belief, and devotion, and recognizing that only Allah deserves to be worshipped. Its opposite is shirk, which means assigning partners to Allah in what belongs uniquely to Him. If you want, I can explain the categories of tawhid in simpler language next."
+                AppLanguage.MALAY ->
+                    "Tauhid ialah mengesakan Allah dalam ibadah, keyakinan, dan penghambaan, serta meyakini bahawa hanya Allah yang paling berhak disembah. Lawannya ialah syirik, iaitu menyekutukan Allah dalam perkara yang khusus bagi-Nya. Jika anda mahu, saya boleh terangkan pembahagian tauhid dengan bahasa yang lebih mudah."
+            }
+
+        query.contains("iman") || query.contains("islam") || query.contains("ihsan") ->
+            when (lang) {
+                AppLanguage.INDONESIAN ->
+                    "Iman berkaitan dengan apa yang diyakini dalam hati, Islam berkaitan dengan ketundukan yang tampak dalam amal dan ibadah, sedangkan ihsan adalah beribadah seakan-akan melihat Allah dan merasa selalu diawasi-Nya. Tiga hal ini saling melengkapi: keyakinan, amal, dan kualitas hati. Kalau kamu mau, saya bisa pecah satu-satu secara ringkas."
+                AppLanguage.ENGLISH ->
+                    "Iman relates to what is believed in the heart, Islam relates to outward submission through actions and worship, and ihsan is to worship Allah as though you see Him and to remain conscious that He sees you. These three complete one another: belief, action, and spiritual excellence. I can break them down one by one if you want."
+                AppLanguage.MALAY ->
+                    "Iman berkaitan dengan apa yang diyakini dalam hati, Islam berkaitan dengan ketundukan yang terlihat melalui amal dan ibadah, manakala ihsan ialah beribadah seolah-olah melihat Allah dan sentiasa sedar bahawa Allah melihat kita. Ketiga-tiganya saling melengkapi: keyakinan, amal, dan kualiti hati. Saya boleh huraikan satu demi satu jika anda mahu."
+            }
+
+        query.contains("shalat") || query.contains("solat") || query.contains("wudhu") || query.contains("tayamum") ->
+            when (lang) {
+                AppLanguage.INDONESIAN ->
+                    "Shalat adalah ibadah utama yang menjadi tiang agama, sedangkan wudhu adalah bentuk bersuci yang menjadi syarat sah shalat dalam keadaan normal. Tayamum adalah pengganti wudhu atau mandi wajib ketika air tidak ada atau tidak bisa digunakan. Kalau kamu mau, saya bisa jelaskan langkah praktisnya satu per satu."
+                AppLanguage.ENGLISH ->
+                    "Salah is a central act of worship and a pillar of the religion, while wudu is the purification normally required before prayer. Tayammum replaces wudu or ghusl when water is unavailable or harmful to use. If you want, I can explain the practical steps one by one."
+                AppLanguage.MALAY ->
+                    "Solat ialah ibadah utama yang menjadi tiang agama, manakala wudhu ialah bentuk bersuci yang menjadi syarat sah solat dalam keadaan biasa. Tayamum menggantikan wudhu atau mandi wajib apabila air tiada atau tidak boleh digunakan. Jika anda mahu, saya boleh jelaskan langkah praktikalnya satu persatu."
+            }
+
+        query.contains("quran") || query.contains("alquran") || query.contains("al-quran") || query.contains("hadith") || query.contains("hadis") || query.contains("sunnah") ->
+            when (lang) {
+                AppLanguage.INDONESIAN ->
+                    "Al-Qur'an adalah wahyu Allah yang diturunkan kepada Nabi Muhammad shallallahu 'alaihi wa sallam sebagai petunjuk hidup, sedangkan hadits atau sunnah adalah penjelasan dari ucapan, perbuatan, dan persetujuan beliau. Keduanya saling berkaitan: Al-Qur'an menjadi sumber utama, dan sunnah menjelaskan cara memahaminya dalam praktik. Kalau kamu ingin, saya bisa bedakan fungsi Qur'an dan hadits lebih detail."
+                AppLanguage.ENGLISH ->
+                    "The Quran is the revelation of Allah sent to Prophet Muhammad, peace be upon him, as guidance for life, while hadith or sunnah preserves his words, actions, and approvals. They work together: the Quran is the primary source, and the sunnah explains how it is lived in practice. If you want, I can explain their roles in more detail."
+                AppLanguage.MALAY ->
+                    "Al-Quran ialah wahyu Allah yang diturunkan kepada Nabi Muhammad sallallahu 'alaihi wa sallam sebagai petunjuk hidup, manakala hadis atau sunnah memelihara ucapan, perbuatan, dan pengakuan baginda. Kedua-duanya saling berkaitan: Al-Quran ialah sumber utama, dan sunnah menerangkan cara mengamalkannya. Jika anda mahu, saya boleh huraikan peranannya dengan lebih terperinci."
+            }
+
+        else -> when (lang) {
+            AppLanguage.INDONESIAN ->
+                "Pertanyaan agama seperti ini bisa dijawab langsung tanpa harus selalu mulai dari ayat. Coba sebutkan istilah atau topik yang ingin kamu pahami, lalu saya akan jelaskan maknanya, fungsinya, dan perbedaannya dengan konsep yang mirip dalam Islam."
+            AppLanguage.ENGLISH ->
+                "Questions like this can be answered directly without always starting from a verse. Tell me the Islamic term or topic you want to understand, and I can explain its meaning, role, and how it differs from related concepts."
+            AppLanguage.MALAY ->
+                "Soalan agama seperti ini boleh dijawab secara langsung tanpa perlu sentiasa bermula dengan ayat. Sebutkan istilah atau topik Islam yang anda ingin fahami, dan saya akan jelaskan maknanya, fungsinya, serta perbezaannya dengan konsep yang hampir sama."
+        }
     }
 
     private fun createDirectFallbackAnswer(query: String, lang: AppLanguage): String = when {

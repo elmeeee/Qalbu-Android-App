@@ -459,13 +459,6 @@ fun TodayScreen(
             }
         }
 
-        app.kamy.saatApp.ui.components.TanyaSaatFab(
-            onClick = { tanyaSaatVm.openSheet() },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = floatingNavAndAudioBottomPadding(audioState.currentUrl != null) + 12.dp)
-        )
-
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
