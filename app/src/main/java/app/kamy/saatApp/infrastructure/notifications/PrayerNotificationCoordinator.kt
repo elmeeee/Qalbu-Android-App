@@ -12,6 +12,10 @@ object PrayerNotificationCoordinator {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /** Minimum interval between two full reschedule runs triggered by received alarms. */
+    private const val RESCHEDULE_DEBOUNCE_MS = 60_000L
+    @Volatile private var lastRescheduleFromCacheMs: Long = 0L
+
     fun onScheduleUpdated(
         context: Context,
         bundle: PrayerScheduleBundle,
@@ -26,6 +30,11 @@ object PrayerNotificationCoordinator {
     }
 
     fun rescheduleFromCache(context: Context) {
+        val now = System.currentTimeMillis()
+        // Debounce: if rescheduled very recently (e.g. multiple prayer alarms firing close
+        // together), skip to avoid duplicate sunnah/duha/tahajud notifications.
+        if (now - lastRescheduleFromCacheMs < RESCHEDULE_DEBOUNCE_MS) return
+        lastRescheduleFromCacheMs = now
         scheduleAsync(context.applicationContext, refreshIfStale = true)
     }
 

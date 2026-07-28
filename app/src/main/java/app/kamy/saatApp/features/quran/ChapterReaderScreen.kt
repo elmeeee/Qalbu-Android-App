@@ -186,8 +186,14 @@ fun ChapterReaderScreen(
 
     val s = state
     val verseCount = s.verses.size
-    val showPreviousTransition = verseCount > 0 && (s.juzNumber != null && s.juzNumber > 1)
-    val showNextTransition = !s.hasMore && verseCount > 0 && (s.juzNumber != null && s.juzNumber < 30)
+    val showPreviousTransition = verseCount > 0 && (
+        (s.juzNumber != null && s.juzNumber > 1) ||
+        (s.juzNumber == null && s.chapterNumber > 1)
+    )
+    val showNextTransition = !s.hasMore && verseCount > 0 && (
+        (s.juzNumber != null && s.juzNumber < 30) ||
+        (s.juzNumber == null && s.chapterNumber < 114)
+    )
     val pageOffset = if (showPreviousTransition) 1 else 0
     val totalPageCount = verseCount + pageOffset + (if (showNextTransition) 1 else 0)
     val pagerState = rememberPagerState(initialPage = pageOffset) { totalPageCount.coerceAtLeast(1) }

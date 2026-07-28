@@ -26,6 +26,7 @@ import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.repository.ContentRepository
 import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
+import app.kamy.saatApp.infrastructure.preferences.LocalReadingProgressStore
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -128,7 +129,6 @@ class ChapterReaderViewModel @Inject constructor(
     val events = _events.asSharedFlow()
 
     private var lastStartedVerseKey: String? = null
-    private var wasPlaying: Boolean = false
     private var lastLoggedReadingKey: String? = null
     private var pendingScrollVerseKey: String? =
         savedStateHandle.get<String>("verseKey")?.takeIf { it.isNotBlank() }
@@ -201,37 +201,57 @@ class ChapterReaderViewModel @Inject constructor(
             }
         }
 
-        // Sync ViewModel with player state so we can auto-advance on completion.
+        // Sync ViewModel with player state to update currently playing verse key UI.
         viewModelScope.launch {
             audioPlayer.state.collect { audio ->
                 val nextPlayingVerseKey =
                     if (audio.currentUrl != null) audio.trackSubtitle.ifBlank { null } else null
-
                 _state.update { it.copy(currentlyPlayingVerseKey = nextPlayingVerseKey) }
-
-                val ended = wasPlaying && !audio.isPlaying && audio.currentUrl == null
-                if (ended) {
-                    maybeAutoAdvanceAfterCompletion()
-                }
-                wasPlaying = audio.isPlaying
             }
+        }
+
+        // Subscribe to track-ended callback for reliable auto-advance (no race condition).
+        audioPlayer.onTrackEnded = {
+            maybeAutoAdvanceAfterCompletion()
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // Clear the callback to avoid leaking this ViewModel reference.
+        if (audioPlayer.onTrackEnded != null) {
+            audioPlayer.onTrackEnded = null
+            audioPlayer.stop()
         }
     }
 
     private fun maybeAutoAdvanceAfterCompletion() {
         val s = _state.value
-        if (s.playbackMode != AyahPlaybackMode.CONTINUOUS) return
-        val lastKey = lastStartedVerseKey ?: return
+        if (s.playbackMode != AyahPlaybackMode.CONTINUOUS) {
+            // Single mode: just stop the player cleanly.
+            audioPlayer.stop()
+            return
+        }
+        val lastKey = lastStartedVerseKey ?: run {
+            audioPlayer.stop()
+            return
+        }
 
         val verses = s.verses
         val lastIndex = verses.indexOfFirst { it.verseKey == lastKey }
-        if (lastIndex < 0) return
+        if (lastIndex < 0) {
+            audioPlayer.stop()
+            return
+        }
 
         val nextIndex = lastIndex + 1
         if (nextIndex in verses.indices) {
             val nextPage = verses[nextIndex]
             playAyahAtIndex(nextIndex, nextPage)
             _events.tryEmit(ReaderEvent.AutoAdvanceToPage(lastIndex, nextIndex))
+        } else {
+            // End of loaded verses — stop player cleanly.
+            audioPlayer.stop()
         }
     }
 
@@ -473,12 +493,20 @@ class ChapterReaderViewModel @Inject constructor(
         if (initialScrollPending) return
 
         val chapterNum = page.chapterNumber ?: s.chapterNumber
-        page.resolvedVerseNumber?.let { logScrollPosition(chapterNum, it) }
+        val ayah = page.resolvedVerseNumber ?: return
 
-        // Track last read Juz and VerseKey for Khatam progress
-        val jNum = page.juzNumber ?: s.juzNumber
+        // Always persist to local store immediately — this is what drives "Continue Reading".
+        // Do not rely solely on logScrollPosition which queues a network call.
+        LocalReadingProgressStore.save(appContext, chapterNum, ayah)
+
+        logScrollPosition(chapterNum, ayah)
+
+        // Track last read Juz and VerseKey for Khatam progress.
+        // In surah mode, juzNumber may come from the verse payload; use the state juzNumber as
+        // fallback, and if both are null derive a best-effort juz number from chapterNumber.
         val vKey = page.verseKey
-        if (jNum != null && vKey != null) {
+        if (vKey != null) {
+            val jNum = page.juzNumber ?: s.juzNumber ?: deriveJuzFromChapter(chapterNum)
             QuranPersonalStore.updateLastReadJuz(appContext, jNum, vKey)
         }
 
@@ -859,6 +887,23 @@ class ChapterReaderViewModel @Inject constructor(
                 val chapter = verse.chapterNumber ?: chapterFallback
                 "$chapter:$ayah"
             }
+
+    /**
+     * Rough chapter-to-juz mapping for use when the verse payload does not include juzNumber.
+     * Based on the standard 30-juz Quran division boundaries.
+     */
+    private fun deriveJuzFromChapter(chapterNumber: Int): Int {
+        // Juz boundary chapters (start of each juz 1-30)
+        val juzStarts = intArrayOf(
+            1, 2, 2, 3, 4, 4, 5, 6, 7, 8,
+            9, 10, 11, 12, 15, 18, 21, 23, 25, 27,
+            29, 33, 36, 39, 41, 46, 51, 58, 67, 78
+        )
+        for (juz in 29 downTo 0) {
+            if (chapterNumber >= juzStarts[juz]) return juz + 1
+        }
+        return 1
+    }
 
     fun loadNextSurahOrJuz() {
         val s = _state.value

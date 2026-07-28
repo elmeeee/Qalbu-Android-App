@@ -65,6 +65,12 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
     private val _state = MutableStateFlow(AudioPlaybackState())
     val state: StateFlow<AudioPlaybackState> = _state.asStateFlow()
 
+    /**
+     * Called when the current single-track playback ends and the queue has no more items.
+     * ViewModel subscribes to this to implement continuous playback / auto-advance logic.
+     */
+    var onTrackEnded: (() -> Unit)? = null
+
     init {
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -241,7 +247,14 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
             player.seekToNext()
             player.play()
         } else {
-            stop()
+            // Notify ViewModel first so it can handle continuous-play advance.
+            // If no listener is registered, stop immediately.
+            val listener = onTrackEnded
+            if (listener != null) {
+                listener()
+            } else {
+                stop()
+            }
         }
     }
 }

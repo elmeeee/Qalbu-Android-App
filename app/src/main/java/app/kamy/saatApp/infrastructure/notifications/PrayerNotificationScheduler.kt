@@ -63,7 +63,7 @@ object PrayerNotificationScheduler {
                             title = prayerTitle(context, prayer.name, fireAt),
                             body = prayerBody(context, prayer.name),
                             kind = "prayer_${prayer.name}",
-                            notificationId = NOTIFICATION_ID_BASE + index + offset,
+                            notificationId = NOTIFICATION_ID_BASE + index * 10 + offset,
                             playAdhan = adhanSoundEnabledForThisPrayer,
                             prayerName = prayer.name
                         )
