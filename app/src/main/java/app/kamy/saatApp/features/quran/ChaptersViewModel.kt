@@ -18,6 +18,7 @@ import app.kamy.saatApp.infrastructure.network.NetworkMonitor
 import app.kamy.saatApp.infrastructure.repository.ContentRepository
 import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
 import app.kamy.saatApp.infrastructure.repository.SearchRepository
+import app.kamy.saatApp.infrastructure.preferences.LocalReadingProgressStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -94,6 +95,9 @@ class ChaptersViewModel @Inject constructor(
     }
 
     fun onScreenVisible() {
+        // Immediately sync local reading progress (fast, no network) so continue-reading
+        // card updates as soon as the screen is visible after the user returns from reading.
+        syncLocalReadingProgress()
         viewModelScope.launch {
             refresh(force = false)
             if (app.kamy.saatApp.infrastructure.review.AppReviewManager.shouldRequestReview(appContext)) {
@@ -240,9 +244,39 @@ class ChaptersViewModel @Inject constructor(
     }
 
     fun continueReadingTarget(): Pair<QuranChapter, Int>? {
+        // Prefer the always-fresh local store (written directly on every page change)
+        // over the network-backed continueReading session which may lag or require sign-in.
+        val local = LocalReadingProgressStore.load(appContext)
+        if (local != null && local.chapterNumber > 0 && local.verseNumber > 0) {
+            val chapter = _state.value.chapters.firstOrNull { it.id == local.chapterNumber }
+                ?: return null
+            return chapter to local.verseNumber
+        }
         val s = _state.value.continueReading ?: return null
         val chapter = _state.value.chapters.firstOrNull { it.id == s.chapterNumber } ?: return null
         return chapter to s.verseNumber
+    }
+
+    /** Sync LocalReadingProgressStore into the state so the UI reflects the latest position. */
+    private fun syncLocalReadingProgress() {
+        val local = LocalReadingProgressStore.load(appContext) ?: return
+        if (local.chapterNumber <= 0 || local.verseNumber <= 0) return
+        // Build a lightweight ReadingSession from local data so the card renders without network.
+        val existing = _state.value.continueReading
+        val localMs = local.updatedAtMillis
+        val cloudMs = existing?.updatedAt?.toLongOrNull() ?: 0L
+        if (existing == null || localMs >= cloudMs) {
+            _state.update {
+                it.copy(
+                    continueReading = ReadingSession(
+                        id = "local",
+                        updatedAt = localMs.toString(),
+                        chapterNumber = local.chapterNumber,
+                        verseNumber = local.verseNumber
+                    )
+                )
+            }
+        }
     }
 
     fun chapterForNumber(number: Int): QuranChapter? =

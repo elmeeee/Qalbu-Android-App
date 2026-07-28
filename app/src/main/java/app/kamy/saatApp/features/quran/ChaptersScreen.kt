@@ -50,6 +50,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -113,8 +114,11 @@ fun ChaptersScreen(
         openVerse(result.chapterNumber, result.ayahNumber)
     }
 
-    LaunchedEffect(Unit) {
+    // Use LifecycleResumeEffect so this fires every time the user returns to this screen
+    // (e.g. after reading a surah), not just the first time the composable enters composition.
+    LifecycleResumeEffect(vm) {
         vm.onScreenVisible()
+        onPauseOrDispose { }
     }
 
     val context = androidx.compose.ui.platform.LocalContext.current

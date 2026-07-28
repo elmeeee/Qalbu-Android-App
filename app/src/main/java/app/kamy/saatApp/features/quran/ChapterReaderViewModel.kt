@@ -211,8 +211,10 @@ class ChapterReaderViewModel @Inject constructor(
         }
 
         // Subscribe to track-ended callback for reliable auto-advance (no race condition).
+        // Must dispatch to viewModelScope because the callback fires on the Media3 listener
+        // thread, while player manipulation and state updates require the Main dispatcher.
         audioPlayer.onTrackEnded = {
-            maybeAutoAdvanceAfterCompletion()
+            viewModelScope.launch { maybeAutoAdvanceAfterCompletion() }
         }
     }
 
