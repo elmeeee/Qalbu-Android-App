@@ -150,7 +150,8 @@ class ChapterReaderViewModel @Inject constructor(
                 selectedTranslationId = LocalQuranConfig.normalizeTranslationId(
                     translationStore.currentTranslationId()
                 ),
-                hifzModeEnabled = QuranPersonalStore.isHifzModeEnabled(appContext)
+                hifzModeEnabled = QuranPersonalStore.isHifzModeEnabled(appContext),
+                fontScale = translationStore.fontScale.value
             )
         }
         loadChapterMeta()
@@ -190,6 +191,11 @@ class ChapterReaderViewModel @Inject constructor(
         viewModelScope.launch {
             translationStore.arabicTextType.collect { type ->
                 _state.update { it.copy(arabicTextType = type) }
+            }
+        }
+        viewModelScope.launch {
+            translationStore.fontScale.collect { scale ->
+                _state.update { it.copy(fontScale = scale) }
             }
         }
 
@@ -394,7 +400,7 @@ class ChapterReaderViewModel @Inject constructor(
     }
 
     fun setFontScale(scale: Float) {
-        _state.update { it.copy(fontScale = scale.coerceIn(0.85f, 2.0f)) }
+        translationStore.setFontScale(scale)
     }
 
     fun setPlaybackMode(mode: AyahPlaybackMode) {

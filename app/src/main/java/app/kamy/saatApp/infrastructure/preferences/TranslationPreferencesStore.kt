@@ -38,6 +38,9 @@ class TranslationPreferencesStore @Inject constructor(
     private val _recitationId = MutableStateFlow(loadRecitationId())
     val recitationId: StateFlow<Int> = _recitationId.asStateFlow()
 
+    private val _fontScale = MutableStateFlow(loadFontScale())
+    val fontScale: StateFlow<Float> = _fontScale.asStateFlow()
+
     fun currentTranslationId(): Int = _translationId.value
 
     fun currentRecitationId(): Int = _recitationId.value
@@ -77,6 +80,16 @@ class TranslationPreferencesStore @Inject constructor(
         _recitationId.value = id
     }
 
+    fun setFontScale(scale: Float) {
+        val clamped = scale.coerceIn(0.85f, 2.0f)
+        prefs.edit().putFloat(KEY_FONT_SCALE, clamped).apply()
+        _fontScale.value = clamped
+    }
+
+    private fun loadFontScale(): Float {
+        return prefs.getFloat(KEY_FONT_SCALE, 1.0f).coerceIn(0.85f, 2.0f)
+    }
+
     private fun loadTranslationId(): Int {
         val saved = prefs.getInt(KEY_ID, 0)
         if (saved > 0) return LocalQuranConfig.normalizeTranslationId(saved)
@@ -113,5 +126,6 @@ class TranslationPreferencesStore @Inject constructor(
         private const val KEY_RECITATION_ID = "chapterReaderRecitationId"
         private const val KEY_ARABIC_TEXT_TYPE = "chapterReaderArabicTextType"
         private const val KEY_TAJWEED_ENABLED = "chapterReaderTajweedEnabled"
+        private const val KEY_FONT_SCALE = "chapterReaderFontScale"
     }
 }

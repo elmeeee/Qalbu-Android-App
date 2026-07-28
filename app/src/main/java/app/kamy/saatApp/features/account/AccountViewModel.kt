@@ -170,6 +170,11 @@ class AccountViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            translationStore.fontScale.collect { scale ->
+                _state.update { it.copy(fontScale = scale) }
+            }
+        }
+        viewModelScope.launch {
             notificationStore.enabled.collect { enabled ->
                 _state.update { it.copy(dailyVerseEnabled = enabled) }
             }
@@ -251,6 +256,7 @@ class AccountViewModel @Inject constructor(
                 selectedTranslationName = translationStore.translationName.value,
                 showTranslation = translationStore.showTranslation.value,
                 showTransliteration = translationStore.showTransliteration.value,
+                fontScale = translationStore.fontScale.value,
                 dailyVerseEnabled = notificationStore.isEnabled(),
                 reminderHour = notificationStore.morningHour(),
                 reminderMinute = notificationStore.morningMinute(),
@@ -385,7 +391,7 @@ class AccountViewModel @Inject constructor(
 
     fun openFontScale() = _state.update { it.copy(showFontScaleSheet = true) }
     fun closeFontScale() = _state.update { it.copy(showFontScaleSheet = false) }
-    fun setFontScale(value: Float) = _state.update { it.copy(fontScale = value.coerceIn(0.85f, 1.35f)) }
+    fun setFontScale(value: Float) = translationStore.setFontScale(value)
 
     fun openTranslator() {
         _state.update { it.copy(showTranslatorSheet = true) }

@@ -895,8 +895,8 @@ private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismi
                 Slider(
                     value = scale,
                     onValueChange = onScaleChange,
-                    valueRange = 0.85f..1.35f,
-                    steps = 9,
+                    valueRange = 0.85f..2.0f,
+                    steps = 22,
                     modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
                 )
                 Text("A", fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
