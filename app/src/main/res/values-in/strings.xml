@@ -749,4 +749,19 @@
     <string name="up_to_date_sheet_title">Aplikasi Sudah Terbaru!</string>
     <string name="up_to_date_sheet_desc">Sāat versi %1$s adalah versi terbaru saat ini. Selamat beribadah!</string>
     <string name="got_it">Mengerti</string>
+
+    <!-- Tanya Sāat AI -->
+    <string name="tanya_saat_ai_title">Tanya Sāat AI</string>
+    <string name="tanya_saat_ai_subtitle">Curhat Emosi &amp; Rekomendasi Ayat/Doa</string>
+    <string name="tanya_saat_placeholder">Ketik curahan hatimu di sini...</string>
+    <string name="tanya_saat_welcome_msg">Assalamu\'alaikum. Bagaimana perasaan hatimu saat ini? Pilih emosi di atas atau curhatkan apa yang sedang kamu rasakan.</string>
+    <string name="mood_anxious">Cemas &amp; Khawatir</string>
+    <string name="mood_sad">Sedih &amp; Kecewa</string>
+    <string name="mood_grateful">Bersyukur</string>
+    <string name="mood_angry">Marah &amp; Emosi</string>
+    <string name="mood_restless">Gelisah &amp; Sulit Tidur</string>
+    <string name="mood_guidance">Butuh Petunjuk</string>
+    <string name="btn_open_in_quran_reader">Buka di Qur\'an Reader</string>
+    <string name="btn_save_doa_bookmark">Simpan Doa / Bookmark</string>
+    <string name="doa_saved_toast">Berhasil disimpan ke Bookmark!</string>
 </resources>

@@ -111,9 +111,11 @@ fun TodayScreen(
     val todayVm: TodayViewModel = hiltViewModel()
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
     val trackerVm: PrayerTrackerViewModel = hiltViewModel()
+    val tanyaSaatVm: TanyaSaatViewModel = hiltViewModel()
     val todayState by todayVm.state.collectAsState()
     val prayerState by prayerVm.state.collectAsState()
     val trackerState by trackerVm.state.collectAsState()
+    val tanyaSaatState by tanyaSaatVm.state.collectAsState()
     val audioState by audioPlayer.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -452,11 +454,36 @@ fun TodayScreen(
             }
         }
 
+        app.kamy.saatApp.ui.components.TanyaSaatFab(
+            onClick = { tanyaSaatVm.openSheet() },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = floatingNavAndAudioBottomPadding(audioState.currentUrl != null) + 12.dp)
+        )
+
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = floatingNavBottomPadding() + 8.dp)
+        )
+    }
+
+    if (tanyaSaatState.isSheetVisible) {
+        app.kamy.saatApp.ui.components.TanyaSaatFullScreen(
+            state = tanyaSaatState,
+            onDismiss = tanyaSaatVm::closeSheet,
+            onMoodSelected = tanyaSaatVm::onMoodSelected,
+            onInputChanged = tanyaSaatVm::onInputTextChanged,
+            onSendMessage = tanyaSaatVm::sendMessage,
+            onOpenVerseInReader = { chapter, verse ->
+                tanyaSaatVm.closeSheet()
+                onOpenChapterReader(chapter, verse)
+            },
+            onBookmarkVerse = { verseData ->
+                tanyaSaatVm.bookmarkVerse(context, verseData)
+            },
+            onClearToast = tanyaSaatVm::clearToast
         )
     }
 

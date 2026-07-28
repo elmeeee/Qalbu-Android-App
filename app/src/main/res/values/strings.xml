@@ -1220,4 +1220,19 @@
     <string name="up_to_date_sheet_title">You\'re Up to Date!</string>
     <string name="up_to_date_sheet_desc">Sāat v%1$s is currently the latest version. Enjoy your spiritual journey!</string>
     <string name="got_it">Got It</string>
+
+    <!-- Tanya Sāat AI -->
+    <string name="tanya_saat_ai_title">Tanya Sāat AI</string>
+    <string name="tanya_saat_ai_subtitle">Spiritual Companion &amp; Verses/Duas Guidance</string>
+    <string name="tanya_saat_placeholder">Type your feelings or questions...</string>
+    <string name="tanya_saat_welcome_msg">Assalamu\'alaikum. How are you feeling today? Select an emotion above or feel free to share what\'s on your mind.</string>
+    <string name="mood_anxious">Anxious</string>
+    <string name="mood_sad">Sad &amp; Hurt</string>
+    <string name="mood_grateful">Grateful</string>
+    <string name="mood_angry">Angry</string>
+    <string name="mood_restless">Restless</string>
+    <string name="mood_guidance">Need Guidance</string>
+    <string name="btn_open_in_quran_reader">Open in Qur\'an Reader</string>
+    <string name="btn_save_doa_bookmark">Save Dua / Bookmark</string>
+    <string name="doa_saved_toast">Saved to Bookmarks!</string>
 </resources>
