@@ -23,6 +23,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -349,7 +352,9 @@ fun ChapterReaderScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            SaatColors.ScreenBackground.copy(alpha = 0.95f),
+                            SaatColors.ScreenBackground,
+                            SaatColors.ScreenBackground.copy(alpha = 0.92f),
+                            SaatColors.ScreenBackground.copy(alpha = 0.6f),
                             Color.Transparent
                         )
                     )
@@ -380,116 +385,126 @@ fun ChapterReaderScreen(
             }
         }
 
-        val surahCaptionBottom = if (audioBarVisible) {
-            FloatingAudioBarMetrics.barHeight + FloatingAudioBarMetrics.bottomGap + 12.dp
-        } else {
-            20.dp
-        }
-
-        if (state.verses.isNotEmpty()) {
-            val readerActionsBottom = FloatingAudioBarMetrics.bottomGap + 14.dp
-            ReaderVerseActionsMenu(
-                expanded = verseMenuExpanded.value,
-                onToggle = { verseMenuExpanded.value = !verseMenuExpanded.value },
-                bookmarked = state.currentVerseBookmarked,
-                hasNote = state.currentVerseHasNote,
-                hifzStatus = state.currentVerseHifzStatus,
-                showTafsir = LocalQuranConfig.supportsTafsir(state.selectedTranslationId),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .navigationBarsPadding()
-                    .padding(end = 10.dp, bottom = readerActionsBottom)
-                    .coachMarkTarget(
-                        coachMarkState,
-                        0,
-                        R.string.coach_mark_quran_menu_title,
-                        R.string.coach_mark_quran_menu_desc
-                    ),
-                onBookmark = {
-                    verseMenuExpanded.value = false
-                    vm.toggleBookmark(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
-                },
-                onNote = {
-                    verseMenuExpanded.value = false
-                    vm.openNote(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
-                },
-                onHifz = {
-                    verseMenuExpanded.value = false
-                    vm.cycleHifzStatus(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
-                },
-                onAiShare = {
-                    verseMenuExpanded.value = false
-                    vm.openAiShare(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
-                },
-                onShareImage = {
-                    verseMenuExpanded.value = false
-                    showImageShareSheet.value = true
-                },
-                onTafsir = {
-                    verseMenuExpanded.value = false
-                    currentVerse?.verseKey?.let(vm::openTafsir)
-                },
-                onHadith = {
-                    verseMenuExpanded.value = false
-                    currentVerse?.verseKey?.let(vm::openHadith)
-                }
-            )
-        }
-
         currentVerse?.let { verse ->
-            Column(
+            val surahCaptionBottom = if (audioBarVisible) {
+                FloatingAudioBarMetrics.barHeight + FloatingAudioBarMetrics.bottomGap + 12.dp
+            } else {
+                18.dp
+            }
+
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth(0.72f)
-                    .navigationBarsPadding()
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                SaatColors.ScreenBackground.copy(alpha = 0.92f)
+                                SaatColors.ScreenBackground.copy(alpha = 0.55f),
+                                SaatColors.ScreenBackground.copy(alpha = 0.92f),
+                                SaatColors.ScreenBackground,
+                                SaatColors.ScreenBackground
                             )
                         )
                     )
+                    .navigationBarsPadding()
                     .padding(
-                        start = 20.dp,
-                        end = 12.dp,
+                        start = 16.dp,
+                        end = 16.dp,
                         bottom = surahCaptionBottom,
-                        top = 48.dp
+                        top = 44.dp
                     )
             ) {
-                Text(
-                    text = surahTitle,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.Slate900,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(6.dp))
-                val subtitle = if (state.juzNumber != null) {
-                    val verseLabel = verse.displayVerseReference?.let { ref ->
-                        stringResource(R.string.verse_key_label, ref)
-                    } ?: verse.resolvedVerseNumber?.let { num ->
-                        stringResource(R.string.verse_number, num)
-                    } ?: stringResource(R.string.verse_label, "—")
-                    listOfNotNull(
-                        verseLabel,
-                        state.juzNumber?.let { stringResource(R.string.juz_number, it) }
-                    ).joinToString(" · ")
-                } else {
-                    verse.resolvedVerseNumber?.let { num ->
-                        stringResource(R.string.verse_number, num)
-                    } ?: verse.displayVerseReference?.let { ref ->
-                        stringResource(R.string.verse_key_label, ref)
-                    } ?: stringResource(R.string.verse_label, "—")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 12.dp)
+                    ) {
+                        Text(
+                            text = surahTitle,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.Slate900,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        val subtitle = if (state.juzNumber != null) {
+                            val verseLabel = verse.displayVerseReference?.let { ref ->
+                                stringResource(R.string.verse_key_label, ref)
+                            } ?: verse.resolvedVerseNumber?.let { num ->
+                                stringResource(R.string.verse_number, num)
+                            } ?: stringResource(R.string.verse_label, "—")
+                            listOfNotNull(
+                                verseLabel,
+                                state.juzNumber?.let { stringResource(R.string.juz_number, it) }
+                            ).joinToString(" · ")
+                        } else {
+                            verse.resolvedVerseNumber?.let { num ->
+                                stringResource(R.string.verse_number, num)
+                            } ?: verse.displayVerseReference?.let { ref ->
+                                stringResource(R.string.verse_key_label, ref)
+                            } ?: stringResource(R.string.verse_label, "—")
+                        }
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = SaatColors.Slate500,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    if (state.verses.isNotEmpty()) {
+                        ReaderVerseActionsMenu(
+                            expanded = verseMenuExpanded.value,
+                            onToggle = { verseMenuExpanded.value = !verseMenuExpanded.value },
+                            bookmarked = state.currentVerseBookmarked,
+                            hasNote = state.currentVerseHasNote,
+                            hifzStatus = state.currentVerseHifzStatus,
+                            showTafsir = LocalQuranConfig.supportsTafsir(state.selectedTranslationId),
+                            modifier = Modifier.coachMarkTarget(
+                                coachMarkState,
+                                0,
+                                R.string.coach_mark_quran_menu_title,
+                                R.string.coach_mark_quran_menu_desc
+                            ),
+                            onBookmark = {
+                                verseMenuExpanded.value = false
+                                vm.toggleBookmark(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                            },
+                            onNote = {
+                                verseMenuExpanded.value = false
+                                vm.openNote(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                            },
+                            onHifz = {
+                                verseMenuExpanded.value = false
+                                vm.cycleHifzStatus(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                            },
+                            onAiShare = {
+                                verseMenuExpanded.value = false
+                                vm.openAiShare(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                            },
+                            onShareImage = {
+                                verseMenuExpanded.value = false
+                                showImageShareSheet.value = true
+                            },
+                            onTafsir = {
+                                verseMenuExpanded.value = false
+                                currentVerse?.verseKey?.let(vm::openTafsir)
+                            },
+                            onHadith = {
+                                verseMenuExpanded.value = false
+                                currentVerse?.verseKey?.let(vm::openHadith)
+                            }
+                        )
+                    }
                 }
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = SaatColors.Slate500,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
 
@@ -637,8 +652,9 @@ private fun SaatAyahPage(
     onContentScroll: (() -> Unit)? = null,
     onTajweedClick: (TajweedType) -> Unit
 ) {
-    val contentTopPadding = 56.dp
-    val contentBottomPadding = if (audioBarVisible) 188.dp else 148.dp
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val contentTopPadding = statusBarTop + 68.dp
+    val contentBottomPadding = if (audioBarVisible) 200.dp else 160.dp
     val scrollState = rememberScrollState()
     var hifzRevealStage by remember(verse.listIdentity) {
         mutableIntStateOf(0)

@@ -308,11 +308,15 @@
     <string name="search_juz_goto">Go to Juz %1$d</string>
     <string name="search_juz_goto_hint">Open the start of this juz</string>
     <string-array name="quran_search_suggestions">
-        <item>2:255</item>
-        <item>Yasin</item>
+        <item>Ayatul Kursi</item>
+        <item>1000 Dinar Verse</item>
+        <item>Dua for Goodness</item>
+        <item>Dua of Prophet Yunus</item>
+        <item>Dua for Ease</item>
+        <item>Dua for Parents</item>
+        <item>Ya-Sin</item>
         <item>Al-Mulk</item>
-        <item>Al-Fatihah</item>
-        <item>Juz 30</item>
+        <item>Al-Kahf</item>
     </string-array>
     <string name="search_results_found">%1$d results</string>
     <string name="quran_search_failed">Search failed</string>

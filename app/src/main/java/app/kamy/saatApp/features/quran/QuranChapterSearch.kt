@@ -68,8 +68,29 @@ fun String.normalizedSearchQuery(): String = trim()
 fun List<QuranChapter>.filteredBySearch(query: String): List<QuranChapter> =
     searchChapters(query)
 
+fun findChapterIdByNameOrAlias(name: String): Int? {
+    val rawNormalized = normalizeLatin(name)
+    val normalized = stripArticle(rawNormalized)
+    CHAPTER_ALIASES[rawNormalized]?.let { return it }
+    CHAPTER_ALIASES[normalized]?.let { return it }
+
+    name.toIntOrNull()?.let { num ->
+        if (num in 1..114) return num
+    }
+    return null
+}
+
 fun List<QuranChapter>.searchChapters(query: String): List<QuranChapter> {
-    val q = query.normalizedSearchQuery()
+    var q = query.normalizedSearchQuery().lowercase()
+    if (q.isEmpty()) return this
+
+    q = q.removePrefix("surah ")
+        .removePrefix("surat ")
+        .removePrefix("qs. ")
+        .removePrefix("qs ")
+        .removePrefix("ayat ")
+        .trim()
+
     if (q.isEmpty()) return this
 
     val normalized = normalizeLatin(q)
@@ -516,20 +537,28 @@ fun QuranSearchSuggestionChips(
     val suggestions = stringArrayResource(R.array.quran_search_suggestions)
     LazyRow(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(suggestions) { label ->
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = SaatColors.DeepEmerald,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .clickable { onSuggestionClick(label) }
-                    .padding(horizontal = 4.dp, vertical = 6.dp)
-            )
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = SaatColors.DeepEmerald.copy(alpha = 0.08f),
+                border = androidx.compose.foundation.BorderStroke(
+                    width = 1.dp,
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.2f)
+                ),
+                modifier = Modifier.clickable { onSuggestionClick(label) }
+            ) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = SaatColors.DeepEmerald,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                )
+            }
         }
     }
 }

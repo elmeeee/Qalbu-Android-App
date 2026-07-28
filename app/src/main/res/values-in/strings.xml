@@ -325,11 +325,15 @@
     <string name="search_juz_goto">Buka Juz %1$d</string>
     <string name="search_juz_goto_hint">Buka awal juz ini</string>
     <string-array name="quran_search_suggestions">
-        <item>2:255</item>
+        <item>Ayat Kursi</item>
+        <item>Ayat 1000 Dinar</item>
+        <item>Doa Sapujagat</item>
+        <item>Doa Nabi Yunus</item>
+        <item>Doa Lapang Dada</item>
+        <item>Doa Orang Tua</item>
         <item>Yasin</item>
         <item>Al-Mulk</item>
-        <item>Al-Fatihah</item>
-        <item>Juz 30</item>
+        <item>Al-Kahfi</item>
     </string-array>
     <string name="search_results_found">%1$d hasil</string>
     <string name="quran_search_failed">Pencarian gagal</string>
