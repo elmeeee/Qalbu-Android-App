@@ -88,8 +88,22 @@ fun RootScreen(
     val audioPlayer = entryPoint.audioPlayer()
     val audioState by audioPlayer.state.collectAsState()
 
-    val updateInfo = remember { AppUpdateManager.checkUpdate(context) }
+    val updateInfo by AppUpdateManager.updateInfoFlow.collectAsState()
     var showForceUpdateSheet by remember { mutableStateOf(updateInfo.isUpdateAvailable) }
+
+    LaunchedEffect(Unit) {
+        AppUpdateManager.checkForUpdateAsync(context) { info ->
+            if (info.isUpdateAvailable) {
+                showForceUpdateSheet = true
+            }
+        }
+    }
+
+    LaunchedEffect(updateInfo.isUpdateAvailable) {
+        if (updateInfo.isUpdateAvailable) {
+            showForceUpdateSheet = true
+        }
+    }
 
     val navController = rememberNavController()
     LaunchedEffect(pendingDeepLinkRoute) {

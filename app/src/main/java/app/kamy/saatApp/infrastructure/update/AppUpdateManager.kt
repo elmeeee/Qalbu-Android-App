@@ -2,15 +2,19 @@ package app.kamy.saatApp.infrastructure.update
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.os.Build
 import app.kamy.saatApp.BuildConfig
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class AppUpdateInfo(
-    val isUpdateAvailable: Boolean,
-    val isForceUpdate: Boolean,
-    val latestVersionName: String,
-    val minRequiredVersionCode: Int
+    val isUpdateAvailable: Boolean = false,
+    val isForceUpdate: Boolean = true,
+    val latestVersionName: String = "",
+    val minRequiredVersionCode: Int = 0
 )
 
 object AppUpdateManager {
@@ -19,6 +23,9 @@ object AppUpdateManager {
     private const val KEY_LATEST_VERSION_NAME = "latest_version_name"
     private const val KEY_IS_FORCE_UPDATE = "is_force_update"
     private const val KEY_SIMULATE_UPDATE = "simulate_update_available"
+
+    private val _updateInfo = MutableStateFlow(AppUpdateInfo())
+    val updateInfoFlow: StateFlow<AppUpdateInfo> = _updateInfo.asStateFlow()
 
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -30,20 +37,68 @@ object AppUpdateManager {
         val currentVersionCode = BuildConfig.VERSION_CODE
         val currentVersionName = BuildConfig.VERSION_NAME
 
-        // If simulation is enabled, or if remote config has set a higher minimum version code
         val minCode = prefs.getInt(KEY_MIN_VERSION_CODE, if (simulate) currentVersionCode + 1 else 0)
         val latestName = prefs.getString(KEY_LATEST_VERSION_NAME, null)
             ?: if (simulate) "1.0.1" else currentVersionName
         val isForce = prefs.getBoolean(KEY_IS_FORCE_UPDATE, true)
 
-        val isAvailable = simulate || currentVersionCode < minCode
+        val isAvailable = simulate || (minCode > 0 && currentVersionCode < minCode)
 
-        return AppUpdateInfo(
+        val info = AppUpdateInfo(
             isUpdateAvailable = isAvailable,
             isForceUpdate = isForce,
             latestVersionName = latestName,
             minRequiredVersionCode = minCode
         )
+        _updateInfo.value = info
+        return info
+    }
+
+    fun checkForUpdateAsync(context: Context, onResult: ((AppUpdateInfo) -> Unit)? = null) {
+        val localInfo = checkUpdate(context)
+        if (localInfo.isUpdateAvailable) {
+            onResult?.invoke(localInfo)
+            return
+        }
+
+        try {
+            val playUpdateManager = AppUpdateManagerFactory.create(context)
+            playUpdateManager.appUpdateInfo.addOnSuccessListener { playInfo ->
+                val isAvailable = playInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE ||
+                        playInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS
+
+                if (isAvailable) {
+                    val availableVersionCode = playInfo.availableVersionCode()
+                    val currentVersionCode = BuildConfig.VERSION_CODE
+                    val isForce = playInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE) ||
+                            availableVersionCode > currentVersionCode
+
+                    val displayVersion = if (availableVersionCode > 0) "v$availableVersionCode" else "Versi Baru"
+
+                    val info = AppUpdateInfo(
+                        isUpdateAvailable = true,
+                        isForceUpdate = isForce,
+                        latestVersionName = displayVersion,
+                        minRequiredVersionCode = availableVersionCode
+                    )
+
+                    getPrefs(context).edit()
+                        .putInt(KEY_MIN_VERSION_CODE, availableVersionCode)
+                        .putString(KEY_LATEST_VERSION_NAME, displayVersion)
+                        .putBoolean(KEY_IS_FORCE_UPDATE, isForce)
+                        .apply()
+
+                    _updateInfo.value = info
+                    onResult?.invoke(info)
+                } else {
+                    onResult?.invoke(localInfo)
+                }
+            }.addOnFailureListener {
+                onResult?.invoke(localInfo)
+            }
+        } catch (e: Throwable) {
+            onResult?.invoke(localInfo)
+        }
     }
 
     fun setSimulatedUpdate(
@@ -59,9 +114,11 @@ object AppUpdateManager {
             .putString(KEY_LATEST_VERSION_NAME, versionName)
             .putInt(KEY_MIN_VERSION_CODE, minVersionCode)
             .apply()
+        checkUpdate(context)
     }
 
     fun clearSimulatedUpdate(context: Context) {
         getPrefs(context).edit().clear().apply()
+        checkUpdate(context)
     }
 }

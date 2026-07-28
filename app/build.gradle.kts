@@ -166,6 +166,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.play.services.location)
     implementation(libs.play.review.ktx)
+    implementation(libs.play.update.ktx)
     implementation(libs.adhan)
 
     // Compose
