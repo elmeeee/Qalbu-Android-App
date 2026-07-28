@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -277,14 +279,17 @@ fun TanyaSaatFullScreen(
 
             // ── Bottom Input Container ──────────────────────────────────────
             Surface(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .imePadding(),
                 color = Color.White,
                 shadowElevation = 6.dp
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                        .navigationBarsPadding()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedTextField(
@@ -396,7 +401,7 @@ private fun AiThinkingBubble() {
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Tanya Sāat AI sedang merenungkan & mencari ayat terbaik...",
+                    text = stringResource(R.string.tanya_saat_ai_thinking),
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
                     color = Color(0xFF475569)
                 )
