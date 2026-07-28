@@ -85,6 +85,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -139,6 +140,18 @@ import app.kamy.saatApp.ui.components.FloatingAudioBarMetrics
 import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
 import kotlinx.coroutines.flow.distinctUntilChanged
 
+/**
+ * Snapshot of the pager position plus the paging bounds it must be interpreted against.
+ * Bundling them means the flow re-emits when verses finish loading, not only when the user
+ * swipes, so the ayah the reader opens on is recorded as last read too.
+ */
+private data class ReaderPageSnapshot(
+    val page: Int,
+    val isScrolling: Boolean,
+    val verseCount: Int,
+    val pageOffset: Int
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterReaderScreen(
@@ -183,6 +196,7 @@ fun ChapterReaderScreen(
     val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
     val showImageShareSheet = remember { mutableStateOf(false) }
     var hasScrolledToInitial by remember { mutableStateOf(false) }
+    var hasAlignedInitialPage by remember { mutableStateOf(false) }
 
     val s = state
     val verseCount = s.verses.size
@@ -210,15 +224,33 @@ fun ChapterReaderScreen(
     }
     val loadErrorDisplay = state.error.rememberErrorDisplay(R.string.verses_load_failed)
 
+    // These long-lived effects below outlive many recompositions, so they must not capture
+    // verseCount/pageOffset/totalPageCount directly: those are 0/0/1 on the first composition
+    // (before verses load) and the captured values would stay stale forever, silently
+    // discarding every page-change and auto-scroll event.
+    val latestVerseCount by rememberUpdatedState(verseCount)
+    val latestPageOffset by rememberUpdatedState(pageOffset)
+    val latestTotalPageCount by rememberUpdatedState(totalPageCount)
+
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage to pagerState.isScrollInProgress }
+        // verseCount/pageOffset are part of the snapshot so the flow also re-emits once the
+        // verses finish loading. Without that, staying on the very first page produces no
+        // further emission and the opening ayah is never recorded as last read.
+        snapshotFlow {
+            ReaderPageSnapshot(
+                page = pagerState.currentPage,
+                isScrolling = pagerState.isScrollInProgress,
+                verseCount = latestVerseCount,
+                pageOffset = latestPageOffset
+            )
+        }
             .distinctUntilChanged()
-            .collect { (page, isScrolling) ->
-                val vIdx = page - pageOffset
-                if (vIdx in 0 until verseCount) {
+            .collect { snap ->
+                val vIdx = snap.page - snap.pageOffset
+                if (vIdx in 0 until snap.verseCount) {
                     vm.onPageChanged(vIdx)
                     vm.loadMoreIfNeeded(vIdx)
-                    if (!isScrolling) {
+                    if (!snap.isScrolling) {
                         vm.onPageSettled(vIdx)
                     }
                 }
@@ -230,6 +262,19 @@ fun ChapterReaderScreen(
         val lastIndex = verseCount - 1 + pageOffset
         if (pagerState.currentPage > lastIndex) {
             pagerState.scrollToPage(lastIndex)
+        }
+    }
+
+    // rememberPagerState captured initialPage while verseCount was still 0, i.e. before
+    // pageOffset could become 1. Once the leading transition page appears, page 0 is that
+    // transition page, so align onto the first real ayah instead of opening on it.
+    LaunchedEffect(verseCount, pageOffset) {
+        if (verseCount == 0 || pageOffset == 0 || hasAlignedInitialPage) return@LaunchedEffect
+        hasAlignedInitialPage = true
+        val isDeepLink = !initialVerseKey.isNullOrBlank() || initialVerseNumber != null
+        if (isDeepLink) return@LaunchedEffect
+        if (pagerState.currentPage == 0) {
+            pagerState.scrollToPage(pageOffset)
         }
     }
 
@@ -266,8 +311,8 @@ fun ChapterReaderScreen(
             when (event) {
                 is ReaderEvent.AnimateToPage -> {
                     val verses = vm.state.value.verses
-                    val target = event.index + pageOffset
-                    if (event.index in verses.indices && target in 0 until totalPageCount) {
+                    val target = event.index + latestPageOffset
+                    if (event.index in verses.indices && target in 0 until latestTotalPageCount) {
                         scope.launch {
                             runCatching { pagerState.animateScrollToPage(target) }
                         }
@@ -275,9 +320,12 @@ fun ChapterReaderScreen(
                 }
                 is ReaderEvent.AutoAdvanceToPage -> {
                     val verses = vm.state.value.verses
-                    val target = event.nextIndex + pageOffset
-                    if (event.nextIndex in verses.indices && target in 0 until totalPageCount) {
-                        if (kotlin.math.abs(pagerState.currentPage - (event.previousIndex + pageOffset)) <= 1) {
+                    val target = event.nextIndex + latestPageOffset
+                    if (event.nextIndex in verses.indices && target in 0 until latestTotalPageCount) {
+                        // Follow the audio only while the pager is still near the ayah that just
+                        // finished, so a user who has browsed elsewhere is not yanked away.
+                        val previousPage = event.previousIndex + latestPageOffset
+                        if (kotlin.math.abs(pagerState.currentPage - previousPage) <= 1) {
                             scope.launch {
                                 runCatching { pagerState.animateScrollToPage(target) }
                             }
@@ -286,6 +334,22 @@ fun ChapterReaderScreen(
                 }
             }
         }
+    }
+
+    // Safety net for audio-follow scrolling. The events above go through a droppable
+    // tryEmit(buffer = 1, no replay), so a missed emission would leave the pager stuck on an
+    // earlier ayah with no way back in sync. Reconciling against the playing verse key here
+    // means playback position always wins eventually, even if an event was lost.
+    val playingVerseKey = state.currentlyPlayingVerseKey
+    LaunchedEffect(playingVerseKey, verseCount) {
+        if (playingVerseKey.isNullOrBlank() || verseCount == 0) return@LaunchedEffect
+        val idx = state.verses.indexOfFirst { it.verseKey == playingVerseKey }
+        if (idx < 0) return@LaunchedEffect
+        val target = idx + pageOffset
+        if (target !in 0 until totalPageCount || pagerState.currentPage == target) return@LaunchedEffect
+        // Only pull the view along if the user has not deliberately browsed away.
+        if (kotlin.math.abs(pagerState.currentPage - target) > 1) return@LaunchedEffect
+        runCatching { pagerState.animateScrollToPage(target) }
     }
 
     Box(

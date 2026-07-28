@@ -2,7 +2,9 @@
 <resources>
     <color name="al_khatib_deep_emerald">#FF064E3B</color>
     <color name="al_khatib_screen_background">#FFF8FAFC</color>
-    <color name="splash_background">#FFFFFF</color>
+    <!-- Dominant colour of the old launch_screen_bg artwork, so the splash reads as the same
+         surface the logo used to sit on. Applies to both light and dark. -->
+    <color name="splash_background">#FFE7E8D3</color>
     <color name="al_khatib_emerald_night">#FF022C22</color>
     <color name="al_khatib_off_white">#FFF9F9F8</color>
 </resources>

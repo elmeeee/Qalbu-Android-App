@@ -10,10 +10,16 @@
         <item name="android:windowBackground">@color/al_khatib_screen_background</item>
     </style>
 
+    <!--
+        Android 12+ owns the splash via the SplashScreen API and only honours a solid
+        windowSplashScreenBackground plus a centred, circle-masked animated icon. A full-bleed
+        background image is not possible there, so use the logo on a matching solid colour and
+        keep it identical on older releases via windowBackground.
+    -->
     <style name="Theme.Saat.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@android:color/transparent</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_transparent_icon</item>
-        <item name="android:windowBackground">@drawable/splash_full_bg</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="android:windowBackground">@color/splash_background</item>
         <item name="postSplashScreenTheme">@style/Theme.Saat</item>
     </style>
 </resources>

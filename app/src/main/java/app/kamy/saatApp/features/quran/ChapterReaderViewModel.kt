@@ -342,6 +342,7 @@ class ChapterReaderViewModel @Inject constructor(
                 }
             }.onFailure { t ->
                 _state.update { it.copy(isLoading = false, error = t.toAppError()) }
+                abandonPendingScroll()
             }
         }
     }
@@ -384,8 +385,23 @@ class ChapterReaderViewModel @Inject constructor(
                             ?: appContext.getString(R.string.error_generic_body)
                     )
                 }
+                // Give up on the pending deep-link scroll: the page holding the target verse
+                // failed to load. Leaving initialScrollPending set would suppress every
+                // reading-progress write for the rest of this reader session.
+                abandonPendingScroll()
             }
         }
+    }
+
+    /**
+     * Releases the deep-link scroll suppression without scrolling, so reading progress starts
+     * being recorded again from wherever the reader actually is.
+     */
+    private fun abandonPendingScroll() {
+        if (pendingScrollVerseKey == null && !initialScrollPending) return
+        pendingScrollVerseKey = null
+        initialScrollPending = false
+        logCurrentVerseReading(force = true)
     }
 
     private suspend fun fetchVersePage(page: Int) =
@@ -537,6 +553,9 @@ class ChapterReaderViewModel @Inject constructor(
         val page = s.verses.getOrNull(index) ?: return
         val chapterNum = page.chapterNumber ?: s.chapterNumber
         val ayah = page.resolvedVerseNumber ?: return
+        // Persist locally as well: logScrollPosition only queues the (deduped, network) call,
+        // and the local store is what "Continue Reading" actually reads.
+        LocalReadingProgressStore.save(appContext, chapterNum, ayah)
         logScrollPosition(chapterNum, ayah, force = force)
     }
 

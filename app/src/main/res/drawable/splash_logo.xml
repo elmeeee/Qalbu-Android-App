@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@drawable/launch_screen_bg" />
-    </item>
-</layer-list>
+<!--
+    Splash icon for the Android 12+ SplashScreen API.
+
+    The platform draws this into a 288dp canvas and masks it to a circle, keeping only the
+    inner 192dp. The logo artwork is square-ish and reaches its own corners, so 16.7% inset
+    per side scales it down to that 192dp safe circle and stops the edges being clipped.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/saat_app_icon"
+    android:insetLeft="16.7%"
+    android:insetTop="16.7%"
+    android:insetRight="16.7%"
+    android:insetBottom="16.7%" />
