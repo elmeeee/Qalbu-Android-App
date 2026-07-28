@@ -315,8 +315,8 @@
     <string name="ayah_number">Ayat %1$d</string>
     <string name="ayah_label">Ayat %1$s</string>
     <string name="no_matches">Tidak ada hasil</string>
-    <string name="search_quran_placeholder">Nama surah, nomor, ayat (2:255), atau juz…</string>
-    <string name="search_surah_placeholder">Nama surah, nomor, ayat (2:255), atau juz…</string>
+    <string name="search_quran_placeholder">Nama surah, nomor, ayat, atau juz</string>
+    <string name="search_surah_placeholder">Nama surah, nomor, ayat, atau juz</string>
     <string name="search_section_surahs">Surah</string>
     <string name="search_section_verses">Ayat cocok</string>
     <string name="search_verse_result_title">%1$s · Ayat %2$d</string>

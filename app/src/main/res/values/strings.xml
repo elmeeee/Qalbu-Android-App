@@ -298,8 +298,8 @@
     <string name="ayah_number">Verse %1$d</string>
     <string name="ayah_label">Verse %1$s</string>
     <string name="no_matches">No matches</string>
-    <string name="search_quran_placeholder">Surah name, number, verse (2:255), or juz…</string>
-    <string name="search_surah_placeholder">Surah name, number, verse (2:255), or juz…</string>
+    <string name="search_quran_placeholder">Surah name, number, verse, or juz</string>
+    <string name="search_surah_placeholder">Surah name, number, verse, or juz</string>
     <string name="search_section_surahs">Surahs</string>
     <string name="search_section_verses">Matching verses</string>
     <string name="search_verse_result_title">%1$s · Ayah %2$d</string>
