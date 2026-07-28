@@ -357,6 +357,12 @@ class AccountViewModel @Inject constructor(
             return
         }
         appLanguageStore.set(language)
+
+        // Automatically set default translation corresponding to the new app language
+        val defaultTranslation = LocalQuranConfig.translationForAppLanguage(language)
+        val label = LocalQuranConfig.translationDisplayLabel(defaultTranslation)
+        translationStore.setTranslation(defaultTranslation.id, label)
+
         contentRepository.clearCache()
         shareComposer.clearCaches()
         viewModelScope.launch {
@@ -368,8 +374,8 @@ class AccountViewModel @Inject constructor(
             it.copy(
                 appLanguage = language,
                 showLanguageSheet = false,
-                selectedTranslationId = translationStore.currentTranslationId(),
-                selectedTranslationName = translationStore.translationName.value
+                selectedTranslationId = defaultTranslation.id,
+                selectedTranslationName = label
             )
         }
     }

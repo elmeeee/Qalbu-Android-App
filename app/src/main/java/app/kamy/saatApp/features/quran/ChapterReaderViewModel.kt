@@ -260,13 +260,17 @@ class ChapterReaderViewModel @Inject constructor(
         }
     }
 
-    fun loadInitial() {
+    fun loadInitial(
+        targetVerseKey: String? = null,
+        targetVerseIndex: Int = 0,
+        autoPlayAfterLoad: Boolean = false
+    ) {
         _state.update {
             it.copy(
                 isLoading = true,
                 error = null,
                 verses = emptyList(),
-                currentVerseIndex = 0,
+                currentVerseIndex = targetVerseIndex,
                 loadedApiPage = 0,
                 hasMore = true
             )
@@ -281,12 +285,18 @@ class ChapterReaderViewModel @Inject constructor(
                 val arabicType = translationStore.arabicTextType.value
                 val rec = translationStore.currentRecitationId()
                 val tid = LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
-                
+
+                val restoredIndex = if (targetVerseKey != null) {
+                    resp.verses.indexOfFirst { it.verseKey == targetVerseKey }.takeIf { it >= 0 } ?: targetVerseIndex
+                } else {
+                    targetVerseIndex
+                }.coerceIn(0, (resp.verses.size - 1).coerceAtLeast(0))
+
                 _state.update { 
                     it.copy(
                         isLoading = false,
                         verses = resp.verses,
-                        currentVerseIndex = 0,
+                        currentVerseIndex = restoredIndex,
                         loadedApiPage = resp.pagination?.currentPage ?: 1,
                         hasMore = resp.pagination?.hasNextPage ?: false,
                         selectedTranslationId = tid,
@@ -299,7 +309,14 @@ class ChapterReaderViewModel @Inject constructor(
                 }
                 tryScrollToPendingVerse()
                 logCurrentVerseReading(force = true)
-                refreshPersonalVerseState(0)
+                refreshPersonalVerseState(restoredIndex)
+
+                if (autoPlayAfterLoad) {
+                    val page = resp.verses.getOrNull(restoredIndex)
+                    if (page != null) {
+                        playAyahAtIndex(restoredIndex, page)
+                    }
+                }
             }.onFailure { t ->
                 _state.update { it.copy(isLoading = false, error = t.toAppError()) }
             }
@@ -394,9 +411,19 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun selectRecitation(id: Int) {
         if (id <= 0 || id == _state.value.selectedRecitationId) return
+        val currentKey = _state.value.currentlyPlayingVerseKey
+            ?: _state.value.verses.getOrNull(_state.value.currentVerseIndex)?.verseKey
+        val activeIndex = _state.value.currentVerseIndex
+        val wasPlaying = audioPlayer.state.value.isPlaying || audioPlayer.state.value.currentUrl != null
+
         translationStore.setRecitation(id)
         _state.update { it.copy(selectedRecitationId = id) }
-        loadInitial()
+
+        loadInitial(
+            targetVerseKey = currentKey,
+            targetVerseIndex = activeIndex,
+            autoPlayAfterLoad = wasPlaying
+        )
     }
 
     fun setFontScale(scale: Float) {
@@ -455,14 +482,9 @@ class ChapterReaderViewModel @Inject constructor(
     fun onPageSettled(index: Int) {
         val s = _state.value
         if (index !in s.verses.indices) return
-        val page = s.verses[index]
-        val audioState = audioPlayer.state.value
-        if (audioState.isPlaying && audioState.currentUrl != null) {
-            val targetKey = page.verseKey
-            if (targetKey != null && targetKey != audioState.trackSubtitle) {
-                playAyahAtIndex(index, page)
-            }
-        }
+        _state.update { it.copy(currentVerseIndex = index) }
+        logCurrentVerseReading()
+        refreshPersonalVerseState(index)
     }
 
     private fun logCurrentVerseReading(force: Boolean = false) {

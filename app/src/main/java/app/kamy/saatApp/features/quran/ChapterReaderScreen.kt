@@ -811,23 +811,39 @@ private fun SaatAyahPage(
                 else -> {
                     val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) (verse.textIndopak ?: verse.textUthmani) else verse.textUthmani
                     val isPlayingThisVerse = audioPlaybackState != null && audioPlaybackState.isPlaying && audioPlaybackState.trackSubtitle == verse.verseKey && audioPlaybackState.currentUrl != null
-                    val words = remember(textToRender) { textToRender?.split("\\s+".toRegex())?.filter { it.isNotBlank() } ?: emptyList() }
-                    val activeWordIndex = remember(isPlayingThisVerse, audioPlaybackState?.progress, words) {
+                    val words = remember(textToRender) {
+                        textToRender?.split("\\s+".toRegex())
+                            ?.filter { it.isNotBlank() }
+                            ?.map { word ->
+                                word.replace("""^[﴿\(]?\d+[﴾\)]?""".toRegex(), "").trim()
+                            }
+                            ?.filter { it.isNotBlank() } ?: emptyList()
+                    }
+                    val activeWordIndex = remember(isPlayingThisVerse, audioPlaybackState?.progress, audioPlaybackState?.currentPositionMs, words) {
                         if (!isPlayingThisVerse || words.isEmpty()) {
                             null
                         } else {
-                            val prog = (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
+                            val dur = audioPlaybackState?.durationMs ?: 0L
+                            val pos = audioPlaybackState?.currentPositionMs ?: 0L
+                            val prog = if (dur > 0L) (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f) else (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
+
                             val weights = words.mapIndexed { index, word ->
                                 var weight = word.length.toFloat().coerceAtLeast(1f)
+                                // Madd (long vowels) & Tajweed extensions
                                 if (word.contains('ٓ') || word.contains('ۤ') || word.contains('ۧ') || word.contains('ۨ') || word.contains('\u0653') || word.contains('\u06E4')) {
                                     weight += 8.0f
                                 }
+                                // Shaddah & Ghunnah
                                 if (word.contains('ّ') || word.contains('\u0651')) {
                                     if (word.contains('ن') || word.contains('م')) {
                                         weight += 4.0f
                                     } else {
                                         weight += 2.0f
                                     }
+                                }
+                                // Pause / Waqf signs (ۘ, ۚ, ۖ, ۗ, ۬, ۥ, ۙ) — add breath pause weight for long verses
+                                if (word.contains('ۘ') || word.contains('ۚ') || word.contains('ۖ') || word.contains('ۗ') || word.contains('۬') || word.contains('ۥ') || word.contains('ۙ')) {
+                                    weight += 6.0f
                                 }
                                 if (index == words.lastIndex && words.size > 1) {
                                     weight *= 1.25f
