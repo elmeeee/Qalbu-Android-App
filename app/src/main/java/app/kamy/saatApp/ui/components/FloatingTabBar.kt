@@ -59,7 +59,8 @@ fun FloatingTabBar(
             )
             .clip(CircleShape),
         shape = CircleShape,
-        color = Color(0xFFECEEEE),
+        color = Color(0xFDF0F4F2),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.8f)),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
