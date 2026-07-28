@@ -85,7 +85,8 @@ object QuranPersonalStore {
         val chapters: List<Int> = emptyList(),
         val juzs: List<Int> = emptyList(),
         val lastReadJuz: Int? = null,
-        val lastReadVerseKey: String? = null
+        val lastReadVerseKey: String? = null,
+        val lastReadUpdatedAtMillis: Long? = null
     )
 
     fun readChapters(context: Context): Set<Int> =
@@ -116,10 +117,44 @@ object QuranPersonalStore {
     fun lastReadVerseKey(context: Context): String? =
         loadList(context, KEY_KHATAM, KhatamList()).lastReadVerseKey
 
-    fun updateLastReadJuz(context: Context, juzNumber: Int, verseKey: String) {
+    fun lastReadUpdatedAtMillis(context: Context): Long? =
+        loadList(context, KEY_KHATAM, KhatamList()).lastReadUpdatedAtMillis
+
+    fun lastReadProgress(context: Context): app.kamy.saatApp.domain.model.LocalReadingProgress? {
         val data = loadList(context, KEY_KHATAM, KhatamList())
-        if (data.lastReadJuz != juzNumber || data.lastReadVerseKey != verseKey) {
-            saveList(context, KEY_KHATAM, data.copy(lastReadJuz = juzNumber, lastReadVerseKey = verseKey))
+        val verseKey = data.lastReadVerseKey ?: return null
+        val parts = verseKey.split(':', limit = 2)
+        val chapterNumber = parts.getOrNull(0)?.toIntOrNull() ?: return null
+        val verseNumber = parts.getOrNull(1)?.toIntOrNull() ?: return null
+        if (chapterNumber <= 0 || verseNumber <= 0) return null
+        return app.kamy.saatApp.domain.model.LocalReadingProgress(
+            chapterNumber = chapterNumber,
+            verseNumber = verseNumber,
+            updatedAtMillis = data.lastReadUpdatedAtMillis ?: 0L
+        )
+    }
+
+    fun updateLastReadJuz(
+        context: Context,
+        juzNumber: Int,
+        verseKey: String,
+        updatedAtMillis: Long = System.currentTimeMillis()
+    ) {
+        val data = loadList(context, KEY_KHATAM, KhatamList())
+        if (
+            data.lastReadJuz != juzNumber ||
+            data.lastReadVerseKey != verseKey ||
+            data.lastReadUpdatedAtMillis != updatedAtMillis
+        ) {
+            saveList(
+                context,
+                KEY_KHATAM,
+                data.copy(
+                    lastReadJuz = juzNumber,
+                    lastReadVerseKey = verseKey,
+                    lastReadUpdatedAtMillis = updatedAtMillis
+                )
+            )
         }
     }
 

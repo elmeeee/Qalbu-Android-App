@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import app.kamy.saatApp.core.locale.AppLanguage
 import java.util.UUID
 import javax.inject.Inject
 
@@ -75,7 +76,15 @@ class TanyaSaatViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val aiResponse = repository.processUserQuery(query)
+            val aiResponse = runCatching {
+                repository.processUserQuery(query)
+            }.getOrElse {
+                SaatChatMessage(
+                    id = UUID.randomUUID().toString(),
+                    sender = ChatSender.AI,
+                    text = fallbackErrorMessage()
+                )
+            }
             _state.update {
                 it.copy(
                     messages = it.messages + aiResponse,
@@ -101,5 +110,14 @@ class TanyaSaatViewModel @Inject constructor(
 
     fun clearToast() {
         _state.update { it.copy(toastMessage = null) }
+    }
+
+    private fun fallbackErrorMessage(): String = when (appLanguageStore.current()) {
+        AppLanguage.INDONESIAN ->
+            "Balasan Sahabat Saat belum berhasil dimuat. Coba kirim lagi dalam beberapa saat."
+        AppLanguage.ENGLISH ->
+            "Sahabat Saat could not load a reply yet. Please try sending your message again shortly."
+        AppLanguage.MALAY ->
+            "Balasan Sahabat Saat belum berjaya dimuat. Cuba hantar semula sebentar lagi."
     }
 }

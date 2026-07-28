@@ -2,11 +2,13 @@ package app.kamy.saatApp.infrastructure.repository
 
 import android.content.Context
 import app.kamy.saatApp.core.error.qfCall
+import app.kamy.saatApp.domain.model.LocalReadingProgress
 import app.kamy.saatApp.domain.model.ReadingSession
 import app.kamy.saatApp.domain.model.ReadingSessionInput
 import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.infrastructure.network.api.AuthV1ApiService
 import app.kamy.saatApp.infrastructure.preferences.LocalReadingProgressStore
+import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,7 +20,10 @@ class ReadingSessionRepository @Inject constructor(
     private val userSession: UserSession
 ) {
     suspend fun fetchMostRecent(): ReadingSession? {
-        val local = LocalReadingProgressStore.load(appContext)?.toReadingSession()
+        val device = bestDeviceProgress()?.also {
+            LocalReadingProgressStore.save(appContext, it.chapterNumber, it.verseNumber)
+        }
+        val local = device?.toReadingSession()
         if (!userSession.isSignedIn.value) return local
 
         val cloud = runCatching {
@@ -65,6 +70,27 @@ class ReadingSessionRepository @Inject constructor(
             local == null -> cloud
             cloud == null -> local
             cloud.updatedAtMillis() >= local.updatedAtMillis() -> cloud
+            else -> local
+        }
+    }
+
+    private fun bestDeviceProgress(): LocalReadingProgress? {
+        val local = LocalReadingProgressStore.load(appContext)
+        val personal = QuranPersonalStore.lastReadProgress(appContext)
+        return when {
+            local == null -> personal
+            personal == null -> local
+            personal.updatedAtMillis == 0L -> {
+                if (
+                    personal.chapterNumber != local.chapterNumber ||
+                    personal.verseNumber != local.verseNumber
+                ) {
+                    personal.copy(updatedAtMillis = System.currentTimeMillis())
+                } else {
+                    local
+                }
+            }
+            personal.updatedAtMillis >= local.updatedAtMillis -> personal
             else -> local
         }
     }
