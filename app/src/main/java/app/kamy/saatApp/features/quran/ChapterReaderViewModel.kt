@@ -137,6 +137,7 @@ class ChapterReaderViewModel @Inject constructor(
                     val chapter = savedStateHandle.get<Int>("chapter") ?: return@let null
                     "$chapter:$ayah"
                 }
+    private var initialScrollPending: Boolean = pendingScrollVerseKey != null
 
     init {
         val isJuzMode = juzNumber != null
@@ -308,7 +309,9 @@ class ChapterReaderViewModel @Inject constructor(
                     ) 
                 }
                 tryScrollToPendingVerse()
-                logCurrentVerseReading(force = true)
+                if (pendingScrollVerseKey == null && !initialScrollPending) {
+                    logCurrentVerseReading(force = true)
+                }
                 refreshPersonalVerseState(restoredIndex)
 
                 if (autoPlayAfterLoad) {
@@ -386,13 +389,19 @@ class ChapterReaderViewModel @Inject constructor(
         val idx = s.verses.indexOfFirst { it.verseKey == key }
         if (idx >= 0) {
             pendingScrollVerseKey = null
+            initialScrollPending = false
+            _state.update { it.copy(currentVerseIndex = idx) }
             _events.tryEmit(ReaderEvent.AnimateToPage(idx))
+            logCurrentVerseReading(force = true)
+            refreshPersonalVerseState(idx)
             return
         }
         if (s.hasMore && !s.isLoadingMore) {
             loadNextPage()
         } else if (!s.hasMore) {
             pendingScrollVerseKey = null
+            initialScrollPending = false
+            logCurrentVerseReading(force = true)
         }
     }
 
@@ -458,6 +467,13 @@ class ChapterReaderViewModel @Inject constructor(
         val page = s.verses[index]
         _state.update { it.copy(currentVerseIndex = index) }
         refreshPersonalVerseState(index)
+
+        // Suppress logging while the initial scroll to the target verse is still pending.
+        // Without this guard, opening a reader with a deep-link (e.g. search → ayat kursi)
+        // would immediately log verse 1 as the reading position before the pager scrolls
+        // to the actual target verse.
+        if (initialScrollPending) return
+
         val chapterNum = page.chapterNumber ?: s.chapterNumber
         page.resolvedVerseNumber?.let { logScrollPosition(chapterNum, it) }
 
