@@ -864,6 +864,47 @@ class ChapterReaderViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadPreviousSurahOrJuz() {
+        val s = _state.value
+        if (s.juzNumber != null) {
+            val prevJuz = s.juzNumber - 1
+            if (prevJuz >= 1) {
+                savedStateHandle.set("juzNumber", prevJuz)
+                _state.update {
+                    it.copy(
+                        juzNumber = prevJuz,
+                        verses = emptyList(),
+                        currentVerseIndex = 0,
+                        loadedApiPage = 0,
+                        hasMore = true,
+                        isLoading = true,
+                        error = null
+                    )
+                }
+                loadChapterMeta()
+                loadInitial()
+            }
+        } else {
+            val prevChapter = s.chapterNumber - 1
+            if (prevChapter >= 1) {
+                savedStateHandle.set("chapter", prevChapter)
+                _state.update {
+                    it.copy(
+                        chapterNumber = prevChapter,
+                        verses = emptyList(),
+                        currentVerseIndex = 0,
+                        loadedApiPage = 0,
+                        hasMore = true,
+                        isLoading = true,
+                        error = null
+                    )
+                }
+                loadChapterMeta()
+                loadInitial()
+            }
+        }
+    }
 }
 
 sealed interface ReaderEvent {
