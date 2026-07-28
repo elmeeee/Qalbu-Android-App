@@ -704,14 +704,49 @@
     <!-- Settings & App Info -->
     <string name="app_tagline">SĀAT • Teman Ibadah Harian</string>
     <string name="app_version_format">Versi %1$s</string>
-    <string name="app_version_subtitle_format">Versi %1$s • Waktu Shalat &amp; Al-Qur\'an</string>
-    <string name="battery_unrestricted">Aman</string>
-    <string name="battery_optimized">Optimasi HP</string>
-    <string name="sound_mode_adhan">Suara Adzan</string>
-    <string name="sound_mode_system">Suara Bawaan HP</string>
-    <string name="test_adhan_title">Tes Adzan Alarm (Layar Penuh)</string>
-    <string name="test_adhan_subtitle">Pilih waktu shalat untuk simulasi adzan</string>
-    <string name="select_test_prayer">Pilih Waktu Shalat (Tes Adzan)</string>
-    <string name="dhuha_reminder_time_title">Waktu Pengingat Duha</string>
-    <string name="notification_settings_footer">Pengaturan Notifikasi &amp; Adzan</string>
+
+    <!-- Revamped Settings Strings -->
+    <string name="settings_main_title">Pengaturan</string>
+    <string name="settings_section_general">Pengaturan Umum</string>
+    <string name="settings_section_prayer_calc">Perhitungan Waktu Solat</string>
+    <string name="settings_section_about_saat">Tentang Sāat</string>
+    <string name="settings_item_language">Bahasa</string>
+    <string name="settings_item_quran">Al-Qur\'an</string>
+    <string name="settings_item_notification">Notifikasi</string>
+    <string name="settings_item_advance_options">Opsi Lanjutan</string>
+    <string name="settings_item_madhab">Mazhab</string>
+    <string name="settings_item_institution">Metode Perhitungan</string>
+    <string name="settings_item_adhan_voice">Suara Adzan</string>
+    <string name="settings_item_about">Tentang</string>
+    <string name="settings_item_privacy">Kebijakan Privasi</string>
+    <string name="settings_item_terms">Syarat &amp; Ketentuan</string>
+    <string name="settings_item_check_update">Cek Pembaruan</string>
+    <string name="settings_item_up_to_date">Versi terbaru</string>
+
+    <string name="notif_adhan_title">Notifikasi Adzan</string>
+    <string name="notif_section_adhan">Notifikasi Adzan</string>
+    <string name="notif_section_reading">Notifikasi Membaca</string>
+    <string name="notif_section_other_prayer">Ibadah Lainnya</string>
+    <string name="notif_surah_reminders">Pengingat Surah</string>
+    <string name="notif_fasting_important_days">Puasa &amp; Hari Penting</string>
+    <string name="notif_mon_thu_fasting">Puasa Senin &amp; Kamis</string>
+    <string name="notif_tahajud_remainder">Pengingat Tahajud</string>
+    <string name="notif_dhuha_remainder">Pengingat Duha</string>
+    <string name="state_on">Aktif</string>
+    <string name="state_off">Nonaktif</string>
+    <string name="surah_count_on_format">%1$d Surah - Aktif</string>
+
+    <string name="reading_notif_title">Notifikasi Membaca</string>
+    <string name="reading_section_reading_notif">Notifikasi Membaca</string>
+    <string name="reading_section_writing">Penulisan</string>
+    <string name="reading_daily_verse">Ayat Harian</string>
+    <string name="reading_daily_verse_time">Waktu Ayat Harian</string>
+    <string name="reading_show_latin">Tampilkan Latin</string>
+    <string name="reading_show_translation">Tampilkan Terjemahan</string>
+    <string name="reading_translator">Penterjemah</string>
+    <string name="state_shown">Tampil</string>
+    <string name="state_hidden">Sembunyi</string>
+    <string name="up_to_date_sheet_title">Aplikasi Sudah Terbaru!</string>
+    <string name="up_to_date_sheet_desc">Sāat versi %1$s adalah versi terbaru saat ini. Selamat beribadah!</string>
+    <string name="got_it">Mengerti</string>
 </resources>

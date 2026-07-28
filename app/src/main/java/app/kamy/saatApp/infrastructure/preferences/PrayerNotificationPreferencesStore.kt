@@ -73,7 +73,13 @@ open class PrayerNotificationPreferencesStoreBase(
     fun isImsakEnabled(): Boolean = bool(KEY_IMSAK, default = true)
     fun isMidnightEnabled(): Boolean = bool(KEY_MIDNIGHT, default = true)
     fun isFirstThirdEnabled(): Boolean = bool(KEY_FIRST_THIRD, default = true)
-    fun isTahajudEnabled(): Boolean = bool(KEY_TAHAJUD, default = true)
+    fun isTahajudEnabled(): Boolean = bool(KEY_TAHAJUD, default = false)
+    fun tahajudHour(): Int = prefs.getInt(KEY_TAHAJUD_HOUR, 3)
+    fun tahajudMinute(): Int = prefs.getInt(KEY_TAHAJUD_MINUTE, 30)
+    fun setTahajudTime(hour: Int, minute: Int) {
+        prefs.edit().putInt(KEY_TAHAJUD_HOUR, hour).putInt(KEY_TAHAJUD_MINUTE, minute).apply()
+        _changed.value = _changed.value + 1
+    }
     fun isYasinReminderEnabled(): Boolean = bool(KEY_YASIN, default = true)
     fun isKahfReminderEnabled(): Boolean = bool(KEY_KAHF, default = true)
     fun isImportantDaysReminderEnabled(): Boolean = bool(KEY_IMPORTANT_DAYS, default = true)
@@ -124,6 +130,8 @@ open class PrayerNotificationPreferencesStoreBase(
         private const val KEY_MIDNIGHT = "midnightNotificationsEnabled"
         private const val KEY_FIRST_THIRD = "firstThirdNotificationsEnabled"
         private const val KEY_TAHAJUD = "tahajudNotificationsEnabled"
+        private const val KEY_TAHAJUD_HOUR = "tahajudReminderHour"
+        private const val KEY_TAHAJUD_MINUTE = "tahajudReminderMinute"
         private const val KEY_YASIN = "yasinReminderEnabled"
         private const val KEY_KAHF = "kahfReminderEnabled"
         private const val KEY_IMPORTANT_DAYS = "importantDaysReminderEnabled"

@@ -2,75 +2,51 @@ package app.kamy.saatApp.features.account
 
 import android.content.Intent
 import android.net.Uri
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Gavel
-import app.kamy.saatApp.core.config.LocalQuranConfig
-import app.kamy.saatApp.design.theme.SaatColors
-import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
-import app.kamy.saatApp.domain.prayer.PrayerMadhab
-import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
-import app.kamy.saatApp.domain.prayer.PrayerMethodOption
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Gavel
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Slider
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -87,38 +63,34 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import app.kamy.saatApp.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import app.kamy.saatApp.core.error.AppError
-import app.kamy.saatApp.design.components.SaatCard
-import app.kamy.saatApp.design.components.SaatCardStyle
-import app.kamy.saatApp.design.components.SaatInlineError
-import app.kamy.saatApp.design.components.SaatSettingsGroup
-import app.kamy.saatApp.design.components.SaatSettingsNavigationRow
-import app.kamy.saatApp.design.components.SaatSettingsToggleRow
-import app.kamy.saatApp.design.theme.SaatSpacing
-import app.kamy.saatApp.core.locale.AppLanguage
-import app.kamy.saatApp.ui.common.rememberErrorDisplay
-import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
-import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
+import app.kamy.saatApp.R
+import app.kamy.saatApp.core.config.LocalQuranConfig
+import app.kamy.saatApp.core.error.AppError
+import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.design.components.SaatInlineError
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.adhan.AdhanVoice
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.saatApp.domain.adhan.FajrAdhanVoice
+import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.domain.model.QFTranslation
+import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
+import app.kamy.saatApp.domain.prayer.PrayerMadhab
+import app.kamy.saatApp.domain.prayer.PrayerMethodOption
+import app.kamy.saatApp.ui.common.rememberErrorDisplay
+import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
+import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,44 +101,53 @@ fun AccountScreen(
     val vm: AccountViewModel = hiltViewModel()
     val state by vm.state.collectAsState()
     val context = LocalContext.current
-    val showNotificationSettings = rememberSaveable { mutableStateOf(false) }
-    val showAboutDeveloper = rememberSaveable { mutableStateOf(false) }
-    val showPrivacyPolicy = rememberSaveable { mutableStateOf(false) }
-    val showTerms = rememberSaveable { mutableStateOf(false) }
+    val currentDetailScreen = rememberSaveable { mutableStateOf<String?>(null) }
+    var showUpToDateSheet by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(showNotificationSettings.value, showPrivacyPolicy.value, showTerms.value) {
-        onAccountDetailScreenChanged(
-            showNotificationSettings.value || showPrivacyPolicy.value || showTerms.value
-        )
+    LaunchedEffect(currentDetailScreen.value) {
+        onAccountDetailScreenChanged(currentDetailScreen.value != null)
     }
 
-    if (showNotificationSettings.value || showPrivacyPolicy.value || showTerms.value) {
+    if (currentDetailScreen.value != null) {
         BackHandler {
-            showNotificationSettings.value = false
-            showPrivacyPolicy.value = false
-            showTerms.value = false
+            currentDetailScreen.value = null
         }
     }
 
-    when {
-        showNotificationSettings.value -> {
-            NotificationSettingsScreen(
+    when (currentDetailScreen.value) {
+        "READING_NOTIFICATION" -> {
+            ReadingNotificationScreen(
+                state = state,
                 vm = vm,
-                onBack = { showNotificationSettings.value = false }
+                onBack = { currentDetailScreen.value = null }
             )
         }
-        showPrivacyPolicy.value -> {
+        "NOTIFICATION_ADHAN" -> {
+            NotificationAdhanScreen(
+                state = state,
+                vm = vm,
+                onBack = { currentDetailScreen.value = null }
+            )
+        }
+        "PRIVACY_POLICY" -> {
             PrivacyPolicyScreen(
                 appLanguage = state.appLanguage,
                 appTheme = state.appTheme,
-                onBack = { showPrivacyPolicy.value = false }
+                onBack = { currentDetailScreen.value = null }
             )
         }
-        showTerms.value -> {
+        "TERMS_CONDITIONS" -> {
             TermsAndConditionsScreen(
                 appLanguage = state.appLanguage,
                 appTheme = state.appTheme,
-                onBack = { showTerms.value = false }
+                onBack = { currentDetailScreen.value = null }
+            )
+        }
+        "ABOUT_SAAT" -> {
+            AboutSaatScreen(
+                appLanguage = state.appLanguage,
+                appTheme = state.appTheme,
+                onBack = { currentDetailScreen.value = null }
             )
         }
         else -> {
@@ -174,32 +155,21 @@ fun AccountScreen(
                 state = state,
                 vm = vm,
                 onBack = onBack,
-                onOpenNotifications = { showNotificationSettings.value = true },
-                onOpenAboutDeveloper = { showAboutDeveloper.value = true },
-                onOpenPrivacyPolicy = { showPrivacyPolicy.value = true },
-                onOpenTerms = { showTerms.value = true }
+                onOpenReadingNotification = { currentDetailScreen.value = "READING_NOTIFICATION" },
+                onOpenNotificationAdhan = { currentDetailScreen.value = "NOTIFICATION_ADHAN" },
+                onOpenAbout = { currentDetailScreen.value = "ABOUT_SAAT" },
+                onOpenPrivacyPolicy = { currentDetailScreen.value = "PRIVACY_POLICY" },
+                onOpenTerms = { currentDetailScreen.value = "TERMS_CONDITIONS" },
+                onCheckUpdate = { showUpToDateSheet = true }
             )
         }
     }
 
-    if (showAboutDeveloper.value) {
-        AboutDeveloperSheet(onDismiss = { showAboutDeveloper.value = false })
+    val filteredTranslations = remember(state.translations, state.translatorQuery) {
+        vm.filteredTranslations()
     }
 
-    // Translator sheet
     if (state.showTranslatorSheet) {
-        val filteredTranslations = remember(state.translations, state.translatorQuery) {
-            val q = state.translatorQuery.trim().lowercase()
-            if (q.isEmpty()) {
-                state.translations
-            } else {
-                state.translations.filter {
-                    it.name.lowercase().contains(q) ||
-                        it.authorName.lowercase().contains(q) ||
-                        it.languageName.lowercase().contains(q)
-                }
-            }
-        }
         TranslatorSheet(
             query = state.translatorQuery,
             selectedId = state.selectedTranslationId,
@@ -226,17 +196,6 @@ fun AccountScreen(
         )
     }
 
-    // Font scale sheet
-    if (state.showFontScaleSheet) {
-        FontScaleSheet(
-            scale = state.fontScale,
-            onScaleChange = vm::setFontScale,
-            onDismiss = vm::closeFontScale
-        )
-    }
-
-
-    // Madhab selection sheet
     if (state.showMadhabSheet) {
         MadhabSelectionSheet(
             selected = state.prayerMadhab,
@@ -245,7 +204,6 @@ fun AccountScreen(
         )
     }
 
-    // Prayer method sheet
     if (state.showPrayerSheet) {
         PrayerMethodSheet(
             selected = state.prayerMethod,
@@ -282,8 +240,6 @@ fun AccountScreen(
         )
     }
 
-
-
     if (state.showSurahRemindersSheet) {
         SurahRemindersSheet(
             reminders = state.surahReminders,
@@ -294,19 +250,40 @@ fun AccountScreen(
             onDismiss = vm::closeSurahRemindersSheet
         )
     }
+
+    val packageInfo = remember {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0)
+        } catch (e: Exception) {
+            null
+        }
+    }
+    val appVersion = remember(packageInfo) {
+        packageInfo?.versionName ?: "1.0.1"
+    }
+
+    if (showUpToDateSheet) {
+        UpToDateSheet(
+            appVersion = appVersion,
+            onDismiss = { showUpToDateSheet = false }
+        )
+    }
 }
+
+// ─── Main Settings View (Mockup 1) ───────────────────────────────────────────
 
 @Composable
 private fun AccountSettingsContent(
     state: AccountUiState,
     vm: AccountViewModel,
     onBack: (() -> Unit)?,
-    onOpenNotifications: () -> Unit,
-    onOpenAboutDeveloper: () -> Unit,
+    onOpenReadingNotification: () -> Unit,
+    onOpenNotificationAdhan: () -> Unit,
+    onOpenAbout: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
-    onOpenTerms: () -> Unit
+    onOpenTerms: () -> Unit,
+    onCheckUpdate: () -> Unit
 ) {
-    val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
     val packageInfo = remember {
         try {
@@ -319,50 +296,42 @@ private fun AccountSettingsContent(
         packageInfo?.versionName ?: "1.0.1"
     }
 
-    val defaultTranslatorName = remember(state.appLanguage) {
-        LocalQuranConfig.translationForAppLanguage(state.appLanguage).authorName
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color(0xFFF7F7F7))
     ) {
-        // Sticky Header bar staying fixed at top
+        // Sticky Header bar
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.background,
-            shadowElevation = 1.dp
+            color = Color(0xFFF7F7F7),
+            shadowElevation = 0.5.dp
         ) {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .tabContentStatusBarInset()
-                    .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 14.dp)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = SaatColors.DeepEmerald
-                            )
-                        }
-                        Spacer(Modifier.width(8.dp))
+                if (onBack != null) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = Color(0xFF1C1C1E)
+                        )
                     }
-                    Text(
-                        text = stringResource(R.string.nav_account),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = SaatColors.DeepEmerald
-                    )
+                    Spacer(Modifier.width(8.dp))
                 }
+                Text(
+                    text = stringResource(R.string.settings_main_title),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color(0xFF1C1C1E)
+                )
             }
         }
 
@@ -372,744 +341,586 @@ private fun AccountSettingsContent(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(
-                    start = SaatSpacing.screenHorizontal,
-                    end = SaatSpacing.screenHorizontal,
-                    top = 12.dp,
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = 8.dp,
                     bottom = floatingNavBottomPadding() + 24.dp
-                ),
-            verticalArrangement = Arrangement.spacedBy(SaatSpacing.md)
+                )
         ) {
-            // 1. General Settings
-            SettingsSectionLabel(
-                text = stringResource(R.string.general),
-                accentColor = Color(0xFF085E43)
-            )
-            SaatSettingsGroup {
-                SaatSettingsNavigationRow(
-                    icon = Icons.Filled.Translate,
-                    title = stringResource(R.string.language_settings_title),
+            // 1. General settings
+            SettingsSectionHeader(stringResource(R.string.settings_section_general))
+            SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_language_custom,
+                    title = stringResource(R.string.settings_item_language),
                     subtitle = stringResource(state.appLanguage.labelRes),
-                    valueBadge = stringResource(state.appLanguage.labelRes),
                     onClick = { vm.openLanguageSheet() },
-                    iconTint = Color(0xFF085E43),
-                    iconBgColor = Color(0xFFE6F3EE),
+                    showChevron = true,
                     showDivider = true
                 )
-                SaatSettingsNavigationRow(
-                    icon = Icons.Filled.TextFields,
-                    title = stringResource(R.string.font_size),
-                    subtitle = stringResource(R.string.font_size_subtitle),
-                    valueBadge = "${(state.fontScale * 100).toInt()}%",
-                    onClick = { vm.openFontScale() },
-                    iconTint = Color(0xFF085E43),
-                    iconBgColor = Color(0xFFE6F3EE),
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_setting_quran_custom,
+                    title = stringResource(R.string.settings_item_quran),
+                    subtitle = stringResource(R.string.settings_item_advance_options),
+                    onClick = onOpenReadingNotification,
+                    showChevron = true,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_notification_custom,
+                    title = stringResource(R.string.settings_item_notification),
+                    subtitle = stringResource(R.string.settings_item_advance_options),
+                    onClick = onOpenNotificationAdhan,
+                    showChevron = true,
                     showDivider = false
                 )
             }
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // 2. Prayer & Adhan Settings
-            SettingsSectionLabel(
-                text = stringResource(R.string.prayer_settings),
-                accentColor = Color(0xFFD97706)
-            )
-            SaatSettingsGroup {
-                SaatSettingsNavigationRow(
-                    icon = Icons.Filled.Schedule,
-                    title = stringResource(R.string.prayer_calculation_method),
-                    subtitle = state.prayerMethod.organization,
-                    valueBadge = state.prayerMethod.name,
-                    onClick = { vm.togglePrayerSheet(true) },
-                    iconTint = Color(0xFFD97706),
-                    iconBgColor = Color(0xFFFFF7ED),
-                    showDivider = true
-                )
-                SaatSettingsNavigationRow(
-                    icon = Icons.Filled.Gavel,
-                    title = stringResource(R.string.madhab_settings_title),
+            // 2. Prayer Calculation
+            SettingsSectionHeader(stringResource(R.string.settings_section_prayer_calc))
+            SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_madhab_custom,
+                    title = stringResource(R.string.settings_item_madhab),
                     subtitle = stringResource(state.prayerMadhab.displayNameRes),
-                    valueBadge = stringResource(state.prayerMadhab.displayNameRes),
                     onClick = { vm.openMadhabSheet() },
-                    iconTint = Color(0xFFD97706),
-                    iconBgColor = Color(0xFFFFF7ED),
+                    showChevron = true,
                     showDivider = true
                 )
-                SaatSettingsNavigationRow(
-                    icon = Icons.AutoMirrored.Filled.VolumeUp,
-                    title = stringResource(R.string.adhan_voice),
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_institution_custom,
+                    title = stringResource(R.string.settings_item_institution),
+                    subtitle = state.prayerMethod.organization,
+                    onClick = { vm.togglePrayerSheet(true) },
+                    showChevron = true,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_adhan_voice_custom,
+                    title = stringResource(R.string.settings_item_adhan_voice),
                     subtitle = state.selectedAdhanVoice.displayName,
-                    valueBadge = state.selectedAdhanVoice.displayName,
                     onClick = { vm.openAdhanSheet() },
-                    iconTint = Color(0xFFD97706),
-                    iconBgColor = Color(0xFFFFF7ED),
+                    showChevron = true,
                     showDivider = false
                 )
             }
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // 3. Quran & Reading Settings
-            SettingsSectionLabel(
-                text = stringResource(R.string.reading_settings),
-                accentColor = Color(0xFF0D9488)
-            )
-            SaatSettingsGroup {
-                SaatSettingsToggleRow(
-                    icon = Icons.AutoMirrored.Filled.MenuBook,
-                    title = stringResource(R.string.show_translation),
-                    checked = state.showTranslation,
-                    onCheckedChange = vm::setShowTranslation,
-                    iconTint = Color(0xFF0D9488),
-                    iconBgColor = Color(0xFFF0FDFA),
+            // 3. About Sāat
+            SettingsSectionHeader(stringResource(R.string.settings_section_about_saat))
+            SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_about_custom,
+                    title = stringResource(R.string.settings_item_about),
+                    onClick = onOpenAbout,
+                    showChevron = true,
                     showDivider = true
                 )
-                SaatSettingsToggleRow(
-                    icon = Icons.Filled.TextFields,
-                    title = stringResource(R.string.show_transliteration),
-                    checked = state.showTransliteration,
-                    onCheckedChange = vm::setShowTransliteration,
-                    iconTint = Color(0xFF0D9488),
-                    iconBgColor = Color(0xFFF0FDFA),
-                    showDivider = true
-                )
-                SaatSettingsNavigationRow(
-                    icon = Icons.Filled.Translate,
-                    title = stringResource(R.string.translator),
-                    subtitle = state.selectedTranslationName.ifBlank { defaultTranslatorName },
-                    valueBadge = if (state.selectedTranslationName.isNotBlank()) state.selectedTranslationName else null,
-                    onClick = { vm.openTranslator() },
-                    iconTint = Color(0xFF0D9488),
-                    iconBgColor = Color(0xFFF0FDFA),
-                    showDivider = false
-                )
-            }
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            // 4. Notifications & Reminders
-            SettingsSectionLabel(
-                text = stringResource(R.string.notifications),
-                accentColor = Color(0xFF6366F1)
-            )
-            SaatSettingsGroup {
-                SaatSettingsNavigationRow(
-                    icon = Icons.Filled.Notifications,
-                    title = stringResource(R.string.reminders),
-                    subtitle = vm.notificationSummary(state),
-                    onClick = onOpenNotifications,
-                    iconTint = Color(0xFF6366F1),
-                    iconBgColor = Color(0xFFEEF2FF),
-                    showDivider = false
-                )
-            }
-
-            Spacer(modifier = Modifier.height(2.dp))
-
-            // 5. About & Info
-            SettingsSectionLabel(
-                text = stringResource(R.string.about),
-                accentColor = Color(0xFF64748B)
-            )
-            SaatSettingsGroup {
-                SaatSettingsNavigationRow(
-                    icon = Icons.Outlined.Info,
-                    title = stringResource(R.string.about_developer),
-                    subtitle = stringResource(R.string.app_version_format, appVersion),
-                    valueBadge = "v$appVersion",
-                    onClick = onOpenAboutDeveloper,
-                    iconTint = Color(0xFF64748B),
-                    iconBgColor = Color(0xFFF1F5F9),
-                    showDivider = true
-                )
-                SaatSettingsNavigationRow(
-                    icon = Icons.Outlined.Shield,
-                    title = stringResource(R.string.privacy_policy),
-                    subtitle = stringResource(R.string.privacy_policy_effective),
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_privacy_custom,
+                    title = stringResource(R.string.settings_item_privacy),
                     onClick = onOpenPrivacyPolicy,
-                    iconTint = Color(0xFF64748B),
-                    iconBgColor = Color(0xFFF1F5F9),
+                    showChevron = true,
                     showDivider = true
                 )
-                SaatSettingsNavigationRow(
-                    icon = Icons.Outlined.Gavel,
-                    title = stringResource(R.string.terms_and_conditions),
-                    subtitle = stringResource(R.string.terms_effective),
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_terms_custom,
+                    title = stringResource(R.string.settings_item_terms),
                     onClick = onOpenTerms,
-                    iconTint = Color(0xFF64748B),
-                    iconBgColor = Color(0xFFF1F5F9),
+                    showChevron = true,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_update_custom,
+                    title = stringResource(R.string.settings_item_check_update),
+                    subtitle = stringResource(R.string.settings_item_up_to_date),
+                    onClick = onCheckUpdate,
+                    showChevron = true,
                     showDivider = false
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Bottom App Branding Footer
+            Spacer(Modifier.height(24.dp))
             AppFooterCard(appVersion = appVersion)
-
             Spacer(Modifier.height(floatingNavBottomPadding()))
         }
     }
 }
 
+// ─── Notification Adhan Screen (Mockup 2) ───────────────────────────────────
+
 @Composable
-private fun SettingsHeroHeader(
-    appVersion: String,
-    appLanguage: AppLanguage,
-    prayerMethod: PrayerCalculationMethod
+fun NotificationAdhanScreen(
+    state: AccountUiState,
+    vm: AccountViewModel,
+    onBack: () -> Unit
 ) {
-    Surface(
+    var showTahajudTimePicker by remember { mutableStateOf(false) }
+    var showDhuhaTimePicker by remember { mutableStateOf(false) }
+
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp)),
-        color = Color.Transparent
+            .fillMaxSize()
+            .background(Color(0xFFF7F7F7))
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(SaatColors.PrimaryVerticalGradient)
-                .padding(horizontal = 20.dp, vertical = 20.dp)
+        // Sticky Header bar
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFFF7F7F7),
+            shadowElevation = 0.5.dp
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .tabContentStatusBarInset()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(50.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.22f))
-                            .border(1.5.dp, Color.White.copy(alpha = 0.45f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    Column {
-                        Text(
-                            text = "Sāat Settings",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "Versi $appVersion • Waktu Shalat & Al-Qur'an",
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-                            color = Color.White.copy(alpha = 0.88f)
-                        )
-                    }
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = Color(0xFF1C1C1E)
+                    )
                 }
-
-                HorizontalDivider(
-                    color = Color.White.copy(alpha = 0.22f),
-                    thickness = 1.dp
+                Text(
+                    text = stringResource(R.string.notif_adhan_title),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color(0xFF1C1C1E)
                 )
-
-                // Quick Status Badges
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.White.copy(alpha = 0.22f)
-                    ) {
-                        Text(
-                            text = "🌐 " + stringResource(appLanguage.labelRes),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                        )
-                    }
-
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.White.copy(alpha = 0.22f),
-                        modifier = Modifier.weight(1f, fill = false)
-                    ) {
-                        Text(
-                            text = "🕋 " + prayerMethod.organization,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
-                        )
-                    }
-                }
             }
         }
-    }
-}
 
-@Composable
-private fun SettingsSectionLabel(
-    text: String,
-    accentColor: Color = MaterialTheme.colorScheme.primary
-) {
-    Row(
-        modifier = Modifier.padding(start = 2.dp, bottom = 6.dp, top = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
+        Column(
             modifier = Modifier
-                .width(4.dp)
-                .height(16.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(accentColor)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            // Section 1: Notification Adhan
+            SettingsSectionHeader(stringResource(R.string.notif_section_adhan))
+            SettingsCard {
+                val fajrOn = state.isPrayerNotificationEnabled(PrayerType.FAJR)
+                SettingsCustomRow(
+                    iconRes = if (fajrOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
+                    title = stringResource(R.string.prayer_fajr),
+                    subtitle = if (fajrOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = fajrOn,
+                    onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.FAJR, it) },
+                    showDivider = true
+                )
+                val dhuhrOn = state.isPrayerNotificationEnabled(PrayerType.DHUHR)
+                SettingsCustomRow(
+                    iconRes = if (dhuhrOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
+                    title = stringResource(R.string.prayer_dhuhr),
+                    subtitle = if (dhuhrOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = dhuhrOn,
+                    onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.DHUHR, it) },
+                    showDivider = true
+                )
+                val asrOn = state.isPrayerNotificationEnabled(PrayerType.ASR)
+                SettingsCustomRow(
+                    iconRes = if (asrOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
+                    title = stringResource(R.string.prayer_asr),
+                    subtitle = if (asrOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = asrOn,
+                    onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.ASR, it) },
+                    showDivider = true
+                )
+                val maghribOn = state.isPrayerNotificationEnabled(PrayerType.MAGHRIB)
+                SettingsCustomRow(
+                    iconRes = if (maghribOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
+                    title = stringResource(R.string.prayer_maghrib),
+                    subtitle = if (maghribOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = maghribOn,
+                    onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.MAGHRIB, it) },
+                    showDivider = true
+                )
+                val ishaOn = state.isPrayerNotificationEnabled(PrayerType.ISHA)
+                SettingsCustomRow(
+                    iconRes = if (ishaOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
+                    title = stringResource(R.string.prayer_isha),
+                    subtitle = if (ishaOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = ishaOn,
+                    onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.ISHA, it) },
+                    showDivider = false
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Section 2: Notification Reading
+            SettingsSectionHeader(stringResource(R.string.notif_section_reading))
+            SettingsCard {
+                val activeCount = state.surahReminders.count { it.enabled }
+                val surahSubtitle = if (state.yasinReminderEnabled) {
+                    stringResource(R.string.surah_count_on_format, if (activeCount > 0) activeCount else 3)
+                } else {
+                    stringResource(R.string.state_off)
+                }
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_remainders_custom,
+                    title = stringResource(R.string.notif_surah_reminders),
+                    subtitle = surahSubtitle,
+                    onClick = { vm.openSurahRemindersSheet() },
+                    checked = state.yasinReminderEnabled,
+                    onCheckedChange = { vm.setYasinReminderEnabled(it) },
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_remainders_custom,
+                    title = stringResource(R.string.notif_fasting_important_days),
+                    subtitle = if (state.importantDaysReminderEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.importantDaysReminderEnabled,
+                    onCheckedChange = vm::setImportantDaysReminderEnabled,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_remainders_custom,
+                    title = stringResource(R.string.notif_mon_thu_fasting),
+                    subtitle = if (state.monThuFastReminderEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.monThuFastReminderEnabled,
+                    onCheckedChange = vm::setMonThuFastReminderEnabled,
+                    showDivider = false
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Section 3: Other Prayer
+            SettingsSectionHeader(stringResource(R.string.notif_section_other_prayer))
+            SettingsCard {
+                val tahajudSub = if (state.tahajudEnabled) "${state.tahajudTimeLabel} - ${stringResource(R.string.state_on)}" else stringResource(R.string.state_off)
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_remainders_custom,
+                    title = stringResource(R.string.notif_tahajud_remainder),
+                    subtitle = tahajudSub,
+                    onClick = { showTahajudTimePicker = true },
+                    checked = state.tahajudEnabled,
+                    onCheckedChange = vm::setTahajudEnabled,
+                    showDivider = true
+                )
+                val dhuhaSub = if (state.dhuhaReminderEnabled) "${state.dhuhaTimeLabel} - ${stringResource(R.string.state_on)}" else stringResource(R.string.state_off)
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_remainders_custom,
+                    title = stringResource(R.string.notif_dhuha_remainder),
+                    subtitle = dhuhaSub,
+                    onClick = { showDhuhaTimePicker = true },
+                    checked = state.dhuhaReminderEnabled,
+                    onCheckedChange = vm::setDhuhaReminderEnabled,
+                    showDivider = false
+                )
+            }
+            Spacer(Modifier.height(floatingNavBottomPadding()))
+        }
+    }
+
+    if (showTahajudTimePicker) {
+        ReminderTimeSheet(
+            hour = state.tahajudHour,
+            minute = state.tahajudMinute,
+            onSave = { h, m ->
+                vm.setTahajudTime(h, m)
+                showTahajudTimePicker = false
+            },
+            onDismiss = { showTahajudTimePicker = false }
         )
-        Spacer(Modifier.width(10.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontWeight = FontWeight.Bold
+    }
+
+    if (showDhuhaTimePicker) {
+        ReminderTimeSheet(
+            hour = state.dhuhaHour,
+            minute = state.dhuhaMinute,
+            onSave = { h, m ->
+                vm.setDhuhaTime(h, m)
+                showDhuhaTimePicker = false
+            },
+            onDismiss = { showDhuhaTimePicker = false }
         )
     }
 }
 
+// ─── Reading Notification Screen (Mockup 3) ──────────────────────────────────
+
 @Composable
-private fun PremiumSheetHeader(
-    title: String,
-    subtitle: String? = null
+fun ReadingNotificationScreen(
+    state: AccountUiState,
+    vm: AccountViewModel,
+    onBack: () -> Unit
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
-                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f)
-                    )
-                )
-            )
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+            .fillMaxSize()
+            .background(Color(0xFFF7F7F7))
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        subtitle?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        // Sticky Header bar
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color(0xFFF7F7F7),
+            shadowElevation = 0.5.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .tabContentStatusBarInset()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = Color(0xFF1C1C1E)
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.reading_notif_title),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color(0xFF1C1C1E)
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            // Section 1: Reading Notification
+            SettingsSectionHeader(stringResource(R.string.reading_section_reading_notif))
+            SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_daily_verse_custom,
+                    title = stringResource(R.string.reading_daily_verse),
+                    subtitle = if (state.dailyVerseEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.dailyVerseEnabled,
+                    onCheckedChange = vm::setDailyVerseEnabled,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_daily_time_custom,
+                    title = stringResource(R.string.reading_daily_verse_time),
+                    subtitle = state.reminderTimeLabel.ifBlank { "07:00 AM" },
+                    onClick = { vm.toggleNotifTimeSheet(true) },
+                    showChevron = true,
+                    showDivider = false
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Section 2: Writing
+            SettingsSectionHeader(stringResource(R.string.reading_section_writing))
+            SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_latin_custom,
+                    title = stringResource(R.string.reading_show_latin),
+                    subtitle = if (state.showTransliteration) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.showTransliteration,
+                    onCheckedChange = vm::setShowTransliteration,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_translator_custom,
+                    title = stringResource(R.string.reading_show_translation),
+                    subtitle = if (state.showTranslation) stringResource(R.string.state_shown) else stringResource(R.string.state_hidden),
+                    checked = state.showTranslation,
+                    onCheckedChange = vm::setShowTranslation,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_translator_custom,
+                    title = stringResource(R.string.reading_translator),
+                    subtitle = state.selectedTranslationName.ifBlank { LocalQuranConfig.translationForAppLanguage(state.appLanguage).authorName },
+                    onClick = { vm.openTranslator() },
+                    showChevron = true,
+                    showDivider = false
+                )
+            }
+            Spacer(Modifier.height(floatingNavBottomPadding()))
         }
     }
 }
 
+// ─── Settings Custom Components ─────────────────────────────────────────────
+
+@Composable
+private fun SettingsCard(
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(0xFFEEEEEE)),
+        shadowElevation = 0.5.dp
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun SettingsSectionHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium.copy(
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+        ),
+        color = Color(0xFF8E8E93),
+        modifier = Modifier.padding(start = 4.dp, bottom = 6.dp, top = 8.dp)
+    )
+}
+
+@Composable
+private fun SettingsCustomRow(
+    iconRes: Int,
+    title: String,
+    subtitle: String? = null,
+    onClick: (() -> Unit)? = null,
+    checked: Boolean? = null,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+    showChevron: Boolean = false,
+    showDivider: Boolean = true
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = onClick != null || onCheckedChange != null) {
+                if (onCheckedChange != null && checked != null) {
+                    onCheckedChange(!checked)
+                } else {
+                    onClick?.invoke()
+                }
+            }
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = title,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(14.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                ),
+                color = Color(0xFF1C1C1E)
+            )
+            if (!subtitle.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 13.sp
+                    ),
+                    color = Color(0xFF8E8E93)
+                )
+            }
+        }
+
+        if (checked != null && onCheckedChange != null) {
+            Image(
+                painter = painterResource(if (checked) R.drawable.ic_toggle_on_custom else R.drawable.ic_toggle_off_custom),
+                contentDescription = if (checked) "On" else "Off",
+                modifier = Modifier.size(width = 52.dp, height = 28.dp)
+            )
+        } else if (showChevron) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color(0xFFC7C7CC),
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+
+    if (showDivider) {
+        HorizontalDivider(
+            modifier = Modifier.padding(start = 54.dp),
+            color = Color(0xFFF2F2F7),
+            thickness = 1.dp
+        )
+    }
+}
+
+// ─── Revamped Bottom Sheets ──────────────────────────────────────────────────
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TranslatorSheet(
-    query: String,
-    selectedId: Int,
-    translations: List<QFTranslation>,
-    isLoading: Boolean,
-    error: AppError?,
-    onQueryChange: (String) -> Unit,
-    onPick: (QFTranslation) -> Unit,
-    onDismiss: () -> Unit,
-    onRetry: () -> Unit
+private fun UpToDateSheet(
+    appVersion: String,
+    onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val errorDisplay = error.rememberErrorDisplay(R.string.failed_load_translators)
-
-    val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-        unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        focusedBorderColor = MaterialTheme.colorScheme.primary,
-        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-        cursorColor = MaterialTheme.colorScheme.primary,
-        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+    val sheetState = rememberModalBottomSheetState()
     SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            PremiumSheetHeader(
-                title = stringResource(R.string.choose_translator)
-            )
-            OutlinedTextField(
-                value = query,
-                onValueChange = onQueryChange,
-                placeholder = { Text(stringResource(R.string.search_translator_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions.Default,
-                singleLine = true,
-                colors = fieldColors
-            )
-            when {
-                isLoading -> Text(stringResource(R.string.loading_translators), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                errorDisplay != null -> {
-                    SaatInlineError(
-                        display = errorDisplay,
-                        onRetry = onRetry
-                    )
-                }
-                translations.isEmpty() -> {
-                    Text(stringResource(R.string.no_translators), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                else -> {
-                    translations.forEach { t ->
-                        val isSelected = t.id == selectedId
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
-                                )
-                                .clickable { onPick(t) }
-                                .padding(horizontal = 12.dp, vertical = 12.dp)
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(
-                                    t.authorName.ifBlank { t.name },
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    text = "${t.languageName.replaceFirstChar { c -> c.titlecase() }} · ${t.name}",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                            if (isSelected) {
-                                Text("✓", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                }
-            }
-            Spacer(Modifier.height(24.dp))
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReminderTimeSheet(
-    hour: Int,
-    minute: Int,
-    onSave: (Int, Int) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val timeState = rememberTimePickerState(
-        initialHour = hour,
-        initialMinute = minute,
-        is24Hour = false
-    )
-    SaatModalBottomSheet(onDismiss, sheetState) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp),
+                .padding(horizontal = 24.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                stringResource(R.string.reminder_time_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                stringResource(R.string.reminder_time_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            TimePicker(state = timeState)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE6F3EE)),
+                contentAlignment = Alignment.Center
             ) {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                TextButton(onClick = { onSave(timeState.hour, timeState.minute) }) {
-                    Text(stringResource(R.string.save), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SaatModalBottomSheet(
-    onDismiss: () -> Unit,
-    sheetState: androidx.compose.material3.SheetState,
-    content: @Composable () -> Unit
-) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
-        content = { content() }
-    )
-}
-
-@Suppress("SpellCheckingInspection")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FontScaleSheet(scale: Float, onScaleChange: (Float) -> Unit, onDismiss: () -> Unit) {
-    val sheetState = rememberModalBottomSheetState()
-    SaatModalBottomSheet(onDismiss, sheetState) {
-        Column(Modifier.fillMaxWidth().padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text(stringResource(R.string.font_size), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ", fontSize = (26 * scale).sp, color = MaterialTheme.colorScheme.onBackground)
-            Text(stringResource(R.string.font_preview_translation), fontSize = (14 * scale).sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("A", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Slider(
-                    value = scale,
-                    onValueChange = onScaleChange,
-                    valueRange = 0.85f..2.0f,
-                    steps = 22,
-                    modifier = Modifier.weight(1f).padding(horizontal = 12.dp)
+                Image(
+                    painter = painterResource(R.drawable.ic_update_custom),
+                    contentDescription = null,
+                    modifier = Modifier.size(36.dp)
                 )
-                Text("A", fontSize = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Text(scaleLabel(scale), color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PrayerMethodSheet(
-    selected: PrayerCalculationMethod,
-    methods: List<PrayerMethodOption>,
-    isLoading: Boolean,
-    error: AppError?,
-    onSelect: (PrayerCalculationMethod) -> Unit,
-    onRetry: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val errorDisplay = error.rememberErrorDisplay(R.string.error_prayer_fetch_title)
-    SaatModalBottomSheet(onDismiss, sheetState) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
             Text(
-                stringResource(R.string.calculation_method),
+                text = stringResource(R.string.up_to_date_sheet_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurface
             )
-            if (isLoading) {
-                Text(stringResource(R.string.loading_methods), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            } else if (errorDisplay != null) {
-                SaatInlineError(
-                    display = errorDisplay,
-                    onRetry = onRetry
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(420.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(methods, key = { "${it.apiKey}-${it.aladhanId}" }) { option ->
-                        val isSelected = selected == option.method
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
-                                )
-                                .clickable {
-                                    onSelect(option.method)
-                                    onDismiss()
-                                }
-                                .padding(14.dp)
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(option.name, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium)
-                                Text(
-                                    option.organization,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            if (isSelected) {
-                                Text("✓", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AdhanVoiceSheet(
-    selected: AdhanVoice,
-    selectedFajr: FajrAdhanVoice,
-    previewingVoiceId: String?,
-    onSelect: (AdhanVoice) -> Unit,
-    onSelectFajr: (FajrAdhanVoice) -> Unit,
-    onPreview: (AdhanVoice) -> Unit,
-    onPreviewFajr: (FajrAdhanVoice) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    SaatModalBottomSheet(onDismiss, sheetState) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
             Text(
-                stringResource(R.string.adhan_voice_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                text = stringResource(R.string.up_to_date_sheet_desc, appVersion),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
-
-            // ── Fajr (Subuh) section ──────────────────────────────────────────
-            Text(
-                stringResource(R.string.subuh_fajr),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                FajrAdhanVoice.selectable.forEach { voice ->
-                    val isSelected = voice == selectedFajr
-                    val isPreviewing = previewingVoiceId == voice.id
-                    AdhanVoiceRow(
-                        displayName = voice.displayName,
-                        isDefault = voice == FajrAdhanVoice.DEFAULT,
-                        isSelected = isSelected,
-                        isPreviewing = isPreviewing,
-                        onClick = { onSelectFajr(voice) },
-                        onPreview = { onPreviewFajr(voice) }
-                    )
-                }
-            }
-
-            // ── Other prayers section ─────────────────────────────────────────
-            Text(
-                stringResource(R.string.adhan_voice_subtitle),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            LazyColumn(
+            Button(
+                onClick = onDismiss,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(320.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF085E43))
             ) {
-                items(AdhanVoice.selectable, key = { it.id }) { voice ->
-                    val isSelected = voice == selected
-                    val isPreviewing = previewingVoiceId == voice.id
-                    AdhanVoiceRow(
-                        displayName = voice.displayName,
-                        isDefault = voice == AdhanVoice.DEFAULT,
-                        isSelected = isSelected,
-                        isPreviewing = isPreviewing,
-                        onClick = { onSelect(voice) },
-                        onPreview = { onPreview(voice) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AdhanVoiceRow(
-    displayName: String,
-    isDefault: Boolean,
-    isSelected: Boolean,
-    isPreviewing: Boolean,
-    onClick: () -> Unit,
-    onPreview: () -> Unit,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
-            )
-            .clickable { onClick() }
-            .padding(horizontal = 8.dp, vertical = 10.dp)
-    ) {
-        Column(Modifier.weight(1f).padding(horizontal = 6.dp)) {
-            Text(
-                displayName,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Medium
-            )
-            if (isDefault) {
                 Text(
-                    stringResource(R.string.default_label),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = stringResource(R.string.got_it),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
                 )
             }
-        }
-        IconButton(onClick = { onPreview() }) {
-            val stopPreviewLabel = stringResource(R.string.stop_preview)
-            val previewAdhanLabel = stringResource(R.string.preview_adhan)
-            Icon(
-                imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                contentDescription = if (isPreviewing) stopPreviewLabel else previewAdhanLabel,
-                tint = MaterialTheme.colorScheme.secondary
-            )
-        }
-        if (isSelected) {
-            Text(
-                "✓",
-                color = MaterialTheme.colorScheme.secondary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(end = 8.dp)
-            )
+            Spacer(Modifier.height(12.dp))
         }
     }
 }
@@ -1121,363 +932,28 @@ private fun LanguageSheet(
     onSelect: (AppLanguage) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SaatSpacing.screenHorizontal)
-                .padding(bottom = SaatSpacing.xl),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            PremiumSheetHeader(
-                title = stringResource(R.string.language_settings_title),
-                subtitle = stringResource(R.string.language_settings_subtitle)
-            )
-            AppLanguage.entries.forEach { language ->
-                val isSelected = language == selected
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(
-                            if (isSelected) MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f) else Color.Transparent
-                        )
-                        .clickable { onSelect(language) }
-                        .padding(horizontal = 12.dp, vertical = 14.dp)
-                ) {
-                    Text(
-                        text = stringResource(language.labelRes),
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-                    )
-                    if (isSelected) {
-                        Text("✓", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun scaleLabel(scale: Float): String {
-    val small = stringResource(R.string.font_scale_small)
-    val medium = stringResource(R.string.font_scale_medium)
-    val large = stringResource(R.string.font_scale_large)
-    val extraLarge = stringResource(R.string.font_scale_extra_large)
-    return when {
-        scale < 0.95f -> small
-        scale < 1.1f -> medium
-        scale < 1.25f -> large
-        else -> extraLarge
-    }
-}
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AboutDeveloperSheet(onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    
-    val openLink = { url: String ->
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        context.startActivity(intent)
-    }
-
-    app.kamy.saatApp.design.components.SaatPartialBottomSheet(
-        onDismiss = onDismiss,
-        maxHeightFraction = 0.85f,
-        scrollContent = false
-    ) {
-        val packageInfo = remember {
-            try {
-                context.packageManager.getPackageInfo(context.packageName, 0)
-            } catch (e: Exception) {
-                null
-            }
-        }
-        val appVersion = remember(packageInfo) {
-            packageInfo?.versionName ?: "1.0.1"
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // App Icon / Initial
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                    MaterialTheme.colorScheme.primary,
-                                    MaterialTheme.colorScheme.primaryContainer
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "SĀ",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            Text(
-                text = "SĀAT",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = "Version $appVersion",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // App Details Section
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.app_details_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(R.string.about_app_desc),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 20.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Developer Section Title
-            Text(
-                text = stringResource(R.string.developer_details_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Developer Avatar
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.secondary,
-                                MaterialTheme.colorScheme.primary
-                            )
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "SE",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = stringResource(R.string.developer_name),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = stringResource(R.string.developer_role),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Developer Bio
-            Text(
-                text = stringResource(R.string.developer_bio),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = 20.sp,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Achievement Card
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    .padding(14.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.developer_achievement_title),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.developer_achievement),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 18.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Links / Contact info
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                AboutLinkRow(
-                    label = stringResource(R.string.contact_linkedin),
-                    url = "https://www.linkedin.com/in/elmysf/",
-                    onClick = openLink
-                )
-                AboutLinkRow(
-                    label = stringResource(R.string.contact_website),
-                    url = "https://elmee.my",
-                    onClick = openLink
-                )
-                AboutLinkRow(
-                    label = stringResource(R.string.contact_github),
-                    url = "https://github.com/elmeeee",
-                    onClick = openLink
-                )
-                AboutLinkRow(
-                    label = stringResource(R.string.contact_email),
-                    url = "mailto:hello@elmee.my",
-                    onClick = openLink
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(48.dp))
-        }
-    }
-}
-
-@Composable
-private fun AboutLinkRow(
-    label: String,
-    url: String,
-    onClick: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .clickable { onClick(url) }
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.Login,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp)
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ThemeSelectionSheet(
-    selected: AppThemeColor,
-    onSelect: (AppThemeColor) -> Unit,
-    onDismiss: () -> Unit
-) {
     val sheetState = rememberModalBottomSheetState()
     SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = stringResource(R.string.theme_settings_title),
+                text = stringResource(R.string.language_settings_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = stringResource(R.string.theme_settings_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AppThemeColor.values().forEach { theme ->
-                    val isSelected = theme == selected
-                    val dotColor = when (theme) {
-                        AppThemeColor.EMERALD -> Color(0xFF0F4C3A)
-                        AppThemeColor.OCEAN -> Color(0xFF1B4965)
-                        AppThemeColor.GOLD -> Color(0xFF8B6015)
-                        AppThemeColor.ROSE -> Color(0xFFE11D48)
-                        AppThemeColor.PURPLE -> Color(0xFF7C3AED)
-                        AppThemeColor.ORANGE -> Color(0xFFEA580C)
-                        AppThemeColor.RED -> Color(0xFFDC2626)
-                    }
+                AppLanguage.values().forEach { lang ->
+                    val isSelected = lang == selected
                     Surface(
-                        onClick = { onSelect(theme) },
+                        onClick = { onSelect(lang) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         color = if (isSelected) {
@@ -1497,16 +973,8 @@ private fun ThemeSelectionSheet(
                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Theme Color Indicator Dot
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .background(dotColor, CircleShape)
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), CircleShape)
-                            )
-                            Spacer(Modifier.width(16.dp))
                             Text(
-                                text = stringResource(theme.displayNameRes),
+                                text = stringResource(lang.labelRes),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
@@ -1543,17 +1011,20 @@ private fun MadhabSelectionSheet(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = stringResource(R.string.madhab_settings_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = stringResource(R.string.madhab_settings_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(R.drawable.ic_madhab_custom),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.madhab_settings_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -1604,7 +1075,536 @@ private fun MadhabSelectionSheet(
     }
 }
 
-// ─── Privacy Policy Screen ───────────────────────────────────────────────────
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PrayerMethodSheet(
+    selected: PrayerCalculationMethod,
+    methods: List<PrayerMethodOption>,
+    isLoading: Boolean,
+    error: AppError?,
+    onSelect: (PrayerCalculationMethod) -> Unit,
+    onRetry: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+
+    SaatModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(R.drawable.ic_institution_custom),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.prayer_calculation_method),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                error != null -> {
+                    val display = error.rememberErrorDisplay()
+                    if (display != null) {
+                        SaatInlineError(
+                            display = display,
+                            onRetry = onRetry
+                        )
+                    }
+                }
+                methods.isNotEmpty() -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(340.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(methods) { methodOpt ->
+                            val isSelected = methodOpt.method == selected
+                            Surface(
+                                onClick = { onSelect(methodOpt.method) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                } else {
+                                    Color.Transparent
+                                },
+                                border = if (isSelected) {
+                                    BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                } else {
+                                    null
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = methodOpt.name,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                        )
+                                        if (methodOpt.organization.isNotBlank()) {
+                                            Text(
+                                                text = methodOpt.organization,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                    if (isSelected) {
+                                        Text(
+                                            text = "✓",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AdhanVoiceSheet(
+    selected: AdhanVoice,
+    selectedFajr: FajrAdhanVoice,
+    previewingVoiceId: String?,
+    onSelect: (AdhanVoice) -> Unit,
+    onSelectFajr: (FajrAdhanVoice) -> Unit,
+    onPreview: (AdhanVoice) -> Unit,
+    onPreviewFajr: (FajrAdhanVoice) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+    SaatModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(R.drawable.ic_adhan_voice_custom),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.adhan_voice),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(340.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(AdhanVoice.selectable) { voice ->
+                    val isSelected = voice == selected
+                    val isPreviewing = voice.id == previewingVoiceId
+                    Surface(
+                        onClick = { onSelect(voice) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                        } else {
+                            Color.Transparent
+                        },
+                        border = if (isSelected) {
+                            BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                        } else {
+                            null
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = voice.displayName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                )
+                            }
+                            IconButton(onClick = { onPreview(voice) }) {
+                                Icon(
+                                    imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                                    contentDescription = "Preview",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            if (isSelected) {
+                                Text(
+                                    text = "✓",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TranslatorSheet(
+    query: String,
+    selectedId: Int,
+    translations: List<QFTranslation>,
+    isLoading: Boolean,
+    error: AppError?,
+    onQueryChange: (String) -> Unit,
+    onPick: (QFTranslation) -> Unit,
+    onDismiss: () -> Unit,
+    onRetry: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+
+    SaatModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                stringResource(R.string.choose_translator),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            OutlinedTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(stringResource(R.string.search_translator_placeholder)) },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                )
+            )
+
+            when {
+                isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                error != null -> {
+                    val display = error.rememberErrorDisplay()
+                    if (display != null) {
+                        SaatInlineError(
+                            display = display,
+                            onRetry = onRetry
+                        )
+                    }
+                }
+                translations.isEmpty() -> {
+                    Text(
+                        stringResource(R.string.no_translators),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(320.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        items(translations, key = { it.id }) { translation ->
+                            val isSelected = translation.id == selectedId
+                            Surface(
+                                onClick = { onPick(translation) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                } else {
+                                    Color.Transparent
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = translation.name,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = "${translation.authorName} · ${translation.languageName}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    if (isSelected) {
+                                        Text(
+                                            text = "✓",
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReminderTimeSheet(
+    hour: Int,
+    minute: Int,
+    onSave: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val timeState = rememberTimePickerState(
+        initialHour = hour,
+        initialMinute = minute,
+        is24Hour = false
+    )
+    SaatModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                stringResource(R.string.reminder_time_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            TimePicker(state = timeState)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                TextButton(onClick = { onSave(timeState.hour, timeState.minute) }) {
+                    Text(stringResource(R.string.save), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SaatModalBottomSheet(
+    onDismiss: () -> Unit,
+    sheetState: SheetState,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = MaterialTheme.colorScheme.surface,
+        content = content
+    )
+}
+
+// ─── Legal Web Views & Info Screens ──────────────────────────────────────────
+
+@Composable
+fun AboutSaatScreen(
+    appLanguage: AppLanguage,
+    appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor,
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                text = stringResource(R.string.settings_item_about),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        LegalWebView(
+            url = "https://elmee.my/saat/about?lang=${appLanguage.tag}&theme=${appTheme.key}",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+fun PrivacyPolicyScreen(
+    appLanguage: AppLanguage,
+    appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor,
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                text = stringResource(R.string.privacy_policy),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        LegalWebView(
+            url = "https://elmee.my/saat/privacy?lang=${appLanguage.tag}&theme=${appTheme.key}",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+fun TermsAndConditionsScreen(
+    appLanguage: AppLanguage,
+    appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor,
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                text = stringResource(R.string.terms_and_conditions),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        LegalWebView(
+            url = "https://elmee.my/saat/terms?lang=${appLanguage.tag}&theme=${appTheme.key}",
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
 
 @Composable
 private fun LegalWebView(
@@ -1619,9 +1619,7 @@ private fun LegalWebView(
                 WebView(context).apply {
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
-                    // Enable caching for faster sub-sequent loads
                     settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
-                    
                     settings.setSupportZoom(false)
                     settings.builtInZoomControls = false
                     settings.displayZoomControls = false
@@ -1649,107 +1647,11 @@ private fun LegalWebView(
         )
 
         if (isLoading) {
-            androidx.compose.material3.LinearProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .align(Alignment.TopCenter),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = Color.Transparent
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = MaterialTheme.colorScheme.primary
             )
         }
-    }
-}
-
-// ─── Privacy Policy Screen ───────────────────────────────────────────────────
-
-@Composable
-fun PrivacyPolicyScreen(
-    appLanguage: app.kamy.saatApp.core.locale.AppLanguage,
-    appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor,
-    onBack: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .tabContentStatusBarInset()
-    ) {
-        // Top bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            Text(
-                text = stringResource(R.string.privacy_policy),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        // Web view
-        LegalWebView(
-            url = "https://elmee.my/saat/privacy?lang=${appLanguage.tag}&theme=${appTheme.key}",
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
-
-// ─── Terms & Conditions Screen ───────────────────────────────────────────────
-
-@Composable
-fun TermsAndConditionsScreen(
-    appLanguage: app.kamy.saatApp.core.locale.AppLanguage,
-    appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor,
-    onBack: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .tabContentStatusBarInset()
-    ) {
-        // Top bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            Text(
-                text = stringResource(R.string.terms_and_conditions),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-        }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        // Web view
-        LegalWebView(
-            url = "https://elmee.my/saat/terms?lang=${appLanguage.tag}&theme=${appTheme.key}",
-            modifier = Modifier.fillMaxSize()
-        )
     }
 }
 
@@ -1784,4 +1686,3 @@ private fun AppFooterCard(appVersion: String) {
         }
     }
 }
-

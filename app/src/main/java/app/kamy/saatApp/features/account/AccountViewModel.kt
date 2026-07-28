@@ -78,13 +78,16 @@ data class AccountUiState(
     val imsakEnabled: Boolean = true,
     val midnightEnabled: Boolean = true,
     val firstThirdEnabled: Boolean = true,
-    val tahajudEnabled: Boolean = true,
+    val tahajudEnabled: Boolean = false,
+    val tahajudHour: Int = 3,
+    val tahajudMinute: Int = 30,
+    val tahajudTimeLabel: String = "03:30",
     val yasinReminderEnabled: Boolean = true,
     val kahfReminderEnabled: Boolean = true,
     val importantDaysReminderEnabled: Boolean = true,
     val adhanSoundEnabled: Boolean = true,
     val monThuFastReminderEnabled: Boolean = true,
-    val dhuhaReminderEnabled: Boolean = true,
+    val dhuhaReminderEnabled: Boolean = false,
     val dhuhaHour: Int = 8,
     val dhuhaMinute: Int = 30,
     val dhuhaTimeLabel: String = "08:30",
@@ -231,6 +234,9 @@ class AccountViewModel @Inject constructor(
                 midnightEnabled = prayerNotificationPrefs.isMidnightEnabled(),
                 firstThirdEnabled = prayerNotificationPrefs.isFirstThirdEnabled(),
                 tahajudEnabled = prayerNotificationPrefs.isTahajudEnabled(),
+                tahajudHour = prayerNotificationPrefs.tahajudHour(),
+                tahajudMinute = prayerNotificationPrefs.tahajudMinute(),
+                tahajudTimeLabel = String.format("%02d:%02d", prayerNotificationPrefs.tahajudHour(), prayerNotificationPrefs.tahajudMinute()),
                 yasinReminderEnabled = prayerNotificationPrefs.isYasinReminderEnabled(),
                 kahfReminderEnabled = prayerNotificationPrefs.isKahfReminderEnabled(),
                 importantDaysReminderEnabled = prayerNotificationPrefs.isImportantDaysReminderEnabled(),
@@ -242,6 +248,12 @@ class AccountViewModel @Inject constructor(
                 dhuhaTimeLabel = String.format("%02d:%02d", prayerNotificationPrefs.dhuhaHour(), prayerNotificationPrefs.dhuhaMinute())
             )
         }
+    }
+
+    fun setTahajudTime(hour: Int, minute: Int) {
+        prayerNotificationPrefs.setTahajudTime(hour, minute)
+        syncPrayerNotificationState()
+        reschedulePrayerNotifications()
     }
 
     private fun reschedulePrayerNotifications() {
