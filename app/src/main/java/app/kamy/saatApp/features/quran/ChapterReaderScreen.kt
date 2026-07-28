@@ -954,7 +954,7 @@ private fun ReaderVerseActionsMenu(
                 ReaderActionPill(
                     icon = {
                         Icon(
-                            if (bookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_bookmark_custom),
                             contentDescription = null,
                             tint = SaatColors.GoldDeep,
                             modifier = Modifier.size(17.dp)
@@ -969,7 +969,7 @@ private fun ReaderVerseActionsMenu(
                 ReaderActionPill(
                     icon = {
                         Icon(
-                            Icons.Filled.EditNote,
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_personalnote_custom),
                             contentDescription = null,
                             tint = if (hasNote) SaatColors.DeepEmerald else SaatColors.Slate500,
                             modifier = Modifier.size(17.dp)
@@ -984,7 +984,7 @@ private fun ReaderVerseActionsMenu(
                 ReaderActionPill(
                     icon = {
                         Icon(
-                            Icons.Filled.Psychology,
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_memorization_custom),
                             contentDescription = null,
                             tint = hifzStatusColor(hifzStatus),
                             modifier = Modifier.size(17.dp)
@@ -1010,7 +1010,7 @@ private fun ReaderVerseActionsMenu(
                 ReaderActionPill(
                     icon = {
                         Icon(
-                            Icons.Filled.Share,
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_share_custom),
                             contentDescription = null,
                             tint = SaatColors.DeepEmerald,
                             modifier = Modifier.size(17.dp)

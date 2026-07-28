@@ -125,7 +125,7 @@ fun PrayerTrackerCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Filled.LocalFireDepartment,
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_streak_custom),
                         contentDescription = null,
                         tint = SaatColors.DeepEmerald,
                         modifier = Modifier.size(14.dp)
@@ -234,7 +234,7 @@ private fun OptionalHabitChip(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            Icons.Filled.Check,
+            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_check_custom),
             contentDescription = null,
             tint = if (item.completed) SaatColors.DeepEmerald else Color.Transparent,
             modifier = Modifier.size(14.dp)
@@ -323,7 +323,7 @@ private fun PrayerCheckChip(
         ) {
             if (completed) {
                 Icon(
-                    Icons.Filled.Check,
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_check_custom),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)

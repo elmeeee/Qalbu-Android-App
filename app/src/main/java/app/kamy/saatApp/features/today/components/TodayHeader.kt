@@ -183,7 +183,7 @@ fun TodayHeader(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.LocationOn,
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_location_custom),
                         contentDescription = stringResource(R.string.location_enable),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(14.dp)

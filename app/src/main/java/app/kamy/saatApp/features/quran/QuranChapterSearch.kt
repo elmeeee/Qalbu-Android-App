@@ -474,7 +474,7 @@ fun QuranChapterSearchBar(
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Icon(
-                imageVector = Icons.Filled.Search,
+                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_search_custom),
                 contentDescription = null,
                 tint = if (isFocused) SaatColors.DeepEmerald else SaatColors.Slate500,
                 modifier = Modifier.size(20.dp)
