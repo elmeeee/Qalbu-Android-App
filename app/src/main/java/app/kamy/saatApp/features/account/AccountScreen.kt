@@ -603,7 +603,10 @@ fun NotificationAdhanScreen(
                     subtitle = tahajudSub,
                     onClick = { showTahajudTimePicker = true },
                     checked = state.tahajudEnabled,
-                    onCheckedChange = vm::setTahajudEnabled,
+                    onCheckedChange = { isChecked ->
+                        vm.setTahajudEnabled(isChecked)
+                        if (isChecked) showTahajudTimePicker = true
+                    },
                     showDivider = true
                 )
                 val dhuhaSub = if (state.dhuhaReminderEnabled) "${state.dhuhaTimeLabel} - ${stringResource(R.string.state_on)}" else stringResource(R.string.state_off)
@@ -613,7 +616,10 @@ fun NotificationAdhanScreen(
                     subtitle = dhuhaSub,
                     onClick = { showDhuhaTimePicker = true },
                     checked = state.dhuhaReminderEnabled,
-                    onCheckedChange = vm::setDhuhaReminderEnabled,
+                    onCheckedChange = { isChecked ->
+                        vm.setDhuhaReminderEnabled(isChecked)
+                        if (isChecked) showDhuhaTimePicker = true
+                    },
                     showDivider = false
                 )
             }
@@ -800,10 +806,10 @@ private fun SettingsCustomRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = onClick != null || onCheckedChange != null) {
-                if (onCheckedChange != null && checked != null) {
+                if (onClick != null) {
+                    onClick()
+                } else if (onCheckedChange != null && checked != null) {
                     onCheckedChange(!checked)
-                } else {
-                    onClick?.invoke()
                 }
             }
             .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -842,7 +848,12 @@ private fun SettingsCustomRow(
             Image(
                 painter = painterResource(if (checked) R.drawable.ic_toggle_on_custom else R.drawable.ic_toggle_off_custom),
                 contentDescription = if (checked) "On" else "Off",
-                modifier = Modifier.size(width = 52.dp, height = 28.dp)
+                modifier = Modifier
+                    .size(width = 52.dp, height = 28.dp)
+                    .clickable(
+                        enabled = true,
+                        onClick = { onCheckedChange(!checked) }
+                    )
             )
         } else if (showChevron) {
             Icon(
@@ -1206,12 +1217,14 @@ private fun AdhanVoiceSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
+    var selectedTab by remember { mutableStateOf(0) }
+
     SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
@@ -1228,58 +1241,191 @@ private fun AdhanVoiceSheet(
                 )
             }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(340.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            // Segmented Tab for Regular Adhan vs Subuh Adhan
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
             ) {
-                items(AdhanVoice.selectable) { voice ->
-                    val isSelected = voice == selected
-                    val isPreviewing = voice.id == previewingVoiceId
-                    Surface(
-                        onClick = { onSelect(voice) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                        } else {
-                            Color.Transparent
-                        },
-                        border = if (isSelected) {
-                            BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
-                        } else {
-                            null
-                        }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp)
+                ) {
+                    val isRegularTab = selectedTab == 0
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                            .background(
+                                color = if (isRegularTab) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable { selectedTab = 0 },
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Text(
+                            text = "Adzan Umum",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (isRegularTab) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    val isFajrTab = selectedTab == 1
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(36.dp)
+                            .background(
+                                color = if (isFajrTab) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .clickable { selectedTab = 1 },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Adzan Subuh",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (isFajrTab) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (selectedTab == 0) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(AdhanVoice.selectable) { voice ->
+                        val isSelected = voice == selected
+                        val isPreviewing = voice.id == previewingVoiceId
+                        Surface(
+                            onClick = { onSelect(voice) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                            } else {
+                                Color.Transparent
+                            },
+                            border = if (isSelected) {
+                                BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                            } else {
+                                null
+                            }
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = voice.displayName,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
-                                )
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = voice.displayName,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                            shape = CircleShape
+                                        )
+                                        .clickable { onPreview(voice) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(if (isPreviewing) R.drawable.ic_pause else R.drawable.ic_play),
+                                        contentDescription = "Preview",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                if (isSelected) {
+                                    Text(
+                                        text = "✓",
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(start = 12.dp)
+                                    )
+                                }
                             }
-                            IconButton(onClick = { onPreview(voice) }) {
-                                Icon(
-                                    imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                                    contentDescription = "Preview",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
+                        }
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(FajrAdhanVoice.selectable) { voice ->
+                        val isSelected = voice == selectedFajr
+                        val isPreviewing = voice.id == previewingVoiceId
+                        Surface(
+                            onClick = { onSelectFajr(voice) },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                            } else {
+                                Color.Transparent
+                            },
+                            border = if (isSelected) {
+                                BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                            } else {
+                                null
                             }
-                            if (isSelected) {
-                                Text(
-                                    text = "✓",
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = voice.displayName,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                            shape = CircleShape
+                                        )
+                                        .clickable { onPreviewFajr(voice) },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(if (isPreviewing) R.drawable.ic_pause else R.drawable.ic_play),
+                                        contentDescription = "Preview",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                if (isSelected) {
+                                    Text(
+                                        text = "✓",
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(start = 12.dp)
+                                    )
+                                }
                             }
                         }
                     }

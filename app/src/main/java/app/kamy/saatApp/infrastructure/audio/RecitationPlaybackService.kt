@@ -39,7 +39,8 @@ class RecitationPlaybackService : MediaSessionService() {
 
         // On Android 15+, starting restricted foreground services from BOOT_COMPLETED
         // or background system restart (intent == null when idle) causes a crash.
-        if (intent == null && !isPlaying) {
+        val isBoot = intent == null || intent.action == Intent.ACTION_BOOT_COMPLETED
+        if (isBoot && !isPlaying) {
             stopSelf()
             return START_NOT_STICKY
         }
@@ -57,12 +58,18 @@ class RecitationPlaybackService : MediaSessionService() {
                 startForeground(NOTIFICATION_ID, buildPlaceholderNotification())
             }
         }.isSuccess
+
         if (!fgStarted && !isPlaying) {
             stopSelf()
             return START_NOT_STICKY
         }
-        super.onStartCommand(intent, flags, startId)
-        return START_NOT_STICKY
+
+        return try {
+            super.onStartCommand(intent, flags, startId)
+        } catch (e: Exception) {
+            stopSelf()
+            START_NOT_STICKY
+        }
     }
 
 

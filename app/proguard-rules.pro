@@ -12,10 +12,13 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep attributes for R8 optimization
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,Exceptions,LineNumberTable,SourceFile
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Okio & ResourceFileSystem optimization
+-dontwarn okio.**
+-keep class okio.** { *; }
+
+# Media3 & Foreground Services
+-keep class androidx.media3.session.** { *; }
+-keep class androidx.media3.common.** { *; }
