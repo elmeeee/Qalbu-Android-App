@@ -112,11 +112,12 @@ class ChapterReaderViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val juzNumber: Int? = savedStateHandle.get<Int>("juzNumber")
+    private val juzNumber: Int? = savedStateHandle.get<Any>("juzNumber")?.toString()?.toIntOrNull()
+    private val parsedChapter: Int = savedStateHandle.get<Any>("chapter")?.toString()?.toIntOrNull() ?: 1
 
     private val _state = MutableStateFlow(
         ChapterReaderUiState(
-            chapterNumber = savedStateHandle.get<Int>("chapter") ?: 1,
+            chapterNumber = parsedChapter,
             juzNumber = juzNumber
         )
     )
@@ -131,12 +132,12 @@ class ChapterReaderViewModel @Inject constructor(
     private var lastLoggedReadingKey: String? = null
     private var pendingScrollVerseKey: String? =
         savedStateHandle.get<String>("verseKey")?.takeIf { it.isNotBlank() }
-            ?: savedStateHandle.get<Int>("ayah")
-                ?.takeIf { it > 0 && savedStateHandle.get<Int>("juzNumber") == null }
-                ?.let { ayah ->
-                    val chapter = savedStateHandle.get<Int>("chapter") ?: return@let null
-                    "$chapter:$ayah"
-                }
+            ?: run {
+                val ayahVal = savedStateHandle.get<Any>("ayah")?.toString()?.toIntOrNull()?.takeIf { it > 0 }
+                if (ayahVal != null && juzNumber == null) {
+                    "$parsedChapter:$ayahVal"
+                } else null
+            }
     private var initialScrollPending: Boolean = pendingScrollVerseKey != null
 
     init {

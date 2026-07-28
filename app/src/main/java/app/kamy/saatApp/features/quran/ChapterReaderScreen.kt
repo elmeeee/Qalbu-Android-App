@@ -233,7 +233,7 @@ fun ChapterReaderScreen(
         }
     }
 
-    LaunchedEffect(verseCount, initialVerseNumber, initialVerseKey) {
+    LaunchedEffect(verseCount, initialVerseNumber, initialVerseKey, state.hasMore, state.isLoadingMore) {
         if (verseCount == 0 || hasScrolledToInitial) return@LaunchedEffect
         val idx = when {
             !initialVerseKey.isNullOrBlank() ->
@@ -242,13 +242,17 @@ fun ChapterReaderScreen(
                 state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
             else -> -1
         }
-        val targetPage = if (idx >= 0) idx + pageOffset else pageOffset
-        if (targetPage >= 0) {
+        if (idx >= 0) {
+            val targetPage = idx + pageOffset
             if (pagerState.currentPage != targetPage) {
                 pagerState.scrollToPage(targetPage)
             }
             hasScrolledToInitial = true
         } else if (initialVerseKey.isNullOrBlank() && initialVerseNumber == null) {
+            hasScrolledToInitial = true
+        } else if (state.hasMore && !state.isLoadingMore) {
+            vm.loadMoreIfNeeded(state.verses.size - 1)
+        } else if (!state.hasMore) {
             hasScrolledToInitial = true
         }
     }
