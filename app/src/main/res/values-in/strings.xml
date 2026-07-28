@@ -764,4 +764,6 @@
     <string name="btn_open_in_quran_reader">Buka di Qur\'an Reader</string>
     <string name="btn_save_doa_bookmark">Simpan Doa / Bookmark</string>
     <string name="doa_saved_toast">Berhasil disimpan ke Bookmark!</string>
+    <string name="adhan_tab_general">Adzan Umum</string>
+    <string name="adhan_tab_fajr">Adzan Subuh</string>
 </resources>

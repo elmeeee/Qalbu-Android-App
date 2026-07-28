@@ -1265,7 +1265,7 @@ private fun AdhanVoiceSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Adzan Umum",
+                            text = stringResource(R.string.adhan_tab_general),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = if (isRegularTab) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
@@ -1285,7 +1285,7 @@ private fun AdhanVoiceSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Adzan Subuh",
+                            text = stringResource(R.string.adhan_tab_fajr),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = if (isFajrTab) Color.White else MaterialTheme.colorScheme.onSurfaceVariant

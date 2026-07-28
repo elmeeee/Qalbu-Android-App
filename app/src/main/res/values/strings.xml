@@ -1188,6 +1188,8 @@
     <string name="settings_item_madhab">Madhab</string>
     <string name="settings_item_institution">Institution</string>
     <string name="settings_item_adhan_voice">Adhan Voice</string>
+    <string name="adhan_tab_general">General Adhan</string>
+    <string name="adhan_tab_fajr">Fajr Adhan</string>
     <string name="settings_item_about">About</string>
     <string name="settings_item_privacy">Privacy &amp; Policy</string>
     <string name="settings_item_terms">Terms &amp; Condition</string>
