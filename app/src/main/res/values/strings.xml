@@ -356,12 +356,6 @@
     <string name="tafsir">Tafsir</string>
     <string name="hadith">Hadith</string>
     <string name="no_verse_retry">No verse available. Pull to retry.</string>
-    <string name="reflect_all">All Reflect</string>
-    <string name="reflect_mine">My Reflect</string>
-    <string name="sign_in_qf">Sign in with Quran Foundation</string>
-    <string name="reflect_community">Shared reflections from the Quran Reflect community</string>
-    <string name="reflect_empty_all">No reflections yet. Be the first to share from the Quran reader.</string>
-    <string name="reflect_empty_mine">You have not published any reflections yet. Share a verse insight from the reader.</string>
     <string name="reflect_recent_comment">Latest comment</string>
     <string name="tafsir_load_error">Couldn\'t load tafsir</string>
     <string name="tafsir_empty">No commentary here</string>
@@ -369,7 +363,7 @@
     <string name="hadith_empty">No hadith here</string>
     <string name="ai_share_placeholder">Your reflection will appear here…</string>
     <string name="ai_reflection">AI reflection</string>
-    <string name="ai_share_hint">Draft uses tafsir &amp; hadith + AI. Edit, then share or publish.</string>
+    <string name="ai_share_hint">Draft uses tafsir &amp; hadith + AI. Edit, then share</string>
     <string name="regenerating">Regenerating…</string>
     <string name="publish_to_reflect">Publish to Reflect</string>
     <string name="publishing">Publishing…</string>

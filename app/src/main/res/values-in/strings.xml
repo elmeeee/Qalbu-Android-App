@@ -409,19 +409,13 @@
     <string name="tafsir">Tafsir</string>
     <string name="hadith">Hadits</string>
     <string name="no_verse_retry">Ayat tidak tersedia. Tarik untuk coba lagi.</string>
-
-    <string name="reflect_all">Semua Refleksi</string>
-    <string name="reflect_mine">Refleksi Saya</string>
-    <string name="sign_in_qf">Masuk dengan Quran Foundation</string>
-    <string name="reflect_community">Refleksi komunitas</string>
-
     <string name="tafsir_load_error">Gagal memuat tafsir</string>
     <string name="tafsir_empty">Belum ada tafsir di sini</string>
     <string name="hadith_load_error">Gagal memuat hadits</string>
     <string name="hadith_empty">Belum ada hadits di sini</string>
     <string name="ai_share_placeholder">Refleksi Anda akan muncul di sini…</string>
     <string name="ai_reflection">Refleksi AI</string>
-    <string name="ai_share_hint">Draf memakai tafsir &amp; hadits + AI. Edit, lalu bagikan atau publikasikan.</string>
+    <string name="ai_share_hint">Draf memakai tafsir &amp; hadits + AI. Edit, lalu bagikan.</string>
     <string name="regenerating">Membuat ulang…</string>
     <string name="publish_to_reflect">Publikasikan ke Refleksi</string>
     <string name="publishing">Mempublikasikan…</string>
