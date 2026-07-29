@@ -1995,8 +1995,9 @@ fun AboutSaatScreen(
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
+        val langTag = appLanguage.tag.ifBlank { "id" }
         LegalWebView(
-            url = "https://elmee.my/saat/about?lang=${appLanguage.tag}&version=${appVersion}",
+            url = "https://elmee.my/saat/about?lang=${langTag}&version=${appVersion}",
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -2008,6 +2009,7 @@ fun PrivacyPolicyScreen(
     appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor,
     onBack: () -> Unit
 ) {
+    val langTag = appLanguage.tag.ifBlank { "id" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -2038,7 +2040,7 @@ fun PrivacyPolicyScreen(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         LegalWebView(
-            url = "https://elmee.my/saat/privacy?lang=${appLanguage.tag}",
+            url = "https://elmee.my/saat/privacy?lang=${langTag}",
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -2050,6 +2052,7 @@ fun TermsAndConditionsScreen(
     appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor,
     onBack: () -> Unit
 ) {
+    val langTag = appLanguage.tag.ifBlank { "id" }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -2080,7 +2083,7 @@ fun TermsAndConditionsScreen(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         LegalWebView(
-            url = "https://elmee.my/saat/terms?lang=${appLanguage.tag}",
+            url = "https://elmee.my/saat/terms?lang=${langTag}",
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -2093,10 +2096,19 @@ private fun LegalWebView(
 ) {
     var isLoading by remember { mutableStateOf(true) }
 
+    val sanitizedUrl = remember(url) {
+        if (url.contains("lang=&") || url.endsWith("lang=")) {
+            url.replace("lang=", "lang=id")
+        } else {
+            url
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         AndroidView(
             factory = { context ->
                 WebView(context).apply {
+                    setBackgroundColor(android.graphics.Color.TRANSPARENT)
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
                     settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
@@ -2105,6 +2117,10 @@ private fun LegalWebView(
                     settings.displayZoomControls = false
                     
                     webViewClient = object : WebViewClient() {
+                        override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                            return false
+                        }
+
                         override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
                             super.onPageStarted(view, url, favicon)
                             isLoading = true
@@ -2115,14 +2131,10 @@ private fun LegalWebView(
                             isLoading = false
                         }
                     }
-                    loadUrl(url)
+                    loadUrl(sanitizedUrl)
                 }
             },
-            update = { webView ->
-                if (webView.url != url) {
-                    webView.loadUrl(url)
-                }
-            },
+            update = { _ -> },
             modifier = Modifier.fillMaxSize()
         )
 
