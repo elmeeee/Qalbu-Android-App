@@ -8,11 +8,20 @@
       "compiled_by": "Rumaysho",
       "content": [
         {
-          "arabic": "أَسْتَغْفِرُ اللهَ (3x)\nاَللَّهُمَّ أَنْتَ السَّلَامُ، وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
-          "latin": "Astagh-firullah (3x). Allahumma antas salaam wa minkas salaam tabaarokta yaa dzal jalaali wal ikrom.",
-          "translation": "Aku memohon ampun kepada Allah (3x). Ya Allah, Engkau pemberi keselamatan, dan dariMu keselamatan, Maha Suci Engkau, wahai Tuhan Yang Pemilik Keagungan dan Kemuliaan.",
-          "fawaid": "Rasulullah shallallahu ‘alaihi wa sallam jika selesai dari shalatnya beliau beristighfar sebanyak tiga kali dan membaca dzikir di atas.",
-          "notes": "Istighfar dibaca 3 kali, dilanjutkan doa keselamatan 1 kali.",
+          "arabic": "أَسْتَغْفِرُ اللهَ",
+          "latin": "Astagh-firullah",
+          "translation": "Aku memohon ampun kepada Allah.",
+          "fawaid": "Rasulullah shallallahu ‘alaihi wa sallam jika selesai dari shalatnya beliau beristighfar sebanyak tiga kali.",
+          "notes": "Istighfar dibaca 3 kali.",
+          "source": "HR. Muslim no. 591",
+          "repeat_count": 3
+        },
+        {
+          "arabic": "اَللَّهُمَّ أَنْتَ السَّلَامُ، وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+          "latin": "Allahumma antas salaam wa minkas salaam tabaarokta yaa dzal jalaali wal ikrom.",
+          "translation": "Ya Allah, Engkau pemberi keselamatan, dan dariMu keselamatan, Maha Suci Engkau, wahai Tuhan Yang Pemilik Keagungan dan Kemuliaan.",
+          "fawaid": "Doa memohon keselamatan setelah beristighfar.",
+          "notes": "Dibaca 1 kali.",
           "source": "HR. Muslim no. 591",
           "repeat_count": 1
         },
@@ -35,11 +44,38 @@
           "repeat_count": 1
         },
         {
-          "arabic": "سُبْحَانَ اللهِ (33x)\nاَلْحَمْدُ لِلَّهِ (33x)\nاَللهُ أَكْبَرُ (33x)\n\nلاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ",
-          "latin": "Subhanallah (33x), Alhamdulillah (33x), Allahu akbar (33x). Laa ilaaha illallahu wahdahu laa syariikalahu, lahul mulku wa lahul hamdu wa huwa 'alaa kulli syai'in qadiir.",
-          "translation": "Maha Suci Allah (33 x), segala puji bagi Allah (33 x), Allah Maha Besar (33 x). Tidak ada Rabb kecuali Allah Yang Maha Esa... Bagi-Nya kerajaan, bagi-Nya pujaan, Dia-lah Yang Mahakuasa...",
-          "fawaid": "Siapa yang membacanya, maka dosa-dosanya diampuni walau sebanyak buih di lautan.",
-          "notes": "Tasbih, tahmid, takbir masing-masing 33 kali secara terpisah, lalu ditutup dengan kalimat tauhid 1 kali.",
+          "arabic": "سُبْحَانَ اللهِ",
+          "latin": "Subhanallah",
+          "translation": "Maha Suci Allah.",
+          "fawaid": "Bertasbih kepada Allah sebanyak 33 kali setelah shalat fardhu.",
+          "notes": "Dibaca 33 kali.",
+          "source": "HR. Muslim no. 597",
+          "repeat_count": 33
+        },
+        {
+          "arabic": "اَلْحَمْدُ لِلَّهِ",
+          "latin": "Alhamdulillah",
+          "translation": "Segala puji bagi Allah.",
+          "fawaid": "Bertahmid kepada Allah sebanyak 33 kali setelah shalat fardhu.",
+          "notes": "Dibaca 33 kali.",
+          "source": "HR. Muslim no. 597",
+          "repeat_count": 33
+        },
+        {
+          "arabic": "اَللهُ أَكْبَرُ",
+          "latin": "Allahu Akbar",
+          "translation": "Allah Maha Besar.",
+          "fawaid": "Bertakbir kepada Allah sebanyak 33 kali setelah shalat fardhu.",
+          "notes": "Dibaca 33 kali.",
+          "source": "HR. Muslim no. 597",
+          "repeat_count": 33
+        },
+        {
+          "arabic": "لاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ",
+          "latin": "Laa ilaaha illallahu wahdahu laa syariikalahu, lahul mulku wa lahul hamdu wa huwa 'alaa kulli syai'in qadiir.",
+          "translation": "Tidak ada Rabb kecuali Allah Yang Maha Esa, tidak ada sekutu bagi-Nya. Bagi-Nya kerajaan dan bagi-Nya pujian. Dia Maha Kuasa atas segala sesuatu.",
+          "fawaid": "Siapa yang membacanya menyempurnakan ke-100 maka dosa-dosanya diampuni walau sebanyak buih di lautan.",
+          "notes": "Penutup tasbih 33x, dibaca 1 kali.",
           "source": "HR. Muslim no. 597",
           "repeat_count": 1
         },

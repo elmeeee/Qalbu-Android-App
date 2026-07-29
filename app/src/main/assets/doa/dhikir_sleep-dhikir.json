@@ -71,13 +71,31 @@
           "repeat_count": 1
         },
         {
-          "arabic": "سُبْحَانَ اللهِ\nالْحَمْدُ لِلَّهِ\nاللهُ أَكْبَرُ",
-          "latin": "Subhanallah (33x), Alhamdulillah (33x), Allahu Akbar (33x).",
-          "translation": "Maha suci Allah (33 x), segala puji bagi Allah (33 x), Allah Maha Besar (33 x).",
-          "fawaid": "Bacaan ini lebih baik daripada memiliki pembantu di rumah (memberikan kekuatan fisik dan ketenangan jiwa).",
-          "notes": "Subhanallah 33x, Alhamdulillah 33x, Allahu Akbar 33x.",
+          "arabic": "سُبْحَانَ اللهِ",
+          "latin": "Subhanallah",
+          "translation": "Maha suci Allah.",
+          "fawaid": "Bertasbih 33x sebelum tidur.",
+          "notes": "Dibaca 33 kali.",
           "source": "HR. Bukhari no. 3705 dan Muslim no. 2727",
-          "repeat_count": 1
+          "repeat_count": 33
+        },
+        {
+          "arabic": "الْحَمْدُ لِلَّهِ",
+          "latin": "Alhamdulillah",
+          "translation": "Segala puji bagi Allah.",
+          "fawaid": "Bertahmid 33x sebelum tidur.",
+          "notes": "Dibaca 33 kali.",
+          "source": "HR. Bukhari no. 3705 dan Muslim no. 2727",
+          "repeat_count": 33
+        },
+        {
+          "arabic": "اللهُ أَكْبَرُ",
+          "latin": "Allahu Akbar",
+          "translation": "Allah Maha Besar.",
+          "fawaid": "Bertakbir 33x sebelum tidur.",
+          "notes": "Dibaca 33 kali.",
+          "source": "HR. Bukhari no. 3705 dan Muslim no. 2727",
+          "repeat_count": 33
         },
         {
           "arabic": "اَللَّهُمَّ رَبَّ السَّمَاوَاتِ السَّبْعِ وَرَبَّ الْعَرْشِ الْعَظِيْمِ، رَبَّنَا وَرَبَّ كُلِّ شَيْءٍ، فَالِقَ الْحَبِّ وَالنَّوَى، وَمُنْزِلَ التَّوْرَاةِ وَاْلإِنْجِيْلِ وَالْفُرْقَانِ، أَعُوْذُ بِكَ مِنْ شَرِّ كُلِّ شَيْءٍ أَنْتَ آخِذٌ بِنَاصِيَتِهِ. اَللَّهُمَّ أَنْتَ اْلأَوَّلُ فَلَيْسَ قَبْلَكَ شَيْءٌ، وَأَنْتَ اْلآخِرُ فَلَيْسَ بَعْدَكَ شَيْءٌ، وَأَنْتَ الظَّاهِرُ فَلَيْسَ فَوْقَكَ شَيْءٌ، وَأَنْتَ الْبَاطِنُ فَلَيْسَ دُوْنَكَ شَيْءٌ، اِقْضِ عَنَّا الدَّيْنَ وَأَغْنِنَا مِنَ الْفَقْرِ",
