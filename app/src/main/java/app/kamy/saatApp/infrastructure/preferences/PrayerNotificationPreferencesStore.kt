@@ -48,8 +48,10 @@ open class PrayerNotificationPreferencesStoreBase(
         dhuhaReminderEnabled = bool(KEY_DHUHA, default = true),
         dhuhaHour = dhuhaHour(),
         dhuhaMinute = dhuhaMinute(),
+        dhuhaDays = dhuhaDays(),
         tahajudHour = tahajudHour(),
-        tahajudMinute = tahajudMinute()
+        tahajudMinute = tahajudMinute(),
+        tahajudDays = tahajudDays()
     )
 
     fun isAdhanSoundEnabled(): Boolean = bool(KEY_ADZAN_SOUND, default = true)
@@ -78,9 +80,27 @@ open class PrayerNotificationPreferencesStoreBase(
     fun isTahajudEnabled(): Boolean = bool(KEY_TAHAJUD, default = false)
     fun tahajudHour(): Int = prefs.getInt(KEY_TAHAJUD_HOUR, 3)
     fun tahajudMinute(): Int = prefs.getInt(KEY_TAHAJUD_MINUTE, 30)
+    fun tahajudDays(): Set<Int> = parseDays(prefs.getString(KEY_TAHAJUD_DAYS, "1,2,3,4,5,6,7"))
     fun setTahajudTime(hour: Int, minute: Int) {
         prefs.edit().putInt(KEY_TAHAJUD_HOUR, hour).putInt(KEY_TAHAJUD_MINUTE, minute).apply()
         _changed.value = _changed.value + 1
+    }
+    fun setTahajudDays(days: Set<Int>) {
+        val cleaned = days.filter { it in 1..7 }.toSet().ifEmpty { (1..7).toSet() }
+        prefs.edit().putString(KEY_TAHAJUD_DAYS, cleaned.joinToString(",")).apply()
+        _changed.value = _changed.value + 1
+    }
+
+    fun dhuhaDays(): Set<Int> = parseDays(prefs.getString(KEY_DHUHA_DAYS, "1,2,3,4,5,6,7"))
+    fun setDhuhaDays(days: Set<Int>) {
+        val cleaned = days.filter { it in 1..7 }.toSet().ifEmpty { (1..7).toSet() }
+        prefs.edit().putString(KEY_DHUHA_DAYS, cleaned.joinToString(",")).apply()
+        _changed.value = _changed.value + 1
+    }
+
+    private fun parseDays(raw: String?): Set<Int> {
+        if (raw.isNullOrBlank()) return (1..7).toSet()
+        return raw.split(",").mapNotNull { it.trim().toIntOrNull() }.toSet().ifEmpty { (1..7).toSet() }
     }
     fun isYasinReminderEnabled(): Boolean = bool(KEY_YASIN, default = true)
     fun isKahfReminderEnabled(): Boolean = bool(KEY_KAHF, default = true)
@@ -134,6 +154,7 @@ open class PrayerNotificationPreferencesStoreBase(
         private const val KEY_TAHAJUD = "tahajudNotificationsEnabled"
         private const val KEY_TAHAJUD_HOUR = "tahajudReminderHour"
         private const val KEY_TAHAJUD_MINUTE = "tahajudReminderMinute"
+        private const val KEY_TAHAJUD_DAYS = "tahajudReminderDays"
         private const val KEY_YASIN = "yasinReminderEnabled"
         private const val KEY_KAHF = "kahfReminderEnabled"
         private const val KEY_IMPORTANT_DAYS = "importantDaysReminderEnabled"
@@ -142,5 +163,6 @@ open class PrayerNotificationPreferencesStoreBase(
         private const val KEY_DHUHA = "dhuhaReminderEnabled"
         private const val KEY_DHUHA_HOUR = "dhuhaReminderHour"
         private const val KEY_DHUHA_MINUTE = "dhuhaReminderMinute"
+        private const val KEY_DHUHA_DAYS = "dhuhaReminderDays"
     }
 }

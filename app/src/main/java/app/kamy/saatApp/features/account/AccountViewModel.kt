@@ -67,6 +67,7 @@ data class AccountUiState(
     val reminderHour: Int = DailyVerseNotificationStore.DEFAULT_HOUR,
     val reminderMinute: Int = DailyVerseNotificationStore.DEFAULT_MINUTE,
     val reminderTimeLabel: String = "",
+    val dailyVerseDays: Set<Int> = (1..7).toSet(),
     val fajrNotificationEnabled: Boolean = true,
     val dhuhrNotificationEnabled: Boolean = true,
     val asrNotificationEnabled: Boolean = true,
@@ -79,6 +80,7 @@ data class AccountUiState(
     val tahajudHour: Int = 3,
     val tahajudMinute: Int = 30,
     val tahajudTimeLabel: String = "03:30",
+    val tahajudDays: Set<Int> = (1..7).toSet(),
     val yasinReminderEnabled: Boolean = true,
     val kahfReminderEnabled: Boolean = true,
     val importantDaysReminderEnabled: Boolean = true,
@@ -88,6 +90,7 @@ data class AccountUiState(
     val dhuhaHour: Int = 8,
     val dhuhaMinute: Int = 30,
     val dhuhaTimeLabel: String = "08:30",
+    val dhuhaDays: Set<Int> = (1..7).toSet(),
     val showAdhanSheet: Boolean = false,
     val showLanguageSheet: Boolean = false,
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
@@ -234,6 +237,7 @@ class AccountViewModel @Inject constructor(
                 tahajudHour = prayerNotificationPrefs.tahajudHour(),
                 tahajudMinute = prayerNotificationPrefs.tahajudMinute(),
                 tahajudTimeLabel = String.format("%02d:%02d", prayerNotificationPrefs.tahajudHour(), prayerNotificationPrefs.tahajudMinute()),
+                tahajudDays = prayerNotificationPrefs.tahajudDays(),
                 yasinReminderEnabled = prayerNotificationPrefs.isYasinReminderEnabled(),
                 kahfReminderEnabled = prayerNotificationPrefs.isKahfReminderEnabled(),
                 importantDaysReminderEnabled = prayerNotificationPrefs.isImportantDaysReminderEnabled(),
@@ -242,13 +246,15 @@ class AccountViewModel @Inject constructor(
                 dhuhaReminderEnabled = prayerNotificationPrefs.isDhuhaEnabled(),
                 dhuhaHour = prayerNotificationPrefs.dhuhaHour(),
                 dhuhaMinute = prayerNotificationPrefs.dhuhaMinute(),
-                dhuhaTimeLabel = String.format("%02d:%02d", prayerNotificationPrefs.dhuhaHour(), prayerNotificationPrefs.dhuhaMinute())
+                dhuhaTimeLabel = String.format("%02d:%02d", prayerNotificationPrefs.dhuhaHour(), prayerNotificationPrefs.dhuhaMinute()),
+                dhuhaDays = prayerNotificationPrefs.dhuhaDays()
             )
         }
     }
 
-    fun setTahajudTime(hour: Int, minute: Int) {
+    fun setTahajudTime(hour: Int, minute: Int, days: Set<Int> = (1..7).toSet()) {
         prayerNotificationPrefs.setTahajudTime(hour, minute)
+        prayerNotificationPrefs.setTahajudDays(days)
         syncPrayerNotificationState()
         reschedulePrayerNotifications()
     }
@@ -270,6 +276,7 @@ class AccountViewModel @Inject constructor(
                 reminderHour = notificationStore.morningHour(),
                 reminderMinute = notificationStore.morningMinute(),
                 reminderTimeLabel = notificationStore.formattedMorningTime(),
+                dailyVerseDays = notificationStore.days(),
                 appLanguage = appLanguageStore.current(),
                 appTheme = themeStore.currentTheme(),
                 prayerMadhab = prayerMethodStore.currentMadhab(),
@@ -480,15 +487,17 @@ class AccountViewModel @Inject constructor(
         DailyVerseNotificationScheduler.reschedule(appContext)
     }
 
-    fun saveReminderTime(hour: Int, minute: Int) {
+    fun saveReminderTime(hour: Int, minute: Int, days: Set<Int> = (1..7).toSet()) {
         notificationStore.setMorningTime(hour, minute)
+        notificationStore.setDays(days)
         DailyVerseNotificationScheduler.reschedule(appContext)
         _state.update {
             it.copy(
                 showNotifTimeSheet = false,
                 reminderHour = notificationStore.morningHour(),
                 reminderMinute = notificationStore.morningMinute(),
-                reminderTimeLabel = notificationStore.formattedMorningTime()
+                reminderTimeLabel = notificationStore.formattedMorningTime(),
+                dailyVerseDays = notificationStore.days()
             )
         }
     }
@@ -557,7 +566,7 @@ class AccountViewModel @Inject constructor(
         reschedulePrayerNotifications()
     }
 
-    fun setDhuhaTime(hour: Int, minute: Int) {
+    fun setDhuhaTime(hour: Int, minute: Int, days: Set<Int> = (1..7).toSet()) {
         val isIndoMalay = appLanguageStore.current() == AppLanguage.INDONESIAN || appLanguageStore.current() == AppLanguage.MALAY
         if (hour < 6 || (hour > 11 || (hour == 11 && minute > 45))) {
             val msg = if (isIndoMalay) {
@@ -569,6 +578,7 @@ class AccountViewModel @Inject constructor(
             return
         }
         prayerNotificationPrefs.setDhuhaTime(hour, minute)
+        prayerNotificationPrefs.setDhuhaDays(days)
         syncPrayerNotificationState()
         reschedulePrayerNotifications()
     }

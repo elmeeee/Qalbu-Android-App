@@ -48,6 +48,17 @@ class DailyVerseNotificationStore @Inject constructor(
         _minute.value = m
     }
 
+    fun days(): Set<Int> {
+        val raw = prefs.getString(KEY_DAYS, "1,2,3,4,5,6,7")
+        if (raw.isNullOrBlank()) return (1..7).toSet()
+        return raw.split(",").mapNotNull { it.trim().toIntOrNull() }.toSet().ifEmpty { (1..7).toSet() }
+    }
+
+    fun setDays(days: Set<Int>) {
+        val cleaned = days.filter { it in 1..7 }.toSet().ifEmpty { (1..7).toSet() }
+        prefs.edit().putString(KEY_DAYS, cleaned.joinToString(",")).apply()
+    }
+
     fun formattedMorningTime(): String {
         val cal = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, morningHour())
@@ -65,5 +76,6 @@ class DailyVerseNotificationStore @Inject constructor(
         private const val KEY_ENABLED = "dailyVerseNotificationsEnabled"
         private const val KEY_HOUR = "dailyVerseNotificationHour"
         private const val KEY_MINUTE = "dailyVerseNotificationMinute"
+        private const val KEY_DAYS = "dailyVerseNotificationDays"
     }
 }

@@ -56,7 +56,7 @@ object DailyVerseNotificationScheduler {
             cancel(context)
             return
         }
-        scheduleAt(context, store.morningHour(), store.morningMinute())
+        scheduleAt(context, store.morningHour(), store.morningMinute(), store.days())
     }
 
     fun cancel(context: Context) {
@@ -64,16 +64,15 @@ object DailyVerseNotificationScheduler {
         alarmManager.cancel(pendingIntent(context))
     }
 
-    fun scheduleAt(context: Context, hour: Int, minute: Int) {
+    fun scheduleAt(context: Context, hour: Int, minute: Int, days: Set<Int> = (1..7).toSet()) {
         ensureChannel(context)
         cancel(context)
-        val trigger = nextTriggerMillis(hour, minute)
+        val trigger = nextTriggerMillis(hour, minute, days)
         val pending = pendingIntent(context)
-        ExactAlarmScheduler.schedule(
+        ExactAlarmScheduler.scheduleExactAndAllowWhileIdle(
             context = context,
             triggerAtMillis = trigger,
-            pending = pending,
-            showIntentRequestCode = SHOW_ALARM_INTENT_REQUEST
+            pending = pending
         )
     }
 
@@ -83,7 +82,7 @@ object DailyVerseNotificationScheduler {
             cancel(context)
             return
         }
-        scheduleAt(context, store.morningHour(), store.morningMinute())
+        scheduleAt(context, store.morningHour(), store.morningMinute(), store.days())
     }
 
     private fun dailyVersePrefs(context: Context) = DailyVerseNotificationStoreReader(context)
@@ -164,7 +163,7 @@ object DailyVerseNotificationScheduler {
         )
     }
 
-    private fun nextTriggerMillis(hour: Int, minute: Int): Long {
+    private fun nextTriggerMillis(hour: Int, minute: Int, days: Set<Int> = (1..7).toSet()): Long {
         val cal = Calendar.getInstance().apply {
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
@@ -176,6 +175,10 @@ object DailyVerseNotificationScheduler {
             set(Calendar.MILLISECOND, 0)
         }
         if (cal.timeInMillis <= compareCal.timeInMillis) {
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        val activeDays = if (days.isEmpty()) (1..7).toSet() else days
+        while (cal.get(Calendar.DAY_OF_WEEK) !in activeDays) {
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
         return cal.timeInMillis

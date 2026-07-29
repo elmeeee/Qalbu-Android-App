@@ -221,32 +221,38 @@ object PrayerNotificationScheduler {
         if (options.dhuhaReminderEnabled) {
             val firstDhuha = nextDailyTime(options.dhuhaHour, options.dhuhaMinute, now)
             upcomingDailyOccurrences(firstDhuha, now, 7).forEachIndexed { offset, fireAt ->
-                scheduleOneShot(
-                    context = context,
-                    requestCode = DHUHA_REQUEST_BASE + offset,
-                    fireAt = fireAt,
-                    channelId = NotificationChannels.SUNNAH,
-                    title = localContext.getString(R.string.sunnah_dhuha_title),
-                    body = localContext.getString(R.string.sunnah_dhuha_body),
-                    kind = "sunnah_dhuha",
-                    notificationId = DHUHA_REQUEST_BASE + offset
-                )
+                val cal = Calendar.getInstance().apply { timeInMillis = fireAt }
+                if (cal.get(Calendar.DAY_OF_WEEK) in options.dhuhaDays) {
+                    scheduleOneShot(
+                        context = context,
+                        requestCode = DHUHA_REQUEST_BASE + offset,
+                        fireAt = fireAt,
+                        channelId = NotificationChannels.SUNNAH,
+                        title = localContext.getString(R.string.sunnah_dhuha_title),
+                        body = localContext.getString(R.string.sunnah_dhuha_body),
+                        kind = "sunnah_dhuha",
+                        notificationId = DHUHA_REQUEST_BASE + offset
+                    )
+                }
             }
         }
 
         if (options.lastThirdEnabled) {
             val firstTahajud = nextDailyTime(options.tahajudHour, options.tahajudMinute, now)
             upcomingDailyOccurrences(firstTahajud, now, 7).forEachIndexed { offset, fireAt ->
-                scheduleOneShot(
-                    context = context,
-                    requestCode = NIGHT_REQUEST_BASE + 40 + offset,
-                    fireAt = fireAt,
-                    channelId = NotificationChannels.PRAYER,
-                    title = localContext.getString(R.string.night_last_third_title),
-                    body = localContext.getString(R.string.night_last_third_body),
-                    kind = "night_${NightDivisionKind.LAST_THIRD.name}",
-                    notificationId = NOTIFICATION_ID_BASE + 62 + offset
-                )
+                val cal = Calendar.getInstance().apply { timeInMillis = fireAt }
+                if (cal.get(Calendar.DAY_OF_WEEK) in options.tahajudDays) {
+                    scheduleOneShot(
+                        context = context,
+                        requestCode = NIGHT_REQUEST_BASE + 40 + offset,
+                        fireAt = fireAt,
+                        channelId = NotificationChannels.PRAYER,
+                        title = localContext.getString(R.string.night_last_third_title),
+                        body = localContext.getString(R.string.night_last_third_body),
+                        kind = "night_${NightDivisionKind.LAST_THIRD.name}",
+                        notificationId = NOTIFICATION_ID_BASE + 62 + offset
+                    )
+                }
             }
         }
     }

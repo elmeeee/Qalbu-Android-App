@@ -27,11 +27,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.BottomSheetDefaults
@@ -50,19 +54,20 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -189,9 +194,13 @@ fun AccountScreen(
 
     if (state.showNotifTimeSheet) {
         ReminderTimeSheet(
+            reminderType = ReminderType.DAILY_VERSE,
             hour = state.reminderHour,
             minute = state.reminderMinute,
-            onSave = vm::saveReminderTime,
+            initialDays = state.dailyVerseDays,
+            onSave = { h, m, days ->
+                vm.saveReminderTime(h, m, days)
+            },
             onDismiss = { vm.toggleNotifTimeSheet(false) }
         )
     }
@@ -629,10 +638,12 @@ fun NotificationAdhanScreen(
 
     if (showTahajudTimePicker) {
         ReminderTimeSheet(
+            reminderType = ReminderType.TAHAJUD,
             hour = state.tahajudHour,
             minute = state.tahajudMinute,
-            onSave = { h, m ->
-                vm.setTahajudTime(h, m)
+            initialDays = state.tahajudDays,
+            onSave = { h, m, days ->
+                vm.setTahajudTime(h, m, days)
                 showTahajudTimePicker = false
             },
             onDismiss = { showTahajudTimePicker = false }
@@ -641,10 +652,12 @@ fun NotificationAdhanScreen(
 
     if (showDhuhaTimePicker) {
         ReminderTimeSheet(
+            reminderType = ReminderType.DHUHA,
             hour = state.dhuhaHour,
             minute = state.dhuhaMinute,
-            onSave = { h, m ->
-                vm.setDhuhaTime(h, m)
+            initialDays = state.dhuhaDays,
+            onSave = { h, m, days ->
+                vm.setDhuhaTime(h, m, days)
                 showDhuhaTimePicker = false
             },
             onDismiss = { showDhuhaTimePicker = false }
@@ -1564,44 +1577,353 @@ private fun TranslatorSheet(
     }
 }
 
+private enum class ReminderType {
+    TAHAJUD,
+    DHUHA,
+    DAILY_VERSE
+}
+
+private data class QuickPresetTime(
+    val hour: Int,
+    val minute: Int,
+    val label: String
+)
+
+private data class DayOption(
+    val calendarDay: Int,
+    val labelEn: String,
+    val labelId: String,
+    val labelMs: String
+)
+
+private val WEEK_DAYS = listOf(
+    DayOption(java.util.Calendar.MONDAY, "Mon", "Sen", "Isn"),
+    DayOption(java.util.Calendar.TUESDAY, "Tue", "Sel", "Sel"),
+    DayOption(java.util.Calendar.WEDNESDAY, "Wed", "Rab", "Rab"),
+    DayOption(java.util.Calendar.THURSDAY, "Thu", "Kam", "Kha"),
+    DayOption(java.util.Calendar.FRIDAY, "Fri", "Jum", "Jum"),
+    DayOption(java.util.Calendar.SATURDAY, "Sat", "Sab", "Sab"),
+    DayOption(java.util.Calendar.SUNDAY, "Sun", "Min", "Aha")
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ReminderTimeSheet(
+    reminderType: ReminderType = ReminderType.TAHAJUD,
     hour: Int,
     minute: Int,
-    onSave: (Int, Int) -> Unit,
+    initialDays: Set<Int> = (1..7).toSet(),
+    onSave: (Int, Int, Set<Int>) -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    val timeState = rememberTimePickerState(
-        initialHour = hour,
-        initialMinute = minute,
-        is24Hour = false
-    )
+    var currentHour by remember { mutableIntStateOf(hour) }
+    var currentMinute by remember { mutableIntStateOf(minute) }
+    var selectedDays by remember { mutableStateOf(if (initialDays.isEmpty()) (1..7).toSet() else initialDays) }
+
+    val context = LocalContext.current
+    val currentLang = remember(context) {
+        app.kamy.saatApp.infrastructure.preferences.AppLanguageStore.from(context).current()
+    }
+    val isIndo = currentLang == AppLanguage.INDONESIAN
+    val isMalay = currentLang == AppLanguage.MALAY
+
+    val title = when (reminderType) {
+        ReminderType.TAHAJUD -> if (isIndo) "Pengingat Tahajud" else if (isMalay) "Peringatan Tahajud" else "Tahajud Reminder"
+        ReminderType.DHUHA -> if (isIndo) "Pengingat Duha" else if (isMalay) "Peringatan Dhuha" else "Dhuha Reminder"
+        ReminderType.DAILY_VERSE -> if (isIndo) "Pengingat Ayat Harian" else if (isMalay) "Peringatan Ayat Harian" else "Daily Verse Reminder"
+    }
+
+    val subtitle = when (reminderType) {
+        ReminderType.TAHAJUD -> if (isIndo) "Atur jam & hari pengingat sepertiga malam" else if (isMalay) "Tetapkan masa & hari sepertiga malam" else "Set time & days for last third of night"
+        ReminderType.DHUHA -> if (isIndo) "Atur jam & hari pengingat shalat Duha" else if (isMalay) "Tetapkan masa & hari solat Dhuha" else "Set time & days for Dhuha prayer"
+        ReminderType.DAILY_VERSE -> if (isIndo) "Atur jam & hari baca Al-Qur'an harian" else if (isMalay) "Tetapkan masa & hari membaca Al-Quran" else "Set time & days for daily Quran verse"
+    }
+
+    val presets = when (reminderType) {
+        ReminderType.TAHAJUD -> listOf(
+            QuickPresetTime(3, 0, if (isIndo || isMalay) "03:00 • Sepertiga" else "03:00 • Last Third"),
+            QuickPresetTime(3, 30, if (isIndo || isMalay) "03:30 • Waktu Utama" else "03:30 • Optimal"),
+            QuickPresetTime(4, 0, if (isIndo) "04:00 • Sblm Subuh" else if (isMalay) "04:00 • Sblm Subuh" else "04:00 • Before Fajr")
+        )
+        ReminderType.DHUHA -> listOf(
+            QuickPresetTime(7, 30, if (isIndo || isMalay) "07:30 • Awal Duha" else "07:30 • Early Dhuha"),
+            QuickPresetTime(8, 30, if (isIndo || isMalay) "08:30 • Waktu Utama" else "08:30 • Optimal"),
+            QuickPresetTime(9, 30, if (isIndo || isMalay) "09:30 • Pertengahan" else "09:30 • Mid Dhuha")
+        )
+        ReminderType.DAILY_VERSE -> listOf(
+            QuickPresetTime(6, 30, if (isIndo || isMalay) "06:30 • Pagi Hari" else "06:30 • Morning"),
+            QuickPresetTime(12, 30, if (isIndo || isMalay) "12:30 • Siang Hari" else "12:30 • Midday"),
+            QuickPresetTime(18, 30, if (isIndo || isMalay) "18:30 • Petang" else "18:30 • Evening")
+        )
+    }
+
+    val repeatDaysHeader = if (isIndo || isMalay) "Ulangi Pada Hari" else "Repeat On Days"
+    val typeTimeHeader = if (isIndo || isMalay) "Ketik Jam & Menit" else "Type Hour & Minute"
+
+    val daysSummary = remember(selectedDays, currentLang) {
+        if (selectedDays.size == 7) {
+            if (isIndo || isMalay) "Setiap Hari" else "Every Day"
+        } else if (selectedDays.isEmpty()) {
+            if (isIndo) "Tidak Ada Hari" else if (isMalay) "Tiada Hari" else "No Days"
+        } else {
+            WEEK_DAYS.filter { it.calendarDay in selectedDays }.joinToString(", ") {
+                if (isIndo) it.labelId else if (isMalay) it.labelMs else it.labelEn
+            }
+        }
+    }
+
     SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp),
+                .padding(horizontal = 24.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Text(
-                stringResource(R.string.reminder_time_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            TimePicker(state = timeState)
+            // Header: Title & Subtitle
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Direct Type Time Input Box (24-Hour Typed Input)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = typeTimeHeader,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                )
+
+                var hourText by remember(currentHour) { mutableStateOf(String.format(java.util.Locale.getDefault(), "%02d", currentHour)) }
+                var minText by remember(currentMinute) { mutableStateOf(String.format(java.util.Locale.getDefault(), "%02d", currentMinute)) }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    OutlinedTextField(
+                        value = hourText,
+                        onValueChange = { input ->
+                            val digits = input.filter { it.isDigit() }.take(2)
+                            hourText = digits
+                            digits.toIntOrNull()?.let { h ->
+                                if (h in 0..23) currentHour = h
+                            }
+                        },
+                        textStyle = MaterialTheme.typography.headlineMedium.copy(
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        ),
+                        modifier = Modifier.width(80.dp)
+                    )
+
+                    Text(
+                        text = ":",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = minText,
+                        onValueChange = { input ->
+                            val digits = input.filter { it.isDigit() }.take(2)
+                            minText = digits
+                            digits.toIntOrNull()?.let { m ->
+                                if (m in 0..59) currentMinute = m
+                            }
+                        },
+                        textStyle = MaterialTheme.typography.headlineMedium.copy(
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                        ),
+                        modifier = Modifier.width(80.dp)
+                    )
+
+                    Spacer(Modifier.width(10.dp))
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                    ) {
+                        Text(
+                            text = "WIB",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+            }
+
+            // Quick Preset Selection Chips (Super Interactive & Beautiful)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
             ) {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                presets.forEach { preset ->
+                    val isSelected = currentHour == preset.hour && currentMinute == preset.minute
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        border = if (isSelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(14.dp))
+                            .clickable {
+                                currentHour = preset.hour
+                                currentMinute = preset.minute
+                            }
+                    ) {
+                        Text(
+                            text = preset.label,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp)
+                        )
+                    }
                 }
-                TextButton(onClick = { onSave(timeState.hour, timeState.minute) }) {
-                    Text(stringResource(R.string.save), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+            }
+
+            // Days of the Week Selection Row (Mon - Sun)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = repeatDaysHeader,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Text(
+                        text = daysSummary,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    WEEK_DAYS.forEach { day ->
+                        val isDaySelected = day.calendarDay in selectedDays
+                        val dayLabel = if (isIndo) day.labelId else if (isMalay) day.labelMs else day.labelEn
+
+                        Surface(
+                            shape = CircleShape,
+                            color = if (isDaySelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                            border = if (isDaySelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .clickable {
+                                    selectedDays = if (isDaySelected) {
+                                        if (selectedDays.size > 1) selectedDays - day.calendarDay else selectedDays
+                                    } else {
+                                        selectedDays + day.calendarDay
+                                    }
+                                }
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Text(
+                                    text = dayLabel,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = if (isDaySelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isDaySelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            // Action Buttons
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = { onSave(currentHour, currentMinute, selectedDays) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text(
+                        stringResource(R.string.save),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        stringResource(R.string.cancel),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }
