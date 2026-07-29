@@ -102,7 +102,6 @@
     <string name="notifications">Notifikasi</string>
     <string name="reminders">Pengingat</string>
     <string name="sign_out">Keluar</string>
-    <string name="sync_reflections">Sinkronkan Refleksi</string>
     <string name="sign_in_prompt">Masuk untuk mencadangkan refleksi dan bergabung dengan komunitas.</string>
     <string name="sign_in">Masuk</string>
 
@@ -444,7 +443,6 @@
     <string name="reading_settings_a11y">Pengaturan baca</string>
 
     <string name="published_to_reflect">Dipublikasikan ke Refleksi</string>
-    <string name="sign_in_to_publish">Masuk untuk publikasikan refleksi</string>
 
     <string name="location_enable">Aktifkan lokasi</string>
     <string name="location_unavailable">Lokasi tidak tersedia</string>
@@ -452,11 +450,7 @@
     <string name="action_settings">Pengaturan</string>
     <string name="action_allow">Izinkan</string>
     <string name="profile_still_loading">Profil masih dimuat — coba lagi sebentar.</string>
-    <string name="reflect_sign_in_title">Masuk ke Refleksi</string>
-    <string name="reflect_sign_in_subtitle">Sinkronkan refleksi Anda di semua perangkat dan bergabung dengan feed komunitas.</string>
-    <string name="reflect_contributor">Kontributor</string>
     <string name="verified">Terverifikasi</string>
-    <string name="reflect_feed_load_failed">Gagal memuat feed</string>
     <string name="done">Selesai</string>
     <string name="this_verse">Ayat ini</string>
     <string name="commentary">Tafsir</string>
@@ -482,7 +476,6 @@
     <string name="share_generate_failed">Tidak dapat membuat teks bagikan</string>
     <string name="publish_failed">Publikasi gagal</string>
     <string name="profile_load_failed">Tidak dapat memuat profil Anda.</string>
-    <string name="sign_in_to_publish_account">Masuk dari Akun untuk publikasikan.</string>
     <string name="verses_load_failed">Gagal memuat ayat</string>
     <string name="chapters_load_failed">Gagal memuat surah</string>
 

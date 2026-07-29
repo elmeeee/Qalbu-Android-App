@@ -37,8 +37,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // OAuth callback host/scheme used by AppAuth's RedirectUriReceiverActivity manifest placeholder.
-        manifestPlaceholders["appAuthRedirectScheme"] = "Saat"
     }
 
     signingConfigs {
@@ -68,22 +66,13 @@ android {
             // Point debug at production APIs so behaviour matches release.
             buildConfigField("String", "QF_API_BASE_URL", "\"https://apis.quran.foundation\"")
             buildConfigField("String", "QF_OAUTH_TOKEN_URL", "\"https://oauth2.quran.foundation/oauth2/token\"")
-            buildConfigField("String", "QF_OAUTH_AUTHORIZE_URL", "\"https://oauth2.quran.foundation/oauth2/auth\"")
-            buildConfigField("String", "QF_OAUTH_CALLBACK_URL", "\"https://elmee.my/oauth/callback\"")
-            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"Saat://oauth/callback\"")
             buildConfigField("String", "QF_OAUTH_CLIENT_ID", "\"9fd71c6c-efb4-406e-84d0-ff39f186ca9b\"")
             buildConfigField(
                 "String",
                 "QF_OAUTH_CLIENT_SECRET",
                 "\"${secret("QF_OAUTH_CLIENT_SECRET_RELEASE")}\""
             )
-            buildConfigField(
-                "String",
-                "QF_OAUTH_SCOPES",
-                "\"openid offline_access user post streak activity_day reading_session\""
-            )
             buildConfigField("String", "QF_VERSES_WEB_BASE", "\"https://verses.quran.com\"")
-            buildConfigField("String", "QF_ALADHAN_ROOT", "\"https://api.aladhan.com\"")
             buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "1")
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
             buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "openai/gpt-oss-20b")}\"")
@@ -103,22 +92,13 @@ android {
 
             buildConfigField("String", "QF_API_BASE_URL", "\"https://apis.quran.foundation\"")
             buildConfigField("String", "QF_OAUTH_TOKEN_URL", "\"https://oauth2.quran.foundation/oauth2/token\"")
-            buildConfigField("String", "QF_OAUTH_AUTHORIZE_URL", "\"https://oauth2.quran.foundation/oauth2/auth\"")
-            buildConfigField("String", "QF_OAUTH_CALLBACK_URL", "\"https://elmee.my/oauth/callback\"")
-            buildConfigField("String", "QF_OAUTH_APP_CALLBACK_URL", "\"Saat://oauth/callback\"")
             buildConfigField("String", "QF_OAUTH_CLIENT_ID", "\"9fd71c6c-efb4-406e-84d0-ff39f186ca9b\"")
             buildConfigField(
                 "String",
                 "QF_OAUTH_CLIENT_SECRET",
                 "\"${secret("QF_OAUTH_CLIENT_SECRET_RELEASE")}\""
             )
-            buildConfigField(
-                "String",
-                "QF_OAUTH_SCOPES",
-                "\"openid offline_access user post streak activity_day reading_session\""
-            )
             buildConfigField("String", "QF_VERSES_WEB_BASE", "\"https://verses.quran.com\"")
-            buildConfigField("String", "QF_ALADHAN_ROOT", "\"https://api.aladhan.com\"")
             buildConfigField("int", "QF_DEFAULT_TRANSLATION_ID", "1")
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
             buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "openai/gpt-oss-20b")}\"")

@@ -188,9 +188,6 @@
     <string name="ramadan_mode_body">Lacak tarawih dan tetap istiqamah di bulan penuh berkah.</string>
     <string name="ramadan_mode_title">Mode Ramadan</string>
     <string name="ramadan_tarawih">Tarawih malam ini selesai</string>
-    <string name="reflect_empty_all">Belum ada refleksi. Jadilah yang pertama berbagi dari pembaca Quran.</string>
-    <string name="reflect_empty_mine">Anda belum mempublikasikan refleksi. Bagikan wawasan ayat dari pembaca.</string>
-    <string name="reflect_recent_comment">Komentar terbaru</string>
     <string name="remove_bookmark">Hapus bookmark</string>
     <string name="shortcut_continue_quran">Lanjutkan Quran</string>
     <string name="shortcut_prayer_today">Jadwal sholat</string>

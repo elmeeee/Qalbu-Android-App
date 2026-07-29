@@ -8,7 +8,6 @@ import app.kamy.saatApp.core.config.AppConfig
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.error.toAppError
-import app.kamy.saatApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.saatApp.core.error.isAuthenticationFailure
 import app.kamy.saatApp.core.error.userFacingAuthOrApiMessage
 import app.kamy.saatApp.domain.model.HadithReference
@@ -20,7 +19,6 @@ import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.audio.AudioQueueItem
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
-import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore

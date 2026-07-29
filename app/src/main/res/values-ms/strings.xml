@@ -88,7 +88,6 @@
     <string name="notifications">Notifikasi</string>
     <string name="reminders">Peringatan</string>
     <string name="sign_out">Log keluar</string>
-    <string name="sync_reflections">Segerak Refleksi</string>
     <string name="sign_in_prompt">Log masuk untuk sandarkan refleksi dan sertai komuniti.</string>
     <string name="sign_in">Log masuk</string>
     <string name="notif_summary_daily_verse">Ayat harian</string>
@@ -418,18 +417,13 @@
     <string name="font_preview_translation">Dengan nama Allah Yang Maha Pengasih, Maha Penyayang.</string>
     <string name="reading_settings_a11y">Tetapan bacaan</string>
     <string name="published_to_reflect">Diterbitkan ke Refleksi</string>
-    <string name="sign_in_to_publish">Log masuk untuk terbitkan refleksi</string>
     <string name="location_enable">Dayakan lokasi</string>
     <string name="location_unavailable">Lokasi tidak tersedia</string>
     <string name="notifications_disabled_snackbar">Pemberitahuan dimatikan. Dayakan dalam Tetapan untuk peringatan solat.</string>
     <string name="action_settings">Tetapan</string>
     <string name="action_allow">Benarkan</string>
     <string name="profile_still_loading">Profil masih dimuatkan — cuba lagi sebentar.</string>
-    <string name="reflect_sign_in_title">Log masuk ke Refleksi</string>
-    <string name="reflect_sign_in_subtitle">Segerakkan refleksi anda merentas peranti dan sertai suapan komuniti.</string>
-    <string name="reflect_contributor">Penyumbang</string>
     <string name="verified">Disahkan</string>
-    <string name="reflect_feed_load_failed">Gagal memuatkan suapan</string>
     <string name="done">Selesai</string>
     <string name="this_verse">Ayat ini</string>
     <string name="commentary">Tafsir</string>
@@ -455,7 +449,6 @@
     <string name="share_generate_failed">Tidak dapat menjana teks kongsi</string>
     <string name="publish_failed">Penerbitan gagal</string>
     <string name="profile_load_failed">Tidak dapat memuatkan profil anda.</string>
-    <string name="sign_in_to_publish_account">Log masuk dari Akaun untuk terbitkan.</string>
     <string name="verses_load_failed">Gagal memuatkan ayat</string>
     <string name="chapters_load_failed">Gagal memuatkan surah</string>
     <string name="share_allah_says">قَالَ اللَّهُ تَعَالَى</string>

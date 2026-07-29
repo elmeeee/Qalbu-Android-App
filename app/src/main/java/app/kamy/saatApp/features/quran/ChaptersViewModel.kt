@@ -11,7 +11,6 @@ import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.QuranJuz
 import app.kamy.saatApp.domain.model.ReadingSession
 import app.kamy.saatApp.domain.model.SearchVerseResult
-import app.kamy.saatApp.infrastructure.auth.UserSession
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.network.NetworkMonitor
@@ -67,8 +66,7 @@ class ChaptersViewModel @Inject constructor(
     private val searchRepository: SearchRepository,
     private val translationStore: TranslationPreferencesStore,
     private val appLanguageStore: AppLanguageStore,
-    private val readingSessions: ReadingSessionRepository,
-    private val userSession: UserSession
+    private val readingSessions: ReadingSessionRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ChaptersUiState())
@@ -85,11 +83,6 @@ class ChaptersViewModel @Inject constructor(
             appLanguageStore.currentFlow.drop(1).collect {
                 contentRepository.clearCache()
                 refresh(force = true)
-            }
-        }
-        viewModelScope.launch {
-            userSession.isSignedIn.collect {
-                refresh(force = false)
             }
         }
     }

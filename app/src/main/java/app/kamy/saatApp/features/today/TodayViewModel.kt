@@ -7,7 +7,6 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.core.config.AppConfig
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.error.AppErrorKind
-import app.kamy.saatApp.core.error.invalidateIfAuthenticationFailure
 import app.kamy.saatApp.core.error.isAuthenticationFailure
 import app.kamy.saatApp.core.error.userFacingAuthOrApiMessage
 import app.kamy.saatApp.core.error.toAppError

@@ -36,7 +36,6 @@ retrofitSerializationConverter = "1.0.0"
 kotlinxCoroutines = "1.9.0"
 
 # OAuth
-appauth = "0.11.1"
 
 # Media
 media3 = "1.4.1"
@@ -108,7 +107,6 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
 
 # OAuth (PKCE flow + custom tabs)
-appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
 
 # Media3 ExoPlayer (recitation audio)
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }

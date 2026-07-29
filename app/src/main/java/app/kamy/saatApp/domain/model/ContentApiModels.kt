@@ -3,13 +3,7 @@ package app.kamy.saatApp.domain.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// ---- Random ayah / verse payloads (Content API) ----
-
-@Serializable
-data class RandomAyahResponse(val verse: RandomAyahPayload? = null)
-
-@Serializable
-data class SingleVerseResponse(val verse: RandomAyahPayload? = null)
+// ---- Verse payloads (shared by the local Quran database and the Content API) ----
 
 @Serializable
 data class RandomAyahPayload(
@@ -233,9 +227,6 @@ data class HadithGrade(
 // ---- Recitations ----
 
 @Serializable
-data class RecitationsResponse(val recitations: List<RecitationPayload>? = null)
-
-@Serializable
 data class RecitationPayload(
     val id: Int? = null,
     val reciterName: String? = null,
@@ -250,12 +241,6 @@ data class RecitationPayload(
 data class RecitationTranslatedName(val name: String? = null)
 
 // ---- Juz ----
-
-@Serializable
-data class JuzsResponse(val juzs: List<QuranJuz> = emptyList())
-
-@Serializable
-data class SingleJuzResponse(val juz: QuranJuz? = null)
 
 @Serializable
 data class QuranJuz(
@@ -279,9 +264,6 @@ data class QuranJuz(
 }
 
 // ---- Chapters ----
-
-@Serializable
-data class ChaptersResponse(val chapters: List<QuranChapter> = emptyList())
 
 @Serializable
 data class QuranChapter(
@@ -366,6 +348,3 @@ data class TranslatedSubName(
     val name: String,
     val languageName: String
 )
-
-@Serializable
-data class TranslationsResponse(val translations: List<QFTranslation>? = null)

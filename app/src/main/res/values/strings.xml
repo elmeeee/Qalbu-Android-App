@@ -88,7 +88,6 @@
     <string name="notifications">Notifications</string>
     <string name="reminders">Reminders</string>
     <string name="sign_out">Sign out</string>
-    <string name="sync_reflections">Sync Reflections</string>
     <string name="sign_in_prompt">Sign in to back up your reflections and join the community.</string>
     <string name="sign_in">Sign in</string>
     <string name="notif_summary_daily_verse">Daily verse</string>
@@ -356,7 +355,6 @@
     <string name="tafsir">Tafsir</string>
     <string name="hadith">Hadith</string>
     <string name="no_verse_retry">No verse available. Pull to retry.</string>
-    <string name="reflect_recent_comment">Latest comment</string>
     <string name="tafsir_load_error">Couldn\'t load tafsir</string>
     <string name="tafsir_empty">No commentary here</string>
     <string name="hadith_load_error">Couldn\'t load hadith</string>
@@ -390,7 +388,6 @@
     <string name="font_preview_translation">In the name of God, the Most Gracious, the Most Merciful.</string>
     <string name="reading_settings_a11y">Reading settings</string>
     <string name="published_to_reflect">Published to Reflect</string>
-    <string name="sign_in_to_publish">Sign in to publish reflections</string>
     <string name="location_enable">Enable location</string>
     <string name="location_unavailable">Location unavailable</string>
     <string name="location_settings_title">Prayer location</string>
@@ -437,11 +434,7 @@
     <string name="action_settings">Settings</string>
     <string name="action_allow">Allow</string>
     <string name="profile_still_loading">Profile still loading — try again in a moment.</string>
-    <string name="reflect_sign_in_title">Sign in to Reflect</string>
-    <string name="reflect_sign_in_subtitle">Sync your reflections across devices and join the community feed.</string>
-    <string name="reflect_contributor">Contributor</string>
     <string name="verified">Verified</string>
-    <string name="reflect_feed_load_failed">Failed to load feed</string>
     <string name="bismillah_arabic">بِسْمِ ٱللَّهِ ٱلرَّحْمٰنِ ٱلرَّحِيمِ</string>
     <string name="done">Done</string>
     <string name="this_verse">This verse</string>
@@ -470,7 +463,6 @@
     <string name="share_generate_failed">Could not generate share text</string>
     <string name="publish_failed">Publish failed</string>
     <string name="profile_load_failed">Could not load your profile.</string>
-    <string name="sign_in_to_publish_account">Sign in from Account to publish.</string>
     <string name="verses_load_failed">Failed to load verses</string>
     <string name="chapters_load_failed">Failed to load chapters</string>
     <string name="share_allah_says">قَالَ اللَّهُ تَعَالَى</string>
