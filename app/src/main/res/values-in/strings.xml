@@ -757,4 +757,9 @@
     <string name="doa_saved_toast">Berhasil disimpan ke Bookmark!</string>
     <string name="adhan_tab_general">Adzan Umum</string>
     <string name="adhan_tab_fajr">Adzan Subuh</string>
+
+    <string name="qibla_point_phone">Arahkan ponsel Anda ke jalan atau area terbuka</string>
+    <string name="qibla_already_facing">Anda sudah menghadap Kiblat</string>
+    <string name="qibla_in_your_left">Kiblat ada di sebelah kiri Anda</string>
+    <string name="qibla_in_your_right">Kiblat ada di sebelah kanan Anda</string>
 </resources>

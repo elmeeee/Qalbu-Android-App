@@ -538,6 +538,10 @@
     <string name="khatam_overall_pages">%1$d / %2$d pages</string>
     <string name="spiritual_tools_title">Spiritual tools</string>
     <string name="qibla_title">Qibla</string>
+    <string name="qibla_point_phone">Point your phone at the street or plain</string>
+    <string name="qibla_already_facing">You\'re already facing the Qibla</string>
+    <string name="qibla_in_your_left">Qibla in your left</string>
+    <string name="qibla_in_your_right">Qibla in your right</string>
     <string name="qibla_location_required">Set your location in Today to find Qibla direction.</string>
     <string name="qibla_bearing">%1$d° to Kaaba</string>
     <string name="qibla_bearing_compass">🕋 %1$d°</string>
@@ -1192,8 +1196,8 @@
     <string name="notif_surah_reminders">Surah Reminders</string>
     <string name="notif_fasting_important_days">Fasting &amp; Important Days</string>
     <string name="notif_mon_thu_fasting">Monday &amp; Thursday Fasting</string>
-    <string name="notif_tahajud_remainder">Tahajud Remainder</string>
-    <string name="notif_dhuha_remainder">Dhuha Remainder</string>
+    <string name="notif_tahajud_remainder">Tahajud Reminder</string>
+    <string name="notif_dhuha_remainder">Dhuha Reminder</string>
     <string name="state_on">On</string>
     <string name="state_off">Off</string>
     <string name="surah_count_on_format">%1$d Surah - On</string>

@@ -9,78 +9,112 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.SaatSpacing
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.tools.QiblaCalculator
 import app.kamy.saatApp.infrastructure.notifications.PrayerScheduleCache
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
-import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
+import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlin.math.abs
 import kotlin.math.roundToInt
-
-private enum class QiblaMode { AR, Compass3D }
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun QiblaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val locationStore = remember(context) { LocationPreferencesStore.from(context) }
     val location = remember {
-        LocationPreferencesStore.from(context).manualLocation()?.let { it.latitude to it.longitude }
+        locationStore.manualLocation()?.let { it.latitude to it.longitude }
             ?: PrayerScheduleCache.loadCoordinates(context)
     }
+    val locationLabel = remember(context) {
+        locationStore.manualLocation()?.label?.takeIf { it.isNotBlank() }
+            ?: PrayerScheduleCache.loadMeta(context)?.cityLabel?.takeIf { it.isNotBlank() }
+            ?: "Tanjungpinang, Riau Islands"
+    }
+
     val bearing = remember(location) {
         location?.let { (lat, lng) -> QiblaCalculator.bearingToKaaba(lat, lng) } ?: 0f
     }
     var deviceAzimuth by remember { mutableFloatStateOf(0f) }
-    var mode by remember { mutableIntStateOf(QiblaMode.AR.ordinal) }
     val cameraPermission = rememberPermissionState(android.Manifest.permission.CAMERA)
 
+    // Request camera permission on launch
+    LaunchedEffect(Unit) {
+        if (!cameraPermission.status.isGranted) {
+            cameraPermission.launchPermissionRequest()
+        }
+    }
+
+    // Orientation sensor listener
     DisposableEffect(context) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val rotation = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
@@ -94,7 +128,9 @@ fun QiblaScreen(onBack: () -> Unit) {
                     SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
                     val orientation = FloatArray(3)
                     SensorManager.getOrientation(rotationMatrix, orientation)
-                    deviceAzimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
+                    var deg = Math.toDegrees(orientation[0].toDouble()).toFloat()
+                    if (deg < 0) deg += 360f
+                    deviceAzimuth = deg
                 }
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
             }
@@ -103,65 +139,13 @@ fun QiblaScreen(onBack: () -> Unit) {
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .tabContentStatusBarInset()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onBackground)
-            }
-            Text(
-                text = stringResource(R.string.qibla_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
-
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-        ) {
-            SegmentedButton(
-                selected = mode == QiblaMode.AR.ordinal,
-                onClick = {
-                    mode = QiblaMode.AR.ordinal
-                    if (!cameraPermission.status.isGranted) cameraPermission.launchPermissionRequest()
-                },
-                shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-            ) { Text(stringResource(R.string.qibla_mode_ar)) }
-            SegmentedButton(
-                selected = mode == QiblaMode.Compass3D.ordinal,
-                onClick = { mode = QiblaMode.Compass3D.ordinal },
-                shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-            ) { Text(stringResource(R.string.qibla_mode_3d)) }
-        }
-
-        if (location == null) {
-            Text(
-                text = stringResource(R.string.qibla_location_required),
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f),
-                modifier = Modifier.padding(24.dp),
-                textAlign = TextAlign.Center
-            )
-            return@Column
-        }
-
-        val performConfirmHaptic = rememberConfirmHaptic()
-    val needleRotation = bearing - deviceAzimuth
-    val aligned = remember(needleRotation) {
-        val normalized = ((needleRotation % 360f) + 360f) % 360f
-        normalized <= 8f || normalized >= 352f
+    val needleRotation = (bearing - deviceAzimuth + 360f) % 360f
+    val normalizedOffset = remember(needleRotation) {
+        if (needleRotation > 180f) needleRotation - 360f else needleRotation
     }
+    val aligned = abs(normalizedOffset) <= 8f
+
+    val performConfirmHaptic = rememberConfirmHaptic()
     var alignedHapticSent by remember { mutableStateOf(false) }
 
     LaunchedEffect(aligned) {
@@ -173,49 +157,303 @@ fun QiblaScreen(onBack: () -> Unit) {
         }
     }
 
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) {
-            if (mode == QiblaMode.AR.ordinal && cameraPermission.status.isGranted) {
-                QiblaCameraPreview(modifier = Modifier.fillMaxSize())
-            } else {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.radialGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.background,
-                                    MaterialTheme.colorScheme.surface
-                                )
-                            )
-                        )
-                )
-            }
+    val headingDegree = (deviceAzimuth.roundToInt() % 360 + 360) % 360
+    val cardinal = remember(headingDegree) { getCardinalDirection(headingDegree.toFloat()) }
 
-            QiblaNeedleOverlay(
-                needleRotation = needleRotation,
-                bearing = bearing,
-                modifier = Modifier.fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF0F172A))
+    ) {
+        // Layer 1: Live Camera Preview or Dark Atmospheric Fallback
+        if (cameraPermission.status.isGranted) {
+            QiblaCameraPreview(modifier = Modifier.fillMaxSize())
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFF0F172A), Color(0xFF1E293B))
+                        )
+                    )
             )
         }
 
-        Text(
-            text = if (aligned) {
-                stringResource(R.string.qibla_aligned)
-            } else {
-                stringResource(R.string.qibla_bearing, bearing.roundToInt())
-            },
-            color = MaterialTheme.colorScheme.tertiary,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
+        // Layer 2: Translucent Dark Overlay for AR Readability
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color.Black.copy(alpha = 0.35f),
+                            Color.Black.copy(alpha = 0.15f),
+                            Color.Black.copy(alpha = 0.45f)
+                        )
+                    )
+                )
+        )
+
+        // Layer 3: Top Guidance Text
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            textAlign = TextAlign.Center
+                .statusBarsPadding()
+                .padding(top = 56.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.qibla_point_phone),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp),
+                fontWeight = FontWeight.Medium,
+                color = Color.White.copy(alpha = 0.95f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
+        }
+
+        // Layer 4: AR Perspective Pathway & Kaaba Horizon Overlay
+        QiblaARPerspectiveView(
+            normalizedOffset = normalizedOffset,
+            aligned = aligned,
+            modifier = Modifier.fillMaxSize()
         )
+
+        // Layer 5: Top Navigation Bar
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.35f))
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = Color.White
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.qibla_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+
+        // Layer 6: Bottom HUD (Degree, Status & Location Tag)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            SaatColors.DeepEmerald.copy(alpha = 0.75f),
+                            SaatColors.DeepEmerald.copy(alpha = 0.95f)
+                        )
+                    )
+                )
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            // Heading degree & Cardinal (e.g. 350 NW)
+            Text(
+                text = "$headingDegree $cardinal",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = Color.White
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            // Qibla Status Row
+            val statusText = when {
+                aligned -> stringResource(R.string.qibla_already_facing)
+                normalizedOffset < 0 -> stringResource(R.string.qibla_in_your_left)
+                else -> stringResource(R.string.qibla_in_your_right)
+            }
+            val statusIcon = when {
+                aligned -> "↑"
+                normalizedOffset < 0 -> "↗"
+                else -> "↖"
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = statusIcon,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (aligned) SaatColors.GoldBright else Color.White
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Location Tag Row (📍 Tanjungpinang, Riau Islands)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.LocationOn,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.85f),
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = locationLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun QiblaARPerspectiveView(
+    normalizedOffset: Float,
+    aligned: Boolean,
+    modifier: Modifier = Modifier
+) {
+    // Continuous pulsing animation for directional arrows
+    val infiniteTransition = rememberInfiniteTransition(label = "ar_arrow_pulse")
+    val arrowOffsetAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -30f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "arrow_slide"
+    )
+    val arrowAlphaAnim by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.95f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "arrow_alpha"
+    )
+
+    // Smooth animated rotation angle toward Kaaba
+    val rotationAngle by animateFloatAsState(
+        targetValue = normalizedOffset.coerceIn(-60f, 60f),
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "qibla_rotation_anim"
+    )
+
+    val shiftPx = (rotationAngle / 45f).coerceIn(-1.2f, 1.2f) * 140f
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        // Perspective Pathway & Arrow Container pivoting dynamically from bottom center
+        Column(
+            modifier = Modifier
+                .graphicsLayer {
+                    rotationZ = rotationAngle
+                    transformOrigin = TransformOrigin(0.5f, 0.9f)
+                    translationX = shiftPx
+                }
+                .fillMaxHeight(0.85f)
+                .padding(bottom = 60.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            // Kaaba Icon Floating at Apex
+            Box(
+                modifier = Modifier
+                    .size(84.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (aligned) SaatColors.GoldDeep.copy(alpha = 0.35f)
+                        else Color.White.copy(alpha = 0.15f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.kaba_qibal_icon),
+                    contentDescription = null,
+                    modifier = Modifier.size(68.dp)
+                )
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            // Stack of Animated Directional Arrows (arow_icon) facing Kaaba
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.offset(y = arrowOffsetAnim.dp)
+            ) {
+                repeat(4) { idx ->
+                    val opacity = (arrowAlphaAnim * (1f - idx * 0.18f)).coerceIn(0.2f, 1f)
+                    Image(
+                        painter = painterResource(R.drawable.arow_icon),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(26.dp)
+                            .scale(1f - idx * 0.12f),
+                        alpha = opacity
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Perspective Pathway Gradient Base (bg_qibla_ar trapezoid representation)
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth(0.82f)
+                    .height(300.dp)
+            ) {
+                val w = size.width
+                val h = size.height
+
+                val path = Path().apply {
+                    moveTo(w * 0.36f, 0f)
+                    lineTo(w * 0.64f, 0f)
+                    lineTo(w, h)
+                    lineTo(0f, h)
+                    close()
+                }
+
+                drawPath(
+                    path = path,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.15f),
+                            SaatColors.DeepEmerald.copy(alpha = 0.65f),
+                            SaatColors.DeepEmerald.copy(alpha = 0.92f)
+                        )
+                    ),
+                    style = Fill
+                )
+            }
+        }
     }
 }
 
@@ -250,46 +488,17 @@ private fun QiblaCameraPreview(modifier: Modifier = Modifier) {
     )
 }
 
-@Composable
-private fun QiblaNeedleOverlay(
-    needleRotation: Float,
-    bearing: Float,
-    modifier: Modifier = Modifier
-) {
-    val onBackgroundColor = MaterialTheme.colorScheme.onBackground
-    val tertiaryColor = MaterialTheme.colorScheme.tertiary
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Canvas(modifier = Modifier.size(260.dp)) {
-            val center = Offset(size.width / 2f, size.height / 2f)
-            drawCircle(
-                color = onBackgroundColor.copy(alpha = 0.12f),
-                radius = size.minDimension / 2f,
-                center = center,
-                style = Stroke(width = 3f)
-            )
-            rotate(needleRotation, center) {
-                drawLine(
-                    color = tertiaryColor,
-                    start = center,
-                    end = Offset(center.x, center.y - size.height * 0.38f),
-                    strokeWidth = 8f
-                )
-                drawCircle(color = tertiaryColor, radius = 10f, center = center)
-            }
-        }
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 48.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.15f))
-                .padding(horizontal = 14.dp, vertical = 6.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.qibla_bearing_compass, bearing.roundToInt()),
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
-            )
-        }
+private fun getCardinalDirection(azimuth: Float): String {
+    val deg = (azimuth % 360 + 360) % 360
+    return when {
+        deg >= 337.5 || deg < 22.5 -> "N"
+        deg >= 22.5 && deg < 67.5 -> "NE"
+        deg >= 67.5 && deg < 112.5 -> "E"
+        deg >= 112.5 && deg < 157.5 -> "SE"
+        deg >= 157.5 && deg < 202.5 -> "S"
+        deg >= 202.5 && deg < 247.5 -> "SW"
+        deg >= 247.5 && deg < 292.5 -> "W"
+        deg >= 292.5 && deg < 337.5 -> "NW"
+        else -> "NW"
     }
 }

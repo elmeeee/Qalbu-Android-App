@@ -722,4 +722,9 @@
     <string name="doa_saved_toast">Berjaya disimpan ke Penanda!</string>
     <string name="adhan_tab_general">Azan Umum</string>
     <string name="adhan_tab_fajr">Azan Subuh</string>
+
+    <string name="qibla_point_phone">Halakan telefon anda ke jalan atau kawasan terbuka</string>
+    <string name="qibla_already_facing">Anda sudah menghadap Kiblat</string>
+    <string name="qibla_in_your_left">Kiblat di sebelah kiri anda</string>
+    <string name="qibla_in_your_right">Kiblat di sebelah kanan anda</string>
 </resources>
