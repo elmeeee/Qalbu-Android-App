@@ -5,6 +5,7 @@ package app.kamy.saatApp.features.quran
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -633,18 +634,20 @@ private fun QuranBrowseTabs(
 ) {
     val surahLabel = stringResource(R.string.quran_tab_surah)
     val juzLabel = stringResource(R.string.quran_tab_juz)
-    val tabShape = RoundedCornerShape(20.dp)
+    val tabShape = RoundedCornerShape(22.dp)
+
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(26.dp))
             .background(
                 Brush.linearGradient(
                     listOf(
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                        SaatColors.SageMist.copy(alpha = 0.5f)
+                        SaatColors.DeepEmerald.copy(alpha = 0.08f),
+                        SaatColors.GoldDeep.copy(alpha = 0.05f)
                     )
                 )
             )
+            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(26.dp))
             .padding(4.dp)
     ) {
         Row(
@@ -654,6 +657,7 @@ private fun QuranBrowseTabs(
             QuranBrowseTab(
                 label = surahLabel,
                 selected = browseMode == QuranBrowseMode.SURAH,
+                drawableResId = R.drawable.ic_quran_on,
                 onClick = { onBrowseModeChange(QuranBrowseMode.SURAH) },
                 modifier = Modifier.weight(1f),
                 shape = tabShape
@@ -661,6 +665,7 @@ private fun QuranBrowseTabs(
             QuranBrowseTab(
                 label = juzLabel,
                 selected = browseMode == QuranBrowseMode.JUZ,
+                drawableResId = R.drawable.ic_tafsir,
                 onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
                 modifier = Modifier.weight(1f),
                 shape = tabShape
@@ -673,39 +678,48 @@ private fun QuranBrowseTabs(
 private fun QuranBrowseTab(
     label: String,
     selected: Boolean,
+    drawableResId: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: RoundedCornerShape = RoundedCornerShape(24.dp)
+    shape: RoundedCornerShape = RoundedCornerShape(22.dp)
 ) {
+    val bgColor by animateColorAsState(
+        targetValue = if (selected) SaatColors.DeepEmerald else Color.Transparent,
+        animationSpec = tween(200),
+        label = "tabBg"
+    )
     val textColor by animateColorAsState(
-        targetValue = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+        targetValue = if (selected) Color.White else SaatColors.Slate700,
         animationSpec = tween(200),
         label = "tabText"
     )
-    Box(
-        modifier = modifier
-            .clip(shape)
-            .then(
-                if (selected) {
-                    Modifier.background(
-                        Brush.linearGradient(
-                            listOf(SaatColors.DeepEmerald, SaatColors.TealDark)
-                        )
-                    )
-                } else {
-                    Modifier
-                }
-            )
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        contentAlignment = Alignment.Center
+
+    Surface(
+        onClick = onClick,
+        modifier = modifier.clip(shape),
+        shape = shape,
+        color = bgColor,
+        shadowElevation = if (selected) 2.dp else 0.dp
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = textColor
-        )
+        Row(
+            modifier = Modifier.padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(drawableResId),
+                contentDescription = null,
+                tint = if (selected) Color.White else SaatColors.DeepEmerald,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = textColor
+            )
+        }
     }
 }
 

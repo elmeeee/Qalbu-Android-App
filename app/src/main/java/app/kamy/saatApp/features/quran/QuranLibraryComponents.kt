@@ -1,8 +1,8 @@
 package app.kamy.saatApp.features.quran
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,11 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,9 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.HifzStatus
@@ -97,45 +93,83 @@ fun MyQuranLibraryCard(
     Surface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         color = SaatColors.PureWhite,
-        shadowElevation = 2.dp
+        shadowElevation = 3.dp,
+        border = BorderStroke(
+            1.dp,
+            Brush.linearGradient(
+                listOf(SaatColors.DeepEmerald.copy(0.22f), SaatColors.Gold.copy(0.25f))
+            )
+        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            SaatColors.DeepEmerald.copy(alpha = 0.04f),
+                            SaatColors.GoldDeep.copy(alpha = 0.03f)
+                        )
+                    )
+                )
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(14.dp))
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(16.dp))
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                SaatColors.DeepEmerald.copy(alpha = 0.18f),
-                                SaatColors.GoldDeep.copy(alpha = 0.14f)
+                                SaatColors.DeepEmerald.copy(alpha = 0.15f),
+                                SaatColors.GoldDeep.copy(alpha = 0.18f)
                             )
                         )
+                    )
+                    .border(
+                        1.dp,
+                        SaatColors.GoldDeep.copy(alpha = 0.3f),
+                        RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Filled.Bookmark,
+                    painter = painterResource(R.drawable.ic_bookmark_custom),
                     contentDescription = null,
                     tint = SaatColors.GoldDeep,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(26.dp)
                 )
             }
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.quran_library_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = SaatColors.Slate900
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.quran_library_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
+                    )
+                    if (counts.total > 0) {
+                        Spacer(Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(SaatColors.GoldDeep)
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "${counts.total}",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = SaatColors.PureWhite,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = stringResource(R.string.quran_library_subtitle),
@@ -147,17 +181,17 @@ fun MyQuranLibraryCard(
                     Spacer(Modifier.height(10.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         LibraryCountChip(
-                            icon = Icons.Filled.Bookmark,
+                            drawableResId = R.drawable.ic_bookmark_custom,
                             count = counts.bookmarks,
                             tint = SaatColors.GoldDeep
                         )
                         LibraryCountChip(
-                            icon = Icons.AutoMirrored.Filled.Notes,
+                            drawableResId = R.drawable.ic_personalnote_custom,
                             count = counts.notes,
                             tint = SaatColors.DeepEmerald
                         )
                         LibraryCountChip(
-                            icon = Icons.Filled.Psychology,
+                            drawableResId = R.drawable.ic_memorization_custom,
                             count = counts.hifz,
                             tint = SaatColors.IndigoDeep
                         )
@@ -168,7 +202,7 @@ fun MyQuranLibraryCard(
                 Icons.Filled.ChevronRight,
                 contentDescription = null,
                 tint = SaatColors.Slate500,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     }
@@ -176,7 +210,7 @@ fun MyQuranLibraryCard(
 
 @Composable
 private fun LibraryCountChip(
-    icon: ImageVector,
+    drawableResId: Int,
     count: Int,
     tint: Color
 ) {
@@ -184,16 +218,22 @@ private fun LibraryCountChip(
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(999.dp))
-            .background(tint.copy(alpha = 0.1f))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .background(tint.copy(alpha = 0.12f))
+            .border(0.8.dp, tint.copy(alpha = 0.2f), RoundedCornerShape(999.dp))
+            .padding(horizontal = 9.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(12.dp))
+        Icon(
+            painter = painterResource(drawableResId),
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(13.dp)
+        )
         Text(
             text = count.toString(),
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
             color = tint
         )
     }
@@ -207,7 +247,7 @@ fun QuranLibraryHero(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(22.dp))
             .background(
                 Brush.linearGradient(
                     listOf(
@@ -218,52 +258,72 @@ fun QuranLibraryHero(
             )
             .border(
                 width = 1.dp,
-                color = SaatColors.DeepEmerald.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(20.dp)
+                color = SaatColors.DeepEmerald.copy(alpha = 0.18f),
+                shape = RoundedCornerShape(22.dp)
             )
-            .padding(18.dp)
+            .padding(20.dp)
     ) {
-        Text(
-            text = stringResource(R.string.quran_library_title),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = SaatColors.Slate900
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = stringResource(R.string.quran_library_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = SaatColors.Slate500,
-            lineHeight = 22.sp
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(SaatColors.GoldDeep.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_bookmark_custom),
+                    contentDescription = null,
+                    tint = SaatColors.GoldDeep,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = stringResource(R.string.quran_library_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = SaatColors.Slate900
+                )
+                Text(
+                    text = stringResource(R.string.quran_library_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SaatColors.Slate500
+                )
+            }
+        }
+
         Spacer(Modifier.height(16.dp))
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             LibraryFeaturePill(
-                icon = Icons.Filled.Bookmark,
+                drawableResId = R.drawable.ic_bookmark_custom,
                 label = stringResource(R.string.bookmarks_title),
                 count = counts.bookmarks,
                 tint = SaatColors.GoldDeep,
                 modifier = Modifier.weight(1f)
             )
             LibraryFeaturePill(
-                icon = Icons.AutoMirrored.Filled.Notes,
+                drawableResId = R.drawable.ic_personalnote_custom,
                 label = stringResource(R.string.notes_title),
                 count = counts.notes,
                 tint = SaatColors.DeepEmerald,
                 modifier = Modifier.weight(1f)
             )
             LibraryFeaturePill(
-                icon = Icons.Filled.Psychology,
+                drawableResId = R.drawable.ic_memorization_custom,
                 label = stringResource(R.string.hifz_title),
                 count = counts.hifz,
                 tint = SaatColors.IndigoDeep,
                 modifier = Modifier.weight(1f)
             )
         }
-        Spacer(Modifier.height(14.dp))
+
+        Spacer(Modifier.height(16.dp))
         QuranLibraryLegend()
     }
 }
@@ -272,26 +332,26 @@ fun QuranLibraryHero(
 fun QuranLibraryLegend(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text(
             text = stringResource(R.string.quran_library_legend),
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
             color = SaatColors.Slate800
         )
         LegendRow(
-            icon = Icons.Filled.Bookmark,
+            drawableResId = R.drawable.ic_bookmark_custom,
             tint = SaatColors.GoldDeep,
             text = stringResource(R.string.quran_library_intro_bookmarks)
         )
         LegendRow(
-            icon = Icons.Filled.EditNote,
+            drawableResId = R.drawable.ic_personalnote_custom,
             tint = SaatColors.DeepEmerald,
             text = stringResource(R.string.quran_library_intro_notes)
         )
         LegendRow(
-            icon = Icons.Filled.Psychology,
+            drawableResId = R.drawable.ic_memorization_custom,
             tint = SaatColors.IndigoDeep,
             text = stringResource(R.string.quran_library_intro_hifz)
         )
@@ -300,7 +360,7 @@ fun QuranLibraryLegend(modifier: Modifier = Modifier) {
 
 @Composable
 private fun LegendRow(
-    icon: ImageVector,
+    drawableResId: Int,
     tint: Color,
     text: String
 ) {
@@ -315,7 +375,12 @@ private fun LegendRow(
                 .background(tint.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(15.dp))
+            Icon(
+                painter = painterResource(drawableResId),
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(15.dp)
+            )
         }
         Text(
             text = text,
@@ -329,7 +394,7 @@ private fun LegendRow(
 
 @Composable
 private fun LibraryFeaturePill(
-    icon: ImageVector,
+    drawableResId: Int,
     label: String,
     count: Int,
     tint: Color,
@@ -337,13 +402,19 @@ private fun LibraryFeaturePill(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.72f))
-            .padding(horizontal = 10.dp, vertical = 10.dp),
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.85f))
+            .border(1.dp, tint.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 10.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.height(4.dp))
+        Icon(
+            painter = painterResource(drawableResId),
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(Modifier.height(6.dp))
         Text(
             text = count.toString(),
             style = MaterialTheme.typography.titleMedium,
@@ -387,7 +458,7 @@ fun VersePersonalBadges(
     ) {
         if (bookmarked) {
             VerseBadge(
-                icon = Icons.Filled.Bookmark,
+                drawableResId = R.drawable.ic_bookmark_custom,
                 label = stringResource(R.string.verse_has_bookmark),
                 tint = SaatColors.GoldDeep,
                 compact = compact
@@ -396,7 +467,7 @@ fun VersePersonalBadges(
         }
         if (hasNote) {
             VerseBadge(
-                icon = Icons.Filled.EditNote,
+                drawableResId = R.drawable.ic_personalnote_custom,
                 label = stringResource(R.string.verse_has_note),
                 tint = SaatColors.DeepEmerald,
                 compact = compact
@@ -411,7 +482,7 @@ fun VersePersonalBadges(
                 HifzStatus.NONE -> "" to Color.Transparent
             }
             VerseBadge(
-                icon = Icons.Filled.Psychology,
+                drawableResId = R.drawable.ic_memorization_custom,
                 label = label,
                 tint = tint,
                 compact = compact
@@ -422,7 +493,7 @@ fun VersePersonalBadges(
 
 @Composable
 private fun VerseBadge(
-    icon: ImageVector,
+    drawableResId: Int,
     label: String,
     tint: Color,
     compact: Boolean
@@ -436,7 +507,12 @@ private fun VerseBadge(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(13.dp))
+        Icon(
+            painter = painterResource(drawableResId),
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(14.dp)
+        )
         if (!compact) {
             Text(
                 text = label,

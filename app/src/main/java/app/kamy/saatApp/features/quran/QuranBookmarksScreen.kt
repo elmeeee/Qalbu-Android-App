@@ -1,6 +1,11 @@
 package app.kamy.saatApp.features.quran
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,19 +23,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Notes
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -43,13 +41,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.components.SaatEmptyState
 import app.kamy.saatApp.design.theme.SaatColors
@@ -77,10 +77,28 @@ fun QuranBookmarksScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.quran_library_title)) },
+                title = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_bookmark_custom),
+                            contentDescription = null,
+                            tint = SaatColors.GoldDeep,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.quran_library_title),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back),
+                            tint = SaatColors.DeepEmerald
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -108,44 +126,13 @@ fun QuranBookmarksScreen(
                 }
 
                 item(key = "tabs") {
-                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                        SegmentedButton(
-                            selected = tab == 0,
-                            onClick = { tab = 0 },
-                            shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3),
-                            label = {
-                                LibraryTabLabel(
-                                    icon = Icons.Filled.Bookmark,
-                                    label = stringResource(R.string.bookmarks_title),
-                                    count = bookmarks.size
-                                )
-                            }
-                        )
-                        SegmentedButton(
-                            selected = tab == 1,
-                            onClick = { tab = 1 },
-                            shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3),
-                            label = {
-                                LibraryTabLabel(
-                                    icon = Icons.AutoMirrored.Filled.Notes,
-                                    label = stringResource(R.string.notes_title),
-                                    count = notes.size
-                                )
-                            }
-                        )
-                        SegmentedButton(
-                            selected = tab == 2,
-                            onClick = { tab = 2 },
-                            shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3),
-                            label = {
-                                LibraryTabLabel(
-                                    icon = Icons.Filled.Psychology,
-                                    label = stringResource(R.string.hifz_title),
-                                    count = hifzSummary.total
-                                )
-                            }
-                        )
-                    }
+                    QuranSayaTabSelector(
+                        selectedTab = tab,
+                        onTabSelected = { tab = it },
+                        bookmarksCount = bookmarks.size,
+                        notesCount = notes.size,
+                        hifzCount = hifzSummary.total
+                    )
                 }
 
                 when (tab) {
@@ -153,7 +140,7 @@ fun QuranBookmarksScreen(
                         if (bookmarks.isEmpty()) {
                             item(key = "empty_bookmarks") {
                                 LibraryEmptyState(
-                                    icon = Icons.Filled.Bookmark,
+                                    drawableResId = R.drawable.ic_bookmark_custom,
                                     title = stringResource(R.string.bookmarks_empty),
                                     body = stringResource(R.string.quran_library_empty_bookmarks_body)
                                 )
@@ -171,7 +158,7 @@ fun QuranBookmarksScreen(
                         if (notes.isEmpty()) {
                             item(key = "empty_notes") {
                                 LibraryEmptyState(
-                                    icon = Icons.AutoMirrored.Filled.Notes,
+                                    drawableResId = R.drawable.ic_personalnote_custom,
                                     title = stringResource(R.string.notes_empty),
                                     body = stringResource(R.string.quran_library_empty_notes_body)
                                 )
@@ -189,7 +176,7 @@ fun QuranBookmarksScreen(
                         if (hifz.isEmpty()) {
                             item(key = "empty_hifz") {
                                 LibraryEmptyState(
-                                    icon = Icons.Filled.Psychology,
+                                    drawableResId = R.drawable.ic_memorization_custom,
                                     title = stringResource(R.string.hifz_empty),
                                     body = stringResource(R.string.quran_library_empty_hifz_body)
                                 )
@@ -215,41 +202,185 @@ fun QuranBookmarksScreen(
 }
 
 @Composable
-private fun LibraryTabLabel(
-    icon: ImageVector,
-    label: String,
-    count: Int
+private fun QuranSayaTabSelector(
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit,
+    bookmarksCount: Int,
+    notesCount: Int,
+    hifzCount: Int,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        SaatColors.DeepEmerald.copy(alpha = 0.08f),
+                        SaatColors.GoldDeep.copy(alpha = 0.06f)
+                    )
+                )
+            )
+            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(24.dp))
+            .padding(4.dp)
     ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp))
-        Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        if (count > 0) {
-            Text(
-                text = count.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            QuranSayaTabChip(
+                drawableResId = R.drawable.ic_bookmark_custom,
+                label = stringResource(R.string.bookmarks_title),
+                count = bookmarksCount,
+                selected = selectedTab == 0,
+                activeColor = SaatColors.GoldDeep,
+                onClick = { onTabSelected(0) },
+                modifier = Modifier.weight(1f)
+            )
+            QuranSayaTabChip(
+                drawableResId = R.drawable.ic_personalnote_custom,
+                label = stringResource(R.string.notes_title),
+                count = notesCount,
+                selected = selectedTab == 1,
+                activeColor = SaatColors.DeepEmerald,
+                onClick = { onTabSelected(1) },
+                modifier = Modifier.weight(1f)
+            )
+            QuranSayaTabChip(
+                drawableResId = R.drawable.ic_memorization_custom,
+                label = stringResource(R.string.hifz_title),
+                count = hifzCount,
+                selected = selectedTab == 2,
+                activeColor = SaatColors.IndigoDeep,
+                onClick = { onTabSelected(2) },
+                modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
 @Composable
+private fun QuranSayaTabChip(
+    drawableResId: Int,
+    label: String,
+    count: Int,
+    selected: Boolean,
+    activeColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val bgColor by animateColorAsState(
+        targetValue = if (selected) activeColor else Color.Transparent,
+        animationSpec = tween(200),
+        label = "tabBg"
+    )
+    val contentColor by animateColorAsState(
+        targetValue = if (selected) Color.White else SaatColors.Slate700,
+        animationSpec = tween(200),
+        label = "tabContent"
+    )
+
+    Surface(
+        onClick = onClick,
+        modifier = modifier.clip(RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        color = bgColor,
+        shadowElevation = if (selected) 2.dp else 0.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(drawableResId),
+                contentDescription = null,
+                tint = if (selected) Color.White else activeColor,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (count > 0) {
+                Spacer(Modifier.width(4.dp))
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(
+                            if (selected) Color.White.copy(alpha = 0.25f) else activeColor.copy(alpha = 0.15f)
+                        )
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = count.toString(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (selected) Color.White else activeColor,
+                        fontSize = 10.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun LibraryEmptyState(
-    icon: ImageVector,
+    drawableResId: Int,
     title: String,
     body: String
 ) {
-    SaatEmptyState(
-        icon = icon,
-        title = title,
-        body = body,
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(280.dp)
-    )
+            .padding(vertical = 16.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = SaatColors.PureWhite,
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+    ) {
+        Column(
+            modifier = Modifier.padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(SaatColors.DeepEmerald.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(drawableResId),
+                    contentDescription = null,
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = SaatColors.Slate900
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodySmall,
+                color = SaatColors.Slate500,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                lineHeight = 20.sp
+            )
+        }
+    }
 }
 
 @Composable
@@ -258,7 +389,7 @@ private fun BookmarkRow(
     onClick: () -> Unit
 ) {
     LibraryItemCard(
-        icon = Icons.Filled.Bookmark,
+        drawableResId = R.drawable.ic_bookmark_custom,
         iconTint = SaatColors.GoldDeep,
         title = bookmark.surahLabel?.let { "$it ${bookmark.verseNumber}" }
             ?: "${bookmark.chapterNumber}:${bookmark.verseNumber}",
@@ -274,7 +405,7 @@ private fun NoteRow(
     onClick: () -> Unit
 ) {
     LibraryItemCard(
-        icon = Icons.Filled.EditNote,
+        drawableResId = R.drawable.ic_personalnote_custom,
         iconTint = SaatColors.DeepEmerald,
         title = "${note.chapterNumber}:${note.verseNumber}",
         subtitle = note.text,
@@ -296,7 +427,7 @@ private fun HifzRow(
         HifzStatus.NONE -> "" to SaatColors.Slate500
     }
     LibraryItemCard(
-        icon = Icons.Filled.Psychology,
+        drawableResId = R.drawable.ic_memorization_custom,
         iconTint = SaatColors.IndigoDeep,
         title = "${entry.chapterNumber}:${entry.verseNumber}",
         subtitle = stringResource(R.string.quran_library_hifz_row_hint),
@@ -308,7 +439,7 @@ private fun HifzRow(
 
 @Composable
 private fun LibraryItemCard(
-    icon: ImageVector,
+    drawableResId: Int,
     iconTint: Color,
     title: String,
     subtitle: String,
@@ -319,9 +450,10 @@ private fun LibraryItemCard(
     Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         color = SaatColors.PureWhite,
-        shadowElevation = 1.dp
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, Color(0xFFF1F5F9))
     ) {
         Row(
             modifier = Modifier
@@ -331,12 +463,17 @@ private fun LibraryItemCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
                     .background(iconTint.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(20.dp))
+                Icon(
+                    painter = painterResource(drawableResId),
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(22.dp)
+                )
             }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -347,14 +484,14 @@ private fun LibraryItemCard(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = SaatColors.Slate900
                     )
                     badge?.takeIf { it.isNotBlank() }?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
                             color = badgeTint,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(999.dp))
@@ -384,14 +521,14 @@ private fun LibraryItemCard(
 
 @Composable
 private fun HifzStatsRow(summary: QuranPersonalStore.HifzSummary) {
-  Row(
-      modifier = Modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(8.dp)
-  ) {
-      HifzStatChip(stringResource(R.string.hifz_learning), summary.learning, SaatColors.Gold)
-      HifzStatChip(stringResource(R.string.hifz_memorized), summary.memorized, SaatColors.DeepEmerald)
-      HifzStatChip(stringResource(R.string.hifz_review), summary.needsReview, Color(0xFFC2410C))
-  }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        HifzStatChip(stringResource(R.string.hifz_learning), summary.learning, SaatColors.Gold)
+        HifzStatChip(stringResource(R.string.hifz_memorized), summary.memorized, SaatColors.DeepEmerald)
+        HifzStatChip(stringResource(R.string.hifz_review), summary.needsReview, Color(0xFFC2410C))
+    }
 }
 
 @Composable
@@ -400,11 +537,12 @@ private fun HifzStatChip(label: String, count: Int, color: Color) {
         modifier = Modifier
             .clip(RoundedCornerShape(999.dp))
             .background(color.copy(alpha = 0.12f))
+            .border(1.dp, color.copy(alpha = 0.2f), RoundedCornerShape(999.dp))
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = color)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = color, fontWeight = FontWeight.Medium)
         Text(
             text = count.toString(),
             style = MaterialTheme.typography.labelSmall,
