@@ -47,6 +47,27 @@ object ExactAlarmScheduler {
         }
     }
 
+    fun scheduleExactAndAllowWhileIdle(
+        context: Context,
+        triggerAtMillis: Long,
+        pending: PendingIntent
+    ) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        runCatching {
+            if (!shouldUseExactScheduling(Build.VERSION.SDK_INT, alarmManager.canScheduleExactAlarms())) {
+                scheduleInexact(alarmManager, triggerAtMillis, pending)
+                return
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
+            }
+        }.onFailure {
+            scheduleInexact(alarmManager, triggerAtMillis, pending)
+        }
+    }
+
     private fun scheduleInexact(
         alarmManager: AlarmManager,
         triggerAtMillis: Long,

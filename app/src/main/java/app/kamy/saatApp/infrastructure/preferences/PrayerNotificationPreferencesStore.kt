@@ -39,7 +39,7 @@ open class PrayerNotificationPreferencesStoreBase(
         imsakEnabled = bool(KEY_IMSAK, default = true),
         midnightEnabled = bool(KEY_MIDNIGHT, default = true),
         firstThirdEnabled = bool(KEY_FIRST_THIRD, default = true),
-        lastThirdEnabled = bool(KEY_TAHAJUD, default = true),
+        lastThirdEnabled = isTahajudEnabled(),
         yasinReminderEnabled = bool(KEY_YASIN, default = true),
         kahfReminderEnabled = bool(KEY_KAHF, default = true),
         importantDaysReminderEnabled = bool(KEY_IMPORTANT_DAYS, default = true),
@@ -47,7 +47,9 @@ open class PrayerNotificationPreferencesStoreBase(
         monThuFastReminderEnabled = bool(KEY_MON_THU_FAST, default = true),
         dhuhaReminderEnabled = bool(KEY_DHUHA, default = true),
         dhuhaHour = dhuhaHour(),
-        dhuhaMinute = dhuhaMinute()
+        dhuhaMinute = dhuhaMinute(),
+        tahajudHour = tahajudHour(),
+        tahajudMinute = tahajudMinute()
     )
 
     fun isAdhanSoundEnabled(): Boolean = bool(KEY_ADZAN_SOUND, default = true)

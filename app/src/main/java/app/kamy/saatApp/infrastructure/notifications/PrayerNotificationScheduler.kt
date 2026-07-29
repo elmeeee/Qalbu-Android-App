@@ -31,7 +31,7 @@ object PrayerNotificationScheduler {
     private const val IMPORTANT_DAYS_ID_BASE = 12_000
     private const val NOTIFICATION_ID_BASE = 8_000
     private const val DAYS_TO_SCHEDULE = 7
-    private const val SUNNAH_WEEKS_TO_SCHEDULE = 8
+    private const val SUNNAH_WEEKS_TO_SCHEDULE = 2
 
 
     suspend fun reschedule(
@@ -65,7 +65,8 @@ object PrayerNotificationScheduler {
                             kind = "prayer_${prayer.name}",
                             notificationId = NOTIFICATION_ID_BASE + index * 10 + offset,
                             playAdhan = adhanSoundEnabledForThisPrayer,
-                            prayerName = prayer.name
+                            prayerName = prayer.name,
+                            useAlarmClock = true
                         )
                     }
             }
@@ -156,6 +157,38 @@ object PrayerNotificationScheduler {
         val now = System.currentTimeMillis()
         val localContext = getLocalizedContext(context)
 
+        if (options.yasinReminderEnabled) {
+            val nextThuNight = nextWeekdayTime(Calendar.THURSDAY, 20, 0, now)
+            upcomingWeeklyOccurrences(nextThuNight, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
+                scheduleOneShot(
+                    context = context,
+                    requestCode = SUNNAH_YASIN_REQUEST + offset,
+                    fireAt = fireAt,
+                    channelId = NotificationChannels.SUNNAH,
+                    title = localContext.getString(R.string.sunnah_yasin_title),
+                    body = localContext.getString(R.string.sunnah_yasin_body),
+                    kind = "sunnah_yasin",
+                    notificationId = SUNNAH_YASIN_REQUEST + offset
+                )
+            }
+        }
+
+        if (options.kahfReminderEnabled) {
+            val nextFri = nextWeekdayTime(Calendar.FRIDAY, 8, 0, now)
+            upcomingWeeklyOccurrences(nextFri, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
+                scheduleOneShot(
+                    context = context,
+                    requestCode = SUNNAH_KAHF_REQUEST + offset,
+                    fireAt = fireAt,
+                    channelId = NotificationChannels.SUNNAH,
+                    title = localContext.getString(R.string.sunnah_kahf_title),
+                    body = localContext.getString(R.string.sunnah_kahf_body),
+                    kind = "sunnah_kahf",
+                    notificationId = SUNNAH_KAHF_REQUEST + offset
+                )
+            }
+        }
+
         if (options.monThuFastReminderEnabled) {
             val nextSun = nextWeekdayTime(Calendar.SUNDAY, 20, 0, now)
             upcomingWeeklyOccurrences(nextSun, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
@@ -197,6 +230,22 @@ object PrayerNotificationScheduler {
                     body = localContext.getString(R.string.sunnah_dhuha_body),
                     kind = "sunnah_dhuha",
                     notificationId = DHUHA_REQUEST_BASE + offset
+                )
+            }
+        }
+
+        if (options.lastThirdEnabled) {
+            val firstTahajud = nextDailyTime(options.tahajudHour, options.tahajudMinute, now)
+            upcomingDailyOccurrences(firstTahajud, now, 7).forEachIndexed { offset, fireAt ->
+                scheduleOneShot(
+                    context = context,
+                    requestCode = NIGHT_REQUEST_BASE + 40 + offset,
+                    fireAt = fireAt,
+                    channelId = NotificationChannels.PRAYER,
+                    title = localContext.getString(R.string.night_last_third_title),
+                    body = localContext.getString(R.string.night_last_third_body),
+                    kind = "night_${NightDivisionKind.LAST_THIRD.name}",
+                    notificationId = NOTIFICATION_ID_BASE + 62 + offset
                 )
             }
         }
@@ -254,6 +303,7 @@ object PrayerNotificationScheduler {
         }.getOrNull() ?: return
         
         val khgtCalendar = entryPoint.khgtCalendarRepository()
+        val localContext = getLocalizedContext(context)
 
         val checkCal = Calendar.getInstance()
         for (offset in 0 until 7) {
@@ -278,13 +328,15 @@ object PrayerNotificationScheduler {
                 }
                 val nowTime = compareCal.timeInMillis
                 if (fireCal.timeInMillis >= nowTime) {
+                    val resolvedTitle = AppNotificationCopy.importantDayTitle(localContext, info.eventTitle.orEmpty())
+                    val resolvedBody = AppNotificationCopy.importantDayBody(localContext, info.eventTitle.orEmpty())
                     scheduleOneShot(
                         context = context,
                         requestCode = IMPORTANT_DAYS_REQUEST_BASE + offset,
                         fireAt = fireCal.timeInMillis,
                         channelId = NotificationChannels.SUNNAH,
-                        title = "",
-                        body = "",
+                        title = resolvedTitle,
+                        body = resolvedBody,
                         kind = "important_day_${info.eventTitle}",
                         notificationId = IMPORTANT_DAYS_ID_BASE + offset
                     )
@@ -339,7 +391,8 @@ object PrayerNotificationScheduler {
         kind: String,
         notificationId: Int = requestCode,
         playAdhan: Boolean = false,
-        prayerName: String? = null
+        prayerName: String? = null,
+        useAlarmClock: Boolean = false
     ) {
         runCatching {
             val currentMillis = System.currentTimeMillis()
@@ -382,7 +435,7 @@ object PrayerNotificationScheduler {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-            setExactAlarm(context, alarmManager, actualFireAt, pending)
+            setExactAlarm(context, alarmManager, actualFireAt, pending, useAlarmClock)
         }
     }
 
@@ -390,14 +443,23 @@ object PrayerNotificationScheduler {
         context: Context,
         alarmManager: AlarmManager,
         fireAt: Long,
-        pending: PendingIntent
+        pending: PendingIntent,
+        useAlarmClock: Boolean = false
     ) {
-        ExactAlarmScheduler.schedule(
-            context = context,
-            triggerAtMillis = fireAt,
-            pending = pending,
-            showIntentRequestCode = SHOW_ALARM_INTENT_REQUEST
-        )
+        if (useAlarmClock) {
+            ExactAlarmScheduler.schedule(
+                context = context,
+                triggerAtMillis = fireAt,
+                pending = pending,
+                showIntentRequestCode = SHOW_ALARM_INTENT_REQUEST
+            )
+        } else {
+            ExactAlarmScheduler.scheduleExactAndAllowWhileIdle(
+                context = context,
+                triggerAtMillis = fireAt,
+                pending = pending
+            )
+        }
     }
 
     private const val SHOW_ALARM_INTENT_REQUEST = 7_001
