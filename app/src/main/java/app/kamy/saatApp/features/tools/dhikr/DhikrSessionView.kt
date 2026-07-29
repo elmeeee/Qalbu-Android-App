@@ -244,8 +244,15 @@ fun DhikrSessionView(
                     }
 
                     val titleLabel = remember(item) {
-                        item.notes?.takeIf { it.isNotBlank() }
-                            ?: item.latin.take(16).ifBlank { "Zikir ${index + 1}" }
+                        val noteClean = item.notes
+                            ?.replace(Regex("(?i)\\s*dibaca\\s*\\d+\\s*kali.*"), "")
+                            ?.replace(Regex("(?i)\\s*\\d+x.*"), "")
+                            ?.trim()
+                        if (!noteClean.isNullOrBlank()) {
+                            noteClean
+                        } else {
+                            item.latin.take(16).ifBlank { "Zikir ${index + 1}" }
+                        }
                     }
 
                     Surface(
@@ -379,9 +386,15 @@ fun DhikrSessionView(
                                 }
                             }
 
-                            if (!item.notes.isNullOrBlank()) {
+                            val displayNotes = remember(item.notes) {
+                                item.notes
+                                    ?.replace(Regex("(?i)^dibaca\\s*\\d+\\s*kali\\.?$"), "")
+                                    ?.replace(Regex("(?i)^\\d+x$"), "")
+                                    ?.trim()
+                            }
+                            if (!displayNotes.isNullOrBlank()) {
                                 Text(
-                                    text = item.notes,
+                                    text = displayNotes,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = SaatColors.Slate500
                                 )

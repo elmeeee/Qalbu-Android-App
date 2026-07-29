@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -677,35 +678,22 @@ private fun ManzilSectionCard(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Numbered circle badge
+            // Numbered frame badge using frame_number_icon
             Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (expanded) {
-                            Brush.linearGradient(listOf(accentStart, accentEnd))
-                        } else {
-                            Brush.linearGradient(
-                                listOf(
-                                    accentStart.copy(alpha = 0.14f),
-                                    accentEnd.copy(alpha = 0.08f)
-                                )
-                            )
-                        }
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = accentStart.copy(alpha = if (expanded) 0.6f else 0.22f),
-                        shape = CircleShape
-                    ),
+                modifier = Modifier.size(40.dp),
                 contentAlignment = Alignment.Center
             ) {
+                Icon(
+                    painter = painterResource(R.drawable.frame_number_icon),
+                    contentDescription = null,
+                    tint = if (expanded) accentStart else SaatColors.DeepEmerald,
+                    modifier = Modifier.size(40.dp)
+                )
                 Text(
                     text = sectionNumber.toString(),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (expanded) SaatColors.PureWhite else accentStart
+                    color = if (expanded) accentStart else SaatColors.DeepEmerald
                 )
             }
             Spacer(Modifier.width(14.dp))

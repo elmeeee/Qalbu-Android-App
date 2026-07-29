@@ -77,21 +77,7 @@ fun QuranBookmarksScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_bookmark_custom),
-                            contentDescription = null,
-                            tint = SaatColors.GoldDeep,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.quran_library_title),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                },
+                title = {},
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

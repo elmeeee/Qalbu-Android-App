@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -116,47 +117,48 @@ fun SpiritualToolsScreen(
             .background(SaatColors.ScreenBackground)
             .tabContentStatusBarInset()
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SaatSpacing.screenHorizontal)
-                .padding(top = SaatSpacing.md, bottom = SaatSpacing.lg)
-                .clip(RoundedCornerShape(22.dp))
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            SaatColors.DeepEmerald.copy(alpha = 0.14f),
-                            SaatColors.Teal.copy(alpha = 0.08f),
-                            SaatColors.Gold.copy(alpha = 0.06f)
-                        )
-                    )
+                .padding(
+                    horizontal = SaatSpacing.screenHorizontal,
+                    vertical = SaatSpacing.md
                 )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        listOf(
-                            SaatColors.DeepEmerald.copy(alpha = 0.25f),
-                            SaatColors.Teal.copy(alpha = 0.12f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(22.dp)
-                )
-                .padding(horizontal = 20.dp, vertical = 22.dp)
         ) {
-            Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "✦",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.width(SaatSpacing.sm))
                 Text(
                     text = stringResource(R.string.spiritual_tools_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.DeepEmerald
-                )
-                Text(
-                    text = stringResource(R.string.spiritual_tools_tab_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = SaatColors.Slate500,
-                    modifier = Modifier.padding(top = 6.dp)
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
                 )
             }
+            Text(
+                text = stringResource(R.string.spiritual_tools_tab_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 18.dp, top = 4.dp)
+            )
+            Spacer(Modifier.height(SaatSpacing.sm))
+            Box(
+                modifier = Modifier
+                    .height(2.dp)
+                    .width(48.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.tertiary,
+                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+                            )
+                        )
+                    )
+            )
         }
 
         LazyColumn(

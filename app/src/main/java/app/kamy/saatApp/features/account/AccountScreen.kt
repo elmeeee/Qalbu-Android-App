@@ -83,8 +83,10 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.locale.AppLanguage
+import androidx.compose.ui.graphics.Brush
 import app.kamy.saatApp.design.components.SaatInlineError
 import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.adhan.AdhanVoice
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.saatApp.domain.adhan.FajrAdhanVoice
@@ -310,38 +312,60 @@ private fun AccountSettingsContent(
             .fillMaxSize()
             .background(Color(0xFFF7F7F7))
     ) {
-        // Sticky Header bar
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFFF7F7F7),
-            shadowElevation = 0.5.dp
+        // Clean Header bar
+        Column(
+            modifier = Modifier
+                .tabContentStatusBarInset()
+                .padding(
+                    horizontal = SaatSpacing.screenHorizontal,
+                    vertical = SaatSpacing.md
+                )
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .tabContentStatusBarInset()
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 if (onBack != null) {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
-                            tint = Color(0xFF1C1C1E)
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                    Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(4.dp))
                 }
                 Text(
+                    text = "✦",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.width(SaatSpacing.sm))
+                Text(
                     text = stringResource(R.string.settings_main_title),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = Color(0xFF1C1C1E)
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
                 )
             }
+            Text(
+                text = stringResource(R.string.settings_main_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = if (onBack != null) 58.dp else 18.dp, top = 4.dp)
+            )
+            Spacer(Modifier.height(SaatSpacing.sm))
+            Box(
+                modifier = Modifier
+                    .height(2.dp)
+                    .width(48.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.tertiary,
+                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+                            )
+                        )
+                    )
+            )
         }
 
         // Scrollable Settings Content

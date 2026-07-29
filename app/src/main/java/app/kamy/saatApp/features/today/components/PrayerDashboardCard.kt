@@ -182,27 +182,18 @@ fun PrayerDashboardCard(
                                 Text(
                                     text = headline.label,
                                     color = Color.White.copy(alpha = 0.9f),
-                                    fontSize = 11.sp,
+                                    fontSize = 12.sp,
                                     fontWeight = FontWeight.Medium
                                 )
                                 Spacer(Modifier.height(2.dp))
                                 Text(
                                     text = headline.title,
                                     color = Color.White,
-                                    fontSize = 20.sp,
+                                    fontSize = 28.sp,
                                     fontWeight = FontWeight.Bold,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
-                                if (formattedTime.isNotBlank()) {
-                                    Text(
-                                        text = formattedTime,
-                                        color = Color.White,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1
-                                    )
-                                }
                             }
 
                             if (state.countdown.isNotBlank()) {
@@ -211,11 +202,18 @@ fun PrayerDashboardCard(
                                     transitionSpec = { fadeIn() togetherWith fadeOut() },
                                     label = "prayerCountdown"
                                 ) { countdown ->
+                                    val formattedCountdown = if (state.isGracePeriod) {
+                                        stringResource(R.string.prayer_countdown_passed, countdown, headline.title)
+                                    } else {
+                                        stringResource(R.string.prayer_countdown_until, countdown, headline.title)
+                                    }
                                     Text(
-                                        text = if (countdown.endsWith("remaining")) countdown else "$countdown remaining",
+                                        text = formattedCountdown,
                                         color = Color.White.copy(alpha = 0.95f),
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Medium
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 }
                             }

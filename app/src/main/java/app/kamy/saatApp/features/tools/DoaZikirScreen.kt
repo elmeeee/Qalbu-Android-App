@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -328,7 +329,7 @@ private fun CatalogRow(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = if (isDhikr) Icons.Filled.Favorite else Icons.Filled.AutoStories,
+                painter = painterResource(if (isDhikr) R.drawable.ic_dhikr else R.drawable.ic_dua),
                 contentDescription = null,
                 tint = if (isDhikr) SaatColors.DeepEmerald else SaatColors.GoldDeep,
                 modifier = Modifier.size(22.dp)

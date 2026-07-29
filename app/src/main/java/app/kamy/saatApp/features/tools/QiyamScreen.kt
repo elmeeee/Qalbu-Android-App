@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -310,16 +311,19 @@ private fun QiyamTrackerTab(
                         color = SaatColors.Slate500
                     )
                 }
-                Switch(
-                    checked = loggedTonight,
-                    onCheckedChange = {
-                        onToggle()
-                        if (!loggedTonight) confirmHaptic()
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = SaatColors.PureWhite,
-                        checkedTrackColor = SaatColors.DeepEmerald
-                    )
+                Icon(
+                    painter = painterResource(
+                        if (loggedTonight) R.drawable.ic_toggle_on_custom
+                        else R.drawable.ic_toggle_off_custom
+                    ),
+                    contentDescription = null,
+                    tint = androidx.compose.ui.graphics.Color.Unspecified,
+                    modifier = Modifier
+                        .size(width = 48.dp, height = 28.dp)
+                        .clickable {
+                            onToggle()
+                            if (!loggedTonight) confirmHaptic()
+                        }
                 )
             }
         }

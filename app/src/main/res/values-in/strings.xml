@@ -84,6 +84,8 @@
     <string name="prayer_schedule">Jadwal sholat</string>
     <string name="prayer_grace_passed">Sholat %1$s sudah lewat</string>
     <string name="prayer_time_remaining">Sisa waktu sebelum %1$s</string>
+    <string name="prayer_countdown_until">%1$s menuju waktu %2$s</string>
+    <string name="prayer_countdown_passed">%1$s adzan %2$s telah berlalu</string>
     <string name="prayer_fetch_failed">Gagal memuat jadwal sholat</string>
     <string name="location_failed">Tidak dapat menentukan lokasi</string>
 
@@ -694,6 +696,7 @@
 
     <!-- Revamped Settings Strings -->
     <string name="settings_main_title">Pengaturan</string>
+    <string name="settings_main_subtitle">Konfigurasi dan preferensi aplikasi</string>
     <string name="settings_section_general">Pengaturan Umum</string>
     <string name="settings_section_prayer_calc">Perhitungan Waktu Solat</string>
     <string name="settings_section_about_saat">Tentang Sāat</string>
