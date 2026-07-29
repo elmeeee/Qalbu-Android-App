@@ -82,6 +82,14 @@ import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material3.Surface
+import androidx.compose.ui.text.style.TextOverflow
+import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -91,14 +99,28 @@ import kotlin.math.roundToInt
 fun QiblaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val locationStore = remember(context) { LocationPreferencesStore.from(context) }
-    val location = remember {
-        locationStore.manualLocation()?.let { it.latitude to it.longitude }
-            ?: PrayerScheduleCache.loadCoordinates(context)
+
+    val isManual = remember(locationStore) { locationStore.mode() == LocationMode.MANUAL }
+
+    val location = remember(context, isManual) {
+        if (isManual) {
+            locationStore.manualLocation()?.let { it.latitude to it.longitude }
+                ?: PrayerScheduleCache.loadCoordinates(context)
+        } else {
+            PrayerScheduleCache.loadCoordinates(context)
+        }
     }
-    val locationLabel = remember(context) {
-        locationStore.manualLocation()?.label?.takeIf { it.isNotBlank() }
-            ?: PrayerScheduleCache.loadMeta(context)?.cityLabel?.takeIf { it.isNotBlank() }
-            ?: "Tanjungpinang, Riau Islands"
+
+    val locationLabel = remember(context, isManual) {
+        if (isManual) {
+            locationStore.manualLocation()?.label?.takeIf { it.isNotBlank() }
+                ?: PrayerScheduleCache.loadMeta(context)?.cityLabel?.takeIf { it.isNotBlank() }
+                ?: "Location"
+        } else {
+            PrayerScheduleCache.loadMeta(context)?.cityLabel?.takeIf { it.isNotBlank() }
+                ?: locationStore.displayLabel()?.takeIf { it.isNotBlank() }
+                ?: "Location"
+        }
     }
 
     val bearing = remember(location) {
@@ -163,7 +185,7 @@ fun QiblaScreen(onBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0F172A))
+            .background(Color(0xFF0A121E))
     ) {
         // Layer 1: Live Camera Preview or Dark Atmospheric Fallback
         if (cameraPermission.status.isGranted) {
@@ -174,157 +196,193 @@ fun QiblaScreen(onBack: () -> Unit) {
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color(0xFF0F172A), Color(0xFF1E293B))
+                            listOf(Color(0xFF0F172A), Color(0xFF09111E))
                         )
                     )
             )
         }
 
-        // Layer 2: Translucent Dark Overlay for AR Readability
+        // Layer 2: Gradient Radial Vignette & Atmospheric Overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            Color.Black.copy(alpha = 0.35f),
-                            Color.Black.copy(alpha = 0.15f),
-                            Color.Black.copy(alpha = 0.45f)
+                            Color.Black.copy(alpha = 0.50f),
+                            Color.Black.copy(alpha = 0.20f),
+                            Color.Black.copy(alpha = 0.65f)
                         )
                     )
                 )
         )
 
-        // Layer 3: Top Guidance Text
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(top = 56.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(R.string.qibla_point_phone),
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp),
-                fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.95f),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-        }
-
-        // Layer 4: AR Perspective Pathway & Kaaba Horizon Overlay
+        // Layer 3: AR Pathway & Dynamic Target Reticle
         QiblaARPerspectiveView(
             normalizedOffset = normalizedOffset,
             aligned = aligned,
             modifier = Modifier.fillMaxSize()
         )
 
-        // Layer 5: Top Navigation Bar
+        // Layer 4: Top Glassmorphic Navigation Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.35f))
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = Color.White
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = stringResource(R.string.qibla_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-        }
-
-        // Layer 6: Bottom HUD (Degree, Status & Location Tag)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            SaatColors.DeepEmerald.copy(alpha = 0.75f),
-                            SaatColors.DeepEmerald.copy(alpha = 0.95f)
-                        )
-                    )
-                )
-                .navigationBarsPadding()
-                .padding(horizontal = 24.dp, vertical = 20.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            // Heading degree & Cardinal (e.g. 350 NW)
-            Text(
-                text = "$headingDegree $cardinal",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.ExtraBold
-                ),
-                color = Color.White
-            )
-
-            Spacer(Modifier.height(6.dp))
-
-            // Qibla Status Row
-            val statusText = when {
-                aligned -> stringResource(R.string.qibla_already_facing)
-                normalizedOffset < 0 -> stringResource(R.string.qibla_in_your_left)
-                else -> stringResource(R.string.qibla_in_your_right)
-            }
-            val statusIcon = when {
-                aligned -> "↑"
-                normalizedOffset < 0 -> "↗"
-                else -> "↖"
-            }
-
             Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.45f))
+                        .border(0.5.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = Color.White
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
                 Text(
-                    text = statusIcon,
-                    style = MaterialTheme.typography.titleMedium,
+                    text = stringResource(R.string.qibla_title),
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = if (aligned) SaatColors.GoldBright else Color.White
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
                     color = Color.White
                 )
             }
 
-            Spacer(Modifier.height(8.dp))
+            // Location Badge Chip
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = Color.Black.copy(alpha = 0.45f),
+                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.25f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.LocationOn,
+                        contentDescription = null,
+                        tint = SaatColors.GoldDeep,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = locationLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
 
-            // Location Tag Row (📍 Tanjungpinang, Riau Islands)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Filled.LocationOn,
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.85f),
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(Modifier.width(6.dp))
+        // Layer 5: Top Guidance Toast Banner
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(top = 68.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = Color.Black.copy(alpha = 0.4f),
+                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
+            ) {
                 Text(
-                    text = locationLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontWeight = FontWeight.Medium
+                    text = stringResource(R.string.qibla_point_phone),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White.copy(alpha = 0.95f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
                 )
+            }
+        }
+
+        // Layer 6: Bottom Glassmorphic HUD Card
+        val statusText = when {
+            aligned -> stringResource(R.string.qibla_already_facing)
+            normalizedOffset < 0 -> stringResource(R.string.qibla_in_your_left)
+            else -> stringResource(R.string.qibla_in_your_right)
+        }
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            shape = RoundedCornerShape(28.dp),
+            color = if (aligned) Color(0xF0085E43) else Color(0xEB0F172A),
+            border = BorderStroke(
+                width = 1.5.dp,
+                color = if (aligned) SaatColors.GoldDeep else Color.White.copy(alpha = 0.15f)
+            ),
+            shadowElevation = 12.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "$headingDegree° $cardinal",
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontSize = 34.sp,
+                                fontWeight = FontWeight.Black
+                            ),
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Kaaba Bearing: ${bearing.roundToInt()}°",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White.copy(alpha = 0.75f),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // Alignment Status Badge
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = if (aligned) SaatColors.GoldDeep else Color.White.copy(alpha = 0.12f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (aligned) Icons.Filled.CheckCircle else Icons.Filled.Navigation,
+                                contentDescription = null,
+                                tint = if (aligned) Color.Black else Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = statusText,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = if (aligned) Color.Black else Color.White
+                            )
+                        }
+                    }
+                }
             }
         }
     }
