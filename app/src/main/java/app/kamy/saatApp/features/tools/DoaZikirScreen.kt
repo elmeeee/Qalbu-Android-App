@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -216,6 +217,7 @@ fun DoaZikirScreen(
                     Surface(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
+                            .navigationBarsPadding()
                             .padding(bottom = 24.dp, end = 24.dp),
                         shape = RoundedCornerShape(28.dp),
                         color = SaatColors.DeepEmerald,

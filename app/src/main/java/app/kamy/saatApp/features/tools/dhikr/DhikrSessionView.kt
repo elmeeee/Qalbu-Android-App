@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -546,7 +547,8 @@ fun DhikrSessionView(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 72.dp, end = 20.dp)
+                .navigationBarsPadding()
+                .padding(bottom = 24.dp, end = 20.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null

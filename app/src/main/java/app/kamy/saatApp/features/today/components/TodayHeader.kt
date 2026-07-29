@@ -54,6 +54,7 @@ fun TodayHeader(
     hijriLabel: String?,
     gregorianLabel: String?,
     onLocationClick: () -> Unit = {},
+    onCalendarClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val weekdays = stringArrayResource(R.array.weekday_names)
@@ -161,8 +162,7 @@ fun TodayHeader(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.clickable(
-                            onClickLabel = stringResource(R.string.date_switch_a11y),
-                            onClick = { showHijri = !showHijri }
+                            onClick = onCalendarClick
                         )
                     )
                 }

@@ -309,13 +309,13 @@
     <string name="search_juz_goto">Go to Juz %1$d</string>
     <string name="search_juz_goto_hint">Open the start of this juz</string>
     <string-array name="quran_search_suggestions">
+        <item>Ya-Sin</item>
         <item>Ayatul Kursi</item>
         <item>1000 Dinar Verse</item>
         <item>Dua for Goodness</item>
         <item>Dua of Prophet Yunus</item>
         <item>Dua for Ease</item>
         <item>Dua for Parents</item>
-        <item>Ya-Sin</item>
         <item>Al-Mulk</item>
         <item>Al-Kahf</item>
     </string-array>

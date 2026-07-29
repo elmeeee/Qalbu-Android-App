@@ -76,7 +76,7 @@ fun PrayerTrackerCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(true) }
     val arrowRotation by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
         label = "arrowRotation"

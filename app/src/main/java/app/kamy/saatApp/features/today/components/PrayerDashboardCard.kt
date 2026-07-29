@@ -134,8 +134,7 @@ fun PrayerDashboardCard(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             color = Color.Transparent,
-            shadowElevation = 4.dp,
-            onClick = onOpenCalendar
+            shadowElevation = 4.dp
         ) {
             Box(
                 modifier = Modifier

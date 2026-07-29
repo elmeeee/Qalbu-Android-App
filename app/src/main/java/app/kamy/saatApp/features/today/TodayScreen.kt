@@ -334,6 +334,7 @@ fun TodayScreen(
                         hijriLabel = prayerState.hijriLabel,
                         gregorianLabel = prayerState.gregorianLabel,
                         onLocationClick = prayerVm::openLocationSheet,
+                        onCalendarClick = onOpenPrayerCalendar,
                         modifier = Modifier
                             .fillMaxWidth()
                             .coachMarkTarget(
@@ -361,7 +362,7 @@ fun TodayScreen(
                     PrayerDashboardCard(
                         state = prayerState,
                         onRetry = { scope.launch { prayerVm.refresh(force = true) } },
-                        onOpenCalendar = onOpenPrayerCalendar,
+                        onOpenCalendar = {},
                         modifier = Modifier
                             .padding(horizontal = 20.dp)
                             .coachMarkTarget(

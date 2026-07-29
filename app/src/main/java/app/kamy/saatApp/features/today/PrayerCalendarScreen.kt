@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.components.SaatErrorState
@@ -116,6 +117,16 @@ fun PrayerCalendarScreen(
                         }
                     }
                 }
+                val hijriHeaderLabel = remember(state.days) {
+                    state.days.firstOrNull { !it.hijriLabel.isNullOrBlank() }?.hijriLabel?.let { raw ->
+                        val parts = raw.trim().split(" ")
+                        if (parts.size >= 3) {
+                            "${parts.drop(1).joinToString(" ")} H"
+                        } else {
+                            "$raw H"
+                        }
+                    }
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -125,13 +136,26 @@ fun PrayerCalendarScreen(
                     IconButton(onClick = { vm.shiftMonth(-1) }) {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = null)
                     }
-                    Text(
-                        text = "$monthLabel ${state.year}",
+                    Column(
                         modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center
-                    )
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "$monthLabel ${state.year}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        if (!hijriHeaderLabel.isNullOrBlank()) {
+                            Text(
+                                text = hijriHeaderLabel,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = SaatColors.DeepEmerald,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                     IconButton(onClick = { vm.shiftMonth(1) }) {
                         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
                     }
@@ -296,6 +320,13 @@ private fun WeekdayHeaderRow() {
     }
 }
 
+private fun toEasternArabicDigits(number: Int): String {
+    val digits = charArrayOf('٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩')
+    return number.toString().map { ch ->
+        if (ch in '0'..'9') digits[ch - '0'] else ch
+    }.joinToString("")
+}
+
 @Composable
 private fun CalendarDayCell(
     day: Int,
@@ -306,7 +337,7 @@ private fun CalendarDayCell(
 ) {
     val background = when {
         isSelected -> SaatColors.DeepEmerald
-        isToday -> SaatColors.DeepEmerald.copy(alpha = 0.12f)
+        isToday -> SaatColors.DeepEmerald.copy(alpha = 0.15f)
         else -> MaterialTheme.colorScheme.surface
     }
     val textColor = when {
@@ -314,15 +345,23 @@ private fun CalendarDayCell(
         isToday -> SaatColors.DeepEmerald
         else -> MaterialTheme.colorScheme.onSurface
     }
+    val arabicTextColor = when {
+        isSelected -> androidx.compose.ui.graphics.Color.White.copy(alpha = 0.9f)
+        isToday -> SaatColors.DeepEmerald.copy(alpha = 0.9f)
+        else -> SaatColors.GoldDeep // High-contrast gold color distinct from background surface
+    }
+
+    val arabicDayStr = remember(day) { toEasternArabicDigits(day) }
+
     Box(
         modifier = Modifier
             .aspectRatio(1f)
-            .padding(3.dp)
-            .clip(CircleShape)
+            .padding(2.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(background)
             .then(
                 if (isToday && !isSelected) {
-                    Modifier.border(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.35f), CircleShape)
+                    Modifier.border(1.5.dp, SaatColors.DeepEmerald.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                 } else Modifier
             )
             .clickable(onClick = onClick),
@@ -334,12 +373,18 @@ private fun CalendarDayCell(
         ) {
             Text(
                 text = day.toString(),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
+                style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
+                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Medium,
                 color = textColor
             )
+            Text(
+                text = arabicDayStr,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                fontWeight = FontWeight.Bold,
+                color = arabicTextColor
+            )
             if (isImportantDay) {
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(1.dp))
                 Box(
                     modifier = Modifier
                         .size(4.dp)

@@ -100,6 +100,8 @@ enum class AyahPlaybackMode {
     CONTINUOUS
 }
 
+private const val HADITH_PAGE_LIMIT = 4
+
 @HiltViewModel
 class ChapterReaderViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
@@ -260,11 +262,12 @@ class ChapterReaderViewModel @Inject constructor(
             runCatching {
                 val chapters = contentRepository.getChapters()
                 val lookup = chapters.associate { it.id to it.displayComplexName }
-                if (juzNumber != null) {
+                val currentJuz = _state.value.juzNumber
+                if (currentJuz != null) {
                     _state.update {
                         it.copy(
                             chapterLookup = lookup,
-                            chapterDisplayName = appContext.getString(R.string.juz_number, juzNumber)
+                            chapterDisplayName = appContext.getString(R.string.juz_number, currentJuz)
                         )
                     }
                 } else {
@@ -403,9 +406,9 @@ class ChapterReaderViewModel @Inject constructor(
     }
 
     private suspend fun fetchVersePage(page: Int) =
-        if (juzNumber != null) {
+        if (_state.value.juzNumber != null) {
             contentRepository.getVersesByJuz(
-                juzNumber = juzNumber,
+                juzNumber = _state.value.juzNumber!!,
                 page = page,
                 audioRecitationId = _state.value.selectedRecitationId
             )
@@ -704,10 +707,6 @@ class ChapterReaderViewModel @Inject constructor(
         }
     }
 
-    private companion object {
-        const val HADITH_PAGE_LIMIT = 4
-    }
-
     fun openAiShare(verseIndex: Int) {
         if (verseIndex !in _state.value.verses.indices) return
         _state.update {
@@ -983,7 +982,7 @@ class ChapterReaderViewModel @Inject constructor(
                     )
                 }
                 loadChapterMeta()
-                loadInitial()
+                loadInitialForEnd()
             }
         } else {
             val prevChapter = s.chapterNumber - 1
@@ -1001,7 +1000,53 @@ class ChapterReaderViewModel @Inject constructor(
                     )
                 }
                 loadChapterMeta()
-                loadInitial()
+                loadInitialForEnd()
+            }
+        }
+    }
+
+    private fun loadInitialForEnd() {
+        _state.update {
+            it.copy(
+                isLoading = true,
+                error = null,
+                verses = emptyList(),
+                currentVerseIndex = 0,
+                loadedApiPage = 0,
+                hasMore = true
+            )
+        }
+        viewModelScope.launch {
+            runCatching {
+                fetchVersePage(page = 1)
+            }.onSuccess { resp ->
+                val trans = translationStore.showTranslation.value
+                val translit = translationStore.showTransliteration.value
+                val tajweed = translationStore.isTajweedEnabled.value
+                val arabicType = translationStore.arabicTextType.value
+                val rec = translationStore.currentRecitationId()
+                val tid = LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
+                val lastIdx = (resp.verses.size - 1).coerceAtLeast(0)
+
+                _state.update { 
+                    it.copy(
+                        isLoading = false,
+                        verses = resp.verses,
+                        currentVerseIndex = lastIdx,
+                        loadedApiPage = resp.pagination?.currentPage ?: 1,
+                        hasMore = resp.pagination?.hasNextPage ?: false,
+                        selectedTranslationId = tid,
+                        showTranslation = trans,
+                        showTransliteration = translit,
+                        isTajweedEnabled = tajweed,
+                        arabicTextType = arabicType,
+                        selectedRecitationId = rec
+                    ) 
+                }
+                _events.tryEmit(ReaderEvent.AnimateToPage(lastIdx))
+                refreshPersonalVerseState(lastIdx)
+            }.onFailure { t ->
+                _state.update { it.copy(isLoading = false, error = t.toAppError()) }
             }
         }
     }

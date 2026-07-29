@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -111,6 +112,7 @@ fun AccountScreen(
     val context = LocalContext.current
     val currentDetailScreen = rememberSaveable { mutableStateOf<String?>(null) }
     var showUpToDateSheet by rememberSaveable { mutableStateOf(false) }
+    val mainScrollState = rememberScrollState()
 
     LaunchedEffect(currentDetailScreen.value) {
         onAccountDetailScreenChanged(currentDetailScreen.value != null)
@@ -122,54 +124,56 @@ fun AccountScreen(
         }
     }
 
-    when (currentDetailScreen.value) {
-        "READING_NOTIFICATION" -> {
-            ReadingNotificationScreen(
-                state = state,
-                vm = vm,
-                onBack = { currentDetailScreen.value = null }
-            )
-        }
-        "NOTIFICATION_ADHAN" -> {
-            NotificationAdhanScreen(
-                state = state,
-                vm = vm,
-                onBack = { currentDetailScreen.value = null }
-            )
-        }
-        "PRIVACY_POLICY" -> {
-            PrivacyPolicyScreen(
-                appLanguage = state.appLanguage,
-                appTheme = state.appTheme,
-                onBack = { currentDetailScreen.value = null }
-            )
-        }
-        "TERMS_CONDITIONS" -> {
-            TermsAndConditionsScreen(
-                appLanguage = state.appLanguage,
-                appTheme = state.appTheme,
-                onBack = { currentDetailScreen.value = null }
-            )
-        }
-        "ABOUT_SAAT" -> {
-            AboutSaatScreen(
-                appLanguage = state.appLanguage,
-                appTheme = state.appTheme,
-                onBack = { currentDetailScreen.value = null }
-            )
-        }
-        else -> {
-            AccountSettingsContent(
-                state = state,
-                vm = vm,
-                onBack = onBack,
-                onOpenReadingNotification = { currentDetailScreen.value = "READING_NOTIFICATION" },
-                onOpenNotificationAdhan = { currentDetailScreen.value = "NOTIFICATION_ADHAN" },
-                onOpenAbout = { currentDetailScreen.value = "ABOUT_SAAT" },
-                onOpenPrivacyPolicy = { currentDetailScreen.value = "PRIVACY_POLICY" },
-                onOpenTerms = { currentDetailScreen.value = "TERMS_CONDITIONS" },
-                onCheckUpdate = { showUpToDateSheet = true }
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        AccountSettingsContent(
+            state = state,
+            vm = vm,
+            scrollState = mainScrollState,
+            onBack = onBack,
+            onOpenReadingNotification = { currentDetailScreen.value = "READING_NOTIFICATION" },
+            onOpenNotificationAdhan = { currentDetailScreen.value = "NOTIFICATION_ADHAN" },
+            onOpenAbout = { currentDetailScreen.value = "ABOUT_SAAT" },
+            onOpenPrivacyPolicy = { currentDetailScreen.value = "PRIVACY_POLICY" },
+            onOpenTerms = { currentDetailScreen.value = "TERMS_CONDITIONS" },
+            onCheckUpdate = { showUpToDateSheet = true }
+        )
+
+        when (currentDetailScreen.value) {
+            "READING_NOTIFICATION" -> {
+                ReadingNotificationScreen(
+                    state = state,
+                    vm = vm,
+                    onBack = { currentDetailScreen.value = null }
+                )
+            }
+            "NOTIFICATION_ADHAN" -> {
+                NotificationAdhanScreen(
+                    state = state,
+                    vm = vm,
+                    onBack = { currentDetailScreen.value = null }
+                )
+            }
+            "PRIVACY_POLICY" -> {
+                PrivacyPolicyScreen(
+                    appLanguage = state.appLanguage,
+                    appTheme = state.appTheme,
+                    onBack = { currentDetailScreen.value = null }
+                )
+            }
+            "TERMS_CONDITIONS" -> {
+                TermsAndConditionsScreen(
+                    appLanguage = state.appLanguage,
+                    appTheme = state.appTheme,
+                    onBack = { currentDetailScreen.value = null }
+                )
+            }
+            "ABOUT_SAAT" -> {
+                AboutSaatScreen(
+                    appLanguage = state.appLanguage,
+                    appTheme = state.appTheme,
+                    onBack = { currentDetailScreen.value = null }
+                )
+            }
         }
     }
 
@@ -288,6 +292,7 @@ fun AccountScreen(
 private fun AccountSettingsContent(
     state: AccountUiState,
     vm: AccountViewModel,
+    scrollState: ScrollState,
     onBack: (() -> Unit)?,
     onOpenReadingNotification: () -> Unit,
     onOpenNotificationAdhan: () -> Unit,
@@ -373,7 +378,7 @@ private fun AccountSettingsContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .padding(
                     start = 16.dp,
                     end = 16.dp,
