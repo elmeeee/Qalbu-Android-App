@@ -257,16 +257,86 @@ object QuranPersonalStore {
         return HifzSummary(learning, memorized, review)
     }
 
-    private inline fun <reified T> loadList(context: Context, key: String, fallback: T): T {
+    @Serializable
+    private data class LocalDevicePersonalBackup(
+        val version: Int = 1,
+        val bookmarks: List<VerseBookmark> = emptyList(),
+        val notes: List<VerseNote> = emptyList(),
+        val lastReadJuz: Int? = null,
+        val lastReadVerseKey: String? = null,
+        val lastReadUpdatedAtMillis: Long? = null
+    )
+
+    private fun getBackupFile(context: Context): java.io.File? {
+        val dir = context.getExternalFilesDir(null) ?: context.filesDir
+        return java.io.File(dir, "qalbu_personal_backup.json")
+    }
+
+    private fun syncBackupToDevice(context: Context) {
+        runCatching {
+            val file = getBackupFile(context) ?: return
+            val khatamData = loadListRaw<KhatamList>(context, KEY_KHATAM, KhatamList())
+            val backup = LocalDevicePersonalBackup(
+                bookmarks = loadListRaw<BookmarkList>(context, KEY_BOOKMARKS, BookmarkList()).items,
+                notes = loadListRaw<NoteList>(context, KEY_NOTES, NoteList()).items,
+                lastReadJuz = khatamData.lastReadJuz,
+                lastReadVerseKey = khatamData.lastReadVerseKey,
+                lastReadUpdatedAtMillis = khatamData.lastReadUpdatedAtMillis
+            )
+            file.writeText(json.encodeToString(backup))
+        }
+    }
+
+    private fun checkRestoreFromBackup(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!prefs.contains(KEY_BOOKMARKS) && !prefs.contains(KEY_NOTES) && !prefs.contains(KEY_KHATAM)) {
+            runCatching {
+                val file = getBackupFile(context) ?: return
+                if (file.exists()) {
+                    val content = file.readText()
+                    val backup = json.decodeFromString<LocalDevicePersonalBackup>(content)
+                    if (backup.bookmarks.isNotEmpty()) {
+                        saveListRaw(context, KEY_BOOKMARKS, BookmarkList(backup.bookmarks))
+                    }
+                    if (backup.notes.isNotEmpty()) {
+                        saveListRaw(context, KEY_NOTES, NoteList(backup.notes))
+                    }
+                    if (backup.lastReadVerseKey != null) {
+                        saveListRaw(
+                            context,
+                            KEY_KHATAM,
+                            KhatamList(
+                                lastReadJuz = backup.lastReadJuz,
+                                lastReadVerseKey = backup.lastReadVerseKey,
+                                lastReadUpdatedAtMillis = backup.lastReadUpdatedAtMillis
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private inline fun <reified T> loadListRaw(context: Context, key: String, fallback: T): T {
         val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(key, null)
             ?: return fallback
         return runCatching { json.decodeFromString<T>(raw) }.getOrDefault(fallback)
     }
 
-    private inline fun <reified T> saveList(context: Context, key: String, value: T) {
+    private inline fun <reified T> saveListRaw(context: Context, key: String, value: T) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putString(key, json.encodeToString(value))
             .apply()
+    }
+
+    private inline fun <reified T> loadList(context: Context, key: String, fallback: T): T {
+        checkRestoreFromBackup(context)
+        return loadListRaw(context, key, fallback)
+    }
+
+    private inline fun <reified T> saveList(context: Context, key: String, value: T) {
+        saveListRaw(context, key, value)
+        syncBackupToDevice(context)
     }
 }

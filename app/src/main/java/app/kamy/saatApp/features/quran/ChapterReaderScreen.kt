@@ -575,19 +575,19 @@ fun ChapterReaderScreen(
                             ),
                             onBookmark = {
                                 verseMenuExpanded.value = false
-                                vm.toggleBookmark(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                                vm.toggleBookmark(currentVerseIndex)
                             },
                             onNote = {
                                 verseMenuExpanded.value = false
-                                vm.openNote(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                                vm.openNote(currentVerseIndex)
                             },
                             onHifz = {
                                 verseMenuExpanded.value = false
-                                vm.cycleHifzStatus(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                                vm.cycleHifzStatus(currentVerseIndex)
                             },
                             onAiShare = {
                                 verseMenuExpanded.value = false
-                                vm.openAiShare(pagerState.currentPage.coerceIn(0, state.verses.lastIndex))
+                                vm.openAiShare(currentVerseIndex)
                             },
                             onShareImage = {
                                 verseMenuExpanded.value = false

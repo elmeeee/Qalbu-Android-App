@@ -547,6 +547,7 @@ class AccountViewModel @Inject constructor(
 
     fun setImportantDaysReminderEnabled(enabled: Boolean) {
         prayerNotificationPrefs.setImportantDaysReminderEnabled(enabled)
+        prayerNotificationPrefs.setMonThuFastEnabled(enabled)
         reschedulePrayerNotifications()
     }
 

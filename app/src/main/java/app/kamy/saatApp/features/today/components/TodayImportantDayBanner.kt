@@ -73,38 +73,51 @@ fun TodayImportantDayBanner(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(
-                Brush.horizontalGradient(
+                Brush.linearGradient(
                     colors = listOf(
-                        SaatColors.PrayerCreamWarm.copy(alpha = 0.45f),
-                        SaatColors.PrayerCream.copy(alpha = 0.25f)
+                        SaatColors.PrayerCreamWarm.copy(alpha = 0.55f),
+                        SaatColors.PrayerCream.copy(alpha = 0.35f),
+                        SaatColors.DeepEmerald.copy(alpha = 0.05f)
                     )
                 )
             )
             .border(
                 BorderStroke(
                     1.dp,
-                    SaatColors.GoldDeep.copy(alpha = 0.2f)
+                    Brush.horizontalGradient(
+                        listOf(
+                            SaatColors.GoldDeep.copy(alpha = 0.35f),
+                            SaatColors.DeepEmerald.copy(alpha = 0.15f)
+                        )
+                    )
                 ),
-                RoundedCornerShape(16.dp)
+                RoundedCornerShape(20.dp)
             )
             .clickable { showDetailSheet = true }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 18.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(SaatColors.GoldDeep.copy(alpha = 0.12f)),
+                .size(46.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            SaatColors.GoldDeep.copy(alpha = 0.18f),
+                            SaatColors.AmberWash
+                        )
+                    )
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = androidx.compose.ui.res.painterResource(R.drawable.month_icon),
                 contentDescription = null,
                 tint = SaatColors.GoldDeep,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(22.dp)
             )
         }
         
@@ -113,20 +126,45 @@ fun TodayImportantDayBanner(
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            Text(
-                text = stringResource(R.string.khgt_important_day).uppercase(),
-                style = MaterialTheme.typography.labelMedium.copy(
-                    letterSpacing = 1.sp
-                ),
-                fontWeight = FontWeight.Bold,
-                color = SaatColors.GoldDeep
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "✦",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = SaatColors.GoldDeep,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = stringResource(R.string.khgt_important_day).uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        letterSpacing = 0.8.sp
+                    ),
+                    fontWeight = FontWeight.Bold,
+                    color = SaatColors.GoldDeep
+                )
+            }
             Text(
                 text = localizedTitle,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.ExtraBold,
                 color = SaatColors.Slate900,
                 modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .background(SaatColors.DeepEmerald.copy(alpha = 0.08f))
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+        ) {
+            Text(
+                text = if (language == AppLanguage.ENGLISH) "Details ›" else "Detail ›",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = SaatColors.DeepEmerald
             )
         }
     }

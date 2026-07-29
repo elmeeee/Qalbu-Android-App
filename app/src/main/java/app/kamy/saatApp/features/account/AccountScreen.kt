@@ -10,6 +10,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -612,14 +613,6 @@ fun NotificationAdhanScreen(
                     subtitle = if (state.importantDaysReminderEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
                     checked = state.importantDaysReminderEnabled,
                     onCheckedChange = vm::setImportantDaysReminderEnabled,
-                    showDivider = true
-                )
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_remainders_custom,
-                    title = stringResource(R.string.notif_mon_thu_fasting),
-                    subtitle = if (state.monThuFastReminderEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
-                    checked = state.monThuFastReminderEnabled,
-                    onCheckedChange = vm::setMonThuFastReminderEnabled,
                     showDivider = false
                 )
             }
@@ -1805,12 +1798,16 @@ private fun ReminderTimeSheet(
                     )
 
                     Spacer(Modifier.width(10.dp))
+                    val tzAbbrev = remember {
+                        val tz = java.util.TimeZone.getDefault()
+                        tz.getDisplayName(tz.inDaylightTime(java.util.Date()), java.util.TimeZone.SHORT, java.util.Locale.getDefault())
+                    }
                     Surface(
                         shape = RoundedCornerShape(8.dp),
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                     ) {
                         Text(
-                            text = "WIB",
+                            text = tzAbbrev,
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
@@ -1820,10 +1817,12 @@ private fun ReminderTimeSheet(
                 }
             }
 
-            // Quick Preset Selection Chips (Super Interactive & Beautiful)
+            // Quick Preset Selection Chips (Horizontal Scrollable, Single Line)
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 presets.forEach { preset ->
                     val isSelected = currentHour == preset.hour && currentMinute == preset.minute
@@ -1843,6 +1842,8 @@ private fun ReminderTimeSheet(
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            softWrap = false,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp)
                         )
                     }
