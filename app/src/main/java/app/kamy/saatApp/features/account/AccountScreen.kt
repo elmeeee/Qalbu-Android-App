@@ -1996,7 +1996,7 @@ fun AboutSaatScreen(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         LegalWebView(
-            url = "https://elmee.my/saat/about?lang=${appLanguage.tag}&theme=${appTheme.key}&version=${appVersion}",
+            url = "https://elmee.my/saat/about?lang=${appLanguage.tag}&version=${appVersion}",
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -2038,7 +2038,7 @@ fun PrivacyPolicyScreen(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         LegalWebView(
-            url = "https://elmee.my/saat/privacy?lang=${appLanguage.tag}&theme=${appTheme.key}",
+            url = "https://elmee.my/saat/privacy?lang=${appLanguage.tag}",
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -2080,7 +2080,7 @@ fun TermsAndConditionsScreen(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         LegalWebView(
-            url = "https://elmee.my/saat/terms?lang=${appLanguage.tag}&theme=${appTheme.key}",
+            url = "https://elmee.my/saat/terms?lang=${appLanguage.tag}",
             modifier = Modifier.fillMaxSize()
         )
     }
