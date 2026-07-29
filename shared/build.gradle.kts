@@ -34,7 +34,7 @@ android {
     namespace = "app.kamy.saatapp.shared"
     compileSdk = 35
     defaultConfig {
-        minSdk = 30
+        minSdk = 31
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

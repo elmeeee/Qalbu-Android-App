@@ -6,12 +6,12 @@
         <item name="android:windowBackground">@color/al_khatib_emerald_night</item>
     </style>
 
-    <!-- Same splash treatment in dark mode: the logo is designed for its light backdrop, so
+<!-- Same splash treatment in dark mode: the logo is designed for its light backdrop, so
          keep the cream background rather than flipping to a dark surface. -->
-    <style name="Theme.Saat.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
-        <item name="android:windowBackground">@color/splash_background</item>
-        <item name="postSplashScreenTheme">@style/Theme.Saat</item>
-    </style>
+     <style name="Theme.Saat.Splash" parent="Theme.SplashScreen">
+         <item name="windowSplashScreenBackground">@drawable/splash_gradient_background</item>
+         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wrapper</item>
+         <item name="android:windowBackground">@drawable/splash_gradient_background</item>
+         <item name="postSplashScreenTheme">@style/Theme.Saat</item>
+     </style>
 </resources>

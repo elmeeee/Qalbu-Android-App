@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources xmlns:ns0="http://schemas.android.com/tools" ns0:ignore="Typos,MissingTranslation">
     <string name="app_name">Sāat</string>
-    <string name="app_name_launcher">S\u200cĀ\u200cA\u200cT</string>
+    <string name="app_name_launcher">Sāat</string>
     <string name="splash_greeting_arabic">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</string>
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
@@ -153,7 +153,7 @@
     <string name="sunnah_kahf_title">📖 Read Surah Al-Kahf</string>
     <string name="sunnah_kahf_body">It\'s Friday — read Surah Al-Kahf for light between this Friday and the next.</string>
     <string name="daily_verse_notif_title">Your verse for today</string>
-    <string name="daily_verse_notif_fallback">Open SĀAT for today\'s verse.</string>
+    <string name="daily_verse_notif_fallback">Open Sāat for today\'s verse.</string>
     <string name="adhan_playback_title">Adhan</string>
     <string name="adhan_playback_body">Playing the call to prayer</string>
     <string name="adhan_stop">Stop adhan</string>
@@ -161,12 +161,12 @@
     <string name="recitation_notification_channel">Quran recitation</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
     <string name="exact_alarm_rationale_title">Prayer reminders on time</string>
-    <string name="fullscreen_intent_rationale">"SĀAT" Would Like to Display Full-Screen Adhan Alarms When Screen Is Locked.</string>
+    <string name="fullscreen_intent_rationale">"Sāat" Would Like to Display Full-Screen Adhan Alarms When Screen Is Locked.</string>
     <string name="fullscreen_intent_rationale_title">Full-Screen Adhan Alarm</string>
     <string name="action_dont_allow">Don\'t Allow</string>
     <string name="action_later">Later</string>
     <string name="battery_opt_snackbar_message">On some phones, allow unrestricted battery so adhan works when the app is closed.</string>
-    <string name="battery_opt_snackbar_oem_message">On %1$s phones: set SĀAT to Unrestricted and enable autostart so adhan works in the background.</string>
+    <string name="battery_opt_snackbar_oem_message">On %1$s phones: set Sāat to Unrestricted and enable autostart so adhan works in the background.</string>
     <string name="battery_opt_settings_title">Background &amp; battery</string>
     <string name="battery_opt_settings_subtitle">Unrestricted — recommended on this phone brand</string>
     <string name="battery_opt_settings_subtitle_ok">Unrestricted — background reminders enabled</string>
@@ -401,7 +401,7 @@
     <string name="prayer_calendar_load_failed">Could not load prayer calendar</string>
     <string name="prayer_widget_title">Prayer times</string>
     <string name="prayer_widget_description">Compact prayer times strip with countdown</string>
-    <string name="prayer_widget_empty">Open SĀAT to load prayer times</string>
+    <string name="prayer_widget_empty">Open Sāat to load prayer times</string>
     <string name="prayer_widget_next">Next: %1$s at %2$s</string>
     <string name="prayer_widget_grace">%1$s started recently</string>
     <string name="prayer_widget_next_label">Next prayer</string>
@@ -413,7 +413,7 @@
     <string name="prayer_calendar_loading_day">Loading prayer times…</string>
     <string name="offline_banner_message">Offline — showing saved data</string>
     <string name="offline_banner_prayer">Offline — prayer times from last sync</string>
-    <string name="onboarding_welcome_title">Welcome to SĀAT</string>
+    <string name="onboarding_welcome_title">Welcome to Sāat</string>
     <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
     <string name="onboarding_location_title">Where do you pray?</string>
     <string name="onboarding_location_body">We need your location to calculate accurate prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha). Your location is stored only on this device and never sent to our servers.</string>
@@ -711,7 +711,7 @@
     <string name="chapters_refresh_failed">Couldn\'t refresh chapters</string>
     <string name="daily_verse_widget_title">Verse of the day</string>
     <string name="daily_verse_widget_desc">Today\'s ayah on your home screen</string>
-    <string name="daily_verse_widget_empty">Open SĀAT to load today\'s verse</string>
+    <string name="daily_verse_widget_empty">Open Sāat to load today\'s verse</string>
     <string name="prayer_widget_next_title">Next prayer</string>
     <string name="prayer_widget_next_desc">Countdown to the next adhan</string>
     <string name="prayer_widget_schedule_title">Prayer schedule</string>
@@ -801,7 +801,7 @@
     <string name="faraidh_status_no_heirs">Tap Edit to add heirs</string>
     <string name="faraidh_status_ready">%1$d heir group(s) · shares calculated</string>
     <string name="faraidh_empty_title">Start your calculation</string>
-    <string name="faraidh_empty_body">Add the net estate and list surviving heirs. SĀAT will compute Quranic shares, blocking rules, and adjustments automatically.</string>
+    <string name="faraidh_empty_body">Add the net estate and list surviving heirs. Sāat will compute Quranic shares, blocking rules, and adjustments automatically.</string>
     <string name="faraidh_empty_cta">Set up calculation</string>
     <string name="faraidh_empty_no_share_title">No distributable shares</string>
     <string name="faraidh_empty_no_share_body">Check that at least one heir is listed and the estate amount is greater than zero.</string>
@@ -975,7 +975,7 @@
     <string name="notif_summary_important_days">Fasting &amp; important days</string>
     <string name="about">About</string>
     <string name="about_developer">About Application</string>
-    <string name="about_app_desc">SĀAT is a modern, comprehensive companion application designed to elevate your daily Islamic routines. Featuring precise prayer times, adhan alerts, colored Tajweed Quran with audio recitations, prayer progress challenges, and a community platform to share and read reflective insights, SĀAT helps you stay connected to your faith, wherever you are.</string>
+    <string name="about_app_desc">Sāat is a modern, comprehensive companion application designed to elevate your daily Islamic routines. Featuring precise prayer times, adhan alerts, colored Tajweed Quran with audio recitations, prayer progress challenges, and a community platform to share and read reflective insights, Sāat helps you stay connected to your faith, wherever you are.</string>
     <string name="app_details_title">Application Details</string>
     <string name="developer_details_title">About Developer</string>
     <string name="developer_name">Sufiandy Elmy</string>

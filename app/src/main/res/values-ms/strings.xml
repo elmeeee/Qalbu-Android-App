@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">SĀAT</string>
+    <string name="app_name">Sāat</string>
     <string name="splash_greeting_arabic">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</string>
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>

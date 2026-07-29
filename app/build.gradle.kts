@@ -30,7 +30,7 @@ android {
 
     defaultConfig {
         applicationId = "app.kamy.saatApp"
-        minSdk = 30
+        minSdk = 31
         targetSdk = 36
         versionCode = 4
         versionName = "1.1.0"

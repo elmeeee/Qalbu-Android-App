@@ -11,15 +11,13 @@
     </style>
 
     <!--
-        Android 12+ owns the splash via the SplashScreen API and only honours a solid
-        windowSplashScreenBackground plus a centred, circle-masked animated icon. A full-bleed
-        background image is not possible there, so use the logo on a matching solid colour and
-        keep it identical on older releases via windowBackground.
+        Android 12+ Splash Screen API theme.
+        Uses a vertical gradient background and a custom icon wrapper
+        that insets the icon to fit within the circle mask.
     -->
     <style name="Theme.Saat.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
-        <item name="android:windowBackground">@color/splash_background</item>
+        <item name="windowSplashScreenBackground">@drawable/splash_gradient_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wrapper</item>
         <item name="postSplashScreenTheme">@style/Theme.Saat</item>
     </style>
 </resources>
