@@ -32,7 +32,8 @@ class AiReflectionRepository @Inject constructor(
     suspend fun complete(
         system: String,
         user: String,
-        temperature: Double = 0.35
+        temperature: Double = 0.35,
+        maxTokens: Int = 1100
     ): String? = withContext(Dispatchers.IO) {
         val apiKey = AppConfig.groqApiKey ?: return@withContext null
         val body = json.encodeToString(
@@ -43,7 +44,8 @@ class AiReflectionRepository @Inject constructor(
                     GroqChatMessage(role = "system", content = system),
                     GroqChatMessage(role = "user", content = user)
                 ),
-                temperature = temperature
+                temperature = temperature,
+                maxTokens = maxTokens
             )
         )
         val request = Request.Builder()

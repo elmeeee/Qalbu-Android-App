@@ -7,7 +7,7 @@ data class GroqChatRequest(
     val model: String,
     val messages: List<GroqChatMessage>,
     val temperature: Double = 0.75,
-    val maxTokens: Int = 600
+    val maxTokens: Int = 1100
 )
 
 @Serializable

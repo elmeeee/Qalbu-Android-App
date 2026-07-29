@@ -158,7 +158,7 @@ class VerseShareTextComposer @Inject constructor(
         val sourceName = verse.translations?.firstOrNull()?.resourceName?.trim().orEmpty()
 
         val system = """
-            You help Muslims write short personal reflections to share with friends.
+            You help Muslims write personal reflections to share with friends.
             The verse (Arabic + translation) is shown separately — do NOT quote or repeat it.
             Return plain text only. No headings, lists, markdown, or labels.
             $languageRule
@@ -170,10 +170,10 @@ class VerseShareTextComposer @Inject constructor(
             Write ONLY the reflection + dua in $outputLanguage.
 
             Structure:
-            • 3–5 short sentences (max 55 words): one honest takeaway for daily life. First person is fine.
+            • 3–6 paragraphs of personal reflection (max 700 words total). Share honest takeaways, relatable life examples, and practical lessons from this verse. First person is welcome. Make it deep but conversational.
             • Blank line.
             • One line starting with: $duaOpener
-              Then 1–2 natural dua sentences (max 28 words).
+              Then 1–3 natural dua sentences (max 40 words).
 
             Avoid completely:
             - "Section", "Reflection", "Dua", numbered lists, bullet points
@@ -190,7 +190,7 @@ class VerseShareTextComposer @Inject constructor(
             Source: ${sourceName.ifBlank { "N/A" }}
         """.trimIndent()
 
-        return aiReflection.complete(system = system, user = user, temperature = 0.62)
+        return aiReflection.complete(system = system, user = user, temperature = 0.62, maxTokens = 1100)
             ?.let { humanizeAiOutput(it, language) }
             ?.takeIf { it.isNotBlank() }
     }
@@ -218,7 +218,7 @@ class VerseShareTextComposer @Inject constructor(
             Verse: $verseLabel
             Translation: ${translation.orEmpty().toVerseTranslationPlainText().ifBlank { "N/A" }}
         """.trimIndent()
-        return aiReflection.complete(system = system, user = user, temperature = 0.58)
+        return aiReflection.complete(system = system, user = user, temperature = 0.58, maxTokens = 300)
             ?.let { humanizeAiOutput(it, language) }
             ?.takeIf { it.isNotBlank() }
     }
@@ -284,7 +284,7 @@ class VerseShareTextComposer @Inject constructor(
         body: String
     ): String {
         val now = Date()
-        return buildString {
+        val header = buildString {
             appendLine(strings.getString(R.string.share_brand_header))
             appendLine(strings.getString(R.string.share_brand_tagline))
             appendLine()
@@ -292,12 +292,19 @@ class VerseShareTextComposer @Inject constructor(
             appendLine(dynamicTransitionLine(now))
             appendLine()
             appendLine(strings.getString(R.string.share_allah_says))
-            appendLine(buildVerseBlock(cleanedArabic, cleanedTranslation, verseLabel))
+            append(buildVerseBlock(cleanedArabic, cleanedTranslation, verseLabel))
+        }
+        val footer = hashtagsBlock(now)
+        val frameWords = wordCount(header) + wordCount(footer)
+        val bodyBudget = (MAX_SHARE_WORDS - frameWords).coerceAtLeast(60)
+        val trimmedBody = trimBodyToWordBudget(body.trim(), bodyBudget)
+        return buildString {
+            appendLine(header)
             appendLine()
-            append(body.trim())
+            append(trimmedBody)
             appendLine()
             appendLine()
-            append(hashtagsBlock(now))
+            append(footer)
         }.trim()
     }
 
@@ -449,6 +456,23 @@ class VerseShareTextComposer @Inject constructor(
 
     companion object {
         private const val TAFSIR_RESOURCE_ID = "169"
+        private const val MAX_SHARE_WORDS = 700
+
+        private fun wordCount(text: String): Int =
+            text.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
+
+        private fun trimBodyToWordBudget(body: String, maxWords: Int): String {
+            if (wordCount(body) <= maxWords) return body
+            val words = body.split(Regex("\\s+")).filter { it.isNotEmpty() }
+            val truncated = words.take(maxWords).joinToString(" ")
+            // Prefer cutting at a sentence boundary for a clean ending
+            val lastSentenceEnd = truncated.lastIndexOfAny(charArrayOf('.', '!', '?', '\n'))
+            return if (lastSentenceEnd > truncated.length / 2) {
+                truncated.substring(0, lastSentenceEnd + 1).trim()
+            } else {
+                truncated.trim()
+            }
+        }
 
         fun humanLabel(verseKey: String?, referenceLabel: String?, strings: AppStrings? = null): String {
             if (!referenceLabel.isNullOrBlank()) {
