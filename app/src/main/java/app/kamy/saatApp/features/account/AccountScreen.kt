@@ -1954,6 +1954,18 @@ fun AboutSaatScreen(
     appTheme: app.kamy.saatApp.infrastructure.preferences.AppThemeColor,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val packageInfo = remember(context) {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0)
+        } catch (e: Exception) {
+            null
+        }
+    }
+    val appVersion = remember(packageInfo) {
+        packageInfo?.versionName ?: "1.0.1"
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -1984,7 +1996,7 @@ fun AboutSaatScreen(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         LegalWebView(
-            url = "https://elmee.my/saat/about?lang=${appLanguage.tag}&theme=${appTheme.key}",
+            url = "https://elmee.my/saat/about?lang=${appLanguage.tag}&theme=${appTheme.key}&version=${appVersion}",
             modifier = Modifier.fillMaxSize()
         )
     }
