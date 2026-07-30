@@ -86,7 +86,7 @@ fun ZakatCalculatorScreen(
     vm: ZakatViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsState()
-    val currency = remember { NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")) }
+    val currency = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     val result = state.result
 
     Column(
@@ -336,7 +336,7 @@ fun ZakatCalculatorScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "Ringkasan Perhitungan Zakat",
+                            text = stringResource(R.string.zakat_summary_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = SaatColors.DeepEmerald
@@ -347,14 +347,6 @@ fun ZakatCalculatorScreen(
                         when (result) {
                             is ZakatMaalCalculationResult -> {
                                 ResultRow(stringResource(R.string.zakat_net_wealth), currency.format(result.zakatableWealth))
-                                ResultRow(
-                                    stringResource(R.string.zakat_nisab_gold, result.nisabGoldGrams.toInt()),
-                                    currency.format(result.nisabGoldValue)
-                                )
-                                ResultRow(
-                                    stringResource(R.string.zakat_nisab_silver, result.nisabSilverGrams.toInt()),
-                                    currency.format(result.nisabSilverValue)
-                                )
 
                                 HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
 
@@ -378,7 +370,7 @@ fun ZakatCalculatorScreen(
                                             )
                                             Spacer(Modifier.width(8.dp))
                                             Text(
-                                                text = if (result.meetsNisab) stringResource(R.string.zakat_meets_nisab) else "Belum Wajib Zakat",
+                                                text = if (result.meetsNisab) stringResource(R.string.zakat_meets_nisab) else stringResource(R.string.zakat_not_yet_mandatory),
                                                 style = MaterialTheme.typography.labelMedium,
                                                 fontWeight = FontWeight.Bold,
                                                 color = if (result.meetsNisab) SaatColors.DeepEmerald else SaatColors.GoldDeep

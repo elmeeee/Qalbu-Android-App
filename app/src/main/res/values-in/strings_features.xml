@@ -496,4 +496,6 @@
     <string name="dhikr_session_menu_button">Kembali ke Menu</string>
     <string name="dhikr_session_empty">Zikir kosong</string>
     <string name="zakat_meets_nisab">Mencapai Nisab (Wajib Zakat)</string>
+    <string name="zakat_summary_title">Ringkasan Perhitungan Zakat</string>
+    <string name="zakat_not_yet_mandatory">Belum Wajib Zakat</string>
 </resources>

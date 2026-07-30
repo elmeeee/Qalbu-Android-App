@@ -1245,4 +1245,6 @@
     <string name="dhikr_session_menu_button">Back to Menu</string>
     <string name="dhikr_session_empty">Dhikr list is empty</string>
     <string name="zakat_meets_nisab">Nisab Reached (Mandatory Zakat)</string>
+    <string name="zakat_summary_title">Zakat Calculation Summary</string>
+    <string name="zakat_not_yet_mandatory">Zakat Not Yet Mandatory</string>
 </resources>

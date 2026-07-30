@@ -47,14 +47,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.SnackbarHost
@@ -479,7 +479,7 @@ fun ChapterReaderScreen(
                 Spacer(Modifier.weight(1f))
                 IconButton(onClick = { settingsVisible.value = true }) {
                     Icon(
-                        Icons.Filled.Settings,
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_setting_on),
                         contentDescription = stringResource(R.string.reading_settings_a11y),
                         tint = SaatColors.Slate900
                     )
@@ -1253,7 +1253,7 @@ private fun ReaderSettingsSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Settings,
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_setting_on),
                         contentDescription = null,
                         tint = SaatColors.DeepEmerald,
                         modifier = Modifier.size(22.dp)
