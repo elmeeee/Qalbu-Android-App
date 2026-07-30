@@ -2,10 +2,6 @@ package app.kamy.saatApp.features.today.components
 
 import android.text.format.DateFormat
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -197,25 +193,19 @@ fun PrayerDashboardCard(
                             }
 
                             if (state.countdown.isNotBlank()) {
-                                AnimatedContent(
-                                    targetState = state.countdown,
-                                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                                    label = "prayerCountdown"
-                                ) { countdown ->
-                                    val formattedCountdown = if (state.isGracePeriod) {
-                                        stringResource(R.string.prayer_countdown_passed, countdown, headline.title)
-                                    } else {
-                                        stringResource(R.string.prayer_countdown_until, countdown, headline.title)
-                                    }
-                                    Text(
-                                        text = formattedCountdown,
-                                        color = Color.White.copy(alpha = 0.95f),
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                val formattedCountdown = if (state.isGracePeriod) {
+                                    stringResource(R.string.prayer_countdown_passed, state.countdown, headline.title)
+                                } else {
+                                    stringResource(R.string.prayer_countdown_until, state.countdown, headline.title)
                                 }
+                                Text(
+                                    text = formattedCountdown,
+                                    color = Color.White.copy(alpha = 0.95f),
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         }
                     }
