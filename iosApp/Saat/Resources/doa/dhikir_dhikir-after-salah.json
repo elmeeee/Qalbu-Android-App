@@ -1,76 +1,270 @@
 {
   "success": true,
-  "message": "Succeeded in taking dhikr by category dhikir-after-salah",
+  "message": "Succeeded in retrieving full post-salah dhikr and comprehensive duaa suite",
   "data": [
     {
-      "title": "Zikir Setelah Salat",
+      "title": "Rangkaian Dzikir & Doa Lengkap Setelah Salat Fardhu",
       "category": "dhikir-after-salah",
-      "compiled_by": "Rumaysho",
+      "compiled_by": "Authentic Hadith Collections & Quranic Supplications",
       "content": [
         {
-          "arabic": "أَسْتَغْفِرُ اللهَ (3x)\nاَللَّهُمَّ أَنْتَ السَّلَامُ، وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
-          "latin": "Astagh-firullah (3x). Allahumma antas salaam wa minkas salaam tabaarokta yaa dzal jalaali wal ikrom.",
-          "translation": "Aku memohon ampun kepada Allah (3x). Ya Allah, Engkau pemberi keselamatan, dan dariMu keselamatan, Maha Suci Engkau, wahai Tuhan Yang Pemilik Keagungan dan Kemuliaan.",
-          "fawaid": "Rasulullah shallallahu ‘alaihi wa sallam jika selesai dari shalatnya beliau beristighfar sebanyak tiga kali dan membaca dzikir di atas.",
-          "notes": "Istighfar dibaca 3 kali, dilanjutkan doa keselamatan 1 kali.",
+          "id": "dhikr_001_istighfar",
+          "arabic": "أَسْتَغْفِرُ اللهَ",
+          "latin": "Astaghfirullah",
+          "translation": {
+            "id": "Aku memohon ampun kepada Allah.",
+            "ms": "Aku memohon keampunan daripada Allah.",
+            "en": "I ask Allah for forgiveness."
+          },
+          "fawaid": "Melebur dosa dan kekurangan dalam pelaksanaan shalat.",
+          "notes": "Dibaca 3 kali setelah salam.",
           "source": "HR. Muslim no. 591",
-          "repeat_count": 1
+          "repeat_count": 3,
+          "context_tags": ["fardhu_all"]
         },
         {
-          "arabic": "لاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ، اَللَّهُمَّ لاَ مَانِعَ لِمَا أَعْطَيْتَ، وَلاَ مُعْطِيَ لِمَا مَنَعْتَ، وَلاَ يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ",
+          "id": "dhikr_002_salam",
+          "arabic": "اَللَّهُمَّ أَنْتَ السَّلَامُ، وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+          "latin": "Allahumma antas-salaam wa minkas-salaam tabaarakta yaa dzal-jalaali wal-ikraam.",
+          "translation": {
+            "id": "Ya Allah, Engkau pemberi keselamatan, dan dari-Mu keselamatan, Maha Suci Engkau, wahai Tuhan Pemilik Keagungan dan Kemuliaan.",
+            "ms": "Ya Allah, Engkaulah Kesejahteraan dan daripada-Mu jua Kesejahteraan, Maha Suci Engkau wahai Tuhan Yang Mempunyai Keagungan dan Kemuliaan.",
+            "en": "O Allah, You are Peace and from You is peace. Blessed are You, O Possessor of majesty and honor."
+          },
+          "fawaid": "Memohon keselamatan hakiki dari Allah Ta'ala.",
+          "notes": "Dibaca 1 kali.",
+          "source": "HR. Muslim no. 591",
+          "repeat_count": 1,
+          "context_tags": ["fardhu_all"]
+        },
+        {
+          "id": "dhikr_003_tauhid_rizq",
+          "arabic": "لاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ، اَللَّهُمَّ لاَ مَانِعَ لِمَا أَعْطَيْتَ، وَلاَ مُعْطِيَ لِمَا مَنَعْتَ، وَلاَ يَنْفَعُ ذَا الْجَدِّ مِنْكَ الْجَدُّ",
           "latin": "Laa ilaaha illallaahu wahdahu laa syariika lah, lahul-mulku wa lahul-hamdu wa huwa 'alaa kulli syai-in qadiir. Allahumma laa maani'a limaa a'thaita wa laa mu'thiya limaa mana'ta wa laa yanfa'u dzal-jaddi minkal-jadd.",
-          "translation": "Tiada Rabb yang berhak disembah selain Allah Yang Maha Esa, tidak ada sekutu bagi-Nya. Bagi-Nya puji dan bagi-Nya kerajaan. Dia Maha Kuasa atas segala sesuatu. Ya Allah, tidak ada yang mencegah apa yang Engkau berikan, dan tidak ada yang memberi apa yang Engkau cegah, dan tidak bermanfaat kekayaan serta kedudukan bagi pemiliknya untuk menghalangi azab-Mu.",
-          "fawaid": "Pernyataan tauhid serta kepasrahan terhadap ketetapan rezeki dan nasib dari Allah.",
+          "translation": {
+            "id": "Tiada sesembahan yang berhak disembah selain Allah Yang Maha Esa, tidak ada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian. Dia Maha Kuasa atas segala sesuatu. Ya Allah, tidak ada yang dapat mencegah apa yang Engkau berikan, dan tidak ada yang dapat memberi apa yang Engkau cegah, dan tidak bermanfaat kekayaan serta kedudukan bagi pemiliknya untuk menghalangi azab-Mu.",
+            "ms": "Tiada Tuhan yang berhak disembah melainkan Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian, dan Dia Maha Kuasa atas segala sesuatu. Ya Allah, tiada siapa yang dapat menahan apa yang Engkau berikan, dan tiada siapa yang dapat memberikan apa yang Engkau tahan, dan tidak memberi faedah kekayaan seseorang itu untuk menyelamatkannya daripada azab-Mu.",
+            "en": "There is no god but Allah alone, with no partner. To Him belongs the dominion and praise, and He is Able to do all things. O Allah, none can withhold what You give, and none can give what You withhold, nor can the wealth/status of a person benefit him against You."
+          },
+          "fawaid": "Pernyataan tauhid murni dan kepasrahan mutlak atas takdir rezeki.",
           "notes": "Dibaca 1 kali.",
-          "source": "HR. Bukhari no. 844 dan Muslim no. 593",
-          "repeat_count": 1
+          "source": "HR. Bukhari no. 844, Muslim no. 593",
+          "repeat_count": 1,
+          "context_tags": ["fardhu_all"]
         },
         {
-          "arabic": "لاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ. لاَ حَوْلَ وَلاَ قُوَّةَ إِلاَّ بِاللهِ، لاَ إِلَـهَ إِلاَّ اللهُ، وَلاَ نَعْبُدُ إِلاَّ إِيَّاهُ، لَهُ النِّعْمَةُ وَلَهُ الْفَضْلُ وَلَهُ الثَّنَاءُ الْحَسَنُ، لاَ إِلَـهَ إِلاَّ اللهُ مُخْلِصِيْنَ لَهُ الدِّيْنَ وَلَوْ كَرِهَ الْكَافِرُوْنَ",
-          "latin": "Laa ilaaha illallaahu wahdahu laa syariika lah, lahul-mulku wa lahul-hamdu wa huwa 'alaa kulli syai-in qadiir. Laa haula wa laa quwwata illaa billaah. Laa ilaaha illallaahu wa laa na'budu illaa iyyaah, lahun-ni'matu wa lahul-fadhlu wa lahutts-tsanaa'ul-hasan. Laa ilaaha illallaahu mukhlisiina lahud-diina walau karihal-kaafiruun.",
-          "translation": "Tiada Rabb yang berhak disembah kecuali Allah Yang Maha Esa, tidak ada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian. Dia Maha Kuasa atas segala sesuatu. Tiada daya dan kekuatan melainkan dengan pertolongan Allah. Tiada Rabb kecuali Allah, dan kami tidak menyembah melainkan Dia. Bagi-Nya segala nikmat, limpah kurnia, dan pujian yang baik. Tiada Rabb melainkan Allah, dengan mengikhlaskan ibadah kepada-Nya walaupun orang-orang kafir membencinya.",
-          "fawaid": "Nabi shallallahu ‘alaihi wa sallam biasa membaca tahlil ini di akhir setiap shalat.",
-          "notes": "Dibaca 1 kali.",
-          "source": "HR. Muslim no. 594",
-          "repeat_count": 1
-        },
-        {
-          "arabic": "سُبْحَانَ اللهِ (33x)\nاَلْحَمْدُ لِلَّهِ (33x)\nاَللهُ أَكْبَرُ (33x)\n\nلاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ",
-          "latin": "Subhanallah (33x), Alhamdulillah (33x), Allahu akbar (33x). Dilanjutkan tahlil 1x.",
-          "translation": "Maha Suci Allah (33 x), segala puji bagi Allah (33 x), Allah Maha Besar (33 x). Tidak ada Rabb kecuali Allah Yang Maha Esa... Bagi-Nya kerajaan, bagi-Nya pujaan, Dia-lah Yang Mahakuasa...",
-          "fawaid": "Siapa yang membacanya, maka dosa-dosanya diampuni walau sebanyak buih di lautan.",
-          "notes": "Tasbih, tahmid, takbir masing-masing 33 kali secara terpisah, lalu ditutup dengan kalimat tauhid 1 kali.",
+          "id": "dhikr_004_tasbih_tahmid_takbir",
+          "arabic": "سُبْحَانَ اللهِ (33x) ، اَلْحَمْدُ لِلَّهِ (33x) ، اَللهُ أَكْبَرُ (33x)\n\nلاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ (1x)",
+          "latin": "Subhanallah (33x), Alhamdulillah (33x), Allahu Akbar (33x).\nLaa ilaaha illallahu wahdahu laa syariikalahu, lahul-mulku wa lahul-hamdu wa huwa 'alaa kulli syai-in qadiir (1x).",
+          "translation": {
+            "id": "Maha Suci Allah (33x). Segala puji bagi Allah (33x). Allah Maha Besar (33x). Tiada sesembahan yang berhak disembah selain Allah Yang Maha Esa... (1x)",
+            "ms": "Maha Suci Allah (33x). Segala puji bagi Allah (33x). Allah Maha Besar (33x). Tiada Tuhan melainkan Allah Yang Maha Esa... (1x)",
+            "en": "Glory be to Allah (33x). Praise be to Allah (33x). Allah is the Greatest (33x). There is no god but Allah alone... (1x)"
+          },
+          "fawaid": "Penghapus dosa-dosa kecil walaupun sebanyak buih di lautan.",
+          "notes": "Rangkaian Tasbih, Tahmid, Takbir (masing-masing 33x) ditutup Tahlil 1x.",
           "source": "HR. Muslim no. 597",
-          "repeat_count": 1
+          "repeat_count": 1,
+          "context_tags": ["fardhu_all"]
         },
         {
-          "arabic": "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
-          "latin": "Allaahu laa ilaaha illaa huwal hayyul qayyuum, laa ta'khudzuhu sinatun wa laa naum. Lahuu maa fis-samaawaati wa maa fil-ardh. Man dzal-ladzii yasyfa'u 'indahuu illaa bi-idznih. Ya'lamu maa baina aidiihim wa maa kholfahum. Wa laa yuhiithuuna bi-syai-im min 'ilmihii illaa bi-maa syaa'. Wasi'a kursiyyuhus-samaawaati wal-ardh. Wa laa ya'uuduhu hifzhuhumaa, wa huwal 'aliyyul 'azhiim.",
-          "translation": "Allah, tidak ada ilah (yang berhak disembah) melainkan Dia, yang hidup kekal lagi terus menerus mengurus (makhluk-Nya). Dia tidak mengantuk dan tidak tidur. Kepunyaan-Nya apa yang di langit dan di bumi. Siapakah yang dapat memberi syafaat di sisi-Nya tanpa izin-Nya? Dia mengetahui apa yang di hadapan mereka dan apa yang di belakang mereka, dan mereka tidak mengetahui sesuatu pun dari ilmu-Nya melainkan apa yang Dia kehendaki. Kursi-Nya meliputi langit dan bumi, dan pemeliharaan kedua-duanya tidak melelahkan-Nya. Dan Dia Maha Tinggi lagi Maha Agung.",
-          "fawaid": "Siapa membaca ayat Kursi setiap selesai shalat fardhu, tidak ada yang menghalanginya masuk surga selain kematian.",
-          "notes": "Dibaca 1 kali.",
-          "source": "HR. An-Nasai dalam Al Kubro 9: 44. Dinyatakan shahih oleh Ibnu Hibban",
-          "repeat_count": 1
+          "id": "dhikr_005_ayat_kursi",
+          "arabic": "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+          "latin": "Allaahu laa ilaaha illaa huwal-hayyul-qayyuum, laa ta'khudzuhu sinatun wa laa naum. Lahuu maa fis-samaawaati wa maa fil-ardh. Man dzal-ladzii yasyfa'u 'indahuu illaa bi-idznih. Ya'lamu maa baina aidiihim wa maa khalfahum. Wa laa yuhiithuuna bi-syai-im min 'ilmihii illaa bi-maa syaa'. Wasi'a kursiyyuhus-samaawaati wal-ardh. Wa laa ya'uuduhu hifzhuhumaa, wa huwal-'aliyyul-'azhiim.",
+          "translation": {
+            "id": "Allah, tidak ada tuhan selain Dia Yang Maha Hidup, yang terus-menerus mengurus makhluk-Nya...",
+            "ms": "Allah, tiada Tuhan melainkan Dia, Yang Maha Hidup, yang sentiasa mentadbirkan sekalian makhluk-Nya...",
+            "en": "Allah! There is no deity except Him, the Ever-Living, the Sustainer of all existence..."
+          },
+          "fawaid": "Penghalang antara seorang hamba dengan surga hanyalah kematian.",
+          "notes": "Ayat Kursi (QS. Al-Baqarah: 255).",
+          "source": "HR. An-Nasa'i (Al-Kubra no. 9848), Shahih Al-Jami' no. 6464",
+          "repeat_count": 1,
+          "context_tags": ["fardhu_all"]
         },
         {
-          "arabic": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ هُوَ اللَّهُ أَحَدٌ اللَّهُ الصَّمَدُ لَمْ يَلِدْ وَلَمْ يُولَدْ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ\n\nبِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ الْفَلَقِ مِن شَرِّ مَا خَلَقَ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ\n\nبِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ\nقُلْ أَعُوذُ بِرَبِّ النَّاسِ مَلِكِ النَّاسِ إِلَهِ النَّاسِ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ مِنَ الْجِنَّةِ وَ النَّاسِ",
-          "latin": "Membaca Surah Al-Ikhlas, Al-Falaq, dan An-Naas.",
-          "translation": "Dengan menyebut nama Allah Yang Maha Pengasih lagi Maha Penyayang. Katakanlah: Dialah Allah, Yang Maha Esa... Aku berlindung kepada Rabb yang menguasai Shubuh... Aku berlindung kepada Rabb manusia...",
-          "fawaid": "Tiga surat pelindung (mu'awwidzat) yang dianjurkan dibaca setiap selesai shalat fardhu.",
-          "notes": "Dibaca 1 kali selesai shalat fardhu (pada shalat Maghrib dan Shubuh dianjurkan dibaca 3 kali).",
-          "source": "HR. Abu Daud no. 1523 dan An-Nasai no. 1337, sanad hasan",
-          "repeat_count": 1
+          "id": "duaa_001_praise_salawat_opening",
+          "arabic": "بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيْمِ. الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِيْنَ، حَمْدًا يُوَافِي نِعَمَهُ وَيُكَافِئُ مَزِيْدَهُ. اللَّهُمَّ صَلِّ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ",
+          "latin": "Bismillahir-rahmaanir-rahiim. Alhamdulillaahi rabbil-'aalamiin, hamdan yuwaafii ni'amahu wa yukaafi'u maziidah. Allahumma shalli 'alaa sayyidinaa Muhammadin wa 'alaa aali sayyidinaa Muhammad.",
+          "translation": {
+            "id": "Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang. Segala puji bagi Allah Tuhan semesta alam, pujian yang sebanding dengan nikmat-Nikmat-Nya dan menjamin tambahannya. Ya Allah, limpahkanlah shalawat kepada junjungan kami Nabi Muhammad dan keluarga Nabi Muhammad.",
+            "ms": "Dengan nama Allah Yang Maha Pemurah lagi Maha Penyayang. Segala puji bagi Allah Tuhan sekalian alam, pujian yang melengkapi nikmat-Nya dan menyamai tambaha-Nya. Ya Allah, selawatkanlah ke atas junjungan kami Nabi Muhammad dan keluarga Nabi Muhammad.",
+            "en": "In the name of Allah, the Most Gracious, the Most Merciful. All praise is due to Allah, Lord of the worlds, a praise that matches His favors and compensates His abundance. O Allah, send blessings upon our master Muhammad and upon the family of our master Muhammad."
+          },
+          "fawaid": "Pembuka doa agar diijabah (dikabulkan) oleh Allah Ta'ala.",
+          "notes": "Setiap doa sangat dianjurkan dibuka dengan tahmid dan shalawat.",
+          "source": "HR. Tirmidzi no. 3477 (Hasan Shahih)",
+          "repeat_count": 1,
+          "context_tags": ["duaa_opening"]
         },
         {
-          "arabic": "اَللَّهُمَّ إِنِّيْ أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلاً مُتَقَبَّلاً",
-          "latin": "Allahumma inni as-aluka 'ilman naafi'a, wa rizqon thoyyiba, wa 'amalan mutaqobbala",
-          "translation": "Ya Allah, sungguh aku memohon kepada-Mu ilmu yang bermanfaat, rizki yang halal dan amal yang diterima.",
-          "fawaid": "Memohon keberkahan ilmu, rezeki, dan amalan di awal hari.",
-          "notes": "Khusus dibaca setelah salam dari shalat Shubuh saja.",
-          "source": "HR. Ibnu Majah no. 925 dan Ahmad 6: 305, sanad shahih",
-          "repeat_count": 1
+          "id": "duaa_002_fatihah_gift",
+          "arabic": "إِلَى حَضْرَةِ النَّبِيِّ الْمُصْطَفَى صَلَّى اللهُ عَلَيْهِ وَسَلَّمَ، وَإِلَى أَرْوَاحِ وَالِدَيْنَا، وَأَزْوَاجِنَا، وَذُرِّيَّاتِنَا، وَأَنْفُسِنَا، وَلِمَنْ سَبَقَنَا بِالْإِيْمَانِ. أَعُوْذُ بِاللهِ مِنَ الشَّيْطَانِ الرَّجِيْمِ. بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيْمِ. الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِيْنَ... (الْفَاتِحَة)",
+          "latin": "Ilaa hadhratin-nabiyyil-mushthafaa shallallaahu 'alaihi wa sallam, wa ilaa arwaahi waalidaynaa, wa azwaajinaa, wa dzurriyyaatinaa, wa anfusinaa, wa liman sabaqanaa bil-iimaan. A'uudzu billaahi minasysyaythaanir-rajiim. Bismillaahir-rahmaanir-rahiim. Alhamdulillaahi rabbil-'aalamiin... (Al-Fatihah)",
+          "translation": {
+            "id": "Kehadirat Nabi pilihan Muhammad SAW, dan untuk ruh kedua orang tua kami, pasangan kami, keturunan kami, diri kami sendiri, serta orang-orang yang telah mendahului kami dalam beriman. (Membaca Surat Al-Fatihah).",
+            "ms": "Kepada hadrat Nabi pilihan Muhammad SAW, dan kepada roh kedua ibu bapa kami, pasangan kami, keturunan kami, diri kami sendiri, serta mereka yang mendahului kami dengan iman. (Membaca Surah Al-Fatihah).",
+            "en": "To the presence of the chosen Prophet Muhammad (PBUH), and to the souls of our parents, spouses, offspring, ourselves, and those who preceded us in faith. (Reciting Surah Al-Fatihah)."
+          },
+          "fawaid": "Tawassul dan mengirimkan pahala bacaan Al-Fatihah (sedekah bacaan) untuk kebaikan diri, keluarga hidup, maupun almarhum/ah.",
+          "notes": "Lafaz niat sedekah Al-Fatihah untuk diri sendiri, keluarga, dan orang tua.",
+          "source": "Tradisi Amalan Para Ulama & QS. Al-Fatihah",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_003_deceased_family",
+          "arabic": "اللَّهُمَّ اغْفِرْ لَهُمْ وَارْحَمْهُمْ وَعَافِهِمْ وَاعْفُ عَنْهُمْ، وَأَكْرِمْ نُزُلَهُمْ وَوَسِّعْ مَدْخَلَهُمْ، وَاجْعَلْ قُبُوْرَهُمْ رَوْضَةً مِنْ رِيَاضِ الْجَنَّةِ",
+          "latin": "Allahummagh-fir lahum warhamhum wa 'aafihim wa'fu 'anhum, wa akrim nuzulahum wa wassi' madkhalahum, waj'al qubuurahum rawdhatam min riyaadhil-jannah.",
+          "translation": {
+            "id": "Ya Allah, ampunilah dosa-dosa mereka (keluarga yang mendahului), rahmatilah mereka, sejahterakanlah mereka, dan maafkanlah kesalahan mereka. Muliakanlah tempat tinggal mereka, lapangkanlah kuburnya, dan jadikanlah kubur mereka taman dari taman-taman surga.",
+            "ms": "Ya Allah, ampunilah dosa-dosa mereka, rahmatilah mereka, sejahterakanlah mereka, dan maafkanlah kesalahan mereka. Muliakanlah tempat tinggal mereka, lapangkanlah kubur mereka, dan jadikanlah kubur mereka taman daripada taman-taman syurga.",
+            "en": "O Allah, forgive them (our deceased family members), have mercy on them, grant them peace, and pardon them. Honor their dwelling place, widen their entrance, and make their graves a garden from the gardens of Paradise."
+          },
+          "fawaid": "Doa khusus untuk mendatangkan ampunan, kelapangan kubur, dan cahaya bagi almarhum/ah keluarga.",
+          "notes": "Doa untuk keluarga dan kerabat yang sudah meninggal dunia.",
+          "source": "HR. Muslim no. 963 (Adaptasi Lafaz Jamak)",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_004_living_parents",
+          "arabic": "رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ وَارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا",
+          "latin": "Rabbighfir lii wa liwaalidayya warhamhumaa kamaa rabbayaanii shaghiiraa.",
+          "translation": {
+            "id": "Wahai Rabbku, ampunilah aku dan kedua orang tuaku, dan kasihilah mereka berdua sebagaimana mereka telah mendidikku sewaktu kecil.",
+            "ms": "Wahai Tuhanku, ampunilah aku dan kedua ibu bapaku, dan kasihanilah mereka berdua sebagaimana mereka telah memelihara dan mendidikku semasa kecil.",
+            "en": "My Lord, forgive me and my parents, and have mercy on them as they raised me when I was small."
+          },
+          "fawaid": "Bentuk bakti anak (birrul walidain) dan penyambung keberkahan hidup.",
+          "notes": "Doa untuk kedua orang tua.",
+          "source": "QS. Al-Isra': 24",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_005_heart_firmness",
+          "arabic": "يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ وَعَلَى طَاعَتِكَ",
+          "latin": "Yaa muqallibal-quluubi tsabbit qalbii 'alaa diinika wa 'alaa thaa'atik.",
+          "translation": {
+            "id": "Wahai Dzat yang membolak-balikkan hati, tetapkanlah hatiku di atas agama-Mu dan di atas ketaatan kepada-Mu.",
+            "ms": "Wahai Dzat yang membolak-balikkan hati, tetapkanlah hatiku di atas agama-Mu dan di atas ketaatan kepada-Mu.",
+            "en": "O Turner of the hearts, make my heart firm upon Your religion and Your obedience."
+          },
+          "fawaid": "Memohon istiqamah agar selalu ingat Allah dan terhindar dari kesesatan.",
+          "notes": "Doa Ya Muqallibal Qulub.",
+          "source": "HR. Tirmidzi no. 2140 & Muslim no. 2654",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_006_1000_dinar",
+          "arabic": "وَمَنْ يَتَّقِ اللَّهَ يَجْعَلْ لَهُ مَخْرَجًا وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ وَمَنْ يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ إِنَّ اللَّهَ بَالِغُ أَمْرِهِ قَدْ جَعَلَ اللَّهُ لِكُلِّ شَيْءٍ قَدْرًا",
+          "latin": "Wa may yattaqillaaha yaj'al lahuu makhrajaa, wa yarzuqhu min haitsu laa yahtasib, wa may yatawakkal 'alallaahi fahuwa hasbuh, innallaaha baalighu amrih, qad ja'alallaahu likulli syai-in qadraa.",
+          "translation": {
+            "id": "Barangsiapa bertakwa kepada Allah niscaya Dia akan membukakan jalan keluar baginya, dan memberinya rezeki dari arah yang tidak disangka-sangka. Dan barangsiapa bertawakal kepada Allah, niscaya Allah akan mencukupkan (keperluan)nya...",
+            "ms": "Sesiapa yang bertaqwa kepada Allah, nescaya Dia akan mengadakan baginya jalan keluar, serta memberinya rezeki dari jalan yang tidak disangka-sangka...",
+            "en": "And whoever fears Allah - He will make for him a way out, and will provide for him from where he does not expect..."
+          },
+          "fawaid": "Pembuka jalan keluar dari kesulitan hidup dan pemurah rezeki (Ayat Seribu Dinar).",
+          "notes": "QS. At-Talaq: 2-3.",
+          "source": "QS. At-Talaq: 2-3",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_007_family_and_children",
+          "arabic": "رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا",
+          "latin": "Rabbanaa hab lanaa min azwaajinaa wa dzurriyyaatinaa qurrata a'yuniw-waj'alnaa lil-muttaqiina imaamaa.",
+          "translation": {
+            "id": "Ya Tuhan kami, anugerahkanlah kepada kami pasangan kami dan keturunan kami sebagai penyenang hati (penyejuk mata), dan jadikanlah kami pemimpin bagi orang-orang yang bertakwa.",
+            "ms": "Wahai Tuhan kami, anugerahkanlah kepada kami isteri-isteri kami dan keturunan kami sebagai penyenang hati, dan jadikanlah kami imam bagi orang-orang yang bertaqwa.",
+            "en": "Our Lord, grant us from among our wives and offspring comfort to our eyes and make us an example for the righteous."
+          },
+          "fawaid": "Memohon keluarga sakinah, rumah tangga harmonis, serta anak soleh/solehah sebagai penyejuk jiwa.",
+          "notes": "Doa keharmonisan rumah tangga.",
+          "source": "QS. Al-Furqan: 74",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_008_job_and_elevation",
+          "arabic": "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ وَرَحْمَتِكَ فَإِنَّهُ لَا يَمْلِكُهَا إِلَّا أَنْتَ، وَارْفَعْ دَرَجَتَنَا فِي الدُّنْيَا وَالْآخِرَةِ",
+          "latin": "Allahumma inni as-aluka min fadhlika wa rahmatika fa-innahu laa yamlikuhaa illaa ant, warfa' darajatanaa fid-dunyaa wal-aakhirah.",
+          "translation": {
+            "id": "Ya Allah, sungguh aku memohon kepada-Mu karunia-Mu dan rahmat-Mu, karena tidak ada yang memilikinya kecuali Engkau, dan angkatlah derajat kami di dunia dan akhirat.",
+            "ms": "Ya Allah, sesungguhnya aku memohon kepada-Mu daripada limpah kurnia-Mu dan rahmat-Mu, kerana tiada yang memilikinya melainkan Engkau, dan tinggikanlah derajat kami di dunia dan akhirat.",
+            "en": "O Allah, I ask You from Your bounty and Your mercy, for indeed no one possesses them except You, and raise our status in this world and the Hereafter."
+          },
+          "fawaid": "Memohon pekerjaan halal yang diridhai Allah untuk mengangkat derajat keluarga kecil.",
+          "notes": "Doa karir & pengangkat derajat.",
+          "source": "HR. Ath-Thabrani (Al-Mu'jam Al-Kabir 10/124), Shahih",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_009_protection_health",
+          "arabic": "اللَّهُمَّ عافِنِي فِي بَدَنِي، اللَّهُمَّ عافِنِي فِي سَمْعِي، اللَّهُمَّ عافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ. اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ جَهْدِ الْبَلَاءِ وَدَرَكِ الشَّقَاءِ وَسُوءِ الْقَضَاءِ",
+          "latin": "Allahumma 'aafinii fii badanii, Allahumma 'aafinii fii sam'ii, Allahumma 'aafinii fii basharii, laa ilaaha illaa ant. Allahumma innii a'uudzu bika min jahdil-balaa'i wa darakisy-syaqaa'i wa suu'il-qadhaa'.",
+          "translation": {
+            "id": "Ya Allah, selamatkanlah tubuhku, pendengaranku, penglihatanku, tiada tuhan selain Engkau. Ya Allah, aku berlindung kepada-Mu dari beratnya musibah, penderitaan yang berat, dan takdir yang buruk.",
+            "ms": "Ya Allah, sejahterakanlah badanku, pendengaranku, penglihatanku, tiada Tuhan melainkan Engkau. Ya Allah, aku berlindung dengan-Mu daripada kesusahan bencana, penderitaan yang berat, dan takdir yang buruk.",
+            "en": "O Allah, grant health to my body, hearing, and sight. There is no god but You. O Allah, I seek refuge in You from severe trials, misery, and bad fate."
+          },
+          "fawaid": "Perlindungan kesehatan mutlak dan dijauhkan dari marabahaya/musibah.",
+          "notes": "Doa perlindungan fisik & takdir.",
+          "source": "HR. Abu Daud no. 5090 & Bukhari no. 6347",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_010_debt_and_anxiety",
+          "arabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَأَعُوذُ بِكَ مِنَ الْعَجْزِ وَالْكَسَلِ، وَأَعُوذُ بِكَ مِنَ الْجُبْنِ وَالْبُخْلِ، وَأَعُوذُ بِكَ مِنْ غَلَبَةِ الدَّيْنِ وَقَهْرِ الرِّجَالِ",
+          "latin": "Allahumma innii a'uudzu bika minal-hammi wal-hazan, wa a'uudzu bika minal-'ajzi wal-kasal, wa a'uudzu bika minal-jubni wal-bukhl, wa a'uudzu bika min ghalabatid-daini wa qahrir-rijaal.",
+          "translation": {
+            "id": "Ya Allah, aku berlindung kepada-Mu dari rasa sedih dan gelisah, dari sifat lemah dan malas, dari sifat penakut dan kikir, serta dari lilitan hutang dan tekanan orang-orang.",
+            "ms": "Ya Allah, aku berlindung dengan-Mu daripada keluh kesah dan kesedihan, daripada kelemahan dan kemalasan, daripada sifat penakut dan bakhil, serta daripada bebanan hutang dan tekanan manusia.",
+            "en": "O Allah, I seek refuge in You from anxiety and sorrow, weakness and laziness, miserliness and cowardice, the burden of debt and being overpowered by men."
+          },
+          "fawaid": "Pembebas beban mental, pelunas beban finansial, serta kelancaran usaha.",
+          "notes": "Doa pembebas kesusahan hidup.",
+          "source": "HR. Abu Daud no. 1555",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_011_dunya_akherat_sapujagat",
+          "arabic": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+          "latin": "Rabbanaa aatinaa fid-dunyaa hasanatah, wa fil-aakhirati hasanatah, wa qinaa 'adzaaban-naar.",
+          "translation": {
+            "id": "Ya Tuhan kami, berilah kami kebaikan di dunia dan kebaikan di akhirat, dan lindungilah kami dari azab neraka.",
+            "ms": "Wahai Tuhan kami, berilah kami kebaikan di dunia dan kebaikan di akhirat, dan peliharalah kami daripada azab neraka.",
+            "en": "Our Lord, give us in this world [that which is] good and in the Hereafter [that which is] good and protect us from the punishment of the Fire."
+          },
+          "fawaid": "Mencakup seluruh kebaikan dunia (rezeki, kesehatan, keluarga) dan kebaikan akhirat.",
+          "notes": "Doa Sapu Jagat.",
+          "source": "QS. Al-Baqarah: 201, HR. Bukhari no. 6389",
+          "repeat_count": 1,
+          "context_tags": ["custom_duaa"]
+        },
+        {
+          "id": "duaa_012_closing_salawat_tahmid",
+          "arabic": "وَصَلَّى اللهُ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِهِ وَصَحْبِهِ وَسَلَّمَ، وَسُبْحَانَ رَبِّكَ رَبِّ الْعِزَّةِ عَمَّا يَصِفُونَ، وَسَلَامٌ عَلَى الْمُرْسَلِينَ، وَالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+          "latin": "Wa shallallaahu 'alaa sayyidinaa Muhammadin wa 'alaa aalihii wa shahbihii wa sallam, wa subhaana rabbika rabbil-'izzati 'ammaa yashifuun, wa salaamun 'alal-mursaliin, wal-hamdulillaahi rabbil-'aalamiin.",
+          "translation": {
+            "id": "Dan semoga Allah melimpahkan shalawat serta salam kepada junjungan kami Nabi Muhammad, beserta keluarga dan sahabatnya. Maha Suci Tuhanmu Yang mempunyai keperkasaan dari apa yang mereka katakan. Dan kesejahteraan dilimpahkan atas para rasul. Dan segala puji bagi Allah Tuhan semesta alam.",
+            "ms": "Dan semoga Allah melimpahkan selawat serta salam ke atas junjungan kami Nabi Muhammad, beserta keluarga dan sahabatnya. Maha Suci Tuhanmu Yang mempunyai keagungan daripada apa yang mereka sifatkan. Dan kesejahteraan ke atas para rasul. Dan segala puji bagi Allah Tuhan sekalian alam.",
+            "en": "And may Allah send blessings and peace upon our master Muhammad, his family, and his companions. Exalted is your Lord, the Lord of might, above what they describe. And peace be upon the messengers. And praise be to Allah, Lord of the worlds."
+          },
+          "fawaid": "Mengunci dan menyegel permohonan doa agar langsung diangkat ke langit.",
+          "notes": "Penutup Doa Sesuai Sunnah.",
+          "source": "QS. Ash-Shaffat: 180-182 & HR. At-Thabrani",
+          "repeat_count": 1,
+          "context_tags": ["duaa_closing"]
         }
-      ]
+      ],
+      "latin": null
     }
-  ]
+  ],
+  "latin": null
 }

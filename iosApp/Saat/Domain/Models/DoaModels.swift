@@ -34,6 +34,27 @@ internal struct DoaItem: Codable, Hashable, Sendable, Identifiable {
         case _id = "id"
         case title, arabic, latin, translation, notes, fawaid, source, category, categories
     }
+
+    internal init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        _id = try container.decodeIfPresent(String.self, forKey: ._id)
+        title = try container.decodeIfPresent(String.self, forKey: .title)
+        arabic = try container.decodeIfPresent(String.self, forKey: .arabic)
+        latin = try container.decodeIfPresent(String.self, forKey: .latin)
+        notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        fawaid = try container.decodeIfPresent(String.self, forKey: .fawaid)
+        source = try container.decodeIfPresent(String.self, forKey: .source)
+        category = try container.decodeIfPresent(String.self, forKey: .category)
+        categories = try container.decodeIfPresent(DoaCategory.self, forKey: .categories)
+
+        if let str = try? container.decodeIfPresent(String.self, forKey: .translation) {
+            translation = str
+        } else if let dict = try? container.decodeIfPresent([String: String].self, forKey: .translation) {
+            translation = dict["id"] ?? dict["ms"] ?? dict["en"]
+        } else {
+            translation = nil
+        }
+    }
 }
 
 internal struct DoaListResponse: Codable, Sendable {
@@ -43,6 +64,7 @@ internal struct DoaListResponse: Codable, Sendable {
 }
 
 internal struct DhikrContentItem: Codable, Hashable, Sendable {
+    internal let id: String?
     internal let arabic: String?
     internal let latin: String?
     internal let translation: String?
@@ -53,7 +75,26 @@ internal struct DhikrContentItem: Codable, Hashable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case repeatCount = "repeat_count"
-        case arabic, latin, translation, fawaid, notes, source
+        case id, arabic, latin, translation, fawaid, notes, source
+    }
+
+    internal init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(String.self, forKey: .id)
+        arabic = try container.decodeIfPresent(String.self, forKey: .arabic)
+        latin = try container.decodeIfPresent(String.self, forKey: .latin)
+        fawaid = try container.decodeIfPresent(String.self, forKey: .fawaid)
+        notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        source = try container.decodeIfPresent(String.self, forKey: .source)
+        repeatCount = try container.decodeIfPresent(Int.self, forKey: .repeatCount)
+
+        if let str = try? container.decodeIfPresent(String.self, forKey: .translation) {
+            translation = str
+        } else if let dict = try? container.decodeIfPresent([String: String].self, forKey: .translation) {
+            translation = dict["id"] ?? dict["ms"] ?? dict["en"]
+        } else {
+            translation = nil
+        }
     }
 }
 

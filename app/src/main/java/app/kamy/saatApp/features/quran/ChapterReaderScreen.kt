@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -108,6 +109,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import app.kamy.saatApp.R
@@ -1220,10 +1222,18 @@ private fun ReaderSettingsSheet(
     onToggleHifzMode: (Boolean) -> Unit,
     onArabicTextTypeChange: (ArabicTextType) -> Unit
 ) {
-    SaatPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.78f) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = SaatColors.PureWhite,
+        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.32f)
+    ) {
+        val maxSheetHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp * 0.78f
         Column(
             Modifier
                 .fillMaxWidth()
+                .heightIn(max = maxSheetHeight)
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 4.dp)
                 .verticalScroll(rememberScrollState()),
