@@ -291,7 +291,11 @@ fun FaraidhCalculatorScreen(
                             )
                             Spacer(Modifier.width(10.dp))
                         } else {
-                            Icon(Icons.Filled.PictureAsPdf, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_pdf),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
                             Spacer(Modifier.width(8.dp))
                         }
                         Text(stringResource(R.string.faraidh_export_pdf), fontWeight = FontWeight.SemiBold)
@@ -403,16 +407,36 @@ private fun FaraidhHeader(
                 )
             }
             IconButton(onClick = onScenarios) {
-                Icon(Icons.Filled.FolderOpen, contentDescription = stringResource(R.string.faraidh_saved_scenarios), tint = SaatColors.Teal)
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_doc),
+                    contentDescription = stringResource(R.string.faraidh_saved_scenarios),
+                    tint = SaatColors.Teal,
+                    modifier = Modifier.size(22.dp)
+                )
             }
             IconButton(onClick = onSave) {
-                Icon(Icons.Filled.Save, contentDescription = stringResource(R.string.faraidh_save_scenario), tint = SaatColors.Teal)
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_save),
+                    contentDescription = stringResource(R.string.faraidh_save_scenario),
+                    tint = SaatColors.Teal,
+                    modifier = Modifier.size(22.dp)
+                )
             }
             IconButton(onClick = onReset) {
-                Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.faraidh_reset), tint = SaatColors.Teal)
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_reload),
+                    contentDescription = stringResource(R.string.faraidh_reset),
+                    tint = SaatColors.Teal,
+                    modifier = Modifier.size(22.dp)
+                )
             }
             IconButton(onClick = onInfo) {
-                Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.faraidh_tooltip_title), tint = SaatColors.Teal)
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_info),
+                    contentDescription = stringResource(R.string.faraidh_tooltip_title),
+                    tint = SaatColors.Teal,
+                    modifier = Modifier.size(22.dp)
+                )
             }
         }
     }
@@ -461,7 +485,7 @@ private fun FaraidhStatusStrip(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    if (hasResult) Icons.Filled.CheckCircle else Icons.Outlined.Calculate,
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_calculate),
                     contentDescription = null,
                     tint = SaatColors.DeepEmerald,
                     modifier = Modifier.size(24.dp)
@@ -499,7 +523,12 @@ private fun FaraidhStatusStrip(
                 border = androidx.compose.foundation.BorderStroke(1.dp, SaatColors.Teal.copy(alpha = 0.4f)),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
             ) {
-                Icon(Icons.Filled.Edit, contentDescription = null, modifier = Modifier.size(16.dp), tint = SaatColors.DeepEmerald)
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_edit),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = SaatColors.DeepEmerald
+                )
                 Spacer(Modifier.width(4.dp))
                 Text(stringResource(R.string.faraidh_edit), style = MaterialTheme.typography.labelMedium, color = SaatColors.DeepEmerald)
             }
@@ -510,10 +539,10 @@ private fun FaraidhStatusStrip(
 @Composable
 private fun FaraidhPillTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
     val tabs = listOf(
-        Triple(0, R.string.faraidh_tab_breakdown, Icons.Filled.TableChart),
-        Triple(1, R.string.faraidh_tab_silsilah, Icons.Filled.AccountTree),
-        Triple(2, R.string.faraidh_tab_dalil, Icons.AutoMirrored.Filled.MenuBook),
-        Triple(3, R.string.faraidh_tab_glossary, Icons.Filled.School)
+        Triple(0, R.string.faraidh_tab_breakdown, R.drawable.ic_faraidh_breakdown),
+        Triple(1, R.string.faraidh_tab_silsilah, R.drawable.ic_faraidh_silsilah),
+        Triple(2, R.string.faraidh_tab_dalil, R.drawable.ic_faraidh_dalil),
+        Triple(3, R.string.faraidh_tab_glossary, R.drawable.ic_faraidh_terms)
     )
     val scroll = rememberScrollState()
     Row(
@@ -524,7 +553,7 @@ private fun FaraidhPillTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
             .padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        tabs.forEach { (index, labelRes, icon) ->
+        tabs.forEach { (index, labelRes, iconRes) ->
             val selected = selectedTab == index
             val bg by animateColorAsState(
                 if (selected) SaatColors.DeepEmerald else SaatColors.LightGrey,
@@ -535,25 +564,26 @@ private fun FaraidhPillTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
                 label = "tabFg"
             )
             Surface(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(14.dp))
-                    .clickable { onTabSelected(index) },
-                color = bg,
-                shape = RoundedCornerShape(14.dp)
+                onClick = { onTabSelected(index) },
+                shape = RoundedCornerShape(14.dp),
+                color = bg
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(icon, contentDescription = null, tint = fg, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        painter = androidx.compose.ui.res.painterResource(iconRes),
+                        contentDescription = null,
+                        tint = fg,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
                     Text(
-                        stringResource(labelRes),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        text = stringResource(labelRes),
+                        style = MaterialTheme.typography.labelLarge,
                         color = fg,
-                        maxLines = 1
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
                     )
                 }
             }
@@ -667,13 +697,18 @@ private fun FaraidhInputSheetContent(
                 )
             }
             Spacer(Modifier.width(12.dp))
-            Switch(
-                checked = state.deceasedBornOutOfWedlock,
-                onCheckedChange = onBornOutOfWedlockChange,
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = SaatColors.DeepEmerald
-                )
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(
+                    if (state.deceasedBornOutOfWedlock) R.drawable.ic_toggle_on_custom else R.drawable.ic_toggle_off_custom
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(width = 52.dp, height = 28.dp)
+                    .clickable(
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                        indication = null,
+                        onClick = { onBornOutOfWedlockChange(!state.deceasedBornOutOfWedlock) }
+                    )
             )
         }
 
@@ -682,8 +717,7 @@ private fun FaraidhInputSheetContent(
         Spacer(Modifier.height(10.dp))
 
         HeirSection(
-            title = stringResource(R.string.faraidh_section_spouse),
-            icon = Icons.Filled.FamilyRestroom
+            title = stringResource(R.string.faraidh_section_spouse)
         ) {
             if (state.gender == DeceasedGender.FEMALE) {
                 NamedHeirStepper(
@@ -708,23 +742,23 @@ private fun FaraidhInputSheetContent(
             }
         }
 
-        HeirSection(title = stringResource(R.string.faraidh_section_parents), icon = Icons.Filled.People) {
+        HeirSection(title = stringResource(R.string.faraidh_section_parents)) {
             NamedHeirStepper(stringResource(R.string.faraidh_heir_father), state.fatherCount, listOf(state.names.fatherName), 0, 1, { onHeirChange(HeirCountField.FATHER, it) }) { _, n -> onHeirNameChange(HeirNameField.FATHER, 0, n) }
             NamedHeirStepper(stringResource(R.string.faraidh_heir_grandfather), state.grandfatherCount, listOf(state.names.grandfatherName), 0, 1, { onHeirChange(HeirCountField.GRANDFATHER, it) }) { _, n -> onHeirNameChange(HeirNameField.GRANDFATHER, 0, n) }
             NamedHeirStepper(stringResource(R.string.faraidh_heir_mother), state.motherCount, listOf(state.names.motherName), 0, 1, { onHeirChange(HeirCountField.MOTHER, it) }) { _, n -> onHeirNameChange(HeirNameField.MOTHER, 0, n) }
         }
 
-        HeirSection(title = stringResource(R.string.faraidh_section_children), icon = Icons.Filled.People) {
+        HeirSection(title = stringResource(R.string.faraidh_section_children)) {
             NamedHeirStepper(stringResource(R.string.faraidh_heir_son), state.sonCount, state.names.sonNames, onCountChange = { onHeirChange(HeirCountField.SON, it) }) { i, n -> onHeirNameChange(HeirNameField.SON, i, n) }
             NamedHeirStepper(stringResource(R.string.faraidh_heir_daughter), state.daughterCount, state.names.daughterNames, onCountChange = { onHeirChange(HeirCountField.DAUGHTER, it) }) { i, n -> onHeirNameChange(HeirNameField.DAUGHTER, i, n) }
         }
 
-        HeirSection(title = stringResource(R.string.faraidh_section_grandchildren), icon = Icons.Filled.People) {
+        HeirSection(title = stringResource(R.string.faraidh_section_grandchildren)) {
             NamedHeirStepper(stringResource(R.string.faraidh_heir_grandson), state.grandsonCount, state.names.grandsonNames, onCountChange = { onHeirChange(HeirCountField.GRANDSON, it) }) { i, n -> onHeirNameChange(HeirNameField.GRANDSON, i, n) }
             NamedHeirStepper(stringResource(R.string.faraidh_heir_granddaughter), state.granddaughterCount, state.names.granddaughterNames, onCountChange = { onHeirChange(HeirCountField.GRANDDAUGHTER, it) }) { i, n -> onHeirNameChange(HeirNameField.GRANDDAUGHTER, i, n) }
         }
 
-        HeirSection(title = stringResource(R.string.faraidh_section_siblings), icon = Icons.Filled.People) {
+        HeirSection(title = stringResource(R.string.faraidh_section_siblings)) {
             NamedHeirStepper(stringResource(R.string.faraidh_heir_full_brother), state.fullBrotherCount, state.names.fullBrotherNames, onCountChange = { onHeirChange(HeirCountField.FULL_BROTHER, it) }) { i, n -> onHeirNameChange(HeirNameField.FULL_BROTHER, i, n) }
             NamedHeirStepper(stringResource(R.string.faraidh_heir_full_sister), state.fullSisterCount, state.names.fullSisterNames, onCountChange = { onHeirChange(HeirCountField.FULL_SISTER, it) }) { i, n -> onHeirNameChange(HeirNameField.FULL_SISTER, i, n) }
             NamedHeirStepper(stringResource(R.string.faraidh_heir_paternal_brother), state.paternalBrotherCount, state.names.paternalBrotherNames, onCountChange = { onHeirChange(HeirCountField.PATERNAL_BROTHER, it) }) { i, n -> onHeirNameChange(HeirNameField.PATERNAL_BROTHER, i, n) }
@@ -746,7 +780,7 @@ private fun FaraidhInputSheetContent(
 }
 
 @Composable
-private fun HeirSection(title: String, icon: ImageVector, content: @Composable () -> Unit) {
+private fun HeirSection(title: String, iconRes: Int = R.drawable.ic_faraidh_people, content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -756,7 +790,12 @@ private fun HeirSection(title: String, icon: ImageVector, content: @Composable (
     ) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = SaatColors.Teal, modifier = Modifier.size(18.dp))
+                Icon(
+                    painter = androidx.compose.ui.res.painterResource(iconRes),
+                    contentDescription = null,
+                    tint = SaatColors.Teal,
+                    modifier = Modifier.size(18.dp)
+                )
                 Spacer(Modifier.width(8.dp))
                 Text(title, fontWeight = FontWeight.SemiBold, color = SaatColors.Slate800)
             }

@@ -40,18 +40,7 @@ enum class AppLanguage(
         }
 
     companion object {
-        fun fromTag(tag: String?): AppLanguage {
-            if (!tag.isNullOrBlank()) {
-                entries.firstOrNull { it.tag.equals(tag, ignoreCase = true) }?.let { return it }
-            }
-            val sysLocale = java.util.Locale.getDefault()
-            val sysLang = sysLocale.language.lowercase()
-            val sysCountry = sysLocale.country.uppercase()
-            return when {
-                sysLang == "id" || sysLang == "in" || sysCountry == "ID" -> INDONESIAN
-                sysLang == "ms" || sysCountry == "MY" -> MALAY
-                else -> INDONESIAN
-            }
-        }
+        fun fromTag(tag: String?): AppLanguage =
+            entries.firstOrNull { it.tag.equals(tag, ignoreCase = true) } ?: ENGLISH
     }
 }

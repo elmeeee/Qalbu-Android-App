@@ -995,21 +995,26 @@ private fun LanguageSheet(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                AppLanguage.values().forEach { lang ->
+                AppLanguage.entries.forEach { lang ->
                     val isSelected = lang == selected
+                    val flagRes = when (lang) {
+                        AppLanguage.INDONESIAN -> R.drawable.ic_flag_id
+                        AppLanguage.ENGLISH -> R.drawable.ic_flag_en
+                        AppLanguage.MALAY -> R.drawable.ic_flag_ms
+                    }
                     Surface(
                         onClick = { onSelect(lang) },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                            SaatColors.DeepEmerald.copy(alpha = 0.08f)
                         } else {
-                            Color.Transparent
+                            SaatColors.LightGrey.copy(alpha = 0.4f)
                         },
                         border = if (isSelected) {
-                            BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                            BorderStroke(1.5.dp, SaatColors.DeepEmerald)
                         } else {
-                            null
+                            BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.6f))
                         }
                     ) {
                         Row(
@@ -1018,17 +1023,24 @@ private fun LanguageSheet(
                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Icon(
+                                painter = painterResource(flagRes),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(width = 28.dp, height = 20.dp)
+                            )
+                            Spacer(Modifier.width(14.dp))
                             Text(
                                 text = stringResource(lang.labelRes),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+                                color = if (isSelected) SaatColors.DeepEmerald else MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.weight(1f)
                             )
                             if (isSelected) {
                                 Text(
                                     text = "✓",
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = SaatColors.DeepEmerald,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
