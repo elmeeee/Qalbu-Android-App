@@ -738,61 +738,60 @@ private fun ContinueReadingCard(
             onClick = onTap,
             modifier = Modifier
                 .width(349.dp)
-                .height(90.dp),
+                .height(120.dp),
             shape = RoundedCornerShape(20.dp),
-            color = Color.White,
-            shadowElevation = 2.dp,
-            border = BorderStroke(1.dp, Color(0xFFF0F2F6))
+            color = Color.Transparent,
+            shadowElevation = 4.dp
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(20.dp))
-                    .background(Color.White)
             ) {
+                // Background image
                 Image(
-                    painter = painterResource(R.drawable.last_read_icon),
+                    painter = painterResource(R.drawable.last_read_bg),
                     contentDescription = null,
-                    modifier = Modifier
-                        .offset(x = 254.dp, y = 26.dp)
-                        .size(width = 82.dp, height = 50.dp)
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
 
+                // Text overlay
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = 20.dp, end = 125.dp),
+                        .padding(start = 20.dp, end = 160.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = stringResource(R.string.today_continue_reading_title),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
                         ),
-                        color = Color(0xFF1E293B),
+                        color = Color.White.copy(alpha = 0.85f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(Modifier.height(2.dp))
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         text = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.ExtraBold
                         ),
-                        color = Color(0xFF0F172A),
+                        color = Color.White,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Spacer(Modifier.height(2.dp))
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Normal
                         ),
-                        color = Color(0xFF7E84A3),
+                        color = Color.White.copy(alpha = 0.75f),
                         maxLines = 1
                     )
                 }
