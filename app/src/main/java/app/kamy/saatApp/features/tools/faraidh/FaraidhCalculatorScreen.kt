@@ -2,6 +2,7 @@ package app.kamy.saatApp.features.tools.faraidh
 
 import android.content.Intent
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -254,6 +255,7 @@ fun FaraidhCalculatorScreen(
         modifier = Modifier
             .fillMaxSize(),
         containerColor = SaatColors.ScreenBackground,
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (hasResult) {
@@ -315,7 +317,7 @@ fun FaraidhCalculatorScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(bottom = padding.calculateBottomPadding())
         ) {
             FaraidhHeader(
                 onBack = onBack,
@@ -324,6 +326,7 @@ fun FaraidhCalculatorScreen(
                 onScenarios = { showScenarioList = true },
                 onReset = { vm.resetCalculation() }
             )
+            Spacer(Modifier.height(8.dp))
 
             FaraidhStatusStrip(
                 netEstate = state.netEstate,
@@ -811,22 +814,24 @@ private fun HeirSection(title: String, iconRes: Int = R.drawable.ic_faraidh_peop
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 10.dp),
+            .padding(bottom = 12.dp),
         shape = RoundedCornerShape(16.dp),
-        color = SaatColors.ScreenBackground
+        color = SaatColors.PureWhite,
+        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.6f)),
+        shadowElevation = 1.dp
     ) {
-        Column(Modifier.padding(12.dp)) {
+        Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = androidx.compose.ui.res.painterResource(iconRes),
                     contentDescription = null,
-                    tint = SaatColors.Teal,
+                    tint = SaatColors.DeepEmerald,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(8.dp))
-                Text(title, fontWeight = FontWeight.SemiBold, color = SaatColors.Slate800)
+                Text(title, fontWeight = FontWeight.Bold, color = SaatColors.Slate900, style = MaterialTheme.typography.titleSmall)
             }
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
             content()
         }
     }

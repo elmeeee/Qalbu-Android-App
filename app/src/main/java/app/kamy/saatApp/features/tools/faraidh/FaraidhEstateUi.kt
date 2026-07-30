@@ -1,5 +1,6 @@
 package app.kamy.saatApp.features.tools.faraidh
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -385,10 +386,18 @@ fun FaraidhEstateInputSection(
                 Text(stringResource(R.string.faraidh_has_house), fontWeight = FontWeight.Medium, color = SaatColors.Slate800)
                 Text(stringResource(R.string.faraidh_has_house_hint), style = MaterialTheme.typography.bodySmall, color = SaatColors.Slate500)
             }
-            Switch(
-                checked = estate.hasResidentialProperty,
-                onCheckedChange = { checked -> onFieldChange { copy(hasResidentialProperty = checked) } },
-                colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = SaatColors.Teal)
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(
+                    if (estate.hasResidentialProperty) R.drawable.ic_toggle_on_custom else R.drawable.ic_toggle_off_custom
+                ),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(width = 52.dp, height = 28.dp)
+                    .clickable(
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                        indication = null,
+                        onClick = { onFieldChange { copy(hasResidentialProperty = !hasResidentialProperty) } }
+                    )
             )
         }
         if (estate.hasResidentialProperty) {
@@ -441,13 +450,15 @@ private fun EstateSection(title: String, content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 10.dp),
+            .padding(bottom = 12.dp),
         shape = RoundedCornerShape(16.dp),
-        color = SaatColors.ScreenBackground
+        color = SaatColors.PureWhite,
+        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.6f)),
+        shadowElevation = 1.dp
     ) {
-        Column(Modifier.padding(12.dp)) {
-            Text(title, fontWeight = FontWeight.SemiBold, color = SaatColors.Slate800)
-            Spacer(Modifier.height(8.dp))
+        Column(Modifier.padding(14.dp)) {
+            Text(title, fontWeight = FontWeight.Bold, color = SaatColors.DeepEmerald, style = MaterialTheme.typography.titleSmall)
+            Spacer(Modifier.height(10.dp))
             content()
         }
     }
