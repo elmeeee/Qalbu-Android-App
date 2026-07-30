@@ -66,6 +66,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
@@ -879,58 +881,62 @@ private fun SaatAyahPage(
                 else -> {
                     val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) (verse.textIndopak ?: verse.textUthmani) else verse.textUthmani
                     val isPlayingThisVerse = audioPlaybackState != null && audioPlaybackState.isPlaying && audioPlaybackState.trackSubtitle == verse.verseKey && audioPlaybackState.currentUrl != null
-                    val words = remember(textToRender) {
-                        textToRender?.split("\\s+".toRegex())
+                    val (words, weights, totalWeight) = remember(textToRender) {
+                        val parsedWords = textToRender?.split("\\s+".toRegex())
                             ?.filter { it.isNotBlank() }
                             ?.map { word ->
                                 word.replace("""^[﴿\(]?\d+[﴾\)]?""".toRegex(), "").trim()
                             }
                             ?.filter { it.isNotBlank() } ?: emptyList()
-                    }
-                    val activeWordIndex = remember(isPlayingThisVerse, audioPlaybackState?.progress, audioPlaybackState?.currentPositionMs, words) {
-                        if (!isPlayingThisVerse || words.isEmpty()) {
-                            null
-                        } else {
-                            val dur = audioPlaybackState?.durationMs ?: 0L
-                            val pos = audioPlaybackState?.currentPositionMs ?: 0L
-                            val prog = if (dur > 0L) (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f) else (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
 
-                            val weights = words.mapIndexed { index, word ->
-                                var weight = word.length.toFloat().coerceAtLeast(1f)
-                                // Madd (long vowels) & Tajweed extensions
-                                if (word.contains('ٓ') || word.contains('ۤ') || word.contains('ۧ') || word.contains('ۨ') || word.contains('\u0653') || word.contains('\u06E4')) {
-                                    weight += 8.0f
+                        val parsedWeights = parsedWords.mapIndexed { index, word ->
+                            var weight = word.length.toFloat().coerceAtLeast(1f)
+                            // Madd (long vowels) & Tajweed extensions
+                            if (word.contains('ٓ') || word.contains('ۤ') || word.contains('ۧ') || word.contains('ۨ') || word.contains('\u0653') || word.contains('\u06E4')) {
+                                weight += 8.0f
+                            }
+                            // Shaddah & Ghunnah
+                            if (word.contains('ّ') || word.contains('\u0651')) {
+                                if (word.contains('ن') || word.contains('م')) {
+                                    weight += 4.0f
+                                } else {
+                                    weight += 2.0f
                                 }
-                                // Shaddah & Ghunnah
-                                if (word.contains('ّ') || word.contains('\u0651')) {
-                                    if (word.contains('ن') || word.contains('م')) {
-                                        weight += 4.0f
-                                    } else {
-                                        weight += 2.0f
+                            }
+                            // Pause / Waqf signs (ۘ, ۚ, ۖ, ۗ, ۬, ۥ, ۙ)
+                            if (word.contains('ۘ') || word.contains('ۚ') || word.contains('ۖ') || word.contains('ۗ') || word.contains('۬') || word.contains('ۥ') || word.contains('ۙ')) {
+                                weight += 6.0f
+                            }
+                            if (index == parsedWords.lastIndex && parsedWords.size > 1) {
+                                weight *= 1.25f
+                            }
+                            weight
+                        }
+                        Triple(parsedWords, parsedWeights, parsedWeights.sum().coerceAtLeast(1f))
+                    }
+
+                    val activeWordIndex by remember(isPlayingThisVerse, words, weights, totalWeight) {
+                        derivedStateOf {
+                            if (!isPlayingThisVerse || words.isEmpty()) {
+                                null
+                            } else {
+                                val dur = audioPlaybackState?.durationMs ?: 0L
+                                val pos = audioPlaybackState?.currentPositionMs ?: 0L
+                                val prog = if (dur > 0L) (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f) else (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
+
+                                val targetWeight = prog * totalWeight
+                                var accum = 0f
+                                var foundIndex = 0
+                                for (i in words.indices) {
+                                    accum += weights[i]
+                                    if (targetWeight <= accum) {
+                                        foundIndex = i
+                                        break
                                     }
-                                }
-                                // Pause / Waqf signs (ۘ, ۚ, ۖ, ۗ, ۬, ۥ, ۙ) — add breath pause weight for long verses
-                                if (word.contains('ۘ') || word.contains('ۚ') || word.contains('ۖ') || word.contains('ۗ') || word.contains('۬') || word.contains('ۥ') || word.contains('ۙ')) {
-                                    weight += 6.0f
-                                }
-                                if (index == words.lastIndex && words.size > 1) {
-                                    weight *= 1.25f
-                                }
-                                weight
-                            }
-                            val totalWeight = weights.sum().coerceAtLeast(1f)
-                            val targetWeight = prog * totalWeight
-                            var accum = 0f
-                            var foundIndex = 0
-                            for (i in words.indices) {
-                                accum += weights[i]
-                                if (targetWeight <= accum) {
                                     foundIndex = i
-                                    break
                                 }
-                                foundIndex = i
+                                foundIndex
                             }
-                            foundIndex
                         }
                     }
                     TajweedHtmlView(

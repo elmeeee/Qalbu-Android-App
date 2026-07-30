@@ -60,6 +60,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import app.kamy.saatApp.R
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -115,11 +117,12 @@ fun DhikrSessionView(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .navigationBarsPadding()
                 .padding(32.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Zikir kosong",
+                text = stringResource(R.string.dhikr_session_empty),
                 style = MaterialTheme.typography.bodyLarge,
                 color = SaatColors.Slate500
             )
@@ -176,7 +179,9 @@ fun DhikrSessionView(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -190,13 +195,13 @@ fun DhikrSessionView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Dzikir ${currentItemIndex + 1} dari ${sessionItems.size}",
+                    text = stringResource(R.string.dhikr_session_counter_format, currentItemIndex + 1, sessionItems.size),
                     style = MaterialTheme.typography.labelLarge,
                     color = SaatColors.DeepEmerald,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${(progressPercent * 100).toInt()}% Selesai",
+                    text = stringResource(R.string.dhikr_session_completed_format, (progressPercent * 100).toInt()),
                     style = MaterialTheme.typography.labelMedium,
                     color = SaatColors.Teal,
                     fontWeight = FontWeight.SemiBold
@@ -275,7 +280,7 @@ fun DhikrSessionView(
                             if (isDone) {
                                 Icon(
                                     imageVector = Icons.Default.CheckCircle,
-                                    contentDescription = "Selesai",
+                                    contentDescription = null,
                                     tint = SaatColors.DeepEmerald,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -324,7 +329,7 @@ fun DhikrSessionView(
 
             Spacer(Modifier.height(14.dp))
 
-            // Main Active Zikir Card
+            // Main Active Zikir Card - TAP ANYWHERE ON CARD TO INCREMENT
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -357,6 +362,12 @@ fun DhikrSessionView(
                                 ),
                                 RoundedCornerShape(24.dp)
                             )
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                incrementCount()
+                            }
                             .padding(20.dp)
                     ) {
                         // Header info badge inside card
@@ -442,7 +453,7 @@ fun DhikrSessionView(
                             Spacer(Modifier.height(12.dp))
                         }
 
-                        // Indonesian Translation
+                        // Translation
                         if (item.translation.isNotBlank()) {
                             Text(
                                 text = item.translation.replace("\r\n", "\n"),
@@ -507,7 +518,7 @@ fun DhikrSessionView(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Sebelumnya",
+                        contentDescription = stringResource(R.string.dhikr_session_prev),
                         tint = if (currentItemIndex > 0) SaatColors.DeepEmerald else SaatColors.Slate500.copy(alpha = 0.4f)
                     )
                 }
@@ -518,7 +529,7 @@ fun DhikrSessionView(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Reset Hitungan",
+                        contentDescription = stringResource(R.string.dhikr_session_reset_count),
                         tint = SaatColors.Slate500
                     )
                 }
@@ -536,7 +547,7 @@ fun DhikrSessionView(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = "Lewati",
+                        contentDescription = stringResource(R.string.dhikr_session_next),
                         tint = SaatColors.DeepEmerald
                     )
                 }
@@ -547,7 +558,6 @@ fun DhikrSessionView(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .navigationBarsPadding()
                 .padding(bottom = 24.dp, end = 20.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
@@ -575,6 +585,7 @@ private fun DhikrCompletionScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -597,7 +608,7 @@ private fun DhikrCompletionScreen(
         Spacer(Modifier.height(24.dp))
 
         Text(
-            text = "Alhamdulillah",
+            text = stringResource(R.string.dhikr_session_finish_title),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = SaatColors.DeepEmerald
@@ -606,7 +617,7 @@ private fun DhikrCompletionScreen(
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "Anda telah menyelesaikan seluruh rangkaian zikir dengan baik. Semoga Allah menerima amal ibadah Anda.",
+            text = stringResource(R.string.dhikr_session_finish_desc),
             style = MaterialTheme.typography.bodyLarge,
             color = SaatColors.Slate800,
             textAlign = TextAlign.Center,
@@ -626,7 +637,7 @@ private fun DhikrCompletionScreen(
                 .height(52.dp)
         ) {
             Text(
-                text = "Ulangi Zikir",
+                text = stringResource(R.string.dhikr_session_repeat_button),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = SaatColors.PureWhite
@@ -644,7 +655,7 @@ private fun DhikrCompletionScreen(
                 .height(52.dp)
         ) {
             Text(
-                text = "Kembali ke Menu",
+                text = stringResource(R.string.dhikr_session_menu_button),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = SaatColors.DeepEmerald

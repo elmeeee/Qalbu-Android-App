@@ -188,13 +188,17 @@ internal object DoaBuiltinLocales {
             "sleep-dhikir:0:12" to entry(translation = "O Allah, I submit myself to You, and I entrust my affairs to You, and I turn my face to You, and I lay myself down relying on You, out of hope and fear of You. There is no refuge and no salvation from You except in You. I believe in the Book You have revealed, and in the Prophet You have sent."),
 
             // Dhikr After Salah
-            "dhikir-after-salah:0:0" to entry(translation = "I seek the forgiveness of Allah (3 times). O Allah, You are Peace and from You comes peace. Blessed are You, O Possessor of majesty and honor."),
-            "dhikir-after-salah:0:1" to entry(translation = "There is no deity except Allah alone, without partner. To Him belongs dominion and praise, and He is competent over all things. O Allah, none can prevent what You give, and none can give what You prevent, and no wealth or majesty can benefit its possessor against You."),
-            "dhikir-after-salah:0:2" to entry(translation = "There is no deity except Allah alone, without partner. To Him belongs dominion and praise, and He is competent over all things. There is no power and no strength except by Allah. There is no deity except Allah, and we worship none but Him. To Him belongs all favor, grace, and good praise. There is no deity except Allah, making our worship sincere to Him even if the disbelievers dislike it."),
-            "dhikir-after-salah:0:3" to entry(translation = "Glory be to Allah (33 times), Praise be to Allah (33 times), Allah is the Greatest (33 times). There is no deity except Allah alone, without partner. To Him belongs dominion and praise, and He is competent over all things."),
-            "dhikir-after-salah:0:4" to entry(translation = "Reciting Ayat Kursi."),
-            "dhikir-after-salah:0:5" to entry(translation = "Reciting Surah Al-Ikhlas, Al-Falaq, and An-Naas."),
-            "dhikir-after-salah:0:6" to entry(translation = "O Allah, I ask You for beneficial knowledge, wholesome sustenance, and acceptable deeds.")
+            "dhikir-after-salah:0:0" to entry(translation = "I seek the forgiveness of Allah (3 times)."),
+            "dhikir-after-salah:0:1" to entry(translation = "O Allah, You are Peace and from You comes peace. Blessed are You, O Possessor of majesty and honor."),
+            "dhikir-after-salah:0:2" to entry(translation = "There is no deity except Allah alone, without partner. To Him belongs dominion and praise, and He is competent over all things. O Allah, none can prevent what You give, and none can give what You prevent, and no wealth or majesty can benefit its possessor against You."),
+            "dhikir-after-salah:0:3" to entry(translation = "There is no deity except Allah alone, without partner. To Him belongs dominion and praise, and He is competent over all things. There is no power and no strength except by Allah. There is no deity except Allah, and we worship none but Him. To Him belongs all favor, grace, and good praise. There is no deity except Allah, making our worship sincere to Him even if the disbelievers dislike it."),
+            "dhikir-after-salah:0:4" to entry(translation = "Glory be to Allah (33 times)."),
+            "dhikir-after-salah:0:5" to entry(translation = "Praise be to Allah (33 times)."),
+            "dhikir-after-salah:0:6" to entry(translation = "Allah is the Greatest (33 times)."),
+            "dhikir-after-salah:0:7" to entry(translation = "There is no deity except Allah alone, without partner. To Him belongs dominion and praise, and He is competent over all things."),
+            "dhikir-after-salah:0:8" to entry(translation = "Allah! There is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth..."),
+            "dhikir-after-salah:0:9" to entry(translation = "Reciting Surah Al-Ikhlas, Al-Falaq, and An-Naas."),
+            "dhikir-after-salah:0:10" to entry(translation = "O Allah, I ask You for beneficial knowledge, wholesome sustenance, and acceptable deeds.")
         )
     )
 
@@ -207,7 +211,9 @@ internal object DoaBuiltinLocales {
                 "morning-dhikir" to "Zikir Pagi",
                 "evening-dhikir" to "Zikir Petang",
                 "dhikir-after-salah" to "Zikir Selepas Solat",
-                "sleep-dhikir" to "Zikir Sebelum Tidur"
+                "sleep-dhikir" to "Zikir Sebelum Tidur",
+                "dzikiralmathuratkubro" to "Dzikir Al-Mathurat Kubro",
+                "dzikiralmathuratsughro" to "Dzikir Al-Mathurat Sugro"
             ),
             doa = english.doa.mapValues { (_, value) ->
                 malayDoa[value.title] ?: value
@@ -271,13 +277,17 @@ internal object DoaBuiltinLocales {
                 "sleep-dhikir:0:12" to entry(translation = "Ya Allah, aku menyerahkan diriku kepada-Mu, aku menyerahkan urusanku kepada-Mu, aku menghadapkan wajahku kepada-Mu, aku menyandarkan punggungku kepada-Mu, kerana mengharap rahmat-Mu dan takut akan azab-Mu. Tiada tempat perlindungan dan keselamatan daripada-Mu melainkan kepada-Mu. Aku beriman kepada kitab-Mu yang telah Engkau turunkan dan Nabi-Mu yang telah Engkau utus."),
 
                 // Dhikr After Salah
-                "dhikir-after-salah:0:0" to entry(translation = "Aku memohon ampun kepada Allah (3x). Ya Allah, Engkau pemberi keselamatan, dan dari-Mu keselamatan. Maha Berkat Engkau, wahai Pemilik Keagungan dan Kemuliaan."),
-                "dhikir-after-salah:0:1" to entry(translation = "Tiada Tuhan yang berhak disembah selain Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya puji dan bagi-Nya kerajaan. Dia Maha Kuasa atas segala sesuatu. Ya Allah, tidak ada yang mencegah apa yang Engkau berikan, dan tidak ada yang memberi apa yang Engkau cegah, dan tidak ada kekayaan mahupun kedudukan yang dapat memberi manfaat kepada pemiliknya daripada azab-Mu."),
-                "dhikir-after-salah:0:2" to entry(translation = "Tiada Tuhan yang berhak disembah selain Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian. Dia Maha Kuasa atas segala sesuatu. Tiada daya dan kekuatan melainkan dengan pertolongan Allah. Tiada Tuhan melainkan Allah, dan kami tidak menyembah melainkan Dia. Bagi-Nya segala nikmat, limpah kurnia, dan pujian yang baik. Tiada Tuhan melainkan Allah, dengan mengikhlaskan ibadah kepada-Nya walaupun orang-orang kafir membencinya."),
-                "dhikir-after-salah:0:3" to entry(translation = "Maha Suci Allah (33x), segala puji bagi Allah (33x), Allah Maha Besar (33x). Tiada Tuhan melainkan Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian, dan Dia Maha Kuasa atas segala sesuatu."),
-                "dhikir-after-salah:0:4" to entry(translation = "Membaca Ayat Kursi selesai solat fardhu."),
-                "dhikir-after-salah:0:5" to entry(translation = "Membaca Surah Al-Ikhlas, Al-Falaq, dan An-Naas selesai solat fardhu."),
-                "dhikir-after-salah:0:6" to entry(translation = "Ya Allah, sungguh aku memohon kepada-Mu ilmu yang bermanfaat, rezeki yang halal dan amal yang diterima.")
+                "dhikir-after-salah:0:0" to entry(translation = "Aku memohon ampun kepada Allah (3x)."),
+                "dhikir-after-salah:0:1" to entry(translation = "Ya Allah, Engkau pemberi keselamatan, dan dari-Mu keselamatan. Maha Berkat Engkau, wahai Pemilik Keagungan dan Kemuliaan."),
+                "dhikir-after-salah:0:2" to entry(translation = "Tiada Tuhan yang berhak disembah selain Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya puji dan bagi-Nya kerajaan. Dia Maha Kuasa atas segala sesuatu. Ya Allah, tidak ada yang mencegah apa yang Engkau berikan, dan tidak ada yang memberi apa yang Engkau cegah, dan tidak ada kekayaan mahupun kedudukan yang dapat memberi manfaat kepada pemiliknya daripada azab-Mu."),
+                "dhikir-after-salah:0:3" to entry(translation = "Tiada Tuhan yang berhak disembah selain Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian. Dia Maha Kuasa atas segala sesuatu. Tiada daya dan kekuatan melainkan dengan pertolongan Allah. Tiada Tuhan melainkan Allah, dan kami tidak menyembah melainkan Dia. Bagi-Nya segala nikmat, limpah kurnia, dan pujian yang baik. Tiada Tuhan melainkan Allah, dengan mengikhlaskan ibadah kepada-Nya walaupun orang-orang kafir membencinya."),
+                "dhikir-after-salah:0:4" to entry(translation = "Maha Suci Allah (33x)."),
+                "dhikir-after-salah:0:5" to entry(translation = "Segala puji bagi Allah (33x)."),
+                "dhikir-after-salah:0:6" to entry(translation = "Allah Maha Besar (33x)."),
+                "dhikir-after-salah:0:7" to entry(translation = "Tiada Tuhan melainkan Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian, dan Dia Maha Kuasa atas segala sesuatu."),
+                "dhikir-after-salah:0:8" to entry(translation = "Membaca Ayat Kursi selesai solat fardhu."),
+                "dhikir-after-salah:0:9" to entry(translation = "Membaca Surah Al-Ikhlas, Al-Falaq, dan An-Naas selesai solat fardhu."),
+                "dhikir-after-salah:0:10" to entry(translation = "Ya Allah, sungguh aku memohon kepada-Mu ilmu yang bermanfaat, rezeki yang halal dan amal yang diterima.")
             )
         )
     }

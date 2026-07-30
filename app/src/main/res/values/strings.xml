@@ -593,7 +593,7 @@
     <string name="zakat_net_wealth">Net zakatable wealth</string>
     <string name="zakat_nisab">Nisab threshold</string>
     <string name="zakat_due">Zakat due (2.5%)</string>
-    <string name="zakat_below_nisab">Below nisab — no zakat due on this estimate.</string>
+    <string name="zakat_below_nisab">Your total wealth is below the nisab threshold. Zakat is not mandatory, but voluntary charity (sadaqah) is encouraged.</string>
     <string name="qiyam_title">Qiyam / Tahajud</string>
     <string name="qiyam_stats">%1$d nights this month · %2$d day streak</string>
     <string name="qiyam_explain">Qiyam is voluntary night prayer — often called tahajud when prayed after sleep.</string>
@@ -1231,4 +1231,17 @@
     <string name="btn_open_in_quran_reader">Open in Qur\'an Reader</string>
     <string name="btn_save_doa_bookmark">Save Dua / Bookmark</string>
     <string name="doa_saved_toast">Saved to Bookmarks!</string>
+
+    <string name="dhikr_start_button">Start Dhikr</string>
+    <string name="dhikr_session_counter_format">Dhikr %1$d of %2$d</string>
+    <string name="dhikr_session_completed_format">%1$d%% Completed</string>
+    <string name="dhikr_session_prev">Previous</string>
+    <string name="dhikr_session_next">Next</string>
+    <string name="dhikr_session_reset_count">Reset Count</string>
+    <string name="dhikr_session_finish_title">Alhamdulillah</string>
+    <string name="dhikr_session_finish_desc">You have completed the entire dhikr sequence. May Allah accept your worship.</string>
+    <string name="dhikr_session_repeat_button">Repeat Dhikr</string>
+    <string name="dhikr_session_menu_button">Back to Menu</string>
+    <string name="dhikr_session_empty">Dhikr list is empty</string>
+    <string name="zakat_meets_nisab">Nisab Reached (Mandatory Zakat)</string>
 </resources>

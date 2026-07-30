@@ -206,7 +206,7 @@
     <string name="verse_note_hint">Apa makna ayat ini bagi Anda hari ini?</string>
     <string name="verse_number">Ayat %1$d</string>
     <string name="zakat_account_subtitle">Harga emas · aturan nisab 2,5%</string>
-    <string name="zakat_below_nisab">Di bawah nisab — tidak ada zakat pada perkiraan ini.</string>
+    <string name="zakat_below_nisab">Total harta Anda belum mencapai batas nisab. Belum wajib zakat, namun disunnahkan bersedekah.</string>
     <string name="zakat_cash">Tunai &amp; tabungan</string>
     <string name="zakat_debts">Hutang jatuh tempo</string>
     <string name="zakat_due">Zakat terutang (2,5%)</string>
@@ -483,4 +483,17 @@
     <string name="followers_load_failed">Gagal memuat pengikut.</string>
     <string name="posts">Refleksi</string>
     <string name="likes">Suka</string>
+
+    <string name="dhikr_start_button">Mulai Zikir</string>
+    <string name="dhikr_session_counter_format">Dzikir %1$d dari %2$d</string>
+    <string name="dhikr_session_completed_format">%1$d%% Selesai</string>
+    <string name="dhikr_session_prev">Sebelumnya</string>
+    <string name="dhikr_session_next">Lewati</string>
+    <string name="dhikr_session_reset_count">Reset Hitungan</string>
+    <string name="dhikr_session_finish_title">Alhamdulillah</string>
+    <string name="dhikr_session_finish_desc">Anda telah menyelesaikan seluruh rangkaian zikir dengan baik. Semoga Allah menerima amal ibadah Anda.</string>
+    <string name="dhikr_session_repeat_button">Ulangi Zikir</string>
+    <string name="dhikr_session_menu_button">Kembali ke Menu</string>
+    <string name="dhikr_session_empty">Zikir kosong</string>
+    <string name="zakat_meets_nisab">Mencapai Nisab (Wajib Zakat)</string>
 </resources>

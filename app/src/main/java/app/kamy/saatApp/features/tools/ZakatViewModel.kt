@@ -97,8 +97,8 @@ class ZakatViewModel @Inject constructor(
                     val silverPrice = s.priceQuote?.silverPerGramIdr ?: ZakatCalculator.silverPriceFromGold(goldPrice)
                     ZakatCalculator.calculate(
                         cash = MoneyInputFormatter.parseAmount(s.cash).toDouble(),
-                        goldGrams = s.goldGrams.toDoubleOrNull() ?: 0.0,
-                        silverGrams = s.silverGrams.toDoubleOrNull() ?: 0.0,
+                        goldGrams = MoneyInputFormatter.parseAmount(s.goldGrams).toDouble(),
+                        silverGrams = MoneyInputFormatter.parseAmount(s.silverGrams).toDouble(),
                         investments = MoneyInputFormatter.parseAmount(s.investments).toDouble(),
                         debts = MoneyInputFormatter.parseAmount(s.debts).toDouble(),
                         goldPricePerGram = goldPrice,

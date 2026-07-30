@@ -482,9 +482,8 @@ private fun AccountSettingsContent(
                 )
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
             AppFooterCard(appVersion = appVersion)
-            Spacer(Modifier.height(floatingNavBottomPadding()))
         }
     }
 }

@@ -19,6 +19,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -144,6 +147,7 @@ fun DoaZikirScreen(
                 onClose = { viewModel.clearSelection() }
             )
         } else {
+            val navBarBottomPadding = androidx.compose.foundation.layout.WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -153,7 +157,7 @@ fun DoaZikirScreen(
                         start = 16.dp,
                         top = 16.dp,
                         end = 16.dp,
-                        bottom = if (inDetail && isDhikrCategory) 96.dp else 16.dp
+                        bottom = (if (inDetail && isDhikrCategory) 96.dp else 24.dp) + navBarBottomPadding
                     ),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -248,7 +252,7 @@ fun DoaZikirScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
-                                text = "Mulai Zikir",
+                                text = stringResource(R.string.dhikr_start_button),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = SaatColors.PureWhite
