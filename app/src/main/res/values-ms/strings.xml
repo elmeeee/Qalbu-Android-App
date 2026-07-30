@@ -71,7 +71,7 @@
     <string name="prayer_schedule">Jadual solat</string>
     <string name="prayer_grace_passed">Solat %1$s telah berlalu</string>
     <string name="prayer_time_remaining">Masa berbaki sebelum %1$s</string>
-    <string name="prayer_countdown_until">%1$s menuju waktu %2$s</string>
+    <string name="prayer_countdown_until">%1$s menuju waktu solat %2$s</string>
     <string name="prayer_countdown_passed">%1$s azan %2$s telah berlalu</string>
     <string name="prayer_fetch_failed">Gagal memuatkan jadual solat</string>
     <string name="location_failed">Tidak dapat tentukan lokasi</string>

@@ -73,7 +73,7 @@
     <string name="prayer_schedule">Prayer schedule</string>
     <string name="prayer_grace_passed">%1$s prayer has passed</string>
     <string name="prayer_time_remaining">Time remaining before %1$s</string>
-    <string name="prayer_countdown_until">%1$s until %2$s</string>
+    <string name="prayer_countdown_until">%1$s until prayer %2$s</string>
     <string name="prayer_countdown_passed">%1$s since %2$s adhan</string>
     <string name="prayer_fetch_failed">Prayer fetch failed</string>
     <string name="location_failed">Could not determine location</string>
