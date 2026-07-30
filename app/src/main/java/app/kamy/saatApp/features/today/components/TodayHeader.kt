@@ -100,106 +100,110 @@ fun TodayHeader(
            .replace("Taman", "Tmn", ignoreCase = true)
     }
 
-    Column(
+    Surface(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .tabContentStatusBarInset()
+            .tabContentStatusBarInset(),
+        color = SaatColors.PureWhite,
+        shadowElevation = 2.dp
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Assalamu'alaykum",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                var showHijri by remember { mutableStateOf(false) }
-                LaunchedEffect(formattedHijri) {
-                    if (!formattedHijri.isNullOrBlank()) {
-                        while (true) {
-                            kotlinx.coroutines.delay(5000)
-                            showHijri = !showHijri
-                        }
-                    }
-                }
-
-                AnimatedContent(
-                    targetState = showHijri,
-                    transitionSpec = {
-                        (slideInVertically { height -> height } + fadeIn()) togetherWith
-                                (slideOutVertically { height -> -height } + fadeOut())
-                    },
-                    label = "dateTransition"
-                ) { targetShowHijri ->
-                    val dateText = remember(targetShowHijri, localDayName, gregorianLabel, formattedHijri) {
-                        val prefix = if (localDayName.isNotEmpty()) "$localDayName, " else ""
-                        if (targetShowHijri && !formattedHijri.isNullOrBlank()) {
-                            "$prefix$formattedHijri"
-                        } else {
-                            "$prefix${gregorianLabel.orEmpty()}"
-                        }
-                    }
-                    val textColor = if (targetShowHijri) SaatColors.DeepEmerald else Color.Black
-
-                    Text(
-                        text = dateText,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = textColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.clickable(
-                            onClick = onCalendarClick
-                        )
-                    )
-                }
-            }
-
-            Spacer(Modifier.width(16.dp))
-
-            // Location Badge on the right
-            Surface(
-                onClick = onLocationClick,
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.align(Alignment.CenterVertically)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    Icon(
-                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_location_custom),
-                        contentDescription = stringResource(R.string.location_enable),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(14.dp)
-                    )
                     Text(
-                        text = displayLocation,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = "Assalamu'alaikum",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = SaatColors.Slate500,
+                        fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.widthIn(max = 140.dp)
+                        overflow = TextOverflow.Ellipsis
                     )
+
+                    var showHijri by remember { mutableStateOf(false) }
+                    LaunchedEffect(formattedHijri) {
+                        if (!formattedHijri.isNullOrBlank()) {
+                            while (true) {
+                                kotlinx.coroutines.delay(5000)
+                                showHijri = !showHijri
+                            }
+                        }
+                    }
+
+                    AnimatedContent(
+                        targetState = showHijri,
+                        transitionSpec = {
+                            (slideInVertically { height -> height } + fadeIn()) togetherWith
+                                    (slideOutVertically { height -> -height } + fadeOut())
+                        },
+                        label = "dateTransition"
+                    ) { targetShowHijri ->
+                        val dateText = remember(targetShowHijri, localDayName, gregorianLabel, formattedHijri) {
+                            val prefix = if (localDayName.isNotEmpty()) "$localDayName, " else ""
+                            if (targetShowHijri && !formattedHijri.isNullOrBlank()) {
+                                "$prefix$formattedHijri"
+                            } else {
+                                "$prefix${gregorianLabel.orEmpty()}"
+                            }
+                        }
+                        val textColor = if (targetShowHijri) SaatColors.DeepEmerald else SaatColors.Slate900
+
+                        Text(
+                            text = dateText,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = textColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.clickable(
+                                onClick = onCalendarClick
+                            )
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(16.dp))
+
+                // Location Badge on the right
+                Surface(
+                    onClick = onLocationClick,
+                    shape = androidx.compose.foundation.shape.CircleShape,
+                    color = SaatColors.MintWash,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SaatColors.Teal.copy(alpha = 0.25f)),
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_location_custom),
+                            contentDescription = stringResource(R.string.location_enable),
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = displayLocation,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.DeepEmerald,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.widthIn(max = 140.dp)
+                        )
+                    }
                 }
             }
+            HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.4f), thickness = 0.5.dp)
         }
     }
 }

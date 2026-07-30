@@ -59,26 +59,9 @@ fun OnboardingScreen(
     onFinished: () -> Unit,
     vm: OnboardingViewModel = hiltViewModel()
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val languageStore = remember { app.kamy.saatApp.infrastructure.preferences.AppLanguageStore.from(context) }
-    val currentLang by languageStore.currentFlow.collectAsState()
-
-    val localizedContext = remember(currentLang) {
-        app.kamy.saatApp.core.locale.AppLocale.wrap(context, currentLang)
-    }
-    val localizedConfiguration = remember(currentLang) {
-        android.content.res.Configuration(context.resources.configuration).apply {
-            setLocale(java.util.Locale.forLanguageTag(currentLang.tag))
-        }
-    }
-
-    CompositionLocalProvider(
-        androidx.compose.ui.platform.LocalContext provides localizedContext,
-        androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration
-    ) {
-        val state by vm.state.collectAsState()
-        var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
-        val scope = rememberCoroutineScope()
+    val state by vm.state.collectAsState()
+    var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
         val locationPermissionLauncher = rememberLauncherForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
@@ -278,7 +261,6 @@ fun OnboardingScreen(
             }
         }
     }
-}
 }
 
 @Composable
