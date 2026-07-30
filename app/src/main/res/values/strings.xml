@@ -414,7 +414,8 @@
     <string name="prayer_calendar_hint">Tap a day to see all prayer times for that date.</string>
     <string name="prayer_calendar_loading_day">Loading prayer times…</string>
     <string name="offline_banner_message">Offline — showing saved data</string>
-    <string name="offline_banner_prayer">Offline — prayer times from last sync</string>
+    <string name="onboarding_language_title">Select App Language</string>
+    <string name="onboarding_language_body">Choose your preferred language to continue</string>
     <string name="onboarding_welcome_title">Welcome to Sāat</string>
     <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
     <string name="onboarding_location_title">Where do you pray?</string>

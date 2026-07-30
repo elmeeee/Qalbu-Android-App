@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -369,75 +370,94 @@ private fun FaraidhHeader(
     onScenarios: () -> Unit,
     onReset: () -> Unit
 ) {
-    Box(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 4.dp)
+            .tabContentStatusBarInset(),
+        color = SaatColors.PureWhite,
+        shadowElevation = 1.dp
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(3.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        listOf(SaatColors.DeepEmerald, SaatColors.Teal, SaatColors.Gold.copy(alpha = 0.6f))
-                    )
-                )
-        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 10.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+            Surface(
+                onClick = onBack,
+                shape = CircleShape,
+                color = SaatColors.LightGrey,
+                modifier = Modifier.size(38.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = SaatColors.Slate800,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
+            Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(R.string.faraidh_title),
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = SaatColors.Slate900
                 )
                 Text(
                     text = stringResource(R.string.faraidh_subtitle_short),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SaatColors.Slate500
+                    style = MaterialTheme.typography.labelSmall,
+                    color = SaatColors.Teal,
+                    fontWeight = FontWeight.Medium
                 )
             }
-            IconButton(onClick = onScenarios) {
-                Icon(
-                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_doc),
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                HeaderIconButton(
+                    iconRes = R.drawable.ic_faraidh_doc,
                     contentDescription = stringResource(R.string.faraidh_saved_scenarios),
-                    tint = SaatColors.Teal,
-                    modifier = Modifier.size(22.dp)
+                    onClick = onScenarios
                 )
-            }
-            IconButton(onClick = onSave) {
-                Icon(
-                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_save),
+                HeaderIconButton(
+                    iconRes = R.drawable.ic_faraidh_save,
                     contentDescription = stringResource(R.string.faraidh_save_scenario),
-                    tint = SaatColors.Teal,
-                    modifier = Modifier.size(22.dp)
+                    onClick = onSave
                 )
-            }
-            IconButton(onClick = onReset) {
-                Icon(
-                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_reload),
+                HeaderIconButton(
+                    iconRes = R.drawable.ic_faraidh_reload,
                     contentDescription = stringResource(R.string.faraidh_reset),
-                    tint = SaatColors.Teal,
-                    modifier = Modifier.size(22.dp)
+                    onClick = onReset
                 )
-            }
-            IconButton(onClick = onInfo) {
-                Icon(
-                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_info),
+                HeaderIconButton(
+                    iconRes = R.drawable.ic_faraidh_info,
                     contentDescription = stringResource(R.string.faraidh_tooltip_title),
-                    tint = SaatColors.Teal,
-                    modifier = Modifier.size(22.dp)
+                    onClick = onInfo
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun HeaderIconButton(
+    iconRes: Int,
+    contentDescription: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = SaatColors.MintWash,
+        modifier = Modifier.size(36.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                painter = androidx.compose.ui.res.painterResource(iconRes),
+                contentDescription = contentDescription,
+                tint = SaatColors.DeepEmerald,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
@@ -609,9 +629,10 @@ private fun FaraidhInputSheetContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .navigationBarsPadding()
             .verticalScroll(scroll)
             .padding(horizontal = SaatSpacing.screenHorizontal)
-            .padding(bottom = 28.dp)
+            .padding(bottom = 36.dp)
     ) {
         Text(
             stringResource(R.string.faraidh_input_title),
@@ -880,14 +901,14 @@ private fun FaraidhBreakdownTab(
 ) {
     when {
         !hasHeirs -> EmptyState(
-            icon = Icons.Outlined.Calculate,
+            iconRes = R.drawable.ic_faraidh_calculate,
             title = stringResource(R.string.faraidh_empty_title),
             body = stringResource(R.string.faraidh_empty_body),
             cta = stringResource(R.string.faraidh_empty_cta),
             onCta = onStart
         )
         result == null || result.activeShares.isEmpty() -> EmptyState(
-            icon = Icons.Filled.People,
+            iconRes = R.drawable.ic_faraidh_people,
             title = stringResource(R.string.faraidh_empty_no_share_title),
             body = stringResource(R.string.faraidh_empty_no_share_body),
             cta = stringResource(R.string.faraidh_edit),
@@ -1163,7 +1184,7 @@ private fun FaraidhSilsilahTab(
 ) {
     if (!hasHeirs || nodes.isEmpty()) {
         EmptyState(
-            icon = Icons.Filled.AccountTree,
+            iconRes = R.drawable.ic_faraidh_silsilah,
             title = stringResource(R.string.faraidh_empty_silsilah_title),
             body = stringResource(R.string.faraidh_empty_silsilah),
             cta = stringResource(R.string.faraidh_empty_cta),
@@ -1296,7 +1317,7 @@ private fun FaraidhDalilTab(
 ) {
     if (!hasResult || proofs.isEmpty()) {
         EmptyState(
-            icon = Icons.AutoMirrored.Filled.MenuBook,
+            iconRes = R.drawable.ic_faraidh_dalil,
             title = stringResource(R.string.faraidh_empty_dalil_title),
             body = stringResource(R.string.faraidh_empty_dalil),
             cta = stringResource(R.string.faraidh_empty_cta),
@@ -1376,19 +1397,56 @@ private fun DalilCard(proof: FaraidhProofItem, onOpenVerse: (Int, Int) -> Unit, 
 
 @Composable
 private fun EmptyState(
-    icon: ImageVector,
+    iconRes: Int = R.drawable.ic_faraidh_calculate,
     title: String,
     body: String,
     cta: String,
     onCta: () -> Unit
 ) {
-    SaatEmptyState(
-        icon = icon,
-        title = title,
-        body = body,
-        cta = cta,
-        onCta = onCta
-    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 36.dp, horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(SaatColors.MintWash),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = androidx.compose.ui.res.painterResource(iconRes),
+                contentDescription = null,
+                tint = SaatColors.DeepEmerald,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = SaatColors.Slate900,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = body,
+            style = MaterialTheme.typography.bodyMedium,
+            color = SaatColors.Slate500,
+            textAlign = TextAlign.Center
+        )
+        Spacer(Modifier.height(20.dp))
+        Button(
+            onClick = onCta,
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
+        ) {
+            Text(cta, fontWeight = FontWeight.SemiBold)
+        }
+    }
 }
 
 private fun countActiveHeirs(state: FaraidhUiState): Int = listOf(

@@ -30,10 +30,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -56,90 +59,107 @@ fun OnboardingScreen(
     onFinished: () -> Unit,
     vm: OnboardingViewModel = hiltViewModel()
 ) {
-    val state by vm.state.collectAsState()
-    var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val languageStore = remember { app.kamy.saatApp.infrastructure.preferences.AppLanguageStore.from(context) }
+    val currentLang by languageStore.currentFlow.collectAsState()
 
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { vm.onLocationPermissionResult(it.values.any { granted -> granted }) }
-
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { vm.onNotificationPermissionResult() }
-
-    val stepIndex = when (state.step) {
-        OnboardingStep.LANGUAGE -> 1
-        OnboardingStep.WELCOME -> 2
-        OnboardingStep.LOCATION -> 3
-        OnboardingStep.NOTIFICATIONS -> 4
-        OnboardingStep.PRAYER_NOTIFICATIONS -> 5
+    val localizedContext = remember(currentLang) {
+        app.kamy.saatApp.core.locale.AppLocale.wrap(context, currentLang)
+    }
+    val localizedConfiguration = remember(currentLang) {
+        android.content.res.Configuration(context.resources.configuration).apply {
+            setLocale(java.util.Locale.forLanguageTag(currentLang.tag))
+        }
     }
 
-    if (showLocationRationale) {
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { showLocationRationale = false },
-            title = {
-                Text(
-                    text = stringResource(R.string.onboarding_location_rationale_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = SaatColors.Slate900
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.onboarding_location_rationale_body),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = SaatColors.Slate700
-                )
-            },
-            confirmButton = {
-                androidx.compose.material3.TextButton(
-                    onClick = {
-                        showLocationRationale = false
-                        locationPermissionLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
+    CompositionLocalProvider(
+        androidx.compose.ui.platform.LocalContext provides localizedContext,
+        androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration
+    ) {
+        val state by vm.state.collectAsState()
+        var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
+        val scope = rememberCoroutineScope()
+
+        val locationPermissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { vm.onLocationPermissionResult(it.values.any { granted -> granted }) }
+
+        val notificationPermissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { vm.onNotificationPermissionResult() }
+
+        val stepIndex = when (state.step) {
+            OnboardingStep.LANGUAGE -> 1
+            OnboardingStep.WELCOME -> 2
+            OnboardingStep.LOCATION -> 3
+            OnboardingStep.NOTIFICATIONS -> 4
+            OnboardingStep.PRAYER_NOTIFICATIONS -> 5
+        }
+
+        if (showLocationRationale) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { showLocationRationale = false },
+                title = {
+                    Text(
+                        text = stringResource(R.string.onboarding_location_rationale_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = SaatColors.Slate900
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(R.string.onboarding_location_rationale_body),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = SaatColors.Slate700
+                    )
+                },
+                confirmButton = {
+                    androidx.compose.material3.TextButton(
+                        onClick = {
+                            showLocationRationale = false
+                            locationPermissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
                             )
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(android.R.string.ok),
+                            color = SaatColors.DeepEmerald,
+                            fontWeight = FontWeight.Bold
                         )
                     }
-                ) {
-                    Text(
-                        text = stringResource(android.R.string.ok),
-                        color = SaatColors.DeepEmerald,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(
-                    onClick = { showLocationRationale = false }
-                ) {
-                    Text(
-                        text = stringResource(android.R.string.cancel),
-                        color = SaatColors.Slate500
-                    )
-                }
-            },
-            shape = RoundedCornerShape(16.dp),
-            containerColor = Color.White
-        )
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFF085E43), Color(0xFF15AA7C))
-                )
+                },
+                dismissButton = {
+                    androidx.compose.material3.TextButton(
+                        onClick = { showLocationRationale = false }
+                    ) {
+                        Text(
+                            text = stringResource(android.R.string.cancel),
+                            color = SaatColors.Slate500
+                        )
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                containerColor = Color.White
             )
-            .statusBarsPadding()
-            .navigationBarsPadding()
-            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.lg),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF085E43), Color(0xFF15AA7C))
+                    )
+                )
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.lg),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 stringResource(R.string.onboarding_step_progress, stepIndex, 5),
@@ -258,6 +278,7 @@ fun OnboardingScreen(
             }
         }
     }
+}
 }
 
 @Composable
@@ -464,7 +485,7 @@ private fun LanguageStep() {
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "Select Language / Pilih Bahasa",
+            text = stringResource(R.string.onboarding_language_title),
             style = MaterialTheme.typography.headlineMedium,
             color = Color.White,
             fontWeight = FontWeight.Bold,
@@ -472,7 +493,7 @@ private fun LanguageStep() {
         )
         Spacer(Modifier.height(12.dp))
         Text(
-            text = "Pilih bahasa aplikasi sesuai kenyamanan Anda",
+            text = stringResource(R.string.onboarding_language_body),
             style = MaterialTheme.typography.bodyMedium,
             color = Color.White.copy(alpha = 0.85f),
             textAlign = TextAlign.Center

@@ -49,19 +49,35 @@ class MainActivity : ComponentActivity() {
         setContent {
             val pendingRoute by deepLinkRoute
             val currentTheme by themePreferencesStore.themeFlow.collectAsState(initial = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
+            val languageStore = androidx.compose.runtime.remember { AppLanguageStore.from(applicationContext) }
+            val currentLang by languageStore.currentFlow.collectAsState()
+
+            val localizedContext = androidx.compose.runtime.remember(currentLang) {
+                AppLocale.wrap(applicationContext, currentLang)
+            }
+            val localizedConfiguration = androidx.compose.runtime.remember(currentLang) {
+                android.content.res.Configuration(applicationContext.resources.configuration).apply {
+                    setLocale(java.util.Locale.forLanguageTag(currentLang.tag))
+                }
+            }
 
             var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
 
-            SaatTheme(theme = currentTheme) {
-                when {
-                    showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })
-                    else -> {
-                        ExactAlarmPermissionGate()
-                        app.kamy.saatApp.ui.permissions.FullScreenIntentPermissionGate()
-                        RootScreen(
-                            pendingDeepLinkRoute = pendingRoute,
-                            onDeepLinkHandled = { deepLinkRoute.value = null }
-                        )
+            androidx.compose.runtime.CompositionLocalProvider(
+                androidx.compose.ui.platform.LocalContext provides localizedContext,
+                androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration
+            ) {
+                SaatTheme(theme = currentTheme) {
+                    when {
+                        showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })
+                        else -> {
+                            ExactAlarmPermissionGate()
+                            app.kamy.saatApp.ui.permissions.FullScreenIntentPermissionGate()
+                            RootScreen(
+                                pendingDeepLinkRoute = pendingRoute,
+                                onDeepLinkHandled = { deepLinkRoute.value = null }
+                            )
+                        }
                     }
                 }
             }

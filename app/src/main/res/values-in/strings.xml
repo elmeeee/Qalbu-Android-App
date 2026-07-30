@@ -369,7 +369,8 @@
     <string name="prayer_widget_at_time">Adzan pukul %1$s</string>
     <string name="prayer_calendar_open">Kalender bulanan</string>
     <string name="prayer_calendar_title">Kalender sholat</string>
-    <string name="prayer_calendar_hint">Ketuk hari untuk melihat semua waktu sholat pada tanggal tersebut.</string>
+    <string name="onboarding_language_title">Pilih Bahasa Aplikasi</string>
+    <string name="onboarding_language_body">Pilih bahasa aplikasi sesuai kenyamanan Anda</string>
     <string name="onboarding_welcome_title">Selamat datang di SĀAT</string>
     <string name="onboarding_welcome_body">Teman Quran harian Anda — jadwal sholat, refleksi, dan komunitas dalam satu aplikasi.</string>
     <string name="onboarding_location_title">Di mana Anda sholat?</string>

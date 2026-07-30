@@ -346,7 +346,8 @@
     <string name="prayer_widget_at_time">Azan pada %1$s</string>
     <string name="prayer_calendar_open">Kalendar bulanan</string>
     <string name="prayer_calendar_title">Kalendar solat</string>
-    <string name="prayer_calendar_hint">Ketik hari untuk lihat semua waktu solat pada tarikh tersebut.</string>
+    <string name="onboarding_language_title">Pilih Bahasa Aplikasi</string>
+    <string name="onboarding_language_body">Pilih bahasa aplikasi mengikut keselesaan anda</string>
     <string name="onboarding_welcome_title">Selamat datang ke SĀAT</string>
     <string name="onboarding_welcome_body">Teman Quran harian anda — waktu solat, refleksi, dan komuniti dalam satu aplikasi.</string>
     <string name="onboarding_location_title">Di mana anda solat?</string>

@@ -118,7 +118,7 @@ fun TodayHeader(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = "Assalamualaikum Wr Wb",
+                    text = "Assalamu'alaykum",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
