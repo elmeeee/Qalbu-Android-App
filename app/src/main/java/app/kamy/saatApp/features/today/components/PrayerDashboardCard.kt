@@ -56,11 +56,12 @@ import java.util.Locale
 @DrawableRes
 private fun getPrayerCardDrawable(type: PrayerType?): Int {
     return when (type) {
-        PrayerType.FAJR -> R.drawable.dhur_asr_card
-        PrayerType.DHUHR, PrayerType.ASR -> R.drawable.dhur_asr_card
-        PrayerType.MAGHRIB -> R.drawable.dhur_asr_card
-        PrayerType.ISHA -> R.drawable.dhur_asr_card
-        else -> R.drawable.dhur_asr_card
+        PrayerType.FAJR -> R.drawable.bg_fajr_card
+        PrayerType.DHUHR -> R.drawable.bg_dhur_card
+        PrayerType.ASR -> R.drawable.bg_asr_card
+        PrayerType.MAGHRIB -> R.drawable.bg_maghrib_card
+        PrayerType.ISHA -> R.drawable.bg_isha_card
+        else -> R.drawable.bg_fajr_card
     }
 }
 
@@ -131,14 +132,14 @@ fun PrayerDashboardCard(
     ) {
         // 1. Top Card: Prayer Info Header Card with Illustration & Linear Gradient (#085E43 -> #F7DC8B)
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.width(349.dp),
             shape = RoundedCornerShape(20.dp),
             color = Color.Transparent,
             shadowElevation = 4.dp
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(349.dp)
                     .height(120.dp)
                     .clip(RoundedCornerShape(20.dp))
                     .background(
@@ -159,7 +160,7 @@ fun PrayerDashboardCard(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .fillMaxWidth()
-                        .height(99.dp)
+                        .height(120.dp)
                 )
 
                 // Text Overlay Content
