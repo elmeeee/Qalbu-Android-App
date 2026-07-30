@@ -96,13 +96,13 @@ fun ZakatCalculatorScreen(
             .tabContentStatusBarInset()
             .imePadding()
             .navigationBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = 32.dp)
     ) {
+        // Sticky Header Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 10.dp),
+                .background(SaatColors.ScreenBackground)
+                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
@@ -120,8 +120,13 @@ fun ZakatCalculatorScreen(
             )
         }
 
+        // Scrollable Body Form
         Column(
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Surface(

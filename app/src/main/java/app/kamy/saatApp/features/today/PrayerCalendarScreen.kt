@@ -117,8 +117,10 @@ fun PrayerCalendarScreen(
                         }
                     }
                 }
-                val hijriHeaderLabel = remember(state.days) {
-                    state.days.firstOrNull { !it.hijriLabel.isNullOrBlank() }?.hijriLabel?.let { raw ->
+                val hijriHeaderLabel = remember(state.days, state.selectedDay) {
+                    val activeDay = state.days.firstOrNull { it.day == state.selectedDay }
+                        ?: state.days.firstOrNull { !it.hijriLabel.isNullOrBlank() }
+                    activeDay?.hijriLabel?.let { raw ->
                         val parts = raw.trim().split(" ")
                         if (parts.size >= 3) {
                             "${parts.drop(1).joinToString(" ")} H"

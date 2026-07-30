@@ -8,6 +8,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -1219,41 +1220,63 @@ private fun ReaderSettingsSheet(
     onToggleHifzMode: (Boolean) -> Unit,
     onArabicTextTypeChange: (ArabicTextType) -> Unit
 ) {
-    SaatPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.65f) {
+    SaatPartialBottomSheet(onDismiss = onDismiss, maxHeightFraction = 0.78f) {
         Column(
             Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 20.dp, vertical = 4.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Column(
+            // Header card
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(18.dp))
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                SaatColors.DeepEmerald.copy(alpha = 0.14f),
-                                SaatColors.Teal.copy(alpha = 0.07f)
+                                SaatColors.DeepEmerald.copy(alpha = 0.12f),
+                                SaatColors.Teal.copy(alpha = 0.06f)
                             )
                         )
                     )
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                    .padding(horizontal = 18.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    stringResource(R.string.reading_settings),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.DeepEmerald
-                )
-                Text(
-                    stringResource(R.string.font_size_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SaatColors.Slate500,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(SaatColors.DeepEmerald.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = null,
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                Spacer(Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.reading_settings),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.DeepEmerald
+                    )
+                    Text(
+                        text = stringResource(R.string.font_size_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SaatColors.Slate500,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
             }
+
+            // Slider card
             ReaderSettingToggleRow(
                 title = stringResource(R.string.text_size),
                 content = {
@@ -1270,6 +1293,7 @@ private fun ReaderSettingsSheet(
                 }
             )
 
+            // Toggles using custom icons
             ReaderSettingToggleRow(
                 title = stringResource(R.string.show_translation),
                 checked = state.showTranslation,
@@ -1299,19 +1323,22 @@ private fun ReaderSettingsSheet(
                     )
                 }
             )
+
             Text(
-                stringResource(R.string.reciter),
-                style = MaterialTheme.typography.labelLarge,
-                color = SaatColors.Slate500,
+                text = stringResource(R.string.reciter),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = SaatColors.Slate800,
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp)
             )
+
             if (state.recitations.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     color = SaatColors.DeepEmerald
                 )
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(0.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     state.recitations.forEach { recitation ->
                         ReciterRow(
                             recitation = recitation,
@@ -1333,20 +1360,52 @@ private fun ReaderSettingToggleRow(
     onCheckedChange: ((Boolean) -> Unit)? = null,
     content: (@Composable () -> Unit)? = null
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(SaatColors.LightGrey.copy(alpha = 0.55f))
-            .padding(horizontal = 14.dp, vertical = 12.dp)
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = SaatColors.PureWhite,
+        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.8f))
     ) {
-        if (content != null) {
-            Text(title, color = SaatColors.Slate900, fontWeight = FontWeight.Medium)
-            content()
-        } else if (checked != null && onCheckedChange != null) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, modifier = Modifier.weight(1f), color = SaatColors.Slate900)
-                Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            if (content != null) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = SaatColors.Slate900,
+                    fontWeight = FontWeight.SemiBold
+                )
+                content()
+            } else if (checked != null && onCheckedChange != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = SaatColors.Slate900,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(
+                            if (checked) R.drawable.ic_toggle_on_custom else R.drawable.ic_toggle_off_custom
+                        ),
+                        contentDescription = if (checked) "On" else "Off",
+                        modifier = Modifier
+                            .size(width = 52.dp, height = 28.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { onCheckedChange(!checked) }
+                            )
+                    )
+                }
             }
         }
     }

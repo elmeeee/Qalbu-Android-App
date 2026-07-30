@@ -503,7 +503,9 @@ fun DhikrSessionView(
 
             // Bottom Navigation & Controls Row
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 54.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -558,7 +560,7 @@ fun DhikrSessionView(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 24.dp, end = 20.dp)
+                .padding(bottom = 54.dp, end = 20.dp)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null

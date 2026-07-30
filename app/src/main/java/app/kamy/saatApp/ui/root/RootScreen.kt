@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.features.account.AccountScreen
 import app.kamy.saatApp.features.quran.ChapterReaderScreen
 import app.kamy.saatApp.features.quran.ChaptersScreen
@@ -135,11 +136,14 @@ fun RootScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(SaatColors.ScreenBackground)
     ) {
         NavHost(
             navController = navController,
             startDestination = RootTab.Default.route,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(SaatColors.ScreenBackground)
         ) {
             composable(
                 route = RootTab.Today.route,

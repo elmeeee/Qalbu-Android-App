@@ -59,8 +59,8 @@ fun FloatingTabBar(
             )
             .clip(CircleShape),
         shape = CircleShape,
-        color = Color(0xC8F4F7F5),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
+        color = Color(0xFFF9FBF9),
+        border = androidx.compose.foundation.BorderStroke(1.2.dp, Color(0xFFCBD5E1)),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
@@ -110,7 +110,7 @@ private fun FloatingTabItem(
             )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = ripple(bounded = true, radius = 28.dp),
+                indication = ripple(bounded = true, color = Color.Black.copy(alpha = 0.08f)),
                 role = Role.Tab,
                 onClick = onClick
             )
