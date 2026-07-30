@@ -122,6 +122,7 @@ fun resolveAdhanBackgroundRes(
 ): Int {
     val query = (prayerName.orEmpty() + " " + title).lowercase(Locale.ROOT)
     return when {
+        query.contains("tahajud") || query.contains("tahajjud") || query.contains("last_third") -> R.drawable.bg_tahajud
         query.contains("fajr") || query.contains("subuh") -> R.drawable.bg_intent_fajr
         query.contains("dhuhr") || query.contains("dhur") || query.contains("dzuhur") || query.contains("zuhur") || query.contains("zohor") -> R.drawable.bg_intent_dhur
         query.contains("asr") || query.contains("ashar") || query.contains("asar") -> R.drawable.bg_intent_asr

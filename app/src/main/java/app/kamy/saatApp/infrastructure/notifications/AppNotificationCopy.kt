@@ -43,7 +43,7 @@ object AppNotificationCopy {
         return when (kind) {
             NightDivisionKind.MIDNIGHT -> ctx.getString(R.string.night_midnight_title)
             NightDivisionKind.FIRST_THIRD -> ctx.getString(R.string.night_first_third_title)
-            NightDivisionKind.LAST_THIRD -> ctx.getString(R.string.night_last_third_title)
+            NightDivisionKind.LAST_THIRD -> ctx.getString(R.string.tahajud_alarm_title)
         }
     }
 
@@ -52,7 +52,7 @@ object AppNotificationCopy {
         return when (kind) {
             NightDivisionKind.MIDNIGHT -> ctx.getString(R.string.night_midnight_body)
             NightDivisionKind.FIRST_THIRD -> ctx.getString(R.string.night_first_third_body)
-            NightDivisionKind.LAST_THIRD -> ctx.getString(R.string.night_last_third_body)
+            NightDivisionKind.LAST_THIRD -> ctx.getString(R.string.tahajud_alarm_body)
         }
     }
 

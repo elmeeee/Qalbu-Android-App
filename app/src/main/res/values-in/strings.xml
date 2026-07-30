@@ -38,8 +38,8 @@
     <string name="sunnah_thu_fast_title">Puasa Sunnah Kamis</string>
     <string name="sunnah_thu_fast_body">Besok adalah hari Kamis. Jangan lupa persiapkan puasa sunnah Anda.</string>
     <string name="sunnah_dhuha_title">Shalat Duha</string>
-    <string name="sunnah_dhuha_body">Saatnya shalat Duha. Sempatkan melaksanakan shalat sunnah Duha.</string>
-    <string name="surah_reminder_notif_title">Saatnya membaca Surah %s</string>
+    <string name="sunnah_dhuha_body">SāatNya shalat Duha. Sempatkan melaksanakan shalat sunnah Duha.</string>
+    <string name="surah_reminder_notif_title">SāatNya membaca Surah %s</string>
     <string name="surah_reminder_notif_body">Sempatkan membaca Surah %s hari ini. Semoga membawa ketenangan dan keberkahan.</string>
 
     <!-- Madhab Settings -->
@@ -153,19 +153,21 @@
     <string name="channel_sunnah_desc">Pengingat bacaan surah mingguan</string>
 
     <string name="prayer_notif_title">%1$s • %2$s</string>
-    <string name="prayer_body_fajr">SAATnya shalat Subuh</string>
-    <string name="prayer_body_dhuhr">SAATnya shalat Dzuhur</string>
-    <string name="prayer_body_asr">SAATnya shalat Ashar</string>
-    <string name="prayer_body_maghrib">SAATnya shalat Maghrib</string>
-    <string name="prayer_body_isha">SAATnya shalat Isya</string>
-    <string name="prayer_body_imsak">SAATnya Imsak</string>
-    <string name="prayer_body_default">SAATnya shalat %1$s</string>
+    <string name="prayer_body_fajr">SāatNya shalat Subuh</string>
+    <string name="prayer_body_dhuhr">SāatNya shalat Dzuhur</string>
+    <string name="prayer_body_asr">SāatNya shalat Ashar</string>
+    <string name="prayer_body_maghrib">SāatNya shalat Maghrib</string>
+    <string name="prayer_body_isha">SāatNya shalat Isya</string>
+    <string name="prayer_body_imsak">SāatNya Imsak</string>
+    <string name="prayer_body_default">SāatNya shalat %1$s</string>
     <string name="night_midnight_title">🌙 Tengah Malam</string>
     <string name="night_midnight_body">Malam sudah setengah. Sholat Witir sebelum tidur — jangan sampai terlewat.</string>
     <string name="night_first_third_title">🌃 Malam Dimulai</string>
     <string name="night_first_third_body">Istirahatlah. Sepertiga akhir malam milik Anda — bangun untuk kebaikan yang siang tidak bisa beri.</string>
     <string name="night_last_third_title">✨ Sepertiga Akhir Telah Tiba</string>
     <string name="night_last_third_body">Allah turun ke langit dunia. Jam paling berkah hari ini dimulai.</string>
+    <string name="tahajud_alarm_title">✨ Waktunya Shalat Tahajud</string>
+    <string name="tahajud_alarm_body">SāatNya bangun untuk Shalat Tahajud. Allah turun ke langit dunia dan mengabulkan doa hamba-Nya yang bermunajat.</string>
     <string name="sunnah_yasin_title">📖 Baca Surah Yasin</string>
     <string name="sunnah_yasin_body">Malam Kamis — waktu berkah membaca Surah Yasin sebelum Jumat.</string>
     <string name="sunnah_kahf_title">📖 Baca Surah Al-Kahf</string>

@@ -68,12 +68,14 @@ class AdhanPlaybackService : Service() {
                 releaseAndStop()
                 return START_NOT_STICKY
             }
-            intent != null && intent.hasExtra(EXTRA_RAW_RES) -> {
+            intent != null && (intent.hasExtra(EXTRA_RAW_RES) || intent.hasExtra(EXTRA_SOUND_URI) || intent.getBooleanExtra(EXTRA_USE_SYSTEM_ALARM, false)) -> {
                 linkedNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
                 val body = intent.getStringExtra(EXTRA_BODY).orEmpty()
                 val prayerName = intent.getStringExtra(EXTRA_PRAYER_NAME)
                 val rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0)
+                val soundUriStr = intent.getStringExtra(EXTRA_SOUND_URI)
+                val useSystemAlarm = intent.getBooleanExtra(EXTRA_USE_SYSTEM_ALARM, false)
                 NotificationChannels.ensureAll(this)
                 val fgSuccess = runCatching {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
@@ -91,7 +93,7 @@ class AdhanPlaybackService : Service() {
                     return START_NOT_STICKY
                 }
                 acquireWakeLock()
-                startAdhan(rawRes, title, body)
+                startPlayback(rawRes, soundUriStr, useSystemAlarm, title, body)
                 runCatching {
                     startActivity(
                         AdhanAlarmActivity.intent(
@@ -117,8 +119,21 @@ class AdhanPlaybackService : Service() {
         super.onDestroy()
     }
 
-    private fun startAdhan(@RawRes rawRes: Int, title: String, body: String) {
-        if (rawRes == 0) {
+    private fun startPlayback(
+        @RawRes rawRes: Int,
+        soundUriStr: String?,
+        useSystemAlarm: Boolean,
+        title: String,
+        body: String
+    ) {
+        val mediaUri: Uri? = when {
+            rawRes != 0 -> Uri.parse("android.resource://$packageName/$rawRes")
+            !soundUriStr.isNullOrBlank() -> Uri.parse(soundUriStr)
+            useSystemAlarm -> android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
+                ?: android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION)
+            else -> null
+        }
+        if (mediaUri == null) {
             stopSelf()
             return
         }
@@ -156,8 +171,7 @@ class AdhanPlaybackService : Service() {
             }
         })
 
-        val uri = Uri.parse("android.resource://$packageName/$rawRes")
-        exo.setMediaItem(MediaItem.fromUri(uri))
+        exo.setMediaItem(MediaItem.fromUri(mediaUri))
         exo.volume = 1f
         boostAlarmVolume()
         exo.prepare()
@@ -334,6 +348,8 @@ class AdhanPlaybackService : Service() {
         private const val VOLUME_STOP_GRACE_MS = 1_500L
         private const val ADHAN_VOLUME_FRACTION = 0.4f
         private const val EXTRA_RAW_RES = "raw_res"
+        private const val EXTRA_SOUND_URI = "sound_uri"
+        private const val EXTRA_USE_SYSTEM_ALARM = "use_system_alarm"
         private const val EXTRA_TITLE = "title"
         private const val EXTRA_BODY = "body"
         private const val EXTRA_PRAYER_NAME = "prayer_name"
@@ -343,7 +359,9 @@ class AdhanPlaybackService : Service() {
 
         fun start(
             context: Context,
-            @RawRes rawRes: Int,
+            @RawRes rawRes: Int = 0,
+            soundUri: Uri? = null,
+            useSystemAlarm: Boolean = false,
             title: String,
             body: String,
             notificationId: Int = -1,
@@ -351,6 +369,10 @@ class AdhanPlaybackService : Service() {
         ): Boolean {
             val intent = Intent(context, AdhanPlaybackService::class.java).apply {
                 putExtra(EXTRA_RAW_RES, rawRes)
+                if (soundUri != null) {
+                    putExtra(EXTRA_SOUND_URI, soundUri.toString())
+                }
+                putExtra(EXTRA_USE_SYSTEM_ALARM, useSystemAlarm)
                 putExtra(EXTRA_TITLE, title)
                 putExtra(EXTRA_BODY, body)
                 if (!prayerName.isNullOrBlank()) {

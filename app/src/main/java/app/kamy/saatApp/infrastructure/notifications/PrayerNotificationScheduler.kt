@@ -246,11 +246,13 @@ object PrayerNotificationScheduler {
                         context = context,
                         requestCode = NIGHT_REQUEST_BASE + 40 + offset,
                         fireAt = fireAt,
-                        channelId = NotificationChannels.PRAYER,
-                        title = localContext.getString(R.string.night_last_third_title),
-                        body = localContext.getString(R.string.night_last_third_body),
+                        channelId = NotificationChannels.PRAYER_ALERT,
+                        title = localContext.getString(R.string.tahajud_alarm_title),
+                        body = localContext.getString(R.string.tahajud_alarm_body),
                         kind = "night_${NightDivisionKind.LAST_THIRD.name}",
-                        notificationId = NOTIFICATION_ID_BASE + 62 + offset
+                        notificationId = NOTIFICATION_ID_BASE + 62 + offset,
+                        playAdhan = true,
+                        useAlarmClock = true
                     )
                 }
             }
