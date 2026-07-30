@@ -26,7 +26,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class OnboardingStep {
-    LANGUAGE,
     WELCOME,
     LOCATION,
     NOTIFICATIONS,
@@ -34,7 +33,7 @@ enum class OnboardingStep {
 }
 
 data class OnboardingUiState(
-    val step: OnboardingStep = OnboardingStep.LANGUAGE,
+    val step: OnboardingStep = OnboardingStep.WELCOME,
     val locationQuery: String = "",
     val savingLocation: Boolean = false,
     val locationError: String? = null,
@@ -67,7 +66,6 @@ class OnboardingViewModel @Inject constructor(
     fun nextStep() {
         _state.update {
             val next = when (it.step) {
-                OnboardingStep.LANGUAGE -> OnboardingStep.WELCOME
                 OnboardingStep.WELCOME -> OnboardingStep.LOCATION
                 OnboardingStep.LOCATION -> OnboardingStep.NOTIFICATIONS
                 OnboardingStep.NOTIFICATIONS -> OnboardingStep.PRAYER_NOTIFICATIONS

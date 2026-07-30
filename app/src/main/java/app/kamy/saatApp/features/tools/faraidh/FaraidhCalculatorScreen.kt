@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.horizontalScroll
@@ -259,47 +260,53 @@ fun FaraidhCalculatorScreen(
                 Surface(
                     shadowElevation = 12.dp,
                     color = SaatColors.PureWhite,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
                 ) {
-                    Button(
-                        onClick = {
-                            vm.exportPdf { uri ->
-                                val share = Intent(Intent.ACTION_SEND).apply {
-                                    type = "application/pdf"
-                                    putExtra(Intent.EXTRA_STREAM, uri)
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(share, context.getString(R.string.faraidh_export_pdf))
-                                )
-                            }
-                        },
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = SaatColors.DeepEmerald,
-                            contentColor = Color.White
-                        ),
-                        enabled = !state.pdfExporting
+                            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp)
                     ) {
-                        if (state.pdfExporting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                            Spacer(Modifier.width(10.dp))
-                        } else {
-                            Icon(
-                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_pdf),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                vm.exportPdf { uri ->
+                                    val share = Intent(Intent.ACTION_SEND).apply {
+                                        type = "application/pdf"
+                                        putExtra(Intent.EXTRA_STREAM, uri)
+                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    }
+                                    context.startActivity(
+                                        Intent.createChooser(share, context.getString(R.string.faraidh_export_pdf))
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = SaatColors.DeepEmerald,
+                                contentColor = Color.White
+                            ),
+                            enabled = !state.pdfExporting
+                        ) {
+                            if (state.pdfExporting) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color.White,
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(Modifier.width(10.dp))
+                            } else {
+                                Icon(
+                                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_pdf),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                            }
+                            Text(stringResource(R.string.faraidh_export_pdf), fontWeight = FontWeight.SemiBold)
                         }
-                        Text(stringResource(R.string.faraidh_export_pdf), fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -371,15 +378,14 @@ private fun FaraidhHeader(
     onReset: () -> Unit
 ) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .tabContentStatusBarInset(),
+        modifier = Modifier.fillMaxWidth(),
         color = SaatColors.PureWhite,
         shadowElevation = 1.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

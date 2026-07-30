@@ -318,7 +318,7 @@ fun TodayScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
-                contentPadding = PaddingValues(top = 4.dp, bottom = listBottomPadding + 12.dp),
+                contentPadding = PaddingValues(top = 0.dp, bottom = listBottomPadding + 12.dp),
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(14.dp)
             ) {
                 stickyHeader(key = "today_header") {

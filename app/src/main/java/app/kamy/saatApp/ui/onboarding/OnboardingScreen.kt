@@ -72,11 +72,10 @@ fun OnboardingScreen(
         ) { vm.onNotificationPermissionResult() }
 
         val stepIndex = when (state.step) {
-            OnboardingStep.LANGUAGE -> 1
-            OnboardingStep.WELCOME -> 2
-            OnboardingStep.LOCATION -> 3
-            OnboardingStep.NOTIFICATIONS -> 4
-            OnboardingStep.PRAYER_NOTIFICATIONS -> 5
+            OnboardingStep.WELCOME -> 1
+            OnboardingStep.LOCATION -> 2
+            OnboardingStep.NOTIFICATIONS -> 3
+            OnboardingStep.PRAYER_NOTIFICATIONS -> 4
         }
 
         if (showLocationRationale) {
@@ -135,28 +134,30 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color(0xFF085E43), Color(0xFF15AA7C))
+                        colors = listOf(
+                            Color(0xFF085E43),
+                            Color(0xFF15AA7C)
+                        )
                     )
                 )
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = SaatSpacing.lg),
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(24.dp)
         ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                stringResource(R.string.onboarding_step_progress, stepIndex, 5),
-                style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.75f),
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            LinearProgressIndicator(
-                progress = { stepIndex / 5f },
-                modifier = Modifier.fillMaxWidth(),
-                color = SaatColors.GoldBright,
-                trackColor = Color.White.copy(alpha = 0.2f)
-            )
-        }
+            Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                Text(
+                    text = stringResource(R.string.onboarding_step_progress, stepIndex, 4),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.White.copy(alpha = 0.75f),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                LinearProgressIndicator(
+                    progress = { stepIndex / 4f },
+                    modifier = Modifier.fillMaxWidth(),
+                    color = SaatColors.GoldBright,
+                    trackColor = Color.White.copy(alpha = 0.2f)
+                )
+            }
 
         Column(
             modifier = Modifier.weight(1f),
@@ -164,7 +165,6 @@ fun OnboardingScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (state.step) {
-                OnboardingStep.LANGUAGE -> LanguageStep()
                 OnboardingStep.WELCOME -> WelcomeStep()
                 OnboardingStep.LOCATION -> LocationStep(
                     query = state.locationQuery,
@@ -185,7 +185,6 @@ fun OnboardingScreen(
             Button(
                 onClick = {
                     when (state.step) {
-                        OnboardingStep.LANGUAGE -> vm.nextStep()
                         OnboardingStep.WELCOME -> vm.nextStep()
                         OnboardingStep.LOCATION -> {
                             if (state.locationQuery.isNotBlank()) {
@@ -221,7 +220,6 @@ fun OnboardingScreen(
             ) {
                 Text(
                     when (state.step) {
-                        OnboardingStep.LANGUAGE -> stringResource(R.string.onboarding_continue)
                         OnboardingStep.PRAYER_NOTIFICATIONS -> stringResource(R.string.onboarding_get_started)
                         OnboardingStep.NOTIFICATIONS -> stringResource(R.string.onboarding_enable_notifications)
                         OnboardingStep.LOCATION -> stringResource(R.string.onboarding_continue)
@@ -229,7 +227,7 @@ fun OnboardingScreen(
                     }
                 )
             }
-            if (state.step != OnboardingStep.WELCOME && state.step != OnboardingStep.LANGUAGE) {
+            if (state.step != OnboardingStep.WELCOME) {
                 OnboardingSecondaryButton(
                     onClick = {
                         if (state.step == OnboardingStep.NOTIFICATIONS) {
@@ -456,84 +454,4 @@ private fun PrayerNotificationsStep(
     }
 }
 
-@Composable
-private fun LanguageStep() {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val languageStore = remember { app.kamy.saatApp.infrastructure.preferences.AppLanguageStore.from(context) }
-    val currentLang by languageStore.currentFlow.collectAsState()
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(R.string.onboarding_language_title),
-            style = MaterialTheme.typography.headlineMedium,
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(12.dp))
-        Text(
-            text = stringResource(R.string.onboarding_language_body),
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.White.copy(alpha = 0.85f),
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(28.dp))
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            app.kamy.saatApp.core.locale.AppLanguage.entries.forEach { lang ->
-                val isSelected = lang == currentLang
-                val flagRes = when (lang) {
-                    app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN -> R.drawable.ic_flag_id
-                    app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> R.drawable.ic_flag_en
-                    app.kamy.saatApp.core.locale.AppLanguage.MALAY -> R.drawable.ic_flag_ms
-                }
-                androidx.compose.material3.Surface(
-                    onClick = { languageStore.set(lang) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = if (isSelected) Color.White else Color.White.copy(alpha = 0.12f),
-                    border = BorderStroke(
-                        width = if (isSelected) 2.dp else 1.dp,
-                        color = if (isSelected) SaatColors.GoldBright else Color.White.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        androidx.compose.material3.Icon(
-                            painter = androidx.compose.ui.res.painterResource(flagRes),
-                            contentDescription = null,
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(width = 30.dp, height = 22.dp)
-                        )
-                        Spacer(Modifier.width(16.dp))
-                        Text(
-                            text = stringResource(lang.labelRes),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) SaatColors.DeepEmerald else Color.White,
-                            modifier = Modifier.weight(1f)
-                        )
-                        if (isSelected) {
-                            Text(
-                                text = "✓",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = SaatColors.DeepEmerald
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}

@@ -21,12 +21,20 @@ import java.util.concurrent.Executors
 class SaatApplication : Application() {
 
     override fun attachBaseContext(base: Context) {
-        val language = AppLanguageStore.from(base).current()
-        super.attachBaseContext(AppLocale.wrap(base, language))
+        super.attachBaseContext(base)
     }
 
     override fun onCreate() {
         super.onCreate()
+        runCatching {
+            val language = AppLanguageStore.from(this).current()
+            val locale = java.util.Locale.forLanguageTag(language.tag)
+            java.util.Locale.setDefault(locale)
+            val config = android.content.res.Configuration(resources.configuration)
+            config.setLocale(locale)
+            @Suppress("DEPRECATION")
+            resources.updateConfiguration(config, resources.displayMetrics)
+        }
         NotificationChannels.ensureAll(this)
         NetworkDebugger.install(this)
         runCatching { DailyVerseNotificationScheduler.reschedule(this) }

@@ -52,19 +52,22 @@ class MainActivity : ComponentActivity() {
             val languageStore = androidx.compose.runtime.remember { AppLanguageStore.from(this@MainActivity) }
             val currentLang by languageStore.currentFlow.collectAsState()
 
-            val localizedContext = androidx.compose.runtime.remember(currentLang) {
-                AppLocale.wrap(this@MainActivity, currentLang)
-            }
             val localizedConfiguration = androidx.compose.runtime.remember(currentLang) {
+                val locale = java.util.Locale.forLanguageTag(currentLang.tag)
+                java.util.Locale.setDefault(locale)
                 android.content.res.Configuration(resources.configuration).apply {
-                    setLocale(java.util.Locale.forLanguageTag(currentLang.tag))
+                    setLocale(locale)
                 }
+            }
+
+            androidx.compose.runtime.LaunchedEffect(currentLang) {
+                @Suppress("DEPRECATION")
+                resources.updateConfiguration(localizedConfiguration, resources.displayMetrics)
             }
 
             var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
 
             androidx.compose.runtime.CompositionLocalProvider(
-                androidx.compose.ui.platform.LocalContext provides localizedContext,
                 androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration
             ) {
                 SaatTheme(theme = currentTheme) {

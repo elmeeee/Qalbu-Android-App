@@ -101,13 +101,15 @@ fun TodayHeader(
     }
 
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .tabContentStatusBarInset(),
+        modifier = modifier.fillMaxWidth(),
         color = SaatColors.PureWhite,
         shadowElevation = 2.dp
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .tabContentStatusBarInset()
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
