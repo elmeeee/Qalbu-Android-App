@@ -863,12 +863,6 @@ private fun ManzilVerseBlock(
         verse.translations?.firstOrNull()?.text?.let { translation ->
             val normalized = translation.trim()
             if (normalized.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.manzil_meaning_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = SaatColors.Teal
-                )
                 ManzilTranslationView(text = normalized)
             }
         }

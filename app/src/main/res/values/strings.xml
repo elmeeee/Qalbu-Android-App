@@ -649,7 +649,7 @@
     <string name="tahajud_dhikr_body">After salam: Astaghfirullah ×3, Allahumma antas salam…, then 33× SubhanAllah, 33× Alhamdulillah, 33× Allahu Akbar.</string>
     <string name="tahajud_dua_title">Personal dua</string>
     <string name="tahajud_dua_body">The last third of the night is when Allah descends (in a manner befitting Him) and answers dua. Ask for forgiveness, guidance, family, and the ummah. Speak from the heart in any language.</string>
-    <string name="qibla_account_subtitle">AR camera or 3D compass to Kaaba</string>
+    <string name="qibla_account_subtitle">AR Qibla</string>
     <string name="qibla_mode_ar">AR camera</string>
     <string name="qibla_mode_3d">3D compass</string>
     <string name="zakat_account_subtitle">Live gold price · 2.5% nisab rules</string>

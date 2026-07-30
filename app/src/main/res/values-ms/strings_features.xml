@@ -104,7 +104,7 @@
     <string name="prayer_widget_next_title">Solat seterusnya</string>
     <string name="prayer_widget_schedule_desc">Lima waktu solat hari ini</string>
     <string name="prayer_widget_schedule_title">Jadual solat</string>
-    <string name="qibla_account_subtitle">Kamera AR atau kompas 3D ke Kaabah</string>
+    <string name="qibla_account_subtitle">Kiblat AR</string>
     <string name="qibla_aligned">Menghadap kiblat — sudah sejajar</string>
     <string name="qibla_bearing">%1$d° ke Kaabah</string>
     <string name="qibla_bearing_compass">🕋 %1$d°</string>
