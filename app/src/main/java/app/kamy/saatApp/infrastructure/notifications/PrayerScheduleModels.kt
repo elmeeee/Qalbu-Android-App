@@ -61,6 +61,6 @@ data class PrayerNotificationScheduleOptions(
     val tahajudMinute: Int = 30,
     val tahajudDays: Set<Int> = (1..7).toSet()
 ) {
-    fun isAdzanEnabledFor(prayerName: String): Boolean = prayerName in enabledAdzanPrayers
+    fun isAdzanEnabledFor(prayerName: String): Boolean = adhanSoundEnabled && (prayerName in enabledAdzanPrayers)
 }
 
