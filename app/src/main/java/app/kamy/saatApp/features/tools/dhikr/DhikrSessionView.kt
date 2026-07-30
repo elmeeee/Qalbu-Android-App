@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection")
+
 package app.kamy.saatApp.features.tools.dhikr
 
 import androidx.compose.animation.AnimatedContent
@@ -34,7 +36,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
@@ -130,9 +131,13 @@ fun DhikrSessionView(
         return
     }
 
-    var currentItemIndex by remember(state.selectedSlug) { mutableIntStateOf(0) }
-    var currentCount by remember(state.selectedSlug, currentItemIndex) { mutableIntStateOf(0) }
-    var isCompleted by remember(state.selectedSlug) { mutableStateOf(false) }
+    val currentItemIndexState = remember(state.selectedSlug) { mutableIntStateOf(0) }
+    val currentCountState = remember(state.selectedSlug) { mutableIntStateOf(0) }
+    val isCompletedState = remember(state.selectedSlug) { mutableStateOf(false) }
+
+    var currentItemIndex by currentItemIndexState
+    var currentCount by currentCountState
+    var isCompleted by isCompletedState
     var pulseKey by remember { mutableIntStateOf(0) }
 
     val stepperListState = rememberLazyListState()
@@ -145,9 +150,9 @@ fun DhikrSessionView(
     if (isCompleted) {
         DhikrCompletionScreen(
             onReset = {
-                currentItemIndex = 0
-                currentCount = 0
-                isCompleted = false
+                currentItemIndexState.intValue = 0
+                currentCountState.intValue = 0
+                isCompletedState.value = false
             },
             onClose = onClose
         )
@@ -160,7 +165,7 @@ fun DhikrSessionView(
     fun incrementCount() {
         if (isCompleted || currentCount >= activeItem.repeatCount) return
         val nextCount = currentCount + 1
-        currentCount = nextCount
+        currentCountState.intValue = nextCount
         pulseKey++
         tapHaptic()
 
@@ -169,10 +174,10 @@ fun DhikrSessionView(
             scope.launch {
                 delay(320)
                 if (currentItemIndex < sessionItems.size - 1) {
-                    currentItemIndex++
-                    currentCount = 0
+                    currentItemIndexState.intValue = currentItemIndex + 1
+                    currentCountState.intValue = 0
                 } else {
-                    isCompleted = true
+                    isCompletedState.value = true
                 }
             }
         }
@@ -257,7 +262,12 @@ fun DhikrSessionView(
                         if (!noteClean.isNullOrBlank()) {
                             noteClean
                         } else {
-                            item.latin.take(16).ifBlank { "Zikir ${index + 1}" }
+                            val latinClean = item.latin.trim()
+                            if (latinClean.length > 20) {
+                                latinClean.take(20).trimEnd('-', ' ') + "…"
+                            } else {
+                                latinClean.ifBlank { "Zikir ${index + 1}" }
+                            }
                         }
                     }
 
@@ -370,32 +380,23 @@ fun DhikrSessionView(
                             }
                             .padding(20.dp)
                     ) {
-                        // Header info badge inside card
+                        // Header info badge inside card - clean badge and notes
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            if (!item.bundleTitle.isNullOrBlank() && item.bundleTitle != state.selectedTitle) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                            ) {
                                 Text(
-                                    text = item.bundleTitle,
+                                    text = "Target: ${item.repeatCount}x",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = SaatColors.Teal,
-                                    fontWeight = FontWeight.Bold
+                                    color = SaatColors.DeepEmerald,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
-                            } else {
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
-                                ) {
-                                    Text(
-                                        text = "Target: ${item.repeatCount}x",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = SaatColors.DeepEmerald,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    )
-                                }
                             }
 
                             val displayNotes = remember(item.notes) {
@@ -405,10 +406,13 @@ fun DhikrSessionView(
                                     ?.trim()
                             }
                             if (!displayNotes.isNullOrBlank()) {
+                                Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = displayNotes,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = SaatColors.Slate500
+                                    color = SaatColors.Slate500,
+                                    textAlign = TextAlign.End,
+                                    modifier = Modifier.weight(1f, fill = false)
                                 )
                             }
                         }
@@ -493,88 +497,119 @@ fun DhikrSessionView(
                             }
                         }
 
-                        // Bottom padding for clear scrolling above floating button
-                        Spacer(Modifier.height(115.dp))
+                        Spacer(Modifier.height(16.dp))
                     }
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
 
-            // Bottom Navigation & Controls Row
-            Row(
+            // Non-Overlapping Integrated Bottom Controller Bar
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 54.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(bottom = 8.dp),
+                shape = RoundedCornerShape(24.dp),
+                color = SaatColors.PureWhite,
+                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                shadowElevation = 2.dp
             ) {
-                IconButton(
-                    onClick = {
-                        if (currentItemIndex > 0) {
-                            currentItemIndex--
-                            currentCount = 0
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Previous Item Button
+                    IconButton(
+                        onClick = {
+                            if (currentItemIndex > 0) {
+                                currentItemIndex--
+                                currentCount = 0
+                            }
+                        },
+                        enabled = currentItemIndex > 0,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (currentItemIndex > 0) SaatColors.DeepEmerald.copy(alpha = 0.1f)
+                                else Color(0xFFF1F5F9)
+                            )
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.dhikr_session_prev),
+                            tint = if (currentItemIndex > 0) SaatColors.DeepEmerald else SaatColors.Slate500.copy(alpha = 0.4f)
+                        )
+                    }
+
+                    // Interactive Tasbih Counter Button (Center)
+                    Box(
+                        modifier = Modifier
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                incrementCount()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        PremiumTasbihCounter(
+                            count = currentCount,
+                            target = activeItem.repeatCount,
+                            pulseKey = pulseKey,
+                            subtitle = "${activeItem.repeatCount}x",
+                            counterSize = 76.dp
+                        )
+                    }
+
+                    // Controls Right Group (Reset & Next)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Reset button
+                        IconButton(
+                            onClick = { currentCount = 0 },
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFF1F5F9))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = stringResource(R.string.dhikr_session_reset_count),
+                                tint = SaatColors.Slate500,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
-                    },
-                    enabled = currentItemIndex > 0
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.dhikr_session_prev),
-                        tint = if (currentItemIndex > 0) SaatColors.DeepEmerald else SaatColors.Slate500.copy(alpha = 0.4f)
-                    )
-                }
 
-                // Reset button
-                IconButton(
-                    onClick = { currentCount = 0 }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = stringResource(R.string.dhikr_session_reset_count),
-                        tint = SaatColors.Slate500
-                    )
-                }
-
-                // Skip / Next button
-                IconButton(
-                    onClick = {
-                        if (currentItemIndex < sessionItems.size - 1) {
-                            currentItemIndex++
-                            currentCount = 0
-                        } else {
-                            isCompleted = true
+                        // Next / Complete button
+                        IconButton(
+                            onClick = {
+                                if (currentItemIndex < sessionItems.size - 1) {
+                                    currentItemIndex++
+                                    currentCount = 0
+                                } else {
+                                    isCompleted = true
+                                }
+                            },
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(SaatColors.DeepEmerald)
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = stringResource(R.string.dhikr_session_next),
+                                tint = SaatColors.PureWhite
+                            )
                         }
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = stringResource(R.string.dhikr_session_next),
-                        tint = SaatColors.DeepEmerald
-                    )
                 }
             }
-        }
-
-        // Floating Interactive Tasbih Counter Button
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 54.dp, end = 20.dp)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    incrementCount()
-                }
-        ) {
-            PremiumTasbihCounter(
-                count = currentCount,
-                target = activeItem.repeatCount,
-                pulseKey = pulseKey,
-                subtitle = "${activeItem.repeatCount}x",
-                counterSize = 92.dp
-            )
         }
     }
 }

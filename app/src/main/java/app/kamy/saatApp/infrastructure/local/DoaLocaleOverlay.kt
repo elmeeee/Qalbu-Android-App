@@ -4,6 +4,7 @@ import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.model.DhikrBundle
 import app.kamy.saatApp.domain.model.DoaCatalogEntry
 import app.kamy.saatApp.domain.model.DoaItem
+import app.kamy.saatApp.domain.model.FlexibleTranslationData
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,12 +20,15 @@ class DoaLocaleOverlay @Inject constructor() {
     }
 
     fun localizeDoas(items: List<DoaItem>, language: AppLanguage): List<DoaItem> {
-        val overlay = overlayFor(language) ?: return items
+        val overlay = overlayFor(language)
         return items.map { item ->
-            val localized = item.id?.let { overlay.doa[it] }
+            val localized = item.id?.let { overlay?.doa?.get(it) }
+            val resolvedTranslation = localized?.translation
+                ?: item.translationData?.resolve(language)
+                ?: item.translation
             item.copy(
                 title = localized?.title ?: item.title,
-                translation = localized?.translation ?: item.translation
+                translationData = FlexibleTranslationData(defaultTranslation = resolvedTranslation, map = item.translationData?.map)
             )
         }
     }
@@ -34,14 +38,19 @@ class DoaLocaleOverlay @Inject constructor() {
         bundles: List<DhikrBundle>,
         language: AppLanguage
     ): List<DhikrBundle> {
-        val overlay = overlayFor(language) ?: return bundles
+        val overlay = overlayFor(language)
         return bundles.mapIndexed { bundleIndex, bundle ->
             val titleKey = "$slug:$bundleIndex"
-            val localizedTitle = overlay.dhikrTitles[titleKey] ?: bundle.title
+            val localizedTitle = overlay?.dhikrTitles?.get(titleKey) ?: bundle.title
             val localizedContent = bundle.content.orEmpty().mapIndexed { contentIndex, item ->
                 val contentKey = "$slug:$bundleIndex:$contentIndex"
-                val localized = overlay.dhikrContent[contentKey]
-                item.copy(translation = localized?.translation ?: item.translation)
+                val localized = overlay?.dhikrContent?.get(contentKey)
+                val resolvedTranslation = localized?.translation
+                    ?: item.translationData?.resolve(language)
+                    ?: item.translation
+                item.copy(
+                    translationData = FlexibleTranslationData(defaultTranslation = resolvedTranslation, map = item.translationData?.map)
+                )
             }
             bundle.copy(title = localizedTitle, content = localizedContent)
         }

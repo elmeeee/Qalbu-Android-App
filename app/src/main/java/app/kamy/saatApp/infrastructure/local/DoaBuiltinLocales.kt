@@ -5,11 +5,14 @@ internal object DoaBuiltinLocales {
         categories = mapOf(
             "daily" to "Daily Supplications",
             "selected" to "Selected Supplications",
-            "doa-ketika-sakit" to "When Ill",
+            "doa-ketika-sakit" to "Supplications When Ill",
             "morning-dhikir" to "Morning Dhikr",
             "evening-dhikir" to "Evening Dhikr",
             "dhikir-after-salah" to "Dhikr After Prayer",
-            "sleep-dhikir" to "Dhikr Before Sleep"
+            "sleep-dhikir" to "Dhikr Before Sleep",
+            "fadhilahdoa" to "Virtues of Supplication",
+            "dzikiralmathuratkubro" to "Al-Mathurat (Kubra)",
+            "dzikiralmathuratsughro" to "Al-Mathurat (Sughra)"
         ),
         doa = mapOf(
             "66b1944156f9d2cc8301cd3d" to entry(
@@ -127,13 +130,35 @@ internal object DoaBuiltinLocales {
             "68c8eac58ed36eba30085c43" to entry(
                 "Supplication for complete healing",
                 "O Allah, Lord of mankind, remove the harm and heal; You are the Healer. There is no healing except Your healing, a healing that leaves no illness."
+            ),
+            "fadhilah_001" to entry(
+                "Supplication is the Most Noble Act Before Allah",
+                "There is nothing more honorable in the sight of Allah Ta'ala than supplication."
+            ),
+            "fadhilah_002" to entry(
+                "Condition for Answered Supplication: Certainty & Devotion",
+                "Call upon Allah while you are certain of being answered, and know that Allah does not answer a supplication from a heedless, distracted heart."
+            ),
+            "fadhilah_003" to entry(
+                "Three Forms of Answered Supplication for a Muslim",
+                "There is no Muslim who supplicates to Allah with a prayer that does not involve sin or severing ties of kinship, except that Allah grants him one of three things: [1] Immediate fulfillment, [2] Stored reward in the Hereafter, or [3] Warding off an equivalent evil."
+            ),
+            "fadhilah_004" to entry(
+                "Command to Supplicate & Warning Against Arrogance",
+                "And your Lord says: 'Call upon Me; I will respond to you. Indeed, those who disdain My worship will enter Hell [rendered] contemptible.'"
+            ),
+            "quran_healing_ayyuub" to entry(
+                "Prophet Ayyub's Prayer for Healing",
+                "My Lord, indeed adversity has touched me, and You are the Most Merciful of the merciful."
             )
         ),
         dhikrTitles = mapOf(
             "morning-dhikir:0" to "Morning Dhikr",
             "evening-dhikir:0" to "Evening Dhikr",
             "dhikir-after-salah:0" to "Dhikr After Obligatory Prayer",
-            "sleep-dhikir:0" to "Dhikr Before Sleep"
+            "sleep-dhikir:0" to "Dhikr Before Sleep",
+            "dzikiralmathuratkubro:0" to "Al-Mathurat Kubra",
+            "dzikiralmathuratsughro:0" to "Al-Mathurat Sughra"
         ),
         dhikrContent = mapOf(
             // Morning Dhikr
@@ -207,22 +232,26 @@ internal object DoaBuiltinLocales {
             categories = mapOf(
                 "daily" to "Doa Harian",
                 "selected" to "Doa Pilihan",
-                "doa-ketika-sakit" to "Ketika Sakit",
+                "doa-ketika-sakit" to "Doa Ketika Sakit",
                 "morning-dhikir" to "Zikir Pagi",
                 "evening-dhikir" to "Zikir Petang",
                 "dhikir-after-salah" to "Zikir Selepas Solat",
                 "sleep-dhikir" to "Zikir Sebelum Tidur",
+                "fadhilahdoa" to "Fadhilah Doa",
                 "dzikiralmathuratkubro" to "Dzikir Al-Mathurat Kubro",
                 "dzikiralmathuratsughro" to "Dzikir Al-Mathurat Sugro"
             ),
-            doa = english.doa.mapValues { (_, value) ->
-                malayDoa[value.title] ?: value
-            },
+            doa = english.doa.mapNotNull { (key, value) ->
+                val m = malayDoa[value.title]
+                if (m != null) key to m else null
+            }.toMap(),
             dhikrTitles = mapOf(
                 "morning-dhikir:0" to "Zikir Pagi",
                 "evening-dhikir:0" to "Zikir Petang",
                 "dhikir-after-salah:0" to "Zikir Selepas Solat Fardu",
-                "sleep-dhikir:0" to "Zikir Sebelum Tidur"
+                "sleep-dhikir:0" to "Zikir Sebelum Tidur",
+                "dzikiralmathuratkubro:0" to "Dzikir Al-Mathurat Kubro",
+                "dzikiralmathuratsughro:0" to "Dzikir Al-Mathurat Sugro"
             ),
             dhikrContent = mapOf(
                 // Morning Dhikr

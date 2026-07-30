@@ -83,4 +83,28 @@ class LocalDoaDataSourceTest {
         assertNotNull("Translation should be parsed", firstItem?.translation)
         assertTrue("Translation should not be blank", firstItem?.translation?.isNotBlank() == true)
     }
+
+    @Test
+    fun testDoaLocaleOverlayEnglish() {
+        val overlay = DoaLocaleOverlay()
+        val file = File(assetsDir, "duas_fadhilahdoa.json")
+        val response = json.decodeFromString(DoaListResponse.serializer(), file.readText())
+        val items = response.data.orEmpty()
+
+        val localized = overlay.localizeDoas(items, app.kamy.saatApp.core.locale.AppLanguage.ENGLISH)
+        val firstItem = localized.first()
+        assertTrue("English translation should be used", firstItem.translation?.startsWith("There is nothing") == true)
+    }
+
+    @Test
+    fun testDoaLocaleOverlayMalay() {
+        val overlay = DoaLocaleOverlay()
+        val file = File(assetsDir, "duas_fadhilahdoa.json")
+        val response = json.decodeFromString(DoaListResponse.serializer(), file.readText())
+        val items = response.data.orEmpty()
+
+        val localized = overlay.localizeDoas(items, app.kamy.saatApp.core.locale.AppLanguage.MALAY)
+        val firstItem = localized.first()
+        assertTrue("Malay translation should be used", firstItem.translation?.startsWith("Tiada sesuatu") == true)
+    }
 }
