@@ -10,14 +10,12 @@
         <item name="android:windowBackground">@color/al_khatib_screen_background</item>
     </style>
 
-    <!--
-        Android 12+ Splash Screen API theme.
-        Uses a vertical gradient background and a custom icon wrapper
-        that insets the icon to fit within the circle mask.
-    -->
+    <!-- Splash screen: gradient bg with centered logo icon.
+         Works on API 30+ via compat library and API 31+ via platform. -->
     <style name="Theme.Saat.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@drawable/splash_gradient_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wrapper</item>
+        <item name="android:windowBackground">@drawable/splash_gradient_background</item>
         <item name="postSplashScreenTheme">@style/Theme.Saat</item>
     </style>
 </resources>

@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 12+ Splash Screen icon area: 288dp total, 108dp safe zone centered.
-     To render the PNG at ~100dp × 115dp inside the safe zone we need insets:
-     Horizontal inset = (288 - 100) / 2 = 94dp
-     Vertical inset   = (288 - 115) / 2 = 86dp                            -->
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/splash_logo"
-    android:insetLeft="94dp"
-    android:insetTop="86dp"
-    android:insetRight="94dp"
-    android:insetBottom="86dp" />
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center"
+    android:src="@drawable/splash_logo" />
