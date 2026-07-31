@@ -408,6 +408,16 @@
     <string name="daily_verse_occasion_isra_miraj">Isra &amp; Mi\'raj</string>
     <string name="daily_verse_occasion_lailatul_qadr">Lailatul Qadar</string>
     <string name="daily_verse_occasion_jumuah">Jumat</string>
+    <string name="daily_verse_occasion_maulid">Maulid Nabi</string>
+    <string name="daily_verse_occasion_tasyrik">Hari Tasyrik</string>
+    <string name="daily_verse_occasion_ayyamul_bidh">Ayyamul Bidh</string>
+    <string name="daily_verse_occasion_fasting_daud">Puasa Daud</string>
+    <string name="daily_verse_occasion_monday">Renungan Senin</string>
+    <string name="daily_verse_occasion_tuesday">Renungan Selasa</string>
+    <string name="daily_verse_occasion_wednesday">Renungan Rabu</string>
+    <string name="daily_verse_occasion_thursday">Renungan Kamis</string>
+    <string name="daily_verse_occasion_saturday">Renungan Sabtu</string>
+    <string name="daily_verse_occasion_sunday">Renungan Minggu</string>
     <string name="pause">Jeda</string>
     <string name="audio">Audio</string>
     <string name="tafsir">Tafsir</string>

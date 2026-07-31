@@ -354,6 +354,16 @@
     <string name="daily_verse_occasion_isra_miraj">Isra &amp; Mi\'raj</string>
     <string name="daily_verse_occasion_lailatul_qadr">Laylat al-Qadr</string>
     <string name="daily_verse_occasion_jumuah">Jumu\'ah</string>
+    <string name="daily_verse_occasion_maulid">Mawlid Al-Nabi</string>
+    <string name="daily_verse_occasion_tasyrik">Days of Tashreeq</string>
+    <string name="daily_verse_occasion_ayyamul_bidh">Ayyamul Bidh</string>
+    <string name="daily_verse_occasion_fasting_daud">Fasting of Daud</string>
+    <string name="daily_verse_occasion_monday">Monday Reflection</string>
+    <string name="daily_verse_occasion_tuesday">Tuesday Reflection</string>
+    <string name="daily_verse_occasion_wednesday">Wednesday Reflection</string>
+    <string name="daily_verse_occasion_thursday">Thursday Reflection</string>
+    <string name="daily_verse_occasion_saturday">Saturday Reflection</string>
+    <string name="daily_verse_occasion_sunday">Sunday Reflection</string>
     <string name="pause">Pause</string>
     <string name="audio">Audio</string>
     <string name="tafsir">Tafsir</string>

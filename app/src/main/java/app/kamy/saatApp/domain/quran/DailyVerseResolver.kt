@@ -19,6 +19,14 @@ object DailyVerseResolver {
             DailyVersePick("22:37", DailyVerseOccasion.EidAdha)
         ),
         EventRule(
+            listOf("tasyrik", "tashreeq"),
+            DailyVersePick("2:203", DailyVerseOccasion.Tasyrik)
+        ),
+        EventRule(
+            listOf("maulid", "mawlid", "kelahiran nabi"),
+            DailyVersePick("21:107", DailyVerseOccasion.Maulid)
+        ),
+        EventRule(
             listOf("isra", "mi'raj", "miraj", "isra miraj"),
             DailyVersePick("17:1", DailyVerseOccasion.IsraMiraj)
         ),
@@ -31,7 +39,7 @@ object DailyVerseResolver {
             DailyVersePick("97:3", DailyVerseOccasion.LailatulQadr)
         ),
         EventRule(
-            listOf("asyura", "ashura", "asyuro"),
+            listOf("asyura", "ashura", "asyuro", "tasua", "tasu'a"),
             DailyVersePick("5:54", DailyVerseOccasion.Ashura)
         ),
         EventRule(
@@ -41,6 +49,14 @@ object DailyVerseResolver {
         EventRule(
             listOf("arafah", "arafat", "wukuf", "hajj", "haji"),
             DailyVersePick("2:198", DailyVerseOccasion.Hajj)
+        ),
+        EventRule(
+            listOf("ayyamul bidh", "puasa putih"),
+            DailyVersePick("2:184", DailyVerseOccasion.AyyamulBidh)
+        ),
+        EventRule(
+            listOf("puasa daud", "daud"),
+            DailyVersePick("38:17", DailyVerseOccasion.FastDaud)
         ),
         EventRule(
             listOf("ramadan", "ramadhan", "puasa"),
@@ -67,9 +83,42 @@ object DailyVerseResolver {
     fun resolve(context: DailyVerseContext): DailyVersePick {
         matchEvent(context.eventTitle)?.let { return it }
         matchHijriLabel(context.hijriLabel, context.isRamadanSeason)?.let { return it }
-        if (context.dayOfWeek == Calendar.FRIDAY) {
-            return DailyVersePick("62:9", DailyVerseOccasion.Jumuah)
+
+        // Day of week thematic picks
+        when (context.dayOfWeek) {
+            Calendar.FRIDAY -> return DailyVersePick("62:9", DailyVerseOccasion.Jumuah)
+            Calendar.MONDAY -> {
+                val picks = listOf("35:10", "3:133", "2:183")
+                val p = picks[(context.dayOfYear - 1) % picks.size]
+                return DailyVersePick(p, DailyVerseOccasion.Monday)
+            }
+            Calendar.THURSDAY -> {
+                val picks = listOf("3:135", "11:114", "4:110")
+                val p = picks[(context.dayOfYear - 1) % picks.size]
+                return DailyVersePick(p, DailyVerseOccasion.Thursday)
+            }
+            Calendar.TUESDAY -> {
+                val picks = listOf("20:114", "58:11", "31:12")
+                val p = picks[(context.dayOfYear - 1) % picks.size]
+                return DailyVersePick(p, DailyVerseOccasion.Tuesday)
+            }
+            Calendar.WEDNESDAY -> {
+                val picks = listOf("65:3", "14:7", "2:152")
+                val p = picks[(context.dayOfYear - 1) % picks.size]
+                return DailyVersePick(p, DailyVerseOccasion.Wednesday)
+            }
+            Calendar.SATURDAY -> {
+                val picks = listOf("30:21", "4:1", "66:6")
+                val p = picks[(context.dayOfYear - 1) % picks.size]
+                return DailyVersePick(p, DailyVerseOccasion.Saturday)
+            }
+            Calendar.SUNDAY -> {
+                val picks = listOf("3:190", "67:2", "88:17")
+                val p = picks[(context.dayOfYear - 1) % picks.size]
+                return DailyVersePick(p, DailyVerseOccasion.Sunday)
+            }
         }
+
         val index = (context.dayOfYear - 1).coerceAtLeast(0) % curatedRotation.size
         return DailyVersePick(curatedRotation[index], DailyVerseOccasion.Daily)
     }
@@ -96,6 +145,8 @@ object DailyVerseResolver {
                 DailyVersePick("22:37", DailyVerseOccasion.EidAdha)
             text.contains("muharram") ->
                 DailyVersePick("9:36", DailyVerseOccasion.Muharram)
+            text.contains("rabi") && (text.contains("awal") || text.contains("awwal")) ->
+                DailyVersePick("21:107", DailyVerseOccasion.Maulid)
             else -> if (isRamadanSeason) DailyVersePick("2:183", DailyVerseOccasion.Ramadan) else null
         }
     }
