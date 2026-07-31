@@ -32,7 +32,6 @@
     <string name="nav_setting">Setting</string>
     <string name="back">Back</string>
     <string name="loading">Loading…</string>
-    <string name="account">Account</string>
     <string name="locating">Locating…</string>
     <string name="prayer_fajr">Fajr</string>
     <string name="prayer_sunrise">Sunrise</string>
@@ -47,13 +46,11 @@
     <string name="prayer_time_remaining">Time remaining before %1$s</string>
     <string name="prayer_countdown_until">%1$s until prayer %2$s</string>
     <string name="prayer_countdown_passed">%1$s since %2$s adhan</string>
-    <string name="general">General</string>
     <string name="font_size_subtitle">Adjust Arabic &amp; translation</string>
     <string name="prayer_calculation_method">Prayer calculation method</string>
     <string name="adhan_voice">Adhan voice</string>
     <string name="show_translation">Show translation</string>
     <string name="show_transliteration">Show Latin transliteration</string>
-    <string name="reminders">Reminders</string>
     <string name="notif_summary_daily_verse">Daily verse</string>
     <string name="notif_summary_prayer">Prayer</string>
     <string name="notif_summary_imsak">Imsak</string>
@@ -64,10 +61,6 @@
     <string name="notif_summary_kahf">Al-Kahf</string>
     <string name="notif_summary_all_off">All reminders off</string>
     <string name="notif_summary_count">%1$d reminders on</string>
-    <string name="daily_verse">Daily verse</string>
-    <string name="imsak">Imsak</string>
-    <string name="midnight">Midnight</string>
-    <string name="last_third">Last third</string>
     <string name="channel_daily_verse">Daily verse</string>
     <string name="channel_daily_verse_desc">Morning Quran verse reminder</string>
     <string name="channel_prayer">Prayer times</string>
@@ -167,7 +160,6 @@
     <string name="juz_load_failed">Couldn\'t load juz list</string>
     <string name="juz_starts_at">Starts at %1$s</string>
     <string name="one_surah_found">1 surah found</string>
-    <string name="continue_reading">Continue reading</string>
     <string name="today_continue_reading_title">Continue Read Qur’an</string>
     <string name="today_continue_reading_verse">Verse %1$d</string>
     <string name="surah_number">Surah %1$d</string>

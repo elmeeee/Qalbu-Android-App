@@ -31,7 +31,6 @@
     <string name="nav_setting">Tetapan</string>
     <string name="back">Kembali</string>
     <string name="loading">Memuatkan…</string>
-    <string name="account">Akaun</string>
     <string name="locating">Mencari lokasi…</string>
     <string name="prayer_fajr">Subuh</string>
     <string name="prayer_sunrise">Syuruk</string>
@@ -46,14 +45,12 @@
     <string name="prayer_time_remaining">Masa berbaki sebelum %1$s</string>
     <string name="prayer_countdown_until">%1$s menuju waktu solat %2$s</string>
     <string name="prayer_countdown_passed">%1$s azan %2$s telah berlalu</string>
-    <string name="general">Umum</string>
     <string name="font_size_subtitle">Laraskan Arab &amp; terjemahan</string>
     <string name="prayer_calculation_method">Kaedah pengiraan solat</string>
     <string name="adhan_voice">Suara azan</string>
     <string name="show_translation">Tunjuk terjemahan</string>
     <string name="show_transliteration">Tunjuk latin</string>
     <string name="reader_scroll_hint">Tatal untuk latin &amp; terjemahan</string>
-    <string name="reminders">Peringatan</string>
     <string name="notif_summary_daily_verse">Ayat harian</string>
     <string name="notif_summary_prayer">Solat</string>
     <string name="notif_summary_imsak">Imsak</string>
@@ -64,10 +61,6 @@
     <string name="notif_summary_kahf">Al-Kahf</string>
     <string name="notif_summary_all_off">Semua peringatan dimatikan</string>
     <string name="notif_summary_count">%1$d peringatan aktif</string>
-    <string name="daily_verse">Ayat harian</string>
-    <string name="imsak">Imsak</string>
-    <string name="midnight">Tengah malam</string>
-    <string name="last_third">Sepertiga akhir</string>
     <string name="channel_daily_verse">Ayat harian</string>
     <string name="channel_daily_verse_desc">Peringatan ayat Al-Quran pagi</string>
     <string name="channel_prayer">Waktu solat</string>
@@ -164,7 +157,6 @@
     <string name="juz_load_failed">Gagal memuat senarai juz</string>
     <string name="juz_starts_at">Bermula pada %1$s</string>
     <string name="one_surah_found">1 surah dijumpai</string>
-    <string name="continue_reading">Teruskan bacaan</string>
     <string name="today_continue_reading_title">Teruskan Bacaan Al-Quran</string>
     <string name="today_continue_reading_verse">Ayat %1$d</string>
     <string name="surah_number">Surah %1$d</string>

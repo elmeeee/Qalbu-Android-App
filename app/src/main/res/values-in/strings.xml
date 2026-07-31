@@ -41,7 +41,6 @@
 
     <string name="back">Kembali</string>
     <string name="loading">Memuat…</string>
-    <string name="account">Akun</string>
     <string name="locating">Mencari lokasi…</string>
 
 
@@ -60,14 +59,12 @@
     <string name="prayer_countdown_until">%1$s menuju waktu shalat %2$s</string>
     <string name="prayer_countdown_passed">%1$s adzan %2$s telah berlalu</string>
 
-    <string name="general">Umum</string>
     <string name="font_size_subtitle">Atur Arab &amp; terjemahan</string>
     <string name="prayer_calculation_method">Metode perhitungan sholat</string>
     <string name="adhan_voice">Suara adzan</string>
     <string name="show_translation">Tampilkan terjemahan</string>
     <string name="show_transliteration">Tampilkan latin</string>
     <string name="reader_scroll_hint">Gulir untuk latin &amp; terjemahan</string>
-    <string name="reminders">Pengingat</string>
 
     <string name="notif_summary_daily_verse">Ayat harian</string>
     <string name="notif_summary_prayer">Sholat</string>
@@ -80,10 +77,6 @@
     <string name="notif_summary_all_off">Semua pengingat mati</string>
     <string name="notif_summary_count">%1$d pengingat aktif</string>
 
-    <string name="daily_verse">Ayat harian</string>
-    <string name="imsak">Imsak</string>
-    <string name="midnight">Tengah malam</string>
-    <string name="last_third">Sepertiga akhir</string>
 
     <string name="channel_daily_verse">Ayat harian</string>
     <string name="channel_daily_verse_desc">Pengingat ayat Al-Quran pagi</string>
@@ -187,7 +180,6 @@
     <string name="juz_load_failed">Gagal memuat daftar juz</string>
     <string name="juz_starts_at">Mulai dari %1$s</string>
     <string name="one_surah_found">1 surah ditemukan</string>
-    <string name="continue_reading">Lanjutkan baca</string>
     <string name="today_continue_reading_title">Lanjut Baca Qur’an</string>
     <string name="today_continue_reading_verse">Ayat %1$d</string>
     <string name="surah_number">Surah %1$d</string>

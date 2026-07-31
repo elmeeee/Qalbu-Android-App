@@ -384,10 +384,10 @@ fun DhikrSessionView(
                             }
                             .padding(20.dp)
                     ) {
-                        // Header info badge inside card - clean badge and notes
+                        // Header info badge inside card - target count badge
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                            horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
@@ -400,20 +400,6 @@ fun DhikrSessionView(
                                     color = SaatColors.DeepEmerald,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
-                            }
-
-                            val displayNotes = remember(item.notes) {
-                                item.notes?.trim()
-                            }
-                            if (!displayNotes.isNullOrBlank()) {
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = displayNotes,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = SaatColors.Slate500,
-                                    textAlign = TextAlign.End,
-                                    modifier = Modifier.weight(1f, fill = false)
                                 )
                             }
                         }
