@@ -144,26 +144,12 @@ fun ZakatCalculatorScreen(
                 )
             }
             Spacer(Modifier.width(12.dp))
-            Column {
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = SaatColors.GoldDeep.copy(alpha = 0.12f)
-                ) {
-                    Text(
-                        text = "✦ KALKULATOR ZAKAT",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.GoldDeep,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.zakat_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = SaatColors.Slate900
-                )
-            }
+            Text(
+                text = stringResource(R.string.zakat_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = SaatColors.Slate900
+            )
         }
 
         // Scrollable Body Form with Bottom Padding guaranteed above Android Navbar
