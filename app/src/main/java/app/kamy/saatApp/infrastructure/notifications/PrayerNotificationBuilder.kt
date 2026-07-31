@@ -21,7 +21,8 @@ object PrayerNotificationBuilder {
         silent: Boolean = false,
         showStopAdhan: Boolean = false,
         @RawRes adhanSoundRes: Int? = null,
-        customPendingIntent: PendingIntent? = null
+        customPendingIntent: PendingIntent? = null,
+        useFullScreenIntent: Boolean = false
     ): android.app.Notification {
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -43,6 +44,21 @@ object PrayerNotificationBuilder {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+
+        if (useFullScreenIntent) {
+            val fullScreenPendingIntent = PendingIntent.getActivity(
+                context,
+                notificationId + 1_000,
+                app.kamy.saatApp.AdhanAlarmActivity.intent(
+                    context = context,
+                    title = title,
+                    body = body,
+                    prayerName = "tahajud"
+                ),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.setFullScreenIntent(fullScreenPendingIntent, true)
+        }
 
         if (silent) {
             builder.setSilent(true)

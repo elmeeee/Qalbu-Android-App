@@ -371,7 +371,8 @@ object PrayerNotificationScheduler {
         showStopAdhan: Boolean = false,
         @RawRes adhanSoundRes: Int? = null,
         kind: String? = null,
-        customPendingIntent: PendingIntent? = null
+        customPendingIntent: PendingIntent? = null,
+        useFullScreenIntent: Boolean = false
     ) {
         NotificationChannels.ensureAll(context)
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
@@ -384,7 +385,8 @@ object PrayerNotificationScheduler {
             silent = silent,
             showStopAdhan = showStopAdhan,
             adhanSoundRes = adhanSoundRes,
-            customPendingIntent = customPendingIntent
+            customPendingIntent = customPendingIntent,
+            useFullScreenIntent = useFullScreenIntent
         )
         NotificationManagerCompat.from(context).notify(notificationId, notification)
     }
@@ -509,17 +511,20 @@ object PrayerNotificationScheduler {
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
 
-        val compareCal = Calendar.getInstance().apply {
-            timeInMillis = from
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        val fromTime = compareCal.timeInMillis
+        val targetMs = cal.timeInMillis
+        val diff = from - targetMs
 
-        if (cal.timeInMillis <= fromTime) {
-            cal.add(Calendar.DAY_OF_YEAR, 1)
+        return when {
+            // Same minute (e.g., testing for 10:40 while current time is 10:40:15) -> fire in 2 seconds
+            diff in 0L..59_999L -> from + 2000L
+            // Target time is in the past today -> roll over to tomorrow
+            diff > 59_999L -> {
+                cal.add(Calendar.DAY_OF_YEAR, 1)
+                cal.timeInMillis
+            }
+            // Target time is in the future today
+            else -> targetMs
         }
-        return cal.timeInMillis
     }
 
     private fun upcomingWeeklyOccurrences(firstFireAt: Long, now: Long, count: Int): List<Long> {

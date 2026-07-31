@@ -532,6 +532,7 @@ class AccountViewModel @Inject constructor(
 
     fun setTahajudEnabled(enabled: Boolean) {
         prayerNotificationPrefs.setTahajudEnabled(enabled)
+        syncPrayerNotificationState()
         reschedulePrayerNotifications()
     }
 

@@ -84,7 +84,8 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                     silent = false,
                     showStopAdhan = shouldPlayAdhan && adhanRawRes != null,
                     adhanSoundRes = if (shouldPlayAdhan && adhanRawRes != null) adhanRawRes else null,
-                    kind = kind
+                    kind = kind,
+                    useFullScreenIntent = isTahajud
                 )
             }
         }
