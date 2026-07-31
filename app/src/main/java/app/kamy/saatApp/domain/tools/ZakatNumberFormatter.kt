@@ -56,9 +56,9 @@ object ZakatNumberFormatter {
         }
     }
 
-    fun formatCurrency(amount: Double, isMalay: Boolean = false, isIndo: Boolean = true): String {
+    fun formatCurrency(amount: Double, currencySymbol: String = "Rp"): String {
         val rounded = kotlin.math.round(amount).toLong()
         val formatted = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).format(rounded)
-        return "Rp $formatted"
+        return "$currencySymbol $formatted"
     }
 }

@@ -641,6 +641,59 @@ fun NotificationAdhanScreen(
                     showDivider = false
                 )
             }
+
+            if (app.kamy.saatApp.BuildConfig.DEBUG) {
+                Spacer(Modifier.height(16.dp))
+                SettingsSectionHeader("DEBUG ALARM TESTS")
+                SettingsCard {
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    SettingsCustomRow(
+                        iconRes = R.drawable.ic_remainders_custom,
+                        title = "Test Tahajjud Alarm Intent",
+                        subtitle = "Launch AdhanAlarmActivity for Tahajjud",
+                        onClick = {
+                            val intent = app.kamy.saatApp.AdhanAlarmActivity.intent(
+                                context = context,
+                                title = "Waktunya Sholat Tahajjud",
+                                body = "Bangunlah untuk bermunajat kepada Allah SWT",
+                                prayerName = "Tahajjud"
+                            )
+                            context.startActivity(intent)
+                        },
+                        showDivider = true
+                    )
+                    SettingsCustomRow(
+                        iconRes = R.drawable.ic_adhan_on_custom,
+                        title = "Test Subuh Adhan Intent",
+                        subtitle = "Launch AdhanAlarmActivity for Subuh",
+                        onClick = {
+                            val intent = app.kamy.saatApp.AdhanAlarmActivity.intent(
+                                context = context,
+                                title = "Adhan Subuh",
+                                body = "Waktunya Sholat Subuh",
+                                prayerName = "Subuh"
+                            )
+                            context.startActivity(intent)
+                        },
+                        showDivider = true
+                    )
+                    SettingsCustomRow(
+                        iconRes = R.drawable.ic_adhan_on_custom,
+                        title = "Test Dzuhur Adhan Intent",
+                        subtitle = "Launch AdhanAlarmActivity for Dzuhur",
+                        onClick = {
+                            val intent = app.kamy.saatApp.AdhanAlarmActivity.intent(
+                                context = context,
+                                title = "Adhan Dzuhur",
+                                body = "Waktunya Sholat Dzuhur",
+                                prayerName = "Dzuhur"
+                            )
+                            context.startActivity(intent)
+                        },
+                        showDivider = false
+                    )
+                }
+            }
             Spacer(Modifier.height(floatingNavBottomPadding()))
         }
     }

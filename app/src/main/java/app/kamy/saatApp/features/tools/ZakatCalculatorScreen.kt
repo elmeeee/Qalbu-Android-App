@@ -1,5 +1,11 @@
 package app.kamy.saatApp.features.tools
 
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -233,7 +239,7 @@ fun ZakatCalculatorScreen(
                 ZakatType.values().forEach { type ->
                     val isSelected = state.selectedType == type
                     val label = stringResource(if (type == ZakatType.MAAL) R.string.zakat_type_maal else R.string.zakat_type_fitrah)
-                    val icon = if (type == ZakatType.MAAL) Icons.Filled.MonetizationOn else Icons.Filled.RiceBowl
+                    val iconRes = if (type == ZakatType.MAAL) R.drawable.ic_zakat_mal else R.drawable.ic_zakat_fitrah
 
                     Surface(
                         modifier = Modifier
@@ -250,10 +256,10 @@ fun ZakatCalculatorScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = icon,
+                                painter = painterResource(iconRes),
                                 contentDescription = null,
                                 tint = if (isSelected) Color.White else SaatColors.Slate500,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
@@ -294,7 +300,7 @@ fun ZakatCalculatorScreen(
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = if (isIndo) "Harga Emas Logam Mulia Live" else "Live Gold Market Price",
+                                    text = if (isIndo) "Harga Emas Live" else "Live Gold Market Price",
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = SaatColors.Slate800
@@ -335,15 +341,10 @@ fun ZakatCalculatorScreen(
                             state.priceQuote?.let { quote ->
                                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                     Text(
-                                        text = "${ZakatNumberFormatter.formatCurrency(quote.goldPerGramIdr, isMalay = isMalay, isIndo = isIndo)} / gram",
+                                        text = "${ZakatNumberFormatter.formatCurrency(quote.goldPerGramIdr, currencySymbol = state.userCurrencySymbol)} / gram",
                                         style = MaterialTheme.typography.titleLarge,
                                         color = SaatColors.DeepEmerald,
                                         fontWeight = FontWeight.ExtraBold
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.zakat_live_price_source, quote.sourceLabel),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = SaatColors.Slate500
                                     )
                                 }
                             } ?: Text(
@@ -361,8 +362,9 @@ fun ZakatCalculatorScreen(
                         label = stringResource(R.string.zakat_manual_gold_price),
                         value = state.manualGoldPrice,
                         onValueChange = { vm.updateManualGoldPrice(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                        unitBadge = "Rp",
-                        icon = Icons.Filled.MonetizationOn
+                        unitBadge = state.userCurrencySymbol,
+                        iconRes = R.drawable.ic_gold_silver,
+                        iconColor = SaatColors.GoldDeep
                     )
                     Text(
                         text = stringResource(R.string.zakat_manual_price_help),
@@ -375,36 +377,41 @@ fun ZakatCalculatorScreen(
                     label = stringResource(R.string.zakat_cash),
                     value = state.cash,
                     onValueChange = { vm.updateCash(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                    unitBadge = "Rp",
-                    icon = Icons.Filled.AccountBalance
+                    unitBadge = state.userCurrencySymbol,
+                    iconRes = R.drawable.ic_cash_saving,
+                    iconColor = SaatColors.DeepEmerald
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_gold_grams),
                     value = state.goldGrams,
                     onValueChange = { vm.updateGoldGrams(ZakatNumberFormatter.formatDecimalInput(it, isIndonesian = isIndo)) },
                     unitBadge = "gram",
-                    icon = Icons.Filled.MonetizationOn
+                    iconRes = R.drawable.ic_gold_silver,
+                    iconColor = SaatColors.GoldDeep
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_silver_grams),
                     value = state.silverGrams,
                     onValueChange = { vm.updateSilverGrams(ZakatNumberFormatter.formatDecimalInput(it, isIndonesian = isIndo)) },
                     unitBadge = "gram",
-                    icon = Icons.Filled.MonetizationOn
+                    iconRes = R.drawable.ic_gold_silver,
+                    iconColor = Color(0xFF708090)
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_investments),
                     value = state.investments,
                     onValueChange = { vm.updateInvestments(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                    unitBadge = "Rp",
-                    icon = Icons.Filled.Savings
+                    unitBadge = state.userCurrencySymbol,
+                    iconRes = R.drawable.ic_invest,
+                    iconColor = SaatColors.DeepEmerald
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_debts),
                     value = state.debts,
                     onValueChange = { vm.updateDebts(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                    unitBadge = "Rp",
-                    icon = Icons.Filled.CreditCard
+                    unitBadge = state.userCurrencySymbol,
+                    iconRes = R.drawable.ic_debt,
+                    iconColor = Color(0xFFD9534F)
                 )
 
                 Text(
@@ -419,14 +426,16 @@ fun ZakatCalculatorScreen(
                     onValueChange = vm::updateFamilyMembers,
                     keyboardType = KeyboardType.Number,
                     unitBadge = if (isIndo) "orang" else if (isMalay) "orang" else "people",
-                    icon = Icons.Filled.Shield
+                    iconRes = R.drawable.ic_family,
+                    iconColor = SaatColors.DeepEmerald
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_rice_price_per_kg),
                     value = state.ricePricePerKg,
                     onValueChange = { vm.updateRicePricePerKg(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                    unitBadge = "Rp/kg",
-                    icon = Icons.Filled.RiceBowl
+                    unitBadge = "${state.userCurrencySymbol}/kg",
+                    iconRes = R.drawable.ic_rice,
+                    iconColor = SaatColors.GoldDeep
                 )
                 Text(
                     text = stringResource(R.string.zakat_fitrah_note),
@@ -466,7 +475,7 @@ fun ZakatCalculatorScreen(
                                 is ZakatMaalCalculationResult -> {
                                     ResultRow(
                                         stringResource(R.string.zakat_net_wealth),
-                                        ZakatNumberFormatter.formatCurrency(result.zakatableWealth, isMalay = isMalay, isIndo = isIndo)
+                                        ZakatNumberFormatter.formatCurrency(result.zakatableWealth, currencySymbol = state.userCurrencySymbol)
                                     )
 
                                     HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
@@ -502,7 +511,7 @@ fun ZakatCalculatorScreen(
 
                                     ResultRow(
                                         stringResource(R.string.zakat_due),
-                                        ZakatNumberFormatter.formatCurrency(result.zakatDue, isMalay = isMalay, isIndo = isIndo),
+                                        ZakatNumberFormatter.formatCurrency(result.zakatDue, currencySymbol = state.userCurrencySymbol),
                                         highlight = result.meetsNisab
                                     )
 
@@ -527,14 +536,14 @@ fun ZakatCalculatorScreen(
                                     )
                                     ResultRow(
                                         stringResource(R.string.zakat_rice_price_per_kg),
-                                        ZakatNumberFormatter.formatCurrency(result.staplePricePerKg, isMalay = isMalay, isIndo = isIndo)
+                                        ZakatNumberFormatter.formatCurrency(result.staplePricePerKg, currencySymbol = state.userCurrencySymbol)
                                     )
 
                                     HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
 
                                     ResultRow(
                                         stringResource(R.string.zakat_due),
-                                        ZakatNumberFormatter.formatCurrency(result.zakatDue, isMalay = isMalay, isIndo = isIndo),
+                                        ZakatNumberFormatter.formatCurrency(result.zakatDue, currencySymbol = state.userCurrencySymbol),
                                         highlight = true
                                     )
                                 }
@@ -736,22 +745,35 @@ private fun ZakatField(
     onValueChange: (String) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Decimal,
     unitBadge: String? = null,
-    icon: ImageVector? = null
+    iconRes: Int? = null,
+    iconColor: Color = SaatColors.DeepEmerald
 ) {
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val scope = rememberCoroutineScope()
 
+    var textFieldValue by remember(value) {
+        mutableStateOf(
+            TextFieldValue(
+                text = value,
+                selection = TextRange(value.length)
+            )
+        )
+    }
+
     OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = textFieldValue,
+        onValueChange = { newValue ->
+            textFieldValue = newValue
+            onValueChange(newValue.text)
+        },
         label = { Text(label) },
         textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Start),
-        leadingIcon = icon?.let {
+        leadingIcon = iconRes?.let { resId ->
             {
                 Icon(
-                    imageVector = it,
+                    painter = painterResource(resId),
                     contentDescription = null,
-                    tint = SaatColors.DeepEmerald,
+                    tint = iconColor,
                     modifier = Modifier.size(20.dp)
                 )
             }

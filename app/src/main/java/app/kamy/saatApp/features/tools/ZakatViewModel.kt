@@ -19,8 +19,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** Maps device locale country code to the corresponding [ZakatCountry]. Falls back to [ZakatCountry.INDONESIA]. */
-private fun detectZakatCountry(): ZakatCountry = when (Locale.getDefault().country.uppercase()) {
+import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
+
+private fun detectZakatCountry(countryCode: String): ZakatCountry = when (countryCode.uppercase()) {
     "MY" -> ZakatCountry.MALAYSIA
     "SG" -> ZakatCountry.SINGAPORE
     "BN" -> ZakatCountry.BRUNEI
@@ -41,31 +42,95 @@ data class ZakatUiState(
     val priceLoading: Boolean = false,
     val priceError: Boolean = false,
     val result: ZakatCalculationResult? = null,
-    /** Country selected by the user (or auto-detected from locale) for the zakat body directory. */
-    val selectedZakatCountry: ZakatCountry = detectZakatCountry()
+    val userCurrencySymbol: String = "Rp",
+    val userCurrencyCode: String = "IDR",
+    val selectedZakatCountry: ZakatCountry = ZakatCountry.INDONESIA
 )
 
 @HiltViewModel
 class ZakatViewModel @Inject constructor(
-    private val goldPriceRepository: GoldPriceRepository
+    private val goldPriceRepository: GoldPriceRepository,
+    private val locationPrefs: LocationPreferencesStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ZakatUiState())
     val state: StateFlow<ZakatUiState> = _state.asStateFlow()
 
     init {
+        val cCode = detectCountryCode()
+        val cSym = resolveCurrencySymbol(cCode)
+        val cCur = resolveCurrencyCode(cCode)
+        _state.update {
+            it.copy(
+                userCurrencySymbol = cSym,
+                userCurrencyCode = cCur,
+                selectedZakatCountry = detectZakatCountry(cCode)
+            )
+        }
         refreshPrices()
+    }
+
+    private fun detectCountryCode(): String {
+        return locationPrefs.manualLocation()?.countryCode
+            ?: locationPrefs.gpsLocation()?.countryCode
+            ?: Locale.getDefault().country
+            ?: "ID"
+    }
+
+    private fun resolveCurrencyCode(countryCode: String): String = when (countryCode.uppercase()) {
+        "ID" -> "IDR"
+        "MY" -> "MYR"
+        "SG" -> "SGD"
+        "BN" -> "BND"
+        "US" -> "USD"
+        "GB" -> "GBP"
+        "JP" -> "JPY"
+        "SA" -> "SAR"
+        "AE" -> "AED"
+        "AU" -> "AUD"
+        "CA" -> "CAD"
+        else -> try {
+            java.util.Currency.getInstance(Locale("", countryCode)).currencyCode
+        } catch (_: Throwable) {
+            "IDR"
+        }
+    }
+
+    private fun resolveCurrencySymbol(countryCode: String): String {
+        val currencyCode = resolveCurrencyCode(countryCode)
+        return when (currencyCode) {
+            "IDR" -> "Rp"
+            "MYR" -> "RM"
+            "SGD" -> "S$"
+            "BND" -> "B$"
+            "USD" -> "$"
+            "GBP" -> "£"
+            "JPY" -> "¥"
+            "EUR" -> "€"
+            "SAR" -> "SR"
+            "AED" -> "AED"
+            else -> try {
+                java.util.Currency.getInstance(currencyCode).symbol
+            } catch (_: Throwable) {
+                currencyCode
+            }
+        }
     }
 
     fun refreshPrices() {
         viewModelScope.launch {
             _state.update { it.copy(priceLoading = true, priceError = false) }
-            val quote = goldPriceRepository.fetchQuote("IDR")
+            val cCode = detectCountryCode()
+            val cCur = resolveCurrencyCode(cCode)
+            val cSym = resolveCurrencySymbol(cCode)
+            val quote = goldPriceRepository.fetchQuote(cCur)
             _state.update {
                 it.copy(
                     priceLoading = false,
                     priceQuote = quote,
-                    priceError = quote == null
+                    priceError = quote == null,
+                    userCurrencySymbol = cSym,
+                    userCurrencyCode = cCur
                 )
             }
             recompute()

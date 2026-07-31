@@ -104,6 +104,27 @@ class PrayerDashboardViewModel @Inject constructor(
     private var lastRefreshAtMs: Long = 0L
 
     init {
+        viewModelScope.launch {
+            val cached = PrayerDayCache.load(appContext)
+            if (cached != null && cached.timings.isNotEmpty()) {
+                val khgt = runCatching { khgtCalendar.todayInfo() }.getOrNull()
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        timings = cached.timings,
+                        cityName = cached.cityName ?: locationPrefs.displayLabel() ?: "",
+                        hijriLabel = cached.hijriLabel,
+                        gregorianLabel = cached.gregorianLabel,
+                        isOfflineData = true,
+                        khgtToday = khgt,
+                        prayerLastSyncAt = PrayerDayCache.lastSavedAt(appContext)
+                    )
+                }
+                scheduleDayKey = dayKey()
+                recomputeActiveAndCountdown()
+            }
+        }
+
         viewModelScope.launch { refresh() }
         viewModelScope.launch {
             prayerMethodStore.method.drop(1).collect { refresh() }
