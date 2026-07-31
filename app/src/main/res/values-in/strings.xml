@@ -1,37 +1,22 @@
 <resources>
     <string name="app_name">Sāat</string>
 
-    <string name="splash_greeting_arabic">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ</string>
 
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="language_malay">Bahasa Melayu</string>
     <string name="language_settings_title">Bahasa aplikasi</string>
-    <string name="language_settings_subtitle">English, Indonesia, atau Melayu</string>
 
     <!-- Theme Settings -->
-    <string name="theme_settings_title">Warna Tema Aplikasi</string>
-    <string name="theme_settings_subtitle">Ubah warna tema utama</string>
     <string name="theme_emerald">Hijau Zamrud</string>
-    <string name="theme_indigo">Biru Samudra</string>
     <string name="theme_gold">Emas Kerajaan</string>
     <string name="theme_ocean">Biru Samudra</string>
-    <string name="theme_dark">Hitam Midnight</string>
     <string name="theme_rose">Mawar Merah Muda</string>
     <string name="theme_purple">Ungu Lavender</string>
     <string name="theme_orange">Jingga Senja</string>
     <string name="theme_red">Merah Hati</string>
-    <string name="theme_custom">Palet Warna Kustom</string>
 
     <!-- Notification & Sound Settings -->
-    <string name="adhan_sound">Suara Adzan</string>
-    <string name="adhan_sound_subtitle">Mainkan suara panggilan shalat saat waktu tiba</string>
-    <string name="surah_reminders_settings_title">Peringatan Membaca Surah</string>
-    <string name="surah_reminders_settings_subtitle">Kustomisasi waktu pengingat untuk Yasin, Al-Kahf, dan surah lainnya</string>
-    <string name="fast_mon_thu">Puasa Senin &amp; Kamis</string>
-    <string name="fast_mon_thu_subtitle">Ingatkan puasa sunnah Senin &amp; Kamis pada Minggu malam dan Rabu malam</string>
-    <string name="dhuha_reminder">Shalat Duha</string>
-    <string name="dhuha_reminder_subtitle">Ingatkan shalat sunnah Duha setiap hari pukul 08:30</string>
 
     <string name="sunnah_mon_fast_title">Puasa Sunnah Senin</string>
     <string name="sunnah_mon_fast_body">Besok adalah hari Senin. Jangan lupa persiapkan puasa sunnah Anda.</string>
@@ -48,29 +33,17 @@
     <string name="madhab_hanbali">Hambali</string>
     <string name="madhab_hanafi">Hanafi</string>
     <string name="madhab_settings_title">Mazhab Perhitungan</string>
-    <string name="madhab_settings_subtitle">Ubah mazhab perhitungan waktu salat</string>
 
-    <string name="nav_today">Beranda</string>
     <string name="nav_home">Beranda</string>
-    <string name="nav_reflect">Refleksi</string>
     <string name="nav_spiritual">Spiritual</string>
     <string name="nav_quran">Al-Quran</string>
-    <string name="nav_account">Pengaturan</string>
     <string name="nav_setting">Pengaturan</string>
 
     <string name="back">Kembali</string>
     <string name="loading">Memuat…</string>
-    <string name="signed_in">Sudah masuk</string>
-    <string name="profile_photo">Foto profil</string>
     <string name="account">Akun</string>
     <string name="locating">Mencari lokasi…</string>
-    <string name="today_label">Hari Ini</string>
-    <string name="date_switch_a11y">Tanggal, ketuk untuk ganti kalender</string>
 
-    <string name="greeting_morning">Selamat Pagi</string>
-    <string name="greeting_afternoon">Selamat Siang</string>
-    <string name="greeting_evening">Selamat Sore</string>
-    <string name="greeting_night">Selamat Malam</string>
 
     <string name="prayer_fajr">Subuh</string>
     <string name="prayer_sunrise">Terbit</string>
@@ -86,26 +59,15 @@
     <string name="prayer_time_remaining">Sisa waktu sebelum %1$s</string>
     <string name="prayer_countdown_until">%1$s menuju waktu shalat %2$s</string>
     <string name="prayer_countdown_passed">%1$s adzan %2$s telah berlalu</string>
-    <string name="prayer_fetch_failed">Gagal memuat jadwal sholat</string>
-    <string name="location_failed">Tidak dapat menentukan lokasi</string>
 
     <string name="general">Umum</string>
-    <string name="font_size">Ukuran font</string>
     <string name="font_size_subtitle">Atur Arab &amp; terjemahan</string>
-    <string name="prayer_settings">Pengaturan sholat</string>
     <string name="prayer_calculation_method">Metode perhitungan sholat</string>
     <string name="adhan_voice">Suara adzan</string>
     <string name="show_translation">Tampilkan terjemahan</string>
     <string name="show_transliteration">Tampilkan latin</string>
-    <string name="translator">Penerjemah</string>
-    <string name="translator_hint">Ketuk untuk pilih sumber terjemahan</string>
-    <string name="translator_sync_subtitle">Diselaraskan dengan bahasa app</string>
     <string name="reader_scroll_hint">Gulir untuk latin &amp; terjemahan</string>
-    <string name="notifications">Notifikasi</string>
     <string name="reminders">Pengingat</string>
-    <string name="sign_out">Keluar</string>
-    <string name="sign_in_prompt">Masuk untuk mencadangkan refleksi dan bergabung dengan komunitas.</string>
-    <string name="sign_in">Masuk</string>
 
     <string name="notif_summary_daily_verse">Ayat harian</string>
     <string name="notif_summary_prayer">Sholat</string>
@@ -118,32 +80,10 @@
     <string name="notif_summary_all_off">Semua pengingat mati</string>
     <string name="notif_summary_count">%1$d pengingat aktif</string>
 
-    <string name="notifications_title">Notifikasi</string>
-    <string name="notifications_intro">Pilih pengingat yang Anda inginkan. Adzan bunyi saat waktu sholat aktif.</string>
-    <string name="section_quran">Al-Quran</string>
     <string name="daily_verse">Ayat harian</string>
-    <string name="daily_verse_subtitle">Surah dan terjemahan pagi</string>
-    <string name="reminder_time">Waktu pengingat</string>
-    <string name="section_prayer">Sholat</string>
     <string name="imsak">Imsak</string>
-    <string name="imsak_subtitle">Sebelum Subuh saat puasa</string>
-    <string name="section_night">Malam</string>
     <string name="midnight">Tengah malam</string>
-    <string name="midnight_subtitle">Pertengahan malam</string>
-    <string name="first_third">Sepertiga awal</string>
-    <string name="first_third_subtitle">Istirahat awal malam</string>
     <string name="last_third">Sepertiga akhir</string>
-    <string name="last_third_subtitle">Waktu terbaik tahajud</string>
-    <string name="section_sunnah">Bacaan sunnah</string>
-    <string name="surah_yasin">Surah Yasin</string>
-    <string name="surah_yasin_subtitle">Kamis malam sebelum Jumat</string>
-    <string name="surah_kahf">Surah Al-Kahf</string>
-    <string name="surah_kahf_subtitle">Pengingat bacaan Jumat</string>
-    <string name="prayer_notif_fajr_sub">Adzan saat subuh</string>
-    <string name="prayer_notif_dhuhr_sub">Adzan saat dzuhur</string>
-    <string name="prayer_notif_asr_sub">Adzan saat ashar</string>
-    <string name="prayer_notif_maghrib_sub">Adzan saat maghrib</string>
-    <string name="prayer_notif_isha_sub">Adzan saat isya</string>
 
     <string name="channel_daily_verse">Ayat harian</string>
     <string name="channel_daily_verse_desc">Pengingat ayat Al-Quran pagi</string>
@@ -178,7 +118,6 @@
     <string name="adhan_playback_title">Adzan</string>
     <string name="adhan_playback_body">Memutar panggilan sholat</string>
     <string name="adhan_stop">Stop adzan</string>
-    <string name="adhan_voice_subtitle">Dzuhur, Ashar, Maghrib &amp; Isya</string>
 
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Izinkan alarm tepat agar adzan dan pengingat sholat tiba tepat waktu.</string>
@@ -187,20 +126,11 @@
     <string name="fullscreen_intent_rationale_title">Tampilkan Azan Layar Penuh</string>
     <string name="action_dont_allow">Jangan Izinkan</string>
     <string name="battery_opt_snackbar_message">Di beberapa HP, izinkan baterai tanpa batas agar adzan berjalan saat app ditutup.</string>
-    <string name="battery_opt_snackbar_oem_message">Di HP %1$s: set SĀAT ke Tanpa batas dan aktifkan autostart agar adzan berjalan di latar belakang.</string>
-    <string name="battery_opt_settings_title">Latar belakang &amp; baterai</string>
-    <string name="battery_opt_settings_subtitle">Tanpa batas — disarankan untuk merek HP ini</string>
-    <string name="battery_opt_settings_subtitle_ok">Tanpa batas — pengingat latar belakang aktif</string>
 
-    <string name="tab_placeholder_today">Hari Ini — ayat harian, jadwal sholat, bagikan</string>
-    <string name="tab_placeholder_reflect">Refleksi — feed komunitas</string>
-    <string name="tab_placeholder_quran">Al-Quran — daftar surah dan pembaca</string>
-    <string name="tab_placeholder_account">Akun — masuk, profil, pengaturan</string>
 
     <string name="cancel">Batal</string>
     <string name="save">Simpan</string>
     <string name="try_again">Coba lagi</string>
-    <string name="sign_in_failed">Gagal masuk. Silakan coba lagi.</string>
     <string name="error_no_internet_title">Tidak ada koneksi internet</string>
     <string name="error_no_internet_body">Periksa koneksi Anda lalu coba lagi.</string>
     <string name="error_server_title">Server tidak tersedia</string>
@@ -235,69 +165,17 @@
     <string name="quran_subtitle_juz">30 Juz · Al-Quran</string>
     <string name="quran_tab_surah">Surah</string>
     <string name="quran_tab_juz">Juz</string>
-    <string name="quran_tab_iqra">Iqra</string>
-    <string name="quran_subtitle_iqra">Pelajaran dasar membaca Arab</string>
-    <string name="iqra_lesson_1_title">Iqra 1 — Huruf Arab</string>
-    <string name="iqra_lesson_1_desc">Pelajari huruf Arab dan vokal pendek</string>
-    <string name="iqra_lesson_1_detail">Kenali setiap huruf dan tanda vokal. Latihan membaca suku kata satu huruf.</string>
-    <string name="iqra_lesson_1_content">Latih huruf-huruf Arab dasar: اَ بَ تَ ثَ جَ حَ خَ دَ ذَ رَ زَ سَ شَ صَ ضَ طَ ظَ عَ غَ فَ قَ كَ لَ مَ نَ وَ هَ يَ. Fokus pada pelafalan jelas setiap huruf dengan vokal pendek \"a\" (Fathah).</string>
-    <string name="iqra_lesson_2_title">Iqra 2 — Maddah dan sukun</string>
-    <string name="iqra_lesson_2_desc">Pahami bunyi panjang dan mati</string>
-    <string name="iqra_lesson_2_detail">Pelajari maddah dan sukun. Baca kata-kata sederhana dengan vokal pendek dan panjang.</string>
-    <string name="iqra_lesson_2_content">Pelajari vokal panjang (Mad) seperti بَا, تَا, ثَا dan tanda sukun (mati) seperti أَبْ, أَتْ, أَجْ. Sukun menandakan huruf dilafalkan tanpa suara vokal.</string>
-    <string name="iqra_lesson_3_title">Iqra 3 — Nun dan Mim</string>
-    <string name="iqra_lesson_3_desc">Baca nun sukun, tanwin, dan mim sukun</string>
-    <string name="iqra_lesson_3_detail">Latih aturan baca nun dan mim. Lihat perubahan bunyi sebelum huruf berbeda.</string>
-    <string name="iqra_lesson_3_content">Pelajari tanda vokal ganda (Tanwin) yang berbunyi \"an\", \"in\", \"un\" (misal: بً, تٍ, ثٌ). Latih membaca nun sukun dan mim sukun dengan pelafalan yang jelas.</string>
-    <string name="iqra_lesson_4_title">Iqra 4 — Idgham &amp; Iqlab</string>
-    <string name="iqra_lesson_4_desc">Pelajari aturan penyisipan dan perubahan</string>
-    <string name="iqra_lesson_4_detail">Pelajari idgham, iqlab, dan ikhfa. Baca contoh tanpa audio untuk mengenali aturan secara visual.</string>
-    <string name="iqra_lesson_4_content">Pelajari aturan meleburkan dan mengubah bunyi: Idgham (meleburkan suara huruf, misal مَنْ يَقُولُ dibaca may-yaqul) dan Iqlab (mengubah suara Nun menjadi Mim, misal مِنْ بَعْدِ dibaca mim-ba\'d).</string>
-    <string name="iqra_lesson_5_title">Iqra 5 — Qalqalah</string>
-    <string name="iqra_lesson_5_desc">Latihan huruf qalqalah di akhir kata</string>
-    <string name="iqra_lesson_5_detail">Kenali hentakan qalqalah pada kata. Fokus pada bentuk dan urutan huruf.</string>
-    <string name="iqra_lesson_5_content">Qalqalah memberi hentakan ringan pada huruf ق ط ب ج د saat mati. Latih kata berakhiran seperti أَقْتَبَ.</string>
-    <string name="iqra_lesson_6_title">Iqra 6 — Latihan membaca</string>
-    <string name="iqra_lesson_6_desc">Gabungkan huruf menjadi frasa pendek</string>
-    <string name="iqra_lesson_6_content">Baca kombinasi pendek: بَسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ, أَلْمُ, نُونٌ، مِيمٌ. Fokus pada bentuk huruf dan tanda vokal.</string>
-    <string name="iqra_lesson_6_detail">Baca kombinasi huruf dan kata pendek. Pelajaran ini menguatkan aturan sebelumnya.</string>
-    <string name="iqra_lesson_content_header">Konten pelajaran</string>
-    <string name="iqra_done">Selesai</string>
-    <string name="quran_tab_mushaf">Mushaf</string>
-    <string name="quran_subtitle_mushaf">Mushaf Madani dengan warna Tajweed — geser untuk membaca</string>
-    <string name="mushaf_page_label">Halaman %1$d dari %2$d</string>
-    <string name="mushaf_reader_title">Mushaf</string>
-    <string name="mushaf_tajweed_label">Madani · Tajweed</string>
-    <string name="mushaf_open_page_result">Buka halaman mushaf %1$d</string>
-    <string name="mushaf_open_page_hint">Langsung ke halaman ini di pembaca mushaf</string>
-    <string name="mushaf_load_failed">Gagal memuat halaman mushaf</string>
-    <string name="mushaf_translation_header">Terjemahan</string>
-    <string name="mushaf_continue_title">Lanjutkan baca mushaf</string>
-    <string name="mushaf_continue_subtitle">Halaman %1$d dari %2$d</string>
-    <string name="mushaf_progress_label">%1$d dari %2$d halaman dijelajahi</string>
-    <string name="mushaf_juz_section_title">30 Juz</string>
-    <string name="mushaf_open_juz_hint">Buka halaman awal juz ini</string>
-    <string name="mushaf_open_juz_failed">Gagal membuka juz ini. Periksa koneksi lalu coba lagi.</string>
-    <string name="mushaf_swipe_hint">Geser kiri/kanan untuk membalik halaman</string>
-    <string name="mushaf_swipe_hint_action">Mengerti</string>
-    <string name="mushaf_cloud_synced">Tersinkron ke akun Anda</string>
     <string name="prayer_tracker_title">Sholat</string>
     <string name="prayer_marked_success">%1$s ditandai ✓</string>
     <string name="prayer_tracker_subtitle">%1$d dari %2$d selesai</string>
-    <string name="prayer_challenge_progress">Tantangan: streak %1$d / %2$d hari</string>
     <string name="prayer_streak_current">Streak saat ini</string>
     <string name="prayer_streak_best">Streak terbaik</string>
-    <string name="prayer_streak_best_short">Terbaik: %1$d</string>
-    <string name="prayer_optional_title">Sunnah opsional</string>
     <string name="optional_qiyam">Qiyamul lail</string>
     <string name="optional_mon_thu_fast">Puasa Senin &amp; Kamis</string>
     <string name="optional_ayyamul_bidh">Sahur Ayyamul Bidh</string>
-    <string name="prayer_tracker_month_title">Bulan ini</string>
     <string name="prayer_tracker_open_calendar">Kalender</string>
     <string name="prayer_tracker_calendar_title">Tantangan sholat</string>
     <string name="prayer_tracker_calendar_subtitle">Lacak streak sholat harian</string>
-    <string name="prayer_check_reminders">Pengingat checklist</string>
-    <string name="prayer_check_reminders_hint">Notifikasi jika sholat belum dicentang</string>
     <string name="prayer_check_notif_title">Sudah sholat %1$s?</string>
     <string name="prayer_check_notif_body">Ketuk untuk centang sholat hari ini dan jaga streak.</string>
     <string name="prayer_wrapup_notif_title">Lengkapi sholat hari ini</string>
@@ -307,19 +185,14 @@
     <string name="previous_month">Bulan sebelumnya</string>
     <string name="next_month">Bulan berikutnya</string>
     <string name="juz_load_failed">Gagal memuat daftar juz</string>
-    <string name="juz_verses_count">%1$d ayat</string>
     <string name="juz_starts_at">Mulai dari %1$s</string>
     <string name="one_surah_found">1 surah ditemukan</string>
-    <string name="surahs_found">%1$d surah ditemukan</string>
     <string name="continue_reading">Lanjutkan baca</string>
     <string name="today_continue_reading_title">Lanjut Baca Qur’an</string>
     <string name="today_continue_reading_verse">Ayat %1$d</string>
     <string name="surah_number">Surah %1$d</string>
-    <string name="ayah_number">Ayat %1$d</string>
-    <string name="ayah_label">Ayat %1$s</string>
     <string name="no_matches">Tidak ada hasil</string>
     <string name="search_quran_placeholder">Nama surah, nomor, ayat, atau juz</string>
-    <string name="search_surah_placeholder">Nama surah, nomor, ayat, atau juz</string>
     <string name="search_section_surahs">Surah</string>
     <string name="search_section_verses">Ayat cocok</string>
     <string name="search_verse_result_title">%1$s · Ayat %2$d</string>
@@ -350,29 +223,18 @@
     <string name="transition_prev_surah_default">Surah Sebelumnya</string>
     <string name="transition_btn_start">Mulai Membaca</string>
     <string name="transition_btn_back">Kembali Membaca</string>
-    <string name="verse_reference_result">Surah %1$d · Ayat %2$d</string>
-    <string name="verse_reference_unavailable">Surah belum dimuat</string>
     <string name="location_settings_title">Lokasi sholat</string>
     <string name="location_settings_subtitle">Cari kota atau gunakan GPS untuk jadwal sholat yang akurat.</string>
     <string name="location_city_hint">Kota atau wilayah</string>
     <string name="location_save_city">Simpan lokasi</string>
     <string name="location_use_gps">Gunakan lokasi saat ini</string>
-    <string name="location_change">Ubah lokasi</string>
     <string name="location_search_not_found">Tempat tidak ditemukan. Coba kota terdekat.</string>
-    <string name="prayer_calendar">Kalender sholat</string>
     <string name="prayer_calendar_load_failed">Gagal memuat kalender sholat</string>
-    <string name="prayer_widget_title">Jadwal sholat</string>
-    <string name="prayer_widget_description">Strip jadwal sholat ringkas dengan hitung mundur</string>
     <string name="prayer_widget_empty">Buka SĀAT untuk memuat jadwal sholat</string>
-    <string name="prayer_widget_next">Berikutnya: %1$s pukul %2$s</string>
-    <string name="prayer_widget_grace">%1$s baru saja dimulai</string>
     <string name="prayer_widget_next_label">Sholat berikutnya</string>
     <string name="prayer_widget_in_progress">Sekarang</string>
     <string name="prayer_widget_at_time">Adzan pukul %1$s</string>
-    <string name="prayer_calendar_open">Kalender bulanan</string>
     <string name="prayer_calendar_title">Kalender sholat</string>
-    <string name="onboarding_language_title">Pilih Bahasa Aplikasi</string>
-    <string name="onboarding_language_body">Pilih bahasa aplikasi sesuai kenyamanan Anda</string>
     <string name="onboarding_welcome_title">Selamat datang di SĀAT</string>
     <string name="onboarding_welcome_body">Teman Quran harian Anda — jadwal sholat, refleksi, dan komunitas dalam satu aplikasi.</string>
     <string name="onboarding_location_title">Di mana Anda sholat?</string>
@@ -431,33 +293,14 @@
     <string name="ai_reflection">Refleksi AI</string>
     <string name="ai_share_hint">Draf memakai tafsir &amp; hadits + AI. Edit, lalu bagikan.</string>
     <string name="regenerating">Membuat ulang…</string>
-    <string name="publish_to_reflect">Publikasikan ke Refleksi</string>
-    <string name="publishing">Mempublikasikan…</string>
     <string name="playing">Memutar</string>
     <string name="stop">Stop</string>
 
     <string name="choose_translator">Pilih penerjemah</string>
     <string name="search_translator_placeholder">Cari nama, penulis, atau bahasa</string>
-    <string name="loading_translators">Memuat penerjemah…</string>
     <string name="no_translators">Penerjemah tidak ditemukan.</string>
-    <string name="failed_load_translators">Gagal memuat penerjemah</string>
-    <string name="reminder_time_title">Waktu pengingat</string>
-    <string name="reminder_time_subtitle">Pilih waktu pengingat ayat harian.</string>
-    <string name="calculation_method">Metode perhitungan</string>
-    <string name="loading_methods">Memuat metode…</string>
-    <string name="adhan_voice_title">Suara adzan</string>
-    <string name="subuh_fajr">Subuh (Fajr)</string>
-    <string name="default_label">Default</string>
-    <string name="preview_adhan">Pratinjau adzan</string>
-    <string name="stop_preview">Stop pratinjau</string>
-    <string name="font_scale_small">Kecil</string>
-    <string name="font_scale_medium">Sedang</string>
-    <string name="font_scale_large">Besar</string>
-    <string name="font_scale_extra_large">Sangat besar</string>
-    <string name="font_preview_translation">Dengan nama Allah Yang Maha Pengasih, Maha Penyayang.</string>
     <string name="reading_settings_a11y">Pengaturan baca</string>
 
-    <string name="published_to_reflect">Dipublikasikan ke Refleksi</string>
 
     <string name="location_enable">Aktifkan lokasi</string>
     <string name="location_unavailable">Lokasi tidak tersedia</string>
@@ -465,7 +308,6 @@
     <string name="action_settings">Pengaturan</string>
     <string name="action_allow">Izinkan</string>
     <string name="profile_still_loading">Profil masih dimuat — coba lagi sebentar.</string>
-    <string name="verified">Terverifikasi</string>
     <string name="done">Selesai</string>
     <string name="this_verse">Ayat ini</string>
     <string name="commentary">Tafsir</string>
@@ -484,66 +326,23 @@
     <string name="clear_search_a11y">Hapus pencarian</string>
     <string name="session_expired">Sesi berakhir. Masuk lagi dari Akun.</string>
     <string name="request_failed">Permintaan gagal</string>
-    <string name="verse_load_failed">Gagal memuat ayat</string>
     <string name="verse_of_day_load_failed">Tidak dapat memuat ayat hari ini. Tarik untuk coba lagi.</string>
-    <string name="tafsir_load_failed">Tidak dapat memuat tafsir</string>
-    <string name="hadith_load_failed">Tidak dapat memuat hadits</string>
     <string name="share_generate_failed">Tidak dapat membuat teks bagikan</string>
-    <string name="publish_failed">Publikasi gagal</string>
-    <string name="profile_load_failed">Tidak dapat memuat profil Anda.</string>
     <string name="verses_load_failed">Gagal memuat ayat</string>
     <string name="chapters_load_failed">Gagal memuat surah</string>
 
     <string name="share_allah_says">قَالَ اللَّهُ تَعَالَى</string>
-    <string name="share_verse_ref">(%1$s)</string>
     <string name="share_fallback_reflection">Ayat ini mengingatkan aku buat ngecek hati dulu sebelum ngomong atau bertindak.</string>
     <string name="share_guaranteed_intro">Ayat ini nggak keluar dari pikiran hari ini.</string>
     <string name="share_dua_opener">🤲 Ya Allah,</string>
-    <string name="share_hashtags">#PengingatQuran #BacaRenungBagikan</string>
 
     <plurals name="hadith_count">
         <item quantity="other">%d hadits</item>
     </plurals>
-    <string name="important_days_reminder">Puasa &amp; Hari Penting</string>
-    <string name="important_days_reminder_subtitle">Dapatkan pengingat untuk puasa sunnah dan hari penting mendatang</string>
     <string name="notif_summary_important_days">Puasa &amp; hari penting</string>
 
     <!-- About Developer -->
-    <string name="about">Tentang</string>
-    <string name="about_developer">Tentang Aplikasi</string>
-    <string name="about_app_desc">SĀAT adalah aplikasi pendamping Islami modern dan komprehensif yang dirancang untuk meningkatkan rutinitas ibadah harian Anda. Menampilkan waktu sholat yang akurat, notifikasi adzan, Al-Quran dengan panduan Tajweed berwarna beserta tilawah audio, tantangan pelacakan sholat, dan platform komunitas untuk berbagi serta membaca refleksi keimanan, SĀAT membantu Anda tetap terhubung dengan ibadah di mana saja.</string>
-    <string name="app_details_title">Detail Aplikasi</string>
-    <string name="developer_details_title">Tentang Pengembang</string>
-    <string name="developer_name">Sufiandy Elmy</string>
-    <string name="developer_role">Senior Software Engineer</string>
-    <string name="developer_bio">Sufiandy Elmy adalah seorang Software Engineer asal Indonesia yang berfokus pada pengembangan aplikasi mobile dan sistem full-stack. Ia memiliki pengalaman dalam merancang serta memelihara arsitektur aplikasi berskala besar untuk platform Mobile.</string>
-    <string name="developer_achievement">WWDC21 Swift Student Challenge Winner: Menjadi salah satu pemenang penghargaan global dari Apple Inc. pada ajang Worldwide Developers Conference 2021 melalui inovasi aplikasi berbasis Swift.</string>
-    <string name="developer_achievement_title">Pencapaian</string>
-    <string name="contact_linkedin">LinkedIn</string>
-    <string name="contact_website">Situs Web</string>
-    <string name="contact_github">GitHub</string>
-    <string name="contact_email">Email</string>
-    <string name="tajweed_ghunna_title">Ghunnah</string>
-    <string name="tajweed_ghunna_desc">Dibaca berdengung (masuk ke hidung) dan ditahan selama 2 harakat.</string>
-    <string name="tajweed_idgham_without_ghunna_title">Idgham Bilaghunnah</string>
-    <string name="tajweed_idgham_without_ghunna_desc">Memasukkan huruf ke huruf berikutnya tanpa dengung.</string>
-    <string name="tajweed_idgham_with_ghunna_title">Idgham Bighunnah</string>
-    <string name="tajweed_idgham_with_ghunna_desc">Memasukkan huruf ke huruf berikutnya dengan dengung (2 harakat).</string>
-    <string name="tajweed_idgham_mimi_title">Idgham Mimi (Mutamasilain)</string>
-    <string name="tajweed_idgham_mimi_desc">Pertemuan huruf Mim sukun dengan Mim, dibaca berdengung (2 harakat).</string>
-    <string name="tajweed_iqlab_title">Iqlab</string>
-    <string name="tajweed_iqlab_desc">Mengganti bunyi Nun sukun/Tanwin menjadi Mim samar disertai dengung.</string>
-    <string name="tajweed_ikhfa_title">Ikhfa Haqiqi</string>
-    <string name="tajweed_ikhfa_desc">Membaca Nun sukun/Tanwin secara samar (antara idzhar &amp; idgham) dengan dengung.</string>
-    <string name="tajweed_ikhfa_syafawi_title">Ikhfa Syafawi</string>
-    <string name="tajweed_ikhfa_syafawi_desc">Membaca Mim sukun secara samar ketika bertemu Ba, disertai dengung.</string>
-    <string name="tajweed_qalqalah_title">Qalqalah</string>
-    <string name="tajweed_qalqalah_desc">Memantulkan bunyi huruf dengan jelas saat sukun (mati).</string>
     <!-- Dzikir, Doa, Wudhu -->
-    <string name="title_dzikir_kubro">Dzikir Al-Mathurat Kubro</string>
-    <string name="title_dzikir_sughro">Dzikir Al-Mathurat Sughro</string>
-    <string name="title_fadhilah_doa">Fadhilah Doa</string>
-    <string name="title_wudhu_guide">Panduan Wudhu</string>
 
     <plurals name="chapter_verse_count">
         <item quantity="one">1 ayat</item>
@@ -675,9 +474,6 @@
     <string name="privacy_policy">Kebijakan Privasi</string>
     <string name="terms_and_conditions">Syarat &amp; Ketentuan</string>
 
-    <string name="privacy_policy_effective">Berlaku Sejak: 1 Juli 2026</string>
-    <string name="terms_effective">Berlaku Sejak: 1 Juli 2026</string>
-    <string name="delete_account">Hapus Akun</string>
 
     <!-- Coach Mark -->
     <string name="coach_mark_skip">Lewati</string>
@@ -699,7 +495,6 @@
     <string name="coach_mark_quran_menu_desc">Ketuk untuk mengakses Bookmark, Catatan, Hifz hafalan, Tafsir, dan membagikan audio.</string>
 
     <!-- Force Update -->
-    <string name="force_update_subtitle">Versi baru Qalbu telah tersedia</string>
     <string name="force_update_later_button">Mungkin Nanti</string>
     <string name="force_update_version_info">Versi Baru: %1$s</string>
 
@@ -732,7 +527,6 @@
     <string name="notif_section_other_prayer">Ibadah Lainnya</string>
     <string name="notif_surah_reminders">Pengingat Surah</string>
     <string name="notif_fasting_important_days">Puasa &amp; Hari Penting</string>
-    <string name="notif_mon_thu_fasting">Puasa Senin &amp; Kamis</string>
     <string name="notif_tahajud_remainder">Pengingat Tahajud</string>
     <string name="notif_dhuha_remainder">Pengingat Duha</string>
     <string name="state_on">Aktif</string>
@@ -766,7 +560,6 @@
     <string name="mood_restless">Gelisah &amp; Sulit Tidur</string>
     <string name="mood_guidance">Butuh Petunjuk</string>
     <string name="btn_open_in_quran_reader">Buka di Qur\'an Reader</string>
-    <string name="btn_save_doa_bookmark">Simpan Doa / Bookmark</string>
     <string name="doa_saved_toast">Berhasil disimpan ke Bookmark!</string>
     <string name="adhan_tab_general">Adzan Umum</string>
     <string name="adhan_tab_fajr">Adzan Subuh</string>
