@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
             val pendingRoute by deepLinkRoute
             val currentTheme by themePreferencesStore.themeFlow.collectAsStateWithLifecycle(initialValue = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
             val languageStore = androidx.compose.runtime.remember { AppLanguageStore.from(this@MainActivity) }
-            val currentLang by languageStore.currentFlow.collectAsStateWithLifecycle(initialValue = app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN)
+            val currentLang by languageStore.currentFlow.collectAsStateWithLifecycle()
 
             val localizedConfiguration = androidx.compose.runtime.remember(currentLang) {
                 val locale = java.util.Locale.forLanguageTag(currentLang.tag)
