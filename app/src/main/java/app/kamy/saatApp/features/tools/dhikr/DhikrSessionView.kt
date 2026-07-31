@@ -35,6 +35,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -136,11 +138,11 @@ fun DhikrSessionView(
         return
     }
 
-    val currentItemIndexState = remember(state.selectedSlug) { mutableIntStateOf(0) }
-    val currentCountState = remember(state.selectedSlug) { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(initialPage = 0) { sessionItems.size }
+    val currentItemIndex = pagerState.currentPage
+    val currentCountState = remember(currentItemIndex) { mutableIntStateOf(0) }
     val isCompletedState = remember(state.selectedSlug) { mutableStateOf(false) }
 
-    var currentItemIndex by currentItemIndexState
     var currentCount by currentCountState
     var isCompleted by isCompletedState
     var pulseKey by remember { mutableIntStateOf(0) }
@@ -155,7 +157,7 @@ fun DhikrSessionView(
     if (isCompleted) {
         DhikrCompletionScreen(
             onReset = {
-                currentItemIndexState.intValue = 0
+                scope.launch { pagerState.scrollToPage(0) }
                 currentCountState.intValue = 0
                 isCompletedState.value = false
             },
@@ -164,7 +166,7 @@ fun DhikrSessionView(
         return
     }
 
-    val activeItem = sessionItems[currentItemIndex]
+    val activeItem = sessionItems.getOrNull(currentItemIndex) ?: sessionItems.first()
     val progressPercent = ((currentItemIndex.toFloat() + (currentCount.toFloat() / activeItem.repeatCount.coerceAtLeast(1))) / sessionItems.size.toFloat()).coerceIn(0f, 1f)
 
     fun incrementCount() {
@@ -179,8 +181,7 @@ fun DhikrSessionView(
             scope.launch {
                 delay(320)
                 if (currentItemIndex < sessionItems.size - 1) {
-                    currentItemIndexState.intValue = currentItemIndex + 1
-                    currentCountState.intValue = 0
+                    pagerState.animateScrollToPage(currentItemIndex + 1)
                 } else {
                     isCompletedState.value = true
                 }
@@ -282,8 +283,7 @@ fun DhikrSessionView(
                         modifier = Modifier
                             .clip(RoundedCornerShape(16.dp))
                             .clickable {
-                                currentItemIndex = index
-                                currentCount = 0
+                                scope.launch { pagerState.animateScrollToPage(index) }
                             },
                         shape = RoundedCornerShape(16.dp),
                         color = chipBg,
@@ -346,51 +346,14 @@ fun DhikrSessionView(
 
             Spacer(Modifier.height(14.dp))
 
-            // Main Active Zikir Card - TAP ANYWHERE ON CARD TO INCREMENT
-            Box(
+            // Main Active Zikir Card - SWIPE LEFT/RIGHT OR TAP TO INCREMENT
+            HorizontalPager(
+                state = pagerState,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .pointerInput(Unit) {
-                        var totalDrag = 0f
-                        detectHorizontalDragGestures(
-                            onDragStart = { },
-                            onHorizontalDrag = { change, dragAmount ->
-                                change.consume()
-                                totalDrag += dragAmount
-                            },
-                            onDragEnd = {
-                                if (abs(totalDrag) > 60f) {
-                                    if (totalDrag > 0 && currentItemIndex > 0) {
-                                        currentItemIndex--
-                                        currentCount = 0
-                                    } else if (totalDrag < 0 && currentItemIndex < sessionItems.size - 1) {
-                                        currentItemIndex++
-                                        currentCount = 0
-                                    }
-                                }
-                                totalDrag = 0f
-                            },
-                            onDragCancel = {
-                                totalDrag = 0f
-                            }
-                        )
-                    }
-            ) {
-                AnimatedContent(
-                    targetState = currentItemIndex,
-                    transitionSpec = {
-                        if (targetState > initialState) {
-                            slideInHorizontally { width -> width } + fadeIn() togetherWith
-                                    slideOutHorizontally { width -> -width } + fadeOut()
-                        } else {
-                            slideInHorizontally { width -> -width } + fadeIn() togetherWith
-                                    slideOutHorizontally { width -> width } + fadeOut()
-                        }
-                    },
-                    label = "zikir_card_transition"
-                ) { targetIndex ->
-                    val item = sessionItems[targetIndex]
+            ) { pageIndex ->
+                val item = sessionItems[pageIndex]
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -540,8 +503,7 @@ fun DhikrSessionView(
                     OutlinedButton(
                         onClick = {
                             if (currentItemIndex > 0) {
-                                currentItemIndex--
-                                currentCount = 0
+                                scope.launch { pagerState.animateScrollToPage(currentItemIndex - 1) }
                             }
                         },
                         enabled = currentItemIndex > 0,
@@ -582,8 +544,7 @@ fun DhikrSessionView(
                     Button(
                         onClick = {
                             if (currentItemIndex < sessionItems.size - 1) {
-                                currentItemIndex++
-                                currentCount = 0
+                                scope.launch { pagerState.animateScrollToPage(currentItemIndex + 1) }
                             } else {
                                 isCompleted = true
                             }
@@ -612,10 +573,9 @@ fun DhikrSessionView(
                     }
                 }
             }
-        }
 
-        // Floating Action Tasbih Counter Button (FLOATING FAB)
-        Surface(
+    // Floating Action Tasbih Counter Button (FLOATING FAB)
+    Surface(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 76.dp, end = 20.dp)

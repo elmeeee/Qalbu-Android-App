@@ -49,27 +49,30 @@ object PrayerNotificationScheduler {
         val now = System.currentTimeMillis()
 
         bundle.adzanPrayers.forEachIndexed { index, prayer ->
-                val adhanSoundEnabledForThisPrayer = options.isAdzanEnabledFor(prayer.name)
-                PrayerScheduleBuilder.upcomingOccurrences(
-                    prayer.fireAtMillis,
-                    now,
-                    DAYS_TO_SCHEDULE
-                ).forEachIndexed { offset, fireAt ->
-                        scheduleOneShot(
-                            context = context,
-                            requestCode = PRAYER_REQUEST_BASE + index * 20 + offset,
-                            fireAt = fireAt,
-                            channelId = NotificationChannels.PRAYER_ALERT,
-                            title = prayerTitle(context, prayer.name, fireAt),
-                            body = prayerBody(context, prayer.name),
-                            kind = "prayer_${prayer.name}",
-                            notificationId = NOTIFICATION_ID_BASE + index * 10 + offset,
-                            playAdhan = adhanSoundEnabledForThisPrayer,
-                            prayerName = prayer.name,
-                            useAlarmClock = true
-                        )
-                    }
+            val isPrayerEnabled = options.enabledAdzanPrayers.contains(prayer.name)
+            if (!isPrayerEnabled) return@forEachIndexed
+
+            val adhanSoundEnabledForThisPrayer = options.isAdzanEnabledFor(prayer.name)
+            PrayerScheduleBuilder.upcomingOccurrences(
+                prayer.fireAtMillis,
+                now,
+                DAYS_TO_SCHEDULE
+            ).forEachIndexed { offset, fireAt ->
+                scheduleOneShot(
+                    context = context,
+                    requestCode = PRAYER_REQUEST_BASE + index * 20 + offset,
+                    fireAt = fireAt,
+                    channelId = NotificationChannels.PRAYER_ALERT,
+                    title = prayerTitle(context, prayer.name, fireAt),
+                    body = prayerBody(context, prayer.name),
+                    kind = "prayer_${prayer.name}",
+                    notificationId = NOTIFICATION_ID_BASE + index * 10 + offset,
+                    playAdhan = adhanSoundEnabledForThisPrayer,
+                    prayerName = prayer.name,
+                    useAlarmClock = true
+                )
             }
+        }
  
         if (options.imsakEnabled) {
             bundle.imsak?.let { imsak ->

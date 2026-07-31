@@ -163,26 +163,30 @@ fun DhikrScreen(onBack: () -> Unit) {
                 count = count,
                 target = preset.target,
                 pulseKey = pulseKey,
-                subtitle = stringResource(R.string.dhikr_of_target, preset.target)
+                subtitle = stringResource(R.string.dhikr_of_target, preset.target),
+                counterSize = 220.dp
             )
             Text(
                 text = stringResource(R.string.dhikr_tap_hint),
-                style = MaterialTheme.typography.labelSmall,
-                color = SaatColors.Slate500.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = SaatColors.Slate500.copy(alpha = 0.85f),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = 12.dp)
             )
         }
 
         Spacer(Modifier.height(8.dp))
 
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding(),
             color = SaatColors.PureWhite,
-            shadowElevation = 3.dp,
-            tonalElevation = 1.dp,
-            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+            shadowElevation = 4.dp,
+            tonalElevation = 2.dp,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
             DhikrStatsRow(
                 count = count,

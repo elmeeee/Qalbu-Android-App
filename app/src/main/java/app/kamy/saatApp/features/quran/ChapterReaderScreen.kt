@@ -917,7 +917,14 @@ private fun SaatAyahPage(
                         Triple(parsedWords, parsedWeights, parsedWeights.sum().coerceAtLeast(1f))
                     }
 
-                    val activeWordIndex by remember(isPlayingThisVerse, words, weights, totalWeight) {
+                    val activeWordIndex by remember(
+                        isPlayingThisVerse,
+                        audioPlaybackState?.currentPositionMs,
+                        audioPlaybackState?.progress,
+                        words,
+                        weights,
+                        totalWeight
+                    ) {
                         derivedStateOf {
                             if (!isPlayingThisVerse || words.isEmpty()) {
                                 null
