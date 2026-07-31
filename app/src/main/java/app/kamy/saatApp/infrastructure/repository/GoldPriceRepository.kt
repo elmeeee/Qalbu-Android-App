@@ -42,7 +42,7 @@ class GoldPriceRepository @Inject constructor() {
         return GoldPriceQuote(
             goldPerGramIdr = goldPerGramLocal,
             silverPerGramIdr = silverPerGramLocal,
-            sourceLabel = "Logam Mulia / Harga Emas.net",
+            sourceLabel = "Logam Mulia",
             fetchedAtMillis = System.currentTimeMillis()
         )
     }

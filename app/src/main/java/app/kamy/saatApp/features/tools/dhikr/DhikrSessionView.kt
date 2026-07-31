@@ -151,7 +151,7 @@ fun DhikrSessionView(
 
     // Scroll stepper to active item
     LaunchedEffect(currentItemIndex) {
-        stepperListState.animateScrollToItem((currentItemIndex - 1).coerceAtLeast(0))
+        stepperListState.animateScrollToItem(currentItemIndex)
     }
 
     if (isCompleted) {
@@ -170,7 +170,17 @@ fun DhikrSessionView(
     val progressPercent = ((currentItemIndex.toFloat() + (currentCount.toFloat() / activeItem.repeatCount.coerceAtLeast(1))) / sessionItems.size.toFloat()).coerceIn(0f, 1f)
 
     fun incrementCount() {
-        if (isCompleted || currentCount >= activeItem.repeatCount) return
+        if (isCompleted) return
+        if (currentCount >= activeItem.repeatCount) {
+            scope.launch {
+                if (currentItemIndex < sessionItems.size - 1) {
+                    pagerState.animateScrollToPage(currentItemIndex + 1)
+                } else {
+                    isCompletedState.value = true
+                }
+            }
+            return
+        }
         val nextCount = currentCount + 1
         currentCountState.intValue = nextCount
         pulseKey++
@@ -193,6 +203,12 @@ fun DhikrSessionView(
         modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                incrementCount()
+            }
     ) {
         Column(
             modifier = Modifier
@@ -357,7 +373,6 @@ fun DhikrSessionView(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
                             .clip(RoundedCornerShape(24.dp))
                             .background(SaatColors.PureWhite)
                             .border(
@@ -373,6 +388,7 @@ fun DhikrSessionView(
                             ) {
                                 incrementCount()
                             }
+                            .verticalScroll(rememberScrollState())
                             .padding(20.dp)
                     ) {
                         // Header info badge inside card - target count badge

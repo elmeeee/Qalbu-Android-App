@@ -156,15 +156,15 @@
           "arabic": "لاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ",
           "latin": "Laa ilaaha illallaahu wahdahu laa syariika lah, lahul-mulku wa lahul-hamdu wa huwa 'alaa kulli syai-in qadiir.",
           "translation": {
-            "id": "Tiada sesembahan yang berhak disembah selain Allah Yang Maha Esa, tidak ada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian. Dia Maha Kuasa atas segala sesuatu.",
+            "id": "Tidak ada Tuhan yang berhak disembah selain Allah Yang Maha Esa, tidak ada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian. Dia Maha Kuasa atas segala sesuatu.",
             "ms": "Tiada Tuhan yang berhak disembah melainkan Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian, dan Dia Maha Kuasa atas segala sesuatu.",
             "en": "There is no god but Allah alone, with no partner. To Him belongs the dominion and praise, and He is Able to do all things."
           },
           "fawaid": "Menyempurnakan pahala dzikir ba'da shalat fardhu menjadi 100 kebaikan.",
           "notes": {
-            "id": "Penutup Tahlil (1 kali)",
-            "ms": "Penutup Tahlil (1 kali)",
-            "en": "Closing Tahlil (1 time)"
+            "id": "Dzikir Tauhid",
+            "ms": "Zikir Tauhid",
+            "en": "Dhikr of Tawheed"
           },
           "source": "HR. Muslim no. 597",
           "repeat_count": 1,
@@ -318,7 +318,7 @@
             "ms": "Sesiapa yang bertaqwa kepada Allah, nescaya Dia akan mengadakan baginya jalan keluar, serta memberinya rezeki dari jalan yang tidak disangka-sangka. Dan sesiapa yang bertawakal kepada Allah, nescaya Allah akan mencukupi (keperluannya). Sesungguhnya Allah melaksanakan urusan yang dikehendaki-Nya. Sesungguhnya Allah telah menentukan kadar bagi tiap-tiap sesuatu.",
             "en": "And whoever fears Allah - He will make for him a way out, and will provide for him from where he does not expect. And whoever relies upon Allah - then He is sufficient for him. Indeed, Allah will accomplish His purpose. Allah has already set for everything a [decreed] extent."
           },
-          "fawaid": "Pembuka jalan keluar dari kesulitan hidup dan pemurah rezeki (Ayat Seribu Dinar).",
+          "fawaid": "Pembuka jalan keluar dari kesulitan hidup dan pemurah rezeki (Ayat 1000 Dinar).",
           "notes": "QS. At-Talaq: 2-3.",
           "source": "QS. At-Talaq: 2-3",
           "repeat_count": 1,
@@ -326,9 +326,9 @@
             "custom_duaa"
           ],
           "title": {
-            "id": "Ayat Seribu Dinar",
-            "ms": "Ayat Seribu Dinar",
-            "en": "Thousand Dinar Verse"
+            "id": "Ayat 1000 Dinar",
+            "ms": "Ayat 1000 Dinar",
+            "en": "1000 Dinar Verse"
           }
         },
         {

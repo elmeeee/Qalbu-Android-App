@@ -78,7 +78,7 @@ fun DhikrScreen(onBack: () -> Unit) {
     val chipListState = rememberLazyListState()
 
     LaunchedEffect(selectedIndex) {
-        chipListState.animateScrollToItem((selectedIndex - 1).coerceAtLeast(0))
+        chipListState.animateScrollToItem(selectedIndex)
     }
 
     LaunchedEffect(pulseKey) {

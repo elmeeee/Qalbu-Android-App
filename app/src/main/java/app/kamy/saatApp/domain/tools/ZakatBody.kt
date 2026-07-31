@@ -54,7 +54,7 @@ object ZakatBodyRepository {
         ZakatBody(
             name = "LAZISNU",
             fullName = "Lembaga Amil Zakat Infak Shodaqoh NU",
-            websiteUrl = "https://lazisnu.or.id",
+            websiteUrl = "https://nucare.id/zakat",
             country = ZakatCountry.INDONESIA
         ),
         ZakatBody(

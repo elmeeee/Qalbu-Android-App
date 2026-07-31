@@ -76,6 +76,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material3.LocalTextStyle
+import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kamy.saatApp.R
@@ -100,9 +107,12 @@ fun ZakatCalculatorScreen(
     val state by vm.state.collectAsStateWithLifecycle()
     val result = state.result
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
 
-    val isMalay = remember { Locale.getDefault().language == "ms" || Locale.getDefault().country.equals("MY", ignoreCase = true) }
-    val isIndo = remember { !isMalay }
+    val appLanguageStore = remember { AppLanguageStore.from(context) }
+    val currentLang by appLanguageStore.currentFlow.collectAsStateWithLifecycle()
+    val isMalay = currentLang == AppLanguage.MALAY
+    val isIndo = currentLang == AppLanguage.INDONESIAN
 
     val navBarBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
@@ -156,6 +166,11 @@ fun ZakatCalculatorScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = navBarBottomPadding + 28.dp),
@@ -346,7 +361,7 @@ fun ZakatCalculatorScreen(
                         label = stringResource(R.string.zakat_manual_gold_price),
                         value = state.manualGoldPrice,
                         onValueChange = { vm.updateManualGoldPrice(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                        unitBadge = if (isMalay) "RM" else "Rp",
+                        unitBadge = "Rp",
                         icon = Icons.Filled.MonetizationOn
                     )
                     Text(
@@ -360,20 +375,20 @@ fun ZakatCalculatorScreen(
                     label = stringResource(R.string.zakat_cash),
                     value = state.cash,
                     onValueChange = { vm.updateCash(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                    unitBadge = if (isMalay) "RM" else "Rp",
+                    unitBadge = "Rp",
                     icon = Icons.Filled.AccountBalance
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_gold_grams),
                     value = state.goldGrams,
-                    onValueChange = { vm.updateGoldGrams(ZakatNumberFormatter.formatDecimalInput(it)) },
+                    onValueChange = { vm.updateGoldGrams(ZakatNumberFormatter.formatDecimalInput(it, isIndonesian = isIndo)) },
                     unitBadge = "gram",
                     icon = Icons.Filled.MonetizationOn
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_silver_grams),
                     value = state.silverGrams,
-                    onValueChange = { vm.updateSilverGrams(ZakatNumberFormatter.formatDecimalInput(it)) },
+                    onValueChange = { vm.updateSilverGrams(ZakatNumberFormatter.formatDecimalInput(it, isIndonesian = isIndo)) },
                     unitBadge = "gram",
                     icon = Icons.Filled.MonetizationOn
                 )
@@ -381,14 +396,14 @@ fun ZakatCalculatorScreen(
                     label = stringResource(R.string.zakat_investments),
                     value = state.investments,
                     onValueChange = { vm.updateInvestments(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                    unitBadge = if (isMalay) "RM" else "Rp",
+                    unitBadge = "Rp",
                     icon = Icons.Filled.Savings
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_debts),
                     value = state.debts,
                     onValueChange = { vm.updateDebts(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                    unitBadge = if (isMalay) "RM" else "Rp",
+                    unitBadge = "Rp",
                     icon = Icons.Filled.CreditCard
                 )
 
@@ -410,7 +425,7 @@ fun ZakatCalculatorScreen(
                     label = stringResource(R.string.zakat_rice_price_per_kg),
                     value = state.ricePricePerKg,
                     onValueChange = { vm.updateRicePricePerKg(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
-                    unitBadge = if (isMalay) "RM/kg" else "Rp/kg",
+                    unitBadge = "Rp/kg",
                     icon = Icons.Filled.RiceBowl
                 )
                 Text(
@@ -730,6 +745,7 @@ private fun ZakatField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
+        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Start),
         leadingIcon = icon?.let {
             {
                 Icon(

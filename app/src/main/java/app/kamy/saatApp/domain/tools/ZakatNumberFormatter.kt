@@ -7,7 +7,7 @@ object ZakatNumberFormatter {
 
     fun parseDecimal(raw: String): Double {
         if (raw.isBlank()) return 0.0
-        val cleaned = raw.replace(" ", "").replace(",", ".")
+        val cleaned = raw.replace(" ", "").replace(".", "").replace(",", ".")
         return cleaned.toDoubleOrNull() ?: 0.0
     }
 
@@ -30,32 +30,35 @@ object ZakatNumberFormatter {
         }
     }
 
-    fun formatDecimalInput(input: String): String {
-        // Allows digits and at most one decimal point (. or ,)
-        val cleaned = StringBuilder()
-        var hasDecimal = false
-        for (ch in input) {
-            if (ch.isDigit()) {
-                cleaned.append(ch)
-            } else if ((ch == '.' || ch == ',') && !hasDecimal) {
-                cleaned.append(ch)
-                hasDecimal = true
-            }
+    fun formatDecimalInput(input: String, isIndonesian: Boolean = true): String {
+        if (input.isBlank()) return ""
+        val separatorIndex = input.indexOfAny(charArrayOf('.', ','))
+        val intPartRaw = if (separatorIndex >= 0) input.substring(0, separatorIndex) else input
+        val decPartRaw = if (separatorIndex >= 0) input.substring(separatorIndex + 1) else null
+
+        val intDigits = intPartRaw.filter { it.isDigit() }
+        val decDigits = decPartRaw?.filter { it.isDigit() }
+
+        if (intDigits.isEmpty() && decDigits == null) return ""
+
+        val intNumber = intDigits.toLongOrNull() ?: 0L
+        val formattedInt = if (isIndonesian) {
+            NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).format(intNumber)
+        } else {
+            NumberFormat.getNumberInstance(Locale.US).format(intNumber)
         }
-        return cleaned.toString()
+
+        return if (decDigits != null) {
+            val sepChar = if (isIndonesian) "," else "."
+            "$formattedInt$sepChar$decDigits"
+        } else {
+            formattedInt
+        }
     }
 
     fun formatCurrency(amount: Double, isMalay: Boolean = false, isIndo: Boolean = true): String {
         val rounded = kotlin.math.round(amount).toLong()
-        return if (isMalay) {
-            val formatted = NumberFormat.getNumberInstance(Locale.US).format(rounded)
-            "RM $formatted"
-        } else if (isIndo) {
-            val formatted = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).format(rounded)
-            "Rp $formatted"
-        } else {
-            val formatted = NumberFormat.getNumberInstance(Locale.US).format(rounded)
-            "$ $formatted"
-        }
+        val formatted = NumberFormat.getNumberInstance(Locale.forLanguageTag("id-ID")).format(rounded)
+        return "Rp $formatted"
     }
 }

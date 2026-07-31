@@ -35,6 +35,35 @@ class DoaLocaleOverlay @Inject constructor() {
         language: AppLanguage
     ): List<DhikrBundle> {
         return bundles.map { bundle ->
+            val localizedBundleTitle = when (language) {
+                AppLanguage.ENGLISH -> when (slug) {
+                    "morning-dhikir" -> "Morning Dhikr"
+                    "evening-dhikir" -> "Evening Dhikr"
+                    "dhikir-after-salah" -> "Dhikr After Prayer"
+                    "sleep-dhikir" -> "Dhikr Before Sleep"
+                    "dzikiralmathuratkubro" -> "Al-Mathurat Kubra"
+                    "dzikiralmathuratsughro" -> "Al-Mathurat Sughra"
+                    else -> bundle.title
+                }
+                AppLanguage.MALAY -> when (slug) {
+                    "morning-dhikir" -> "Zikir Pagi"
+                    "evening-dhikir" -> "Zikir Petang"
+                    "dhikir-after-salah" -> "Zikir Selepas Solat"
+                    "sleep-dhikir" -> "Zikir Sebelum Tidur"
+                    "dzikiralmathuratkubro" -> "Al-Mathurat Kubra"
+                    "dzikiralmathuratsughro" -> "Al-Mathurat Sughra"
+                    else -> bundle.title
+                }
+                AppLanguage.INDONESIAN -> when (slug) {
+                    "morning-dhikir" -> "Zikir Pagi"
+                    "evening-dhikir" -> "Zikir Petang"
+                    "dhikir-after-salah" -> "Zikir Setelah Salat"
+                    "sleep-dhikir" -> "Zikir Sebelum Tidur"
+                    "dzikiralmathuratkubro" -> "Al-Mathurat Kubra"
+                    "dzikiralmathuratsughro" -> "Al-Mathurat Sughra"
+                    else -> bundle.title
+                }
+            }
             val localizedContent = bundle.content.orEmpty().map { item ->
                 val resolvedTitle = item.titleData?.resolve(language) ?: item.title
                 val resolvedTranslation = item.translationData?.resolve(language) ?: item.translation
@@ -45,7 +74,7 @@ class DoaLocaleOverlay @Inject constructor() {
                     notesData = FlexibleTranslationData(defaultTranslation = resolvedNotes, map = item.notesData?.map)
                 )
             }
-            bundle.copy(content = localizedContent)
+            bundle.copy(title = localizedBundleTitle, content = localizedContent)
         }
     }
 
