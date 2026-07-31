@@ -4,7 +4,11 @@
   "data": [
     {
       "id": "675662d3f66804ebb0047b4b",
-      "title": "Doa Terhindar dari Kejahatan Manusia & Makhluk Lainnya",
+      "title": {
+        "id": "Doa Terhindar dari Kejahatan Manusia & Makhluk Lainnya",
+        "ms": "Doa Perlindungan daripada Kejahatan Manusia & Makhluk Lain",
+        "en": "Supplication for protection from human and other harm"
+      },
       "category": "selected",
       "compiled_by": "Authentic Hadith Collections",
       "arabic": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ غَضَبِهِ وَعِقَابِهِ وَشَرِّ عِبَادِهِ وَمِنْ هَمَزَاتِ الشَّيَاطِينِ وَأَنْ يَحْضُرُونِ",
@@ -18,17 +22,15 @@
       "notes": "Dibaca saat merasa cemas, takut akan gangguan orang/makhluk halus, atau sebelum tidur.",
       "source": "HR. Abu Daud no. 3893 & Tirmidzi no. 3528 (Hasan)",
       "repeat_count": 1,
-      "context_tags": ["protection", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["protection", "selected"]
     },
     {
       "id": "6756631df66804ebb0047b4c",
-      "title": "Doa Menghilangkan Amarah & Emosi Negatif",
+      "title": {
+        "id": "Doa Menghilangkan Amarah & Emosi Negatif",
+        "ms": "Doa Menghilangkan Kemarahan & Emosi Negatif",
+        "en": "Supplication to remove anger"
+      },
       "category": "selected",
       "compiled_by": "Authentic Hadith Collections",
       "arabic": "أَعُوْذُ بِاللهِ مِنَ الشَّيْطَانِ الرَّجِيْمِ، اَللَّهُمَّ اغْفِرْ لِيْ ذَنْبِيْ، وَأَذْهِبْ غَيْظَ قَلْبِيْ، وَأَجِرْنِيْ مِنَ الشَّيْطَانِ الرَّجِيْمِ",
@@ -42,17 +44,15 @@
       "notes": "Dibaca langsung saat emosi atau emosi mulai memuncak.",
       "source": "HR. Ibnu As-Sunni no. 457 & An-Nasa'i",
       "repeat_count": 1,
-      "context_tags": ["mindfulness", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["mindfulness", "selected"]
     },
     {
       "id": "67566370f66804ebb0047b4d",
-      "title": "Doa Keselamatan Mutlak (Perlindungan Pagi & Petang)",
+      "title": {
+        "id": "Doa Keselamatan Mutlak (Perlindungan Pagi & Petang)",
+        "ms": "Doa Keselamatan Mutlak (Perlindungan Pagi & Petang)",
+        "en": "Supplication for safety"
+      },
       "category": "selected",
       "compiled_by": "Authentic Hadith Collections",
       "arabic": "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
@@ -66,17 +66,15 @@
       "notes": "Sangat dianjurkan dibaca 3 kali setiap pagi dan petang.",
       "source": "HR. Abu Daud no. 5088 & Tirmidzi no. 3388 (Shahih)",
       "repeat_count": 3,
-      "context_tags": ["protection", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["protection", "selected"]
     },
     {
       "id": "6756641df66804ebb0047b4e",
-      "title": "Doa Pengampunan Kesalahan & Beban Hidup (Penutup Al-Baqarah)",
+      "title": {
+        "id": "Doa Pengampunan Kesalahan & Beban Hidup (Penutup Al-Baqarah)",
+        "ms": "Doa Pengampunan Kesalahan & Beban Hidup (Penutup Al-Baqarah)",
+        "en": "Supplication for forgiveness and not to be burdened beyond capacity"
+      },
       "category": "selected",
       "compiled_by": "Al-Qur'an Al-Kariim",
       "arabic": "رَبَّنَا لَا تُؤَاخِذْنَا إِنْ نَسِينَا أَوْ أَخْطَأْنَا، رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَا إِصْرًا كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِنْ قَبْلِنَا، رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِ، وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَا، أَنْتَ مَوْلَانَا فَانْصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ",
@@ -90,17 +88,15 @@
       "notes": "QS. Al-Baqarah: 286.",
       "source": "QS. Al-Baqarah: 286 (HR. Bukhari no. 5009)",
       "repeat_count": 1,
-      "context_tags": ["quranic", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["quranic", "selected"]
     },
     {
       "id": "67566545f66804ebb0047b4f",
-      "title": "Doa Kelapangan Hati, Kemudahan Urusan & Kelancaran Bicara",
+      "title": {
+        "id": "Doa Kelapangan Hati, Kemudahan Urusan & Kelancaran Bicara",
+        "ms": "Doa Kelapangan Hati, Kemudahan Urusan & Kelancaran Bicara",
+        "en": "Supplication for an open heart and ease in speech"
+      },
       "category": "selected",
       "compiled_by": "Al-Qur'an Al-Kariim",
       "arabic": "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِنْ لِسَانِي يَفْقَهُوا قَوْلِي",
@@ -114,17 +110,15 @@
       "notes": "QS. Tha-Ha: 25-28. Sangat bagus dibaca sebelum presentasi, meeting, atau ujian.",
       "source": "QS. Tha-Ha: 25-28",
       "repeat_count": 1,
-      "context_tags": ["quranic", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["quranic", "selected"]
     },
     {
       "id": "675665cbf66804ebb0047b50",
-      "title": "Doa Ketetapan Hidayah & Permohonan Rahmat Allah",
+      "title": {
+        "id": "Doa Ketetapan Hidayah & Permohonan Rahmat Allah",
+        "ms": "Doa Ketetapan Hidayah & Permohonan Rahmat Allah",
+        "en": "Supplication to be kept from misguidance and granted mercy"
+      },
       "category": "selected",
       "compiled_by": "Al-Qur'an Al-Kariim",
       "arabic": "رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِنْ لَدُنْكَ رَحْمَةً إِنَّكَ أَنْتَ الْوَهَّابُ",
@@ -138,17 +132,15 @@
       "notes": "QS. Ali 'Imran: 8.",
       "source": "QS. Ali 'Imran: 8",
       "repeat_count": 1,
-      "context_tags": ["quranic", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["quranic", "selected"]
     },
     {
       "id": "6756665af66804ebb0047b51",
-      "title": "Doa Menepis Anggapan Kemalangan & Sial (Thiyarah)",
+      "title": {
+        "id": "Doa Menepis Anggapan Kemalangan & Sial (Thiyarah)",
+        "ms": "Doa Menepis Anggapan Kemalangan & Sial (Thiyarah)",
+        "en": "Supplication when facing something distressing"
+      },
       "category": "selected",
       "compiled_by": "Authentic Hadith Collections",
       "arabic": "اَللَّهُمَّ لَا يَأْتِي بِالْحَسَنَاتِ إِلَّا أَنْتَ، وَلَا يَدْفَعُ السَّيِّئَاتِ إِلَّا أَنْتَ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللهِ",
@@ -162,17 +154,15 @@
       "notes": "Memperkuat tauhid dan ketenangan batin.",
       "source": "HR. Abu Daud no. 3919",
       "repeat_count": 1,
-      "context_tags": ["faith", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["faith", "selected"]
     },
     {
       "id": "675668aaf66804ebb0047b52",
-      "title": "Doa Memohon Kebenaran Awal-Akhir & Pertolongan",
+      "title": {
+        "id": "Doa Memohon Kebenaran Awal-Akhir & Pertolongan",
+        "ms": "Doa Memohon Kebenaran Awal-Akhir & Pertolongan",
+        "en": "Supplication for truth and divine support"
+      },
       "category": "selected",
       "compiled_by": "Al-Qur'an Al-Kariim",
       "arabic": "رَبِّ أَدْخِلْنِي مُدْخَلَ صِدْقٍ وَأَخْرِجْنِي مُخْرَجَ صِدْقٍ وَاجْعَلْ لِي مِنْ لَدُنْكَ سُلْطَانًا نَصِيرًا",
@@ -186,17 +176,15 @@
       "notes": "QS. Al-Isra': 80.",
       "source": "QS. Al-Isra': 80",
       "repeat_count": 1,
-      "context_tags": ["quranic", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["quranic", "selected"]
     },
     {
       "id": "67566900f66804ebb0047b53",
-      "title": "Doa Berlindung dari Hilangnya Nikmat & Perubahan Kesehatan",
+      "title": {
+        "id": "Doa Berlindung dari Hilangnya Nikmat & Perubahan Kesehatan",
+        "ms": "Doa Berlindung daripada Hilangnya Nikmat & Perubahan Kesihatan",
+        "en": "Supplication for protection from loss of favor and change in health"
+      },
       "category": "selected",
       "compiled_by": "Authentic Hadith Collections",
       "arabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ زَوَالِ نِعْمَتِكَ، وَتَحَوُّلِ عَافِيَتِكَ، وَفُجَاءَةِ نِقْمَتِكَ، وَجَمِيعِ سَخَطِكَ",
@@ -210,17 +198,15 @@
       "notes": "Salah satu doa perlindungan paling ringkas dan padat.",
       "source": "HR. Muslim no. 2739",
       "repeat_count": 1,
-      "context_tags": ["protection", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["protection", "selected"]
     },
     {
       "id": "67566950f66804ebb0047b54",
-      "title": "Doa Perbaikan Segala Urusan Agama & Dunia",
+      "title": {
+        "id": "Doa Perbaikan Segala Urusan Agama & Dunia",
+        "ms": "Doa Pembaikan Segala Urusan Agama & Dunia",
+        "en": "Supplication for improvement of all religious and worldly affairs"
+      },
       "category": "selected",
       "compiled_by": "Authentic Hadith Collections",
       "arabic": "اللَّهُمَّ أَصْلِحْ لِي دِينِيَ الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِي الَّتِي فِيهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ",
@@ -234,13 +220,8 @@
       "notes": "Sangat dianjurkan dibaca setiap hari.",
       "source": "HR. Muslim no. 2720",
       "repeat_count": 1,
-      "context_tags": ["comprehensive", "selected"],
-      "categories": {
-        "id": "651f74994b931b6523055766",
-        "name": "Doa Pilihan",
-        "slug": "selected",
-        "photo": "http://masa-api.muhammadiyah.or.id/image/category-dua-dhikir/dua-doa-pilihan-1768273400.png"
-      }
+      "context_tags": ["comprehensive", "selected"]
     }
-  ]
+  ],
+  "latin": null
 }

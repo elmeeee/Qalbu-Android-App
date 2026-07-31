@@ -35,7 +35,7 @@ class LocalDoaDataSource @Inject constructor(
             val slug = cat.slug?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
             val title = cat.name?.takeIf { it.isNotBlank() } ?: slug
             val kind = if (slug in dhikrSlugs) DoaCatalogKind.DHIKR else DoaCatalogKind.DOA
-            DoaCatalogEntry(slug = slug, title = title, kind = kind)
+            DoaCatalogEntry(slug = slug, title = title, kind = kind, nameData = cat.nameData)
         }
     }
 

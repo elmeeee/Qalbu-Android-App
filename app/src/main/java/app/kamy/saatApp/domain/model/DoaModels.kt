@@ -96,15 +96,22 @@ object FlexibleTranslationSerializer : KSerializer<String?> {
 @Serializable
 data class DoaCategory(
     val id: String? = null,
-    val name: String? = null,
+    @SerialName("name")
+    @Serializable(with = FlexibleTranslationDataSerializer::class)
+    val nameData: FlexibleTranslationData? = null,
     val slug: String? = null,
     val photo: String? = null
-)
+) {
+    @kotlinx.serialization.Transient
+    val name: String? = nameData?.defaultTranslation
+}
 
 @Serializable
 data class DoaItem(
     val id: String? = null,
-    val title: String? = null,
+    @SerialName("title")
+    @Serializable(with = FlexibleTranslationDataSerializer::class)
+    val titleData: FlexibleTranslationData? = null,
     val arabic: String? = null,
     val latin: String? = null,
     @SerialName("translation")
@@ -116,6 +123,9 @@ data class DoaItem(
     val category: String? = null,
     val categories: DoaCategory? = null
 ) {
+    @kotlinx.serialization.Transient
+    val title: String? = titleData?.defaultTranslation
+
     @kotlinx.serialization.Transient
     val translation: String? = translationData?.defaultTranslation
 }
@@ -182,5 +192,6 @@ enum class DoaCatalogKind { DOA, DHIKR }
 data class DoaCatalogEntry(
     val slug: String,
     val title: String,
-    val kind: DoaCatalogKind
+    val kind: DoaCatalogKind,
+    val nameData: FlexibleTranslationData? = null
 )

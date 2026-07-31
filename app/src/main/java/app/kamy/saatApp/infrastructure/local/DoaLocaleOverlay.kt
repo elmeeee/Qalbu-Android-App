@@ -12,22 +12,18 @@ import javax.inject.Singleton
 class DoaLocaleOverlay @Inject constructor() {
 
     fun localizeCatalog(entries: List<DoaCatalogEntry>, language: AppLanguage): List<DoaCatalogEntry> {
-        val overlay = overlayFor(language) ?: return entries
         return entries.map { entry ->
-            val title = overlay.categories[entry.slug] ?: entry.title
+            val title = entry.nameData?.resolve(language) ?: entry.title
             entry.copy(title = title)
         }
     }
 
     fun localizeDoas(items: List<DoaItem>, language: AppLanguage): List<DoaItem> {
-        val overlay = overlayFor(language)
         return items.map { item ->
-            val localized = item.id?.let { overlay?.doa?.get(it) }
-            val resolvedTranslation = localized?.translation
-                ?: item.translationData?.resolve(language)
-                ?: item.translation
+            val resolvedTitle = item.titleData?.resolve(language) ?: item.title
+            val resolvedTranslation = item.translationData?.resolve(language) ?: item.translation
             item.copy(
-                title = localized?.title ?: item.title,
+                titleData = FlexibleTranslationData(defaultTranslation = resolvedTitle, map = item.titleData?.map),
                 translationData = FlexibleTranslationData(defaultTranslation = resolvedTranslation, map = item.translationData?.map)
             )
         }
@@ -38,37 +34,20 @@ class DoaLocaleOverlay @Inject constructor() {
         bundles: List<DhikrBundle>,
         language: AppLanguage
     ): List<DhikrBundle> {
-        val overlay = overlayFor(language)
-        return bundles.mapIndexed { bundleIndex, bundle ->
-            val titleKey = "$slug:$bundleIndex"
-            val localizedTitle = overlay?.dhikrTitles?.get(titleKey) ?: bundle.title
-            val localizedContent = bundle.content.orEmpty().mapIndexed { contentIndex, item ->
-                val contentKey = "$slug:$bundleIndex:$contentIndex"
-                val localized = overlay?.dhikrContent?.get(contentKey)
-                val resolvedTitle = localized?.title
-                    ?: item.titleData?.resolve(language)
-                    ?: item.title
-                val resolvedTranslation = localized?.translation
-                    ?: item.translationData?.resolve(language)
-                    ?: item.translation
-                val resolvedNotes = localized?.notes
-                    ?: item.notesData?.resolve(language)
-                    ?: item.notes
+        return bundles.map { bundle ->
+            val localizedContent = bundle.content.orEmpty().map { item ->
+                val resolvedTitle = item.titleData?.resolve(language) ?: item.title
+                val resolvedTranslation = item.translationData?.resolve(language) ?: item.translation
+                val resolvedNotes = item.notesData?.resolve(language) ?: item.notes
                 item.copy(
                     titleData = FlexibleTranslationData(defaultTranslation = resolvedTitle, map = item.titleData?.map),
                     translationData = FlexibleTranslationData(defaultTranslation = resolvedTranslation, map = item.translationData?.map),
                     notesData = FlexibleTranslationData(defaultTranslation = resolvedNotes, map = item.notesData?.map)
                 )
             }
-            bundle.copy(title = localizedTitle, content = localizedContent)
+            bundle.copy(content = localizedContent)
         }
     }
 
     fun invalidateCache() = Unit
-
-    private fun overlayFor(language: AppLanguage): DoaLocaleData? = when (language) {
-        AppLanguage.ENGLISH -> DoaBuiltinLocales.english
-        AppLanguage.MALAY -> DoaBuiltinLocales.malay
-        AppLanguage.INDONESIAN -> null
-    }
 }

@@ -6,7 +6,11 @@
       "id": "651f74994b931b6523055762",
       "type": "dhikir",
       "slug": "morning-dhikir",
-      "name": "Zikir Pagi",
+      "name": {
+        "id": "Zikir Pagi",
+        "ms": "Zikir Pagi",
+        "en": "Morning Dhikr"
+      },
       "photo": "",
       "latin": null
     },
@@ -14,7 +18,11 @@
       "id": "651f74994b931b6523055763",
       "type": "dhikir",
       "slug": "evening-dhikir",
-      "name": "Zikir Petang",
+      "name": {
+        "id": "Zikir Petang",
+        "ms": "Zikir Petang",
+        "en": "Evening Dhikr"
+      },
       "photo": "",
       "latin": null
     },
@@ -22,7 +30,11 @@
       "id": "651f74994b931b6523055764",
       "type": "dhikir",
       "slug": "dhikir-after-salah",
-      "name": "Zikir Setelah Salat",
+      "name": {
+        "id": "Zikir Setelah Salat",
+        "ms": "Zikir Selepas Solat",
+        "en": "Dhikr After Prayer"
+      },
       "photo": "",
       "latin": null
     },
@@ -30,7 +42,11 @@
       "id": "651f74994b931b6523055767",
       "type": "dhikir",
       "slug": "sleep-dhikir",
-      "name": "Zikir Sebelum Tidur",
+      "name": {
+        "id": "Zikir Sebelum Tidur",
+        "ms": "Zikir Sebelum Tidur",
+        "en": "Dhikr Before Sleep"
+      },
       "photo": "",
       "latin": null
     },
@@ -38,7 +54,11 @@
       "id": "almathurat_kubro",
       "type": "dhikir",
       "slug": "dzikiralmathuratkubro",
-      "name": "Dzikir Al-Mathurat Kubro",
+      "name": {
+        "id": "Dzikir Al-Mathurat Kubro",
+        "ms": "Al-Mathurat (Kubra)",
+        "en": "Al-Mathurat (Kubra)"
+      },
       "photo": "",
       "latin": null
     },
@@ -46,7 +66,11 @@
       "id": "almathurat_sugro",
       "type": "dhikir",
       "slug": "dzikiralmathuratsughro",
-      "name": "Dzikir Al-Mathurat Sugro",
+      "name": {
+        "id": "Dzikir Al-Mathurat Sugro",
+        "ms": "Al-Mathurat (Sughra)",
+        "en": "Al-Mathurat (Sughra)"
+      },
       "photo": "",
       "latin": null
     },
@@ -54,7 +78,11 @@
       "id": "651f74994b931b6523055765",
       "type": "dua",
       "slug": "daily",
-      "name": "Doa Harian",
+      "name": {
+        "id": "Doa Harian",
+        "ms": "Doa Harian",
+        "en": "Daily Supplications"
+      },
       "photo": "",
       "latin": null
     },
@@ -62,7 +90,11 @@
       "id": "651f74994b931b6523055766",
       "type": "dua",
       "slug": "selected",
-      "name": "Doa Pilihan",
+      "name": {
+        "id": "Doa Pilihan",
+        "ms": "Doa Pilihan",
+        "en": "Selected Supplications"
+      },
       "photo": "",
       "latin": null
     },
@@ -70,7 +102,11 @@
       "id": "66b18aa956f9d2cc8301cd32",
       "type": "dua",
       "slug": "doa-ketika-sakit",
-      "name": "Doa Ketika Sakit",
+      "name": {
+        "id": "Doa Ketika Sakit",
+        "ms": "Doa Ketika Sakit",
+        "en": "Supplications When Ill"
+      },
       "photo": "",
       "latin": null
     },
@@ -78,7 +114,11 @@
       "id": "fadhilah_doa",
       "type": "dua",
       "slug": "fadhilahdoa",
-      "name": "Fadhilah Doa",
+      "name": {
+        "id": "Fadhilah Doa",
+        "ms": "Fadhilat Doa",
+        "en": "Virtues of Supplication"
+      },
       "photo": "",
       "latin": null
     }
