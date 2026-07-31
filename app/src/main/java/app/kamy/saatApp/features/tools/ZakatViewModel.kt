@@ -22,10 +22,13 @@ import kotlinx.coroutines.launch
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 
 private fun detectZakatCountry(countryCode: String): ZakatCountry = when (countryCode.uppercase()) {
+    "ID" -> ZakatCountry.INDONESIA
     "MY" -> ZakatCountry.MALAYSIA
     "SG" -> ZakatCountry.SINGAPORE
     "BN" -> ZakatCountry.BRUNEI
-    else -> ZakatCountry.INDONESIA
+    "US" -> ZakatCountry.USA
+    "GB" -> ZakatCountry.UK
+    else -> ZakatCountry.GLOBAL
 }
 
 data class ZakatUiState(

@@ -486,6 +486,9 @@
     <string name="zakat_country_malaysia">Malaysia</string>
     <string name="zakat_country_singapore">Singapore</string>
     <string name="zakat_country_brunei">Brunei</string>
+    <string name="zakat_country_usa">United States</string>
+    <string name="zakat_country_uk">United Kingdom</string>
+    <string name="zakat_country_global">International</string>
     <string name="ramadan_mode_title">Ramadan mode</string>
     <string name="ramadan_mode_body">Track tarawih and stay mindful this blessed month.</string>
     <string name="ramadan_tarawih">Tarawih done tonight</string>

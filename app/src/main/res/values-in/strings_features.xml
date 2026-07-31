@@ -187,6 +187,9 @@
     <string name="zakat_country_malaysia">Malaysia</string>
     <string name="zakat_country_singapore">Singapura</string>
     <string name="zakat_country_brunei">Brunei</string>
+    <string name="zakat_country_usa">Amerika Serikat</string>
+    <string name="zakat_country_uk">Inggris (UK)</string>
+    <string name="zakat_country_global">Internasional</string>
 
     <string name="faraidh_title">Faraidh</string>
     <string name="faraidh_account_subtitle">Hajb, furud, asabah, aul &amp; radd</string>

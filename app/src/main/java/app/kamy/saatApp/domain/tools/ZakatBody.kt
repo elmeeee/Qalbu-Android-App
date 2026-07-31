@@ -7,7 +7,10 @@ enum class ZakatCountry(val emoji: String, @StringRes val labelRes: Int) {
     INDONESIA("🇮🇩", R.string.zakat_country_indonesia),
     MALAYSIA("🇲🇾", R.string.zakat_country_malaysia),
     SINGAPORE("🇸🇬", R.string.zakat_country_singapore),
-    BRUNEI("🇧🇳", R.string.zakat_country_brunei)
+    BRUNEI("🇧🇳", R.string.zakat_country_brunei),
+    USA("🇺🇸", R.string.zakat_country_usa),
+    UK("🇬🇧", R.string.zakat_country_uk),
+    GLOBAL("🌐", R.string.zakat_country_global)
 }
 
 data class ZakatBody(
@@ -197,6 +200,48 @@ object ZakatBodyRepository {
             fullName = "Jabatan Urusan Zakat, Waqaf dan Baitulmal",
             websiteUrl = "https://www.mora.gov.bn",
             country = ZakatCountry.BRUNEI
+        ),
+
+        // ── USA ──────────────────────────────────────────────────────────────────
+        ZakatBody(
+            name = "Zakat Foundation of America",
+            fullName = "Zakat Foundation of America",
+            websiteUrl = "https://www.zakat.org",
+            country = ZakatCountry.USA
+        ),
+        ZakatBody(
+            name = "Islamic Relief USA",
+            fullName = "Islamic Relief USA Zakat Program",
+            websiteUrl = "https://irusa.org/zakat",
+            country = ZakatCountry.USA
+        ),
+
+        // ── UK ───────────────────────────────────────────────────────────────────
+        ZakatBody(
+            name = "NZF UK",
+            fullName = "National Zakat Foundation UK",
+            websiteUrl = "https://nzf.org.uk",
+            country = ZakatCountry.UK
+        ),
+        ZakatBody(
+            name = "Islamic Relief UK",
+            fullName = "Islamic Relief UK Zakat Portal",
+            websiteUrl = "https://www.islamic-relief.org.uk/zakat",
+            country = ZakatCountry.UK
+        ),
+
+        // ── International / Global ────────────────────────────────────────────────
+        ZakatBody(
+            name = "Islamic Relief Worldwide",
+            fullName = "Islamic Relief Worldwide Zakat Portal",
+            websiteUrl = "https://www.islamic-relief.org",
+            country = ZakatCountry.GLOBAL
+        ),
+        ZakatBody(
+            name = "Zakat Foundation",
+            fullName = "Zakat Foundation International",
+            websiteUrl = "https://www.zakat.org",
+            country = ZakatCountry.GLOBAL
         )
     )
 

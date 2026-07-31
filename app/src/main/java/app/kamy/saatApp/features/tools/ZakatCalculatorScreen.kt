@@ -590,7 +590,7 @@ private fun ZakatBodiesSection(
             )
         }
 
-        // Country Selector Chips (Indonesia 🇮🇩, Malaysia 🇲🇾, Singapore 🇸🇬, Brunei 🇧🇳)
+        // Country Selector Chips
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -599,12 +599,7 @@ private fun ZakatBodiesSection(
         ) {
             ZakatCountry.values().forEach { country ->
                 val isSelected = country == selectedCountry
-                val flag = when (country) {
-                    ZakatCountry.INDONESIA -> "🇮🇩 Indonesia"
-                    ZakatCountry.MALAYSIA -> "🇲🇾 Malaysia"
-                    ZakatCountry.SINGAPORE -> "🇸🇬 Singapore"
-                    ZakatCountry.BRUNEI -> "🇧🇳 Brunei"
-                }
+                val flag = "${country.emoji} ${stringResource(country.labelRes)}"
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
