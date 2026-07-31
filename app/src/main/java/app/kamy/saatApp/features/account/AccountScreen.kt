@@ -650,45 +650,56 @@ fun NotificationAdhanScreen(
                     SettingsCustomRow(
                         iconRes = R.drawable.ic_remainders_custom,
                         title = "Test Tahajjud Alarm Intent",
-                        subtitle = "Launch AdhanAlarmActivity for Tahajjud",
+                        subtitle = "Play alarm audio & full-screen overlay",
                         onClick = {
-                            val intent = app.kamy.saatApp.AdhanAlarmActivity.intent(
+                            app.kamy.saatApp.infrastructure.audio.AdhanPlaybackService.start(
                                 context = context,
-                                title = "Waktunya Sholat Tahajjud",
-                                body = "Bangunlah untuk bermunajat kepada Allah SWT",
-                                prayerName = "Tahajjud"
+                                useSystemAlarm = true,
+                                title = "Sholat Tahajjud",
+                                body = "Waktunya Bangun Sholat Tahajjud",
+                                notificationId = 9991,
+                                prayerName = "tahajud"
                             )
-                            context.startActivity(intent)
                         },
                         showDivider = true
                     )
                     SettingsCustomRow(
                         iconRes = R.drawable.ic_adhan_on_custom,
                         title = "Test Subuh Adhan Intent",
-                        subtitle = "Launch AdhanAlarmActivity for Subuh",
+                        subtitle = "Play Subuh adhan audio & full-screen overlay",
                         onClick = {
-                            val intent = app.kamy.saatApp.AdhanAlarmActivity.intent(
+                            val store = app.kamy.saatApp.infrastructure.preferences.AdhanPreferencesStore.from(context)
+                            val voice = store.currentVoice()
+                            val fajrVoice = store.currentFajrVoice()
+                            val rawRes = app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog.rawResForPrayer("Subuh", voice, fajrVoice)
+                            app.kamy.saatApp.infrastructure.audio.AdhanPlaybackService.start(
                                 context = context,
+                                rawRes = rawRes,
                                 title = "Adhan Subuh",
                                 body = "Waktunya Sholat Subuh",
+                                notificationId = 9992,
                                 prayerName = "Subuh"
                             )
-                            context.startActivity(intent)
                         },
                         showDivider = true
                     )
                     SettingsCustomRow(
                         iconRes = R.drawable.ic_adhan_on_custom,
                         title = "Test Dzuhur Adhan Intent",
-                        subtitle = "Launch AdhanAlarmActivity for Dzuhur",
+                        subtitle = "Play Dzuhur adhan audio & full-screen overlay",
                         onClick = {
-                            val intent = app.kamy.saatApp.AdhanAlarmActivity.intent(
+                            val store = app.kamy.saatApp.infrastructure.preferences.AdhanPreferencesStore.from(context)
+                            val voice = store.currentVoice()
+                            val fajrVoice = store.currentFajrVoice()
+                            val rawRes = app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog.rawResForPrayer("Dzuhur", voice, fajrVoice)
+                            app.kamy.saatApp.infrastructure.audio.AdhanPlaybackService.start(
                                 context = context,
+                                rawRes = rawRes,
                                 title = "Adhan Dzuhur",
                                 body = "Waktunya Sholat Dzuhur",
+                                notificationId = 9993,
                                 prayerName = "Dzuhur"
                             )
-                            context.startActivity(intent)
                         },
                         showDivider = false
                     )

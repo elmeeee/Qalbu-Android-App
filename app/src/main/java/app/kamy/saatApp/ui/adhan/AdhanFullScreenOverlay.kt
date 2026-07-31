@@ -94,6 +94,11 @@ fun AdhanFullScreenOverlay(
             }
         }
 
+        val isTahajjudOrAlarm = remember(prayerName, title) {
+            val q = (prayerName.orEmpty() + " " + title).lowercase(Locale.ROOT)
+            q.contains("tahajud") || q.contains("tahajjud") || q.contains("alarm")
+        }
+
         Button(
             onClick = onStopClick,
             modifier = Modifier
@@ -109,7 +114,7 @@ fun AdhanFullScreenOverlay(
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(
-                text = stringResource(id = R.string.adhan_stop),
+                text = stringResource(id = if (isTahajjudOrAlarm) R.string.alarm_stop else R.string.adhan_stop),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )

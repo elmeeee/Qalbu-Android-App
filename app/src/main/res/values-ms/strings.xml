@@ -92,6 +92,7 @@
     <string name="adhan_playback_title">Azan</string>
     <string name="adhan_playback_body">Memainkan panggilan solat</string>
     <string name="adhan_stop">Hentikan azan</string>
+    <string name="alarm_stop">Hentikan penggera</string>
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Benarkan penggera tepat supaya azan dan peringatan solat sampai tepat masa.</string>
     <string name="exact_alarm_rationale_title">Peringatan solat tepat masa</string>
