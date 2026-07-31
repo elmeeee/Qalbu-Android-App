@@ -797,9 +797,7 @@ private fun SaatAyahPage(
                 available: Offset,
                 source: NestedScrollSource
             ): Offset {
-                // After the inner scroll has had its chance, any remaining delta
-                // (available != 0) means we hit a boundary — let it bubble up to pager.
-                return Offset.Zero
+                return available
             }
         }
     }

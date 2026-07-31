@@ -98,7 +98,8 @@ fun AdhanFullScreenOverlay(
             onClick = onStopClick,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 64.dp)
+                .padding(bottom = 24.dp)
+                .navigationBarsPadding()
                 .fillMaxWidth(0.8f)
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(

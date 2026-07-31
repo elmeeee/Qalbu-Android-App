@@ -173,7 +173,7 @@ class AdhanPlaybackService : Service() {
 
         exo.setMediaItem(MediaItem.fromUri(mediaUri))
         exo.volume = 1f
-        boostAlarmVolume()
+        runCatching { boostAlarmVolume() }
         exo.prepare()
         exo.play()
 

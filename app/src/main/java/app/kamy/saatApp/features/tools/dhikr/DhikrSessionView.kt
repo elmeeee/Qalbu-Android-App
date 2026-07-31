@@ -33,6 +33,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -76,6 +78,7 @@ import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
 import app.kamy.saatApp.ui.feedback.rememberTapHaptic
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 data class SessionDhikrItem(
     val bundleTitle: String?,
@@ -348,6 +351,31 @@ fun DhikrSessionView(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
+                    .pointerInput(Unit) {
+                        var totalDrag = 0f
+                        detectHorizontalDragGestures(
+                            onDragStart = { },
+                            onHorizontalDrag = { change, dragAmount ->
+                                change.consume()
+                                totalDrag += dragAmount
+                            },
+                            onDragEnd = {
+                                if (abs(totalDrag) > 60f) {
+                                    if (totalDrag > 0 && currentItemIndex > 0) {
+                                        currentItemIndex--
+                                        currentCount = 0
+                                    } else if (totalDrag < 0 && currentItemIndex < sessionItems.size - 1) {
+                                        currentItemIndex++
+                                        currentCount = 0
+                                    }
+                                }
+                                totalDrag = 0f
+                            },
+                            onDragCancel = {
+                                totalDrag = 0f
+                            }
+                        )
+                    }
             ) {
                 AnimatedContent(
                     targetState = currentItemIndex,
