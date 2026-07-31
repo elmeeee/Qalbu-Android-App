@@ -34,22 +34,18 @@ fun ExactAlarmPermissionGate() {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
 
-    fun rescheduleIfAllowed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !context.canScheduleExactAlarms()) {
-            return
-        }
+    fun reschedule() {
         runCatching { DailyVerseNotificationScheduler.reschedule(context) }
         runCatching { PrayerNotificationCoordinator.rescheduleFromCache(context) }
     }
 
     LaunchedEffect(Unit) {
-        if (context.canScheduleExactAlarms() || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            rescheduleIfAllowed()
-            return@LaunchedEffect
-        }
-        if (needsExactAlarmPrompt && !autoPromptedThisSession) {
-            autoPromptedThisSession = true
-            showRationale = true
+        reschedule()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !context.canScheduleExactAlarms()) {
+            if (!autoPromptedThisSession) {
+                autoPromptedThisSession = true
+                showRationale = true
+            }
         }
     }
 
@@ -77,7 +73,7 @@ fun ExactAlarmPermissionGate() {
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                rescheduleIfAllowed()
+                reschedule()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

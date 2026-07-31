@@ -253,6 +253,7 @@ class AccountViewModel @Inject constructor(
     }
 
     fun setTahajudTime(hour: Int, minute: Int, days: Set<Int> = (1..7).toSet()) {
+        prayerNotificationPrefs.setTahajudEnabled(true)
         prayerNotificationPrefs.setTahajudTime(hour, minute)
         prayerNotificationPrefs.setTahajudDays(days)
         syncPrayerNotificationState()
