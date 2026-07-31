@@ -193,13 +193,13 @@ private fun ManzilInfoCard() {
     )
 
     val manzilRows = listOf(
-        Triple("١ — ف (fa')", "Juz 1–6", "Al-Fatihah – An-Nisa'"),
-        Triple("٢ — م (mim)", "Juz 6–11", "Al-Ma'idah – At-Taubah"),
-        Triple("٣ — ي (ya')", "Juz 11–14", "Yunus – An-Nahl"),
-        Triple("٤ — ب (ba')", "Juz 15–19", "Al-Isra' – Al-Furqan"),
-        Triple("٥ — ش (syin)", "Juz 19–23", "Asy-Syu'ara – Yasin"),
-        Triple("٦ — و (wau)", "Juz 23–26", "Ash-Shaffat – Al-Hujurat"),
-        Triple("٧ — ق (qaf)", "Juz 26–30", "Qaf – An-Nas"),
+        Triple(stringResource(R.string.manzil_row_1_letter), stringResource(R.string.manzil_row_1_juz), stringResource(R.string.manzil_row_1_surah)),
+        Triple(stringResource(R.string.manzil_row_2_letter), stringResource(R.string.manzil_row_2_juz), stringResource(R.string.manzil_row_2_surah)),
+        Triple(stringResource(R.string.manzil_row_3_letter), stringResource(R.string.manzil_row_3_juz), stringResource(R.string.manzil_row_3_surah)),
+        Triple(stringResource(R.string.manzil_row_4_letter), stringResource(R.string.manzil_row_4_juz), stringResource(R.string.manzil_row_4_surah)),
+        Triple(stringResource(R.string.manzil_row_5_letter), stringResource(R.string.manzil_row_5_juz), stringResource(R.string.manzil_row_5_surah)),
+        Triple(stringResource(R.string.manzil_row_6_letter), stringResource(R.string.manzil_row_6_juz), stringResource(R.string.manzil_row_6_surah)),
+        Triple(stringResource(R.string.manzil_row_7_letter), stringResource(R.string.manzil_row_7_juz), stringResource(R.string.manzil_row_7_surah)),
     )
 
     Column(

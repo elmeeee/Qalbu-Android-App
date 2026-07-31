@@ -32,7 +32,7 @@ kotlin {
 
 android {
     namespace = "app.kamy.saatapp.shared"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         minSdk = 30
     }

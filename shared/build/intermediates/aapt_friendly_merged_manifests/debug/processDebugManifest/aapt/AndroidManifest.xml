@@ -2,6 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.kamy.saatapp.shared" >
 
-    <uses-sdk android:minSdkVersion="31" />
+    <uses-sdk android:minSdkVersion="30" />
 
 </manifest>

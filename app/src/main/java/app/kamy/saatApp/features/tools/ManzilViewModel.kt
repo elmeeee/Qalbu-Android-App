@@ -2,9 +2,12 @@ package app.kamy.saatApp.features.tools
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.kamy.saatApp.core.config.LocalQuranConfig
+import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.tools.ManzilSectionDef
 import app.kamy.saatApp.domain.tools.manzilSections
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.repository.ContentRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +18,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -34,7 +38,8 @@ data class ManzilUiState(
 @HiltViewModel
 class ManzilViewModel @Inject constructor(
     private val contentRepository: ContentRepository,
-    private val translationStore: TranslationPreferencesStore
+    private val translationStore: TranslationPreferencesStore,
+    private val appLanguageStore: AppLanguageStore
 ) : ViewModel() {
     private val sectionDefs = manzilSections()
 
@@ -48,14 +53,20 @@ class ManzilViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             loadAll()
-            translationStore.translationId.drop(1).collect {
+            combine(
+                translationStore.translationId,
+                appLanguageStore.currentFlow
+            ) { _, _ -> }.drop(1).collect {
                 loadAll()
             }
         }
     }
 
     private suspend fun loadAll() {
-        val translationId = translationStore.currentTranslationId()
+        val currentAppLang = appLanguageStore.current()
+        val prefTranslationId = translationStore.currentTranslationId()
+        val translationId = resolveEffectiveTranslationId(prefTranslationId, currentAppLang)
+
         _state.update { it.copy(loading = true, translationId = translationId) }
         val loaded = coroutineScope {
             sectionDefs.map { def ->
@@ -71,5 +82,14 @@ class ManzilViewModel @Inject constructor(
             }.awaitAll()
         }
         _state.update { it.copy(loading = false, translationId = translationId, sections = loaded) }
+    }
+
+    private fun resolveEffectiveTranslationId(prefId: Int, appLang: AppLanguage): Int {
+        val langForPref = LocalQuranConfig.appLanguageForTranslationId(prefId)
+        return if (langForPref == appLang || langForPref == null) {
+            prefId
+        } else {
+            LocalQuranConfig.translationForAppLanguage(appLang).id
+        }
     }
 }

@@ -91,10 +91,16 @@ class TranslationPreferencesStore @Inject constructor(
     }
 
     private fun loadTranslationId(): Int {
+        val currentLang = AppLanguageStore.from(context).current()
         val saved = prefs.getInt(KEY_ID, 0)
-        if (saved > 0) return LocalQuranConfig.normalizeTranslationId(saved)
-        val lang = AppLanguageStore.from(context).current()
-        return LocalQuranConfig.translationForAppLanguage(lang).id
+        if (saved > 0) {
+            val normalized = LocalQuranConfig.normalizeTranslationId(saved)
+            val langOfSaved = LocalQuranConfig.appLanguageForTranslationId(normalized)
+            if (langOfSaved == currentLang || langOfSaved == null) {
+                return normalized
+            }
+        }
+        return LocalQuranConfig.translationForAppLanguage(currentLang).id
     }
 
     private fun loadTranslationName(): String {
