@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -92,9 +93,9 @@ fun RootScreen(
         EntryPointAccessors.fromApplication(context.applicationContext, RootEntryPoint::class.java)
     }
     val audioPlayer = entryPoint.audioPlayer()
-    val audioState by audioPlayer.state.collectAsState()
+    val audioState by audioPlayer.state.collectAsStateWithLifecycle()
 
-    val updateInfo by AppUpdateManager.updateInfoFlow.collectAsState()
+    val updateInfo by AppUpdateManager.updateInfoFlow.collectAsStateWithLifecycle()
     var showForceUpdateSheet by remember { mutableStateOf(updateInfo.isUpdateAvailable) }
 
     LaunchedEffect(Unit) {

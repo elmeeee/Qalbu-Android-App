@@ -32,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -57,7 +58,7 @@ fun PrayerTrackerCalendarScreen(
     onBack: () -> Unit,
     vm: PrayerTrackerCalendarViewModel = hiltViewModel()
 ) {
-    val state by vm.state.collectAsState()
+    val state by vm.state.collectAsStateWithLifecycle()
     val monthLabel = remember(state.year, state.month) {
         val symbols = DateFormatSymbols.getInstance(Locale.getDefault())
         val monthName = symbols.months.getOrNull(state.month - 1).orEmpty()

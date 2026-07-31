@@ -45,6 +45,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -89,7 +90,7 @@ fun ChaptersScreen(
     onOpenBookmarks: () -> Unit = {}
 ) {
     val vm: ChaptersViewModel = hiltViewModel()
-    val state by vm.state.collectAsState()
+    val state by vm.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val searchFocusRequester = remember { FocusRequester() }
     var isPullRefreshing by remember { mutableStateOf(false) }

@@ -85,6 +85,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -166,8 +167,8 @@ fun ChapterReaderScreen(
     onBack: () -> Unit
 ) {
     val vm: ChapterReaderViewModel = hiltViewModel()
-    val state by vm.state.collectAsState()
-    val audioPlaybackState by vm.audioPlaybackState.collectAsState()
+    val state by vm.state.collectAsStateWithLifecycle()
+    val audioPlaybackState by vm.audioPlaybackState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     DisposableEffect(Unit) {

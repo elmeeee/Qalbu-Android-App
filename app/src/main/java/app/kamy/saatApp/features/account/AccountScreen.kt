@@ -60,6 +60,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -108,7 +109,7 @@ fun AccountScreen(
     onAccountDetailScreenChanged: (Boolean) -> Unit = {}
 ) {
     val vm: AccountViewModel = hiltViewModel()
-    val state by vm.state.collectAsState()
+    val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val currentDetailScreen = rememberSaveable { mutableStateOf<String?>(null) }
     var showUpToDateSheet by rememberSaveable { mutableStateOf(false) }

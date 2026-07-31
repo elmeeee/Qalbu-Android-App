@@ -25,7 +25,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Put common KMP dependencies here (e.g. Ktor, Koin)
+            implementation(libs.kotlinx.coroutines.core)
         }
     }
 }

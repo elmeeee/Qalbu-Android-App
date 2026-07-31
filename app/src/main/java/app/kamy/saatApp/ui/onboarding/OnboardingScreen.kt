@@ -50,6 +50,8 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.PrayerType
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,7 +61,7 @@ fun OnboardingScreen(
     onFinished: () -> Unit,
     vm: OnboardingViewModel = hiltViewModel()
 ) {
-    val state by vm.state.collectAsState()
+    val state by vm.state.collectAsStateWithLifecycle()
     var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 

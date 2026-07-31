@@ -23,6 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
 import app.kamy.saatApp.infrastructure.review.AppReviewManager
 
@@ -48,9 +49,9 @@ class MainActivity : ComponentActivity() {
         val needsOnboarding = !onboardingStore.isComplete()
         setContent {
             val pendingRoute by deepLinkRoute
-            val currentTheme by themePreferencesStore.themeFlow.collectAsState(initial = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
+            val currentTheme by themePreferencesStore.themeFlow.collectAsStateWithLifecycle(initialValue = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
             val languageStore = androidx.compose.runtime.remember { AppLanguageStore.from(this@MainActivity) }
-            val currentLang by languageStore.currentFlow.collectAsState()
+            val currentLang by languageStore.currentFlow.collectAsStateWithLifecycle(initialValue = app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN)
 
             val localizedConfiguration = androidx.compose.runtime.remember(currentLang) {
                 val locale = java.util.Locale.forLanguageTag(currentLang.tag)

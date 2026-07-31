@@ -55,6 +55,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -116,11 +117,11 @@ fun TodayScreen(
     val prayerVm: PrayerDashboardViewModel = hiltViewModel()
     val trackerVm: PrayerTrackerViewModel = hiltViewModel()
     val tanyaSaatVm: TanyaSaatViewModel = hiltViewModel()
-    val todayState by todayVm.state.collectAsState()
-    val prayerState by prayerVm.state.collectAsState()
-    val trackerState by trackerVm.state.collectAsState()
-    val tanyaSaatState by tanyaSaatVm.state.collectAsState()
-    val audioState by audioPlayer.state.collectAsState()
+    val todayState by todayVm.state.collectAsStateWithLifecycle()
+    val prayerState by prayerVm.state.collectAsStateWithLifecycle()
+    val trackerState by trackerVm.state.collectAsStateWithLifecycle()
+    val tanyaSaatState by tanyaSaatVm.state.collectAsStateWithLifecycle()
+    val audioState by audioPlayer.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
