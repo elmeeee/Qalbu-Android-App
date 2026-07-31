@@ -20,6 +20,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -64,10 +69,17 @@ fun DhikrScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val tapHaptic = rememberTapHaptic()
     val confirmHaptic = rememberConfirmHaptic()
-    var selectedIndex by remember { mutableIntStateOf(0) }
-    val preset = DhikrStore.presets[selectedIndex.coerceIn(DhikrStore.presets.indices)]
+    val scope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(initialPage = 0) { DhikrStore.presets.size }
+    val selectedIndex = pagerState.currentPage
+    val preset = DhikrStore.presets[selectedIndex]
     var count by remember(preset.id) { mutableIntStateOf(DhikrStore.sessionCount(context, preset.id)) }
     var pulseKey by remember { mutableIntStateOf(0) }
+    val chipListState = rememberLazyListState()
+
+    LaunchedEffect(selectedIndex) {
+        chipListState.animateScrollToItem((selectedIndex - 1).coerceAtLeast(0))
+    }
 
     LaunchedEffect(pulseKey) {
         if (pulseKey > 0) {
@@ -115,6 +127,7 @@ fun DhikrScreen(onBack: () -> Unit) {
         }
 
         LazyRow(
+            state = chipListState,
             contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -122,8 +135,7 @@ fun DhikrScreen(onBack: () -> Unit) {
                 FilterChip(
                     selected = index == selectedIndex,
                     onClick = {
-                        selectedIndex = index
-                        count = DhikrStore.sessionCount(context, item.id)
+                        scope.launch { pagerState.animateScrollToPage(index) }
                     },
                     label = { Text(dhikrLabel(context, item)) },
                     colors = FilterChipDefaults.filterChipColors(
@@ -136,45 +148,60 @@ fun DhikrScreen(onBack: () -> Unit) {
 
         Spacer(Modifier.height(12.dp))
 
-        AnimatedContent(
-            targetState = preset.id,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "dhikr_card"
-        ) { presetId ->
-            val active = DhikrStore.presets.first { it.id == presetId }
-            DhikrReadingCard(preset = active)
-        }
-
-        Box(
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
+        ) { pageIndex ->
+            val activePreset = DhikrStore.presets[pageIndex]
+            var pageCount by remember(activePreset.id) {
+                mutableIntStateOf(DhikrStore.sessionCount(context, activePreset.id))
+            }
+            if (pageIndex == selectedIndex && pageCount != count) {
+                pageCount = count
+            }
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                DhikrReadingCard(preset = activePreset)
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            val newCount = DhikrStore.increment(context, activePreset.id)
+                            pageCount = newCount
+                            count = newCount
+                            pulseKey++
+                            tapHaptic()
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    count = DhikrStore.increment(context, preset.id)
-                    pulseKey++
-                    tapHaptic()
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            PremiumTasbihCounter(
-                count = count,
-                target = preset.target,
-                pulseKey = pulseKey,
-                subtitle = stringResource(R.string.dhikr_of_target, preset.target),
-                counterSize = 220.dp
-            )
-            Text(
-                text = stringResource(R.string.dhikr_tap_hint),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Medium,
-                color = SaatColors.Slate500.copy(alpha = 0.85f),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp)
-            )
+                    PremiumTasbihCounter(
+                        count = pageCount,
+                        target = activePreset.target,
+                        pulseKey = if (pageIndex == selectedIndex) pulseKey else 0,
+                        subtitle = stringResource(R.string.dhikr_of_target, activePreset.target),
+                        counterSize = 220.dp
+                    )
+                    Text(
+                        text = stringResource(R.string.dhikr_tap_hint),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = SaatColors.Slate500.copy(alpha = 0.85f),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 12.dp)
+                    )
+                }
+            }
         }
 
         Spacer(Modifier.height(8.dp))

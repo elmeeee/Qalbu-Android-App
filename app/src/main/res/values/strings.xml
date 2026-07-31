@@ -384,7 +384,7 @@
     <string name="dhikr_of_target">of %1$d</string>
     <string name="dhikr_reset">Reset session</string>
     <string name="dhikr_total">Lifetime: %1$d</string>
-    <string name="dhikr_premium_subtitle">Premium digital tasbih</string>
+    <string name="dhikr_premium_subtitle">Digital tasbih</string>
     <string name="dhikr_tap_hint">Tap anywhere to count</string>
     <string name="dhikr_session_progress">%1$d%% of target</string>
     <string name="dhikr_translit_subhanallah">Subḥānallāh</string>
