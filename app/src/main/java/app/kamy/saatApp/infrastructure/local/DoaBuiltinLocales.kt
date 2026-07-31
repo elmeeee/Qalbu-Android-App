@@ -321,8 +321,8 @@ internal object DoaBuiltinLocales {
         )
     }
 
-    private fun entry(title: String? = null, translation: String? = null) =
-        DoaLocaleEntry(title = title, translation = translation)
+    private fun entry(title: String? = null, translation: String? = null, notes: String? = null) =
+        DoaLocaleEntry(title = title, translation = translation, notes = notes)
 
     private val malayDoa = mapOf(
         "Supplication for good in this world and the Hereafter" to entry(
@@ -425,5 +425,6 @@ internal data class DoaLocaleData(
 
 internal data class DoaLocaleEntry(
     val title: String? = null,
-    val translation: String? = null
+    val translation: String? = null,
+    val notes: String? = null
 )

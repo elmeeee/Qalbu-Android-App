@@ -485,6 +485,7 @@
     <string name="likes">Suka</string>
 
     <string name="dhikr_start_button">Mula Zikir</string>
+    <string name="dhikr_target_format">Sasaran: %1$dx</string>
     <string name="dhikr_session_counter_format">Zikir %1$d daripada %2$d</string>
     <string name="dhikr_session_completed_format">%1$d%% Selesai</string>
     <string name="dhikr_session_prev">Sebelumnya</string>

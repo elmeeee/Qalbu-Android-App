@@ -79,6 +79,7 @@ import kotlinx.coroutines.launch
 
 data class SessionDhikrItem(
     val bundleTitle: String?,
+    val title: String? = null,
     val arabic: String,
     val latin: String,
     val translation: String,
@@ -102,6 +103,7 @@ fun DhikrSessionView(
             bundle.content.orEmpty().map { item ->
                 SessionDhikrItem(
                     bundleTitle = bundle.title,
+                    title = item.title,
                     arabic = item.arabic.orEmpty(),
                     latin = item.latin.orEmpty(),
                     translation = item.translation.orEmpty(),
@@ -254,19 +256,21 @@ fun DhikrSessionView(
                         else -> BorderStroke(1.dp, Color(0xFFE2E8F0))
                     }
 
-                    val titleLabel = remember(item) {
-                        val noteClean = item.notes
-                            ?.replace(Regex("(?i)\\s*dibaca\\s*\\d+\\s*kali.*"), "")
-                            ?.replace(Regex("(?i)\\s*\\d+x.*"), "")
-                            ?.trim()
-                        if (!noteClean.isNullOrBlank()) {
-                            noteClean
+                    val defaultDhikrTitle = stringResource(R.string.dhikr_title)
+                    val titleLabel = remember(item, defaultDhikrTitle) {
+                        val titleRaw = item.title?.trim()
+                        if (!titleRaw.isNullOrBlank()) {
+                            if (titleRaw.length > 25) {
+                                titleRaw.take(25).trimEnd('-', ' ') + "…"
+                            } else {
+                                titleRaw
+                            }
                         } else {
                             val latinClean = item.latin.trim()
-                            if (latinClean.length > 20) {
-                                latinClean.take(20).trimEnd('-', ' ') + "…"
+                            if (latinClean.length > 22) {
+                                latinClean.take(22).trimEnd('-', ' ') + "…"
                             } else {
-                                latinClean.ifBlank { "Zikir ${index + 1}" }
+                                latinClean.ifBlank { "$defaultDhikrTitle ${index + 1}" }
                             }
                         }
                     }
@@ -391,7 +395,7 @@ fun DhikrSessionView(
                                 color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
                             ) {
                                 Text(
-                                    text = "Target: ${item.repeatCount}x",
+                                    text = stringResource(R.string.dhikr_target_format, item.repeatCount),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = SaatColors.DeepEmerald,
                                     fontWeight = FontWeight.Bold,
@@ -400,10 +404,7 @@ fun DhikrSessionView(
                             }
 
                             val displayNotes = remember(item.notes) {
-                                item.notes
-                                    ?.replace(Regex("(?i)^dibaca\\s*\\d+\\s*kali\\.?$"), "")
-                                    ?.replace(Regex("(?i)^\\d+x$"), "")
-                                    ?.trim()
+                                item.notes?.trim()
                             }
                             if (!displayNotes.isNullOrBlank()) {
                                 Spacer(Modifier.width(8.dp))
@@ -504,7 +505,7 @@ fun DhikrSessionView(
 
             Spacer(Modifier.height(10.dp))
 
-            // Non-Overlapping Integrated Bottom Controller Bar
+            // Non-Overlapping Integrated Bottom Controller Bar (3 Clean Navigation Buttons)
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -512,17 +513,17 @@ fun DhikrSessionView(
                 shape = RoundedCornerShape(24.dp),
                 color = SaatColors.PureWhite,
                 border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
-                shadowElevation = 2.dp
+                shadowElevation = 3.dp
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Previous Item Button
-                    IconButton(
+                    OutlinedButton(
                         onClick = {
                             if (currentItemIndex > 0) {
                                 currentItemIndex--
@@ -530,86 +531,98 @@ fun DhikrSessionView(
                             }
                         },
                         enabled = currentItemIndex > 0,
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (currentItemIndex > 0) SaatColors.DeepEmerald.copy(alpha = 0.1f)
-                                else Color(0xFFF1F5F9)
-                            )
+                        shape = RoundedCornerShape(14.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.dhikr_session_prev),
-                            tint = if (currentItemIndex > 0) SaatColors.DeepEmerald else SaatColors.Slate500.copy(alpha = 0.4f)
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.dhikr_session_prev),
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
 
-                    // Interactive Tasbih Counter Button (Center)
-                    Box(
-                        modifier = Modifier
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                incrementCount()
-                            },
-                        contentAlignment = Alignment.Center
+                    // Reset Count Button
+                    OutlinedButton(
+                        onClick = { currentCount = 0 },
+                        shape = RoundedCornerShape(14.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                     ) {
-                        PremiumTasbihCounter(
-                            count = currentCount,
-                            target = activeItem.repeatCount,
-                            pulseKey = pulseKey,
-                            subtitle = "${activeItem.repeatCount}x",
-                            counterSize = 76.dp
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.dhikr_session_reset_count),
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
 
-                    // Controls Right Group (Reset & Next)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    // Next / Finish Button
+                    Button(
+                        onClick = {
+                            if (currentItemIndex < sessionItems.size - 1) {
+                                currentItemIndex++
+                                currentCount = 0
+                            } else {
+                                isCompleted = true
+                            }
+                        },
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = SaatColors.DeepEmerald,
+                            contentColor = SaatColors.PureWhite
+                        ),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                     ) {
-                        // Reset button
-                        IconButton(
-                            onClick = { currentCount = 0 },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFF1F5F9))
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = stringResource(R.string.dhikr_session_reset_count),
-                                tint = SaatColors.Slate500,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        // Next / Complete button
-                        IconButton(
-                            onClick = {
-                                if (currentItemIndex < sessionItems.size - 1) {
-                                    currentItemIndex++
-                                    currentCount = 0
-                                } else {
-                                    isCompleted = true
-                                }
-                            },
-                            modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
-                                .background(SaatColors.DeepEmerald)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                contentDescription = stringResource(R.string.dhikr_session_next),
-                                tint = SaatColors.PureWhite
-                            )
-                        }
+                        Text(
+                            text = stringResource(
+                                if (currentItemIndex < sessionItems.size - 1) R.string.dhikr_session_next
+                                else R.string.dhikr_session_finish_title
+                            ),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
                     }
                 }
             }
+        }
+
+        // Floating Action Tasbih Counter Button (FLOATING FAB)
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 76.dp, end = 20.dp)
+                .clip(CircleShape)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    incrementCount()
+                },
+            shape = CircleShape,
+            color = Color.Transparent,
+            shadowElevation = 8.dp
+        ) {
+            PremiumTasbihCounter(
+                count = currentCount,
+                target = activeItem.repeatCount,
+                pulseKey = pulseKey,
+                subtitle = "${activeItem.repeatCount}x",
+                counterSize = 84.dp
+            )
         }
     }
 }

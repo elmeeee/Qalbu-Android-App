@@ -1246,6 +1246,7 @@
     <string name="doa_saved_toast">Saved to Bookmarks!</string>
 
     <string name="dhikr_start_button">Start Dhikr</string>
+    <string name="dhikr_target_format">Target: %1$dx</string>
     <string name="dhikr_session_counter_format">Dhikr %1$d of %2$d</string>
     <string name="dhikr_session_completed_format">%1$d%% Completed</string>
     <string name="dhikr_session_prev">Previous</string>

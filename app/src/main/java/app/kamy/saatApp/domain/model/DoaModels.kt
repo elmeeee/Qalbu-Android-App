@@ -130,18 +130,29 @@ data class DoaListResponse(
 @Serializable
 data class DhikrContentItem(
     val id: String? = null,
+    @SerialName("title")
+    @Serializable(with = FlexibleTranslationDataSerializer::class)
+    val titleData: FlexibleTranslationData? = null,
     val arabic: String? = null,
     val latin: String? = null,
     @SerialName("translation")
     @Serializable(with = FlexibleTranslationDataSerializer::class)
     val translationData: FlexibleTranslationData? = null,
     val fawaid: String? = null,
-    val notes: String? = null,
+    @SerialName("notes")
+    @Serializable(with = FlexibleTranslationDataSerializer::class)
+    val notesData: FlexibleTranslationData? = null,
     val source: String? = null,
     @SerialName("repeat_count") val repeatCount: Int? = null
 ) {
     @kotlinx.serialization.Transient
+    val title: String? = titleData?.defaultTranslation
+
+    @kotlinx.serialization.Transient
     val translation: String? = translationData?.defaultTranslation
+
+    @kotlinx.serialization.Transient
+    val notes: String? = notesData?.defaultTranslation
 }
 
 @Serializable

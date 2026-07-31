@@ -45,11 +45,19 @@ class DoaLocaleOverlay @Inject constructor() {
             val localizedContent = bundle.content.orEmpty().mapIndexed { contentIndex, item ->
                 val contentKey = "$slug:$bundleIndex:$contentIndex"
                 val localized = overlay?.dhikrContent?.get(contentKey)
+                val resolvedTitle = localized?.title
+                    ?: item.titleData?.resolve(language)
+                    ?: item.title
                 val resolvedTranslation = localized?.translation
                     ?: item.translationData?.resolve(language)
                     ?: item.translation
+                val resolvedNotes = localized?.notes
+                    ?: item.notesData?.resolve(language)
+                    ?: item.notes
                 item.copy(
-                    translationData = FlexibleTranslationData(defaultTranslation = resolvedTranslation, map = item.translationData?.map)
+                    titleData = FlexibleTranslationData(defaultTranslation = resolvedTitle, map = item.titleData?.map),
+                    translationData = FlexibleTranslationData(defaultTranslation = resolvedTranslation, map = item.translationData?.map),
+                    notesData = FlexibleTranslationData(defaultTranslation = resolvedNotes, map = item.notesData?.map)
                 )
             }
             bundle.copy(title = localizedTitle, content = localizedContent)

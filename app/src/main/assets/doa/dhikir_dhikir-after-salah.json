@@ -20,7 +20,14 @@
           "notes": "Dibaca 3 kali setelah salam.",
           "source": "HR. Muslim no. 591",
           "repeat_count": 3,
-          "context_tags": ["fardhu_all"]
+          "context_tags": [
+            "fardhu_all"
+          ],
+          "title": {
+            "id": "Istighfar",
+            "ms": "Istighfar",
+            "en": "Istighfar"
+          }
         },
         {
           "id": "dhikr_002_salam",
@@ -35,7 +42,14 @@
           "notes": "Dibaca 1 kali.",
           "source": "HR. Muslim no. 591",
           "repeat_count": 1,
-          "context_tags": ["fardhu_all"]
+          "context_tags": [
+            "fardhu_all"
+          ],
+          "title": {
+            "id": "Doa Keselamatan (Salam)",
+            "ms": "Doa Kesejahteraan (Salam)",
+            "en": "Supplication for Peace"
+          }
         },
         {
           "id": "dhikr_003_tauhid_rizq",
@@ -50,37 +64,140 @@
           "notes": "Dibaca 1 kali.",
           "source": "HR. Bukhari no. 844, Muslim no. 593",
           "repeat_count": 1,
-          "context_tags": ["fardhu_all"]
+          "context_tags": [
+            "fardhu_all"
+          ],
+          "title": {
+            "id": "Pengakuan Tauhid & Rezeki",
+            "ms": "Pengakuan Tauhid & Rezeki",
+            "en": "Declaration of Monotheism"
+          }
         },
         {
-          "id": "dhikr_004_tasbih_tahmid_takbir",
-          "arabic": "سُبْحَانَ اللهِ (33x) ، اَلْحَمْدُ لِلَّهِ (33x) ، اَللهُ أَكْبَرُ (33x)\n\nلاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ (1x)",
-          "latin": "Subhanallah (33x), Alhamdulillah (33x), Allahu Akbar (33x).\nLaa ilaaha illallahu wahdahu laa syariikalahu, lahul-mulku wa lahul-hamdu wa huwa 'alaa kulli syai-in qadiir (1x).",
+          "id": "dhikr_004_1_tasbih",
+          "arabic": "سُبْحَانَ اللَّهِ",
+          "latin": "Subhanallah",
           "translation": {
-            "id": "Maha Suci Allah (33x). Segala puji bagi Allah (33x). Allah Maha Besar (33x). Tiada sesembahan yang berhak disembah selain Allah Yang Maha Esa... (1x)",
-            "ms": "Maha Suci Allah (33x). Segala puji bagi Allah (33x). Allah Maha Besar (33x). Tiada Tuhan melainkan Allah Yang Maha Esa... (1x)",
-            "en": "Glory be to Allah (33x). Praise be to Allah (33x). Allah is the Greatest (33x). There is no god but Allah alone... (1x)"
+            "id": "Maha Suci Allah.",
+            "ms": "Maha Suci Allah.",
+            "en": "Glory be to Allah."
           },
           "fawaid": "Penghapus dosa-dosa kecil walaupun sebanyak buih di lautan.",
-          "notes": "Rangkaian Tasbih, Tahmid, Takbir (masing-masing 33x) ditutup Tahlil 1x.",
+          "notes": {
+            "id": "Subhanallah (33 kali)",
+            "ms": "Subhanallah (33 kali)",
+            "en": "SubhanAllah (33 times)"
+          },
+          "source": "HR. Muslim no. 597",
+          "repeat_count": 33,
+          "context_tags": [
+            "fardhu_all"
+          ],
+          "title": {
+            "id": "Subhanallah",
+            "ms": "Subhanallah",
+            "en": "SubhanAllah"
+          }
+        },
+        {
+          "id": "dhikr_004_2_tahmid",
+          "arabic": "اَلْحَمْدُ لِلَّهِ",
+          "latin": "Alhamdulillah",
+          "translation": {
+            "id": "Segala puji bagi Allah.",
+            "ms": "Segala puji bagi Allah.",
+            "en": "All praise is due to Allah."
+          },
+          "fawaid": "Penghapus dosa-dosa kecil walaupun sebanyak buih di lautan.",
+          "notes": {
+            "id": "Alhamdulillah (33 kali)",
+            "ms": "Alhamdulillah (33 kali)",
+            "en": "Alhamdulillah (33 times)"
+          },
+          "source": "HR. Muslim no. 597",
+          "repeat_count": 33,
+          "context_tags": [
+            "fardhu_all"
+          ],
+          "title": {
+            "id": "Alhamdulillah",
+            "ms": "Alhamdulillah",
+            "en": "Alhamdulillah"
+          }
+        },
+        {
+          "id": "dhikr_004_3_takbir",
+          "arabic": "اَللَّهُ أَكْبَرُ",
+          "latin": "Allahu Akbar",
+          "translation": {
+            "id": "Allah Maha Besar.",
+            "ms": "Allah Maha Besar.",
+            "en": "Allah is the Greatest."
+          },
+          "fawaid": "Penghapus dosa-dosa kecil walaupun sebanyak buih di lautan.",
+          "notes": {
+            "id": "Allahu Akbar (33 kali)",
+            "ms": "Allahu Akbar (33 kali)",
+            "en": "Allahu Akbar (33 times)"
+          },
+          "source": "HR. Muslim no. 597",
+          "repeat_count": 33,
+          "context_tags": [
+            "fardhu_all"
+          ],
+          "title": {
+            "id": "Allahu Akbar",
+            "ms": "Allahu Akbar",
+            "en": "Allahu Akbar"
+          }
+        },
+        {
+          "id": "dhikr_004_4_tahlil",
+          "arabic": "لاَ إِلَـهَ إِلاَّ اللهُ وَحْدَهُ لاَ شَرِيْكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيْرُ",
+          "latin": "Laa ilaaha illallaahu wahdahu laa syariika lah, lahul-mulku wa lahul-hamdu wa huwa 'alaa kulli syai-in qadiir.",
+          "translation": {
+            "id": "Tiada sesembahan yang berhak disembah selain Allah Yang Maha Esa, tidak ada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian. Dia Maha Kuasa atas segala sesuatu.",
+            "ms": "Tiada Tuhan yang berhak disembah melainkan Allah Yang Maha Esa, tiada sekutu bagi-Nya. Bagi-Nya kerajaan dan pujian, dan Dia Maha Kuasa atas segala sesuatu.",
+            "en": "There is no god but Allah alone, with no partner. To Him belongs the dominion and praise, and He is Able to do all things."
+          },
+          "fawaid": "Menyempurnakan pahala dzikir ba'da shalat fardhu menjadi 100 kebaikan.",
+          "notes": {
+            "id": "Penutup Tahlil (1 kali)",
+            "ms": "Penutup Tahlil (1 kali)",
+            "en": "Closing Tahlil (1 time)"
+          },
           "source": "HR. Muslim no. 597",
           "repeat_count": 1,
-          "context_tags": ["fardhu_all"]
+          "context_tags": [
+            "fardhu_all"
+          ],
+          "title": {
+            "id": "Tahlil Penutup",
+            "ms": "Tahlil Penutup",
+            "en": "Closing Tahlil"
+          }
         },
         {
           "id": "dhikr_005_ayat_kursi",
           "arabic": "اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
           "latin": "Allaahu laa ilaaha illaa huwal-hayyul-qayyuum, laa ta'khudzuhu sinatun wa laa naum. Lahuu maa fis-samaawaati wa maa fil-ardh. Man dzal-ladzii yasyfa'u 'indahuu illaa bi-idznih. Ya'lamu maa baina aidiihim wa maa khalfahum. Wa laa yuhiithuuna bi-syai-im min 'ilmihii illaa bi-maa syaa'. Wasi'a kursiyyuhus-samaawaati wal-ardh. Wa laa ya'uuduhu hifzhuhumaa, wa huwal-'aliyyul-'azhiim.",
           "translation": {
-            "id": "Allah, tidak ada tuhan selain Dia Yang Maha Hidup, yang terus-menerus mengurus makhluk-Nya...",
-            "ms": "Allah, tiada Tuhan melainkan Dia, Yang Maha Hidup, yang sentiasa mentadbirkan sekalian makhluk-Nya...",
-            "en": "Allah! There is no deity except Him, the Ever-Living, the Sustainer of all existence..."
+            "id": "Allah, tidak ada tuhan selain Dia Yang Maha Hidup, yang terus-menerus mengurus makhluk-Nya. Dia tidak mengantuk dan tidak tidur. Kepunyaan-Nya apa yang ada di langit dan di bumi. Siapakah yang dapat memberi syafaat di sisi-Nya tanpa izin-Nya? Dia mengetahui apa yang di hadapan mereka dan apa yang di belakang mereka, dan mereka tidak mengetahui sesuatu pun dari ilmu-Nya melainkan apa yang Dia kehendaki. Kursi-Nya meliputi langit dan bumi, dan pemeliharaan kedua-duanya tidak melelahkan-Nya. Dan Dia Maha Tinggi lagi Maha Agung.",
+            "ms": "Allah, tiada Tuhan melainkan Dia, Yang Maha Hidup, yang sentiasa mentadbirkan sekalian makhluk-Nya. Dia tidak mengantuk dan tidak tidur. Bagi-Nya apa yang ada di langit dan di bumi. Tiada sesiapa yang dapat memberi syafaat di sisi-Nya melainkan dengan izin-Nya. Dia mengetahui apa yang di hadapan mereka dan apa yang di belakang mereka, dan mereka tidak mengetahui sesuatu pun daripada ilmu-Nya melainkan apa yang Dia kehendaki. Kursi Allah meliputi langit dan bumi, dan pemeliharaan kedua-duanya tidak melelahkan-Nya. Dan Dia Maha Tinggi lagi Maha Agung.",
+            "en": "Allah! There is no deity except Him, the Ever-Living, the Sustainer of all existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great."
           },
           "fawaid": "Penghalang antara seorang hamba dengan surga hanyalah kematian.",
           "notes": "Ayat Kursi (QS. Al-Baqarah: 255).",
           "source": "HR. An-Nasa'i (Al-Kubra no. 9848), Shahih Al-Jami' no. 6464",
           "repeat_count": 1,
-          "context_tags": ["fardhu_all"]
+          "context_tags": [
+            "fardhu_all"
+          ],
+          "title": {
+            "id": "Ayat Kursi",
+            "ms": "Ayat Kursi",
+            "en": "Ayat al-Kursi"
+          }
         },
         {
           "id": "duaa_001_praise_salawat_opening",
@@ -95,7 +212,14 @@
           "notes": "Setiap doa sangat dianjurkan dibuka dengan tahmid dan shalawat.",
           "source": "HR. Tirmidzi no. 3477 (Hasan Shahih)",
           "repeat_count": 1,
-          "context_tags": ["duaa_opening"]
+          "context_tags": [
+            "duaa_opening"
+          ],
+          "title": {
+            "id": "Pembuka Doa (Tahmid & Shalawat)",
+            "ms": "Pembuka Doa (Tahmid & Selawat)",
+            "en": "Opening Prayer (Praise & Salawat)"
+          }
         },
         {
           "id": "duaa_002_fatihah_gift",
@@ -110,7 +234,14 @@
           "notes": "Lafaz niat sedekah Al-Fatihah untuk diri sendiri, keluarga, dan orang tua.",
           "source": "Tradisi Amalan Para Ulama & QS. Al-Fatihah",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Surah Al-Fatihah",
+            "ms": "Surah Al-Fatihah",
+            "en": "Surah Al-Fatihah"
+          }
         },
         {
           "id": "duaa_003_deceased_family",
@@ -125,7 +256,14 @@
           "notes": "Doa untuk keluarga dan kerabat yang sudah meninggal dunia.",
           "source": "HR. Muslim no. 963 (Adaptasi Lafaz Jamak)",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Doa Ampunan Ahli Kubur",
+            "ms": "Doa Keampunan Ahli Kubur",
+            "en": "Prayer for Deceased Family"
+          }
         },
         {
           "id": "duaa_004_living_parents",
@@ -140,7 +278,14 @@
           "notes": "Doa untuk kedua orang tua.",
           "source": "QS. Al-Isra': 24",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Doa Orang Tua",
+            "ms": "Doa Ibu Bapa",
+            "en": "Prayer for Parents"
+          }
         },
         {
           "id": "duaa_005_heart_firmness",
@@ -155,22 +300,36 @@
           "notes": "Doa Ya Muqallibal Qulub.",
           "source": "HR. Tirmidzi no. 2140 & Muslim no. 2654",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Doa Keteguhan Hati",
+            "ms": "Doa Ketetapan Hati",
+            "en": "Prayer for Firmness of Faith"
+          }
         },
         {
           "id": "duaa_006_1000_dinar",
           "arabic": "وَمَنْ يَتَّقِ اللَّهَ يَجْعَلْ لَهُ مَخْرَجًا وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ وَمَنْ يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ إِنَّ اللَّهَ بَالِغُ أَمْرِهِ قَدْ جَعَلَ اللَّهُ لِكُلِّ شَيْءٍ قَدْرًا",
           "latin": "Wa may yattaqillaaha yaj'al lahuu makhrajaa, wa yarzuqhu min haitsu laa yahtasib, wa may yatawakkal 'alallaahi fahuwa hasbuh, innallaaha baalighu amrih, qad ja'alallaahu likulli syai-in qadraa.",
           "translation": {
-            "id": "Barangsiapa bertakwa kepada Allah niscaya Dia akan membukakan jalan keluar baginya, dan memberinya rezeki dari arah yang tidak disangka-sangka. Dan barangsiapa bertawakal kepada Allah, niscaya Allah akan mencukupkan (keperluan)nya...",
-            "ms": "Sesiapa yang bertaqwa kepada Allah, nescaya Dia akan mengadakan baginya jalan keluar, serta memberinya rezeki dari jalan yang tidak disangka-sangka...",
-            "en": "And whoever fears Allah - He will make for him a way out, and will provide for him from where he does not expect..."
+            "id": "Barangsiapa bertakwa kepada Allah niscaya Dia akan membukakan jalan keluar baginya, dan memberinya rezeki dari arah yang tidak disangka-sangka. Dan barangsiapa bertawakal kepada Allah, niscaya Allah akan mencukupkan (keperluan)nya. Sesungguhnya Allah melaksanakan urusan yang dikehendaki-Nya. Sungguh, Allah telah mengadakan ketentuan bagi setiap sesuatu.",
+            "ms": "Sesiapa yang bertaqwa kepada Allah, nescaya Dia akan mengadakan baginya jalan keluar, serta memberinya rezeki dari jalan yang tidak disangka-sangka. Dan sesiapa yang bertawakal kepada Allah, nescaya Allah akan mencukupi (keperluannya). Sesungguhnya Allah melaksanakan urusan yang dikehendaki-Nya. Sesungguhnya Allah telah menentukan kadar bagi tiap-tiap sesuatu.",
+            "en": "And whoever fears Allah - He will make for him a way out, and will provide for him from where he does not expect. And whoever relies upon Allah - then He is sufficient for him. Indeed, Allah will accomplish His purpose. Allah has already set for everything a [decreed] extent."
           },
           "fawaid": "Pembuka jalan keluar dari kesulitan hidup dan pemurah rezeki (Ayat Seribu Dinar).",
           "notes": "QS. At-Talaq: 2-3.",
           "source": "QS. At-Talaq: 2-3",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Ayat Seribu Dinar",
+            "ms": "Ayat Seribu Dinar",
+            "en": "Thousand Dinar Verse"
+          }
         },
         {
           "id": "duaa_007_family_and_children",
@@ -185,7 +344,14 @@
           "notes": "Doa keharmonisan rumah tangga.",
           "source": "QS. Al-Furqan: 74",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Doa Keharmonisan Keluarga",
+            "ms": "Doa Keharmonisan Keluarga",
+            "en": "Prayer for Family Harmony"
+          }
         },
         {
           "id": "duaa_008_job_and_elevation",
@@ -200,7 +366,14 @@
           "notes": "Doa karir & pengangkat derajat.",
           "source": "HR. Ath-Thabrani (Al-Mu'jam Al-Kabir 10/124), Shahih",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Doa Karir & Keberkahan",
+            "ms": "Doa Kerjaya & Keberkatan",
+            "en": "Prayer for Career & Blessing"
+          }
         },
         {
           "id": "duaa_009_protection_health",
@@ -215,7 +388,14 @@
           "notes": "Doa perlindungan fisik & takdir.",
           "source": "HR. Abu Daud no. 5090 & Bukhari no. 6347",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Doa Perlindungan Kesehatan",
+            "ms": "Doa Perlindungan Kesihatan",
+            "en": "Prayer for Health & Well-being"
+          }
         },
         {
           "id": "duaa_010_debt_and_anxiety",
@@ -230,7 +410,14 @@
           "notes": "Doa pembebas kesusahan hidup.",
           "source": "HR. Abu Daud no. 1555",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Doa Pembebas Hutang & Duka",
+            "ms": "Doa Pembebas Hutang & Duka",
+            "en": "Prayer for Relief from Debt & Anxiety"
+          }
         },
         {
           "id": "duaa_011_dunya_akherat_sapujagat",
@@ -245,7 +432,14 @@
           "notes": "Doa Sapu Jagat.",
           "source": "QS. Al-Baqarah: 201, HR. Bukhari no. 6389",
           "repeat_count": 1,
-          "context_tags": ["custom_duaa"]
+          "context_tags": [
+            "custom_duaa"
+          ],
+          "title": {
+            "id": "Doa Sapu Jagad",
+            "ms": "Doa Sapu Jagad",
+            "en": "Supplication for World & Hereafter"
+          }
         },
         {
           "id": "duaa_012_closing_salawat_tahmid",
@@ -260,7 +454,14 @@
           "notes": "Penutup Doa Sesuai Sunnah.",
           "source": "QS. Ash-Shaffat: 180-182 & HR. At-Thabrani",
           "repeat_count": 1,
-          "context_tags": ["duaa_closing"]
+          "context_tags": [
+            "duaa_closing"
+          ],
+          "title": {
+            "id": "Penutup Doa (Shalawat)",
+            "ms": "Penutup Doa (Selawat)",
+            "en": "Closing Supplication"
+          }
         }
       ],
       "latin": null
