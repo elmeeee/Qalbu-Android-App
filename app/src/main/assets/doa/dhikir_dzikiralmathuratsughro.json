@@ -10,7 +10,11 @@
         {
           "arabic": "بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ . اَلْحَمْدُ لِلّٰهِ رَبِّ الْعٰلَمِيْنَۙ . الرَّحْمٰنِ الرَّحِيْمِۙ . مٰلِكِ يَوْمِ الدِّيْنِۗ . اِيَّاكَ نَعْبُدُ وَاِيَّاكَ نَسْتَعِيْنُۗ . اِهْدِنَا الصِّرَاطَ الْمُسْتَقِيْمَۙ . صِرَاطَ الَّذِيْنَ اَنْعَمْتَ عَلَيْهِمْ ەۙ غَيْرِ الْمَغْضُوْبِ عَلَيْهِمْ وَلَا الضَّاۤلِّيْنَࣖ ",
           "latin": "Bismillāhir-Raḥmānir-Raḥīm. Al-Ḥamdu Lillāhi Rabbil-‘Ālamīn. Ar-Raḥmānir-Raḥīm. Māliki Yaumid-Dīn. Iyyāka Na‘Budu Wa Iyyāka Nasta‘Īn. Ihdinaṣ-Ṣirāṭal-Mustaqīm. Ṣirāṭallażīna An‘Amta ‘Alaihim, Gairil-Magḍūbi ‘Alaihim Wa Laḍ-Ḍāllīn",
-          "translation": "Dengan nama Allah, Yang Maha Pemurah, lagi Maha Mengasihani. Segala puji tertentu bagi Allah, Tuhan yang Memelihara dan Mentadbirkan sekalian alam. Yang Maha Pemurah, lagi Maha Mengasihani. Yang Menguasai pemerintahan hari Pembalasan (hari akhirat). Engkaulah sahaja (Ya Allah) Yang Kami sembah dan kepada Engkaulah sahaja kami memohon pertolongan. Tunjukilah kami jalan yang lurus. Iaitu jalan orang-orang yang Engkau telah kurniakan nikmat kepada mereka, bukan (jalan) orang-orang yang Engkau telah murkai dan bukan pula (jalan) orang-orang yang sesat.",
+          "translation": {
+            "id": "Dengan nama Allah, Yang Maha Pemurah, lagi Maha Mengasihani. Segala puji tertentu bagi Allah, Tuhan yang Memelihara dan Mentadbirkan sekalian alam. Yang Maha Pemurah, lagi Maha Mengasihani. Yang Menguasai pemerintahan hari Pembalasan (hari akhirat). Engkaulah sahaja (Ya Allah) Yang Kami sembah dan kepada Engkaulah sahaja kami memohon pertolongan. Tunjukilah kami jalan yang lurus. Iaitu jalan orang-orang yang Engkau telah kurniakan nikmat kepada mereka, bukan (jalan) orang-orang yang Engkau telah murkai dan bukan pula (jalan) orang-orang yang sesat.",
+            "ms": "Dengan nama Allah, Yang Maha Pemurah, lagi Maha Mengasihani. Segala puji bagi Allah, Tuhan yang Memelihara dan Mentadbirkan sekalian alam. Yang Maha Pemurah, lagi Maha Mengasihani. Yang Menguasai hari Pembalasan. Engkaulah sahaja Yang Kami sembah dan kepada Engkaulah sahaja kami memohon pertolongan. Tunjukilah kami jalan yang lurus. Iaitu jalan orang-orang yang Engkau telah kurniakan nikmat kepada mereka, bukan jalan orang-orang yang Engkau telah murkai dan bukan pula jalan orang-orang yang sesat.",
+            "en": "In the name of Allah, the Entirely Merciful, the Especially Merciful. [All] praise is [due] to Allah, Lord of the worlds - The Entirely Merciful, the Especially Merciful, Sovereign of the Day of Recompense. It is You we worship and You we ask for help. Guide us to the straight path - The path of those upon whom You have bestowed favor, not of those who have earned [Your] anger or of those who are astray."
+          },
           "fawaid": "(QS. Al Fatihah: 1-7)",
           "notes": "Al-Fatihah ayat 1-7",
           "source": "",
@@ -19,7 +23,11 @@
         {
           "arabic": "الٓمٓ . ذَٰلِكَ ٱلْكِتَـٰبُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًۭى لِّلْمُتَّقِينَ . ٱلَّذِينَ يُؤْمِنُونَ بِٱلْغَيْبِ وَيُقِيمُونَ ٱلصَّلَوٰةَ وَمِمَّا رَزَقْنَـٰهُمْ يُنفِقُونَ . وَٱلَّذِينَ يُؤْمِنُونَ بِمَآ أُنزِلَ إِلَيْكَ وَمَآ أُنزِلَ مِن قَبْلِكَ وَبِٱلْـَٔاخِرَةِ هُمْ يُوقِنُونَ . أُو۟لَـٰٓئِكَ عَلَىٰ هُدًۭى مِّن رَّبِّهِمْ ۖ وَأُو۟لَـٰٓئِكَ هُمُ ٱلْمُفْلِحُونَ",
           "latin": "Alif Lām Mīm. Żālikal-Kitābu Lā Raiba Fīh, Hudal Lil-Muttaqīn. Allażīna Yu’minūna Bil-Gaibi Wa Yuqīmūnaṣ-Ṣalāta Wa Mimmā Razaqnāhum Yunfiqūn. Wallażīna Yu’minūna Bimā Unzila Ilaika Wa Mā Unzila Min Qablik, Wa Bil-Ākhirati Hum Yūqinūn. Ulā’ika ‘Alā Hudam Mir Rabbihim Wa Ulā’ika Humul-Mufliḥūn",
-          "translation": "Alif, Laam, Miim. Kitab Al-Quran ini, tidak ada sebarang syak padanya (tentang datangnya dari Allah dan tentang sempurnanya); ia pula menjadi petunjuk bagi orang-orang yang (hendak) bertaqwa; Iaitu orang-orang yang beriman kepada perkara-perkara yang ghaib, dan mendirikan (mengerjakan) sembahyang serta membelanjakan (mendermakan) sebahagian dari rezeki yang Kami berikan kepada mereka. Dan juga orang-orang yang beriman kepada Kitab “Al-Quran” yang diturunkan kepadamu (Wahai Muhammad), dan Kitab-kitab yang diturunkan dahulu daripadamu, serta mereka yakin akan (adanya) hari akhirat (dengan sepenuhnya). Mereka itulah yang tetap mendapat petunjuk dari Tuhan mereka, dan merekalah orang-orang yang berjaya.",
+          "translation": {
+            "id": "Alif, Laam, Miim. Kitab Al-Quran ini, tidak ada sebarang syak padanya (tentang datangnya dari Allah dan tentang sempurnanya); ia pula menjadi petunjuk bagi orang-orang yang (hendak) bertaqwa; Iaitu orang-orang yang beriman kepada perkara-perkara yang ghaib, dan mendirikan (mengerjakan) sembahyang serta membelanjakan (mendermakan) sebahagian dari rezeki yang Kami berikan kepada mereka. Dan juga orang-orang yang beriman kepada Kitab “Al-Quran” yang diturunkan kepadamu (Wahai Muhammad), dan Kitab-kitab yang diturunkan dahulu daripadamu, serta mereka yakin akan (adanya) hari akhirat (dengan sepenuhnya). Mereka itulah yang tetap mendapat petunjuk dari Tuhan mereka, dan merekalah orang-orang yang berjaya.",
+            "ms": "Alif, Laam, Miim. Kitab Al-Quran ini, tidak ada sebarang keraguan padanya; ia menjadi petunjuk bagi orang-orang yang bertaqwa; Iaitu orang-orang yang beriman kepada perkara yang ghaib, mendirikan solat dan membelanjakan sebahagian rezeki yang Kami berikan kepada mereka. Dan juga orang-orang yang beriman kepada Al-Quran yang diturunkan kepadamu dan Kitab-kitab yang diturunkan sebelummu, serta mereka yakin akan hari akhirat. Mereka itulah yang mendapat petunjuk dari Tuhan mereka dan merekalah orang-orang yang berjaya.",
+            "en": "Alif, Lam, Meem. This is the Book about which there is no doubt, a guidance for those conscious of Allah - Who believe in the unseen, establish prayer, and spend out of what We have provided for them, And who believe in what has been revealed to you, [O Muhammad], and what was revealed before you, and of the Hereafter they are certain [in faith]. Those are upon [right] guidance from their Lord, and it is those who are the successful."
+          },
           "fawaid": "(QS. Al Baqarah: 1-5)",
           "notes": "Al-Baqarah ayat 1-5",
           "source": "",
@@ -28,7 +36,11 @@
         {
           "arabic": "ٱللَّهُ لَآ إِلَـٰهَ إِلَّا هُوَ ٱلْحَىُّ ٱلْقَيُّومُ ۚ لَا تَأْخُذُهُۥ سِنَةٌۭ وَلَا نَوْمٌۭ ۚ لَّهُۥ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ مَن ذَا ٱلَّذِى يَشْفَعُ عِندَهُۥٓ إِلَّا بِإِذْنِهِۦ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَىْءٍۢ مِّنْ عِلْمِهِۦٓ إِلَّا بِمَا شَآءَ ۚ وَسِعَ كُرْسِيُّهُ ٱلسَّمَـٰوَٰتِ وَٱلْأَرْضَ ۖ وَلَا يَـُٔودُهُۥ حِفْظُهُمَا ۚ وَهُوَ ٱلْعَلِىُّ ٱلْعَظِيمُ",
           "latin": "Allāhu Lā Ilāha Illā Huw, Al-Ḥayyul-Qayyūm, Lā Ta’khużuhū Sinatuw Wa Lā Naum, Lahū Mā Fis-Samāwāti Wa Mā Fil-Arḍ, Man Żallażī Yasyfa‘U ‘Indahū Illā Bi’iżnih, Ya‘Lamu Mā Baina Aidīhim Wa Mā Khalfahum, Wa Lā Yuḥīṭūna Bisyai’im Min ‘Ilmihī Illā Bimā Syā’, Wasi‘A Kursiyyuhus-Samāwāti Wal-Arḍ, Wa Lā Ya’ūduhū Ḥifẓuhumā, Wa Huwal-‘Aliyyul-‘Aẓīm",
-          "translation": "Allah, tiada Tuhan (yang berhak disembah) melainkan Dia, Yang Tetap hidup, Yang Kekal selama-lamanya mentadbirkan (sekalian makhlukNya). Yang tidak mengantuk usahkan tidur. Yang memiliki segala yang ada di langit dan yang ada di bumi. Tiada sesiapa yang dapat memberi syafaat (pertolongan) di sisiNya melainkan dengan izinNya. yang mengetahui apa yang ada di hadapan mereka dan apa yang ada di belakang mereka, sedang mereka tidak mengetahui sesuatu pun dari (kandungan) ilmu Allah melainkan apa yang Allah kehendaki (memberitahu kepadanya). Luasnya Kursi Allah (ilmuNya dan kekuasaanNya) meliputi langit dan bumi; dan tiadalah menjadi keberatan kepada Allah menjaga serta memelihara keduanya. Dan Dia lah Yang Maha Tinggi (darjat kemuliaanNya), lagi Maha Besar (kekuasaanNya)",
+          "translation": {
+            "id": "Allah, tiada Tuhan (yang berhak disembah) melainkan Dia, Yang Tetap hidup, Yang Kekal selama-lamanya mentadbirkan (sekalian makhlukNya). Yang tidak mengantuk usahkan tidur. Yang memiliki segala yang ada di langit dan yang ada di bumi. Tiada sesiapa yang dapat memberi syafaat (pertolongan) di sisiNya melainkan dengan izinNya. yang mengetahui apa yang ada di hadapan mereka dan apa yang ada di belakang mereka, sedang mereka tidak mengetahui sesuatu pun dari (kandungan) ilmu Allah melainkan apa yang Allah kehendaki (memberitahu kepadanya). Luasnya Kursi Allah (ilmuNya dan kekuasaanNya) meliputi langit dan bumi; dan tiadalah menjadi keberatan kepada Allah menjaga serta memelihara keduanya. Dan Dia lah Yang Maha Tinggi (darjat kemuliaanNya), lagi Maha Besar (kekuasaanNya)",
+            "ms": "Allah, tiada Tuhan melainkan Dia, Yang Hidup Kekal lagi terus menerus mengurus makhluk-Nya. Dia tidak mengantuk dan tidak tidur. Kepunyaan-Nya apa yang di langit dan di bumi. Tiada yang dapat memberi syafaat di sisi-Nya tanpa izin-Nya. Dia mengetahui apa yang di hadapan mereka dan apa yang di belakang mereka, dan mereka tidak mengetahui sesuatu pun dari ilmu-Nya melainkan apa yang Dia kehendaki. Kursi-Nya meliputi langit dan bumi, dan pemeliharaan kedua-duanya tidak melelahkan-Nya. Dan Dia Maha Tinggi lagi Maha Agung.",
+            "en": "Allah - there is no deity except Him, the Ever-Living, the Sustainer of [all] existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is [presently] before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great."
+          },
           "fawaid": "(QS. Al Baqarah: 255)",
           "notes": "Ayatul Kursi",
           "source": "",
@@ -37,7 +49,11 @@
         {
           "arabic": "لَآ إِكْرَاهَ فِى ٱلدِّينِ ۖ قَد تَّبَيَّنَ ٱلرُّشْدُ مِنَ ٱلْغَىِّ ۚ فَمَن يَكْفُرْ بِٱلطَّـٰغُوتِ وَيُؤْمِنۢ بِٱللَّهِ فَقَدِ ٱسْتَمْسَكَ بِٱلْعُرْوَةِ ٱلْوُثْقَىٰ لَا ٱنفِصَامَ لَهَا ۗ وَٱللَّهُ سَمِيعٌ عَلِيمٌ",
           "latin": "Lā Ikrāha Fid-Dīn, Qat Tabayyanar-Rusydu Minal-Gayy, Fa May Yakfur Biṭ-Ṭāgūti Wa Yu’mim Billāhi Fa Qadistamsaka Bil-‘Urwatil-Wuṡqā Lanfiṣāma Lahā, Wallāhu Samī‘Un ‘Alīm",
-          "translation": "Tidak ada paksaan dalam ugama (Islam), kerana sesungguhnya telah nyata kebenaran (Islam) dari kesesatan (kufur). Oleh itu, sesiapa yang tidak percayakan Taghut, dan ia pula beriman kepada Allah, maka sesungguhnya ia telah berpegang kepada simpulan (tali ugama) yang teguh yang tidak akan putus. Dan (ingatlah), Allah Maha Mendengar, lagi Maha Mengetahui.",
+          "translation": {
+            "id": "Tidak ada paksaan dalam ugama (Islam), kerana sesungguhnya telah nyata kebenaran (Islam) dari kesesatan (kufur). Oleh itu, sesiapa yang tidak percayakan Taghut, dan ia pula beriman kepada Allah, maka sesungguhnya ia telah berpegang kepada simpulan (tali ugama) yang teguh yang tidak akan putus. Dan (ingatlah), Allah Maha Mendengar, lagi Maha Mengetahui.",
+            "ms": "Tidak ada paksaan dalam ugama (Islam), kerana sesungguhnya telah nyata kebenaran (Islam) dari kesesatan (kufur). Oleh itu, sesiapa yang tidak percayakan Taghut, dan ia pula beriman kepada Allah, maka sesungguhnya ia telah berpegang kepada simpulan (tali ugama) yang teguh yang tidak akan putus. Dan (ingatlah), Allah Maha Mendengar, lagi Maha Mengetahui.",
+            "en": "Tidak ada paksaan dalam ugama (Islam), kerana sesungguhnya telah nyata kebenaran (Islam) dari kesesatan (kufur). Oleh itu, sesiapa yang tidak percayakan Taghut, dan ia pula beriman kepada Allah, maka sesungguhnya ia telah berpegang kepada simpulan (tali ugama) yang teguh yang tidak akan putus. Dan (ingatlah), Allah Maha Mendengar, lagi Maha Mengetahui."
+          },
           "fawaid": "(QS. Al Baqarah: 256)",
           "notes": "Al-Baqarah ayat 256",
           "source": "",
@@ -46,7 +62,11 @@
         {
           "arabic": "ٱللَّهُ وَلِىُّ ٱلَّذِينَ ءَامَنُوا۟ يُخْرِجُهُم مِّنَ ٱلظُّلُمَـٰتِ إِلَى ٱلنُّورِ ۖ وَٱلَّذِينَ كَفَرُوٓا۟ أَوْلِيَآؤُهُمُ ٱلطَّـٰغُوتُ يُخْرِجُونَهُم مِّنَ ٱلنُّورِ إِلَى ٱلظُّلُمَـٰتِ ۗ أُو۟لَـٰٓئِكَ أَصْحَـٰبُ ٱلنَّارِ ۖ هُمْ فِيهَا خَـٰلِدُونَ",
           "latin": "Allāhu Waliyyullażīna Āmanū Yukhrijuhum Minaẓ-Ẓulumāti Ilan-Nūr, Wallażīna Kafarū Auliyā’uhumuṭ-Ṭāgūtu Yukhrijūnahum Minan-Nūri Ilaẓ-Ẓulumāt, Ulā’ika Aṣḥābun-Nār, Hum Fīhā Khālidūn",
-          "translation": "Allah Pelindung (Yang mengawal dan menolong) orang-orang yang beriman. Ia mengeluarkan mereka dari kegelapan (kufur) kepada cahaya (iman). Dan orang-orang yang kafir, penolong-penolong mereka ialah Taghut yang mengeluarkan mereka dari cahaya (iman) kepada kegelapan (kufur). Mereka itulah ahli neraka, mereka kekal di dalamnya.",
+          "translation": {
+            "id": "Allah Pelindung (Yang mengawal dan menolong) orang-orang yang beriman. Ia mengeluarkan mereka dari kegelapan (kufur) kepada cahaya (iman). Dan orang-orang yang kafir, penolong-penolong mereka ialah Taghut yang mengeluarkan mereka dari cahaya (iman) kepada kegelapan (kufur). Mereka itulah ahli neraka, mereka kekal di dalamnya.",
+            "ms": "Allah Pelindung (Yang mengawal dan menolong) orang-orang yang beriman. Ia mengeluarkan mereka dari kegelapan (kufur) kepada cahaya (iman). Dan orang-orang yang kafir, penolong-penolong mereka ialah Taghut yang mengeluarkan mereka dari cahaya (iman) kepada kegelapan (kufur). Mereka itulah ahli neraka, mereka kekal di dalamnya.",
+            "en": "Allah Pelindung (Yang mengawal dan menolong) orang-orang yang beriman. Ia mengeluarkan mereka dari kegelapan (kufur) kepada cahaya (iman). Dan orang-orang yang kafir, penolong-penolong mereka ialah Taghut yang mengeluarkan mereka dari cahaya (iman) kepada kegelapan (kufur). Mereka itulah ahli neraka, mereka kekal di dalamnya."
+          },
           "fawaid": "(QS. Al Baqarah: 257)",
           "notes": "Al-Baqarah ayat 257",
           "source": "",
@@ -55,7 +75,11 @@
         {
           "arabic": "لِّلَّهِ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ وَإِن تُبْدُوا۟ مَا فِىٓ أَنفُسِكُمْ أَوْ تُخْفُوهُ يُحَاسِبْكُم بِهِ ٱللَّهُ ۖ فَيَغْفِرُ لِمَن يَشَآءُ وَيُعَذِّبُ مَن يَشَآءُ ۗ وَٱللَّهُ عَلَىٰ كُلِّ شَىْءٍۢ قَدِيرٌ",
           "latin": "Lillāhi Mā Fis-Samāwāti Wa Mā Fil-Arḍ, Wa In Tubdū Mā Fī Anfusikum Au Tukhfūhu Yuḥāsibkum Bihillāh, Fa Yagfiru Limay Yasyā’u Wa Yu‘Ażżibu May Yasyā’, Wallāhu ‘Alā Kulli Syai’in Qadīr",
-          "translation": "Segala yang ada di langit dan yang ada di bumi adalah kepunyaan Allah. Dan jika kamu melahirkan apa yang ada di dalam hati kamu atau kamu memyembunyikannya, nescaya Allah akan menghitung dan menyatakannya kepada kamu. Kemudian Ia mengampunkan bagi sesiapa yang dikehendakiNya dan menyeksa sesiapa yang dikehendakiNya (menurut undang-undang peraturanNya) Dan (ingatlah), Allah Maha Kuasa atas tiap-tiap sesuatu.",
+          "translation": {
+            "id": "Segala yang ada di langit dan yang ada di bumi adalah kepunyaan Allah. Dan jika kamu melahirkan apa yang ada di dalam hati kamu atau kamu memyembunyikannya, nescaya Allah akan menghitung dan menyatakannya kepada kamu. Kemudian Ia mengampunkan bagi sesiapa yang dikehendakiNya dan menyeksa sesiapa yang dikehendakiNya (menurut undang-undang peraturanNya) Dan (ingatlah), Allah Maha Kuasa atas tiap-tiap sesuatu.",
+            "ms": "Segala yang ada di langit dan yang ada di bumi adalah kepunyaan Allah. Dan jika kamu melahirkan apa yang ada di dalam hati kamu atau kamu memyembunyikannya, nescaya Allah akan menghitung dan menyatakannya kepada kamu. Kemudian Ia mengampunkan bagi sesiapa yang dikehendakiNya dan menyeksa sesiapa yang dikehendakiNya (menurut undang-undang peraturanNya) Dan (ingatlah), Allah Maha Kuasa atas tiap-tiap sesuatu.",
+            "en": "Segala yang ada di langit dan yang ada di bumi adalah kepunyaan Allah. Dan jika kamu melahirkan apa yang ada di dalam hati kamu atau kamu memyembunyikannya, nescaya Allah akan menghitung dan menyatakannya kepada kamu. Kemudian Ia mengampunkan bagi sesiapa yang dikehendakiNya dan menyeksa sesiapa yang dikehendakiNya (menurut undang-undang peraturanNya) Dan (ingatlah), Allah Maha Kuasa atas tiap-tiap sesuatu."
+          },
           "fawaid": "(QS. Al Baqarah: 284)",
           "notes": "Al-Baqarah ayat 284",
           "source": "",
@@ -64,7 +88,11 @@
         {
           "arabic": "ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ ۚ كُلٌّ ءَامَنَ بِٱللَّهِ وَمَلَـٰٓئِكَتِهِۦ وَكُتُبِهِۦ وَرُسُلِهِۦ لَا نُفَرِّقُ بَيْنَ أَحَدٍۢ مِّن رُّسُلِهِۦ ۚ وَقَالُوا۟ سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ ٱلْمَصِيرُ",
           "latin": "Āmanar-Rasūlu Bimā Unzila Ilaihi Mir Rabbihī Wal-Mu’minūn, Kullun Āmana Billāhi Wa Malā’ikatihī Wa Kutubihī Wa Rusulih, Lā Nufarriqu Baina Aḥadim Mir Rusulih, Wa Qālū Sami‘Nā Wa Aṭa‘Nā Gufrānaka Rabbanā Wa Ilaikal-Maṣīr",
-          "translation": "Rasulullah telah beriman kepada apa yang diturunkan kepadanya dari Tuhannya, dan juga orang-orang yang beriman; semuanya beriman kepada Allah, dan Malaikat-malaikatNya, dan Kitab-kitabNya, dan Rasul-rasulNya. (Mereka berkata): “Kami tidak membezakan antara seorang dengan yang lain Rasul-rasulnya”. Mereka berkata lagi: Kami dengar dan kami taat (kami pohonkan) keampunanMu wahai Tuhan kami, dan kepadaMu jualah tempat kembali”.",
+          "translation": {
+            "id": "Rasulullah telah beriman kepada apa yang diturunkan kepadanya dari Tuhannya, dan juga orang-orang yang beriman; semuanya beriman kepada Allah, dan Malaikat-malaikatNya, dan Kitab-kitabNya, dan Rasul-rasulNya. (Mereka berkata): “Kami tidak membezakan antara seorang dengan yang lain Rasul-rasulnya”. Mereka berkata lagi: Kami dengar dan kami taat (kami pohonkan) keampunanMu wahai Tuhan kami, dan kepadaMu jualah tempat kembali”.",
+            "ms": "Rasulullah telah beriman kepada apa yang diturunkan kepadanya dari Tuhannya, dan juga orang-orang yang beriman; semuanya beriman kepada Allah, dan Malaikat-malaikatNya, dan Kitab-kitabNya, dan Rasul-rasulNya. (Mereka berkata): “Kami tidak membezakan antara seorang dengan yang lain Rasul-rasulnya”. Mereka berkata lagi: Kami dengar dan kami taat (kami pohonkan) keampunanMu wahai Tuhan kami, dan kepadaMu jualah tempat kembali”.",
+            "en": "Rasulullah telah beriman kepada apa yang diturunkan kepadanya dari Tuhannya, dan juga orang-orang yang beriman; semuanya beriman kepada Allah, dan Malaikat-malaikatNya, dan Kitab-kitabNya, dan Rasul-rasulNya. (Mereka berkata): “Kami tidak membezakan antara seorang dengan yang lain Rasul-rasulnya”. Mereka berkata lagi: Kami dengar dan kami taat (kami pohonkan) keampunanMu wahai Tuhan kami, dan kepadaMu jualah tempat kembali”."
+          },
           "fawaid": "(QS. Al Baqarah: 285)",
           "notes": "Al-Baqarah ayat 285",
           "source": "",
@@ -73,7 +101,11 @@
         {
           "arabic": "لِّلَّهِ مَا فِى ٱلسَّمَـٰوَٰتِ وَمَا فِى ٱلْأَرْضِ ۗ وَإِن تُبْدُوا۟ مَا فِىٓ أَنفُسِكُمْ أَوْ تُخْفُوهُ يُحَاسِبْكُم بِهِ ٱللَّهُ ۖ فَيَغْفِرُ لِمَن يَشَآءُ وَيُعَذِّبُ مَن يَشَآءُ ۗ وَٱللَّهُ عَلَىٰ كُلِّ شَىْءٍۢ قَدِيرٌ ٢٨٤ ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ ۚ كُلٌّ ءَامَنَ بِٱللَّهِ وَمَلَـٰٓئِكَتِهِۦ وَكُتُبِهِۦ وَرُسُلِهِۦ لَا نُفَرِّقُ بَيْنَ أَحَدٍۢ مِّن رُّسُلِهِۦ ۚ وَقَالُوا۟ سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ ٱلْمَصِيرُ ٢٨٥ لَا يُكَلِّفُ ٱللَّهُ نَفْسًا إِلَّا وُسْعَهَا ۚ لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا ٱكْتَسَبَتْ ۗ رَبَّنَا لَا تُؤَاخِذْنَآ إِن نَّسِينَآ أَوْ أَخْطَأْنَا ۚ رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَآ إِصْرًۭا كَمَا حَمَلْتَهُۥ عَلَى ٱلَّذِينَ مِن قَبْلِنَا ۚ رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِۦ ۖ وَٱعْفُ عَنَّا وَٱغْفِرْ لَنَا وَٱرْحَمْنَآ ۚ أَنتَ مَوْلَىٰنَا فَٱنصُرْنَا عَلَى ٱلْقَوْمِ ٱلْكَـٰفِرِينَ",
           "latin": "Lillāhi mā fis-samāwāti wa mā fil-arḍ, wa in tubdū mā fī anfusikum au tukhfūhu yuḥāsibkum bihillāh, fa yagfiru limay yasyā’u wa yu‘ażżibu may yasyā’, wallāhu ‘alā kulli syai’in qadīr. Āmanar-rasūlu bimā unzila ilaihi mir rabbihī wal-mu’minūn, kullun āmana billāhi wa malā’ikatihī wa kutubihī wa rusulih, lā nufarriqu baina aḥadim mir rusulih, wa qālū sami‘nā wa aṭa‘nā gufrānaka rabbanā wa ilaikal-maṣīr. Lā yukallifullāhu nafsan illā wus‘ahā, lahā mā kasabat wa ‘alaihā maktasabat, rabbanā lā tu’ākhiżnā in nasīnā au akhṭa’nā, rabbanā wa lā taḥmil ‘alainā iṣran kamā Ḥamaltahū ‘alallażīna min qablinā, rabbanā wa lā tuḥammilnā mā lā Ṭāqata lanā bih, wa‘fu ‘annā, wagfir lanā, warḥamnā, anta maulānā fanṣurnā ‘Alal qaumil-kāfirīn",
-          "translation": "Allah tidak memberati seseorang melainkan apa yang terdaya olehnya. Ia mendapat pahala kebaikan yang diusahakannya, dan ia juga menanggung dosa kejahatan yang diusahakannya. (Mereka berdoa dengan berkata): “Wahai Tuhan kami! Janganlah Engkau mengirakan kami salah jika kami lupa atau kami tersalah. Wahai Tuhan kami ! Janganlah Engkau bebankan kepada kami bebanan yang berat sebagaimana yang telah Engkau bebankan kepada orang-orang yang terdahulu daripada kami. Wahai Tuhan kami! Janganlah Engkau pikulkan kepada kami apa yang kami tidak terdaya memikulnya. Dan maafkanlah kesalahan kami, serta ampunkanlah dosa kami, dan berilah rahmat kepada kami. Engkaulah Penolong kami; oleh itu, tolonglah kami untuk mencapai kemenangan terhadap kaum-kaum yang kafir”.",
+          "translation": {
+            "id": "Allah tidak memberati seseorang melainkan apa yang terdaya olehnya. Ia mendapat pahala kebaikan yang diusahakannya, dan ia juga menanggung dosa kejahatan yang diusahakannya. (Mereka berdoa dengan berkata): “Wahai Tuhan kami! Janganlah Engkau mengirakan kami salah jika kami lupa atau kami tersalah. Wahai Tuhan kami ! Janganlah Engkau bebankan kepada kami bebanan yang berat sebagaimana yang telah Engkau bebankan kepada orang-orang yang terdahulu daripada kami. Wahai Tuhan kami! Janganlah Engkau pikulkan kepada kami apa yang kami tidak terdaya memikulnya. Dan maafkanlah kesalahan kami, serta ampunkanlah dosa kami, dan berilah rahmat kepada kami. Engkaulah Penolong kami; oleh itu, tolonglah kami untuk mencapai kemenangan terhadap kaum-kaum yang kafir”.",
+            "ms": "Allah tidak memberati seseorang melainkan apa yang terdaya olehnya. Ia mendapat pahala kebaikan yang diusahakannya, dan ia juga menanggung dosa kejahatan yang diusahakannya. (Mereka berdoa dengan berkata): “Wahai Tuhan kami! Janganlah Engkau mengirakan kami salah jika kami lupa atau kami tersalah. Wahai Tuhan kami ! Janganlah Engkau bebankan kepada kami bebanan yang berat sebagaimana yang telah Engkau bebankan kepada orang-orang yang terdahulu daripada kami. Wahai Tuhan kami! Janganlah Engkau pikulkan kepada kami apa yang kami tidak terdaya memikulnya. Dan maafkanlah kesalahan kami, serta ampunkanlah dosa kami, dan berilah rahmat kepada kami. Engkaulah Penolong kami; oleh itu, tolonglah kami untuk mencapai kemenangan terhadap kaum-kaum yang kafir”.",
+            "en": "Allah tidak memberati seseorang melainkan apa yang terdaya olehnya. Ia mendapat pahala kebaikan yang diusahakannya, dan ia juga menanggung dosa kejahatan yang diusahakannya. (Mereka berdoa dengan berkata): “Wahai Tuhan kami! Janganlah Engkau mengirakan kami salah jika kami lupa atau kami tersalah. Wahai Tuhan kami ! Janganlah Engkau bebankan kepada kami bebanan yang berat sebagaimana yang telah Engkau bebankan kepada orang-orang yang terdahulu daripada kami. Wahai Tuhan kami! Janganlah Engkau pikulkan kepada kami apa yang kami tidak terdaya memikulnya. Dan maafkanlah kesalahan kami, serta ampunkanlah dosa kami, dan berilah rahmat kepada kami. Engkaulah Penolong kami; oleh itu, tolonglah kami untuk mencapai kemenangan terhadap kaum-kaum yang kafir”."
+          },
           "fawaid": "(QS. Al Baqarah: 286)",
           "notes": "Al-Baqarah ayat 286",
           "source": "",
@@ -82,7 +114,11 @@
         {
           "arabic": " قُلْ هُوَ ٱللَّهُ أَحَدٌ . ٱللَّهُ ٱلصَّمَدُ . لَمْ يَلِدْ وَلَمْ يُولَدْ . وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ",
           "latin": "Qul Huwallāhu Aḥad. Allāhuṣ-Ṣamad. Lam Yalid Wa Lam Yūlad. Wa Lam Yakul Lahū Kufuwan Aḥad",
-          "translation": "Katakanlah (wahai Muhammad): “(Tuhanku) ialah Allah Yang Maha Esa; “Allah Yang menjadi tumpuan sekalian makhluk untuk memohon sebarang hajat; “Ia tiada beranak, dan Ia pula tidak diperanakkan; “Dan tidak ada sesiapapun yang serupa denganNya”.",
+          "translation": {
+            "id": "Katakanlah (wahai Muhammad): “(Tuhanku) ialah Allah Yang Maha Esa; “Allah Yang menjadi tumpuan sekalian makhluk untuk memohon sebarang hajat; “Ia tiada beranak, dan Ia pula tidak diperanakkan; “Dan tidak ada sesiapapun yang serupa denganNya”.",
+            "ms": "Katakanlah (wahai Muhammad): “(Tuhanku) ialah Allah Yang Maha Esa; “Allah Yang menjadi tumpuan sekalian makhluk untuk memohon sebarang hajat; “Ia tiada beranak, dan Ia pula tidak diperanakkan; “Dan tidak ada sesiapapun yang serupa denganNya”.",
+            "en": "Katakanlah (wahai Muhammad): “(Tuhanku) ialah Allah Yang Maha Esa; “Allah Yang menjadi tumpuan sekalian makhluk untuk memohon sebarang hajat; “Ia tiada beranak, dan Ia pula tidak diperanakkan; “Dan tidak ada sesiapapun yang serupa denganNya”."
+          },
           "fawaid": "(QS. Al-Ikhlas: 1-4)",
           "notes": "Al-Ikhlas",
           "source": "",
@@ -91,7 +127,11 @@
         {
           "arabic": "قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ . مِن شَرِّ مَا خَلَقَ . وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ . وَمِن شَرِّ ٱلنَّفَّـٰثَـٰتِ فِى ٱلْعُقَدِ . وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
           "latin": "Qul A‘Ūżu Birabbil-Falaq. Min Syarri Mā Khalaq. Wa Min Syarri Gāsiqin Iżā Waqab. Wa Min Syarrin-Naffāṡāti Fil-‘Uqad. Wa Min Syarri Ḥāsidin Iżā Ḥasad",
-          "translation": "Katakanlah (wahai Muhammad); “Aku berlindung kepada (Allah) Tuhan yang menciptakan sekalian makhluk, “Dari bencana makhluk-makhluk yang Ia ciptakan; “Dan dari bahaya gelap apabila ia masuk; “Dan dari kejahatan makhluk-makhluk yang menghembus-hembus pada simpulan-simpulan (dan ikatan-ikatan); “Dan dari kejahatan orang yang dengki apabila ia melakukan dengkinya”.",
+          "translation": {
+            "id": "Katakanlah (wahai Muhammad); “Aku berlindung kepada (Allah) Tuhan yang menciptakan sekalian makhluk, “Dari bencana makhluk-makhluk yang Ia ciptakan; “Dan dari bahaya gelap apabila ia masuk; “Dan dari kejahatan makhluk-makhluk yang menghembus-hembus pada simpulan-simpulan (dan ikatan-ikatan); “Dan dari kejahatan orang yang dengki apabila ia melakukan dengkinya”.",
+            "ms": "Katakanlah (wahai Muhammad); “Aku berlindung kepada (Allah) Tuhan yang menciptakan sekalian makhluk, “Dari bencana makhluk-makhluk yang Ia ciptakan; “Dan dari bahaya gelap apabila ia masuk; “Dan dari kejahatan makhluk-makhluk yang menghembus-hembus pada simpulan-simpulan (dan ikatan-ikatan); “Dan dari kejahatan orang yang dengki apabila ia melakukan dengkinya”.",
+            "en": "Katakanlah (wahai Muhammad); “Aku berlindung kepada (Allah) Tuhan yang menciptakan sekalian makhluk, “Dari bencana makhluk-makhluk yang Ia ciptakan; “Dan dari bahaya gelap apabila ia masuk; “Dan dari kejahatan makhluk-makhluk yang menghembus-hembus pada simpulan-simpulan (dan ikatan-ikatan); “Dan dari kejahatan orang yang dengki apabila ia melakukan dengkinya”."
+          },
           "fawaid": "(QS. Al-Falaq: 1-5)",
           "notes": "Al-Falaq",
           "source": "",
@@ -100,7 +140,11 @@
         {
           "arabic": "قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ . مَلِكِ ٱلنَّاسِ . إِلَـٰهِ ٱلنَّاسِ ٣ مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ . ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ . مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",
           "latin": "Qul A‘Ūżu Birabbin-Nās. Malikin-Nās. Ilāhin-Nās. Min Syarril-Waswāsil-Khannās. Allażī Yuwaswisu Fī Ṣudūrin-Nās. Minal Jinnati Wan-Nās",
-          "translation": "Katakanlah (wahai Muhammad): “Aku berlindung kepada (Allah) Pemulihara sekalian manusia. “Yang Menguasai sekalian manusia, “Tuhan yang berhak disembah oleh sekalian manusia, “Dari kejahatan pembisik penghasut yang timbul tenggelam, -“Yang melemparkan bisikan dan hasutannya ke dalam hati manusia, – “(Iaitu pembisik dan penghasut) dari kalangan jin dan manusia”.",
+          "translation": {
+            "id": "Katakanlah (wahai Muhammad): “Aku berlindung kepada (Allah) Pemulihara sekalian manusia. “Yang Menguasai sekalian manusia, “Tuhan yang berhak disembah oleh sekalian manusia, “Dari kejahatan pembisik penghasut yang timbul tenggelam, -“Yang melemparkan bisikan dan hasutannya ke dalam hati manusia, – “(Iaitu pembisik dan penghasut) dari kalangan jin dan manusia”.",
+            "ms": "Katakanlah (wahai Muhammad): “Aku berlindung kepada (Allah) Pemulihara sekalian manusia. “Yang Menguasai sekalian manusia, “Tuhan yang berhak disembah oleh sekalian manusia, “Dari kejahatan pembisik penghasut yang timbul tenggelam, -“Yang melemparkan bisikan dan hasutannya ke dalam hati manusia, – “(Iaitu pembisik dan penghasut) dari kalangan jin dan manusia”.",
+            "en": "Katakanlah (wahai Muhammad): “Aku berlindung kepada (Allah) Pemulihara sekalian manusia. “Yang Menguasai sekalian manusia, “Tuhan yang berhak disembah oleh sekalian manusia, “Dari kejahatan pembisik penghasut yang timbul tenggelam, -“Yang melemparkan bisikan dan hasutannya ke dalam hati manusia, – “(Iaitu pembisik dan penghasut) dari kalangan jin dan manusia”."
+          },
           "fawaid": "(QS. An-Nas: 1-6)",
           "notes": "An-Nas",
           "source": "",
@@ -109,7 +153,11 @@
         {
           "arabic": "َصْبَحْنَا وَأَصْبَحَ (أَمْسَيْنَا وَأَمْسَا) الْمُلْكُ لِلَّهِ وَالحَمْدُ لِلَّهِ لَا شَريكَ لَهُ لا إله إلَّا هُوَ وَإِلَيْهِ النُّشُورُ (الْمَصِيرُ)",
           "latin": "AsbahNa Wa Asbahal (AmSaiNa Wa Amsal) Mulku Lillahi Walhamdu Lillahi Laa SyariiKa-Lahu Laa iLaaHa illa Huwa Wa ilaiHin-Nusyur (al-Masir)",
-          "translation": "Sesungguhnya kami terjaga di pagi hari (di petang hari) dengan (kesedaran bahawa) Kerajaan (bumi dan segala isinya) ini seluruhnya adalah milik Allah. Dan segala puji bagi Allah, tiada sekutu bagi-Nya tiada Tuhan selain Dia dan kepada-Nya kami akan dibangkitkan. (3x)(tulisan dalam kurung dibaca pada waktu petang)",
+          "translation": {
+            "id": "Sesungguhnya kami terjaga di pagi hari (di petang hari) dengan (kesedaran bahawa) Kerajaan (bumi dan segala isinya) ini seluruhnya adalah milik Allah. Dan segala puji bagi Allah, tiada sekutu bagi-Nya tiada Tuhan selain Dia dan kepada-Nya kami akan dibangkitkan. (3x)(tulisan dalam kurung dibaca pada waktu petang)",
+            "ms": "Sesungguhnya kami terjaga di pagi hari (di petang hari) dengan (kesedaran bahawa) Kerajaan (bumi dan segala isinya) ini seluruhnya adalah milik Allah. Dan segala puji bagi Allah, tiada sekutu bagi-Nya tiada Tuhan selain Dia dan kepada-Nya kami akan dibangkitkan. (3x)(tulisan dalam kurung dibaca pada waktu petang)",
+            "en": "Sesungguhnya kami terjaga di pagi hari (di petang hari) dengan (kesedaran bahawa) Kerajaan (bumi dan segala isinya) ini seluruhnya adalah milik Allah. Dan segala puji bagi Allah, tiada sekutu bagi-Nya tiada Tuhan selain Dia dan kepada-Nya kami akan dibangkitkan. (3x)(tulisan dalam kurung dibaca pada waktu petang)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Doa pujian kepada Allah SWT",
           "source": "",
@@ -118,7 +166,11 @@
         {
           "arabic": "ََصْبَحْنَا (أَمْسَيْنَا) عَلَى فِطْرَةِ الْإِسْلَامِ وَكَلِمَةِ الْإخْلَاصِ وَعَلَى دِين نَبِيِّنَا مُحَمَّدٍ، وَعَلَى مِلَّةِ أَبِيْنَاإِبْرَاهِيمَ حَنِيْفاً وَمَا كَانَ مِنَ الْمُشْرِكِيْنَ",
           "latin": "AsBahNa (AmsaiNaa) ‘Ala Fitratil-Islami Wa Kalimatil-IkhLaaSi Wa ‘Alaa DiiNi NabiyyiNa Muhammad, Wa ‘Ala Millati AbiiNaa IbraaHima HaniFan WaMaa Kana Minal Musyrikin.",
-          "translation": "Kami terjaga di pagi hari (petang hari) dalam fitrah Islam, dan kalimah ikhlas dan dalam agama nabi kami, Muhammad SAW, dan dalam millah (ajaran) bapa kami Ibrahim yang hanif (lurus) sedang dia bukan orang musyrik. (tulisan dalam kurung dibaca pada waktu petang)",
+          "translation": {
+            "id": "Kami terjaga di pagi hari (petang hari) dalam fitrah Islam, dan kalimah ikhlas dan dalam agama nabi kami, Muhammad SAW, dan dalam millah (ajaran) bapa kami Ibrahim yang hanif (lurus) sedang dia bukan orang musyrik. (tulisan dalam kurung dibaca pada waktu petang)",
+            "ms": "Kami terjaga di pagi hari (petang hari) dalam fitrah Islam, dan kalimah ikhlas dan dalam agama nabi kami, Muhammad SAW, dan dalam millah (ajaran) bapa kami Ibrahim yang hanif (lurus) sedang dia bukan orang musyrik. (tulisan dalam kurung dibaca pada waktu petang)",
+            "en": "Kami terjaga di pagi hari (petang hari) dalam fitrah Islam, dan kalimah ikhlas dan dalam agama nabi kami, Muhammad SAW, dan dalam millah (ajaran) bapa kami Ibrahim yang hanif (lurus) sedang dia bukan orang musyrik. (tulisan dalam kurung dibaca pada waktu petang)"
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Doa untuk teguh pendirian dalam Islam ",
           "source": "",
@@ -127,7 +179,11 @@
         {
           "arabic": "اللَّهُمَّ إِنِّي أَصْبَحْتُ (أَمْسَيْتُ) مِنْكَ فِي نِعْمَةٍ وَعَافِيَةٍ وَسِتْرٍ فَأَتِمَّ عَلَى نِعْمَتَكَ وَعَافِيَتَكَ وَسِتْرَكَ فِي الدُّنْيَا وَالآخِرَةِ",
           "latin": "Allahumma Inni AsbahTu (AmSayTu) Minka Fii Ni’matin Wa ‘Afiyatin Wasitrin FaAtimma ‘Alayya Ni’mataka Wa ‘Afiyatika WasitRoka Fid-dunyaa Wal Aakhirati",
-          "translation": "Ya Allah, aku terjaga pada pagi dan petang dalam nikmat Mu, afiat (keselamatan dari mara bencana), dan terjaganya rahsia-rahsia (dosa-dosa) ku, maka sempurnakan nikmat-Mu, afiat-Mu dan penjagaan-Mu itu di atasku, di dunia dan akhirat. (3x) (tulisan dalam kurung dibaca pada waktu petang)",
+          "translation": {
+            "id": "Ya Allah, aku terjaga pada pagi dan petang dalam nikmat Mu, afiat (keselamatan dari mara bencana), dan terjaganya rahsia-rahsia (dosa-dosa) ku, maka sempurnakan nikmat-Mu, afiat-Mu dan penjagaan-Mu itu di atasku, di dunia dan akhirat. (3x) (tulisan dalam kurung dibaca pada waktu petang)",
+            "ms": "Ya Allah, aku terjaga pada pagi dan petang dalam nikmat Mu, afiat (keselamatan dari mara bencana), dan terjaganya rahsia-rahsia (dosa-dosa) ku, maka sempurnakan nikmat-Mu, afiat-Mu dan penjagaan-Mu itu di atasku, di dunia dan akhirat. (3x) (tulisan dalam kurung dibaca pada waktu petang)",
+            "en": "Ya Allah, aku terjaga pada pagi dan petang dalam nikmat Mu, afiat (keselamatan dari mara bencana), dan terjaganya rahsia-rahsia (dosa-dosa) ku, maka sempurnakan nikmat-Mu, afiat-Mu dan penjagaan-Mu itu di atasku, di dunia dan akhirat. (3x) (tulisan dalam kurung dibaca pada waktu petang)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Doa mensyukuri nikmat",
           "source": "",
@@ -136,7 +192,11 @@
         {
           "arabic": "اَللَّهُمَّ مَا أَصْبَحَ (مَا أَمْسَ) بِنْ مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ",
           "latin": "Allāhumma Mā Aṣbaḥa (Mā Amsā) Bii Min Niʿmatin Aw Bi Aḥadin Min Khalqika Fa Minka Waḥdaka Lā Sharīka Lak, Fa Laka L-Ḥamdu Wa Laka Sh-Shukru",
-          "translation": "Ya Allah, tidaklah aku pada waktu pagi dan petang dengan nikmat apa yang aku peroleh dan diperoleh seseorang di antara makhluk-Mu adalah dari-Mu, yang Esa dan tidak bersekutu, maka bagi-Mu segala puji dan syukur. (Apabila dibaca pada waktu petang, perkataan Mā Aṣbaḥa diganti dengan Mā Amsā)",
+          "translation": {
+            "id": "Ya Allah, tidaklah aku pada waktu pagi dan petang dengan nikmat apa yang aku peroleh dan diperoleh seseorang di antara makhluk-Mu adalah dari-Mu, yang Esa dan tidak bersekutu, maka bagi-Mu segala puji dan syukur. (Apabila dibaca pada waktu petang, perkataan Mā Aṣbaḥa diganti dengan Mā Amsā)",
+            "ms": "Ya Allah, tidaklah aku pada waktu pagi dan petang dengan nikmat apa yang aku peroleh dan diperoleh seseorang di antara makhluk-Mu adalah dari-Mu, yang Esa dan tidak bersekutu, maka bagi-Mu segala puji dan syukur. (Apabila dibaca pada waktu petang, perkataan Mā Aṣbaḥa diganti dengan Mā Amsā)",
+            "en": "Ya Allah, tidaklah aku pada waktu pagi dan petang dengan nikmat apa yang aku peroleh dan diperoleh seseorang di antara makhluk-Mu adalah dari-Mu, yang Esa dan tidak bersekutu, maka bagi-Mu segala puji dan syukur. (Apabila dibaca pada waktu petang, perkataan Mā Aṣbaḥa diganti dengan Mā Amsā)"
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Pengakuan segala nikmat dari Allah",
           "source": "",
@@ -145,7 +205,11 @@
         {
           "arabic": "يَارَبِّ لَكَ الْحَمْدُ كَمَا يَنْبَغِي لِجَلَالِ وَجْهِكَ وَعَظِيْمٍ سُلْطَانِكَ",
           "latin": "Yā Rabbi Lakal-Ḥamdu Kamā Yanbaghī Li Jalāli Wajhika Wa ʿAZiimi Sulṭhonik",
-          "translation": "Ya Allah, bagi-Mu segala puji seagung kemuliaan wajah- Mu dan kebesaran kekuasaan-Mu.",
+          "translation": {
+            "id": "Ya Allah, bagi-Mu segala puji seagung kemuliaan wajah- Mu dan kebesaran kekuasaan-Mu.",
+            "ms": "Ya Allah, bagi-Mu segala puji seagung kemuliaan wajah- Mu dan kebesaran kekuasaan-Mu.",
+            "en": "Ya Allah, bagi-Mu segala puji seagung kemuliaan wajah- Mu dan kebesaran kekuasaan-Mu."
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Pujian Bagi Allah",
           "source": "",
@@ -154,7 +218,11 @@
         {
           "arabic": "رَضِيْتُ بِاللهِ رَبًّا وَبِالْإِسْلَامِ دِينًا وَبِمُحَمَّدٍ نَبِيَّاً وَرَسُولًا",
           "latin": "Raḍhiitu Billahi Rabban, Wa Bil-Islāmi Diinan, Wa Bi Muḥammadin Nabiyyan Wa Rasūlaa",
-          "translation": "Aku telah redha dengan Allah sebagai Tuhanku, dan dengan Islam sebagai agamaku dan dengan Muhammad sebagai nabi dan rasulku. (3x)",
+          "translation": {
+            "id": "Aku telah redha dengan Allah sebagai Tuhanku, dan dengan Islam sebagai agamaku dan dengan Muhammad sebagai nabi dan rasulku. (3x)",
+            "ms": "Aku telah redha dengan Allah sebagai Tuhanku, dan dengan Islam sebagai agamaku dan dengan Muhammad sebagai nabi dan rasulku. (3x)",
+            "en": "Aku telah redha dengan Allah sebagai Tuhanku, dan dengan Islam sebagai agamaku dan dengan Muhammad sebagai nabi dan rasulku. (3x)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Bacaan Ikrar",
           "source": "",
@@ -163,7 +231,11 @@
         {
           "arabic": "سُبْحَانَ اللهِ وَبِحَمْدِهِ عَدَدَ خَلْقِهِ وَرِضَا نَفْسِهِ وَزِنَةَ عَرْشِهِ وَمِدَادَ كَلِمَاتِهِ",
           "latin": "Subḥānallāhi Wa Bi Ḥamdihi, ʿAdada Khalqihī Wa Riḍhā Nafsihī Wa Zinata ʿArshiHii Wa MidaaDa Kalimatihi (3x)",
-          "translation": "Maha suci Allah dan segala puji bagi-Nya sebanyak bilangan kejadian-Nya dan keredhaan-Nya, dan seberat timbangan ‘Arasy-Nya dan sebanyak dakwat (yang terpakai untuk menuliskan) kalimah-Nya. (3x)",
+          "translation": {
+            "id": "Maha suci Allah dan segala puji bagi-Nya sebanyak bilangan kejadian-Nya dan keredhaan-Nya, dan seberat timbangan ‘Arasy-Nya dan sebanyak dakwat (yang terpakai untuk menuliskan) kalimah-Nya. (3x)",
+            "ms": "Maha suci Allah dan segala puji bagi-Nya sebanyak bilangan kejadian-Nya dan keredhaan-Nya, dan seberat timbangan ‘Arasy-Nya dan sebanyak dakwat (yang terpakai untuk menuliskan) kalimah-Nya. (3x)",
+            "en": "Maha suci Allah dan segala puji bagi-Nya sebanyak bilangan kejadian-Nya dan keredhaan-Nya, dan seberat timbangan ‘Arasy-Nya dan sebanyak dakwat (yang terpakai untuk menuliskan) kalimah-Nya. (3x)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Bertasbih Kepada Allah",
           "source": "",
@@ -172,7 +244,11 @@
         {
           "arabic": "بِسْمِ اللهِ الَّذِئ لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
           "latin": "Bismillāhil-Lazhii Laa Yaḍurru MaʿAsmihii Shayʾun Fil-Arḍi Wa Laa Fis-Samāʾi Wa Huwas-Samiiʿul-ʿAliim (3X)",
-          "translation": "Dengan nama Allah, yang dengan nama-Nya akan terhalanglah, segala sesuatu di bumi dan di langit, untuk menimpakan bencana, dan Ia Maha Mendengar dan Mengetahui. (3x)",
+          "translation": {
+            "id": "Dengan nama Allah, yang dengan nama-Nya akan terhalanglah, segala sesuatu di bumi dan di langit, untuk menimpakan bencana, dan Ia Maha Mendengar dan Mengetahui. (3x)",
+            "ms": "Dengan nama Allah, yang dengan nama-Nya akan terhalanglah, segala sesuatu di bumi dan di langit, untuk menimpakan bencana, dan Ia Maha Mendengar dan Mengetahui. (3x)",
+            "en": "Dengan nama Allah, yang dengan nama-Nya akan terhalanglah, segala sesuatu di bumi dan di langit, untuk menimpakan bencana, dan Ia Maha Mendengar dan Mengetahui. (3x)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Meninggikan Asma’ Allah",
           "source": "",
@@ -181,7 +257,11 @@
         {
           "arabic": "اللَّهُمَّ إِنَّا نَعُوْذُبِكَ مِنْ أَنْ نُشْرِكَ بِكَ شَيْئًا نَعْلَمُهُ وَنَسْتَغْفِرُكَ لِمَا لَا نَعْلَمُهُ",
           "latin": "Allāhumma Innā NaʿUuzuBika Min An NushRika Bika Shayʾan NaʿLamuHuu Wa Nastaghfiruka Li Maa Laa Na’lamuhu (3x)",
-          "translation": "Ya Allah, kami berlindung pada–Mu dari menyekutukan- Mu dengan sesuatu yang kami ketahui, dan kami memohon ampun dari (menyekutukan-Mu) dengan sesuatu yang tidak kami ketahui. (3x)",
+          "translation": {
+            "id": "Ya Allah, kami berlindung pada–Mu dari menyekutukan- Mu dengan sesuatu yang kami ketahui, dan kami memohon ampun dari (menyekutukan-Mu) dengan sesuatu yang tidak kami ketahui. (3x)",
+            "ms": "Ya Allah, kami berlindung pada–Mu dari menyekutukan- Mu dengan sesuatu yang kami ketahui, dan kami memohon ampun dari (menyekutukan-Mu) dengan sesuatu yang tidak kami ketahui. (3x)",
+            "en": "Ya Allah, kami berlindung pada–Mu dari menyekutukan- Mu dengan sesuatu yang kami ketahui, dan kami memohon ampun dari (menyekutukan-Mu) dengan sesuatu yang tidak kami ketahui. (3x)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Doa Terhindar dari Syirik",
           "source": "",
@@ -190,7 +270,11 @@
         {
           "arabic": "َعُوْذُ بِكَلِماتِ اللهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
           "latin": "AʿUuzu Bi Kalimaatil-laahit-Tāmmāti Min Sharri Maa Khalaq (3x)",
-          "translation": "Aku berlindung pada kalimat Allah yang sempurna, dari kejahatan apa-apa yang diciptakan. (3x)",
+          "translation": {
+            "id": "Aku berlindung pada kalimat Allah yang sempurna, dari kejahatan apa-apa yang diciptakan. (3x)",
+            "ms": "Aku berlindung pada kalimat Allah yang sempurna, dari kejahatan apa-apa yang diciptakan. (3x)",
+            "en": "Aku berlindung pada kalimat Allah yang sempurna, dari kejahatan apa-apa yang diciptakan. (3x)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Doa Berlindung dari Kejahatan Makhluk",
           "source": "",
@@ -199,7 +283,11 @@
         {
           "arabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ،وَأَعُوذُ بِكَ مِنَ الْعَجْزِ وَالْكَسَلِ، وَأَعُوذُ بِكَ مِنَ الْجُبْنِ وَالْبُخْلِ، وَأَعُوذُ بِكَ مِنْ غَلَبَةِ الدَّيْنِ وَقَهْرِ الرِّجَال",
           "latin": "Allāhumma Innī AʿUzuBika Minal-Hammi Wal-Ḥazan, Wa AʿUuzuBika Minal-ʿAjzi Wal-Kasal, Wa AʿUuzuBika Minal-Jubni Wal-Bukhl, Wa AʿUuzuBika Min Ghalabatid-Dayni Wa Qahrir-Rijāl",
-          "translation": "Ya Allah, aku berlindung pada-Mu dari rasa sedih dan gelisah, dan aku berlindung pada-Mu dari sikap pengecut dan bakhil, dan aku berlindung pada-Mu dari cengkaman hutang dan penindasan orang.",
+          "translation": {
+            "id": "Ya Allah, aku berlindung pada-Mu dari rasa sedih dan gelisah, dan aku berlindung pada-Mu dari sikap pengecut dan bakhil, dan aku berlindung pada-Mu dari cengkaman hutang dan penindasan orang.",
+            "ms": "Ya Allah, aku berlindung pada-Mu dari rasa sedih dan gelisah, dan aku berlindung pada-Mu dari sikap pengecut dan bakhil, dan aku berlindung pada-Mu dari cengkaman hutang dan penindasan orang.",
+            "en": "Ya Allah, aku berlindung pada-Mu dari rasa sedih dan gelisah, dan aku berlindung pada-Mu dari sikap pengecut dan bakhil, dan aku berlindung pada-Mu dari cengkaman hutang dan penindasan orang."
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Doa Terhindar Dari Belenggu Hutang",
           "source": "",
@@ -208,7 +296,11 @@
         {
           "arabic": "اللَّهُمَّ عَافِنِي فِي بَدَنِي اللَّهُمَّ عَافِنِي فِي سَمْعِي اَللَّهُمَّ عَافِنِي فِي بَصَرِى",
           "latin": "Allāhumma ʿAafinī Fii Badanii, Allāhumma ʿAafinii Fii Sam’ie, Allāhumma ʿAafinī Fii Baṣarii",
-          "translation": "Ya Allah, sihatkanlah badanku, Ya Allah, sihatkanlah pendengaranku, Ya Allah, sihatkanlah penglihatanku.",
+          "translation": {
+            "id": "Ya Allah, sihatkanlah badanku, Ya Allah, sihatkanlah pendengaranku, Ya Allah, sihatkanlah penglihatanku.",
+            "ms": "Ya Allah, sihatkanlah badanku, Ya Allah, sihatkanlah pendengaranku, Ya Allah, sihatkanlah penglihatanku.",
+            "en": "Ya Allah, sihatkanlah badanku, Ya Allah, sihatkanlah pendengaranku, Ya Allah, sihatkanlah penglihatanku."
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Doa Dilimpahkan Kesihatan",
           "source": "",
@@ -217,7 +309,11 @@
         {
           "arabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلهَ إِلَّا أَنْتَ",
           "latin": "Allāhumma Innii AʿUuzuBika Minal-Kufri Wal-Faqr, Allāhumma Innii AʿUzuBika Min ʿAZaabil-Qabr, Laa Ilāha Illā Anta",
-          "translation": "Ya Allah, sesungguhnya aku berlindung pada-Mu dari kekafiran dan kefakiran; Ya Allah, aku berlindung kepada- Mu dari azab kubur; tidak ada Tuhan selain Engkau. (3x) (Ibnu Sunni, H. Sahih)",
+          "translation": {
+            "id": "Ya Allah, sesungguhnya aku berlindung pada-Mu dari kekafiran dan kefakiran; Ya Allah, aku berlindung kepada- Mu dari azab kubur; tidak ada Tuhan selain Engkau. (3x) (Ibnu Sunni, H. Sahih)",
+            "ms": "Ya Allah, sesungguhnya aku berlindung pada-Mu dari kekafiran dan kefakiran; Ya Allah, aku berlindung kepada- Mu dari azab kubur; tidak ada Tuhan selain Engkau. (3x) (Ibnu Sunni, H. Sahih)",
+            "en": "Ya Allah, sesungguhnya aku berlindung pada-Mu dari kekafiran dan kefakiran; Ya Allah, aku berlindung kepada- Mu dari azab kubur; tidak ada Tuhan selain Engkau. (3x) (Ibnu Sunni, H. Sahih)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Doa Terhindar Dari Kemiskinan",
           "source": "",
@@ -226,7 +322,11 @@
         {
           "arabic": "اَللّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ خَلَقْتَنِي وَأَنَا عَبْدُكَ وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَاسْتَطَعْتُ. أَعُوْذُبِكَ مِنْ شَرِ مَا صَنَعْتُ. أَبُوْءُ لَكَ بِنِعْمَتِكَ عَلَ وَأَبُوهُ بِذَنْبِي فَاغْفِرْلِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
           "latin": "Allāhumma Anta Rabbī Laa Ilāha Illā Anta Khalaqtanī Wa Ana ʿAbduka Wa Ana ʿAlaa ʿAhdika Wa Wa’dika MasTaṭa’tu. A’UzuBika Min Syarri Maa Ṣana’tu. Abuu’U Laka BiNi’matika ʿAlayya Wa Abū’U BizanBii FaghFirLii Fa Innahuu Laa Yaghfiruz-Zunūba Illā Anta",
-          "translation": "Ya Allah, Engkau adalah Tuhanku, tidak ada Tuhan selain Engkau; Engkau yang menciptakan dan aku abdi- Mu, dan aku berada dalam perjanjian dengan-Mu, ikrar kepada-Mu, (yang akan aku laksanakan dengan) segala kemampuanku; dan aku berlindung pada-Mu, dari kejahatan apa-apa yang telah aku lakukan; aku mengakui (dengan sebenar-benarnya) nikmat-Mu kepadaku; dan aku mengakui dosaku, maka ampunilah aku, kerana tidak ada yang boleh mengampuni dosa-dosa, kecuali Engkau.",
+          "translation": {
+            "id": "Ya Allah, Engkau adalah Tuhanku, tidak ada Tuhan selain Engkau; Engkau yang menciptakan dan aku abdi- Mu, dan aku berada dalam perjanjian dengan-Mu, ikrar kepada-Mu, (yang akan aku laksanakan dengan) segala kemampuanku; dan aku berlindung pada-Mu, dari kejahatan apa-apa yang telah aku lakukan; aku mengakui (dengan sebenar-benarnya) nikmat-Mu kepadaku; dan aku mengakui dosaku, maka ampunilah aku, kerana tidak ada yang boleh mengampuni dosa-dosa, kecuali Engkau.",
+            "ms": "Ya Allah, Engkau adalah Tuhanku, tidak ada Tuhan selain Engkau; Engkau yang menciptakan dan aku abdi- Mu, dan aku berada dalam perjanjian dengan-Mu, ikrar kepada-Mu, (yang akan aku laksanakan dengan) segala kemampuanku; dan aku berlindung pada-Mu, dari kejahatan apa-apa yang telah aku lakukan; aku mengakui (dengan sebenar-benarnya) nikmat-Mu kepadaku; dan aku mengakui dosaku, maka ampunilah aku, kerana tidak ada yang boleh mengampuni dosa-dosa, kecuali Engkau.",
+            "en": "Ya Allah, Engkau adalah Tuhanku, tidak ada Tuhan selain Engkau; Engkau yang menciptakan dan aku abdi- Mu, dan aku berada dalam perjanjian dengan-Mu, ikrar kepada-Mu, (yang akan aku laksanakan dengan) segala kemampuanku; dan aku berlindung pada-Mu, dari kejahatan apa-apa yang telah aku lakukan; aku mengakui (dengan sebenar-benarnya) nikmat-Mu kepadaku; dan aku mengakui dosaku, maka ampunilah aku, kerana tidak ada yang boleh mengampuni dosa-dosa, kecuali Engkau."
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Doa Memohon Keampunan",
           "source": "",
@@ -235,7 +335,11 @@
         {
           "arabic": "سْتَغْفِرُ اللهَ الَّذِئ لا إله إلَّا هُوَ الْحَيُّ الْقَيُّومُ وَأَتُوبُ إِلَيْهِ",
           "latin": "Astaghfirullahal-LaDzi Laa ilaaHa illaa Huwal-Hayyul Qoyyum Wa AtuuBu-ilayh",
-          "translation": "Aku memohon ampun kepada Allah yang tidak ada Tuhan selain Dia, yang hidup dan selalu jaga; dan aku bertaubat pada-Mu. (Ulang 3 kali)",
+          "translation": {
+            "id": "Aku memohon ampun kepada Allah yang tidak ada Tuhan selain Dia, yang hidup dan selalu jaga; dan aku bertaubat pada-Mu. (Ulang 3 kali)",
+            "ms": "Aku memohon ampun kepada Allah yang tidak ada Tuhan selain Dia, yang hidup dan selalu jaga; dan aku bertaubat pada-Mu. (Ulang 3 kali)",
+            "en": "Aku memohon ampun kepada Allah yang tidak ada Tuhan selain Dia, yang hidup dan selalu jaga; dan aku bertaubat pada-Mu. (Ulang 3 kali)"
+          },
           "fawaid": "(Dibaca 3x)",
           "notes": "Istighfar (Memohon Keampunan)",
           "source": "",
@@ -244,7 +348,11 @@
         {
           "arabic": "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا أنْتَ أَسْتَغْفِرُكَ وَأَتُوبُ إِلَيْكَ",
           "latin": "SubhaaNaka Allahumma Wabihamdika Asyhadu Anlaa IlaaHa Illa Anta Astaghfiruka Wa AtuuBu-ilayh",
-          "translation": "Maha Suci Engkau, Ya Allah dan segala pujian bagi- Mu; aku bersaksi bahawa tiada Tuhan selain Allah, aku mohon ampun dan bertaubat pada-Mu.",
+          "translation": {
+            "id": "Maha Suci Engkau, Ya Allah dan segala pujian bagi- Mu; aku bersaksi bahawa tiada Tuhan selain Allah, aku mohon ampun dan bertaubat pada-Mu.",
+            "ms": "Maha Suci Engkau, Ya Allah dan segala pujian bagi- Mu; aku bersaksi bahawa tiada Tuhan selain Allah, aku mohon ampun dan bertaubat pada-Mu.",
+            "en": "Maha Suci Engkau, Ya Allah dan segala pujian bagi- Mu; aku bersaksi bahawa tiada Tuhan selain Allah, aku mohon ampun dan bertaubat pada-Mu."
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Pujian Dan Memohon Taubat",
           "source": "",
@@ -253,7 +361,11 @@
         {
           "arabic": "اللَّهُمَّ صَلَّى عَلَى سَيِّدِنَا مُحَمَّدٍ عَبْدِكَ وَنَبِيكَ وَرَسُوْلِكَ النَّبِيِّ الْأُمِّيِّ وَعَلَى آلِهِ وَصَحْبِهِ وَسَلَّمْ تَسْلِيمًا عَدَدَمَا أَحَاطَ بِهِ عِلْمُكَ وَخَطَ بِهِ قَلَمُكَ وَأَحْصَاهُ كِتَابُكَ . وَارْضَ اللَّهُمَّ عَنْ سَادَاتِنَا أَبِي بَكْرٍ وَعُمَرَ وَعُثْمَانَ وَعَلَى وَعَنِ الصَّحَابَةِ أَجْمَعِيْنَ وَعَنِ التَّابِعِينَ وَتَابِعِهِمْ بِإِحْسَانٍ إِلَى يَوْمِ الدِّيْنِ سُبْحَانَ رَبِّ الْعِزَّةِ عَمَّا يَصِفُوْنَ وَسَلَامُ عَلَى الْمُرْسَلِيْنَ وَالْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِيْنَ",
           "latin": "Allāhumma Ṣolli ʿAlā Sayyidinā Muḥammadin ʿAbdika Wa Nabiyyika Wa Rasulikan-Nabiyyi Ummiyyi Wa ‘Alaa Alihii Wasohbihi Wasallim Tasliiman ‘Adadamaa AḥaaTho Bihii ‘ilmuka, Wa KhaṭTa Bihii Qalamuka, Wa Aḥṣāhu Kitābuka. Warḍallāhumma ‘An Saadaatinaa Abī Bakrin Wa ʿUmara Wa ʿUthsmāna Wa ʿAliyyin, Wa ʿAnis-saḥābati Ajma’in, Wa ‘Anit-Tābiʿīna Wa Tābiʿihim Bi IḥsaaNin Ilaa Yawmid-Diin. Subḥāna Rabbil-ʿIzzati ʿAmmā Yaṣifūn Wa Salāmun ʿAlal-Mursalīn Wal-Ḥamdu Lillaahi Rabbil-ʿAalamīn",
-          "translation": "Ya Allah restui dan berkatkanlah junjungan kami Muhammad sebagai hamba, nabi dan rasul-Mu yang ummi. Berkatkan keluarga dan sahabat Baginda. Sejahterakanlah Baginda selama-lamanya. Sejahterakanlah Baginda selama-lamanya sebanyak-banyak bilangan dalam ilmu dan sebanyak-banyak perkara yang ditulis oleh Qalam-Mu dan sebanyak-banyak yang dirangkum oleh kitab-Mu. Terimalah dan relakanlah pemimpin terutama kami; Sayyidina Abu Bakar, Omar, Othman, Ali dan para sahabat Baginda semuanya, para tabi’in, dan orang-orang yang mengikut jejak langkah mereka sampai hari pembalasan. Terimalah (kepulangan) mereka dengan sebaik-baiknya. Maha Suci Tuhan (Mu) yang memiliki kebesaran dan kemuliaan dari sifat tercela. Salam sejahtera untuk para Rasul utusan, dan segala puji bagi Allah, Tuhan sekalian alam.",
+          "translation": {
+            "id": "Ya Allah restui dan berkatkanlah junjungan kami Muhammad sebagai hamba, nabi dan rasul-Mu yang ummi. Berkatkan keluarga dan sahabat Baginda. Sejahterakanlah Baginda selama-lamanya. Sejahterakanlah Baginda selama-lamanya sebanyak-banyak bilangan dalam ilmu dan sebanyak-banyak perkara yang ditulis oleh Qalam-Mu dan sebanyak-banyak yang dirangkum oleh kitab-Mu. Terimalah dan relakanlah pemimpin terutama kami; Sayyidina Abu Bakar, Omar, Othman, Ali dan para sahabat Baginda semuanya, para tabi’in, dan orang-orang yang mengikut jejak langkah mereka sampai hari pembalasan. Terimalah (kepulangan) mereka dengan sebaik-baiknya. Maha Suci Tuhan (Mu) yang memiliki kebesaran dan kemuliaan dari sifat tercela. Salam sejahtera untuk para Rasul utusan, dan segala puji bagi Allah, Tuhan sekalian alam.",
+            "ms": "Ya Allah restui dan berkatkanlah junjungan kami Muhammad sebagai hamba, nabi dan rasul-Mu yang ummi. Berkatkan keluarga dan sahabat Baginda. Sejahterakanlah Baginda selama-lamanya. Sejahterakanlah Baginda selama-lamanya sebanyak-banyak bilangan dalam ilmu dan sebanyak-banyak perkara yang ditulis oleh Qalam-Mu dan sebanyak-banyak yang dirangkum oleh kitab-Mu. Terimalah dan relakanlah pemimpin terutama kami; Sayyidina Abu Bakar, Omar, Othman, Ali dan para sahabat Baginda semuanya, para tabi’in, dan orang-orang yang mengikut jejak langkah mereka sampai hari pembalasan. Terimalah (kepulangan) mereka dengan sebaik-baiknya. Maha Suci Tuhan (Mu) yang memiliki kebesaran dan kemuliaan dari sifat tercela. Salam sejahtera untuk para Rasul utusan, dan segala puji bagi Allah, Tuhan sekalian alam.",
+            "en": "Ya Allah restui dan berkatkanlah junjungan kami Muhammad sebagai hamba, nabi dan rasul-Mu yang ummi. Berkatkan keluarga dan sahabat Baginda. Sejahterakanlah Baginda selama-lamanya. Sejahterakanlah Baginda selama-lamanya sebanyak-banyak bilangan dalam ilmu dan sebanyak-banyak perkara yang ditulis oleh Qalam-Mu dan sebanyak-banyak yang dirangkum oleh kitab-Mu. Terimalah dan relakanlah pemimpin terutama kami; Sayyidina Abu Bakar, Omar, Othman, Ali dan para sahabat Baginda semuanya, para tabi’in, dan orang-orang yang mengikut jejak langkah mereka sampai hari pembalasan. Terimalah (kepulangan) mereka dengan sebaik-baiknya. Maha Suci Tuhan (Mu) yang memiliki kebesaran dan kemuliaan dari sifat tercela. Salam sejahtera untuk para Rasul utusan, dan segala puji bagi Allah, Tuhan sekalian alam."
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Selawat Ke Atas Nabi",
           "source": "",
@@ -262,7 +374,11 @@
         {
           "arabic": "بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ .اللَّهُمَّ إِنَّا نَسْأَلُكَ لِسَانًا رَطْبًا بذكركَ وَقَلْبًا مُفْعَمّا بشكرك بِشُكْرِكَ وَبَدَنَا هَيِّنًا لِيِّنًا بِطَاعَتِكَ. اللّهُمَّ إِنَّا نَسْأَلُكَ إِيمَانًا كَامِلا وَنَسْأَلُكَ قَلْبًا خَاشِعًا وَنَسْأَلُكَ عِلْمًا نَافِعًا وَنَسْأَلُكَ يَقِيْنًا صَادِقًا وَنَسْأَلُكَ دِينا قيما وَنَسْأَلُكَ الْعَافِيَةَ مِنْ كُلِّ بَلِيَّةٍ وَنَسْأَلُكَ تَمَامَ الْغِنَى عَنِ النَّاسِ وَهَبْ لَنَا حَقِيقَة الْإِيْمَانِ بِكَ حَتَّى لَا نَخَافُ وَلَا نَرْجُو غَيْرَكَ وَلَا نَعْبُدُ شَيْئًا سِوَاكَ وَاجْعَلْ يَدَكَ مَبْسُوطَةً عَلَيْنَا وَعَلَى أَهْلِنَا وَأَوْلَادِنَا وَمَنْ مَعَنَا بِرَحْمَتِكَ وَلَا تَكِلْنَا إِلى أَنْفُسِنَا طَرْفَةَ عَيْنٍ وَلَا أَفَلَ مِنْ ذلِكَ يَا نِعْمَ الْمُجيْبُ. وَصَلَّى اللَّهُ عَلَى سَيِّدِنَا مُحَمَّدٍ النَّبِيِّ الْكَرِيمِ وَعَلَى آلِهِ وَصَحْبِهِ أَجْمَعِيْنَ",
           "latin": "Bismillāhir-Raḥmānir-Raḥīm. Allāhumma Innā Nas’aluka Lisānan Raṭban Bidhikrika Wa Qalban Muf‘Aman Bishukrika Wa Badanā Hayyinan Layyinan Biṭā‘Atika. Allāhumma Innā Nas’aluka Īmānan Kāmilan Wa Nas’aluka Qalban Khāshi‘An Wa Nas’aluka ‘Ilman Nāfi‘An Wa Nas’aluka Yaqīnan Ṣādiqan Wa Nas’aluka Dīnan Qayyiman Wa Nas’aluka Al-‘Āfiyata Min Kulli Balīyah Wa Nas’aluka Tamāmal Ghina ‘Anin-Nās Wa Hāblanā Ḥaqīqata Al-Īmān Bika Ḥattā Lā Nakhāfu Wa Lā Narjū Ghayraka Wa Lā Na‘Budu Shay’an Siwāka Wa’jal Yadaka Mabsūṭatan ‘Alaynā Wa ‘Alā Ahlinā Wa Awlādina Wa Man Ma‘Anā Bi Raḥmatika Wa Lā Takilnā Ilā Anfusinā Ṭarfata ‘Aynin Wa Lā Aqalla Min Dhālik Yā Ni‘Ma Al-Mujīb. Wa Ṣollallāhu ‘Alā Sayyidinā Muḥammadin An-Nabiyyi Al-Karīm Wa ‘Alā Ālihi Wa Ṣaḥbihi Ajma‘Īn",
-          "translation": "Ya Allah kurniakanlah kami lisan (lidah) yang lembut membasahi mengingati dan menyebut (nama-Mu), hati yang penuh segar mensyukuri (nikmat-Mu), serta badan yang ringan menyempurnakan ketaatan kepada (perintah-Mu). Ya Allah, kurniakanlah kami iman yang sempurna, hati yang khusyuk, ilmu yang berguna, keyakinan yang benar-benar mantap, dinn (cara hidup) yang jitu dan unggul, selamat dari segala mara bahaya dan petaka. Kami mohon kepada-Mu Ya Allah kecukupan yang tidak perlu kami terpaksa meminta kepada orang lain. Berikanlah kami Ya Allah iman yang sebenarnya sehingga kami tidak menyekutukan-Mu. Berikanlah rahmat-Mu kepada kami, keluarga dan anak-anak kami serta sesiapa sahaja yang bersama-sama kami. Jangan (Ya Allah) Engkau biarkan nasib kami ditentukan oleh diri kami sendiri; walaupun hanya dalam sekelip mata atau lebih pendek dari masa itu. Wahai Tuhan yang paling mudah dan cepat memperkenankan permintaan. Selawat (berkat dan rahmat) dan restu Allah untuk junjungan kami Muhammad, nabi yang mulia, kepada keluarga Baginda dan para sahabat Baginda amnya.",
+          "translation": {
+            "id": "Ya Allah kurniakanlah kami lisan (lidah) yang lembut membasahi mengingati dan menyebut (nama-Mu), hati yang penuh segar mensyukuri (nikmat-Mu), serta badan yang ringan menyempurnakan ketaatan kepada (perintah-Mu). Ya Allah, kurniakanlah kami iman yang sempurna, hati yang khusyuk, ilmu yang berguna, keyakinan yang benar-benar mantap, dinn (cara hidup) yang jitu dan unggul, selamat dari segala mara bahaya dan petaka. Kami mohon kepada-Mu Ya Allah kecukupan yang tidak perlu kami terpaksa meminta kepada orang lain. Berikanlah kami Ya Allah iman yang sebenarnya sehingga kami tidak menyekutukan-Mu. Berikanlah rahmat-Mu kepada kami, keluarga dan anak-anak kami serta sesiapa sahaja yang bersama-sama kami. Jangan (Ya Allah) Engkau biarkan nasib kami ditentukan oleh diri kami sendiri; walaupun hanya dalam sekelip mata atau lebih pendek dari masa itu. Wahai Tuhan yang paling mudah dan cepat memperkenankan permintaan. Selawat (berkat dan rahmat) dan restu Allah untuk junjungan kami Muhammad, nabi yang mulia, kepada keluarga Baginda dan para sahabat Baginda amnya.",
+            "ms": "Ya Allah kurniakanlah kami lisan (lidah) yang lembut membasahi mengingati dan menyebut (nama-Mu), hati yang penuh segar mensyukuri (nikmat-Mu), serta badan yang ringan menyempurnakan ketaatan kepada (perintah-Mu). Ya Allah, kurniakanlah kami iman yang sempurna, hati yang khusyuk, ilmu yang berguna, keyakinan yang benar-benar mantap, dinn (cara hidup) yang jitu dan unggul, selamat dari segala mara bahaya dan petaka. Kami mohon kepada-Mu Ya Allah kecukupan yang tidak perlu kami terpaksa meminta kepada orang lain. Berikanlah kami Ya Allah iman yang sebenarnya sehingga kami tidak menyekutukan-Mu. Berikanlah rahmat-Mu kepada kami, keluarga dan anak-anak kami serta sesiapa sahaja yang bersama-sama kami. Jangan (Ya Allah) Engkau biarkan nasib kami ditentukan oleh diri kami sendiri; walaupun hanya dalam sekelip mata atau lebih pendek dari masa itu. Wahai Tuhan yang paling mudah dan cepat memperkenankan permintaan. Selawat (berkat dan rahmat) dan restu Allah untuk junjungan kami Muhammad, nabi yang mulia, kepada keluarga Baginda dan para sahabat Baginda amnya.",
+            "en": "Ya Allah kurniakanlah kami lisan (lidah) yang lembut membasahi mengingati dan menyebut (nama-Mu), hati yang penuh segar mensyukuri (nikmat-Mu), serta badan yang ringan menyempurnakan ketaatan kepada (perintah-Mu). Ya Allah, kurniakanlah kami iman yang sempurna, hati yang khusyuk, ilmu yang berguna, keyakinan yang benar-benar mantap, dinn (cara hidup) yang jitu dan unggul, selamat dari segala mara bahaya dan petaka. Kami mohon kepada-Mu Ya Allah kecukupan yang tidak perlu kami terpaksa meminta kepada orang lain. Berikanlah kami Ya Allah iman yang sebenarnya sehingga kami tidak menyekutukan-Mu. Berikanlah rahmat-Mu kepada kami, keluarga dan anak-anak kami serta sesiapa sahaja yang bersama-sama kami. Jangan (Ya Allah) Engkau biarkan nasib kami ditentukan oleh diri kami sendiri; walaupun hanya dalam sekelip mata atau lebih pendek dari masa itu. Wahai Tuhan yang paling mudah dan cepat memperkenankan permintaan. Selawat (berkat dan rahmat) dan restu Allah untuk junjungan kami Muhammad, nabi yang mulia, kepada keluarga Baginda dan para sahabat Baginda amnya."
+          },
           "fawaid": "(Dibaca 1x)",
           "notes": "Doa Al-Mathurat",
           "source": "",
