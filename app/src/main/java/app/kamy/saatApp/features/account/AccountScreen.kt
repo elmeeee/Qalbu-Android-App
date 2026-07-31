@@ -200,18 +200,7 @@ fun AccountScreen(
         )
     }
 
-    if (state.showNotifTimeSheet) {
-        ReminderTimeSheet(
-            reminderType = ReminderType.DAILY_VERSE,
-            hour = state.reminderHour,
-            minute = state.reminderMinute,
-            initialDays = state.dailyVerseDays,
-            onSave = { h, m, days ->
-                vm.saveReminderTime(h, m, days)
-            },
-            onDismiss = { vm.toggleNotifTimeSheet(false) }
-        )
-    }
+
 
     if (state.showMadhabSheet) {
         MadhabSelectionSheet(
@@ -640,16 +629,14 @@ fun NotificationAdhanScreen(
                     },
                     showDivider = true
                 )
-                val dhuhaSub = if (state.dhuhaReminderEnabled) "${state.dhuhaTimeLabel} - ${stringResource(R.string.state_on)}" else stringResource(R.string.state_off)
+                val dhuhaSub = if (state.dhuhaReminderEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off)
                 SettingsCustomRow(
                     iconRes = R.drawable.ic_remainders_custom,
                     title = stringResource(R.string.notif_dhuha_remainder),
                     subtitle = dhuhaSub,
-                    onClick = { showDhuhaTimePicker = true },
                     checked = state.dhuhaReminderEnabled,
                     onCheckedChange = { isChecked ->
                         vm.setDhuhaReminderEnabled(isChecked)
-                        if (isChecked) showDhuhaTimePicker = true
                     },
                     showDivider = false
                 )
@@ -669,20 +656,6 @@ fun NotificationAdhanScreen(
                 showTahajudTimePicker = false
             },
             onDismiss = { showTahajudTimePicker = false }
-        )
-    }
-
-    if (showDhuhaTimePicker) {
-        ReminderTimeSheet(
-            reminderType = ReminderType.DHUHA,
-            hour = state.dhuhaHour,
-            minute = state.dhuhaMinute,
-            initialDays = state.dhuhaDays,
-            onSave = { h, m, days ->
-                vm.setDhuhaTime(h, m, days)
-                showDhuhaTimePicker = false
-            },
-            onDismiss = { showDhuhaTimePicker = false }
         )
     }
 }
@@ -1676,9 +1649,11 @@ private fun ReminderTimeSheet(
 
     val presets = when (reminderType) {
         ReminderType.TAHAJUD -> listOf(
-            QuickPresetTime(3, 0, if (isIndo || isMalay) "03:00 • Sepertiga" else "03:00 • Last Third"),
+            QuickPresetTime(2, 30, if (isIndo || isMalay) "02:30 • Awal Malam" else "02:30 • Early Night"),
+            QuickPresetTime(3, 0, if (isIndo || isMalay) "03:00 • 1/3 Malam" else "03:00 • Last Third"),
             QuickPresetTime(3, 30, if (isIndo || isMalay) "03:30 • Waktu Utama" else "03:30 • Optimal"),
-            QuickPresetTime(4, 0, if (isIndo) "04:00 • Sblm Subuh" else if (isMalay) "04:00 • Sblm Subuh" else "04:00 • Before Fajr")
+            QuickPresetTime(4, 0, if (isIndo || isMalay) "04:00 • Sblm Subuh" else "04:00 • Before Fajr"),
+            QuickPresetTime(4, 30, if (isIndo || isMalay) "04:30 • Akhir Malam" else "04:30 • Late Night")
         )
         ReminderType.DHUHA -> listOf(
             QuickPresetTime(7, 30, if (isIndo || isMalay) "07:30 • Awal Duha" else "07:30 • Early Dhuha"),
@@ -1734,103 +1709,36 @@ private fun ReminderTimeSheet(
                 )
             }
 
-            // Direct Type Time Input Box (24-Hour Typed Input)
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            // Formatted Time Display Badge
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 Text(
-                    text = typeTimeHeader,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                    text = String.format(java.util.Locale.getDefault(), "%02d:%02d", currentHour, currentMinute),
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 )
 
-                var hourText by remember(currentHour) { mutableStateOf(String.format(java.util.Locale.getDefault(), "%02d", currentHour)) }
-                var minText by remember(currentMinute) { mutableStateOf(String.format(java.util.Locale.getDefault(), "%02d", currentMinute)) }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                Spacer(Modifier.width(10.dp))
+                val tzAbbrev = remember {
+                    val tz = java.util.TimeZone.getDefault()
+                    tz.getDisplayName(tz.inDaylightTime(java.util.Date()), java.util.TimeZone.SHORT, java.util.Locale.getDefault())
+                }
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                 ) {
-                    OutlinedTextField(
-                        value = hourText,
-                        onValueChange = { input ->
-                            val digits = input.filter { it.isDigit() }.take(2)
-                            hourText = digits
-                            digits.toIntOrNull()?.let { h ->
-                                if (h in 0..23) currentHour = h
-                            }
-                        },
-                        textStyle = MaterialTheme.typography.headlineMedium.copy(
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary
-                        ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                        ),
-                        modifier = Modifier.width(80.dp)
-                    )
-
                     Text(
-                        text = ":",
-                        style = MaterialTheme.typography.headlineLarge,
+                        text = tzAbbrev,
+                        style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                     )
-
-                    OutlinedTextField(
-                        value = minText,
-                        onValueChange = { input ->
-                            val digits = input.filter { it.isDigit() }.take(2)
-                            minText = digits
-                            digits.toIntOrNull()?.let { m ->
-                                if (m in 0..59) currentMinute = m
-                            }
-                        },
-                        textStyle = MaterialTheme.typography.headlineMedium.copy(
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.primary
-                        ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                        ),
-                        modifier = Modifier.width(80.dp)
-                    )
-
-                    Spacer(Modifier.width(10.dp))
-                    val tzAbbrev = remember {
-                        val tz = java.util.TimeZone.getDefault()
-                        tz.getDisplayName(tz.inDaylightTime(java.util.Date()), java.util.TimeZone.SHORT, java.util.Locale.getDefault())
-                    }
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                    ) {
-                        Text(
-                            text = tzAbbrev,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
-                        )
-                    }
                 }
             }
 
