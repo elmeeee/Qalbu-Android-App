@@ -9,15 +9,22 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,12 +41,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -53,22 +64,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -78,19 +83,14 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.tools.QiblaCalculator
 import app.kamy.saatApp.infrastructure.notifications.PrayerScheduleCache
+import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material3.Surface
-import androidx.compose.ui.text.style.TextOverflow
-import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import com.google.accompanist.permissions.rememberPermissionState
+import java.text.NumberFormat
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -99,7 +99,6 @@ import kotlin.math.roundToInt
 fun QiblaScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val locationStore = remember(context) { LocationPreferencesStore.from(context) }
-
     val isManual = remember(locationStore) { locationStore.mode() == LocationMode.MANUAL }
 
     val location = remember(context, isManual) {
@@ -126,6 +125,18 @@ fun QiblaScreen(onBack: () -> Unit) {
     val bearing = remember(location) {
         location?.let { (lat, lng) -> QiblaCalculator.bearingToKaaba(lat, lng) } ?: 0f
     }
+
+    val distanceKm = remember(location) {
+        location?.let { (lat, lng) -> QiblaCalculator.distanceToKaabaKm(lat, lng) } ?: 0.0
+    }
+
+    val formattedDistance = remember(distanceKm) {
+        val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+            maximumFractionDigits = 0
+        }
+        numberFormat.format(distanceKm)
+    }
+
     var deviceAzimuth by remember { mutableFloatStateOf(0f) }
     val cameraPermission = rememberPermissionState(android.Manifest.permission.CAMERA)
 
@@ -185,9 +196,9 @@ fun QiblaScreen(onBack: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0A121E))
+            .background(Color(0xFF070D18))
     ) {
-        // Layer 1: Live Camera Preview or Dark Atmospheric Fallback
+        // Layer 1: Live Camera Preview or Dark Atmospheric Gradient Fallback
         if (cameraPermission.status.isGranted) {
             QiblaCameraPreview(modifier = Modifier.fillMaxSize())
         } else {
@@ -196,28 +207,28 @@ fun QiblaScreen(onBack: () -> Unit) {
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color(0xFF0F172A), Color(0xFF09111E))
+                            listOf(Color(0xFF0F172A), Color(0xFF070D18))
                         )
                     )
             )
         }
 
-        // Layer 2: Gradient Radial Vignette & Atmospheric Overlay
+        // Layer 2: Subtle Radial Vignette Gradient
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            Color.Black.copy(alpha = 0.50f),
+                            Color.Black.copy(alpha = 0.55f),
                             Color.Black.copy(alpha = 0.20f),
-                            Color.Black.copy(alpha = 0.65f)
+                            Color.Black.copy(alpha = 0.70f)
                         )
                     )
                 )
         )
 
-        // Layer 3: AR Pathway & Dynamic Target Reticle
+        // Layer 3: Clean Floating AR Qibla Indicator (No Moving Green Card Base!)
         QiblaARPerspectiveView(
             normalizedOffset = normalizedOffset,
             aligned = aligned,
@@ -240,10 +251,10 @@ fun QiblaScreen(onBack: () -> Unit) {
                         .size(42.dp)
                         .clip(CircleShape)
                         .background(Color.Black.copy(alpha = 0.45f))
-                        .border(0.5.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                        .border(0.5.dp, Color.White.copy(alpha = 0.25f), CircleShape)
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back),
                         tint = Color.White
                     )
@@ -286,7 +297,7 @@ fun QiblaScreen(onBack: () -> Unit) {
             }
         }
 
-        // Layer 5: Top Guidance Toast Banner
+        // Layer 5: Top Guidance Banner
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -296,25 +307,25 @@ fun QiblaScreen(onBack: () -> Unit) {
         ) {
             Surface(
                 shape = RoundedCornerShape(24.dp),
-                color = Color.Black.copy(alpha = 0.4f),
-                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
+                color = Color.Black.copy(alpha = 0.45f),
+                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.2f))
             ) {
                 Text(
-                    text = stringResource(R.string.qibla_point_phone),
+                    text = if (aligned) "✦ Ka'bah Terdeteksi!" else stringResource(R.string.qibla_point_phone),
                     style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
-                    fontWeight = FontWeight.Medium,
-                    color = Color.White.copy(alpha = 0.95f),
+                    fontWeight = if (aligned) FontWeight.Bold else FontWeight.Medium,
+                    color = if (aligned) SaatColors.GoldDeep else Color.White.copy(alpha = 0.95f),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
                 )
             }
         }
 
-        // Layer 6: Bottom Glassmorphic HUD Card
+        // Layer 6: Premium Bottom Glassmorphic HUD Card (Guaranteed Floating Above Android Navbar!)
         val statusText = when {
             aligned -> stringResource(R.string.qibla_already_facing)
-            normalizedOffset < 0 -> stringResource(R.string.qibla_in_your_left)
-            else -> stringResource(R.string.qibla_in_your_right)
+            normalizedOffset < 0 -> "${abs(normalizedOffset.roundToInt())}° " + stringResource(R.string.qibla_in_your_left)
+            else -> "${abs(normalizedOffset.roundToInt())}° " + stringResource(R.string.qibla_in_your_right)
         }
 
         Surface(
@@ -324,17 +335,18 @@ fun QiblaScreen(onBack: () -> Unit) {
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             shape = RoundedCornerShape(28.dp),
-            color = if (aligned) Color(0xF0085E43) else Color(0xEB0F172A),
+            color = if (aligned) Color(0xF0085E43) else Color(0xEE0F172A),
             border = BorderStroke(
                 width = 1.5.dp,
-                color = if (aligned) SaatColors.GoldDeep else Color.White.copy(alpha = 0.15f)
+                color = if (aligned) SaatColors.GoldDeep else Color.White.copy(alpha = 0.2f)
             ),
-            shadowElevation = 12.dp
+            shadowElevation = 16.dp
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -351,9 +363,9 @@ fun QiblaScreen(onBack: () -> Unit) {
                             color = Color.White
                         )
                         Text(
-                            text = "Kaaba Bearing: ${bearing.roundToInt()}°",
+                            text = "Arah Qibla: ${bearing.roundToInt()}° • $formattedDistance km ke Makkah",
                             style = MaterialTheme.typography.labelMedium,
-                            color = Color.White.copy(alpha = 0.75f),
+                            color = Color.White.copy(alpha = 0.8f),
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -361,7 +373,7 @@ fun QiblaScreen(onBack: () -> Unit) {
                     // Alignment Status Badge
                     Surface(
                         shape = RoundedCornerShape(16.dp),
-                        color = if (aligned) SaatColors.GoldDeep else Color.White.copy(alpha = 0.12f)
+                        color = if (aligned) SaatColors.GoldDeep else Color.White.copy(alpha = 0.14f)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -398,7 +410,7 @@ private fun QiblaARPerspectiveView(
     val infiniteTransition = rememberInfiniteTransition(label = "ar_arrow_pulse")
     val arrowOffsetAnim by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = -30f,
+        targetValue = -26f,
         animationSpec = infiniteRepeatable(
             animation = tween(1200, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
@@ -406,8 +418,8 @@ private fun QiblaARPerspectiveView(
         label = "arrow_slide"
     )
     val arrowAlphaAnim by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.95f,
+        initialValue = 0.35f,
+        targetValue = 1.0f,
         animationSpec = infiniteRepeatable(
             animation = tween(1200, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -426,42 +438,71 @@ private fun QiblaARPerspectiveView(
 
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.BottomCenter
+        contentAlignment = Alignment.Center
     ) {
-        // Perspective Pathway & Arrow Container pivoting dynamically from bottom center
+        // Perspective Pivot Container (NO ugly solid green card base!)
         Column(
             modifier = Modifier
                 .graphicsLayer {
                     rotationZ = rotationAngle
-                    transformOrigin = TransformOrigin(0.5f, 0.9f)
+                    transformOrigin = TransformOrigin(0.5f, 0.85f)
                     translationX = shiftPx
                 }
-                .fillMaxHeight(0.85f)
-                .padding(bottom = 60.dp),
+                .padding(bottom = 80.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom
+            verticalArrangement = Arrangement.Center
         ) {
-            // Kaaba Icon Floating at Apex
+            // Floating Kaaba Badge at Apex with Golden Aura Glow
             Box(
                 modifier = Modifier
-                    .size(84.dp)
+                    .size(100.dp)
                     .clip(CircleShape)
                     .background(
-                        if (aligned) SaatColors.GoldDeep.copy(alpha = 0.35f)
-                        else Color.White.copy(alpha = 0.15f)
+                        if (aligned) {
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    SaatColors.GoldDeep.copy(alpha = 0.55f),
+                                    SaatColors.GoldDeep.copy(alpha = 0.15f),
+                                    Color.Transparent
+                                )
+                            )
+                        } else {
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    Color.White.copy(alpha = 0.25f),
+                                    Color.Transparent
+                                )
+                            )
+                        }
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(R.drawable.kaba_qibal_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(68.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (aligned) SaatColors.GoldDeep.copy(alpha = 0.25f)
+                            else Color.Black.copy(alpha = 0.45f)
+                        )
+                        .border(
+                            width = if (aligned) 2.dp else 1.dp,
+                            color = if (aligned) SaatColors.GoldDeep else Color.White.copy(alpha = 0.3f),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.kaba_qibal_icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp)
+                    )
+                }
             }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(18.dp))
 
-            // Stack of Animated Directional Arrows (arow_icon) facing Kaaba
+            // Stack of Animated Directional Arrows (arow_icon) pointing toward Kaaba
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -473,43 +514,11 @@ private fun QiblaARPerspectiveView(
                         painter = painterResource(R.drawable.arow_icon),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(26.dp)
+                            .size(28.dp)
                             .scale(1f - idx * 0.12f),
                         alpha = opacity
                     )
                 }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Perspective Pathway Gradient Base (bg_qibla_ar trapezoid representation)
-            Canvas(
-                modifier = Modifier
-                    .fillMaxWidth(0.82f)
-                    .height(300.dp)
-            ) {
-                val w = size.width
-                val h = size.height
-
-                val path = Path().apply {
-                    moveTo(w * 0.36f, 0f)
-                    lineTo(w * 0.64f, 0f)
-                    lineTo(w, h)
-                    lineTo(0f, h)
-                    close()
-                }
-
-                drawPath(
-                    path = path,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.15f),
-                            SaatColors.DeepEmerald.copy(alpha = 0.65f),
-                            SaatColors.DeepEmerald.copy(alpha = 0.92f)
-                        )
-                    ),
-                    style = Fill
-                )
             }
         }
     }
