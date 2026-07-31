@@ -580,6 +580,7 @@ class AccountViewModel @Inject constructor(
             android.widget.Toast.makeText(appContext, msg, android.widget.Toast.LENGTH_LONG).show()
             return
         }
+        prayerNotificationPrefs.setDhuhaEnabled(true)
         prayerNotificationPrefs.setDhuhaTime(hour, minute)
         prayerNotificationPrefs.setDhuhaDays(days)
         syncPrayerNotificationState()

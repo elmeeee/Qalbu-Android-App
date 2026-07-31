@@ -40,6 +40,7 @@ class SaatApplication : Application() {
         runCatching { DailyVerseNotificationScheduler.reschedule(this) }
         runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
         runCatching { PrayerCheckReminderScheduler.reschedule(this) }
+        runCatching { app.kamy.saatApp.infrastructure.preferences.SurahReminderStore.from(this).let { store -> store.rescheduleAlarms(store.getReminders()) } }
         runCatching {
             WidgetCoordinator.refreshAll(this)
             if (WidgetCoordinator.hasAnyWidgets(this)) {

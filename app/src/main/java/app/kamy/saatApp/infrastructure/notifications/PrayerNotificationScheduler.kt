@@ -26,6 +26,8 @@ object PrayerNotificationScheduler {
     private const val FAST_MON_REQUEST = 10_300
     private const val FAST_THU_REQUEST = 10_350
     private const val DHUHA_REQUEST_BASE = 10_400
+    private const val TAHAJUD_REQUEST_BASE = 10_500
+    private const val TAHAJUD_NOTIFICATION_ID_BASE = 10_500
     private const val MIDNIGHT_REFRESH_REQUEST = 11_000
     private const val IMPORTANT_DAYS_REQUEST_BASE = 12_000
     private const val IMPORTANT_DAYS_ID_BASE = 12_000
@@ -247,13 +249,13 @@ object PrayerNotificationScheduler {
                 if (cal.get(Calendar.DAY_OF_WEEK) in options.tahajudDays) {
                     scheduleOneShot(
                         context = context,
-                        requestCode = NIGHT_REQUEST_BASE + 40 + offset,
+                        requestCode = TAHAJUD_REQUEST_BASE + offset,
                         fireAt = fireAt,
                         channelId = NotificationChannels.PRAYER_ALERT,
                         title = localContext.getString(R.string.tahajud_alarm_title),
                         body = localContext.getString(R.string.tahajud_alarm_body),
-                        kind = "night_${NightDivisionKind.LAST_THIRD.name}",
-                        notificationId = NOTIFICATION_ID_BASE + 62 + offset,
+                        kind = "night_tahajud",
+                        notificationId = TAHAJUD_NOTIFICATION_ID_BASE + offset,
                         playAdhan = true,
                         useAlarmClock = true
                     )
@@ -297,6 +299,9 @@ object PrayerNotificationScheduler {
             alarmManager.cancel(pendingAlarm(context, code))
         }
         (DHUHA_REQUEST_BASE until DHUHA_REQUEST_BASE + 7).forEach { code ->
+            alarmManager.cancel(pendingAlarm(context, code))
+        }
+        (TAHAJUD_REQUEST_BASE until TAHAJUD_REQUEST_BASE + 7).forEach { code ->
             alarmManager.cancel(pendingAlarm(context, code))
         }
     }

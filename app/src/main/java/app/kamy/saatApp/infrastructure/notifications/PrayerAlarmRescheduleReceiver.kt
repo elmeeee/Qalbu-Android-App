@@ -24,6 +24,7 @@ class PrayerAlarmRescheduleReceiver : BroadcastReceiver() {
                 }
                 runCatching { DailyVerseNotificationScheduler.reschedule(appContext) }
                 runCatching { PrayerCheckReminderScheduler.reschedule(appContext) }
+                runCatching { app.kamy.saatApp.infrastructure.preferences.SurahReminderStore.from(appContext).let { store -> store.rescheduleAlarms(store.getReminders()) } }
             } finally {
                 pending.finish()
             }
