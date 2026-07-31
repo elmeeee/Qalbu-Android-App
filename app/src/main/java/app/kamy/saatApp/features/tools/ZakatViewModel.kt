@@ -9,6 +9,7 @@ import app.kamy.saatApp.domain.tools.ZakatCalculator
 import app.kamy.saatApp.domain.tools.ZakatCountry
 import app.kamy.saatApp.domain.tools.ZakatType
 import app.kamy.saatApp.infrastructure.repository.GoldPriceRepository
+import app.kamy.saatApp.domain.tools.ZakatNumberFormatter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Locale
 import javax.inject.Inject
@@ -85,22 +86,21 @@ class ZakatViewModel @Inject constructor(
     fun updateFamilyMembers(v: String) { _state.update { it.copy(familyMembers = v) }; recompute() }
     fun updateRicePricePerKg(v: String) { _state.update { it.copy(ricePricePerKg = v) }; recompute() }
     fun updateZakatCountry(country: ZakatCountry) { _state.update { it.copy(selectedZakatCountry = country) } }
-
     private fun recompute() {
         val s = _state.value
         val result: ZakatCalculationResult? = when (s.selectedType) {
             ZakatType.MAAL -> {
-                val goldPrice = s.priceQuote?.goldPerGramIdr?.takeIf { it > 0 } ?: MoneyInputFormatter.parseAmount(s.manualGoldPrice).toDouble()
+                val goldPrice = s.priceQuote?.goldPerGramIdr?.takeIf { it > 0 } ?: ZakatNumberFormatter.parseMoney(s.manualGoldPrice)
                 if (goldPrice <= 0.0) {
                     null
                 } else {
                     val silverPrice = s.priceQuote?.silverPerGramIdr ?: ZakatCalculator.silverPriceFromGold(goldPrice)
                     ZakatCalculator.calculate(
-                        cash = MoneyInputFormatter.parseAmount(s.cash).toDouble(),
-                        goldGrams = MoneyInputFormatter.parseAmount(s.goldGrams).toDouble(),
-                        silverGrams = MoneyInputFormatter.parseAmount(s.silverGrams).toDouble(),
-                        investments = MoneyInputFormatter.parseAmount(s.investments).toDouble(),
-                        debts = MoneyInputFormatter.parseAmount(s.debts).toDouble(),
+                        cash = ZakatNumberFormatter.parseMoney(s.cash),
+                        goldGrams = ZakatNumberFormatter.parseDecimal(s.goldGrams),
+                        silverGrams = ZakatNumberFormatter.parseDecimal(s.silverGrams),
+                        investments = ZakatNumberFormatter.parseMoney(s.investments),
+                        debts = ZakatNumberFormatter.parseMoney(s.debts),
                         goldPricePerGram = goldPrice,
                         silverPricePerGram = silverPrice
                     )
@@ -108,7 +108,7 @@ class ZakatViewModel @Inject constructor(
             }
             ZakatType.FITRAH -> {
                 val members = s.familyMembers.toIntOrNull()
-                val ricePrice = MoneyInputFormatter.parseAmount(s.ricePricePerKg).toDouble()
+                val ricePrice = ZakatNumberFormatter.parseMoney(s.ricePricePerKg)
                 if (members == null || members <= 0 || ricePrice <= 0.0) {
                     null
                 } else {

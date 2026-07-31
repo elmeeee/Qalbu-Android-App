@@ -3,21 +3,28 @@ package app.kamy.saatApp.features.tools
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,8 +39,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MonetizationOn
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.RiceBowl
+import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,15 +55,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,7 +66,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -66,20 +77,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.SaatSpacing
-import app.kamy.saatApp.domain.faraidh.MoneyInputFormatter
 import app.kamy.saatApp.domain.tools.ZakatBody
 import app.kamy.saatApp.domain.tools.ZakatBodyRepository
 import app.kamy.saatApp.domain.tools.ZakatCountry
 import app.kamy.saatApp.domain.tools.ZakatFitrahCalculationResult
 import app.kamy.saatApp.domain.tools.ZakatMaalCalculationResult
+import app.kamy.saatApp.domain.tools.ZakatNumberFormatter
 import app.kamy.saatApp.domain.tools.ZakatType
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
-import java.text.NumberFormat
-import java.util.Locale
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun ZakatCalculatorScreen(
@@ -87,55 +98,90 @@ fun ZakatCalculatorScreen(
     vm: ZakatViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
-    val currency = remember { NumberFormat.getCurrencyInstance(Locale.getDefault()) }
     val result = state.result
+    val context = LocalContext.current
+
+    val isMalay = remember { Locale.getDefault().language == "ms" || Locale.getDefault().country.equals("MY", ignoreCase = true) }
+    val isIndo = remember { !isMalay }
+
+    val navBarBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SaatColors.ScreenBackground)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        SaatColors.ScreenBackground,
+                        SaatColors.SageMist.copy(alpha = 0.4f),
+                        SaatColors.ScreenBackground
+                    )
+                )
+            )
             .tabContentStatusBarInset()
             .imePadding()
-            .navigationBarsPadding()
     ) {
-        // Sticky Header Row
+        // Sticky Premium Header Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(SaatColors.ScreenBackground)
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
+                .background(SaatColors.ScreenBackground.copy(alpha = 0.95f))
+                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(SaatColors.PureWhite)
+                    .border(1.dp, SaatColors.SoftGrey, CircleShape)
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back),
                     tint = SaatColors.Slate800
                 )
             }
-            Text(
-                text = stringResource(R.string.zakat_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = SaatColors.Slate900
-            )
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = SaatColors.GoldDeep.copy(alpha = 0.12f)
+                ) {
+                    Text(
+                        text = "✦ KALKULATOR ZAKAT",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.GoldDeep,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.zakat_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = SaatColors.Slate900
+                )
+            }
         }
 
-        // Scrollable Body Form
+        // Scrollable Body Form with Bottom Padding guaranteed above Android Navbar
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp),
+                .padding(bottom = navBarBottomPadding + 28.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Header Intro Card
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(22.dp),
                 color = SaatColors.PureWhite,
-                shadowElevation = 2.dp,
-                border = BorderStroke(1.dp, SaatColors.SoftGrey)
+                shadowElevation = 3.dp,
+                border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.15f))
             ) {
                 Row(
                     modifier = Modifier.padding(18.dp),
@@ -143,16 +189,23 @@ fun ZakatCalculatorScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(52.dp)
                             .clip(CircleShape)
-                            .background(SaatColors.DeepEmerald.copy(alpha = 0.1f)),
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        SaatColors.DeepEmerald.copy(alpha = 0.15f),
+                                        SaatColors.GoldDeep.copy(alpha = 0.12f)
+                                    )
+                                )
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_zakat),
                             contentDescription = null,
                             tint = SaatColors.DeepEmerald,
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                     Spacer(Modifier.width(14.dp))
@@ -166,45 +219,105 @@ fun ZakatCalculatorScreen(
                 }
             }
 
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                ZakatType.values().forEachIndexed { index, type ->
-                    SegmentedButton(
-                        selected = state.selectedType == type,
-                        onClick = { vm.updateType(type) },
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = ZakatType.values().size),
-                        colors = SegmentedButtonDefaults.colors(
-                            activeContainerColor = SaatColors.DeepEmerald,
-                            activeContentColor = Color.White,
-                            inactiveContainerColor = SaatColors.PureWhite,
-                            inactiveContentColor = SaatColors.Slate700
-                        )
+            // Custom Segmented Pill Tab Selector (Maal vs Fitrah)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(SaatColors.PureWhite)
+                    .border(1.dp, SaatColors.SoftGrey, RoundedCornerShape(18.dp))
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                ZakatType.values().forEach { type ->
+                    val isSelected = state.selectedType == type
+                    val label = stringResource(if (type == ZakatType.MAAL) R.string.zakat_type_maal else R.string.zakat_type_fitrah)
+                    val icon = if (type == ZakatType.MAAL) Icons.Filled.MonetizationOn else Icons.Filled.RiceBowl
+
+                    Surface(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(14.dp))
+                            .clickable { vm.updateType(type) },
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isSelected) SaatColors.DeepEmerald else Color.Transparent,
+                        shadowElevation = if (isSelected) 2.dp else 0.dp
                     ) {
-                        Text(
-                            text = stringResource(
-                                if (type == ZakatType.MAAL) R.string.zakat_type_maal else R.string.zakat_type_fitrah
-                            ),
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Row(
+                            modifier = Modifier.padding(vertical = 11.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = if (isSelected) Color.White else SaatColors.Slate500,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                                color = if (isSelected) Color.White else SaatColors.Slate700
+                            )
+                        }
                     }
                 }
             }
 
             if (state.selectedType == ZakatType.MAAL) {
+                // Gold Live Price Card
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(20.dp),
                     color = SaatColors.PureWhite,
-                    border = BorderStroke(1.dp, SaatColors.Teal.copy(alpha = 0.25f))
+                    border = BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.3f)),
+                    shadowElevation = 2.dp
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        if (state.priceLoading) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .clip(CircleShape)
+                                        .background(if (state.priceQuote != null) SaatColors.DeepEmerald else SaatColors.GoldDeep)
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = if (isIndo) "Harga Emas Logam Mulia Live" else "Live Gold Market Price",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SaatColors.Slate800
+                                )
+                            }
+
+                            IconButton(
+                                onClick = vm::refreshPrices,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Refresh,
+                                    contentDescription = stringResource(R.string.retry),
+                                    tint = SaatColors.DeepEmerald,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+
+                        if (state.priceLoading) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(vertical = 6.dp)
+                            ) {
                                 CircularProgressIndicator(
                                     modifier = Modifier.size(18.dp),
                                     strokeWidth = 2.dp,
@@ -219,15 +332,12 @@ fun ZakatCalculatorScreen(
                             }
                         } else {
                             state.priceQuote?.let { quote ->
-                                Column {
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                     Text(
-                                        text = stringResource(
-                                            R.string.zakat_live_gold_price,
-                                            currency.format(quote.goldPerGramIdr)
-                                        ),
-                                        style = MaterialTheme.typography.titleSmall,
+                                        text = "${ZakatNumberFormatter.formatCurrency(quote.goldPerGramIdr, isMalay = isMalay, isIndo = isIndo)} / gram",
+                                        style = MaterialTheme.typography.titleLarge,
                                         color = SaatColors.DeepEmerald,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.ExtraBold
                                     )
                                     Text(
                                         text = stringResource(R.string.zakat_live_price_source, quote.sourceLabel),
@@ -242,14 +352,6 @@ fun ZakatCalculatorScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
-
-                        TextButton(onClick = vm::refreshPrices) {
-                            Text(
-                                text = stringResource(R.string.retry),
-                                color = SaatColors.Teal,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
                     }
                 }
 
@@ -257,8 +359,9 @@ fun ZakatCalculatorScreen(
                     ZakatField(
                         label = stringResource(R.string.zakat_manual_gold_price),
                         value = state.manualGoldPrice,
-                        onValueChange = { vm.updateManualGoldPrice(MoneyInputFormatter.format(it)) },
-                        unitBadge = "Rp"
+                        onValueChange = { vm.updateManualGoldPrice(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
+                        unitBadge = if (isMalay) "RM" else "Rp",
+                        icon = Icons.Filled.MonetizationOn
                     )
                     Text(
                         text = stringResource(R.string.zakat_manual_price_help),
@@ -270,32 +373,37 @@ fun ZakatCalculatorScreen(
                 ZakatField(
                     label = stringResource(R.string.zakat_cash),
                     value = state.cash,
-                    onValueChange = { vm.updateCash(MoneyInputFormatter.format(it)) },
-                    unitBadge = "Rp"
+                    onValueChange = { vm.updateCash(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
+                    unitBadge = if (isMalay) "RM" else "Rp",
+                    icon = Icons.Filled.AccountBalance
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_gold_grams),
                     value = state.goldGrams,
-                    onValueChange = { vm.updateGoldGrams(MoneyInputFormatter.format(it)) },
-                    unitBadge = "gram"
+                    onValueChange = { vm.updateGoldGrams(ZakatNumberFormatter.formatDecimalInput(it)) },
+                    unitBadge = "gram",
+                    icon = Icons.Filled.MonetizationOn
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_silver_grams),
                     value = state.silverGrams,
-                    onValueChange = { vm.updateSilverGrams(MoneyInputFormatter.format(it)) },
-                    unitBadge = "gram"
+                    onValueChange = { vm.updateSilverGrams(ZakatNumberFormatter.formatDecimalInput(it)) },
+                    unitBadge = "gram",
+                    icon = Icons.Filled.MonetizationOn
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_investments),
                     value = state.investments,
-                    onValueChange = { vm.updateInvestments(MoneyInputFormatter.format(it)) },
-                    unitBadge = "Rp"
+                    onValueChange = { vm.updateInvestments(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
+                    unitBadge = if (isMalay) "RM" else "Rp",
+                    icon = Icons.Filled.Savings
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_debts),
                     value = state.debts,
-                    onValueChange = { vm.updateDebts(MoneyInputFormatter.format(it)) },
-                    unitBadge = "Rp"
+                    onValueChange = { vm.updateDebts(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
+                    unitBadge = if (isMalay) "RM" else "Rp",
+                    icon = Icons.Filled.CreditCard
                 )
 
                 Text(
@@ -309,13 +417,15 @@ fun ZakatCalculatorScreen(
                     value = state.familyMembers,
                     onValueChange = vm::updateFamilyMembers,
                     keyboardType = KeyboardType.Number,
-                    unitBadge = "orang"
+                    unitBadge = if (isIndo) "orang" else if (isMalay) "orang" else "people",
+                    icon = Icons.Filled.Shield
                 )
                 ZakatField(
                     label = stringResource(R.string.zakat_rice_price_per_kg),
                     value = state.ricePricePerKg,
-                    onValueChange = { vm.updateRicePricePerKg(MoneyInputFormatter.format(it)) },
-                    unitBadge = "Rp/kg"
+                    onValueChange = { vm.updateRicePricePerKg(ZakatNumberFormatter.formatMoneyInput(it, isIndonesian = isIndo)) },
+                    unitBadge = if (isMalay) "RM/kg" else "Rp/kg",
+                    icon = Icons.Filled.RiceBowl
                 )
                 Text(
                     text = stringResource(R.string.zakat_fitrah_note),
@@ -324,109 +434,120 @@ fun ZakatCalculatorScreen(
                 )
             }
 
-            if (result != null) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    color = SaatColors.PureWhite,
-                    shadowElevation = 3.dp,
-                    border = BorderStroke(1.5.dp, SaatColors.DeepEmerald.copy(alpha = 0.4f))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+            // Calculation Summary Card
+            AnimatedVisibility(
+                visible = result != null,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                if (result != null) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        color = SaatColors.PureWhite,
+                        shadowElevation = 4.dp,
+                        border = BorderStroke(1.5.dp, SaatColors.DeepEmerald.copy(alpha = 0.35f))
                     ) {
-                        Text(
-                            text = stringResource(R.string.zakat_summary_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald
-                        )
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.zakat_summary_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = SaatColors.DeepEmerald
+                            )
 
-                        HorizontalDivider(color = SaatColors.SoftGrey)
+                            HorizontalDivider(color = SaatColors.SoftGrey)
 
-                        when (result) {
-                            is ZakatMaalCalculationResult -> {
-                                ResultRow(stringResource(R.string.zakat_net_wealth), currency.format(result.zakatableWealth))
+                            when (result) {
+                                is ZakatMaalCalculationResult -> {
+                                    ResultRow(
+                                        stringResource(R.string.zakat_net_wealth),
+                                        ZakatNumberFormatter.formatCurrency(result.zakatableWealth, isMalay = isMalay, isIndo = isIndo)
+                                    )
 
-                                HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
+                                    HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
 
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = if (result.meetsNisab) SaatColors.DeepEmerald.copy(alpha = 0.08f) else SaatColors.GoldDeep.copy(alpha = 0.08f)
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(12.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    Surface(
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = if (result.meetsNisab) SaatColors.DeepEmerald.copy(alpha = 0.1f) else SaatColors.GoldDeep.copy(alpha = 0.1f)
                                     ) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Icon(
-                                                imageVector = if (result.meetsNisab) Icons.Filled.CheckCircle else Icons.Filled.Info,
-                                                contentDescription = null,
-                                                tint = if (result.meetsNisab) SaatColors.DeepEmerald else SaatColors.GoldDeep,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                            Spacer(Modifier.width(8.dp))
-                                            Text(
-                                                text = if (result.meetsNisab) stringResource(R.string.zakat_meets_nisab) else stringResource(R.string.zakat_not_yet_mandatory),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (result.meetsNisab) SaatColors.DeepEmerald else SaatColors.GoldDeep
-                                            )
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(14.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = if (result.meetsNisab) Icons.Filled.CheckCircle else Icons.Filled.Info,
+                                                    contentDescription = null,
+                                                    tint = if (result.meetsNisab) SaatColors.DeepEmerald else SaatColors.GoldDeep,
+                                                    modifier = Modifier.size(22.dp)
+                                                )
+                                                Spacer(Modifier.width(10.dp))
+                                                Text(
+                                                    text = if (result.meetsNisab) stringResource(R.string.zakat_meets_nisab) else stringResource(R.string.zakat_not_yet_mandatory),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = if (result.meetsNisab) SaatColors.DeepEmerald else SaatColors.GoldDeep
+                                                )
+                                            }
                                         }
                                     }
+
+                                    ResultRow(
+                                        stringResource(R.string.zakat_due),
+                                        ZakatNumberFormatter.formatCurrency(result.zakatDue, isMalay = isMalay, isIndo = isIndo),
+                                        highlight = result.meetsNisab
+                                    )
+
+                                    if (!result.meetsNisab) {
+                                        Text(
+                                            text = stringResource(R.string.zakat_below_nisab),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = SaatColors.Slate500,
+                                            lineHeight = 20.sp
+                                        )
+                                    }
                                 }
+                                is ZakatFitrahCalculationResult -> {
+                                    ResultRow(stringResource(R.string.zakat_family_members), "${result.familyMembers} orang")
+                                    ResultRow(
+                                        stringResource(R.string.zakat_fitrah_weight_per_person),
+                                        "${result.stapleWeightPerPersonKg} kg"
+                                    )
+                                    ResultRow(
+                                        stringResource(R.string.zakat_fitrah_total_weight),
+                                        "${result.totalStapleKilograms} kg"
+                                    )
+                                    ResultRow(
+                                        stringResource(R.string.zakat_rice_price_per_kg),
+                                        ZakatNumberFormatter.formatCurrency(result.staplePricePerKg, isMalay = isMalay, isIndo = isIndo)
+                                    )
 
-                                ResultRow(
-                                    stringResource(R.string.zakat_due),
-                                    currency.format(result.zakatDue),
-                                    highlight = result.meetsNisab
-                                )
+                                    HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
 
-                                if (!result.meetsNisab) {
-                                    Text(
-                                        text = stringResource(R.string.zakat_below_nisab),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = SaatColors.Slate500,
-                                        lineHeight = 20.sp
+                                    ResultRow(
+                                        stringResource(R.string.zakat_due),
+                                        ZakatNumberFormatter.formatCurrency(result.zakatDue, isMalay = isMalay, isIndo = isIndo),
+                                        highlight = true
                                     )
                                 }
-                            }
-                            is ZakatFitrahCalculationResult -> {
-                                ResultRow(stringResource(R.string.zakat_family_members), "${result.familyMembers} orang")
-                                ResultRow(
-                                    stringResource(R.string.zakat_fitrah_weight_per_person),
-                                    "${result.stapleWeightPerPersonKg} kg"
-                                )
-                                ResultRow(
-                                    stringResource(R.string.zakat_fitrah_total_weight),
-                                    "${result.totalStapleKilograms} kg"
-                                )
-                                ResultRow(
-                                    stringResource(R.string.zakat_rice_price_per_kg),
-                                    currency.format(result.staplePricePerKg)
-                                )
-
-                                HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
-
-                                ResultRow(
-                                    stringResource(R.string.zakat_due),
-                                    currency.format(result.zakatDue),
-                                    highlight = true
-                                )
                             }
                         }
                     }
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
             HorizontalDivider(color = SaatColors.SoftGrey)
             Spacer(Modifier.height(4.dp))
 
+            // Directory of Official Zakat Bodies
             ZakatBodiesSection(
                 selectedCountry = state.selectedZakatCountry,
                 onCountrySelected = vm::updateZakatCountry
@@ -444,12 +565,12 @@ private fun ZakatBodiesSection(
     val context = LocalContext.current
     val bodies = remember(selectedCountry) { ZakatBodyRepository.byCountry(selectedCountry) }
 
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = stringResource(R.string.zakat_pay_where_title),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 color = SaatColors.Slate900
             )
             Text(
@@ -457,6 +578,41 @@ private fun ZakatBodiesSection(
                 style = MaterialTheme.typography.bodySmall,
                 color = SaatColors.Slate500
             )
+        }
+
+        // Country Selector Chips (Indonesia 🇮🇩, Malaysia 🇲🇾, Singapore 🇸🇬, Brunei 🇧🇳)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ZakatCountry.values().forEach { country ->
+                val isSelected = country == selectedCountry
+                val flag = when (country) {
+                    ZakatCountry.INDONESIA -> "🇮🇩 Indonesia"
+                    ZakatCountry.MALAYSIA -> "🇲🇾 Malaysia"
+                    ZakatCountry.SINGAPORE -> "🇸🇬 Singapore"
+                    ZakatCountry.BRUNEI -> "🇧🇳 Brunei"
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (isSelected) SaatColors.DeepEmerald else SaatColors.PureWhite,
+                    border = BorderStroke(1.dp, if (isSelected) SaatColors.DeepEmerald else SaatColors.SoftGrey),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onCountrySelected(country) }
+                ) {
+                    Text(
+                        text = flag,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isSelected) Color.White else SaatColors.Slate700,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
+                }
+            }
         }
 
         if (selectedCountry == ZakatCountry.MALAYSIA) {
@@ -498,15 +654,15 @@ private fun ZakatBodyCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(18.dp))
             .border(
                 width = 1.dp,
                 color = SaatColors.SoftGrey,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(18.dp)
             )
             .clickable { onOpenUrl(body.websiteUrl) },
         color = SaatColors.PureWhite,
-        shadowElevation = 1.dp
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
@@ -517,7 +673,7 @@ private fun ZakatBodyCard(
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(3.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 body.stateTag?.let { tag ->
                     Surface(
@@ -536,7 +692,7 @@ private fun ZakatBodyCard(
                 Text(
                     text = body.name,
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = SaatColors.Slate900
                 )
                 Text(
@@ -549,13 +705,13 @@ private fun ZakatBodyCard(
                     text = body.websiteUrl,
                     style = MaterialTheme.typography.labelSmall,
                     color = SaatColors.Teal,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
             }
             Spacer(Modifier.width(12.dp))
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(42.dp)
                     .clip(CircleShape)
                     .background(SaatColors.DeepEmerald.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center
@@ -578,7 +734,8 @@ private fun ZakatField(
     value: String,
     onValueChange: (String) -> Unit,
     keyboardType: KeyboardType = KeyboardType.Decimal,
-    unitBadge: String? = null
+    unitBadge: String? = null,
+    icon: ImageVector? = null
 ) {
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val scope = rememberCoroutineScope()
@@ -587,14 +744,30 @@ private fun ZakatField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
+        leadingIcon = icon?.let {
+            {
+                Icon(
+                    imageVector = it,
+                    contentDescription = null,
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        },
         suffix = unitBadge?.let {
             {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = SaatColors.Slate500,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                ) {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = SaatColors.DeepEmerald,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
             }
         },
         modifier = Modifier
@@ -607,7 +780,7 @@ private fun ZakatField(
                     }
                 }
             },
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = SaatColors.DeepEmerald,
             unfocusedBorderColor = SaatColors.SoftGrey,
@@ -633,8 +806,8 @@ private fun ResultRow(label: String, value: String, highlight: Boolean = false) 
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
             color = if (highlight) SaatColors.DeepEmerald else SaatColors.Slate900
         )
     }

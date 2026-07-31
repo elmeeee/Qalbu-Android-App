@@ -719,14 +719,6 @@ fun ReadingNotificationScreen(
                     subtitle = if (state.dailyVerseEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
                     checked = state.dailyVerseEnabled,
                     onCheckedChange = vm::setDailyVerseEnabled,
-                    showDivider = true
-                )
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_daily_time_custom,
-                    title = stringResource(R.string.reading_daily_verse_time),
-                    subtitle = state.reminderTimeLabel.ifBlank { "07:00 AM" },
-                    onClick = { vm.toggleNotifTimeSheet(true) },
-                    showChevron = true,
                     showDivider = false
                 )
             }
