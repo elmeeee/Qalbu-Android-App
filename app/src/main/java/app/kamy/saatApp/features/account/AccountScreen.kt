@@ -654,8 +654,7 @@ fun NotificationAdhanScreen(
                         onClick = {
                             app.kamy.saatApp.infrastructure.audio.AdhanPlaybackService.start(
                                 context = context,
-                                rawRes = R.raw.adhan_fajr_mishary_alafasy,
-                                useSystemAlarm = true,
+                                rawRes = R.raw.tahajud_alarm,
                                 title = "Sholat Tahajjud",
                                 body = "Waktunya Bangun Sholat Tahajjud",
                                 notificationId = 9991,
