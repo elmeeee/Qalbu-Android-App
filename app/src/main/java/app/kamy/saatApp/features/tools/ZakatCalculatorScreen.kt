@@ -559,8 +559,7 @@ fun ZakatCalculatorScreen(
 
             // Directory of Official Zakat Bodies
             ZakatBodiesSection(
-                selectedCountry = state.selectedZakatCountry,
-                onCountrySelected = vm::updateZakatCountry
+                selectedCountry = state.selectedZakatCountry
             )
         }
     }
@@ -569,8 +568,7 @@ fun ZakatCalculatorScreen(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ZakatBodiesSection(
-    selectedCountry: ZakatCountry,
-    onCountrySelected: (ZakatCountry) -> Unit
+    selectedCountry: ZakatCountry
 ) {
     val context = LocalContext.current
     val bodies = remember(selectedCountry) { ZakatBodyRepository.byCountry(selectedCountry) }
@@ -588,36 +586,6 @@ private fun ZakatBodiesSection(
                 style = MaterialTheme.typography.bodySmall,
                 color = SaatColors.Slate500
             )
-        }
-
-        // Country Selector Chips
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            ZakatCountry.values().forEach { country ->
-                val isSelected = country == selectedCountry
-                val flag = "${country.emoji} ${stringResource(country.labelRes)}"
-
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = if (isSelected) SaatColors.DeepEmerald else SaatColors.PureWhite,
-                    border = BorderStroke(1.dp, if (isSelected) SaatColors.DeepEmerald else SaatColors.SoftGrey),
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { onCountrySelected(country) }
-                ) {
-                    Text(
-                        text = flag,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isSelected) Color.White else SaatColors.Slate700,
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                    )
-                }
-            }
         }
 
         if (selectedCountry == ZakatCountry.MALAYSIA) {
