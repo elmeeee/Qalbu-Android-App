@@ -474,131 +474,81 @@ fun DhikrSessionView(
                                 )
                             }
                         }
-
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(Modifier.height(84.dp))
                     }
                 }
             }
 
-            Spacer(Modifier.height(10.dp))
+        // Bottom Controls Container: Next/Finish Button + Tasbih Counter FAB (Positioned above system navbar)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+            // Next / Finish Button
+            Button(
+                onClick = {
+                    if (currentItemIndex < sessionItems.size - 1) {
+                        scope.launch { pagerState.animateScrollToPage(currentItemIndex + 1) }
+                    } else {
+                        isCompleted = true
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SaatColors.DeepEmerald,
+                    contentColor = SaatColors.PureWhite
+                ),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            ) {
+                Text(
+                    text = stringResource(
+                        if (currentItemIndex < sessionItems.size - 1) R.string.dhikr_session_next
+                        else R.string.dhikr_session_finish_title
+                    ),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
 
-            // Non-Overlapping Integrated Bottom Controller Bar (3 Clean Navigation Buttons)
+            // Tasbih Counter Floating Button
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                shape = RoundedCornerShape(24.dp),
-                color = SaatColors.PureWhite,
-                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
-                shadowElevation = 3.dp
+                    .clip(CircleShape)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        incrementCount()
+                    },
+                shape = CircleShape,
+                color = Color.Transparent,
+                shadowElevation = 8.dp
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Previous Item Button
-                    OutlinedButton(
-                        onClick = {
-                            if (currentItemIndex > 0) {
-                                scope.launch { pagerState.animateScrollToPage(currentItemIndex - 1) }
-                            }
-                        },
-                        enabled = currentItemIndex > 0,
-                        shape = RoundedCornerShape(14.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.dhikr_session_prev),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-
-                    // Reset Count Button
-                    OutlinedButton(
-                        onClick = { currentCount = 0 },
-                        shape = RoundedCornerShape(14.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.dhikr_session_reset_count),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                    }
-
-                    // Next / Finish Button
-                    Button(
-                        onClick = {
-                            if (currentItemIndex < sessionItems.size - 1) {
-                                scope.launch { pagerState.animateScrollToPage(currentItemIndex + 1) }
-                            } else {
-                                isCompleted = true
-                            }
-                        },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = SaatColors.DeepEmerald,
-                            contentColor = SaatColors.PureWhite
-                        ),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = stringResource(
-                                if (currentItemIndex < sessionItems.size - 1) R.string.dhikr_session_next
-                                else R.string.dhikr_session_finish_title
-                            ),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+                PremiumTasbihCounter(
+                    count = currentCount,
+                    target = activeItem.repeatCount,
+                    pulseKey = pulseKey,
+                    subtitle = "${activeItem.repeatCount}x",
+                    counterSize = 80.dp
+                )
             }
-
-    // Floating Action Tasbih Counter Button (FLOATING FAB)
-    Surface(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 76.dp, end = 20.dp)
-                .clip(CircleShape)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    incrementCount()
-                },
-            shape = CircleShape,
-            color = Color.Transparent,
-            shadowElevation = 8.dp
-        ) {
-            PremiumTasbihCounter(
-                count = currentCount,
-                target = activeItem.repeatCount,
-                pulseKey = pulseKey,
-                subtitle = "${activeItem.repeatCount}x",
-                counterSize = 84.dp
-            )
         }
     }
+}
 }
 
 @Composable
