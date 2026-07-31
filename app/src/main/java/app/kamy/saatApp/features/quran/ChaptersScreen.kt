@@ -2,11 +2,15 @@
 
 package app.kamy.saatApp.features.quran
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.Image
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.BorderStroke
@@ -124,6 +128,13 @@ fun ChaptersScreen(
     }
 
     val context = androidx.compose.ui.platform.LocalContext.current
+    val focusManager = LocalFocusManager.current
+
+    BackHandler(enabled = state.isSearchActive || state.searchQuery.isNotEmpty()) {
+        focusManager.clearFocus()
+        vm.onSearchActiveChange(false)
+    }
+
     LaunchedEffect(Unit) {
         vm.reviewFlow.collect {
             val act = context as? android.app.Activity
@@ -137,6 +148,14 @@ fun ChaptersScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .pointerInput(state.isSearchActive, state.searchQuery) {
+                if (state.isSearchActive || state.searchQuery.isNotEmpty()) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                        vm.onSearchActiveChange(false)
+                    })
+                }
+            }
     ) {
         when {
             state.isLoading && state.chapters.isEmpty() && !isPullRefreshing ->
@@ -204,7 +223,10 @@ fun ChaptersScreen(
                     QuranListHeader(
                         searchQuery = state.searchQuery,
                         onSearchQueryChange = vm::onSearchQueryChange,
-                        onClearSearch = vm::clearSearch,
+                        onClearSearch = {
+                            focusManager.clearFocus()
+                            vm.onSearchActiveChange(false)
+                        },
                         searchEnabled = true,
                         isSearching = isSearching,
                         browseMode = state.browseMode,
