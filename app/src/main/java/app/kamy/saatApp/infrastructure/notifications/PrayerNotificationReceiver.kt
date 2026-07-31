@@ -38,7 +38,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         if (playAdhan && isTahajud) {
             adhanPlaying = AdhanPlaybackService.start(
                 context = appContext,
-                useSystemAlarm = true,
+                rawRes = app.kamy.saatApp.R.raw.tahajud_alarm,
                 title = title,
                 body = body,
                 notificationId = notificationId,

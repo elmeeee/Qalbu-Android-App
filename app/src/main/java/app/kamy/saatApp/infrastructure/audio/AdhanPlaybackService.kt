@@ -126,17 +126,14 @@ class AdhanPlaybackService : Service() {
         title: String,
         body: String
     ) {
-        val mediaUri: Uri? = when {
+        val fallbackRawUri = Uri.parse("android.resource://$packageName/${R.raw.tahajud_alarm}")
+        val primaryUri: Uri? = when {
             rawRes != 0 -> Uri.parse("android.resource://$packageName/$rawRes")
             !soundUriStr.isNullOrBlank() -> Uri.parse(soundUriStr)
-            useSystemAlarm -> android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
-                ?: android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION)
-            else -> null
+            useSystemAlarm -> fallbackRawUri
+            else -> fallbackRawUri
         }
-        if (mediaUri == null) {
-            stopSelf()
-            return
-        }
+        val mediaUri = primaryUri ?: fallbackRawUri
         releasePlayer()
 
         val exo = ExoPlayer.Builder(this)
@@ -152,6 +149,7 @@ class AdhanPlaybackService : Service() {
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
 
+        var triedFallback = false
         exo.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 when (playbackState) {
@@ -167,7 +165,18 @@ class AdhanPlaybackService : Service() {
             }
 
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
-                releaseAndStop()
+                if (!triedFallback) {
+                    triedFallback = true
+                    runCatching {
+                        exo.setMediaItem(MediaItem.fromUri(fallbackRawUri))
+                        exo.prepare()
+                        exo.play()
+                    }.onFailure {
+                        releaseAndStop()
+                    }
+                } else {
+                    releaseAndStop()
+                }
             }
         })
 
