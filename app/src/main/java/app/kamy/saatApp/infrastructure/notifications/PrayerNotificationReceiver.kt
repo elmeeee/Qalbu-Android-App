@@ -32,7 +32,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         val globalAdhanSoundEnabled = PrayerNotificationPreferencesStore.from(appContext).isAdhanSoundEnabled()
         val shouldPlayAdhan = playAdhan && globalAdhanSoundEnabled
 
-        val isTahajud = kind?.contains("LAST_THIRD") == true || kind?.contains("tahajud") == true
+        val isTahajud = kind?.contains("LAST_THIRD") == true || kind?.contains("tahajud") == true || prayerName?.equals("tahajud", ignoreCase = true) == true
         var adhanPlaying = false
         var adhanRawRes: Int? = null
         if (playAdhan && isTahajud) {

@@ -93,7 +93,7 @@ class AdhanPlaybackService : Service() {
                     return START_NOT_STICKY
                 }
                 acquireWakeLock()
-                startPlayback(rawRes, soundUriStr, useSystemAlarm, title, body)
+                startPlayback(rawRes, soundUriStr, useSystemAlarm, title, body, prayerName)
                 runCatching {
                     startActivity(
                         AdhanAlarmActivity.intent(
@@ -124,7 +124,8 @@ class AdhanPlaybackService : Service() {
         soundUriStr: String?,
         useSystemAlarm: Boolean,
         title: String,
-        body: String
+        body: String,
+        prayerName: String? = null
     ) {
         val fallbackRawUri = Uri.parse("android.resource://$packageName/${R.raw.tahajud_alarm}")
         val primaryUri: Uri? = when {
@@ -148,6 +149,12 @@ class AdhanPlaybackService : Service() {
             .setHandleAudioBecomingNoisy(false)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
+
+        val isTahajudAlarm = prayerName?.equals("tahajud", ignoreCase = true) == true ||
+            rawRes == R.raw.tahajud_alarm
+        if (isTahajudAlarm) {
+            exo.repeatMode = Player.REPEAT_MODE_ONE
+        }
 
         var triedFallback = false
         exo.addListener(object : Player.Listener {

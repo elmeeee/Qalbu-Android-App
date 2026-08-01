@@ -26,10 +26,6 @@ object ExactAlarmScheduler {
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         runCatching {
-            if (!shouldUseExactScheduling(Build.VERSION.SDK_INT, alarmManager.canScheduleExactAlarms())) {
-                scheduleInexact(alarmManager, triggerAtMillis, pending)
-                return
-            }
             val showIntent = PendingIntent.getActivity(
                 context,
                 showIntentRequestCode,
