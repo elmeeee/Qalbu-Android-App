@@ -93,7 +93,7 @@ class ZakatViewModel @Inject constructor(
         "AU" -> "AUD"
         "CA" -> "CAD"
         else -> try {
-            java.util.Currency.getInstance(Locale("", countryCode)).currencyCode
+            java.util.Currency.getInstance(Locale.Builder().setRegion(countryCode.uppercase()).build()).currencyCode
         } catch (_: Throwable) {
             "IDR"
         }
