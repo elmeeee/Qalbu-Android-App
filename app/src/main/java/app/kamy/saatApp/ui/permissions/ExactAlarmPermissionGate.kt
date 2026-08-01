@@ -41,7 +41,7 @@ fun ExactAlarmPermissionGate() {
 
     LaunchedEffect(Unit) {
         reschedule()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !context.canScheduleExactAlarms()) {
+        if (needsExactAlarmPrompt && !context.canScheduleExactAlarms()) {
             if (!autoPromptedThisSession) {
                 autoPromptedThisSession = true
                 showRationale = true

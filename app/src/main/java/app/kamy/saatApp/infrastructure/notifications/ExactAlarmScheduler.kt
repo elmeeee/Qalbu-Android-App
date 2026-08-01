@@ -4,7 +4,9 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.content.ContextCompat
 import app.kamy.saatApp.MainActivity
 
 object ExactAlarmScheduler {
@@ -15,7 +17,11 @@ object ExactAlarmScheduler {
 
     fun canScheduleExactAlarms(context: Context): Boolean {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        return shouldUseExactScheduling(Build.VERSION.SDK_INT, alarmManager.canScheduleExactAlarms())
+        if (shouldUseExactScheduling(Build.VERSION.SDK_INT, alarmManager.canScheduleExactAlarms())) return true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return ContextCompat.checkSelfPermission(context, android.Manifest.permission.USE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED
+        }
+        return false
     }
 
     fun schedule(
@@ -50,7 +56,7 @@ object ExactAlarmScheduler {
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         runCatching {
-            if (!shouldUseExactScheduling(Build.VERSION.SDK_INT, alarmManager.canScheduleExactAlarms())) {
+            if (!canScheduleExactAlarms(context)) {
                 scheduleInexact(alarmManager, triggerAtMillis, pending)
                 return
             }
