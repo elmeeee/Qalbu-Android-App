@@ -9,6 +9,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import app.kamy.saatApp.core.config.AppConfig
+import app.kamy.saatApp.infrastructure.airplane.AirplaneModeReceiver
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -128,6 +129,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         chapterNumber: Int? = null,
         ayahNumber: Int? = null
     ) {
+        if (AirplaneModeReceiver.isAirplaneModeOn(context)) return
         val absolute = AppConfig.absoluteVerseMediaUrl(url)
         val parsed = parseVerseKey(ayahLabel)
         val chapter = chapterNumber ?: parsed?.first
@@ -164,6 +166,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         chapterNumber: Int? = null
     ) {
         if (items.isEmpty()) return
+        if (AirplaneModeReceiver.isAirplaneModeOn(context)) return
         val resolved = items.map { it.copy(url = AppConfig.absoluteVerseMediaUrl(it.url)) }
         val mediaItems = resolved.map { item ->
             buildMediaItem(item.url, surahTitle, item.label, reciterName)

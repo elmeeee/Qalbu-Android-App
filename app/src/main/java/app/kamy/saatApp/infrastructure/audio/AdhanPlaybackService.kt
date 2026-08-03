@@ -26,6 +26,7 @@ import app.kamy.saatApp.AdhanAlarmActivity
 import app.kamy.saatApp.MainActivity
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLocale
+import app.kamy.saatApp.infrastructure.airplane.AirplaneModeReceiver
 import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 
@@ -98,7 +99,12 @@ class AdhanPlaybackService : Service() {
                     return START_NOT_STICKY
                 }
                 acquireWakeLock()
-                startPlayback(rawRes, soundUriStr, useSystemAlarm, title, body, prayerName)
+                if (AirplaneModeReceiver.isAirplaneModeOn(this)) {
+                    // Airplane mode active — skip adhan audio but keep the visual
+                    // notification + full-screen alarm overlay already shown above.
+                } else {
+                    startPlayback(rawRes, soundUriStr, useSystemAlarm, title, body, prayerName)
+                }
                 runCatching {
                     startActivity(
                         AdhanAlarmActivity.intent(

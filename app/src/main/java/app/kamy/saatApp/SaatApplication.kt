@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import app.kamy.saatApp.core.locale.AppLocale
 import app.kamy.saatApp.di.LocalQuranEntryPoint
+import app.kamy.saatApp.infrastructure.airplane.AirplaneModeReceiver
 import app.kamy.saatApp.infrastructure.network.NetworkDebugger
 import app.kamy.saatApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
@@ -36,6 +37,7 @@ class SaatApplication : Application() {
             resources.updateConfiguration(config, resources.displayMetrics)
         }
         NotificationChannels.ensureAll(this)
+        AirplaneModeReceiver.register(this)
         NetworkDebugger.install(this)
         runCatching { DailyVerseNotificationScheduler.reschedule(this) }
         runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
