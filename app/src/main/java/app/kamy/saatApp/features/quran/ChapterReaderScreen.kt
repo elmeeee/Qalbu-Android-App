@@ -12,6 +12,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -808,19 +810,18 @@ private fun SaatAyahPage(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                if (hifzModeEnabled) {
-                    when (hifzRevealStage) {
-                        0 -> hifzRevealStage = 1
-                        1 -> if (showTranslation) hifzRevealStage = 2 else onPlay()
-                        else -> onPlay()
+            .pointerInput(hifzModeEnabled, showTranslation) {
+                detectTapGestures(onTap = {
+                    if (hifzModeEnabled) {
+                        when (hifzRevealStage) {
+                            0 -> hifzRevealStage = 1
+                            1 -> if (showTranslation) hifzRevealStage = 2 else onPlay()
+                            else -> onPlay()
+                        }
+                    } else {
+                        onPlay()
                     }
-                } else {
-                    onPlay()
-                }
+                })
             },
         contentAlignment = Alignment.Center
     ) {
