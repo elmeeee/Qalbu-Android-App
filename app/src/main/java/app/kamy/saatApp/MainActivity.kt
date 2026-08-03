@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -13,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.kamy.saatApp.design.theme.SaatTheme
 import app.kamy.saatApp.core.locale.AppLocale
+import app.kamy.saatApp.ui.edge.enableEdgeToEdge
 import app.kamy.saatApp.ui.navigation.DeepLinkRoutes
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.ui.permissions.ExactAlarmPermissionGate
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         AppReviewManager.recordAppLaunch(applicationContext)
 
-        enableEdgeToEdge()
+        enableEdgeToEdge(window, window.decorView, true)
         val needsOnboarding = !onboardingStore.isComplete()
         setContent {
             val pendingRoute by deepLinkRoute

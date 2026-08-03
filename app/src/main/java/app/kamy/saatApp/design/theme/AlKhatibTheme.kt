@@ -1,16 +1,10 @@
 package app.kamy.saatApp.design.theme
 
-import android.app.Activity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
-
 import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
-import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
+import app.kamy.saatApp.ui.edge.EdgeToEdgeContent
 
 @Composable
 fun SaatTheme(
@@ -50,15 +44,7 @@ fun SaatTheme(
         onError = SaatColors.OffWhite
     )
 
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = view.context.findActivity()?.window
-            if (window != null) {
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
-            }
-        }
-    }
+    EdgeToEdgeContent(enableLightBars = true)
 
     MaterialTheme(
         colorScheme = dynamicColors,
@@ -66,10 +52,4 @@ fun SaatTheme(
         shapes = SaatShapes,
         content = content
     )
-}
-
-private tailrec fun android.content.Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is android.content.ContextWrapper -> baseContext.findActivity()
-    else -> null
 }

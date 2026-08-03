@@ -3,14 +3,9 @@ plugins {
     alias(libs.plugins.android.library)
 }
 
+
 kotlin {
-    androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
-        }
-    }
+    androidTarget()
     
     listOf(
         iosX64(),
