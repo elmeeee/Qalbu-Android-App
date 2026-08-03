@@ -579,7 +579,6 @@ object PrayerNotificationScheduler {
             app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> java.util.Locale.US
             app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN -> java.util.Locale.forLanguageTag("id-ID")
             app.kamy.saatApp.core.locale.AppLanguage.MALAY -> java.util.Locale.forLanguageTag("ms-MY")
-            else -> java.util.Locale.US
         }
         val config = android.content.res.Configuration(context.resources.configuration).apply {
             setLocale(locale)

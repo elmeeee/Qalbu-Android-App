@@ -62,19 +62,18 @@ class AdhanPlaybackService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val isBoot = intent == null || intent.action == Intent.ACTION_BOOT_COMPLETED
-        if (isBoot) {
+        if (intent == null || intent.action == Intent.ACTION_BOOT_COMPLETED) {
             stopSelf()
             return START_NOT_STICKY
         }
 
         when {
-            intent?.action == ACTION_STOP -> {
+            intent.action == ACTION_STOP -> {
                 linkedNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, linkedNotificationId)
                 releaseAndStop()
                 return START_NOT_STICKY
             }
-            intent != null && (intent.hasExtra(EXTRA_RAW_RES) || intent.hasExtra(EXTRA_SOUND_URI) || intent.getBooleanExtra(EXTRA_USE_SYSTEM_ALARM, false)) -> {
+            intent.hasExtra(EXTRA_RAW_RES) || intent.hasExtra(EXTRA_SOUND_URI) || intent.getBooleanExtra(EXTRA_USE_SYSTEM_ALARM, false) -> {
                 linkedNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
                 val body = intent.getStringExtra(EXTRA_BODY).orEmpty()

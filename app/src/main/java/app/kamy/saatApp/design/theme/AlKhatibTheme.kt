@@ -4,7 +4,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
-import app.kamy.saatApp.ui.edge.EdgeToEdgeContent
 
 @Composable
 fun SaatTheme(
@@ -43,8 +42,6 @@ fun SaatTheme(
         error = SaatColors.Danger,
         onError = SaatColors.OffWhite
     )
-
-    EdgeToEdgeContent(enableLightBars = true)
 
     MaterialTheme(
         colorScheme = dynamicColors,

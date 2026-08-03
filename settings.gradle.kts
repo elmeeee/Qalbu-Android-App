@@ -21,4 +21,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Saat-Android"
 include(":app")
-include(":shared")

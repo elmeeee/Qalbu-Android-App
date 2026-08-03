@@ -8,7 +8,7 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import app.kamy.saatApp.core.locale.AppLocale
-import app.kamy.saatApp.ui.edge.enableEdgeToEdge
+import androidx.activity.enableEdgeToEdge
 import app.kamy.saatApp.design.theme.SaatTheme
 import app.kamy.saatApp.infrastructure.audio.AdhanStopReceiver
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
@@ -74,7 +74,7 @@ class AdhanAlarmActivity : ComponentActivity() {
             )
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        enableEdgeToEdge(window, window.decorView, true)
+        enableEdgeToEdge()
 
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
         val body = intent.getStringExtra(EXTRA_BODY).orEmpty()

@@ -1,12 +1,10 @@
 import java.util.Properties
 
 plugins {
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-    id("org.jetbrains.kotlin.kapt")
     alias(libs.plugins.hilt)
 }
 
@@ -110,25 +108,32 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs += listOf("-opt-in=kotlin.RequiresOptIn")
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 
-    applicationVariants.all {
-        if (name == "release") {
-            outputs.all {
-                val output = this as? com.android.build.gradle.api.ApkVariantOutput
-                output?.outputFileName = "Sāat-Production.apk"
-            }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xannotation-default-target=param-property"
+        )
+    }
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        variant.outputs.forEach { output ->
+            output.outputFileName.set("Sāat-Production.apk")
         }
     }
 }
+
 
 dependencies {
     // AndroidX core
@@ -167,7 +172,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
     // Networking
