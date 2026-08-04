@@ -24,7 +24,6 @@ import java.util.zip.GZIPInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
-import app.kamy.saatApp.infrastructure.offline.MurottalOfflineStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -555,8 +554,7 @@ class LocalQuranDataSource @Inject constructor(
         val aya = getInt(getColumnIndexOrThrow("aya"))
         val globalAyah = getInt(getColumnIndexOrThrow("global_ayah"))
         val translationText = translationText(translationId)
-        val audioUrl = MurottalOfflineStore.localUrlIfDownloaded(context, recitationId, globalAyah)
-            ?: LocalQuranConfig.murottalUrl(recitationId, globalAyah)
+        val audioUrl = LocalQuranConfig.murottalUrl(recitationId, globalAyah)
         return RandomAyahPayload(
             chapterId = sura,
             verseNumber = aya,

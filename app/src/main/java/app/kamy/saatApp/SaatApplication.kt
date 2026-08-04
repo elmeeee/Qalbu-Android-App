@@ -12,7 +12,6 @@ import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
 import app.kamy.saatApp.infrastructure.notifications.PrayerCheckReminderScheduler
 import app.kamy.saatApp.infrastructure.notifications.PrayerNotificationCoordinator
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
-import app.kamy.saatApp.infrastructure.preferences.OfflineDownloadStore
 import app.kamy.saatApp.infrastructure.widget.WidgetCoordinator
 import app.kamy.saatApp.infrastructure.widget.WidgetRefreshScheduler
 import dagger.hilt.android.EntryPointAccessors
@@ -65,14 +64,14 @@ class SaatApplication : Application(), androidx.work.Configuration.Provider {
                     WidgetRefreshScheduler.schedule(this)
                 }
             }
-            markBundledQuranAvailable()
-            warmUpLocalQuranDatabase()
+            // Warm up Quran database in background (non-blocking for first paint).
+            warmUpBackgroundTasks()
         } catch (t: Throwable) {
             android.util.Log.e("SaatApplication", "Startup initialization failed", t)
         }
     }
 
-    private fun warmUpLocalQuranDatabase() {
+    private fun warmUpBackgroundTasks() {
         Executors.newSingleThreadExecutor().execute {
             runCatching {
                 EntryPointAccessors.fromApplication(this, LocalQuranEntryPoint::class.java)
@@ -82,12 +81,5 @@ class SaatApplication : Application(), androidx.work.Configuration.Provider {
                 android.util.Log.e("SaatApplication", "Failed to warm up local Quran DB", it)
             }
         }
-    }
-
-    private fun markBundledQuranAvailable() {
-        for (chapter in 1..114) {
-            OfflineDownloadStore.markChapterDownloaded(this, chapter)
-        }
-        OfflineDownloadStore.markCompleted(this)
     }
 }
