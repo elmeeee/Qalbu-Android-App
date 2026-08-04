@@ -16,7 +16,6 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent == null) return
-        val pendingResult = goAsync()
         val appContext = context.applicationContext
         val channelId = intent.getStringExtra(EXTRA_CHANNEL_ID) ?: NotificationChannels.PRAYER
         val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, 0)
@@ -70,7 +69,6 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                         NotificationChannels.ADHAN_ALERT
                     }
                     kind?.startsWith("prayer_") == true || kind == "imsak" -> {
-                        // Toggle OFF → default device sound via high-importance PRAYER_ALERT channel
                         NotificationChannels.PRAYER_ALERT
                     }
                     else -> channelId
@@ -90,12 +88,12 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
             }
         }
 
+        // Roll alarms forward in background — do not block the broadcast receiver.
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
             try {
-                // Roll alarms forward only — avoid network + Hilt on every adhan fire.
                 PrayerNotificationCoordinator.rescheduleFromCache(appContext)
-            } finally {
-                pendingResult.finish()
+            } catch (_: Throwable) {
+                // Reschedule failure is non-critical; next app launch will repair alarms.
             }
         }
     }

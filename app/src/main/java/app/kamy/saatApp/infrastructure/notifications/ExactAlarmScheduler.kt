@@ -81,7 +81,7 @@ object ExactAlarmScheduler {
             alarmManager.setWindow(
                 AlarmManager.RTC_WAKEUP,
                 triggerAtMillis,
-                60_000L,
+                15_000L,
                 pending
             )
         }
