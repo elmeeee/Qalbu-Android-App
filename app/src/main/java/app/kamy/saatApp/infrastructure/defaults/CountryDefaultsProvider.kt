@@ -37,7 +37,9 @@ object CountryDefaultsProvider {
      * returns the generic fallback.
      */
     fun detect(context: Context): CountryDefaults {
+        // Locale is a reliable fallback on devices without a SIM/network country.
         val countryCode = detectCountryCode(context)
+            ?: java.util.Locale.getDefault().country.takeIf { it.isNotBlank() }
         return defaultsForCountryCode(countryCode)
     }
 
@@ -60,7 +62,7 @@ object CountryDefaultsProvider {
     }
 
     private fun translationIdForCountry(code: String?): Int = when (code) {
-        "ID" -> LocalQuranConfig.TRANSLATION_INDONESIAN
+        "ID" -> LocalQuranConfig.TRANSLATION_KEMENAG
         "MY" -> LocalQuranConfig.TRANSLATION_MALAY
         else -> LocalQuranConfig.TRANSLATION_ENGLISH
     }

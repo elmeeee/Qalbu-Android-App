@@ -27,4 +27,26 @@
 -keep class app.kamy.saatApp.** { *; }
 -keep class dagger.hilt.** { *; }
 -keep class javax.inject.** { *; }
+
+# kotlinx.serialization — keep library + generated $$serializer classes
 -keep class kotlinx.serialization.** { *; }
+-keepclassmembers class app.kamy.saatApp.** {
+    *** Companion;
+}
+-keepclasseswithmembers class app.kamy.saatApp.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keep,includedescriptorclasses class app.kamy.saatApp.**$$serializer { *; }
+
+# Retrofit — keep service interfaces + method parameter annotations
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations
+-keep,allowobfuscation,allowshrinking interface retrofit2.Call
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
+
+# OkHttp platform-specific (needed for Android 10+ connection Conscrypt)
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**

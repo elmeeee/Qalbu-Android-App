@@ -104,11 +104,13 @@ class TranslationPreferencesStore @Inject constructor(
     }
 
     private fun loadTranslationName(): String {
-        val saved = prefs.getString(KEY_NAME, "").orEmpty()
-        if (saved.isNotBlank()) return saved
         val id = loadTranslationId()
         val match = LocalQuranConfig.translations.find { it.id == id }
-        return match?.authorName?.ifBlank { match.name } ?: match?.name ?: "Kementerian Agama RI"
+        // Resolve from the effective ID so a legacy/stale label (e.g. Sahih)
+        // can never disagree with the selected translation.
+        return match?.let { LocalQuranConfig.translationDisplayLabel(it) }
+            ?: prefs.getString(KEY_NAME, "").orEmpty()
+                .ifBlank { "Kementerian Agama RI" }
     }
 
     private fun loadRecitationId(): Int {

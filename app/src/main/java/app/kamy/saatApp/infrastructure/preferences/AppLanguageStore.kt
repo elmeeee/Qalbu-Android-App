@@ -2,6 +2,7 @@ package app.kamy.saatApp.infrastructure.preferences
 
 import android.content.Context
 import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.infrastructure.defaults.DeviceLanguageDetector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +17,10 @@ class AppLanguageStore(context: Context) {
 
     val currentFlow: StateFlow<AppLanguage> = _currentFlow.asStateFlow()
 
-    fun current(): AppLanguage = AppLanguage.fromTag(prefs.getString(KEY_LANGUAGE, null))
+    /** Uses the device language until the user/default initializer persists a choice. */
+    fun current(): AppLanguage = prefs.getString(KEY_LANGUAGE, null)
+        ?.let(AppLanguage::fromTag)
+        ?: DeviceLanguageDetector.detect()
 
     fun set(language: AppLanguage) {
         prefs.edit().putString(KEY_LANGUAGE, language.tag).apply()

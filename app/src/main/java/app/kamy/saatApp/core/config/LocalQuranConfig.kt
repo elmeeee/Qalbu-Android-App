@@ -120,7 +120,7 @@ object LocalQuranConfig {
         when (language) {
             AppLanguage.ENGLISH -> translations.first { it.id == TRANSLATION_ENGLISH }
             AppLanguage.MALAY -> translations.first { it.id == TRANSLATION_MALAY }
-            AppLanguage.INDONESIAN -> translations.first { it.id == TRANSLATION_INDONESIAN }
+            AppLanguage.INDONESIAN -> translations.first { it.id == TRANSLATION_KEMENAG }
         }
 
     fun appLanguageForTranslationId(translationId: Int): AppLanguage? =
