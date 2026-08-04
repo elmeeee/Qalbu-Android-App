@@ -1,6 +1,7 @@
 package app.kamy.saatApp.infrastructure.defaults
 
 import android.content.Context
+import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerCalculationStore
@@ -24,12 +25,17 @@ object SmartDefaultsInitializer {
         val language = DeviceLanguageDetector.detect()
         AppLanguageStore.from(appContext).set(language)
 
-        // 2. Auto-default translation + prayer method from SIM/network country.
-        val defaults = CountryDefaultsProvider.detect(appContext)
+        // 2. Translation default follows the app language, not country, so a
+        //    Indonesian-languaged device always picks Kemenag even without a SIM.
+        val translation = LocalQuranConfig.translationForAppLanguage(language)
+        val translationName = LocalQuranConfig.translationDisplayLabel(translation)
         TranslationPreferencesStore(appContext).setTranslation(
-            defaults.translationId,
-            defaults.translationName
+            translation.id,
+            translationName
         )
+
+        // 3. Prayer method still comes from country, fallback to device locale.
+        val defaults = CountryDefaultsProvider.detect(appContext)
         PrayerCalculationStore(appContext).setMethod(defaults.prayerMethod)
 
         onboardingStore.markFirstLaunchDefaultApplied()

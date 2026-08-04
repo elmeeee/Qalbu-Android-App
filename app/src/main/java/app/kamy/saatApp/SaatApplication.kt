@@ -28,7 +28,10 @@ class SaatApplication : Application(), androidx.work.Configuration.Provider {
             .build()
 
     override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(base)
+        // Set locale BEFORE any resource access so the app always starts in the
+        // persisted language (or device default on first launch).
+        val language = AppLanguageStore.from(base).current()
+        super.attachBaseContext(AppLocale.wrap(base, language))
     }
 
     override fun onCreate() {
