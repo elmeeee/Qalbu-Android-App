@@ -14,7 +14,6 @@ object LocalQuranConfig {
     const val TRANSLATION_INDONESIAN = 1
     const val TRANSLATION_ENGLISH = 2
     const val TRANSLATION_MALAY = 3
-    const val TRANSLATION_KEMENAG = 4
 
     const val DEFAULT_TRANSLATION_ID = TRANSLATION_INDONESIAN
 
@@ -56,14 +55,6 @@ object LocalQuranConfig {
             slug = "my",
             languageName = "malay",
             translatedName = TranslatedSubName("Malay", "malay")
-        ),
-        QFTranslation(
-            id = TRANSLATION_KEMENAG,
-            name = "Kemenag (Arab Latin)",
-            authorName = "Kementerian Agama RI",
-            slug = "kemenag",
-            languageName = "indonesian",
-            translatedName = TranslatedSubName("Kemenag", "indonesian")
         )
     )
 
@@ -87,7 +78,8 @@ object LocalQuranConfig {
 
     /** Map legacy QF translation IDs saved in prefs to local IDs. */
     fun normalizeTranslationId(savedId: Int): Int = when (savedId) {
-        TRANSLATION_INDONESIAN, TRANSLATION_ENGLISH, TRANSLATION_MALAY, TRANSLATION_KEMENAG -> savedId
+        TRANSLATION_INDONESIAN, TRANSLATION_ENGLISH, TRANSLATION_MALAY -> savedId
+        4 -> TRANSLATION_INDONESIAN
         22, 131, 33 -> TRANSLATION_INDONESIAN
         20, 84 -> TRANSLATION_ENGLISH
         else -> DEFAULT_TRANSLATION_ID
@@ -120,14 +112,14 @@ object LocalQuranConfig {
         when (language) {
             AppLanguage.ENGLISH -> translations.first { it.id == TRANSLATION_ENGLISH }
             AppLanguage.MALAY -> translations.first { it.id == TRANSLATION_MALAY }
-            AppLanguage.INDONESIAN -> translations.first { it.id == TRANSLATION_KEMENAG }
+            AppLanguage.INDONESIAN -> translations.first { it.id == TRANSLATION_INDONESIAN }
         }
 
     fun appLanguageForTranslationId(translationId: Int): AppLanguage? =
         when (normalizeTranslationId(translationId)) {
             TRANSLATION_ENGLISH -> AppLanguage.ENGLISH
             TRANSLATION_MALAY -> AppLanguage.MALAY
-            TRANSLATION_INDONESIAN, TRANSLATION_KEMENAG -> AppLanguage.INDONESIAN
+            TRANSLATION_INDONESIAN -> AppLanguage.INDONESIAN
             else -> null
         }
 

@@ -146,7 +146,7 @@ class ContentRepository @Inject constructor(
             val onlineTafsirId = when (translationId) {
                 LocalQuranConfig.TRANSLATION_ENGLISH -> "169" // English Tafsir Ibn Kathir
                 LocalQuranConfig.TRANSLATION_MALAY -> "30" // Malay
-                LocalQuranConfig.TRANSLATION_INDONESIAN, LocalQuranConfig.TRANSLATION_KEMENAG -> "156" // Kemenag
+                LocalQuranConfig.TRANSLATION_INDONESIAN -> "156" // Kemenag
                 else -> "169"
             }
             runCatching {
@@ -155,10 +155,6 @@ class ContentRepository @Inject constructor(
         }
 
         return when (translationId) {
-            LocalQuranConfig.TRANSLATION_KEMENAG -> {
-                local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)
-                    ?: local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
-            }
             LocalQuranConfig.TRANSLATION_INDONESIAN -> {
                 local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
                     ?: local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)

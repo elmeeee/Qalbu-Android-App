@@ -62,7 +62,7 @@ object CountryDefaultsProvider {
     }
 
     private fun translationIdForCountry(code: String?): Int = when (code) {
-        "ID" -> LocalQuranConfig.TRANSLATION_KEMENAG
+        "ID" -> LocalQuranConfig.TRANSLATION_INDONESIAN
         "MY" -> LocalQuranConfig.TRANSLATION_MALAY
         else -> LocalQuranConfig.TRANSLATION_ENGLISH
     }

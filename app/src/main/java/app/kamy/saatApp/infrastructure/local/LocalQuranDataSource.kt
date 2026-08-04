@@ -585,7 +585,6 @@ class LocalQuranDataSource @Inject constructor(
         val column = when (translationId) {
             LocalQuranConfig.TRANSLATION_ENGLISH -> "translation_en"
             LocalQuranConfig.TRANSLATION_MALAY -> "malay"
-            LocalQuranConfig.TRANSLATION_KEMENAG -> "kemenag"
             else -> "indonesian"
         }
         return getStringOrNull(column)?.takeIf { it.isNotBlank() }
@@ -594,14 +593,12 @@ class LocalQuranDataSource @Inject constructor(
     private fun translationResourceName(translationId: Int): String = when (translationId) {
         LocalQuranConfig.TRANSLATION_ENGLISH -> "English"
         LocalQuranConfig.TRANSLATION_MALAY -> "Malay"
-        LocalQuranConfig.TRANSLATION_KEMENAG -> "Kemenag"
         else -> "Indonesian"
     }
 
     private fun translationColumn(translationId: Int): String = when (translationId) {
         LocalQuranConfig.TRANSLATION_ENGLISH -> "a.translation_en"
         LocalQuranConfig.TRANSLATION_MALAY -> "a.malay"
-        LocalQuranConfig.TRANSLATION_KEMENAG -> "a.kemenag"
         else -> "a.indonesian"
     }
 
