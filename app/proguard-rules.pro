@@ -23,6 +23,35 @@
 -keep class androidx.media3.session.** { *; }
 -keep class androidx.media3.common.** { *; }
 
+# WorkManager + Room — bulletproof rules to prevent reflection failures
+-keep class androidx.work.** { *; }
+-keep class androidx.work.impl.** { *; }
+-keep class androidx.work.impl.WorkDatabase { *; }
+-keep class androidx.work.impl.WorkDatabase_Impl { *; }
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep class **_Impl { *; }
+-keepclassmembers class * {
+    @androidx.room.* <methods>;
+    @androidx.room.* <fields>;
+}
+-keepclassmembers class * extends androidx.room.RoomDatabase {
+    public <init>(...);
+    public <init>();
+}
+-keepclassmembers @androidx.room.Database class * {
+    public abstract <methods>;
+}
+
+# AndroidX Startup — keep initializers from being stripped
+-keep class * extends androidx.startup.Initializer { *; }
+-keepclassmembers class * extends androidx.startup.Initializer {
+    <init>();
+}
+
+# Glance (widgets) — keep RemoteViewsService & factory classes
+-keep class * extends android.widget.RemoteViewsService { *; }
+-keep class * extends androidx.glance.** { *; }
+
 # Keep app classes and Hilt-generated wiring intact for release builds.
 -keep class app.kamy.saatApp.** { *; }
 -keep class dagger.hilt.** { *; }

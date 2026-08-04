@@ -176,6 +176,18 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Disable WorkManager androidx.startup auto-init so a DB failure can never
+             crash the app at provider install time. Initialized manually in Application. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                tools:node="remove" />
+        </provider>
+
     </application>
 
 </manifest>

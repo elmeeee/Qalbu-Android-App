@@ -373,7 +373,7 @@ class AdhanPlaybackService : Service() {
     companion object {
         private const val NOTIFICATION_ID = 12_001
         private const val VOLUME_STOP_GRACE_MS = 1_500L
-        private const val ADHAN_VOLUME_FRACTION = 0.95f
+        private const val ADHAN_VOLUME_FRACTION = 0.55f
         private const val EXTRA_RAW_RES = "raw_res"
         private const val EXTRA_SOUND_URI = "sound_uri"
         private const val EXTRA_USE_SYSTEM_ALARM = "use_system_alarm"

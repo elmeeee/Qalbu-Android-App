@@ -20,7 +20,12 @@ import dagger.hilt.android.HiltAndroidApp
 import java.util.concurrent.Executors
 
 @HiltAndroidApp
-class SaatApplication : Application() {
+class SaatApplication : Application(), androidx.work.Configuration.Provider {
+
+    override val workManagerConfiguration: androidx.work.Configuration
+        get() = androidx.work.Configuration.Builder()
+            .setMinimumLoggingLevel(android.util.Log.INFO)
+            .build()
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
@@ -29,6 +34,11 @@ class SaatApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         try {
+            // WorkManager auto-init is disabled in the manifest. Initialize here so
+            // a library/database failure is contained instead of crashing startup.
+            runCatching {
+                androidx.work.WorkManager.initialize(this, workManagerConfiguration)
+            }
             runCatching {
                 val language = AppLanguageStore.from(this).current()
                 val locale = java.util.Locale.forLanguageTag(language.tag)
