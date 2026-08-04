@@ -162,7 +162,7 @@
           },
           "fawaid": "Penghalang antara seorang hamba dengan surga hanyalah kematian.",
           "notes": "Ayat Kursi (QS. Al-Baqarah: 255).",
-          "source": "HR. An-Nasa'i (Al-Kubra no. 9848), dinilai shahih oleh Al-Albani dalam Shahih Al-Jami' no. 6464",
+          "source": "QS. Al-Baqarah: 255",
           "repeat_count": 1,
           "context_tags": [
             "fardhu_all"
@@ -184,7 +184,7 @@
           },
           "fawaid": "Pembuka doa agar diijabah (dikabulkan) oleh Allah Ta'ala.",
           "notes": "Setiap doa sangat dianjurkan dibuka dengan tahmid dan shalawat.",
-          "source": "HR. Tirmidzi no. 3477 (Hasan Shahih)",
+          "source": "HR. Tirmidzi no. 3477",
           "repeat_count": 1,
           "context_tags": [
             "duaa_opening"
@@ -228,7 +228,7 @@
           },
           "fawaid": "Memohon istiqamah agar selalu ingat Allah dan terhindar dari kesesatan.",
           "notes": "Doa Ya Muqallibal Qulub.",
-          "source": "HR. Tirmidzi no. 2140, Ahmad no. 12107 (Shahih menurut Al-Albani dalam Shahih At-Tirmidzi)",
+          "source": "HR. Tirmidzi no. 2140",
           "repeat_count": 1,
           "context_tags": [
             "custom_duaa"
@@ -294,7 +294,7 @@
           },
           "fawaid": "Memohon karunia dan rahmat Allah secara mutlak, khususnya dalam mencari rezeki dan penghidupan yang halal.",
           "notes": "Diucapkan Nabi ﷺ ketika mencari makanan untuk menjamu tamu, lalu Allah mendatangkan rezeki tak terduga. Catatan: frasa 'warfa' darajatanaa fid-dunyaa wal-aakhirah' pada versi sebelumnya tidak ditemukan dalam riwayat aslinya sehingga dihapus.",
-          "source": "HR. Ath-Thabrani, Al-Mu'jam Al-Kabir (10/220) no. 10379 - dinilai Hasan/Shahih oleh Al-Albani (Silsilah Ash-Shahihah no. 1543, Shahih Al-Jami' no. 1278)",
+          "source": "HR. Ath-Thabrani, Al-Mu'jam Al-Kabir (10/220) no. 10379)",
           "repeat_count": 1,
           "context_tags": [
             "custom_duaa"
@@ -316,7 +316,7 @@
           },
           "fawaid": "Perlindungan kesehatan mutlak dan dijauhkan dari marabahaya/musibah.",
           "notes": "Doa perlindungan fisik & takdir (gabungan dua riwayat).",
-          "source": "Bagian 'afiyah': HR. Abu Daud no. 5090; Bagian ta'awwudz dari jahd al-bala': HR. Bukhari no. 6347, Muslim no. 2707",
+          "source": "HR. Bukhari no. 6347, Muslim no. 2707",
           "repeat_count": 1,
           "context_tags": [
             "custom_duaa"
