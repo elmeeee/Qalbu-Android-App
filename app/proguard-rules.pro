@@ -22,3 +22,9 @@
 # Media3 & Foreground Services
 -keep class androidx.media3.session.** { *; }
 -keep class androidx.media3.common.** { *; }
+
+# Keep app classes and Hilt-generated wiring intact for release builds.
+-keep class app.kamy.saatApp.** { *; }
+-keep class dagger.hilt.** { *; }
+-keep class javax.inject.** { *; }
+-keep class kotlinx.serialization.** { *; }

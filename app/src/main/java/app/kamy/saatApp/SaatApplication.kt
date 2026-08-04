@@ -28,31 +28,35 @@ class SaatApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        runCatching {
-            val language = AppLanguageStore.from(this).current()
-            val locale = java.util.Locale.forLanguageTag(language.tag)
-            java.util.Locale.setDefault(locale)
-            val config = android.content.res.Configuration(resources.configuration)
-            config.setLocale(locale)
-            @Suppress("DEPRECATION")
-            resources.updateConfiguration(config, resources.displayMetrics)
-        }
-        NotificationChannels.ensureAll(this)
-        AirplaneModeReceiver.register(this)
-        runCatching { SmartDefaultsInitializer.applyIfNeeded(this) }
-        NetworkDebugger.install(this)
-        runCatching { DailyVerseNotificationScheduler.reschedule(this) }
-        runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
-        runCatching { PrayerCheckReminderScheduler.reschedule(this) }
-        runCatching { app.kamy.saatApp.infrastructure.preferences.SurahReminderStore.from(this).let { store -> store.rescheduleAlarms(store.getReminders()) } }
-        runCatching {
-            WidgetCoordinator.refreshAll(this)
-            if (WidgetCoordinator.hasAnyWidgets(this)) {
-                WidgetRefreshScheduler.schedule(this)
+        try {
+            runCatching {
+                val language = AppLanguageStore.from(this).current()
+                val locale = java.util.Locale.forLanguageTag(language.tag)
+                java.util.Locale.setDefault(locale)
+                val config = android.content.res.Configuration(resources.configuration)
+                config.setLocale(locale)
+                @Suppress("DEPRECATION")
+                resources.updateConfiguration(config, resources.displayMetrics)
             }
+            NotificationChannels.ensureAll(this)
+            AirplaneModeReceiver.register(this)
+            runCatching { SmartDefaultsInitializer.applyIfNeeded(this) }
+            NetworkDebugger.install(this)
+            runCatching { DailyVerseNotificationScheduler.reschedule(this) }
+            runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
+            runCatching { PrayerCheckReminderScheduler.reschedule(this) }
+            runCatching { app.kamy.saatApp.infrastructure.preferences.SurahReminderStore.from(this).let { store -> store.rescheduleAlarms(store.getReminders()) } }
+            runCatching {
+                WidgetCoordinator.refreshAll(this)
+                if (WidgetCoordinator.hasAnyWidgets(this)) {
+                    WidgetRefreshScheduler.schedule(this)
+                }
+            }
+            markBundledQuranAvailable()
+            warmUpLocalQuranDatabase()
+        } catch (t: Throwable) {
+            android.util.Log.e("SaatApplication", "Startup initialization failed", t)
         }
-        markBundledQuranAvailable()
-        warmUpLocalQuranDatabase()
     }
 
     private fun warmUpLocalQuranDatabase() {
