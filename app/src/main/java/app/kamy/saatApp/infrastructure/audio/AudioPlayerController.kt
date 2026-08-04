@@ -41,7 +41,8 @@ data class AudioPlaybackState(
     val queue: List<AudioQueueItem> = emptyList(),
     val chapterNumber: Int? = null,
     val ayahNumber: Int? = null,
-    val currentPositionMs: Long = 0L
+    val currentPositionMs: Long = 0L,
+    val lastError: String? = null
 ) {
     val hasReaderNavigation: Boolean = chapterNumber != null && chapterNumber > 0
 }
@@ -103,8 +104,14 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
                 }
             }
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
-                error.printStackTrace()
-                stop()
+                android.util.Log.e("AudioPlayerController", "Playback error", error)
+                val errorMsg = error.localizedMessage ?: "Gagal memutar audio"
+                _state.value = _state.value.copy(isPlaying = false, lastError = errorMsg)
+                runCatching { player.stop() }
+                runCatching { player.clearMediaItems() }
+                runCatching {
+                    context.stopService(Intent(context, RecitationPlaybackService::class.java))
+                }
             }
         })
 
@@ -150,7 +157,8 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
             queue = listOf(queueItem),
             activeIndex = 0,
             chapterNumber = chapter,
-            ayahNumber = ayah
+            ayahNumber = ayah,
+            lastError = null
         )
         player.setMediaItem(mediaItem)
         player.prepare()
@@ -185,7 +193,8 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
             queue = resolved,
             activeIndex = startIndex,
             chapterNumber = chapterNumber ?: parsed?.first,
-            ayahNumber = parsed?.second ?: starting?.ayahNumber?.takeIf { it > 0 }
+            ayahNumber = parsed?.second ?: starting?.ayahNumber?.takeIf { it > 0 },
+            lastError = null
         )
         ensurePlaybackService()
     }
@@ -199,7 +208,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
     fun stop() {
         runCatching { player.stop() }
         runCatching { player.clearMediaItems() }
-        _state.value = AudioPlaybackState()
+        _state.value = AudioPlaybackState(lastError = _state.value.lastError)
         runCatching {
             context.stopService(Intent(context, RecitationPlaybackService::class.java))
         }

@@ -79,11 +79,11 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            if (hasReleaseSigning) {
-                signingConfig = signingConfigs.getByName("release")
-            } else {
-                signingConfig = signingConfigs.getByName("debug")
-            }
+            requireNotNull(signingConfigs.findByName("release")) {
+                "Release signing config is required for release builds. " +
+                "Configure RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, " +
+                "RELEASE_KEY_ALIAS, and RELEASE_KEY_PASSWORD in local.properties."
+            }.also { signingConfig = it }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

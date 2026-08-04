@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        try {
+        val startupError = try {
             AppReviewManager.recordAppLaunch(applicationContext)
             enableEdgeToEdge()
             val needsOnboarding = !onboardingStore.isComplete()
@@ -97,8 +97,13 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+            null
         } catch (t: Throwable) {
             android.util.Log.e("MainActivity", "Failed to initialize UI", t)
+            t
+        }
+
+        if (startupError != null) {
             setContent {
                 Box(
                     modifier = Modifier.fillMaxSize(),
