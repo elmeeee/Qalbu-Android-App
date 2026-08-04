@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -22,10 +21,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,12 +42,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.core.locale.AppStrings
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.PrayerType
@@ -62,6 +65,7 @@ fun OnboardingScreen(
     vm: OnboardingViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val strings = vm.strings
     var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -74,10 +78,11 @@ fun OnboardingScreen(
         ) { vm.onNotificationPermissionResult() }
 
         val stepIndex = when (state.step) {
-            OnboardingStep.WELCOME -> 1
-            OnboardingStep.LOCATION -> 2
-            OnboardingStep.NOTIFICATIONS -> 3
-            OnboardingStep.PRAYER_NOTIFICATIONS -> 4
+            OnboardingStep.LANGUAGE -> 1
+            OnboardingStep.WELCOME -> 2
+            OnboardingStep.LOCATION -> 3
+            OnboardingStep.NOTIFICATIONS -> 4
+            OnboardingStep.PRAYER_NOTIFICATIONS -> 5
         }
 
         if (showLocationRationale) {
@@ -85,14 +90,14 @@ fun OnboardingScreen(
                 onDismissRequest = { showLocationRationale = false },
                 title = {
                     Text(
-                        text = stringResource(R.string.onboarding_location_rationale_title),
+                        text = strings.getString(R.string.onboarding_location_rationale_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = SaatColors.Slate900
                     )
                 },
                 text = {
                     Text(
-                        text = stringResource(R.string.onboarding_location_rationale_body),
+                        text = strings.getString(R.string.onboarding_location_rationale_body),
                         style = MaterialTheme.typography.bodyMedium,
                         color = SaatColors.Slate700
                     )
@@ -110,7 +115,7 @@ fun OnboardingScreen(
                         }
                     ) {
                         Text(
-                            text = stringResource(android.R.string.ok),
+                            text = strings.getString(android.R.string.ok),
                             color = SaatColors.DeepEmerald,
                             fontWeight = FontWeight.Bold
                         )
@@ -121,7 +126,7 @@ fun OnboardingScreen(
                         onClick = { showLocationRationale = false }
                     ) {
                         Text(
-                            text = stringResource(android.R.string.cancel),
+                            text = strings.getString(android.R.string.cancel),
                             color = SaatColors.Slate500
                         )
                     }
@@ -148,13 +153,13 @@ fun OnboardingScreen(
         ) {
             Column(modifier = Modifier.padding(bottom = 16.dp)) {
                 Text(
-                    text = stringResource(R.string.onboarding_step_progress, stepIndex, 4),
+                    text = strings.getString(R.string.onboarding_step_progress, stepIndex, 5),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White.copy(alpha = 0.75f),
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 LinearProgressIndicator(
-                    progress = { stepIndex / 4f },
+                    progress = { stepIndex / 5f },
                     modifier = Modifier.fillMaxWidth(),
                     color = SaatColors.GoldBright,
                     trackColor = Color.White.copy(alpha = 0.2f)
@@ -167,18 +172,25 @@ fun OnboardingScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (state.step) {
-                OnboardingStep.WELCOME -> WelcomeStep()
+                OnboardingStep.LANGUAGE -> LanguageStep(
+                    selected = state.selectedLanguage,
+                    onSelect = vm::selectLanguage,
+                    strings = strings
+                )
+                OnboardingStep.WELCOME -> WelcomeStep(strings = strings)
                 OnboardingStep.LOCATION -> LocationStep(
                     query = state.locationQuery,
                     saving = state.savingLocation,
                     error = state.locationError,
                     onQueryChange = vm::updateLocationQuery,
-                    onUseGps = { showLocationRationale = true }
+                    onUseGps = { showLocationRationale = true },
+                    strings = strings
                 )
-                OnboardingStep.NOTIFICATIONS -> NotificationsStep()
+                OnboardingStep.NOTIFICATIONS -> NotificationsStep(strings = strings)
                 OnboardingStep.PRAYER_NOTIFICATIONS -> PrayerNotificationsStep(
                     toggles = state.prayerAdzanToggles,
-                    onToggle = vm::togglePrayerAdzan
+                    onToggle = vm::togglePrayerAdzan,
+                    strings = strings
                 )
             }
         }
@@ -187,6 +199,10 @@ fun OnboardingScreen(
             Button(
                 onClick = {
                     when (state.step) {
+                        OnboardingStep.LANGUAGE -> {
+                            vm.selectLanguage(state.selectedLanguage)
+                            vm.nextStep()
+                        }
                         OnboardingStep.WELCOME -> vm.nextStep()
                         OnboardingStep.LOCATION -> {
                             if (state.locationQuery.isNotBlank()) {
@@ -205,7 +221,7 @@ fun OnboardingScreen(
                         OnboardingStep.PRAYER_NOTIFICATIONS -> {
                             scope.launch {
                                 vm.completeOnboarding()
-                                delay(200) // Decouple heavy DB read/write to prevent button lag
+                                delay(200)
                                 onFinished()
                             }
                         }
@@ -222,14 +238,14 @@ fun OnboardingScreen(
             ) {
                 Text(
                     when (state.step) {
-                        OnboardingStep.PRAYER_NOTIFICATIONS -> stringResource(R.string.onboarding_get_started)
-                        OnboardingStep.NOTIFICATIONS -> stringResource(R.string.onboarding_enable_notifications)
-                        OnboardingStep.LOCATION -> stringResource(R.string.onboarding_continue)
-                        OnboardingStep.WELCOME -> stringResource(R.string.onboarding_continue)
+                        OnboardingStep.LANGUAGE -> strings.getString(R.string.onboarding_continue)
+                        OnboardingStep.PRAYER_NOTIFICATIONS -> strings.getString(R.string.onboarding_get_started)
+                        OnboardingStep.NOTIFICATIONS -> strings.getString(R.string.onboarding_enable_notifications)
+                        else -> strings.getString(R.string.onboarding_continue)
                     }
                 )
             }
-            if (state.step != OnboardingStep.WELCOME) {
+            if (state.step != OnboardingStep.LANGUAGE) {
                 OnboardingSecondaryButton(
                     onClick = {
                         if (state.step == OnboardingStep.NOTIFICATIONS) {
@@ -251,10 +267,10 @@ fun OnboardingScreen(
                 ) {
                     Text(
                         when (state.step) {
-                            OnboardingStep.LOCATION -> stringResource(R.string.onboarding_skip_location)
-                            OnboardingStep.PRAYER_NOTIFICATIONS -> stringResource(R.string.onboarding_skip)
-                            OnboardingStep.NOTIFICATIONS -> stringResource(R.string.onboarding_skip_notifications)
-                            else -> stringResource(R.string.onboarding_skip)
+                            OnboardingStep.LOCATION -> strings.getString(R.string.onboarding_skip_location)
+                            OnboardingStep.PRAYER_NOTIFICATIONS -> strings.getString(R.string.onboarding_skip)
+                            OnboardingStep.NOTIFICATIONS -> strings.getString(R.string.onboarding_skip_notifications)
+                            else -> strings.getString(R.string.onboarding_skip)
                         }
                     )
                 }
@@ -264,11 +280,11 @@ fun OnboardingScreen(
 }
 
 @Composable
-private fun WelcomeStep() {
+private fun WelcomeStep(strings: AppStrings) {
     Text("☪", style = MaterialTheme.typography.displayMedium, color = SaatColors.GoldBright)
     Spacer(Modifier.height(16.dp))
     Text(
-        text = stringResource(R.string.onboarding_welcome_title),
+        text = strings.getString(R.string.onboarding_welcome_title),
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         color = androidx.compose.ui.graphics.Color.White,
@@ -276,11 +292,87 @@ private fun WelcomeStep() {
     )
     Spacer(Modifier.height(12.dp))
     Text(
-        text = stringResource(R.string.onboarding_welcome_body),
+        text = strings.getString(R.string.onboarding_welcome_body),
         style = MaterialTheme.typography.bodyLarge,
         color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.82f),
         textAlign = TextAlign.Center
     )
+}
+
+@Composable
+private fun LanguageStep(
+    selected: AppLanguage,
+    onSelect: (AppLanguage) -> Unit,
+    strings: AppStrings
+) {
+    Text(
+        text = strings.getString(R.string.onboarding_language_title),
+        style = MaterialTheme.typography.headlineSmall,
+        fontWeight = FontWeight.Bold,
+        color = androidx.compose.ui.graphics.Color.White,
+        textAlign = TextAlign.Center
+    )
+    Spacer(Modifier.height(12.dp))
+    Text(
+        text = strings.getString(R.string.onboarding_language_body),
+        style = MaterialTheme.typography.bodyMedium,
+        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
+        textAlign = TextAlign.Center
+    )
+    Spacer(Modifier.height(24.dp))
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        AppLanguage.entries.forEach { lang ->
+            val isSelected = lang == selected
+            val flagRes = when (lang) {
+                AppLanguage.INDONESIAN -> R.drawable.ic_flag_id
+                AppLanguage.ENGLISH -> R.drawable.ic_flag_en
+                AppLanguage.MALAY -> R.drawable.ic_flag_ms
+            }
+            Surface(
+                onClick = { onSelect(lang) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                color = if (isSelected) {
+                    SaatColors.DeepEmerald.copy(alpha = 0.15f)
+                } else {
+                    SaatColors.LightGrey.copy(alpha = 0.35f)
+                },
+                border = if (isSelected) {
+                    BorderStroke(1.5.dp, SaatColors.GoldBright)
+                } else {
+                    BorderStroke(1.dp, androidx.compose.ui.graphics.Color.White.copy(alpha = 0.35f))
+                }
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = androidx.compose.ui.res.painterResource(id = flagRes),
+                        contentDescription = null,
+                        modifier = Modifier.size(width = 28.dp, height = 20.dp)
+                    )
+                    Spacer(Modifier.width(14.dp))
+                    Text(
+                        text = strings.getString(lang.labelRes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = androidx.compose.ui.graphics.Color.White,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (isSelected) {
+                        Text(
+                            text = "✓",
+                            color = SaatColors.GoldBright,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -289,10 +381,11 @@ private fun LocationStep(
     saving: Boolean,
     error: String?,
     onQueryChange: (String) -> Unit,
-    onUseGps: () -> Unit
+    onUseGps: () -> Unit,
+    strings: AppStrings
 ) {
     Text(
-        text = stringResource(R.string.onboarding_location_title),
+        text = strings.getString(R.string.onboarding_location_title),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = androidx.compose.ui.graphics.Color.White,
@@ -300,7 +393,7 @@ private fun LocationStep(
     )
     Spacer(Modifier.height(12.dp))
     Text(
-        text = stringResource(R.string.onboarding_location_body),
+        text = strings.getString(R.string.onboarding_location_body),
         style = MaterialTheme.typography.bodyMedium,
         color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
         textAlign = TextAlign.Center
@@ -310,7 +403,7 @@ private fun LocationStep(
         value = query,
         onValueChange = onQueryChange,
         modifier = Modifier.fillMaxWidth(),
-        label = { Text(stringResource(R.string.location_city_hint)) },
+        label = { Text(strings.getString(R.string.location_city_hint)) },
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it, color = Color.White.copy(alpha = 0.85f)) } },
@@ -340,7 +433,7 @@ private fun LocationStep(
                 strokeWidth = 2.dp
             )
         } else {
-            Text(stringResource(R.string.location_use_gps))
+            Text(strings.getString(R.string.location_use_gps))
         }
     }
 }
@@ -368,9 +461,9 @@ private fun OnboardingSecondaryButton(
 }
 
 @Composable
-private fun NotificationsStep() {
+private fun NotificationsStep(strings: AppStrings) {
     Text(
-        text = stringResource(R.string.onboarding_notifications_title),
+        text = strings.getString(R.string.onboarding_notifications_title),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = androidx.compose.ui.graphics.Color.White,
@@ -378,7 +471,7 @@ private fun NotificationsStep() {
     )
     Spacer(Modifier.height(12.dp))
     Text(
-        text = stringResource(R.string.onboarding_notifications_body),
+        text = strings.getString(R.string.onboarding_notifications_body),
         style = MaterialTheme.typography.bodyMedium,
         color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
         textAlign = TextAlign.Center
@@ -386,9 +479,9 @@ private fun NotificationsStep() {
 }
 
 @Composable
-private fun WidgetStep() {
+private fun WidgetStep(strings: AppStrings) {
     Text(
-        text = stringResource(R.string.onboarding_widget_title),
+        text = strings.getString(R.string.onboarding_widget_title),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = androidx.compose.ui.graphics.Color.White,
@@ -396,7 +489,7 @@ private fun WidgetStep() {
     )
     Spacer(Modifier.height(12.dp))
     Text(
-        text = stringResource(R.string.onboarding_widget_body),
+        text = strings.getString(R.string.onboarding_widget_body),
         style = MaterialTheme.typography.bodyMedium,
         color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
         textAlign = TextAlign.Center
@@ -406,10 +499,11 @@ private fun WidgetStep() {
 @Composable
 private fun PrayerNotificationsStep(
     toggles: Map<PrayerType, Boolean>,
-    onToggle: (PrayerType, Boolean) -> Unit
+    onToggle: (PrayerType, Boolean) -> Unit,
+    strings: AppStrings
 ) {
     Text(
-        text = stringResource(R.string.onboarding_prayer_config_title),
+        text = strings.getString(R.string.onboarding_prayer_config_title),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = androidx.compose.ui.graphics.Color.White,
@@ -417,7 +511,7 @@ private fun PrayerNotificationsStep(
     )
     Spacer(Modifier.height(12.dp))
     Text(
-        text = stringResource(R.string.onboarding_prayer_config_body),
+        text = strings.getString(R.string.onboarding_prayer_config_body),
         style = MaterialTheme.typography.bodyMedium,
         color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
         textAlign = TextAlign.Center
@@ -432,11 +526,11 @@ private fun PrayerNotificationsStep(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 val prayerName = when (type) {
-                    PrayerType.FAJR -> stringResource(R.string.prayer_fajr)
-                    PrayerType.DHUHR -> stringResource(R.string.prayer_dhuhr)
-                    PrayerType.ASR -> stringResource(R.string.prayer_asr)
-                    PrayerType.MAGHRIB -> stringResource(R.string.prayer_maghrib)
-                    PrayerType.ISHA -> stringResource(R.string.prayer_isha)
+                    PrayerType.FAJR -> strings.getString(R.string.prayer_fajr)
+                    PrayerType.DHUHR -> strings.getString(R.string.prayer_dhuhr)
+                    PrayerType.ASR -> strings.getString(R.string.prayer_asr)
+                    PrayerType.MAGHRIB -> strings.getString(R.string.prayer_maghrib)
+                    PrayerType.ISHA -> strings.getString(R.string.prayer_isha)
                     else -> ""
                 }
                 Text(prayerName, color = Color.White, style = MaterialTheme.typography.titleMedium)

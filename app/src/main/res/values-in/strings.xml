@@ -230,6 +230,8 @@
     <string name="prayer_calendar_title">Kalender sholat</string>
     <string name="onboarding_welcome_title">Selamat datang di SĀAT</string>
     <string name="onboarding_welcome_body">Teman Quran harian Anda — jadwal sholat, refleksi, dan komunitas dalam satu aplikasi.</string>
+    <string name="onboarding_language_title">Pilih bahasa</string>
+    <string name="onboarding_language_body">Pilih bahasa yang ingin kamu gunakan di aplikasi ini. Kamu bisa mengubahnya nanti di Pengaturan.</string>
     <string name="onboarding_location_title">Di mana Anda sholat?</string>
     <string name="onboarding_location_body">Lokasi digunakan untuk jadwal sholat yang akurat. Cari kota atau izinkan GPS.</string>
     <string name="onboarding_location_denied">Izin lokasi ditolak. Anda bisa mencari kota secara manual.</string>

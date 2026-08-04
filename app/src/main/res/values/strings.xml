@@ -266,6 +266,8 @@
     <string name="offline_banner_message">Offline — showing saved data</string>
     <string name="onboarding_welcome_title">Welcome to Sāat</string>
     <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
+    <string name="onboarding_language_title">Choose your language</string>
+    <string name="onboarding_language_body">Select the language you want to use in the app. You can change this later in Settings.</string>
     <string name="onboarding_location_title">Where do you pray?</string>
     <string name="onboarding_location_body">We need your location to calculate accurate prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha). Your location is stored only on this device and never sent to our servers.</string>
     <string name="onboarding_location_denied">Location denied. You can type a city name below to set your prayer location manually.</string>

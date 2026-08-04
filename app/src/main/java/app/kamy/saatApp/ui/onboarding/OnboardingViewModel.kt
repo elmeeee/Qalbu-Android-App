@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.core.locale.AppStrings
 import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.infrastructure.location.LocationProvider
 import app.kamy.saatApp.infrastructure.notifications.DailyVerseNotificationScheduler
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
@@ -26,6 +28,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 enum class OnboardingStep {
+    LANGUAGE,
     WELCOME,
     LOCATION,
     NOTIFICATIONS,
@@ -33,7 +36,8 @@ enum class OnboardingStep {
 }
 
 data class OnboardingUiState(
-    val step: OnboardingStep = OnboardingStep.WELCOME,
+    val step: OnboardingStep = OnboardingStep.LANGUAGE,
+    val selectedLanguage: AppLanguage = AppLanguage.ENGLISH,
     val locationQuery: String = "",
     val savingLocation: Boolean = false,
     val locationError: String? = null,
@@ -43,15 +47,17 @@ data class OnboardingUiState(
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val strings: AppStrings,
+    private val appStrings: AppStrings,
     private val onboardingStore: OnboardingStore,
     private val locationProvider: LocationProvider,
     private val locationPrefs: LocationPreferencesStore,
-    private val prayerPrefs: PrayerNotificationPreferencesStore
+    private val prayerPrefs: PrayerNotificationPreferencesStore,
+    private val appLanguageStore: AppLanguageStore
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(OnboardingUiState())
+    private val _state = MutableStateFlow(OnboardingUiState(selectedLanguage = appLanguageStore.current()))
     val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
+    val strings: AppStrings = appStrings
 
     init {
         _state.update {
@@ -66,6 +72,7 @@ class OnboardingViewModel @Inject constructor(
     fun nextStep() {
         _state.update {
             val next = when (it.step) {
+                OnboardingStep.LANGUAGE -> OnboardingStep.WELCOME
                 OnboardingStep.WELCOME -> OnboardingStep.LOCATION
                 OnboardingStep.LOCATION -> OnboardingStep.NOTIFICATIONS
                 OnboardingStep.NOTIFICATIONS -> OnboardingStep.PRAYER_NOTIFICATIONS
@@ -73,6 +80,11 @@ class OnboardingViewModel @Inject constructor(
             }
             it.copy(step = next, locationError = null)
         }
+    }
+
+    fun selectLanguage(language: AppLanguage) {
+        appLanguageStore.set(language)
+        _state.update { it.copy(selectedLanguage = language) }
     }
 
     fun updateLocationQuery(query: String) {
@@ -89,7 +101,7 @@ class OnboardingViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         savingLocation = false,
-                        locationError = strings.getString(R.string.location_search_not_found)
+                        locationError = appStrings.getString(R.string.location_search_not_found)
                     )
                 }
                 return@launch
@@ -127,7 +139,7 @@ class OnboardingViewModel @Inject constructor(
             }
         } else {
             _state.update {
-                it.copy(locationError = strings.getString(R.string.onboarding_location_denied))
+                it.copy(locationError = appStrings.getString(R.string.onboarding_location_denied))
             }
         }
     }

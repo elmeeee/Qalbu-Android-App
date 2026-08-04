@@ -207,6 +207,8 @@
     <string name="prayer_calendar_title">Kalendar solat</string>
     <string name="onboarding_welcome_title">Selamat datang ke SĀAT</string>
     <string name="onboarding_welcome_body">Teman Quran harian anda — waktu solat, refleksi, dan komuniti dalam satu aplikasi.</string>
+    <string name="onboarding_language_title">Pilih bahasa</string>
+    <string name="onboarding_language_body">Pilih bahasa yang ingin anda gunakan dalam aplikasi ini. Anda boleh menukarnya kemudian dalam Tetapan.</string>
     <string name="onboarding_location_title">Di mana anda solat?</string>
     <string name="onboarding_location_body">Lokasi digunakan untuk waktu solat yang tepat. Cari bandar atau benarkan GPS.</string>
     <string name="onboarding_location_denied">Kebenaran lokasi ditolak. Anda boleh cari bandar secara manual.</string>

@@ -23,7 +23,7 @@ class AppLanguageStore(context: Context) {
         ?: DeviceLanguageDetector.detect()
 
     fun set(language: AppLanguage) {
-        prefs.edit().putString(KEY_LANGUAGE, language.tag).apply()
+        prefs.edit().putString(KEY_LANGUAGE, language.tag).commit()
         _currentFlow.value = language
     }
 
