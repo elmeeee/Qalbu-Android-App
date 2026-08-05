@@ -994,4 +994,26 @@
     <string name="zakat_meets_nisab">Nisab Reached (Mandatory Zakat)</string>
     <string name="zakat_summary_title">Zakat Calculation Summary</string>
     <string name="zakat_not_yet_mandatory">Zakat Not Yet Mandatory</string>
+    <string name="radio_quran_title">Radio Quran Live</string>
+    <string name="radio_quran_subtitle">24/7 Quran recitations &amp; Islamic broadcasts</string>
+    <string name="radio_quran_account_subtitle">Live Quran recitations &amp; Islamic streams</string>
+    <string name="radio_quran_list_title">Live Radio Stations</string>
+    <string name="radio_quran_hero_idle_title">Islamic Broadcast &amp; Murottal</string>
+    <string name="radio_quran_hero_idle_desc">Select a radio station below to start live streaming.</string>
+    <string name="radio_quran_listening_live">Listening Live</string>
+    <string name="radio_quran_stopped">Stopped</string>
+    <string name="radio_quran_playing_badge">✦ PLAYING</string>
+    <string name="radio_quran_live_badge">LIVE</string>
+    <string name="radio_quran_offline_badge">OFFLINE</string>
+    <string name="notification_radio_title">Listening to Islamic Radio</string>
+    <string name="notification_recitation_title_format">Playing Surah %1$s</string>
+    <string name="media_playback_channel_name">Islamic Radio</string>
+    <string name="asmaul_husna_title">Asmaul Husna</string>
+    <string name="asmaul_husna_subtitle">99 Beautiful Names of Allah with Evidence</string>
+    <string name="asmaul_husna_account_subtitle">99 Names of Allah, meanings, authentic Quranic dalil</string>
+    <string name="asmaul_husna_search_hint">Search Asmaul Husna or meaning</string>
+    <string name="asmaul_husna_practice_button">Practice Dhikr</string>
+    <string name="asmaul_husna_dalil_title">Dalil / Evidence</string>
+    <string name="asmaul_husna_fadhilah_title">Virtue &amp; Practice Guide</string>
+    <string name="asmaul_husna_counter_finish">Alhamdulillah! You have completed 100x dhikr.</string>
 </resources>

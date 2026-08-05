@@ -96,10 +96,10 @@ object NotificationChannels {
         manager.createNotificationChannel(
             NotificationChannel(
                 MEDIA_PLAYBACK,
-                context.getString(R.string.recitation_notification_channel),
+                context.getString(R.string.media_playback_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = context.getString(R.string.recitation_notification_channel)
+                description = context.getString(R.string.media_playback_channel_name)
                 setSound(null, null)
             }
         )

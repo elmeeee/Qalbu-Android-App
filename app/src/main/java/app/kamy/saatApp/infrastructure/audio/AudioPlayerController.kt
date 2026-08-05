@@ -167,6 +167,32 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         ensurePlaybackService()
     }
 
+    fun playRadioStation(
+        stationName: String,
+        countryName: String,
+        url: String
+    ) {
+        if (AirplaneModeReceiver.isAirplaneModeOn(context)) return
+        val mediaItem = buildMediaItem(url, stationName, "$countryName ✦ Live Radio", "Radio Quran", mediaType = "RADIO")
+        _state.value = AudioPlaybackState(
+            isPlaying = true,
+            currentUrl = url,
+            trackTitle = stationName,
+            trackSubtitle = "$countryName ✦ Live",
+            reciterName = "Radio Quran",
+            queue = emptyList(),
+            activeIndex = null,
+            chapterNumber = null,
+            ayahNumber = null,
+            lastError = null
+        )
+        player.setMediaItem(mediaItem)
+        player.prepare()
+        player.playWhenReady = true
+        ensurePlaybackService()
+    }
+
+
     fun playSequence(
         items: List<AudioQueueItem>,
         surahTitle: String,
@@ -232,7 +258,8 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         url: String,
         surahTitle: String,
         ayahLabel: String,
-        reciterName: String
+        reciterName: String,
+        mediaType: String = "RECITATION"
     ): MediaItem = MediaItem.Builder()
         .setUri(url)
         .setMediaMetadata(
@@ -240,6 +267,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
                 .setTitle(surahTitle)
                 .setArtist(reciterName)
                 .setAlbumTitle(ayahLabel)
+                .setDescription(mediaType)
                 .build()
         )
         .build()

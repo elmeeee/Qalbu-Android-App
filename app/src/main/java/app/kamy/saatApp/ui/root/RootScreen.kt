@@ -232,6 +232,18 @@ fun RootScreen(
             composable("tools/manzil") {
                 ManzilScreen(onBack = { navController.popBackStack() })
             }
+            composable("tools/radio") {
+                app.kamy.saatApp.features.tools.radio.QuranRadioScreen(
+                    audioPlayer = audioPlayer,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable("tools/asmaul-husna") {
+                app.kamy.saatApp.features.tools.asmaulhusna.AsmaulHusnaScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
             composable("tools/faraidh",
                 enterTransition = { slideInHorizontally(tween(280)) { it } + fadeIn(tween(200)) },
                 exitTransition = { fadeOut(tween(180)) },

@@ -448,7 +448,31 @@
     <string name="zakat_meets_nisab">Mencapai Nisab (Wajib Zakat)</string>
     <string name="zakat_summary_title">Ringkasan Pengiraan Zakat</string>
     <string name="zakat_not_yet_mandatory">Belum Wajib Zakat</string>
+    <string name="radio_quran_title">Radio Quran Live</string>
+    <string name="radio_quran_subtitle">Siaran radio murottal &amp; dakwah Islam 24/7</string>
+    <string name="radio_quran_account_subtitle">Live stream radio Al-Qur\'an &amp; dakwah Islam</string>
+    <string name="radio_quran_list_title">Senarai Stesen Radio Live</string>
+    <string name="radio_quran_hero_idle_title">Siaran Radio Dakwah &amp; Murottal</string>
+    <string name="radio_quran_hero_idle_desc">Pilih salah satu stesen radio di bawah untuk memulakan siaran live stream.</string>
+    <string name="radio_quran_listening_live">Mendengar Live</string>
+    <string name="radio_quran_stopped">Dihentikan</string>
+    <string name="radio_quran_playing_badge">✦ PLAYING</string>
+    <string name="radio_quran_live_badge">LIVE</string>
+    <string name="radio_quran_offline_badge">OFFLINE</string>
+    <string name="notification_radio_title">Sedang mendengar radio islami</string>
+    <string name="notification_recitation_title_format">Sedang memainkan surah %1$s</string>
+    <string name="media_playback_channel_name">Radio Islami</string>
+    <string name="asmaul_husna_title">Asmaul Husna</string>
+    <string name="asmaul_husna_subtitle">99 Nama Allah beserta dalil</string>
+    <string name="asmaul_husna_account_subtitle">99 Asmaul Husna lengkap dengan makna, dalil Qur\'an</string>
+    <string name="asmaul_husna_search_hint">Cari Asmaul Husna atau artinya</string>
+    <string name="asmaul_husna_practice_button">Amalkan Zikir</string>
+    <string name="asmaul_husna_dalil_title">Dalil &amp; Referensi</string>
+    <string name="asmaul_husna_fadhilah_title">Keutamaan &amp; Panduan Amalan</string>
+    <string name="asmaul_husna_counter_finish">Alhamdulillah! Anda telah menyelesaikan 100x zikir.</string>
     <string name="action_later">Nanti</string>
+
+
     <string name="app_name_launcher">Sāat</string>
     <string name="faraidh_reset">Tetapkan semula pengiraan</string>
     <string name="faraidh_save_scenario">Simpan senario</string>

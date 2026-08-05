@@ -56,6 +56,22 @@ fun SpiritualToolsScreen(
 ) {
     val tools = listOf(
         SpiritualToolItem(
+            R.drawable.ic_radio_custom,
+            R.string.radio_quran_title,
+            R.string.radio_quran_subtitle,
+            "radio",
+            SaatColors.DeepEmerald,
+            SaatColors.Gold
+        ),
+        SpiritualToolItem(
+            R.drawable.ic_asmaulhusna_custom,
+            R.string.asmaul_husna_title,
+            R.string.asmaul_husna_subtitle,
+            "asmaul-husna",
+            SaatColors.GoldDeep,
+            SaatColors.DeepEmerald
+        ),
+        SpiritualToolItem(
             R.drawable.ic_qibla,
             R.string.qibla_title,
             R.string.qibla_account_subtitle,
@@ -63,6 +79,7 @@ fun SpiritualToolsScreen(
             SaatColors.DeepEmerald,
             SaatColors.Teal
         ),
+
         SpiritualToolItem(
             R.drawable.ic_dua,
             R.string.doa_zikir_title,
