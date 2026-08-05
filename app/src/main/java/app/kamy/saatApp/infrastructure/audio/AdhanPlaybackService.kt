@@ -29,6 +29,7 @@ import app.kamy.saatApp.core.locale.AppLocale
 import app.kamy.saatApp.infrastructure.airplane.AirplaneModeReceiver
 import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+import app.kamy.saatApp.infrastructure.util.BootContextChecker
 
 private const val VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION"
 private const val EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE"
@@ -63,7 +64,10 @@ class AdhanPlaybackService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent == null || intent.action == Intent.ACTION_BOOT_COMPLETED) {
+        val isBoot = BootContextChecker.isRecentlyBooted() ||
+            intent == null ||
+            intent.action == Intent.ACTION_BOOT_COMPLETED
+        if (isBoot) {
             stopSelf()
             return START_NOT_STICKY
         }
@@ -374,6 +378,7 @@ class AdhanPlaybackService : Service() {
         private const val NOTIFICATION_ID = 12_001
         private const val VOLUME_STOP_GRACE_MS = 1_500L
         private const val ADHAN_VOLUME_FRACTION = 0.55f
+        private const val BOOT_GRACE_PERIOD_MS = 60_000L
         private const val EXTRA_RAW_RES = "raw_res"
         private const val EXTRA_SOUND_URI = "sound_uri"
         private const val EXTRA_USE_SYSTEM_ALARM = "use_system_alarm"
@@ -409,8 +414,20 @@ class AdhanPlaybackService : Service() {
                     putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                 }
             }
+            val appContext = context.applicationContext
+            if (BootContextChecker.isRecentlyBooted()) {
+                Handler(Looper.getMainLooper()).postDelayed(
+                    {
+                        runCatching {
+                            androidx.core.content.ContextCompat.startForegroundService(appContext, intent)
+                        }
+                    },
+                    BOOT_GRACE_PERIOD_MS
+                )
+                return true
+            }
             return runCatching {
-                androidx.core.content.ContextCompat.startForegroundService(context, intent)
+                androidx.core.content.ContextCompat.startForegroundService(appContext, intent)
             }.isSuccess
         }
 

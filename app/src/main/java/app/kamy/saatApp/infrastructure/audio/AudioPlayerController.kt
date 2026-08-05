@@ -10,6 +10,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import app.kamy.saatApp.core.config.AppConfig
 import app.kamy.saatApp.infrastructure.airplane.AirplaneModeReceiver
+import app.kamy.saatApp.infrastructure.util.BootContextChecker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -243,12 +244,23 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         )
         .build()
 
+    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+
     private fun ensurePlaybackService() {
-        runCatching {
-            ContextCompat.startForegroundService(
-                context,
-                Intent(context, RecitationPlaybackService::class.java)
+        val serviceIntent = Intent(context, RecitationPlaybackService::class.java)
+        if (BootContextChecker.isRecentlyBooted()) {
+            mainHandler.postDelayed(
+                {
+                    runCatching {
+                        ContextCompat.startForegroundService(context, serviceIntent)
+                    }
+                },
+                60_000L
             )
+            return
+        }
+        runCatching {
+            ContextCompat.startForegroundService(context, serviceIntent)
         }
     }
 

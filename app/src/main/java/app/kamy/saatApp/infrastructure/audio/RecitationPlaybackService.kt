@@ -12,6 +12,7 @@ import androidx.media3.session.MediaSessionService
 import app.kamy.saatApp.MainActivity
 import app.kamy.saatApp.R
 import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
+import app.kamy.saatApp.infrastructure.util.BootContextChecker
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -37,10 +38,10 @@ class RecitationPlaybackService : MediaSessionService() {
         val player = runCatching { playbackEngine.player }.getOrNull()
         val isPlaying = player?.playWhenReady == true || player?.isPlaying == true
 
-        // On Android 15+, starting restricted foreground services from BOOT_COMPLETED
-        // or background system restart (intent == null when idle) causes a crash.
-        val isBoot = intent == null || intent.action == Intent.ACTION_BOOT_COMPLETED
-        if (isBoot && !isPlaying) {
+        val isBoot = BootContextChecker.isRecentlyBooted() ||
+            intent == null ||
+            intent.action == Intent.ACTION_BOOT_COMPLETED
+        if (isBoot) {
             stopSelf()
             return START_NOT_STICKY
         }

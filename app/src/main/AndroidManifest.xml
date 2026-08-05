@@ -86,12 +86,22 @@
             android:name=".infrastructure.notifications.PrayerNotificationReceiver"
             android:exported="false" />
 
+        <!--
+            Android 15+: BOOT_COMPLETED is intentionally isolated in its own <receiver> block.
+            This receiver ONLY reschedules AlarmManager alarms — it does NOT start any
+            foreground service. Isolation makes this contract verifiable by Play's static scanner.
+        -->
         <receiver
             android:name=".infrastructure.notifications.PrayerAlarmRescheduleReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".infrastructure.notifications.PrayerAlarmRescheduleReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
