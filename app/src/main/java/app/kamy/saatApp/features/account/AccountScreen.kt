@@ -4,6 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.core.view.ViewCompat
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -2114,6 +2117,11 @@ private fun LegalWebView(
         AndroidView(
             factory = { context ->
                 WebView(context).apply {
+                    // Enable View-side nested scrolling so Compose's nested scroll
+                    // dispatcher can communicate with WebView's internal OverScroller.
+                    // Without this, scroll events are lost at top/bottom boundaries
+                    // causing the "stuck" scroll bug in About/Privacy/Terms screens.
+                    ViewCompat.setNestedScrollingEnabled(this, true)
                     setBackgroundColor(android.graphics.Color.TRANSPARENT)
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
@@ -2121,7 +2129,7 @@ private fun LegalWebView(
                     settings.setSupportZoom(false)
                     settings.builtInZoomControls = false
                     settings.displayZoomControls = false
-                    
+
                     webViewClient = object : WebViewClient() {
                         override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
                             return false
@@ -2141,7 +2149,12 @@ private fun LegalWebView(
                 }
             },
             update = { _ -> },
-            modifier = Modifier.fillMaxSize()
+            // rememberNestedScrollInteropConnection() bridges the Compose nested scroll
+            // protocol with View's NestedScrollingChild/Parent protocol, so that
+            // fling and boundary events are correctly handed off between the two systems.
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(rememberNestedScrollInteropConnection())
         )
 
         if (isLoading) {

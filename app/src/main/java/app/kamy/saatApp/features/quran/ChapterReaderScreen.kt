@@ -781,16 +781,17 @@ private fun SaatAyahPage(
     val nestedScrollConnection = remember(scrollState) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Scrolling down (negative dy) — forward to pager only when already at bottom
-                if (available.y < 0 && scrollState.value >= scrollState.maxValue) {
-                    return Offset.Zero
+                // Scrolling DOWN (negative dy): inner content not yet at bottom → let inner scroll consume.
+                // Only yield to Pager when inner has already reached its bottom boundary.
+                if (available.y < 0 && scrollState.value < scrollState.maxValue) {
+                    return available
                 }
-                // Scrolling up (positive dy) — forward to pager only when already at top
-                if (available.y > 0 && scrollState.value <= 0) {
-                    return Offset.Zero
+                // Scrolling UP (positive dy): inner content not yet at top → let inner scroll consume.
+                // Only yield to Pager when inner has already reached its top boundary.
+                if (available.y > 0 && scrollState.value > 0) {
+                    return available
                 }
-                // Inner scroll can still handle it — consume nothing here so the
-                // inner verticalScroll modifier gets the event.
+                // At boundary — don't consume; Pager's own connection will handle it.
                 return Offset.Zero
             }
 
@@ -799,7 +800,9 @@ private fun SaatAyahPage(
                 available: Offset,
                 source: NestedScrollSource
             ): Offset {
-                return available
+                // Don't forward remaining scroll up to Pager unconditionally —
+                // let Pager's own nested scroll connection decide via its pre/post phase.
+                return Offset.Zero
             }
         }
     }
@@ -828,10 +831,10 @@ private fun SaatAyahPage(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(
-                    state = scrollState,
-                    enabled = scrollState.maxValue > 0
-                )
+                // Do NOT gate on scrollState.maxValue > 0: on first composition maxValue is 0
+                // (layout not yet measured) which would disable scroll entirely and cause the
+                // VerticalPager to steal the gesture on ayah 1 before content is measurable.
+                .verticalScroll(state = scrollState)
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
