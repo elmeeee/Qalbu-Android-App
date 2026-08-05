@@ -87,12 +87,14 @@
             android:exported="false" />
 
         <!--
-            Android 15+: BOOT_COMPLETED is intentionally isolated in its own <receiver> block.
-            This receiver ONLY reschedules AlarmManager alarms — it does NOT start any
-            foreground service. Isolation makes this contract verifiable by Play's static scanner.
+            Android 15+: BOOT_COMPLETED is handled by a dedicated receiver class.
+            BootCompletedReceiver ONLY reschedules AlarmManager alarms — it does NOT
+            start any foreground service of any type. This satisfies the Android 15
+            restriction on restricted foreground service types (mediaPlayback, camera, etc.)
+            being started from BOOT_COMPLETED broadcast receivers.
         -->
         <receiver
-            android:name=".infrastructure.notifications.PrayerAlarmRescheduleReceiver"
+            android:name=".infrastructure.notifications.BootCompletedReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

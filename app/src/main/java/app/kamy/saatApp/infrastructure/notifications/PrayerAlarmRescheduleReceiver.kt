@@ -27,13 +27,9 @@ class PrayerAlarmRescheduleReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        // Android 15+ restriction: BOOT_COMPLETED receivers must NOT start restricted
-        // foreground service types (e.g. mediaPlayback, camera, microphone).
-        // This receiver ONLY schedules AlarmManager alarms — no foreground service is started here.
-        // BOOT_COMPLETED is also isolated in a separate <receiver> block in AndroidManifest.xml
-        // to make this boundary verifiable by Play's static analysis scanner.
+        // Handles system time/locale/package change events that require rescheduling alarms.
+        // BOOT_COMPLETED is handled separately by BootCompletedReceiver (Android 15 compliance).
         private val RESCHEDULE_ACTIONS = setOf(
-            Intent.ACTION_BOOT_COMPLETED,
             "android.intent.action.TIME_SET",
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
