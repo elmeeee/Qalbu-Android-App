@@ -518,4 +518,8 @@
     <string name="sunnah_special_doa_title">Doa Khusus</string>
     <string name="sunnah_open_doa_collection">Buka Koleksi Doa &amp; Zikir Lengkap</string>
     <string name="sunnah_open_qiyam_tracker">Buka Tracker Solat Malam</string>
+
+    <!-- Adhan Notification Helper Strings (Malay) -->
+    <string name="notif_off_default_sound_hint">Mati (Tetap notif dengan bunyi bawaan HP)</string>
+    <string name="notif_adhan_section_info">💡 Apabila suara Azan dimatikan, peringatan solat tetap akan muncul menggunakan bunyi pemberitahuan bawaan HP.</string>
 </resources>

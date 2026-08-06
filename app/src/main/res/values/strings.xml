@@ -1047,4 +1047,8 @@
     <string name="sunnah_special_doa_title">Special Supplication (Dua)</string>
     <string name="sunnah_open_doa_collection">Open Full Doa &amp; Dhikr Collection</string>
     <string name="sunnah_open_qiyam_tracker">Open Qiyam Night Tracker</string>
+
+    <!-- Adhan Notification Helper Strings -->
+    <string name="notif_off_default_sound_hint">Off (Will still notify with default sound)</string>
+    <string name="notif_adhan_section_info">💡 When Adhan sound is turned off, prayer alerts will still be delivered using your device\'s default notification sound.</string>
 </resources>

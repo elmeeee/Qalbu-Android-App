@@ -541,7 +541,7 @@ fun NotificationAdhanScreen(
                 SettingsCustomRow(
                     iconRes = if (fajrOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
                     title = stringResource(R.string.prayer_fajr),
-                    subtitle = if (fajrOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    subtitle = if (fajrOn) stringResource(R.string.state_on) else stringResource(R.string.notif_off_default_sound_hint),
                     checked = fajrOn,
                     onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.FAJR, it) },
                     showDivider = true
@@ -550,7 +550,7 @@ fun NotificationAdhanScreen(
                 SettingsCustomRow(
                     iconRes = if (dhuhrOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
                     title = stringResource(R.string.prayer_dhuhr),
-                    subtitle = if (dhuhrOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    subtitle = if (dhuhrOn) stringResource(R.string.state_on) else stringResource(R.string.notif_off_default_sound_hint),
                     checked = dhuhrOn,
                     onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.DHUHR, it) },
                     showDivider = true
@@ -559,7 +559,7 @@ fun NotificationAdhanScreen(
                 SettingsCustomRow(
                     iconRes = if (asrOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
                     title = stringResource(R.string.prayer_asr),
-                    subtitle = if (asrOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    subtitle = if (asrOn) stringResource(R.string.state_on) else stringResource(R.string.notif_off_default_sound_hint),
                     checked = asrOn,
                     onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.ASR, it) },
                     showDivider = true
@@ -568,7 +568,7 @@ fun NotificationAdhanScreen(
                 SettingsCustomRow(
                     iconRes = if (maghribOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
                     title = stringResource(R.string.prayer_maghrib),
-                    subtitle = if (maghribOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    subtitle = if (maghribOn) stringResource(R.string.state_on) else stringResource(R.string.notif_off_default_sound_hint),
                     checked = maghribOn,
                     onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.MAGHRIB, it) },
                     showDivider = true
@@ -577,12 +577,19 @@ fun NotificationAdhanScreen(
                 SettingsCustomRow(
                     iconRes = if (ishaOn) R.drawable.ic_adhan_on_custom else R.drawable.ic_adhan_off_custom,
                     title = stringResource(R.string.prayer_isha),
-                    subtitle = if (ishaOn) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    subtitle = if (ishaOn) stringResource(R.string.state_on) else stringResource(R.string.notif_off_default_sound_hint),
                     checked = ishaOn,
                     onCheckedChange = { vm.setPrayerNotificationEnabled(PrayerType.ISHA, it) },
                     showDivider = false
                 )
             }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = stringResource(R.string.notif_adhan_section_info),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
 
             Spacer(Modifier.height(16.dp))
 
