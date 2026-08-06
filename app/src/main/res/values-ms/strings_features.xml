@@ -520,6 +520,6 @@
     <string name="sunnah_open_qiyam_tracker">Buka Tracker Solat Malam</string>
 
     <!-- Adhan Notification Helper Strings (Malay) -->
-    <string name="notif_off_default_sound_hint">Mati (Tetap notif dengan bunyi bawaan HP)</string>
+    <string name="notif_off_default_sound_hint">Mati (Tetap notif dengan bunyi bawaan)</string>
     <string name="notif_adhan_section_info">💡 Apabila suara Azan dimatikan, peringatan solat tetap akan muncul menggunakan bunyi pemberitahuan bawaan HP.</string>
 </resources>
