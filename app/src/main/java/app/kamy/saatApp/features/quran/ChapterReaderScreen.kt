@@ -775,44 +775,11 @@ private fun SaatAyahPage(
             }
     }
 
-    // Nested scroll connection: let inner Column consume scroll first.
-    // Only release the gesture to the parent VerticalPager when the inner
-    // content has already hit its top or bottom boundary.
-    val nestedScrollConnection = remember(scrollState) {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Scrolling DOWN (negative dy): inner content not yet at bottom → let inner scroll consume.
-                // Only yield to Pager when inner has already reached its bottom boundary.
-                if (available.y < 0 && scrollState.value < scrollState.maxValue) {
-                    return available
-                }
-                // Scrolling UP (positive dy): inner content not yet at top → let inner scroll consume.
-                // Only yield to Pager when inner has already reached its top boundary.
-                if (available.y > 0 && scrollState.value > 0) {
-                    return available
-                }
-                // At boundary — don't consume; Pager's own connection will handle it.
-                return Offset.Zero
-            }
-
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                // Don't forward remaining scroll up to Pager unconditionally —
-                // let Pager's own nested scroll connection decide via its pre/post phase.
-                return Offset.Zero
-            }
-        }
-    }
-
     val interactionSource = remember { MutableInteractionSource() }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(nestedScrollConnection)
             .pointerInput(hifzModeEnabled, showTranslation) {
                 detectTapGestures(onTap = {
                     if (hifzModeEnabled) {
