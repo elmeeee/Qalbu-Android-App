@@ -137,6 +137,8 @@ object DailyVerseNotificationScheduler {
             openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/${R.raw.off_toggle_adzan}")
+        val vibrationPattern = longArrayOf(0, 400, 200, 400)
         val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(localContext.getString(R.string.daily_verse_notif_title))
@@ -147,8 +149,10 @@ object DailyVerseNotificationScheduler {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setSound(soundUri)
+            .setVibrate(vibrationPattern)
             .build()
+        PrayerNotificationScheduler.triggerHaptics(context)
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
     }
 

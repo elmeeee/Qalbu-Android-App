@@ -10,19 +10,24 @@ import androidx.annotation.RawRes
 import app.kamy.saatApp.R
 
 object NotificationChannels {
-    const val DAILY_VERSE = "daily_verse_v3"
-    const val PRAYER = "prayer_times_v3"
-    const val PRAYER_ALERT = "prayer_alert_v3"
-    const val SUNNAH = "sunnah_reminders_v3"
+    const val DAILY_VERSE = "daily_verse_v4"
+    const val PRAYER = "prayer_times_v4"
+    const val PRAYER_ALERT = "prayer_alert_v4"
+    const val SUNNAH = "sunnah_reminders_v4"
     const val ADHAN_PLAYBACK = "adhan_playback"
-    const val ADHAN_ALERT = "adhan_alert"
+    const val ADHAN_ALERT = "adhan_alert_v4"
     const val MEDIA_PLAYBACK = "media_playback"
-
-    const val PRAYER_TRACKER = "prayer_tracker_v3"
-
+    const val PRAYER_TRACKER = "prayer_tracker_v4"
 
     fun ensureAll(context: Context) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val soundUri = Uri.parse("android.resource://${context.packageName}/${R.raw.off_toggle_adzan}")
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+        val vibrationPattern = longArrayOf(0, 400, 200, 400)
+
         manager.createNotificationChannel(
             NotificationChannel(
                 DAILY_VERSE,
@@ -30,7 +35,9 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_daily_verse_desc)
+                setSound(soundUri, audioAttributes)
                 enableVibration(true)
+                setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
             }
         )
@@ -38,14 +45,15 @@ object NotificationChannels {
             NotificationChannel(
                 PRAYER,
                 context.getString(R.string.channel_prayer),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_prayer_desc)
+                setSound(soundUri, audioAttributes)
                 enableVibration(true)
+                setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
             }
         )
-        // Dedicated high-priority channel for prayer time alerts (no adzan sound — uses device default)
         manager.createNotificationChannel(
             NotificationChannel(
                 PRAYER_ALERT,
@@ -53,7 +61,9 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_prayer_desc)
+                setSound(soundUri, audioAttributes)
                 enableVibration(true)
+                setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
             }
         )
@@ -64,7 +74,9 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_sunnah_desc)
+                setSound(soundUri, audioAttributes)
                 enableVibration(true)
+                setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
             }
         )
@@ -75,7 +87,9 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = context.getString(R.string.channel_prayer_tracker_desc)
+                setSound(soundUri, audioAttributes)
                 enableVibration(true)
+                setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
             }
         )
@@ -88,7 +102,8 @@ object NotificationChannels {
             ).apply {
                 description = context.getString(R.string.adhan_playback_body)
                 setSound(null, null)
-                enableVibration(false)
+                enableVibration(true)
+                setVibrationPattern(vibrationPattern)
                 lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
                 setBypassDnd(true)
             }

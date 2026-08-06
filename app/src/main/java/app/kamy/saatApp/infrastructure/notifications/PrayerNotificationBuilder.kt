@@ -60,14 +60,16 @@ object PrayerNotificationBuilder {
             builder.setFullScreenIntent(fullScreenPendingIntent, true)
         }
 
+        val vibrationPattern = longArrayOf(0, 400, 200, 400)
+        builder.setVibrate(vibrationPattern)
+
         if (silent) {
             builder.setSilent(true)
-        } else if (adhanSoundRes != null && channelId != NotificationChannels.ADHAN_ALERT) {
-            val soundUri = Uri.parse("android.resource://${context.packageName}/$adhanSoundRes")
+        } else {
+            val soundRes = adhanSoundRes ?: R.raw.off_toggle_adzan
+            val soundUri = Uri.parse("android.resource://${context.packageName}/$soundRes")
             builder.setSound(soundUri)
-            builder.setPriority(NotificationCompat.PRIORITY_MAX)
-        } else if (adhanSoundRes == null) {
-            builder.setDefaults(NotificationCompat.DEFAULT_ALL)
+            builder.setPriority(NotificationCompat.PRIORITY_HIGH)
         }
 
         if (showStopAdhan) {

@@ -395,7 +395,30 @@ object PrayerNotificationScheduler {
             customPendingIntent = customPendingIntent,
             useFullScreenIntent = useFullScreenIntent
         )
+        triggerHaptics(context)
         NotificationManagerCompat.from(context).notify(notificationId, notification)
+    }
+
+    fun triggerHaptics(context: Context) {
+        runCatching {
+            val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                val vm = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? android.os.VibratorManager
+                vm?.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+            }
+            vibrator?.let { v ->
+                if (v.hasVibrator()) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        v.vibrate(android.os.VibrationEffect.createWaveform(longArrayOf(0, 400, 200, 400), -1))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        v.vibrate(longArrayOf(0, 400, 200, 400), -1)
+                    }
+                }
+            }
+        }
     }
 
     private fun scheduleOneShot(
