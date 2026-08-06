@@ -62,16 +62,25 @@ private fun getPrayerCardDrawable(type: PrayerType?): Int {
 }
 
 @DrawableRes
-private fun getPrayerIconRes(type: PrayerType, isActive: Boolean): Int {
+private fun getPrayerIconRes(type: PrayerType): Int {
     return when (type) {
-        PrayerType.FAJR -> if (isActive) R.drawable.ic_fajr_on else R.drawable.ic_fajr_off
-        PrayerType.DHUHR -> if (isActive) R.drawable.ic_dhur_on else R.drawable.ic_dhur_off
-        PrayerType.ASR -> if (isActive) R.drawable.ic_asr_on else R.drawable.ic_asr_off
-        PrayerType.MAGHRIB -> if (isActive) R.drawable.ic_maghrib_on else R.drawable.ic_maghrib_off
-        PrayerType.ISHA -> if (isActive) R.drawable.ic_isha_on else R.drawable.ic_isha_off
-        else -> if (isActive) R.drawable.ic_dhur_on else R.drawable.ic_dhur_off
+        PrayerType.FAJR -> R.drawable.ic_prayer_fajr
+        PrayerType.SUNRISE -> R.drawable.ic_prayer_terbit
+        PrayerType.DHUHR -> R.drawable.ic_prayer_dhuhr
+        PrayerType.ASR -> R.drawable.ic_prayer_asr
+        PrayerType.MAGHRIB -> R.drawable.ic_prayer_maghrib
+        PrayerType.ISHA -> R.drawable.ic_prayer_isha
     }
 }
+
+private val DISPLAY_PRAYER_SLOTS = listOf(
+    PrayerType.FAJR,
+    PrayerType.SUNRISE,
+    PrayerType.DHUHR,
+    PrayerType.ASR,
+    PrayerType.MAGHRIB,
+    PrayerType.ISHA
+)
 
 private fun android.content.Context.is24HourClock(): Boolean {
     try {
@@ -105,7 +114,7 @@ fun PrayerDashboardCard(
         ?.rememberErrorDisplay(R.string.error_prayer_fetch_title)
 
     val slotEntries = remember(state.timings) {
-        PrayerType.ADZAN_NOTIFICATION_PRAYERS.map { type ->
+        DISPLAY_PRAYER_SLOTS.map { type ->
             state.timings.find { it.type == type }
         }
     }
@@ -115,6 +124,15 @@ fun PrayerDashboardCard(
 
     val context = LocalContext.current
     val is24Hour = context.is24HourClock()
+
+    val activeSlotType = remember(state.timings, state.activePrayer, state.nextPrayer) {
+        if (state.timings.isEmpty()) null
+        else {
+            val now = java.util.Date()
+            val lastPassed = state.timings.lastOrNull { it.date.before(now) }
+            lastPassed?.type ?: state.activePrayer ?: PrayerType.FAJR
+        }
+    }
 
     val nextPrayerEntry = state.timings.find { it.type == targetPrayer }
     val formattedTime = nextPrayerEntry?.date?.let {
@@ -213,7 +231,7 @@ fun PrayerDashboardCard(
             }
         }
 
-        // 2. Bottom Card: 5 Prayer Schedule Slots Row with SVG Icons
+        // 2. Bottom Card: 6 Prayer Schedule Slots Row with SVG Icons (Including Terbit)
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
@@ -224,19 +242,18 @@ fun PrayerDashboardCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp, horizontal = 4.dp),
+                    .padding(vertical = 6.dp, horizontal = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (state.isLoading && state.timings.isEmpty()) {
-                    repeat(5) {
+                    repeat(6) {
                         SchedulePrayerSlotSkeleton(modifier = Modifier.weight(1f))
                     }
                 } else {
-                    PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEachIndexed { index, type ->
+                    DISPLAY_PRAYER_SLOTS.forEachIndexed { index, type ->
                         val entry = slotEntries[index]
-                        // Highlight active ONLY when timings are loaded and entry matches activePrayer
-                        val isActive = !state.isLoading && state.timings.isNotEmpty() && entry != null && state.activePrayer != null && entry.type == state.activePrayer
+                        val isActive = !state.isLoading && state.timings.isNotEmpty() && entry != null && activeSlotType == type
                         SchedulePrayerSlot(
                             type = type,
                             entry = entry,
@@ -269,13 +286,14 @@ private fun rememberHeadline(state: PrayerUiState): PrayerHeadline {
     val asr = stringResource(R.string.prayer_asr)
     val maghrib = stringResource(R.string.prayer_maghrib)
     val isha = stringResource(R.string.prayer_isha)
+    val sunrise = stringResource(R.string.prayer_sunrise)
     fun name(type: PrayerType) = when (type) {
         PrayerType.FAJR -> fajr
         PrayerType.DHUHR -> dhuhr
         PrayerType.ASR -> asr
         PrayerType.MAGHRIB -> maghrib
         PrayerType.ISHA -> isha
-        PrayerType.SUNRISE -> ""
+        PrayerType.SUNRISE -> sunrise
     }
     return remember(
         state.needsPermission,
@@ -333,7 +351,7 @@ private fun SchedulePrayerSlot(
         SimpleDateFormat(pattern, Locale.getDefault()).format(it)
     } ?: "--.--"
 
-    val iconRes = getPrayerIconRes(type, isActive)
+    val iconRes = getPrayerIconRes(type)
 
     Box(
         modifier = modifier
@@ -352,31 +370,32 @@ private fun SchedulePrayerSlot(
                     Modifier
                 }
             )
-            .padding(vertical = 6.dp, horizontal = 2.dp),
+            .padding(vertical = 6.dp, horizontal = 1.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             Text(
                 text = prayerDisplayShort(type),
-                color = if (isActive) Color.White else Color(0xFF262626),
-                fontSize = 11.sp,
+                color = if (isActive) Color.White else Color(0xFF334155),
+                fontSize = 10.5.sp,
                 fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = null,
-                tint = if (isActive) Color.White else Color.Unspecified,
-                modifier = Modifier.size(22.dp)
+                tint = if (isActive) Color.White else Color(0xFF475569),
+                modifier = Modifier.size(20.dp)
             )
             Text(
                 text = timeText,
                 color = if (isActive) Color.White else Color(0xFF1E293B),
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.SemiBold,
                 maxLines = 1,
                 textAlign = TextAlign.Center
@@ -416,7 +435,7 @@ private fun SchedulePrayerSlotSkeleton(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .padding(vertical = 6.dp, horizontal = 2.dp),
+            .padding(vertical = 6.dp, horizontal = 1.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -425,7 +444,7 @@ private fun SchedulePrayerSlotSkeleton(
         ) {
             SaatSkeletonOnDark(
                 modifier = Modifier
-                    .width(28.dp)
+                    .width(26.dp)
                     .height(10.dp)
             )
             SaatSkeletonOnDark(
@@ -435,8 +454,8 @@ private fun SchedulePrayerSlotSkeleton(
             )
             SaatSkeletonOnDark(
                 modifier = Modifier
-                    .width(32.dp)
-                    .height(12.dp)
+                    .width(28.dp)
+                    .height(11.dp)
             )
         }
     }
@@ -445,9 +464,9 @@ private fun SchedulePrayerSlotSkeleton(
 @Composable
 private fun prayerDisplayShort(type: PrayerType): String = when (type) {
     PrayerType.FAJR -> stringResource(R.string.prayer_fajr)
+    PrayerType.SUNRISE -> stringResource(R.string.prayer_sunrise)
     PrayerType.DHUHR -> stringResource(R.string.prayer_dhuhr)
     PrayerType.ASR -> stringResource(R.string.prayer_asr)
     PrayerType.MAGHRIB -> stringResource(R.string.prayer_maghrib)
     PrayerType.ISHA -> stringResource(R.string.prayer_isha)
-    PrayerType.SUNRISE -> ""
 }

@@ -17,6 +17,16 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         if (intent == null) return
         val appContext = context.applicationContext
+
+        // Check if user allows notifications. If disabled, skip BOTH push notification AND adhan sound!
+        val areNotificationsEnabled = androidx.core.app.NotificationManagerCompat.from(appContext).areNotificationsEnabled()
+        if (!areNotificationsEnabled) {
+            CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
+                runCatching { PrayerNotificationCoordinator.rescheduleFromCache(appContext) }
+            }
+            return
+        }
+
         val channelId = intent.getStringExtra(EXTRA_CHANNEL_ID) ?: NotificationChannels.PRAYER
         val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, 0)
         val playAdhan = intent.getBooleanExtra(EXTRA_PLAY_ADHAN, false)
@@ -60,32 +70,28 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         }
 
         if (title.isNotEmpty()) {
-            if (shouldPlayAdhan && adhanPlaying) {
-                // Foreground service already shows the adhan notification with stop action.
-            } else {
-                val alertChannel = when {
-                    shouldPlayAdhan && adhanRawRes != null -> {
-                        NotificationChannels.ensureAdhanAlert(appContext, adhanRawRes)
-                        NotificationChannels.ADHAN_ALERT
-                    }
-                    kind?.startsWith("prayer_") == true || kind == "imsak" -> {
-                        NotificationChannels.PRAYER_ALERT
-                    }
-                    else -> channelId
+            val alertChannel = when {
+                shouldPlayAdhan && adhanRawRes != null -> {
+                    NotificationChannels.ensureAdhanAlert(appContext, adhanRawRes)
+                    NotificationChannels.ADHAN_ALERT
                 }
-                PrayerNotificationScheduler.showNotification(
-                    context = appContext,
-                    notificationId = notificationId,
-                    channelId = alertChannel,
-                    title = title,
-                    body = body,
-                    silent = false,
-                    showStopAdhan = shouldPlayAdhan && adhanRawRes != null,
-                    adhanSoundRes = if (shouldPlayAdhan && adhanRawRes != null) adhanRawRes else null,
-                    kind = kind,
-                    useFullScreenIntent = isTahajud
-                )
+                kind?.startsWith("prayer_") == true || kind == "imsak" -> {
+                    NotificationChannels.PRAYER_ALERT
+                }
+                else -> channelId
             }
+            PrayerNotificationScheduler.showNotification(
+                context = appContext,
+                notificationId = notificationId,
+                channelId = alertChannel,
+                title = title,
+                body = body,
+                silent = false,
+                showStopAdhan = shouldPlayAdhan && adhanRawRes != null,
+                adhanSoundRes = if (shouldPlayAdhan && adhanRawRes != null) adhanRawRes else null,
+                kind = kind,
+                useFullScreenIntent = isTahajud
+            )
         }
 
         // Roll alarms forward in background — do not block the broadcast receiver.
