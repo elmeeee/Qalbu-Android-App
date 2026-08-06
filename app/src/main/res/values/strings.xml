@@ -1027,4 +1027,5 @@
     <string name="asmaul_husna_counter_finish">Alhamdulillah! You have completed 100x dhikr.</string>
     <string name="asmaul_husna_tap_to_dhikr">TAP TO DHIKR (+1)</string>
     <string name="asmaul_husna_tap_to_reset">COMPLETED ✦ TAP TO RESET</string>
+    <string name="spiritual_tools_badge_count">%1$d Essential Tools</string>
 </resources>

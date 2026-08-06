@@ -85,7 +85,7 @@ import app.kamy.saatApp.domain.model.AsmaulHusnaItem
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 
 private enum class AsmaulHusnaFilter {
-    ALL, FAVORITES, RECOMMENDED
+    ALL, FAVORITES
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,7 +106,6 @@ fun AsmaulHusnaScreen(
             val matchesFilter = when (selectedFilter) {
                 AsmaulHusnaFilter.ALL -> true
                 AsmaulHusnaFilter.FAVORITES -> favoriteIds.contains(item.number)
-                AsmaulHusnaFilter.RECOMMENDED -> item.recommendedCount > 0
             }
 
             val query = searchQuery.trim().lowercase()
@@ -117,6 +116,17 @@ fun AsmaulHusnaScreen(
                 item.meaning(appLanguage).lowercase().contains(query)
 
             matchesFilter && matchesQuery
+        }
+    }
+
+    val onToggleFavorite: (Int) -> Unit = remember {
+        { itemNumber ->
+            favoriteIds = if (favoriteIds.contains(itemNumber)) favoriteIds - itemNumber else favoriteIds + itemNumber
+        }
+    }
+    val onSelectItem: (AsmaulHusnaItem) -> Unit = remember {
+        { item ->
+            selectedItemForDetail = item
         }
     }
 
@@ -216,24 +226,6 @@ fun AsmaulHusnaScreen(
                         shape = RoundedCornerShape(20.dp)
                     )
                     FilterChip(
-                        selected = selectedFilter == AsmaulHusnaFilter.RECOMMENDED,
-                        onClick = { selectedFilter = AsmaulHusnaFilter.RECOMMENDED },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.AutoAwesome,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = if (selectedFilter == AsmaulHusnaFilter.RECOMMENDED) Color.White else SaatColors.DeepEmerald
-                            )
-                        },
-                        label = { Text(stringResource(R.string.asmaul_husna_filter_recommended)) },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = SaatColors.DeepEmerald,
-                            selectedLabelColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    FilterChip(
                         selected = selectedFilter == AsmaulHusnaFilter.FAVORITES,
                         onClick = { selectedFilter = AsmaulHusnaFilter.FAVORITES },
                         leadingIcon = {
@@ -272,10 +264,8 @@ fun AsmaulHusnaScreen(
                         item = item,
                         appLanguage = appLanguage,
                         isFavorite = isFav,
-                        onToggleFavorite = {
-                            favoriteIds = if (isFav) favoriteIds - item.number else favoriteIds + item.number
-                        },
-                        onClick = { selectedItemForDetail = item }
+                        onToggleFavorite = onToggleFavorite,
+                        onClick = onSelectItem
                     )
                 }
             }
@@ -373,18 +363,21 @@ private fun AsmaulHusnaCardItem(
     item: AsmaulHusnaItem,
     appLanguage: AppLanguage,
     isFavorite: Boolean,
-    onToggleFavorite: () -> Unit,
-    onClick: () -> Unit
+    onToggleFavorite: (Int) -> Unit,
+    onClick: (AsmaulHusnaItem) -> Unit
 ) {
+    val meaningText = remember(item, appLanguage) { item.meaning(appLanguage) }
+    val dhikrText = remember(item.recommendedCount) { item.recommendedCount }
+    val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    val cardBorder = remember { BorderStroke(1.dp, Color(0xFFE2E8F0)) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = { onClick(item) }),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+        colors = cardColors,
+        border = cardBorder,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -414,7 +407,7 @@ private fun AsmaulHusnaCardItem(
                 }
 
                 IconButton(
-                    onClick = onToggleFavorite,
+                    onClick = { onToggleFavorite(item.number) },
                     modifier = Modifier.size(28.dp)
                 ) {
                     Icon(
@@ -446,7 +439,7 @@ private fun AsmaulHusnaCardItem(
             )
 
             Text(
-                text = item.meaning(appLanguage),
+                text = meaningText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -463,7 +456,7 @@ private fun AsmaulHusnaCardItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(R.string.asmaul_husna_dhikr_fmt, item.recommendedCount),
+                    text = stringResource(R.string.asmaul_husna_dhikr_fmt, dhikrText),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = SaatColors.DeepEmerald,

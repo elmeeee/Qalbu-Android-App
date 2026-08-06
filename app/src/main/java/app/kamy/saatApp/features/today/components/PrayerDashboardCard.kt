@@ -128,14 +128,14 @@ fun PrayerDashboardCard(
     ) {
         // 1. Top Card: Prayer Info Header Card with Illustration & Linear Gradient (#085E43 -> #F7DC8B)
         Surface(
-            modifier = Modifier.width(349.dp),
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             color = Color.Transparent,
             shadowElevation = 4.dp
         ) {
             Box(
                 modifier = Modifier
-                    .width(349.dp)
+                    .fillMaxWidth()
                     .height(120.dp)
                     .clip(RoundedCornerShape(20.dp))
                     .background(

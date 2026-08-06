@@ -760,7 +760,7 @@ private fun ContinueReadingCard(
         Surface(
             onClick = onTap,
             modifier = Modifier
-                .width(349.dp)
+                .fillMaxWidth()
                 .height(120.dp),
             shape = RoundedCornerShape(20.dp),
             color = Color.Transparent,
@@ -783,7 +783,8 @@ private fun ContinueReadingCard(
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = 20.dp, end = 160.dp),
+                        .fillMaxWidth(0.6f)
+                        .padding(start = 20.dp),
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(

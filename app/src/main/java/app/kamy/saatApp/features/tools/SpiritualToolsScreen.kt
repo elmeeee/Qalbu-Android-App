@@ -1,9 +1,11 @@
 package app.kamy.saatApp.features.tools
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,13 +18,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -31,10 +38,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.SaatSpacing
@@ -44,91 +54,82 @@ import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 private data class SpiritualToolItem(
     @DrawableRes val iconRes: Int,
     val titleRes: Int,
-    val subtitleRes: Int,
     val route: String,
-    val accentStart: androidx.compose.ui.graphics.Color,
-    val accentEnd: androidx.compose.ui.graphics.Color
+    val accentStart: Color,
+    val accentEnd: Color
 )
 
 @Composable
 fun SpiritualToolsScreen(
     onOpenTool: (String) -> Unit
 ) {
-    val tools = listOf(
-        SpiritualToolItem(
-            R.drawable.ic_radio_custom,
-            R.string.radio_quran_title,
-            R.string.radio_quran_subtitle,
-            "radio",
-            SaatColors.DeepEmerald,
-            SaatColors.Gold
-        ),
-        SpiritualToolItem(
-            R.drawable.ic_asmaulhusna_custom,
-            R.string.asmaul_husna_title,
-            R.string.asmaul_husna_subtitle,
-            "asmaul-husna",
-            SaatColors.GoldDeep,
-            SaatColors.DeepEmerald
-        ),
-        SpiritualToolItem(
-            R.drawable.ic_qibla,
-            R.string.qibla_title,
-            R.string.qibla_account_subtitle,
-            "qibla",
-            SaatColors.DeepEmerald,
-            SaatColors.Teal
-        ),
-
-        SpiritualToolItem(
-            R.drawable.ic_dua,
-            R.string.doa_zikir_title,
-            R.string.doa_zikir_account_subtitle,
-            "doa-zikir",
-            SaatColors.Teal,
-            SaatColors.DeepEmerald
-        ),
-        SpiritualToolItem(
-            R.drawable.ic_dhikr,
-            R.string.dhikr_title,
-            R.string.dhikr_account_subtitle,
-            "dhikr",
-            SaatColors.GoldDeep,
-            SaatColors.Gold
-        ),
-        SpiritualToolItem(
-            R.drawable.ic_zakat,
-            R.string.zakat_title,
-            R.string.zakat_account_subtitle,
-            "zakat",
-            SaatColors.IndigoAccent,
-            SaatColors.Teal
-        ),
-        SpiritualToolItem(
-            R.drawable.ic_zakat,
-            R.string.faraidh_title,
-            R.string.faraidh_account_subtitle,
-            "faraidh",
-            SaatColors.GoldDeep,
-            SaatColors.DeepEmerald
-        ),
-        SpiritualToolItem(
-            R.drawable.ic_qiyam,
-            R.string.qiyam_title,
-            R.string.qiyam_account_subtitle,
-            "qiyam",
-            SaatColors.DeepEmerald,
-            SaatColors.IndigoAccent
-        ),
-        SpiritualToolItem(
-            R.drawable.ic_manzil,
-            R.string.manzil_title,
-            R.string.manzil_account_subtitle,
-            "manzil",
-            SaatColors.DeepEmerald,
-            SaatColors.GoldDeep
+    val tools = remember {
+        listOf(
+            SpiritualToolItem(
+                R.drawable.ic_radio_custom,
+                R.string.radio_quran_title,
+                "radio",
+                SaatColors.DeepEmerald,
+                SaatColors.Gold
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_asmaulhusna_custom,
+                R.string.asmaul_husna_title,
+                "asmaul-husna",
+                SaatColors.GoldDeep,
+                SaatColors.DeepEmerald
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_qibla,
+                R.string.qibla_title,
+                "qibla",
+                SaatColors.DeepEmerald,
+                SaatColors.Teal
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_dua,
+                R.string.doa_zikir_title,
+                "doa-zikir",
+                SaatColors.Teal,
+                SaatColors.DeepEmerald
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_dhikr,
+                R.string.dhikr_title,
+                "dhikr",
+                SaatColors.GoldDeep,
+                SaatColors.Gold
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_zakat,
+                R.string.zakat_title,
+                "zakat",
+                SaatColors.IndigoAccent,
+                SaatColors.Teal
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_zakat,
+                R.string.faraidh_title,
+                "faraidh",
+                SaatColors.GoldDeep,
+                SaatColors.DeepEmerald
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_qiyam,
+                R.string.qiyam_title,
+                "qiyam",
+                SaatColors.DeepEmerald,
+                SaatColors.IndigoAccent
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_manzil,
+                R.string.manzil_title,
+                "manzil",
+                SaatColors.DeepEmerald,
+                SaatColors.GoldDeep
+            )
         )
-    )
+    }
 
     Column(
         modifier = Modifier
@@ -138,25 +139,45 @@ fun SpiritualToolsScreen(
     ) {
         Column(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(
                     horizontal = SaatSpacing.screenHorizontal,
                     vertical = SaatSpacing.md
                 )
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "✦",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.width(SaatSpacing.sm))
-                Text(
-                    text = stringResource(R.string.spiritual_tools_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "✦",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = SaatColors.GoldDeep,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.width(SaatSpacing.sm))
+                    Text(
+                        text = stringResource(R.string.spiritual_tools_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = SaatColors.DeepEmerald,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Surface(
+                    shape = CircleShape,
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.1f)
+                ) {
+                    Text(
+                        text = stringResource(R.string.spiritual_tools_badge_count, tools.size),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.DeepEmerald,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
             }
             Text(
                 text = stringResource(R.string.spiritual_tools_tab_subtitle),
@@ -167,35 +188,33 @@ fun SpiritualToolsScreen(
             Spacer(Modifier.height(SaatSpacing.sm))
             Box(
                 modifier = Modifier
-                    .height(2.dp)
-                    .width(48.dp)
+                    .height(2.5.dp)
+                    .width(52.dp)
                     .background(
                         Brush.horizontalGradient(
                             listOf(
-                                MaterialTheme.colorScheme.tertiary,
-                                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+                                SaatColors.GoldDeep,
+                                SaatColors.GoldDeep.copy(alpha = 0.1f)
                             )
                         )
                     )
             )
         }
 
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = SaatSpacing.screenHorizontal,
                 end = SaatSpacing.screenHorizontal,
-                bottom = floatingNavBottomPadding() + 16.dp
+                bottom = floatingNavBottomPadding() + 20.dp
             ),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(tools, key = { it.route }) { tool ->
-                SpiritualToolCard(
-                    iconRes = tool.iconRes,
-                    title = stringResource(tool.titleRes),
-                    subtitle = stringResource(tool.subtitleRes),
-                    accentStart = tool.accentStart,
-                    accentEnd = tool.accentEnd,
+                SpiritualToolGridCard(
+                    tool = tool,
                     onClick = { onOpenTool(tool.route) }
                 )
             }
@@ -204,68 +223,66 @@ fun SpiritualToolsScreen(
 }
 
 @Composable
-private fun SpiritualToolCard(
-    @DrawableRes iconRes: Int,
-    title: String,
-    subtitle: String,
-    accentStart: androidx.compose.ui.graphics.Color,
-    accentEnd: androidx.compose.ui.graphics.Color,
+private fun SpiritualToolGridCard(
+    tool: SpiritualToolItem,
     onClick: () -> Unit
 ) {
-    Row(
+    val interactionSource = remember { MutableInteractionSource() }
+    val titleStr = stringResource(tool.titleRes)
+    val borderGradient = remember(tool.accentStart, tool.accentEnd) {
+        Brush.linearGradient(
+            colors = listOf(
+                tool.accentStart.copy(alpha = 0.30f),
+                tool.accentEnd.copy(alpha = 0.10f)
+            )
+        )
+    }
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .background(SaatColors.PureWhite)
-            .border(
-                width = 1.dp,
-                color = SaatColors.SoftGrey.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(18.dp)
-            )
+            .height(130.dp)
+            .clip(RoundedCornerShape(22.dp))
             .clickable(
-                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                indication = ripple(color = SaatColors.Slate500.copy(alpha = 0.2f)),
+                interactionSource = interactionSource,
+                indication = ripple(color = tool.accentStart.copy(alpha = 0.15f)),
                 onClick = onClick
-            )
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+            ),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        border = BorderStroke(1.dp, borderGradient),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Box(
+        Column(
             modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(
-                    Brush.linearGradient(listOf(accentStart.copy(alpha = 0.18f), accentEnd.copy(alpha = 0.10f)))
-                ),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            // Large Colored Vector Icon
             Icon(
-                painter = painterResource(iconRes),
+                painter = painterResource(tool.iconRes),
                 contentDescription = null,
-                tint = accentStart,
-                modifier = Modifier.size(24.dp)
+                tint = tool.accentStart,
+                modifier = Modifier.size(46.dp)
             )
-        }
-        Spacer(Modifier.width(14.dp))
-        Column(modifier = Modifier.weight(1f)) {
+
+            Spacer(Modifier.height(10.dp))
+
+            // Centered Feature Title Name
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
+                text = titleStr,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
                 fontWeight = FontWeight.SemiBold,
-                color = SaatColors.Slate800
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = SaatColors.Slate500,
-                modifier = Modifier.padding(top = 3.dp)
+                color = SaatColors.Slate900,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
             )
         }
-        Icon(
-            Icons.AutoMirrored.Filled.KeyboardArrowRight,
-            contentDescription = null,
-            tint = SaatColors.Teal,
-            modifier = Modifier.size(22.dp)
-        )
     }
 }

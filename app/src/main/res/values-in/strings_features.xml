@@ -481,6 +481,7 @@
     <string name="asmaul_husna_counter_finish">Alhamdulillah! Anda telah menyelesaikan 100x zikir.</string>
     <string name="asmaul_husna_tap_to_dhikr">TEKAN UNTUK ZIKIR (+1)</string>
     <string name="asmaul_husna_tap_to_reset">SELESAI ✦ TEKAN UNTUK RESET</string>
+    <string name="spiritual_tools_badge_count">%1$d Fitur Ibadah</string>
     <string name="action_later">Nanti</string>
 
     <string name="app_name_launcher">Sāat</string>
