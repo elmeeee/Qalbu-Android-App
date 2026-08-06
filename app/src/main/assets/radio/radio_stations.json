@@ -19,11 +19,24 @@
     "countryId": "Malaysia",
     "countryMs": "Malaysia",
     "countryFlag": "🇲🇾",
-    "descriptionEn": "Islamic Understanding Institute Malaysia",
-    "descriptionId": "Institut Kefahaman Islam Malaysia",
-    "descriptionMs": "Institut Kefahaman Islam Malaysia",
+    "descriptionEn": "Institut Kefahaman Islam Malaysia (Official Live Stream)",
+    "descriptionId": "Institut Kefahaman Islam Malaysia (Siaran Resmi)",
+    "descriptionMs": "Institut Kefahaman Islam Malaysia (Siaran Resmi)",
     "category": "MALAYSIA",
     "streamUrl": "https://ais-sa8.cdnstream1.com/5035/playlist.m3u8"
+  },
+  {
+    "id": "saudi_quran",
+    "name": "Radio Quran Live (Saudi Arabia)",
+    "countryEn": "Saudi Arabia / Global",
+    "countryId": "Arab Saudi / Global",
+    "countryMs": "Arab Saudi / Global",
+    "countryFlag": "🇸🇦",
+    "descriptionEn": "Live 24/7 Quran Recitation from Makkah & Madinah",
+    "descriptionId": "Siaran Langsung 24 Jam Al-Qur'an dari Makkah & Madinah",
+    "descriptionMs": "Siaran Langsung 24 Jam Al-Qur'an dari Makkah & Madinah",
+    "category": "MUROTTAL_GLOBAL",
+    "streamUrl": "https://backup.qurango.net/radio/mix"
   },
   {
     "id": "warna_sg",
@@ -50,19 +63,6 @@
     "descriptionMs": "Siaran Islamiyyah & Kebudayaan Melayu Nusantara",
     "category": "BRUNEI",
     "streamUrl": "https://28163.live.streamtheworld.com:443/ASYIK_FMAAC_SC"
-  },
-  {
-    "id": "cairo_quran",
-    "name": "Cairo Quran Live",
-    "countryEn": "Egypt / Global",
-    "countryId": "Mesir / Global",
-    "countryMs": "Mesir / Global",
-    "countryFlag": "🇪🇬",
-    "descriptionEn": "Quran Recitation from Cairo",
-    "descriptionId": "Lantunan Al-Qur'an dari Kairo",
-    "descriptionMs": "Lantunan Al-Qur'an dari Kairo",
-    "category": "MUROTTAL_GLOBAL",
-    "streamUrl": "https://stream.radiojar.com/8s5u5tpdtwzuv"
   },
   {
     "id": "alafasy_radio",

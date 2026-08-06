@@ -173,25 +173,34 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         url: String
     ) {
         if (AirplaneModeReceiver.isAirplaneModeOn(context)) return
-        val mediaItem = buildMediaItem(url, stationName, "$countryName ✦ Live Radio", "Radio Quran", mediaType = "RADIO")
-        _state.value = AudioPlaybackState(
-            isPlaying = true,
-            currentUrl = url,
-            trackTitle = stationName,
-            trackSubtitle = "$countryName ✦ Live",
-            reciterName = "Radio Quran",
-            queue = emptyList(),
-            activeIndex = null,
-            chapterNumber = null,
-            ayahNumber = null,
-            lastError = null
-        )
-        player.setMediaItem(mediaItem)
-        player.prepare()
-        player.playWhenReady = true
-        ensurePlaybackService()
+        runCatching {
+            val mediaItem = buildMediaItem(url, stationName, "$countryName ✦ Live Radio", "Radio Quran", mediaType = "RADIO")
+            _state.value = AudioPlaybackState(
+                isPlaying = true,
+                currentUrl = url,
+                trackTitle = stationName,
+                trackSubtitle = "$countryName ✦ Live",
+                reciterName = "Radio Quran",
+                queue = emptyList(),
+                activeIndex = null,
+                chapterNumber = null,
+                ayahNumber = null,
+                lastError = null
+            )
+            player.stop()
+            player.clearMediaItems()
+            player.setMediaItem(mediaItem)
+            player.prepare()
+            player.playWhenReady = true
+            ensurePlaybackService()
+        }.onFailure { error ->
+            android.util.Log.e("AudioPlayerController", "Failed to start radio playback: $stationName", error)
+            _state.value = _state.value.copy(
+                isPlaying = false,
+                lastError = "Gagal memutar radio $stationName"
+            )
+        }
     }
-
 
     fun playSequence(
         items: List<AudioQueueItem>,
@@ -260,17 +269,24 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         ayahLabel: String,
         reciterName: String,
         mediaType: String = "RECITATION"
-    ): MediaItem = MediaItem.Builder()
-        .setUri(url)
-        .setMediaMetadata(
-            MediaMetadata.Builder()
-                .setTitle(surahTitle)
-                .setArtist(reciterName)
-                .setAlbumTitle(ayahLabel)
-                .setDescription(mediaType)
-                .build()
-        )
-        .build()
+    ): MediaItem {
+        val builder = MediaItem.Builder()
+            .setUri(url)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(surahTitle)
+                    .setArtist(reciterName)
+                    .setAlbumTitle(ayahLabel)
+                    .setDescription(mediaType)
+                    .build()
+            )
+
+        if (url.contains(".m3u8", ignoreCase = true)) {
+            builder.setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8)
+        }
+
+        return builder.build()
+    }
 
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
 

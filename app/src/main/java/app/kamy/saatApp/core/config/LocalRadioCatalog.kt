@@ -54,7 +54,7 @@ object LocalRadioCatalog {
     private var cachedStations: List<QuranRadioStation>? = null
 
     val stations: List<QuranRadioStation>
-        get() = cachedStations ?: fallbackStations
+        get() = cachedStations ?: emptyList()
 
     fun getStations(context: Context? = null): List<QuranRadioStation> {
         cachedStations?.let { return it }
@@ -66,7 +66,7 @@ object LocalRadioCatalog {
                 return loaded
             }
         }
-        return fallbackStations
+        return emptyList()
     }
 
     private fun loadFromAssets(context: Context): List<QuranRadioStation> = runCatching {
@@ -96,72 +96,4 @@ object LocalRadioCatalog {
         }
         list
     }.getOrDefault(emptyList())
-
-    private val fallbackStations: List<QuranRadioStation> = listOf(
-        QuranRadioStation(
-            id = "suara_muslim_id",
-            name = "Suara Muslim Surabaya",
-            countryEn = "Indonesia",
-            countryId = "Indonesia",
-            countryMs = "Indonesia",
-            countryFlag = "🇮🇩",
-            descriptionEn = "Islamic Broadcast & Quran Recitation",
-            descriptionId = "Radio Dakwah Islamiyyah & Murottal",
-            descriptionMs = "Radio Dakwah Islamiyyah & Murottal",
-            category = RadioCategory.INDONESIA,
-            streamUrl = "https://pu.klikhost.com/proxy/suaramuslim/stream"
-        ),
-        QuranRadioStation(
-            id = "ikim_my",
-            name = "IKIM FM",
-            countryEn = "Malaysia",
-            countryId = "Malaysia",
-            countryMs = "Malaysia",
-            countryFlag = "🇲🇾",
-            descriptionEn = "Islamic Understanding Institute Malaysia",
-            descriptionId = "Institut Kefahaman Islam Malaysia",
-            descriptionMs = "Institut Kefahaman Islam Malaysia",
-            category = RadioCategory.MALAYSIA,
-            streamUrl = "https://ais-sa8.cdnstream1.com/5035/playlist.m3u8"
-        ),
-        QuranRadioStation(
-            id = "warna_sg",
-            name = "Warna 94.2 FM",
-            countryEn = "Singapore",
-            countryId = "Singapura",
-            countryMs = "Singapura",
-            countryFlag = "🇸🇬",
-            descriptionEn = "Mediacorp Singapore (Islamic & Malay Broadcast)",
-            descriptionId = "Mediacorp Singapore (Siaran Islami & Kebudayaan Melayu)",
-            descriptionMs = "Mediacorp Singapore (Siaran Islami & Kebudayaan Melayu)",
-            category = RadioCategory.SINGAPORE,
-            streamUrl = "https://22393.live.streamtheworld.com:443/WARNA942FM_PREM.aac"
-        ),
-        QuranRadioStation(
-            id = "asyik_bn",
-            name = "Asyik FM",
-            countryEn = "Brunei / Regional",
-            countryId = "Brunei / Regional",
-            countryMs = "Brunei / Regional",
-            countryFlag = "🇧🇳",
-            descriptionEn = "Islamic & Malay Regional Broadcast",
-            descriptionId = "Siaran Islamiyyah & Kebudayaan Melayu Nusantara",
-            descriptionMs = "Siaran Islamiyyah & Kebudayaan Melayu Nusantara",
-            category = RadioCategory.BRUNEI,
-            streamUrl = "https://28163.live.streamtheworld.com:443/ASYIK_FMAAC_SC"
-        ),
-        QuranRadioStation(
-            id = "cairo_quran",
-            name = "Cairo Quran Live",
-            countryEn = "Egypt / Global",
-            countryId = "Mesir / Global",
-            countryMs = "Mesir / Global",
-            countryFlag = "🇪🇬",
-            descriptionEn = "Quran Recitation from Cairo",
-            descriptionId = "Lantunan Al-Qur'an dari Kairo",
-            descriptionMs = "Lantunan Al-Qur'an dari Kairo",
-            category = RadioCategory.MUROTTAL_GLOBAL,
-            streamUrl = "https://stream.radiojar.com/8s5u5tpdtwzuv"
-        )
-    )
 }
