@@ -515,7 +515,7 @@ private fun SunnahPrayerDetailFullScreen(
                                     )
                                     Spacer(Modifier.width(8.dp))
                                     Text(
-                                        text = if (appLanguage == AppLanguage.ENGLISH) "Recommended Surahs" else if (appLanguage == AppLanguage.MALAY) "Surah Yang Disyorkan" else "Surah Yang Dianjurkan",
+                                        text = stringResource(R.string.sunnah_recommended_surahs_title),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = SaatColors.DeepEmerald
@@ -534,7 +534,7 @@ private fun SunnahPrayerDetailFullScreen(
                     // Section 1: Niat & Lafaz
                     if (item.niatList.isNotEmpty()) {
                         Text(
-                            text = if (appLanguage == AppLanguage.ENGLISH) "1. Prayer Intention (Niyyah)" else if (appLanguage == AppLanguage.MALAY) "1. Niat Solat" else "1. Niat Shalat",
+                            text = stringResource(R.string.sunnah_section_niyyah),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -548,7 +548,7 @@ private fun SunnahPrayerDetailFullScreen(
                     // Section 2: Tata Cara Step-by-Step
                     if (item.steps.isNotEmpty()) {
                         Text(
-                            text = if (appLanguage == AppLanguage.ENGLISH) "2. Step-by-Step Procedure" else if (appLanguage == AppLanguage.MALAY) "2. Tatacara Pelaksanaan" else "2. Tata Cara Pelaksanaan",
+                            text = stringResource(R.string.sunnah_section_procedure),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -559,9 +559,9 @@ private fun SunnahPrayerDetailFullScreen(
                         }
                     }
 
-                    // Section 3: Doa Khusus & Feature Connections
+                    // Section 3: Doa Khusus & Amalan Sunnah
                     Text(
-                        text = if (appLanguage == AppLanguage.ENGLISH) "3. Supplication & Feature Actions" else if (appLanguage == AppLanguage.MALAY) "3. Doa & Sambungan Fitur" else "3. Doa & Sambungan Fitur",
+                        text = stringResource(R.string.sunnah_section_doa_features),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -582,7 +582,7 @@ private fun SunnahPrayerDetailFullScreen(
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 Text(
-                                    text = if (appLanguage == AppLanguage.ENGLISH) "Supplication (Dua)" else if (appLanguage == AppLanguage.MALAY) "Doa Khusus" else "Doa Khusus",
+                                    text = stringResource(R.string.sunnah_special_doa_title),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = SaatColors.GoldDeep
@@ -639,7 +639,7 @@ private fun SunnahPrayerDetailFullScreen(
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                text = if (appLanguage == AppLanguage.ENGLISH) "Open Doa & Zikir Collection" else "Buka Koleksi Doa & Zikir Lengkap",
+                                text = stringResource(R.string.sunnah_open_doa_collection),
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -659,7 +659,7 @@ private fun SunnahPrayerDetailFullScreen(
                                 )
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = if (appLanguage == AppLanguage.ENGLISH) "Open Qiyam Night Tracker" else "Buka Qiyam Night Tracker",
+                                    text = stringResource(R.string.sunnah_open_qiyam_tracker),
                                     fontWeight = FontWeight.Bold
                                 )
                             }

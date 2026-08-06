@@ -324,7 +324,7 @@ private fun RadioHeroPlayerCard(
                             }
                         }
                         Text(
-                            text = "RADIO QURAN LIVE",
+                            text = stringResource(R.string.radio_quran_title),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = SaatColors.GoldBright,

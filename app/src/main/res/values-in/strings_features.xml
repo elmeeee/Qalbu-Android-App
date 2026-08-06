@@ -451,7 +451,7 @@
     <string name="radio_quran_title">Radio Islami</string>
     <string name="radio_quran_subtitle">Siaran radio murottal &amp; dakwah Islam 24/7</string>
     <string name="radio_quran_account_subtitle">Live stream radio Al-Qur\'an &amp; dakwah Islam</string>
-    <string name="radio_quran_list_title">Daftar Stasiun Radio Live</string>
+    <string name="radio_quran_list_title">Daftar Stasiun Radio Islami</string>
     <string name="radio_quran_hero_idle_title">Siaran Radio Dakwah &amp; Murottal</string>
     <string name="radio_quran_hero_idle_desc">Pilih salah satu stasiun radio di bawah untuk memulai siaran live stream.</string>
     <string name="radio_quran_listening_live">Mendengarkan Live</string>
@@ -510,4 +510,13 @@
     <string name="zakat_rice_price_per_kg">Harga beras per kg</string>
     <string name="zakat_type_fitrah">Zakat Fitrah</string>
     <string name="zakat_type_maal">Zakat Maal</string>
+
+    <!-- Sunnah Prayer Detail Strings (Indonesian) -->
+    <string name="sunnah_recommended_surahs_title">Surah Yang Dianjurkan</string>
+    <string name="sunnah_section_niyyah">1. Niat Shalat</string>
+    <string name="sunnah_section_procedure">2. Tata Cara Pelaksanaan</string>
+    <string name="sunnah_section_doa_features">3. Doa Khusus &amp; Amalan Sunnah</string>
+    <string name="sunnah_special_doa_title">Doa Khusus</string>
+    <string name="sunnah_open_doa_collection">Buka Koleksi Doa &amp; Zikir Lengkap</string>
+    <string name="sunnah_open_qiyam_tracker">Buka Tracker Salat Malam (Qiyam)</string>
 </resources>

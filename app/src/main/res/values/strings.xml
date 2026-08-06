@@ -912,7 +912,7 @@
     <string name="coach_mark_dhikr_desc">Tap the screen or button to count dhikr, and set your target count as needed.</string>
     <string name="coach_mark_asmaul_title">99 Names of Allah</string>
     <string name="coach_mark_asmaul_desc">Explore 99 Asmaul Husna with 3-language translations, audio recitations, and dhikr practices.</string>
-    <string name="coach_mark_radio_title">Live Quran Radio</string>
+    <string name="coach_mark_radio_title">Islamic Radio</string>
     <string name="coach_mark_radio_desc">Listen to 24/7 live Islamic radio broadcasts and recitations from around the world.</string>
     <string name="coach_mark_chapters_title">Surah &amp; Juz List</string>
     <string name="coach_mark_chapters_desc">Search surahs quickly and switch views between Surahs, Juzs, or Page layouts.</string>
@@ -1007,7 +1007,7 @@
     <string name="radio_quran_title">Islamic Radio</string>
     <string name="radio_quran_subtitle">24/7 Quran recitations &amp; Islamic broadcasts</string>
     <string name="radio_quran_account_subtitle">Live Quran recitations &amp; Islamic streams</string>
-    <string name="radio_quran_list_title">Live Radio Stations</string>
+    <string name="radio_quran_list_title">Islamic Radio Stations</string>
     <string name="radio_quran_hero_idle_title">Islamic Broadcast &amp; Murottal</string>
     <string name="radio_quran_hero_idle_desc">Select a radio station below to start live streaming.</string>
     <string name="radio_quran_listening_live">Listening Live</string>
@@ -1038,4 +1038,13 @@
     <string name="asmaul_husna_tap_to_dhikr">TAP TO DHIKR (+1)</string>
     <string name="asmaul_husna_tap_to_reset">COMPLETED ✦ TAP TO RESET</string>
     <string name="spiritual_tools_badge_count">%1$d Essential Tools</string>
+
+    <!-- Sunnah Prayer Detail Strings -->
+    <string name="sunnah_recommended_surahs_title">Recommended Surahs</string>
+    <string name="sunnah_section_niyyah">1. Prayer Intention (Niyyah)</string>
+    <string name="sunnah_section_procedure">2. Step-by-Step Procedure</string>
+    <string name="sunnah_section_doa_features">3. Special Supplication &amp; Recommended Actions</string>
+    <string name="sunnah_special_doa_title">Special Supplication (Dua)</string>
+    <string name="sunnah_open_doa_collection">Open Full Doa &amp; Dhikr Collection</string>
+    <string name="sunnah_open_qiyam_tracker">Open Qiyam Night Tracker</string>
 </resources>
