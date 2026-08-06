@@ -87,7 +87,7 @@ class AdhanPlaybackService : Service() {
                 val soundUriStr = intent.getStringExtra(EXTRA_SOUND_URI)
                 val useSystemAlarm = intent.getBooleanExtra(EXTRA_USE_SYSTEM_ALARM, false)
                 NotificationChannels.ensureAll(this)
-                val fgSuccess = runCatching {
+                runCatching {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
                         startForeground(
                             NOTIFICATION_ID,
@@ -97,10 +97,6 @@ class AdhanPlaybackService : Service() {
                     } else {
                         startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body, prayerName))
                     }
-                }.isSuccess
-                if (!fgSuccess) {
-                    stopSelf()
-                    return START_NOT_STICKY
                 }
                 acquireWakeLock()
                 if (AirplaneModeReceiver.isAirplaneModeOn(this)) {

@@ -71,10 +71,6 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
 
         if (title.isNotEmpty()) {
             val alertChannel = when {
-                shouldPlayAdhan && adhanRawRes != null -> {
-                    NotificationChannels.ensureAdhanAlert(appContext, adhanRawRes)
-                    NotificationChannels.ADHAN_ALERT
-                }
                 kind?.startsWith("prayer_") == true || kind == "imsak" -> {
                     NotificationChannels.PRAYER_ALERT
                 }
@@ -88,7 +84,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 body = body,
                 silent = false,
                 showStopAdhan = shouldPlayAdhan && adhanRawRes != null,
-                adhanSoundRes = if (shouldPlayAdhan && adhanRawRes != null) adhanRawRes else null,
+                adhanSoundRes = null,
                 kind = kind,
                 useFullScreenIntent = isTahajud
             )

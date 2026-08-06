@@ -108,12 +108,12 @@ object NotificationChannels {
     /** Channel with custom adhan sound for notification fallback when foreground playback cannot start. */
     fun ensureAdhanAlert(context: Context, @RawRes rawRes: Int) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (manager.getNotificationChannel(ADHAN_ALERT) != null) return
         val soundUri = Uri.parse("android.resource://${context.packageName}/$rawRes")
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_ALARM)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
-        manager.deleteNotificationChannel(ADHAN_ALERT)
         manager.createNotificationChannel(
             NotificationChannel(
                 ADHAN_ALERT,
