@@ -58,12 +58,15 @@ class LocationPreferencesStore @Inject constructor(
             .apply()
     }
 
-    fun saveGpsLocation(latitude: Double, longitude: Double, label: String) {
-        prefs.edit()
+    fun saveGpsLocation(latitude: Double, longitude: Double, label: String, countryCode: String? = null) {
+        val editor = prefs.edit()
             .putFloat(KEY_GPS_LAT, latitude.toFloat())
             .putFloat(KEY_GPS_LON, longitude.toFloat())
             .putString(KEY_GPS_LABEL, label)
-            .apply()
+        if (!countryCode.isNullOrBlank()) {
+            editor.putString(KEY_GPS_COUNTRY, countryCode)
+        }
+        editor.apply()
     }
 
     fun gpsLocation(): SavedManualLocation? {
@@ -75,8 +78,17 @@ class LocationPreferencesStore @Inject constructor(
         return SavedManualLocation(
             latitude = lat,
             longitude = lon,
-            label = label
+            label = label,
+            countryCode = prefs.getString(KEY_GPS_COUNTRY, null)?.takeIf { it.isNotBlank() }
         )
+    }
+
+    fun activeCountryCode(): String? {
+        if (mode() == LocationMode.MANUAL) {
+            manualLocation()?.countryCode?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+        return gpsLocation()?.countryCode?.takeIf { it.isNotBlank() }
+            ?: manualLocation()?.countryCode?.takeIf { it.isNotBlank() }
     }
 
     fun saveActiveLabel(label: String) {
@@ -101,5 +113,6 @@ class LocationPreferencesStore @Inject constructor(
         private const val KEY_GPS_LAT = "gps_latitude"
         private const val KEY_GPS_LON = "gps_longitude"
         private const val KEY_GPS_LABEL = "gps_label"
+        private const val KEY_GPS_COUNTRY = "gps_country_code"
     }
 }

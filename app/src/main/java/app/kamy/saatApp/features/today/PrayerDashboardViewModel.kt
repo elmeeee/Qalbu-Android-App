@@ -313,7 +313,7 @@ class PrayerDashboardViewModel @Inject constructor(
             ?: locationPrefs.gpsLocation()?.label
             ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
         if (geocode.cityName != null) {
-            locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, cityLabel)
+            locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, cityLabel, geocode.countryCode)
         }
         return LocationResolveResult.Success(
             ResolvedPrayerLocation(

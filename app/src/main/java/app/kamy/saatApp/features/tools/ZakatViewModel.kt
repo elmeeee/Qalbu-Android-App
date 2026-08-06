@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 
 private fun detectZakatCountry(countryCode: String): ZakatCountry = when (countryCode.uppercase()) {
@@ -53,7 +55,8 @@ data class ZakatUiState(
 @HiltViewModel
 class ZakatViewModel @Inject constructor(
     private val goldPriceRepository: GoldPriceRepository,
-    private val locationPrefs: LocationPreferencesStore
+    private val locationPrefs: LocationPreferencesStore,
+    private val appLanguageStore: AppLanguageStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ZakatUiState())
@@ -74,10 +77,38 @@ class ZakatViewModel @Inject constructor(
     }
 
     private fun detectCountryCode(): String {
-        return locationPrefs.manualLocation()?.countryCode
-            ?: locationPrefs.gpsLocation()?.countryCode
-            ?: Locale.getDefault().country
-            ?: "ID"
+        // 1. First priority: active location countryCode used for Prayer Times
+        val activeCC = locationPrefs.activeCountryCode()
+        if (!activeCC.isNullOrBlank()) return activeCC
+
+        // 2. Second priority: resolve country from user's active Prayer Times lat/lon coordinates
+        val activeLoc = locationPrefs.manualLocation() ?: locationPrefs.gpsLocation()
+        if (activeLoc != null) {
+            val ccFromCoords = resolveCountryFromCoordinates(activeLoc.latitude, activeLoc.longitude)
+            if (!ccFromCoords.isNullOrBlank()) return ccFromCoords
+        }
+
+        // 3. Fallback priority: in-app language
+        return when (appLanguageStore.current()) {
+            AppLanguage.INDONESIAN -> "ID"
+            AppLanguage.MALAY -> "MY"
+            AppLanguage.ENGLISH -> {
+                val sysCC = Locale.getDefault().country.uppercase()
+                if (sysCC in listOf("ID", "MY", "SG", "BN", "US", "GB")) {
+                    sysCC
+                } else {
+                    "ID"
+                }
+            }
+        }
+    }
+
+    private fun resolveCountryFromCoordinates(lat: Double, lon: Double): String? {
+        if (lat in 1.15..1.48 && lon in 103.6..104.1) return "SG"
+        if (lat in 4.0..5.2 && lon in 114.0..115.5) return "BN"
+        if (lat in 1.0..7.5 && lon in 99.5..119.5 && lat > 1.2) return "MY"
+        if (lat in -11.0..6.5 && lon in 95.0..141.0) return "ID"
+        return null
     }
 
     private fun resolveCurrencyCode(countryCode: String): String = when (countryCode.uppercase()) {

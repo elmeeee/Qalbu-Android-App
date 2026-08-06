@@ -55,6 +55,8 @@ import androidx.compose.material.icons.filled.RiceBowl
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -559,7 +561,8 @@ fun ZakatCalculatorScreen(
 
             // Directory of Official Zakat Bodies
             ZakatBodiesSection(
-                selectedCountry = state.selectedZakatCountry
+                selectedCountry = state.selectedZakatCountry,
+                onSelectCountry = vm::updateZakatCountry
             )
         }
     }
@@ -568,7 +571,8 @@ fun ZakatCalculatorScreen(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ZakatBodiesSection(
-    selectedCountry: ZakatCountry
+    selectedCountry: ZakatCountry,
+    onSelectCountry: (ZakatCountry) -> Unit
 ) {
     val context = LocalContext.current
     val bodies = remember(selectedCountry) { ZakatBodyRepository.byCountry(selectedCountry) }
@@ -586,6 +590,41 @@ private fun ZakatBodiesSection(
                 style = MaterialTheme.typography.bodySmall,
                 color = SaatColors.Slate500
             )
+        }
+
+        // Country Selector Chips
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ZakatCountry.entries.forEach { country ->
+                val isSelected = country == selectedCountry
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { onSelectCountry(country) },
+                    label = {
+                        Text(
+                            text = "${country.emoji} ${stringResource(country.labelRes)}",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = SaatColors.DeepEmerald,
+                        selectedLabelColor = Color.White,
+                        containerColor = SaatColors.SoftGrey,
+                        labelColor = SaatColors.Slate700
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = isSelected,
+                        borderColor = Color.Transparent,
+                        selectedBorderColor = Color.Transparent
+                    )
+                )
+            }
         }
 
         if (selectedCountry == ZakatCountry.MALAYSIA) {
