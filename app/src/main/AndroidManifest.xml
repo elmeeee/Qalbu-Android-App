@@ -101,6 +101,11 @@
             </intent-filter>
         </receiver>
 
+        <!-- Disable WorkManager's default RescheduleReceiver to comply with Android 15 BOOT_COMPLETED static analysis -->
+        <receiver
+            android:name="androidx.work.impl.background.systemalarm.RescheduleReceiver"
+            tools:node="remove" />
+
         <receiver
             android:name=".infrastructure.notifications.PrayerAlarmRescheduleReceiver"
             android:exported="false">

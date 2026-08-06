@@ -292,19 +292,8 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
 
     private fun ensurePlaybackService() {
         val serviceIntent = Intent(context, RecitationPlaybackService::class.java)
-        if (BootContextChecker.isRecentlyBooted()) {
-            mainHandler.postDelayed(
-                {
-                    runCatching {
-                        ContextCompat.startForegroundService(context, serviceIntent)
-                    }
-                },
-                60_000L
-            )
-            return
-        }
         runCatching {
-            ContextCompat.startForegroundService(context, serviceIntent)
+            context.startService(serviceIntent)
         }
     }
 

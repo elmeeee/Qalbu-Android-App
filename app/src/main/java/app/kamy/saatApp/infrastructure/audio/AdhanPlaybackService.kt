@@ -411,19 +411,8 @@ class AdhanPlaybackService : Service() {
                 }
             }
             val appContext = context.applicationContext
-            if (BootContextChecker.isRecentlyBooted()) {
-                Handler(Looper.getMainLooper()).postDelayed(
-                    {
-                        runCatching {
-                            androidx.core.content.ContextCompat.startForegroundService(appContext, intent)
-                        }
-                    },
-                    BOOT_GRACE_PERIOD_MS
-                )
-                return true
-            }
             return runCatching {
-                androidx.core.content.ContextCompat.startForegroundService(appContext, intent)
+                appContext.startService(intent)
             }.isSuccess
         }
 
