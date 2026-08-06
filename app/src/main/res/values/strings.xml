@@ -1010,10 +1010,21 @@
     <string name="media_playback_channel_name">Islamic Radio</string>
     <string name="asmaul_husna_title">Asmaul Husna</string>
     <string name="asmaul_husna_subtitle">99 Beautiful Names of Allah with Evidence</string>
+    <string name="asmaul_husna_subtitle_count">99 Names of Allah SWT</string>
     <string name="asmaul_husna_account_subtitle">99 Names of Allah, meanings, authentic Quranic dalil</string>
     <string name="asmaul_husna_search_hint">Search Asmaul Husna or meaning</string>
+    <string name="asmaul_husna_filter_all">All (%1$d)</string>
+    <string name="asmaul_husna_filter_recommended">Dhikr Practice</string>
+    <string name="asmaul_husna_filter_favorites">Favorites (%1$d)</string>
+    <string name="asmaul_husna_hero_title">VIRTUES OF ASMAUL HUSNA</string>
+    <string name="asmaul_husna_hero_verse">\"And to Allah belong the best names, so invoke Him by them.\" (QS. Al-A\'raf: 180)</string>
+    <string name="asmaul_husna_hero_hint">💡 Tap any card to view authentic evidence, virtue guides, and digital dhikr counter.</string>
+    <string name="asmaul_husna_dhikr_fmt">Dhikr %1$dx</string>
     <string name="asmaul_husna_practice_button">Practice Dhikr</string>
     <string name="asmaul_husna_dalil_title">Dalil / Evidence</string>
     <string name="asmaul_husna_fadhilah_title">Virtue &amp; Practice Guide</string>
+    <string name="asmaul_husna_tasbih_title">DIGITAL TASBIH ASMAUL HUSNA</string>
     <string name="asmaul_husna_counter_finish">Alhamdulillah! You have completed 100x dhikr.</string>
+    <string name="asmaul_husna_tap_to_dhikr">TAP TO DHIKR (+1)</string>
+    <string name="asmaul_husna_tap_to_reset">COMPLETED ✦ TAP TO RESET</string>
 </resources>

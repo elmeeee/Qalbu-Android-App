@@ -137,10 +137,13 @@ class PrayerCalendarViewModel @Inject constructor(
                     set(Calendar.DAY_OF_MONTH, day.day)
                 }
                 val khgtInfo = runCatching { khgtCalendar.infoForDate(dateCal) }.getOrNull()
+                val effectiveHijriLabel = khgtInfo?.hijriLabel ?: day.hijriLabel
+                val parsedHijriDay = app.kamy.saatApp.domain.prayer.HijriDayHelper.parseHijriDayFromLabel(effectiveHijriLabel)
                 day.copy(
-                    hijriLabel = khgtInfo?.hijriLabel ?: day.hijriLabel,
+                    hijriLabel = effectiveHijriLabel,
                     khgtEventTitle = khgtInfo?.eventTitle,
-                    isImportantDay = khgtInfo?.isImportantDay == true
+                    isImportantDay = khgtInfo?.isImportantDay == true,
+                    hijriDay = parsedHijriDay ?: day.hijriDay
                 )
             }
 

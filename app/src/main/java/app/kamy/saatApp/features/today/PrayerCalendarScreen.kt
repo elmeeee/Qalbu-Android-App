@@ -118,15 +118,35 @@ fun PrayerCalendarScreen(
                         }
                     }
                 }
-                val hijriHeaderLabel = remember(state.days, state.selectedDay) {
-                    val activeDay = state.days.firstOrNull { it.day == state.selectedDay }
-                        ?: state.days.firstOrNull { !it.hijriLabel.isNullOrBlank() }
-                    activeDay?.hijriLabel?.let { raw ->
-                        val parts = raw.trim().split(" ")
-                        if (parts.size >= 3) {
-                            "${parts.drop(1).joinToString(" ")} H"
-                        } else {
-                            "$raw H"
+                val hijriHeaderLabel = remember(state.days) {
+                    if (state.days.isEmpty()) null
+                    else {
+                        val firstHijri = state.days.firstOrNull { !it.hijriLabel.isNullOrBlank() }?.hijriLabel
+                        val lastHijri = state.days.lastOrNull { !it.hijriLabel.isNullOrBlank() }?.hijriLabel
+                        
+                        fun extractMonthYear(raw: String?): String? {
+                            if (raw.isNullOrBlank()) return null
+                            val parts = raw.trim().split(" ")
+                            return if (parts.size >= 3) parts.drop(1).joinToString(" ") else raw
+                        }
+
+                        val firstMonthYear = extractMonthYear(firstHijri)
+                        val lastMonthYear = extractMonthYear(lastHijri)
+
+                        when {
+                            firstMonthYear == null -> null
+                            lastMonthYear == null || firstMonthYear == lastMonthYear -> "$firstMonthYear H"
+                            else -> {
+                                val firstParts = firstMonthYear.split(" ")
+                                val lastParts = lastMonthYear.split(" ")
+                                if (firstParts.size >= 2 && lastParts.size >= 2 && firstParts.last() == lastParts.last()) {
+                                    val firstMonth = firstParts.dropLast(1).joinToString(" ")
+                                    val lastMonth = lastParts.dropLast(1).joinToString(" ")
+                                    "$firstMonth - $lastMonth ${lastParts.last()} H"
+                                } else {
+                                    "$firstMonthYear - $lastMonthYear H"
+                                }
+                            }
                         }
                     }
                 }
@@ -278,11 +298,14 @@ private fun MonthGrid(
                         } else {
                             val isToday = isCurrentMonth && cell.day == todayDay
                             val isSelected = cell.day == selectedDay
-                            val isImportant = remember(days, cell.day) {
-                                days.firstOrNull { it.day == cell.day }?.isImportantDay == true
+                            val dayData = remember(days, cell.day) {
+                                days.firstOrNull { it.day == cell.day }
                             }
+                            val isImportant = dayData?.isImportantDay == true
+                            val hijriDay = dayData?.hijriDay
                             CalendarDayCell(
                                 day = cell.day,
+                                hijriDay = hijriDay,
                                 isToday = isToday,
                                 isSelected = isSelected,
                                 isImportantDay = isImportant,
@@ -333,6 +356,7 @@ private fun toEasternArabicDigits(number: Int): String {
 @Composable
 private fun CalendarDayCell(
     day: Int,
+    hijriDay: Int?,
     isToday: Boolean,
     isSelected: Boolean,
     isImportantDay: Boolean,
@@ -351,10 +375,12 @@ private fun CalendarDayCell(
     val arabicTextColor = when {
         isSelected -> androidx.compose.ui.graphics.Color.White.copy(alpha = 0.9f)
         isToday -> SaatColors.DeepEmerald.copy(alpha = 0.9f)
-        else -> SaatColors.GoldDeep // High-contrast gold color distinct from background surface
+        else -> SaatColors.GoldDeep
     }
 
-    val arabicDayStr = remember(day) { toEasternArabicDigits(day) }
+    val arabicDayStr = remember(hijriDay) {
+        if (hijriDay != null) toEasternArabicDigits(hijriDay) else ""
+    }
 
     Box(
         modifier = Modifier
@@ -380,12 +406,14 @@ private fun CalendarDayCell(
                 fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Medium,
                 color = textColor
             )
-            Text(
-                text = arabicDayStr,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                fontWeight = FontWeight.Bold,
-                color = arabicTextColor
-            )
+            if (arabicDayStr.isNotEmpty()) {
+                Text(
+                    text = arabicDayStr,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    fontWeight = FontWeight.Bold,
+                    color = arabicTextColor
+                )
+            }
             if (isImportantDay) {
                 Spacer(modifier = Modifier.height(1.dp))
                 Box(

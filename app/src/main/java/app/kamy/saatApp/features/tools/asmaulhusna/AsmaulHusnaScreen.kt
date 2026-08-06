@@ -29,14 +29,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -130,7 +131,7 @@ fun AsmaulHusnaScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "99 Nama Allah SWT",
+                            text = stringResource(R.string.asmaul_husna_subtitle_count),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -140,7 +141,7 @@ fun AsmaulHusnaScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
@@ -183,7 +184,7 @@ fun AsmaulHusnaScreen(
                             IconButton(onClick = { searchQuery = "" }) {
                                 Icon(
                                     Icons.Default.Clear,
-                                    contentDescription = "Clear search"
+                                    contentDescription = null
                                 )
                             }
                         }
@@ -207,7 +208,7 @@ fun AsmaulHusnaScreen(
                     FilterChip(
                         selected = selectedFilter == AsmaulHusnaFilter.ALL,
                         onClick = { selectedFilter = AsmaulHusnaFilter.ALL },
-                        label = { Text("Semua (99)") },
+                        label = { Text(stringResource(R.string.asmaul_husna_filter_all, 99)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = SaatColors.DeepEmerald,
                             selectedLabelColor = Color.White
@@ -217,7 +218,15 @@ fun AsmaulHusnaScreen(
                     FilterChip(
                         selected = selectedFilter == AsmaulHusnaFilter.RECOMMENDED,
                         onClick = { selectedFilter = AsmaulHusnaFilter.RECOMMENDED },
-                        label = { Text("⭐ Amalan Zikir") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.AutoAwesome,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = if (selectedFilter == AsmaulHusnaFilter.RECOMMENDED) Color.White else SaatColors.DeepEmerald
+                            )
+                        },
+                        label = { Text(stringResource(R.string.asmaul_husna_filter_recommended)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = SaatColors.DeepEmerald,
                             selectedLabelColor = Color.White
@@ -227,7 +236,15 @@ fun AsmaulHusnaScreen(
                     FilterChip(
                         selected = selectedFilter == AsmaulHusnaFilter.FAVORITES,
                         onClick = { selectedFilter = AsmaulHusnaFilter.FAVORITES },
-                        label = { Text("❤️ Favorit (${favoriteIds.size})") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = if (selectedFilter == AsmaulHusnaFilter.FAVORITES) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = if (selectedFilter == AsmaulHusnaFilter.FAVORITES) Color.White else SaatColors.DeepEmerald
+                            )
+                        },
+                        label = { Text(stringResource(R.string.asmaul_husna_filter_favorites, favoriteIds.size)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = SaatColors.DeepEmerald,
                             selectedLabelColor = Color.White
@@ -311,13 +328,13 @@ private fun AsmaulHusnaHeroCard() {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
-                        Icons.Default.Star,
+                        Icons.Outlined.AutoAwesome,
                         contentDescription = null,
                         tint = SaatColors.GoldBright,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "KEUTAMAAN ASMAUL HUSNA",
+                        text = stringResource(R.string.asmaul_husna_hero_title),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.GoldBright,
@@ -326,7 +343,7 @@ private fun AsmaulHusnaHeroCard() {
                 }
 
                 Text(
-                    text = "وَلِلَّهِ الْأَسْمَاءُ الْحُسْنَىٰ فَADْعُوهُ بِهَا",
+                    text = "وَلِلَّهِ الْأَسْمَاءُ الْحُسْنَىٰ فَادْعُوهُ بِهَا",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
@@ -336,13 +353,13 @@ private fun AsmaulHusnaHeroCard() {
                 )
 
                 Text(
-                    text = "\"Hanya milik Allah asmaulhusna, maka bermohonlah kepada-Nya dengan menyebut asmaulhusna itu.\" (QS. Al-A'raf: 180)",
+                    text = stringResource(R.string.asmaul_husna_hero_verse),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.9f)
                 )
 
                 Text(
-                    text = "💡 Ketuk kartu apa saja untuk melihat dalil shahih, keutamaan amalan, dan menghitung zikir digital 100x.",
+                    text = stringResource(R.string.asmaul_husna_hero_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = SaatColors.GoldBright.copy(alpha = 0.9f)
                 )
@@ -401,9 +418,9 @@ private fun AsmaulHusnaCardItem(
                     modifier = Modifier.size(28.dp)
                 ) {
                     Icon(
-                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        imageVector = if (isFavorite) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                        contentDescription = null,
+                        tint = if (isFavorite) SaatColors.GoldDeep else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -446,7 +463,7 @@ private fun AsmaulHusnaCardItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "📿 Zikir ${item.recommendedCount}x",
+                    text = stringResource(R.string.asmaul_husna_dhikr_fmt, item.recommendedCount),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = SaatColors.DeepEmerald,
@@ -506,7 +523,7 @@ private fun AsmaulHusnaDetailSheet(
                 IconButton(onClick = { dhikrCount = 0 }) {
                     Icon(
                         Icons.Default.Refresh,
-                        contentDescription = "Reset Counter",
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -563,7 +580,7 @@ private fun AsmaulHusnaDetailSheet(
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = "DALIL & REFERENSI (${item.dalilReference})",
+                            text = "${stringResource(R.string.asmaul_husna_dalil_title)} (${item.dalilReference})",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = SaatColors.DeepEmerald
@@ -596,13 +613,13 @@ private fun AsmaulHusnaDetailSheet(
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Icon(
-                            Icons.Default.Star,
+                            Icons.Outlined.AutoAwesome,
                             contentDescription = null,
                             tint = SaatColors.DeepEmerald,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = "KEUTAMAAN & PANDUAN ZIKIR",
+                            text = stringResource(R.string.asmaul_husna_fadhilah_title),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = SaatColors.DeepEmerald
@@ -634,7 +651,7 @@ private fun AsmaulHusnaDetailSheet(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "TASBIH DIGITAL ASMAUL HUSNA",
+                        text = stringResource(R.string.asmaul_husna_tasbih_title),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.GoldBright,
@@ -695,6 +712,8 @@ private fun AsmaulHusnaDetailSheet(
                             if (dhikrCount < targetCount) {
                                 dhikrCount++
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            } else {
+                                dhikrCount = 0
                             }
                         },
                         shape = CircleShape,
@@ -706,7 +725,7 @@ private fun AsmaulHusnaDetailSheet(
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
-                                text = if (dhikrCount >= targetCount) "SELESAI ✦ TAP UNTUK RESET" else "TEKAN UNTUK ZIKIR (+1)",
+                                text = if (dhikrCount >= targetCount) stringResource(R.string.asmaul_husna_tap_to_reset) else stringResource(R.string.asmaul_husna_tap_to_dhikr),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = SaatColors.DeepEmerald

@@ -464,12 +464,23 @@
     <string name="media_playback_channel_name">Radio Islami</string>
     <string name="asmaul_husna_title">Asmaul Husna</string>
     <string name="asmaul_husna_subtitle">99 Nama Allah beserta dalil</string>
+    <string name="asmaul_husna_subtitle_count">99 Nama Allah SWT</string>
     <string name="asmaul_husna_account_subtitle">99 Asmaul Husna lengkap dengan makna, dalil Qur\'an</string>
     <string name="asmaul_husna_search_hint">Cari Asmaul Husna atau artinya</string>
+    <string name="asmaul_husna_filter_all">Semua (%1$d)</string>
+    <string name="asmaul_husna_filter_recommended">Amalan Zikir</string>
+    <string name="asmaul_husna_filter_favorites">Favorit (%1$d)</string>
+    <string name="asmaul_husna_hero_title">KEUTAMAAN ASMAUL HUSNA</string>
+    <string name="asmaul_husna_hero_verse">\"Hanya milik Allah asmaulhusna, maka bermohonlah kepada-Nya dengan menyebut asmaulhusna itu.\" (QS. Al-A\'raf: 180)</string>
+    <string name="asmaul_husna_hero_hint">💡 Ketuk kartu apa saja untuk melihat dalil shahih, keutamaan amalan, dan menghitung zikir digital 100x.</string>
+    <string name="asmaul_husna_dhikr_fmt">Zikir %1$dx</string>
     <string name="asmaul_husna_practice_button">Amalkan Zikir</string>
     <string name="asmaul_husna_dalil_title">Dalil &amp; Referensi</string>
     <string name="asmaul_husna_fadhilah_title">Keutamaan &amp; Panduan Amalan</string>
+    <string name="asmaul_husna_tasbih_title">TASBIH DIGITAL ASMAUL HUSNA</string>
     <string name="asmaul_husna_counter_finish">Alhamdulillah! Anda telah menyelesaikan 100x zikir.</string>
+    <string name="asmaul_husna_tap_to_dhikr">TEKAN UNTUK ZIKIR (+1)</string>
+    <string name="asmaul_husna_tap_to_reset">SELESAI ✦ TEKAN UNTUK RESET</string>
     <string name="action_later">Nanti</string>
 
     <string name="app_name_launcher">Sāat</string>

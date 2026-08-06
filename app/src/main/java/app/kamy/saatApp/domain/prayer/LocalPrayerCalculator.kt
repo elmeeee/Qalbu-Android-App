@@ -141,7 +141,8 @@ object LocalPrayerCalculator {
                 dhuhr = byKey[PrayerType.DHUHR.aladhanKey].orEmpty(),
                 asr = byKey[PrayerType.ASR.aladhanKey].orEmpty(),
                 maghrib = byKey[PrayerType.MAGHRIB.aladhanKey].orEmpty(),
-                isha = byKey[PrayerType.ISHA.aladhanKey].orEmpty()
+                isha = byKey[PrayerType.ISHA.aladhanKey].orEmpty(),
+                hijriDay = result.hijriDay
             )
         }
     }
