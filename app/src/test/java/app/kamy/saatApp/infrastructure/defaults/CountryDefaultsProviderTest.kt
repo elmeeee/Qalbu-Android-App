@@ -11,7 +11,7 @@ class CountryDefaultsProviderTest {
     @Test
     fun `Indonesia maps to Kemenag translation and KEMENAG method`() {
         val defaults = CountryDefaultsProvider.defaultsForCountryCode("ID")
-        assertEquals(LocalQuranConfig.TRANSLATION_KEMENAG, defaults.translationId)
+        assertEquals(LocalQuranConfig.TRANSLATION_INDONESIAN, defaults.translationId)
         assertEquals(PrayerCalculationMethod.KEMENAG, defaults.prayerMethod)
     }
 
@@ -53,7 +53,7 @@ class CountryDefaultsProviderTest {
     @Test
     fun `Lowercase country code is normalized to uppercase`() {
         val defaults = CountryDefaultsProvider.defaultsForCountryCode("id")
-        assertEquals(LocalQuranConfig.TRANSLATION_KEMENAG, defaults.translationId)
+        assertEquals(LocalQuranConfig.TRANSLATION_INDONESIAN, defaults.translationId)
         assertEquals(PrayerCalculationMethod.KEMENAG, defaults.prayerMethod)
     }
 
