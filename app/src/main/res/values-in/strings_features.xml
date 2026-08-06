@@ -478,9 +478,9 @@
     <string name="asmaul_husna_dalil_title">Dalil &amp; Referensi</string>
     <string name="asmaul_husna_fadhilah_title">Keutamaan &amp; Panduan Amalan</string>
     <string name="asmaul_husna_tasbih_title">TASBIH DIGITAL ASMAUL HUSNA</string>
-    <string name="asmaul_husna_counter_finish">Alhamdulillah! Anda telah menyelesaikan 100x zikir.</string>
-    <string name="asmaul_husna_tap_to_dhikr">TEKAN UNTUK ZIKIR (+1)</string>
-    <string name="asmaul_husna_tap_to_reset">SELESAI ✦ TEKAN UNTUK RESET</string>
+    <string name="asmaul_husna_counter_finish">Alhamdulillah! Anda telah menyelesaikan %1$dx zikir.</string>
+    <string name="asmaul_husna_tap_to_dhikr">Ketuk untuk Berzikir (+1)</string>
+    <string name="asmaul_husna_tap_to_reset">Alhamdulillah Selesai ✦ Ketuk untuk Ulangi</string>
     <string name="spiritual_tools_badge_count">%1$d Fitur Ibadah</string>
     <string name="action_later">Nanti</string>
 

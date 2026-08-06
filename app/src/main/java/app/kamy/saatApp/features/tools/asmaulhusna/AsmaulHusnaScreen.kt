@@ -523,7 +523,7 @@ private fun AsmaulHusnaDetailSheet(
     val haptic = LocalHapticFeedback.current
 
     var dhikrCount by remember { mutableIntStateOf(0) }
-    val targetCount = item.recommendedCount
+    val targetCount = item.actualTargetCount
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -735,7 +735,7 @@ private fun AsmaulHusnaDetailSheet(
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
-                                text = stringResource(R.string.asmaul_husna_counter_finish),
+                                text = stringResource(R.string.asmaul_husna_counter_finish, targetCount),
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = SaatColors.GoldBright
@@ -743,18 +743,18 @@ private fun AsmaulHusnaDetailSheet(
                         }
                     }
 
-                    // Large Tap Button
+                    // Large Tap Button (High-contrast Pure White / Bright Gold Surface with Haptic Feedback)
                     Surface(
                         onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             if (dhikrCount < targetCount) {
                                 dhikrCount++
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             } else {
                                 dhikrCount = 0
                             }
                         },
                         shape = CircleShape,
-                        color = SaatColors.Gold,
+                        color = if (dhikrCount >= targetCount) SaatColors.GoldBright else Color.White,
                         shadowElevation = 6.dp,
                         modifier = Modifier
                             .fillMaxWidth()

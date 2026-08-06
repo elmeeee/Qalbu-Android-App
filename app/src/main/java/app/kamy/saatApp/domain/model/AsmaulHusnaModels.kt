@@ -35,4 +35,13 @@ data class AsmaulHusnaItem(
         AppLanguage.MALAY -> fadhilahMs
         AppLanguage.INDONESIAN -> fadhilahId
     }
+
+    val actualTargetCount: Int
+        get() {
+            val text = fadhilahId.ifBlank { fadhilahEn }
+            val match = Regex("""(\d+)\s*x""", RegexOption.IGNORE_CASE).find(text)
+                ?: Regex("""(\d+)\s*kali""", RegexOption.IGNORE_CASE).find(text)
+            val parsed = match?.groupValues?.get(1)?.toIntOrNull()
+            return if (parsed != null && parsed in 1..10000) parsed else recommendedCount
+        }
 }

@@ -1034,9 +1034,9 @@
     <string name="asmaul_husna_dalil_title">Dalil / Evidence</string>
     <string name="asmaul_husna_fadhilah_title">Virtue &amp; Practice Guide</string>
     <string name="asmaul_husna_tasbih_title">DIGITAL TASBIH ASMAUL HUSNA</string>
-    <string name="asmaul_husna_counter_finish">Alhamdulillah! You have completed 100x dhikr.</string>
-    <string name="asmaul_husna_tap_to_dhikr">TAP TO DHIKR (+1)</string>
-    <string name="asmaul_husna_tap_to_reset">COMPLETED ✦ TAP TO RESET</string>
+    <string name="asmaul_husna_counter_finish">Alhamdulillah! You have completed %1$dx dhikr.</string>
+    <string name="asmaul_husna_tap_to_dhikr">Tap to Recite Dhikr (+1)</string>
+    <string name="asmaul_husna_tap_to_reset">Alhamdulillah Completed ✦ Tap to Reset</string>
     <string name="spiritual_tools_badge_count">%1$d Essential Tools</string>
 
     <!-- Sunnah Prayer Detail Strings -->
