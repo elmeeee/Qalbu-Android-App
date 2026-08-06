@@ -31,6 +31,10 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -234,62 +238,54 @@ fun FaraidhCalculatorScreen(
     }
 
     if (state.showInputSheet) {
-        Dialog(
-            onDismissRequest = { vm.toggleInputSheet(false) },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = false,
-                decorFitsSystemWindows = false
-            )
+        androidx.activity.compose.BackHandler(onBack = { vm.toggleInputSheet(false) })
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = SaatColors.ScreenBackground
         ) {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = SaatColors.ScreenBackground
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .tabContentStatusBarInset()
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = SaatColors.PureWhite,
+                    shadowElevation = 1.dp
                 ) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = SaatColors.ScreenBackground,
-                        shadowElevation = 1.dp
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(onClick = { vm.toggleInputSheet(false) }) {
-                                Icon(
-                                    Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.back),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            Text(
-                                text = stringResource(R.string.faraidh_input_title),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                        IconButton(onClick = { vm.toggleInputSheet(false) }) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back),
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
+                        Text(
+                            text = stringResource(R.string.faraidh_input_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
-
-                    FaraidhInputSheetContent(
-                        state = state,
-                        currency = currency,
-                        onDeceasedNameChange = vm::setDeceasedName,
-                        onGenderChange = vm::setGender,
-                        onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
-                        onMadhhabChange = vm::setMadhhab,
-                        onEstateFieldChange = vm::setEstateField,
-                        onHeirChange = vm::setHeirCount,
-                        onHeirNameChange = vm::setHeirName,
-                        onDone = { vm.toggleInputSheet(false) }
-                    )
                 }
+
+                FaraidhInputSheetContent(
+                    state = state,
+                    currency = currency,
+                    onDeceasedNameChange = vm::setDeceasedName,
+                    onGenderChange = vm::setGender,
+                    onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
+                    onMadhhabChange = vm::setMadhhab,
+                    onEstateFieldChange = vm::setEstateField,
+                    onHeirChange = vm::setHeirCount,
+                    onHeirNameChange = vm::setHeirName,
+                    onDone = { vm.toggleInputSheet(false) }
+                )
             }
         }
     }
