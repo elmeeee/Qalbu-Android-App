@@ -5,6 +5,7 @@
     -->
     <style name="Theme.Saat" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/al_khatib_screen_background</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="35">always</item>
     </style>
 
     <!-- Splash screen: gradient bg with centered logo icon.
