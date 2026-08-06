@@ -243,6 +243,13 @@ fun RootScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable("tools/sunnah-prayer") {
+                app.kamy.saatApp.features.tools.sunnah.SunnahPrayerScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenDoaZikir = { navController.navigate("tools/doa-zikir") },
+                    onOpenQiyam = { navController.navigate("tools/qiyam") }
+                )
+            }
 
             composable("tools/faraidh",
                 enterTransition = { slideInHorizontally(tween(280)) { it } + fadeIn(tween(200)) },

@@ -127,6 +127,13 @@ fun SpiritualToolsScreen(
                 "manzil",
                 SaatColors.DeepEmerald,
                 SaatColors.GoldDeep
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_prayer_rug,
+                R.string.sunnah_prayer_title,
+                "sunnah-prayer",
+                SaatColors.GoldDeep,
+                SaatColors.DeepEmerald
             )
         )
     }
@@ -241,7 +248,7 @@ private fun SpiritualToolGridCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(130.dp)
+            .height(136.dp)
             .clip(RoundedCornerShape(22.dp))
             .clickable(
                 interactionSource = interactionSource,
@@ -258,7 +265,7 @@ private fun SpiritualToolGridCard(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(horizontal = 12.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -267,19 +274,19 @@ private fun SpiritualToolGridCard(
                 painter = painterResource(tool.iconRes),
                 contentDescription = null,
                 tint = tool.accentStart,
-                modifier = Modifier.size(46.dp)
+                modifier = Modifier.size(42.dp)
             )
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
 
             // Centered Feature Title Name
             Text(
                 text = titleStr,
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 14.sp),
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp, lineHeight = 16.sp),
                 fontWeight = FontWeight.SemiBold,
                 color = SaatColors.Slate900,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
             )

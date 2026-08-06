@@ -550,6 +550,8 @@
     <string name="up_to_date_sheet_desc">Sāat versi %1$s adalah versi terbaru saat ini. Selamat beribadah!</string>
     <string name="got_it">Mengerti</string>
 
+    <!-- Spiritual Tools -->
+    <string name="sunnah_prayer_title">Panduan Salat Sunnah &amp; Jenazah</string>
     <!-- Sahabat Sāat -->
     <string name="tanya_saat_ai_title">Sahabat Sāat</string>
     <string name="tanya_saat_ai_subtitle">Teman Curhat &amp; Panduan Ayat Al-Qur\'an</string>

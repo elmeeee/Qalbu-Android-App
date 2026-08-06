@@ -97,6 +97,8 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.R
@@ -232,23 +234,63 @@ fun FaraidhCalculatorScreen(
     }
 
     if (state.showInputSheet) {
-        SaatPartialBottomSheet(
-            onDismiss = { vm.toggleInputSheet(false) },
-            maxHeightFraction = 0.92f,
-            scrollContent = false
-        ) {
-            FaraidhInputSheetContent(
-                state = state,
-                currency = currency,
-                onDeceasedNameChange = vm::setDeceasedName,
-                onGenderChange = vm::setGender,
-                onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
-                onMadhhabChange = vm::setMadhhab,
-                onEstateFieldChange = vm::setEstateField,
-                onHeirChange = vm::setHeirCount,
-                onHeirNameChange = vm::setHeirName,
-                onDone = { vm.toggleInputSheet(false) }
+        Dialog(
+            onDismissRequest = { vm.toggleInputSheet(false) },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
             )
+        ) {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = SaatColors.ScreenBackground
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .tabContentStatusBarInset()
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = SaatColors.ScreenBackground,
+                        shadowElevation = 1.dp
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = { vm.toggleInputSheet(false) }) {
+                                Icon(
+                                    Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.back),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.faraidh_input_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    FaraidhInputSheetContent(
+                        state = state,
+                        currency = currency,
+                        onDeceasedNameChange = vm::setDeceasedName,
+                        onGenderChange = vm::setGender,
+                        onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
+                        onMadhhabChange = vm::setMadhhab,
+                        onEstateFieldChange = vm::setEstateField,
+                        onHeirChange = vm::setHeirCount,
+                        onHeirNameChange = vm::setHeirName,
+                        onDone = { vm.toggleInputSheet(false) }
+                    )
+                }
+            }
         }
     }
 

@@ -70,7 +70,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -100,6 +106,7 @@ private enum class AsmaulHusnaFilter {
 fun AsmaulHusnaScreen(
     onBack: () -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val onboardingStore = remember(context) { OnboardingStore.from(context) }
     val coachMarkState = rememberCoachMarkState()
@@ -141,8 +148,9 @@ fun AsmaulHusnaScreen(
             favoriteIds = if (favoriteIds.contains(itemNumber)) favoriteIds - itemNumber else favoriteIds + itemNumber
         }
     }
-    val onSelectItem: (AsmaulHusnaItem) -> Unit = remember {
+    val onSelectItem: (AsmaulHusnaItem) -> Unit = remember(focusManager) {
         { item ->
+            focusManager.clearFocus()
             selectedItemForDetail = item
         }
     }
@@ -165,7 +173,10 @@ fun AsmaulHusnaScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        focusManager.clearFocus()
+                        onBack()
+                    }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
@@ -182,6 +193,9 @@ fun AsmaulHusnaScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }
         ) {
             // Search Bar & Filters
             Column(
@@ -214,7 +228,10 @@ fun AsmaulHusnaScreen(
                     },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
+                            IconButton(onClick = {
+                                searchQuery = ""
+                                focusManager.clearFocus()
+                            }) {
                                 Icon(
                                     Icons.Default.Clear,
                                     contentDescription = null
@@ -223,6 +240,8 @@ fun AsmaulHusnaScreen(
                         }
                     },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,

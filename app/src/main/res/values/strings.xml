@@ -972,6 +972,8 @@
     <string name="up_to_date_sheet_desc">Sāat v%1$s is currently the latest version. Enjoy your spiritual journey!</string>
     <string name="got_it">Got It</string>
 
+    <!-- Spiritual Tools -->
+    <string name="sunnah_prayer_title">Sunnah &amp; Janazah Prayer Guide</string>
     <!-- Sahabat Sāat -->
     <string name="tanya_saat_ai_title">Sahabat Sāat</string>
     <string name="tanya_saat_ai_subtitle">Spiritual Companion &amp; Quranic Guidance</string>
