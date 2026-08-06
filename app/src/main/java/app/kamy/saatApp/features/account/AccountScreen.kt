@@ -2007,7 +2007,9 @@ fun AboutSaatScreen(
         val langTag = appLanguage.tag.ifBlank { "id" }
         LegalWebView(
             url = "https://elmee.my/saat/about?lang=${langTag}&version=${appVersion}",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         )
     }
 }
@@ -2050,7 +2052,9 @@ fun PrivacyPolicyScreen(
 
         LegalWebView(
             url = "https://elmee.my/saat/privacy?lang=${langTag}",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         )
     }
 }
@@ -2093,7 +2097,9 @@ fun TermsAndConditionsScreen(
 
         LegalWebView(
             url = "https://elmee.my/saat/terms?lang=${langTag}",
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         )
     }
 }
@@ -2117,12 +2123,14 @@ private fun LegalWebView(
         AndroidView(
             factory = { context ->
                 WebView(context).apply {
-                    // Enable View-side nested scrolling so Compose's nested scroll
-                    // dispatcher can communicate with WebView's internal OverScroller.
-                    // Without this, scroll events are lost at top/bottom boundaries
-                    // causing the "stuck" scroll bug in About/Privacy/Terms screens.
-                    ViewCompat.setNestedScrollingEnabled(this, true)
+                    layoutParams = android.view.ViewGroup.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                    )
                     setBackgroundColor(android.graphics.Color.TRANSPARENT)
+                    isVerticalScrollBarEnabled = true
+                    overScrollMode = android.view.View.OVER_SCROLL_IF_CONTENT_SCROLLS
+
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
                     settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
@@ -2149,12 +2157,7 @@ private fun LegalWebView(
                 }
             },
             update = { _ -> },
-            // rememberNestedScrollInteropConnection() bridges the Compose nested scroll
-            // protocol with View's NestedScrollingChild/Parent protocol, so that
-            // fling and boundary events are correctly handed off between the two systems.
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(rememberNestedScrollInteropConnection())
+            modifier = Modifier.fillMaxSize()
         )
 
         if (isLoading) {
