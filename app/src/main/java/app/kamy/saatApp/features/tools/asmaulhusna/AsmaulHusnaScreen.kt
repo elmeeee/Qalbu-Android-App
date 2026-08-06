@@ -84,6 +84,13 @@ import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.AsmaulHusnaItem
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 
+import androidx.compose.runtime.LaunchedEffect
+import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
+import kotlinx.coroutines.delay
+
 private enum class AsmaulHusnaFilter {
     ALL, FAVORITES
 }
@@ -94,12 +101,22 @@ fun AsmaulHusnaScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val onboardingStore = remember(context) { OnboardingStore.from(context) }
+    val coachMarkState = rememberCoachMarkState()
     val appLanguage = remember(context) { AppLanguageStore.from(context).current() }
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf(AsmaulHusnaFilter.ALL) }
     var selectedItemForDetail by remember { mutableStateOf<AsmaulHusnaItem?>(null) }
     var favoriteIds by remember { mutableStateOf(setOf<Int>()) }
     val allItems = remember(context) { LocalAsmaulHusnaCatalog.getItems(context) }
+
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownAsmaulCoachMark()) {
+            delay(500)
+            onboardingStore.markAsmaulCoachMarkShown()
+            coachMarkState.show()
+        }
+    }
 
     val filteredItems = remember(searchQuery, selectedFilter, favoriteIds, appLanguage, allItems) {
         allItems.filter { item ->
@@ -170,7 +187,13 @@ fun AsmaulHusnaScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .coachMarkTarget(
+                        coachMarkState,
+                        0,
+                        R.string.coach_mark_asmaul_title,
+                        R.string.coach_mark_asmaul_desc
+                    ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 OutlinedTextField(
@@ -280,6 +303,8 @@ fun AsmaulHusnaScreen(
             onDismiss = { selectedItemForDetail = null }
         )
     }
+
+    CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable

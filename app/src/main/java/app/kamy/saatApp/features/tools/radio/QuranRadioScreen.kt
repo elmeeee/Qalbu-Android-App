@@ -77,15 +77,31 @@ import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.ui.layout.floatingNavAndAudioBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
+import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
+import androidx.compose.runtime.LaunchedEffect
+
 @Composable
 fun QuranRadioScreen(
     audioPlayer: AudioPlayerController,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val onboardingStore = remember(context) { OnboardingStore.from(context) }
+    val coachMarkState = rememberCoachMarkState()
     val appLanguage = remember(context) { AppLanguageStore.from(context).current() }
     val playbackState by audioPlayer.state.collectAsStateWithLifecycle()
     var selectedCategory by remember { mutableStateOf(RadioCategory.ALL) }
+
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownRadioCoachMark()) {
+            kotlinx.coroutines.delay(500)
+            onboardingStore.markRadioCoachMarkShown()
+            coachMarkState.show()
+        }
+    }
 
     val allStations = remember(context) { LocalRadioCatalog.getStations(context) }
     val filteredStations = remember(selectedCategory, allStations) {
@@ -96,12 +112,13 @@ fun QuranRadioScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(SaatColors.ScreenBackground)
-            .tabContentStatusBarInset()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(SaatColors.ScreenBackground)
+                .tabContentStatusBarInset()
+        ) {
         // Sticky Header bar
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -153,11 +170,20 @@ fun QuranRadioScreen(
         ) {
             // Hero / Now Playing Card
             item {
-                RadioHeroPlayerCard(
-                    playbackState = playbackState,
-                    onToggle = { audioPlayer.toggle() },
-                    onStop = { audioPlayer.stop() }
-                )
+                Box(
+                    modifier = Modifier.coachMarkTarget(
+                        coachMarkState,
+                        0,
+                        R.string.coach_mark_radio_title,
+                        R.string.coach_mark_radio_desc
+                    )
+                ) {
+                    RadioHeroPlayerCard(
+                        playbackState = playbackState,
+                        onToggle = { audioPlayer.toggle() },
+                        onStop = { audioPlayer.stop() }
+                    )
+                }
             }
 
             // Category Filter Pills
@@ -203,6 +229,8 @@ fun QuranRadioScreen(
             }
         }
     }
+}
+CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable

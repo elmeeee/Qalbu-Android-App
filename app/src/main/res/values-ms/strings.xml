@@ -440,19 +440,27 @@
     <string name="coach_mark_next">Seterusnya</string>
     <string name="coach_mark_finish">Selesai</string>
     <string name="coach_mark_today_location_title">Lokasi &amp; Tarikh</string>
-    <string name="coach_mark_today_location_desc">Pantau waktu solat dengan tepat mengikut bandar dan tarikh semasa anda.</string>
+    <string name="coach_mark_today_location_desc">Lokasi anda semasa. Ketik tarikh untuk melihat jadual solat &amp; kalendar Hijriah.</string>
     <string name="coach_mark_today_khgt_title">Hari-Hari Penting Islam</string>
     <string name="coach_mark_today_khgt_desc">Dapatkan maklumat mengenai tarikh dan peristiwa penting dalam kalendar Islam.</string>
     <string name="coach_mark_today_prayer_title">Jadual Solat</string>
-    <string name="coach_mark_today_prayer_desc">Pantau jadual solat harian, kiraan mundur ke solat seterusnya, dan arah kiblat.</string>
+    <string name="coach_mark_today_prayer_desc">Maklumat jadual solat harian serta kiraan mundur ke waktu solat seterusnya.</string>
     <string name="coach_mark_today_tracker_title">Penjejak Ibadah Harian</string>
-    <string name="coach_mark_today_tracker_desc">Catat ibadah harian anda, dari solat wajib, sunnah, hingga puasa dengan mudah.</string>
+    <string name="coach_mark_today_tracker_desc">Catat dan pantau pelaksanaan solat fardu harian anda dengan mudah.</string>
     <string name="coach_mark_today_continue_title">Teruskan Membaca</string>
     <string name="coach_mark_today_continue_desc">Sambung sesi bacaan Al-Quran tepat pada ayat terakhir yang anda baca.</string>
     <string name="coach_mark_today_verse_title">Ayat Hari Ini</string>
     <string name="coach_mark_today_verse_desc">Dengar bacaan murottal, baca tafsir, dan kongsi inspirasi Al-Quran harian dengan bantuan AI.</string>
     <string name="coach_mark_quran_menu_title">Menu Tindakan Ayat</string>
     <string name="coach_mark_quran_menu_desc">Ketuk untuk mengakses Penanda Buku, Nota, Hifz hafalan, Tafsir, dan perkongsian audio.</string>
+    <string name="coach_mark_dhikr_title">Kiraan Zikir</string>
+    <string name="coach_mark_dhikr_desc">Ketik butang atau skrin untuk mengira zikir, dan tetapkan sasaran mengikut keperluan anda.</string>
+    <string name="coach_mark_asmaul_title">99 Nama Allah</string>
+    <string name="coach_mark_asmaul_desc">Terokai 99 Asmaul Husna lengkap dengan makna 3 bahasa, audio murottal, dan amalan zikir.</string>
+    <string name="coach_mark_radio_title">Radio Quran Live</string>
+    <string name="coach_mark_radio_desc">Dengar siaran langsung radio dakwah &amp; murottal 24 jam daripada pelbagai negara.</string>
+    <string name="coach_mark_chapters_title">Senarai Surah &amp; Juz</string>
+    <string name="coach_mark_chapters_desc">Cari surah dengan cepat dan pilih mod paparan mengikut Surah, Juz, atau Halaman.</string>
 
     <!-- Force Update -->
     <string name="force_update_later_button">Mungkin Nanti</string>

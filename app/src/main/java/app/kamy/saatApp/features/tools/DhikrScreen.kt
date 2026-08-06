@@ -62,11 +62,17 @@ import app.kamy.saatApp.infrastructure.preferences.DhikrPreset
 import app.kamy.saatApp.infrastructure.preferences.DhikrStore
 import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
 import app.kamy.saatApp.ui.feedback.rememberTapHaptic
+import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 @Composable
 fun DhikrScreen(onBack: () -> Unit) {
     val context = LocalContext.current
+    val onboardingStore = remember(context) { OnboardingStore.from(context) }
+    val coachMarkState = rememberCoachMarkState()
     val tapHaptic = rememberTapHaptic()
     val confirmHaptic = rememberConfirmHaptic()
     val scope = rememberCoroutineScope()
@@ -76,6 +82,14 @@ fun DhikrScreen(onBack: () -> Unit) {
     var count by remember(preset.id) { mutableIntStateOf(DhikrStore.sessionCount(context, preset.id)) }
     var pulseKey by remember { mutableIntStateOf(0) }
     val chipListState = rememberLazyListState()
+
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownDhikrCoachMark()) {
+            kotlinx.coroutines.delay(500)
+            onboardingStore.markDhikrCoachMarkShown()
+            coachMarkState.show()
+        }
+    }
 
     LaunchedEffect(selectedIndex) {
         chipListState.animateScrollToItem(selectedIndex)
@@ -92,17 +106,18 @@ fun DhikrScreen(onBack: () -> Unit) {
         if (count > 0 && count % preset.target == 0) confirmHaptic()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(SaatColors.ScreenBackground, SaatColors.SageMist, SaatColors.PrayerMint)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(SaatColors.ScreenBackground, SaatColors.SageMist, SaatColors.PrayerMint)
+                    )
                 )
-            )
-            .tabContentStatusBarInset()
-            .navigationBarsPadding()
-    ) {
+                .tabContentStatusBarInset()
+                .navigationBarsPadding()
+        ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -172,6 +187,12 @@ fun DhikrScreen(onBack: () -> Unit) {
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
+                        .coachMarkTarget(
+                            coachMarkState,
+                            0,
+                            R.string.coach_mark_dhikr_title,
+                            R.string.coach_mark_dhikr_desc
+                        )
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
@@ -226,6 +247,8 @@ fun DhikrScreen(onBack: () -> Unit) {
             )
         }
     }
+}
+CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable

@@ -86,6 +86,11 @@ import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import kotlinx.coroutines.launch
 
+import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChaptersScreen(
@@ -128,6 +133,16 @@ fun ChaptersScreen(
     }
 
     val context = androidx.compose.ui.platform.LocalContext.current
+    val onboardingStore = remember(context) { OnboardingStore.from(context) }
+    val coachMarkState = rememberCoachMarkState()
+
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownChaptersCoachMark()) {
+            kotlinx.coroutines.delay(500)
+            onboardingStore.markChaptersCoachMarkShown()
+            coachMarkState.show()
+        }
+    }
     val focusManager = LocalFocusManager.current
 
     BackHandler(enabled = state.isSearchActive || state.searchQuery.isNotEmpty()) {
@@ -249,6 +264,12 @@ fun ChaptersScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.background)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                0,
+                                R.string.coach_mark_chapters_title,
+                                R.string.coach_mark_chapters_desc
+                            )
                     )
                     key(state.browseMode) {
                     LazyColumn(
@@ -528,6 +549,8 @@ fun ChaptersScreen(
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 16.dp, vertical = 16.dp)
         )
+
+        CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
     }
 }
 
