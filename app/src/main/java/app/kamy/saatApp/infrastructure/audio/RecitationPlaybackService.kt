@@ -15,6 +15,8 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import app.kamy.saatApp.MainActivity
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.locale.AppLocale
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
 import app.kamy.saatApp.infrastructure.util.BootContextChecker
 import com.google.common.collect.ImmutableList
@@ -25,6 +27,11 @@ import javax.inject.Inject
 class RecitationPlaybackService : MediaSessionService() {
 
     @Inject lateinit var playbackEngine: PlaybackEngine
+
+    override fun attachBaseContext(newBase: Context) {
+        val language = AppLanguageStore.from(newBase).current()
+        super.attachBaseContext(AppLocale.wrap(newBase, language))
+    }
 
     @OptIn(UnstableApi::class)
     override fun onCreate() {

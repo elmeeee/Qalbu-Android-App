@@ -556,6 +556,8 @@ class LocalQuranDataSource @Inject constructor(
         val translationText = translationText(translationId)
         val audioUrl = LocalQuranConfig.murottalUrl(recitationId, globalAyah)
         return RandomAyahPayload(
+            id = globalAyah,
+            globalAyah = globalAyah,
             chapterId = sura,
             verseNumber = aya,
             verseKey = "$sura:$aya",

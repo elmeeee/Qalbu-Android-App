@@ -853,7 +853,7 @@ private fun SaatAyahPage(
                 }
                 else -> {
                     val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) (verse.textIndopak ?: verse.textUthmani) else verse.textUthmani
-                    val isPlayingThisVerse = audioPlaybackState != null && audioPlaybackState.isPlaying && audioPlaybackState.trackSubtitle == verse.verseKey && audioPlaybackState.currentUrl != null
+                    val isPlayingThisVerse = audioPlaybackState != null && audioPlaybackState.trackSubtitle == verse.verseKey && audioPlaybackState.currentUrl != null
                     val (words, weights, totalWeight) = remember(textToRender) {
                         val parsedWords = textToRender?.split("\\s+".toRegex())
                             ?.filter { it.isNotBlank() }
@@ -891,6 +891,7 @@ private fun SaatAyahPage(
                     val activeWordIndex by remember(
                         isPlayingThisVerse,
                         audioPlaybackState?.currentPositionMs,
+                        audioPlaybackState?.durationMs,
                         audioPlaybackState?.progress,
                         words,
                         weights,
@@ -902,7 +903,12 @@ private fun SaatAyahPage(
                             } else {
                                 val dur = audioPlaybackState?.durationMs ?: 0L
                                 val pos = audioPlaybackState?.currentPositionMs ?: 0L
-                                val prog = if (dur > 0L) (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f) else (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
+                                val rawProg = if (dur > 0L) (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f) else (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
+
+                                // Normalize progress to trim leading (~3%) and trailing (~5%) audio padding/silence
+                                val leadPaddingRatio = 0.03f
+                                val trailPaddingRatio = 0.05f
+                                val prog = ((rawProg - leadPaddingRatio) / (1f - leadPaddingRatio - trailPaddingRatio)).coerceIn(0f, 1f)
 
                                 val targetWeight = prog * totalWeight
                                 var accum = 0f

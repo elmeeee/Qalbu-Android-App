@@ -14,6 +14,7 @@ import app.kamy.saatApp.domain.model.HadithReference
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.domain.model.TafsirPayload
+import app.kamy.saatApp.domain.model.AudioPayload
 import app.kamy.saatApp.domain.model.ArabicTextType
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.audio.AudioQueueItem
@@ -457,19 +458,32 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun selectRecitation(id: Int) {
         if (id <= 0 || id == _state.value.selectedRecitationId) return
-        val currentKey = _state.value.currentlyPlayingVerseKey
-            ?: _state.value.verses.getOrNull(_state.value.currentVerseIndex)?.verseKey
+        val currentVerse = _state.value.verses.getOrNull(_state.value.currentVerseIndex)
         val activeIndex = _state.value.currentVerseIndex
         val wasPlaying = audioPlayer.state.value.isPlaying || audioPlayer.state.value.currentUrl != null
 
         translationStore.setRecitation(id)
-        _state.update { it.copy(selectedRecitationId = id) }
 
-        loadInitial(
-            targetVerseKey = currentKey,
-            targetVerseIndex = activeIndex,
-            autoPlayAfterLoad = wasPlaying
-        )
+        _state.update { s ->
+            val updatedVerses = s.verses.map { verse ->
+                val gAyah = verse.globalAyah ?: verse.id
+                val newAudioUrl = if (gAyah != null && gAyah > 0) {
+                    LocalQuranConfig.murottalUrl(id, gAyah)
+                } else {
+                    verse.audio?.url
+                }
+                verse.copy(audio = AudioPayload(url = newAudioUrl))
+            }
+            s.copy(
+                selectedRecitationId = id,
+                verses = updatedVerses
+            )
+        }
+
+        if (wasPlaying && currentVerse != null) {
+            val updatedVerse = _state.value.verses.getOrNull(activeIndex) ?: currentVerse
+            playAyahAtIndex(activeIndex, updatedVerse)
+        }
     }
 
     fun setFontScale(scale: Float) {

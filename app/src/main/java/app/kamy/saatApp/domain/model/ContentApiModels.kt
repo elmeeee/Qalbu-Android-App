@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class RandomAyahPayload(
     val id: Int? = null,
+    @SerialName("global_ayah") val globalAyah: Int? = null,
     @SerialName("chapter_id") val chapterId: Int? = null,
     @SerialName("verse_number") val verseNumber: Int? = null,
     @SerialName("verse_key") val verseKey: String? = null,
