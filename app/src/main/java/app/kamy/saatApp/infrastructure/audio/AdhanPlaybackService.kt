@@ -412,19 +412,20 @@ class AdhanPlaybackService : Service() {
             }
             val appContext = context.applicationContext
             return runCatching {
-                appContext.startService(intent)
+                androidx.core.content.ContextCompat.startForegroundService(appContext, intent)
             }.isSuccess
         }
 
         fun stop(context: Context, notificationId: Int = -1) {
-            context.startService(
-                Intent(context, AdhanPlaybackService::class.java).apply {
-                    action = ACTION_STOP
-                    if (notificationId >= 0) {
-                        putExtra(EXTRA_NOTIFICATION_ID, notificationId)
-                    }
+            val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+                action = ACTION_STOP
+                if (notificationId >= 0) {
+                    putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                 }
-            )
+            }
+            runCatching {
+                androidx.core.content.ContextCompat.startForegroundService(context.applicationContext, intent)
+            }
         }
     }
 }
