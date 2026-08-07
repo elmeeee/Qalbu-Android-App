@@ -6,18 +6,23 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.core.content.ContextCompat
 import app.kamy.saatApp.MainActivity
 
 object ExactAlarmScheduler {
+
+    private const val TAG = "ExactAlarmScheduler"
 
     internal fun shouldUseExactScheduling(sdkInt: Int, canScheduleExact: Boolean): Boolean {
         return sdkInt < Build.VERSION_CODES.S || canScheduleExact
     }
 
     fun canScheduleExactAlarms(context: Context): Boolean {
+        // API < 31: exact alarms are always allowed — no permission check needed.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (shouldUseExactScheduling(Build.VERSION.SDK_INT, alarmManager.canScheduleExactAlarms())) return true
+        if (alarmManager.canScheduleExactAlarms()) return true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             return ContextCompat.checkSelfPermission(context, android.Manifest.permission.USE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED
         }
@@ -44,7 +49,8 @@ object ExactAlarmScheduler {
                 AlarmManager.AlarmClockInfo(triggerAtMillis, showIntent),
                 pending
             )
-        }.onFailure {
+        }.onFailure { e ->
+            Log.w(TAG, "setAlarmClock failed, falling back to setExactAndAllowWhileIdle", e)
             scheduleExactAndAllowWhileIdle(context, triggerAtMillis, pending)
         }
     }
@@ -56,12 +62,9 @@ object ExactAlarmScheduler {
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         runCatching {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
-            } else {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
-            }
-        }.onFailure {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
+        }.onFailure { e ->
+            Log.w(TAG, "setExactAndAllowWhileIdle failed, falling back to inexact", e)
             scheduleInexact(alarmManager, triggerAtMillis, pending)
         }
     }
@@ -73,7 +76,8 @@ object ExactAlarmScheduler {
     ) {
         runCatching {
             alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAtMillis, pending)
-        }.onFailure {
+        }.onFailure { e ->
+            Log.w(TAG, "set() failed, last resort setWindow", e)
             alarmManager.setWindow(
                 AlarmManager.RTC_WAKEUP,
                 triggerAtMillis,

@@ -261,7 +261,7 @@ class AccountViewModel @Inject constructor(
     }
 
     private fun reschedulePrayerNotifications() {
-        PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+        PrayerNotificationCoordinator.rescheduleFromCache(appContext, force = true)
     }
 
     private fun syncPreferencesIntoState() {

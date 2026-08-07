@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.RawRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -19,6 +20,7 @@ import java.util.Locale
 
 object PrayerNotificationScheduler {
 
+    private const val TAG = "PrayerNotifScheduler"
     private const val PRAYER_REQUEST_BASE = 8_000
     private const val NIGHT_REQUEST_BASE = 9_000
     private const val SUNNAH_YASIN_REQUEST = 10_000
@@ -42,7 +44,9 @@ object PrayerNotificationScheduler {
         options: PrayerNotificationScheduleOptions
     ) {
         NotificationChannels.ensureAll(context)
-        runCatching { cancelAll(context) }
+        runCatching { cancelAll(context) }.onFailure { e ->
+            Log.e(TAG, "cancelAll failed during reschedule", e)
+        }
         scheduleSunnahReminders(context, options)
         scheduleImportantDaysReminders(context, options)
         scheduleMidnightRefresh(context)
@@ -449,6 +453,9 @@ object PrayerNotificationScheduler {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             setExactAlarm(context, alarmManager, actualFireAt, pending, useAlarmClock)
+            Log.d(TAG, "Scheduled alarm: kind=$kind rc=$requestCode fireAt=${Date(actualFireAt)} playAdhan=$playAdhan")
+        }.onFailure { e ->
+            Log.e(TAG, "Failed to schedule alarm: kind=$kind rc=$requestCode", e)
         }
     }
 

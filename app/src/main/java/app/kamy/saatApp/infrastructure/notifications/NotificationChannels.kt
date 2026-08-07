@@ -11,21 +11,40 @@ import app.kamy.saatApp.R
 
 object NotificationChannels {
     const val DAILY_VERSE = "daily_verse_v4"
-    const val PRAYER = "prayer_times_v4"
-    const val PRAYER_ALERT = "prayer_alert_v4"
+    const val PRAYER = "prayer_times_v5"
+    const val PRAYER_ALERT = "prayer_alert_v5"
     const val SUNNAH = "sunnah_reminders_v4"
     const val ADHAN_PLAYBACK = "adhan_playback"
     const val ADHAN_ALERT = "adhan_alert_v4"
     const val MEDIA_PLAYBACK = "media_playback"
     const val PRAYER_TRACKER = "prayer_tracker_v4"
 
+    /** Old channel IDs that must be deleted so the new configuration takes effect. */
+    private val DEPRECATED_CHANNELS = listOf(
+        "prayer_times_v4",
+        "prayer_alert_v4"
+    )
+
     fun ensureAll(context: Context) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val soundUri = Uri.parse("android.resource://${context.packageName}/${R.raw.off_toggle_adzan}")
-        val audioAttributes = AudioAttributes.Builder()
+
+        // Clean up deprecated channels so new audio attributes take effect.
+        DEPRECATED_CHANNELS.forEach { oldId ->
+            runCatching { manager.deleteNotificationChannel(oldId) }
+        }
+
+        val notificationAudioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_NOTIFICATION)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
+
+        // Prayer channels use USAGE_ALARM so the sound reliably bypasses DND on all OEMs.
+        val alarmAudioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
         val vibrationPattern = longArrayOf(0, 400, 200, 400)
 
         manager.createNotificationChannel(
@@ -35,7 +54,7 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_daily_verse_desc)
-                setSound(soundUri, audioAttributes)
+                setSound(soundUri, notificationAudioAttributes)
                 enableVibration(true)
                 setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
@@ -48,7 +67,7 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_prayer_desc)
-                setSound(soundUri, audioAttributes)
+                setSound(soundUri, alarmAudioAttributes)
                 enableVibration(true)
                 setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
@@ -61,7 +80,7 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_prayer_desc)
-                setSound(soundUri, audioAttributes)
+                setSound(soundUri, alarmAudioAttributes)
                 enableVibration(true)
                 setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
@@ -74,7 +93,7 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_sunnah_desc)
-                setSound(soundUri, audioAttributes)
+                setSound(soundUri, notificationAudioAttributes)
                 enableVibration(true)
                 setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
@@ -87,7 +106,7 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = context.getString(R.string.channel_prayer_tracker_desc)
-                setSound(soundUri, audioAttributes)
+                setSound(soundUri, notificationAudioAttributes)
                 enableVibration(true)
                 setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
@@ -143,3 +162,4 @@ object NotificationChannels {
         )
     }
 }
+
