@@ -17,8 +17,8 @@
     <string name="sunnah_thu_fast_title">Puasa Sunnah Kamis</string>
     <string name="sunnah_thu_fast_body">Esok adalah hari Kamis. Jangan lupa persiapkan puasa sunnah Anda.</string>
     <string name="sunnah_dhuha_title">Solat Duha</string>
-    <string name="sunnah_dhuha_body">SāatNya solat Duha. Sempatkan melaksanakan solat sunnah Duha.</string>
-    <string name="surah_reminder_notif_title">SāatNya membaca Surah %s</string>
+    <string name="sunnah_dhuha_body">SaatNya solat Duha. Sempatkan melaksanakan solat sunnah Duha.</string>
+    <string name="surah_reminder_notif_title">SaatNya membaca Surah %s</string>
     <string name="surah_reminder_notif_body">Sempatkan membaca Surah %s hari ini. Semoga membawa ketenangan dan keberkatan.</string>
     <string name="madhab_shafi">Syafi\'i</string>
     <string name="madhab_maliki">Maliki</string>
@@ -68,13 +68,13 @@
     <string name="channel_sunnah">Bacaan sunnah</string>
     <string name="channel_sunnah_desc">Peringatan bacaan surah mingguan</string>
     <string name="prayer_notif_title">%1$s • %2$s</string>
-    <string name="prayer_body_fajr">SāatNya solat Subuh</string>
-    <string name="prayer_body_dhuhr">SāatNya solat Zohor</string>
-    <string name="prayer_body_asr">SāatNya solat Asar</string>
-    <string name="prayer_body_maghrib">SāatNya solat Maghrib</string>
-    <string name="prayer_body_isha">SāatNya solat Isyak</string>
-    <string name="prayer_body_imsak">SāatNya Imsak</string>
-    <string name="prayer_body_default">SāatNya solat %1$s</string>
+    <string name="prayer_body_fajr">SaatNya solat Subuh</string>
+    <string name="prayer_body_dhuhr">SaatNya solat Zohor</string>
+    <string name="prayer_body_asr">SaatNya solat Asar</string>
+    <string name="prayer_body_maghrib">SaatNya solat Maghrib</string>
+    <string name="prayer_body_isha">SaatNya solat Isyak</string>
+    <string name="prayer_body_imsak">SaatNya Imsak</string>
+    <string name="prayer_body_default">SaatNya solat %1$s</string>
     <string name="night_midnight_title">🌙 Tengah Malam</string>
     <string name="night_midnight_body">Malam sudah separuh. Solat Witir sebelum tidur - jangan biarkan terlepas.</string>
     <string name="night_first_third_title">🌃 Malam Bermula</string>
@@ -83,12 +83,8 @@
     <string name="night_last_third_body">Allah turun ke langit dunia. Waktu paling berkat hari ini bermula.</string>
     <string name="tahajud_alarm_title">✨ Waktunya Solat Tahajud</string>
     <string name="tahajud_alarm_body">Masa untuk bangun Solat Tahajud. Allah turun ke langit dunia dan memperkenankan doa hamba-Nya yang bermunajat.</string>
-    <string name="sunnah_yasin_title">📖 Baca Surah Yasin</string>
-    <string name="sunnah_yasin_body">Malam Khamis — waktu berkat membaca Surah Yasin sebelum Jumaat.</string>
-    <string name="sunnah_kahf_title">📖 Baca Surah Al-Kahf</string>
-    <string name="sunnah_kahf_body">Hari Jumaat — baca Surah Al-Kahf untuk cahaya sehingga Jumaat akan datang.</string>
     <string name="daily_verse_notif_title">Ayat anda hari ini</string>
-    <string name="daily_verse_notif_fallback">Buka SĀAT untuk ayat hari ini.</string>
+    <string name="daily_verse_notif_fallback">Buka Saat untuk ayat hari ini.</string>
     <string name="adhan_playback_title">Azan</string>
     <string name="adhan_playback_body">Memainkan panggilan solat</string>
     <string name="adhan_stop">Hentikan azan</string>
@@ -96,7 +92,7 @@
     <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Benarkan penggera tepat supaya azan dan peringatan solat sampai tepat masa.</string>
     <string name="exact_alarm_rationale_title">Peringatan solat tepat masa</string>
-    <string name="fullscreen_intent_rationale">"SĀAT" Ingin Memaparkan Azan Skrin Penuh Apabila Skrin Dikunci.</string>
+    <string name="fullscreen_intent_rationale">"Saat" Ingin Memaparkan Azan Skrin Penuh Apabila Skrin Dikunci.</string>
     <string name="fullscreen_intent_rationale_title">Paparan Azan Skrin Penuh</string>
     <string name="action_dont_allow">Jangan Benarkan</string>
     <string name="battery_opt_snackbar_message">Pada sesetengah telefon, benarkan bateri tanpa had supaya azan berfungsi apabila aplikasi ditutup.</string>
@@ -200,12 +196,12 @@
     <string name="location_use_gps">Gunakan lokasi semasa</string>
     <string name="location_search_not_found">Tempat tidak dijumpai. Cuba bandar berdekatan.</string>
     <string name="prayer_calendar_load_failed">Gagal memuatkan kalendar solat</string>
-    <string name="prayer_widget_empty">Buka SĀAT untuk memuatkan waktu solat</string>
+    <string name="prayer_widget_empty">Buka Saat untuk memuatkan waktu solat</string>
     <string name="prayer_widget_next_label">Solat seterusnya</string>
     <string name="prayer_widget_in_progress">Sekarang</string>
     <string name="prayer_widget_at_time">Azan pada %1$s</string>
     <string name="prayer_calendar_title">Kalendar solat</string>
-    <string name="onboarding_welcome_title">Selamat datang ke SĀAT</string>
+    <string name="onboarding_welcome_title">Selamat datang ke Saat</string>
     <string name="onboarding_welcome_body">Teman Quran harian anda — waktu solat, refleksi, dan komuniti dalam satu aplikasi.</string>
     <string name="onboarding_language_title">Pilih bahasa</string>
     <string name="onboarding_language_body">Pilih bahasa yang ingin anda gunakan dalam aplikasi ini. Anda boleh menukarnya kemudian dalam Tetapan.</string>
@@ -215,7 +211,7 @@
     <string name="onboarding_notifications_title">Kekal tepat pada masa</string>
     <string name="onboarding_notifications_body">Hidupkan pemberitahuan untuk azan dan ayat harian.</string>
     <string name="onboarding_widget_title">Tambah widget</string>
-    <string name="onboarding_widget_body">Tekan lama skrin utama → Widget → SĀAT untuk pin waktu solat.</string>
+    <string name="onboarding_widget_body">Tekan lama skrin utama → Widget → Saat untuk pin waktu solat.</string>
     <string name="onboarding_continue">Teruskan</string>
     <string name="onboarding_get_started">Mula</string>
     <string name="onboarding_enable_notifications">Hidupkan pemberitahuan</string>
@@ -467,7 +463,7 @@
     <string name="force_update_version_info">Versi Baharu: %1$s</string>
 
     <!-- Settings & App Info -->
-    <string name="app_tagline">SĀAT • Teman Ibadah Harian</string>
+    <string name="app_tagline">Saat • Teman Ibadah Harian</string>
     <string name="app_version_format">Versi %1$s</string>
 
     <!-- Revamped Settings Strings -->
@@ -475,7 +471,7 @@
     <string name="settings_main_subtitle">Konfigurasi dan keutamaan aplikasi</string>
     <string name="settings_section_general">Tetapan Umum</string>
     <string name="settings_section_prayer_calc">Pengiraan Waktu Solat</string>
-    <string name="settings_section_about_saat">Mengenai Sāat</string>
+    <string name="settings_section_about_saat">Mengenai Saat</string>
     <string name="settings_item_language">Bahasa</string>
     <string name="settings_item_quran">Al-Quran</string>
     <string name="settings_item_notification">Pemberitahuan</string>
@@ -512,16 +508,16 @@
     <string name="state_shown">Dipaparkan</string>
     <string name="state_hidden">Disembunyikan</string>
     <string name="up_to_date_sheet_title">Aplikasi Terkini!</string>
-    <string name="up_to_date_sheet_desc">Sāat versi %1$s ialah versi terkini. Selamat beribadah!</string>
+    <string name="up_to_date_sheet_desc">Saat versi %1$s ialah versi terkini. Selamat beribadah!</string>
     <string name="got_it">Faham</string>
 
     <!-- Spiritual Tools -->
     <string name="sunnah_prayer_title">Panduan Solat Sunnah &amp; Jenazah</string>
-    <string name="tanya_saat_ai_title">Sahabat Sāat</string>
+    <string name="tanya_saat_ai_title">Sahabat Saat</string>
     <string name="tanya_saat_ai_subtitle">Teman Luahan &amp; Panduan Ayat Al-Qur\'an</string>
     <string name="tanya_saat_placeholder">Taip luahan hati anda di sini...</string>
     <string name="tanya_saat_welcome_msg">Assalamu\'alaikum. Bagaimana perasaan hati anda hari ini? Pilih emosi di atas atau luahkan apa yang anda rasakan.</string>
-    <string name="tanya_saat_ai_thinking">Sahabat Sāat sedang berfikir &amp; mencari petunjuk terbaik...</string>
+    <string name="tanya_saat_ai_thinking">Sahabat Saat sedang berfikir &amp; mencari petunjuk terbaik...</string>
     <string name="mood_anxious">Risau &amp; Gelisah</string>
     <string name="mood_sad">Sedih &amp; Kecewa</string>
     <string name="mood_grateful">Bersyukur</string>

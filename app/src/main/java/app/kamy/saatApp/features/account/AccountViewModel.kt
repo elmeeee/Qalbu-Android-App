@@ -539,6 +539,7 @@ class AccountViewModel @Inject constructor(
 
     fun setYasinReminderEnabled(enabled: Boolean) {
         prayerNotificationPrefs.setYasinReminderEnabled(enabled)
+        surahReminderStore.rescheduleAlarms(surahReminderStore.getReminders())
         reschedulePrayerNotifications()
     }
 

@@ -58,9 +58,11 @@ object AppNotificationCopy {
 
     fun sunnahTitle(context: Context, kind: String): String? {
         val ctx = localized(context)
+        if (kind.startsWith("sunnah_surah_")) {
+            val surahName = kind.removePrefix("sunnah_surah_")
+            return ctx.getString(R.string.surah_reminder_notif_title, surahName)
+        }
         return when (kind) {
-            "sunnah_yasin" -> ctx.getString(R.string.sunnah_yasin_title)
-            "sunnah_kahf" -> ctx.getString(R.string.sunnah_kahf_title)
             "sunnah_mon_fast" -> ctx.getString(R.string.sunnah_mon_fast_title)
             "sunnah_thu_fast" -> ctx.getString(R.string.sunnah_thu_fast_title)
             "sunnah_dhuha" -> ctx.getString(R.string.sunnah_dhuha_title)
@@ -70,9 +72,11 @@ object AppNotificationCopy {
 
     fun sunnahBody(context: Context, kind: String): String? {
         val ctx = localized(context)
+        if (kind.startsWith("sunnah_surah_")) {
+            val surahName = kind.removePrefix("sunnah_surah_")
+            return ctx.getString(R.string.surah_reminder_notif_body, surahName)
+        }
         return when (kind) {
-            "sunnah_yasin" -> ctx.getString(R.string.sunnah_yasin_body)
-            "sunnah_kahf" -> ctx.getString(R.string.sunnah_kahf_body)
             "sunnah_mon_fast" -> ctx.getString(R.string.sunnah_mon_fast_body)
             "sunnah_thu_fast" -> ctx.getString(R.string.sunnah_thu_fast_body)
             "sunnah_dhuha" -> ctx.getString(R.string.sunnah_dhuha_body)

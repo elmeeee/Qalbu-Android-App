@@ -70,13 +70,13 @@
     <string name="channel_adhan_alert">Adhan alert</string>
     <string name="channel_adhan_alert_desc">Plays adhan when full playback cannot start</string>
     <string name="prayer_notif_title">%1$s • %2$s</string>
-    <string name="prayer_body_fajr">It\'s Sāat for Fajr prayer</string>
-    <string name="prayer_body_dhuhr">It\'s Sāat for Dhuhr prayer</string>
-    <string name="prayer_body_asr">It\'s Sāat for Asr prayer</string>
-    <string name="prayer_body_maghrib">It\'s Sāat for Maghrib prayer</string>
-    <string name="prayer_body_isha">It\'s Sāat for Isha prayer</string>
-    <string name="prayer_body_imsak">It\'s Sāat for Imsak</string>
-    <string name="prayer_body_default">It\'s Sāat for %1$s prayer</string>
+    <string name="prayer_body_fajr">It\'s Saat for Fajr prayer</string>
+    <string name="prayer_body_dhuhr">It\'s Saat for Dhuhr prayer</string>
+    <string name="prayer_body_asr">It\'s Saat for Asr prayer</string>
+    <string name="prayer_body_maghrib">It\'s Saat for Maghrib prayer</string>
+    <string name="prayer_body_isha">It\'s Saat for Isha prayer</string>
+    <string name="prayer_body_imsak">It\'s Saat for Imsak</string>
+    <string name="prayer_body_default">It\'s Saat for %1$s prayer</string>
     <string name="night_midnight_title">🌙 Midnight</string>
     <string name="night_midnight_body">The night is halfway through. Pray Witr before you sleep — don\'t let it slip away.</string>
     <string name="night_first_third_title">🌃 The Night Begins</string>
@@ -85,12 +85,8 @@
     <string name="night_last_third_body">Allah descends to the lowest heaven. The most powerful hour of the day starts now.</string>
     <string name="tahajud_alarm_title">✨ Time for Tahajud Prayer</string>
     <string name="tahajud_alarm_body">Wake up for Tahajud. Allah descends to the lowest heaven and answers the prayers of those who call upon Him.</string>
-    <string name="sunnah_yasin_title">📖 Read Surah Yasin</string>
-    <string name="sunnah_yasin_body">Thursday night — a blessed time to read Surah Yasin before Jumu\'ah.</string>
-    <string name="sunnah_kahf_title">📖 Read Surah Al-Kahf</string>
-    <string name="sunnah_kahf_body">It\'s Friday — read Surah Al-Kahf for light between this Friday and the next.</string>
     <string name="daily_verse_notif_title">Your verse for today</string>
-    <string name="daily_verse_notif_fallback">Open Sāat for today\'s verse.</string>
+    <string name="daily_verse_notif_fallback">Open Saat for today\'s verse.</string>
     <string name="adhan_playback_title">Adhan</string>
     <string name="adhan_playback_body">Playing the call to prayer</string>
     <string name="adhan_stop">Stop adhan</string>
@@ -98,7 +94,7 @@
     <string name="recitation_notification_channel">Quran recitation</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
     <string name="exact_alarm_rationale_title">Prayer reminders on time</string>
-    <string name="fullscreen_intent_rationale">"Sāat" Would Like to Display Full-Screen Adhan Alarms When Screen Is Locked.</string>
+    <string name="fullscreen_intent_rationale">"Saat" Would Like to Display Full-Screen Adhan Alarms When Screen Is Locked.</string>
     <string name="fullscreen_intent_rationale_title">Full-Screen Adhan Alarm</string>
     <string name="action_dont_allow">Don\'t Allow</string>
     <string name="action_later">Later</string>
@@ -256,7 +252,7 @@
     <string name="location_use_gps">Use current location</string>
     <string name="location_search_not_found">Could not find that place. Try a nearby city.</string>
     <string name="prayer_calendar_load_failed">Could not load prayer calendar</string>
-    <string name="prayer_widget_empty">Open Sāat to load prayer times</string>
+    <string name="prayer_widget_empty">Open Saat to load prayer times</string>
     <string name="prayer_widget_next_label">Next prayer</string>
     <string name="prayer_widget_in_progress">Now</string>
     <string name="prayer_widget_at_time">Adhan at %1$s</string>
@@ -264,7 +260,7 @@
     <string name="prayer_calendar_hint">Tap a day to see all prayer times for that date.</string>
     <string name="prayer_calendar_loading_day">Loading prayer times…</string>
     <string name="offline_banner_message">Offline — showing saved data</string>
-    <string name="onboarding_welcome_title">Welcome to Sāat</string>
+    <string name="onboarding_welcome_title">Welcome to Saat</string>
     <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
     <string name="onboarding_language_title">Choose your language</string>
     <string name="onboarding_language_body">Select the language you want to use in the app. You can change this later in Settings.</string>
@@ -276,7 +272,7 @@
     <string name="onboarding_notifications_title">Stay on time</string>
     <string name="onboarding_notifications_body">Enable notifications for adhan reminders and your daily verse. You can customize each prayer notification in Settings.</string>
     <string name="onboarding_widget_title">Add a home widget</string>
-    <string name="onboarding_widget_body">Long-press your home screen → Widgets → SĀAT to pin prayer times at a glance.</string>
+    <string name="onboarding_widget_body">Long-press your home screen → Widgets → Saat to pin prayer times at a glance.</string>
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_enable_notifications">Enable notifications</string>
@@ -520,7 +516,7 @@
     <string name="chapters_refresh_failed">Couldn\'t refresh chapters</string>
     <string name="daily_verse_widget_title">Verse of the day</string>
     <string name="daily_verse_widget_desc">Today\'s ayah on your home screen</string>
-    <string name="daily_verse_widget_empty">Open Sāat to load today\'s verse</string>
+    <string name="daily_verse_widget_empty">Open Saat to load today\'s verse</string>
     <string name="prayer_widget_next_title">Next prayer</string>
     <string name="prayer_widget_next_desc">Countdown to the next adhan</string>
     <string name="shortcut_continue_quran">Continue Quran</string>
@@ -593,7 +589,7 @@
     <string name="faraidh_status_no_heirs">Tap Edit to add heirs</string>
     <string name="faraidh_status_ready">%1$d heir group(s) · shares calculated</string>
     <string name="faraidh_empty_title">Start your calculation</string>
-    <string name="faraidh_empty_body">Add the net estate and list surviving heirs. Sāat will compute Quranic shares, blocking rules, and adjustments automatically.</string>
+    <string name="faraidh_empty_body">Add the net estate and list surviving heirs. Saat will compute Quranic shares, blocking rules, and adjustments automatically.</string>
     <string name="faraidh_empty_cta">Set up calculation</string>
     <string name="faraidh_empty_no_share_title">No distributable shares</string>
     <string name="faraidh_empty_no_share_body">Check that at least one heir is listed and the estate amount is greater than zero.</string>
@@ -922,7 +918,7 @@
     <string name="force_update_version_info">New Version: %1$s</string>
     
     <!-- Settings & App Info -->
-    <string name="app_tagline">SĀAT • Daily Worship Companion</string>
+    <string name="app_tagline">Saat • Daily Worship Companion</string>
     <string name="app_version_format">Version %1$s</string>
 
     <!-- Revamped Settings Strings -->
@@ -930,7 +926,7 @@
     <string name="settings_main_subtitle">App preferences and configuration</string>
     <string name="settings_section_general">General settings</string>
     <string name="settings_section_prayer_calc">Prayer Calculation</string>
-    <string name="settings_section_about_saat">About Sāat</string>
+    <string name="settings_section_about_saat">About Saat</string>
     <string name="settings_item_language">Language</string>
     <string name="settings_item_quran">Quran</string>
     <string name="settings_item_notification">Notification</string>
@@ -969,17 +965,17 @@
     <string name="state_shown">Shown</string>
     <string name="state_hidden">Hidden</string>
     <string name="up_to_date_sheet_title">You\'re Up to Date!</string>
-    <string name="up_to_date_sheet_desc">Sāat v%1$s is currently the latest version. Enjoy your spiritual journey!</string>
+    <string name="up_to_date_sheet_desc">Saat v%1$s is currently the latest version. Enjoy your spiritual journey!</string>
     <string name="got_it">Got It</string>
 
     <!-- Spiritual Tools -->
     <string name="sunnah_prayer_title">Sunnah &amp; Janazah Prayer Guide</string>
-    <!-- Sahabat Sāat -->
-    <string name="tanya_saat_ai_title">Sahabat Sāat</string>
+    <!-- Sahabat Saat -->
+    <string name="tanya_saat_ai_title">Sahabat Saat</string>
     <string name="tanya_saat_ai_subtitle">Spiritual Companion &amp; Quranic Guidance</string>
     <string name="tanya_saat_placeholder">Type your feelings or questions...</string>
     <string name="tanya_saat_welcome_msg">Assalamu\'alaikum. How are you feeling today? Select an emotion above or feel free to share what\'s on your mind.</string>
-    <string name="tanya_saat_ai_thinking">Sahabat Sāat is reflecting &amp; searching for guidance...</string>
+    <string name="tanya_saat_ai_thinking">Sahabat Saat is reflecting &amp; searching for guidance...</string>
     <string name="mood_anxious">Anxious</string>
     <string name="mood_sad">Sad &amp; Hurt</string>
     <string name="mood_grateful">Grateful</string>

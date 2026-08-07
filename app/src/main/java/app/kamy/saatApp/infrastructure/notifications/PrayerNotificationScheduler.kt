@@ -161,37 +161,9 @@ object PrayerNotificationScheduler {
         val now = System.currentTimeMillis()
         val localContext = getLocalizedContext(context)
 
-        if (options.yasinReminderEnabled) {
-            val nextThuNight = nextWeekdayTime(Calendar.THURSDAY, 20, 0, now)
-            upcomingWeeklyOccurrences(nextThuNight, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
-                scheduleOneShot(
-                    context = context,
-                    requestCode = SUNNAH_YASIN_REQUEST + offset,
-                    fireAt = fireAt,
-                    channelId = NotificationChannels.SUNNAH,
-                    title = localContext.getString(R.string.sunnah_yasin_title),
-                    body = localContext.getString(R.string.sunnah_yasin_body),
-                    kind = "sunnah_yasin",
-                    notificationId = SUNNAH_YASIN_REQUEST + offset
-                )
-            }
-        }
+        // Surah Yasin and Al-Kahf reminders are managed dynamically by SurahReminderStore
+        // to avoid duplicate push notifications.
 
-        if (options.kahfReminderEnabled) {
-            val nextFri = nextWeekdayTime(Calendar.FRIDAY, 8, 0, now)
-            upcomingWeeklyOccurrences(nextFri, now, SUNNAH_WEEKS_TO_SCHEDULE).forEachIndexed { offset, fireAt ->
-                scheduleOneShot(
-                    context = context,
-                    requestCode = SUNNAH_KAHF_REQUEST + offset,
-                    fireAt = fireAt,
-                    channelId = NotificationChannels.SUNNAH,
-                    title = localContext.getString(R.string.sunnah_kahf_title),
-                    body = localContext.getString(R.string.sunnah_kahf_body),
-                    kind = "sunnah_kahf",
-                    notificationId = SUNNAH_KAHF_REQUEST + offset
-                )
-            }
-        }
 
         if (options.monThuFastReminderEnabled) {
             val nextSun = nextWeekdayTime(Calendar.SUNDAY, 20, 0, now)
