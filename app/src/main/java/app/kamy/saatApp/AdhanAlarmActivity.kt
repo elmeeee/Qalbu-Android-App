@@ -74,6 +74,7 @@ class AdhanAlarmActivity : ComponentActivity() {
             )
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        volumeControlStream = android.media.AudioManager.STREAM_ALARM
         enableEdgeToEdge()
 
         val title = intent.getStringExtra(EXTRA_TITLE).orEmpty()
