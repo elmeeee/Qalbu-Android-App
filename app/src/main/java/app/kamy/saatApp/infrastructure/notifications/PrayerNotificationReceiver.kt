@@ -82,7 +82,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 channelId = alertChannel,
                 title = title,
                 body = body,
-                silent = false,
+                silent = adhanPlaying,
                 showStopAdhan = shouldPlayAdhan && adhanRawRes != null,
                 adhanSoundRes = null,
                 kind = kind,

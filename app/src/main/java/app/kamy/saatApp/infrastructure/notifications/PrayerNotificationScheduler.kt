@@ -56,8 +56,7 @@ object PrayerNotificationScheduler {
 
         bundle.adzanPrayers.forEachIndexed { index, prayer ->
             val isAdhanOnForPrayer = options.enabledAdzanPrayers.contains(prayer.name)
-            if (!isAdhanOnForPrayer) return@forEachIndexed
-            val playAdhan = options.adhanSoundEnabled
+            val playAdhan = isAdhanOnForPrayer && options.adhanSoundEnabled
 
             PrayerScheduleBuilder.upcomingOccurrences(
                 prayer.fireAtMillis,

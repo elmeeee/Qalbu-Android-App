@@ -64,10 +64,7 @@ class AdhanPlaybackService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val isBoot = BootContextChecker.isRecentlyBooted() ||
-            intent == null ||
-            intent.action == Intent.ACTION_BOOT_COMPLETED
-        if (isBoot) {
+        if (intent == null) {
             stopSelf()
             return START_NOT_STICKY
         }
@@ -272,7 +269,7 @@ class AdhanPlaybackService : Service() {
                 }
                 val newVolume = intent.getIntExtra(EXTRA_VOLUME_STREAM_VALUE, -1)
                 val oldVolume = intent.getIntExtra(EXTRA_PREV_VOLUME_STREAM_VALUE, -1)
-                if (newVolume >= 0 && oldVolume >= 0 && newVolume != oldVolume) {
+                if (newVolume >= 0 && oldVolume >= 0 && newVolume < oldVolume) {
                     releaseAndStop()
                 }
             }
