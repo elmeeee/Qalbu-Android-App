@@ -57,7 +57,16 @@ class MainActivity : ComponentActivity() {
 
         val startupError = try {
             AppReviewManager.recordAppLaunch(applicationContext)
-            enableEdgeToEdge()
+            enableEdgeToEdge(
+                statusBarStyle = androidx.activity.SystemBarStyle.auto(
+                    android.graphics.Color.TRANSPARENT,
+                    android.graphics.Color.TRANSPARENT
+                ),
+                navigationBarStyle = androidx.activity.SystemBarStyle.auto(
+                    android.graphics.Color.TRANSPARENT,
+                    android.graphics.Color.TRANSPARENT
+                )
+            )
             val needsOnboarding = !onboardingStore.isComplete()
             setContent {
                 val pendingRoute by deepLinkRoute

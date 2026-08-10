@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Android 15 (API 35+) dedicated theme override.
+        In API 35, edge-to-edge is enforced by default and
+        LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS is used instead of shortEdges.
+    -->
+    <style name="Theme.Saat" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/al_khatib_screen_background</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
+    </style>
+</resources>
