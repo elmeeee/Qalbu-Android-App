@@ -17,19 +17,19 @@ import javax.inject.Singleton
 class AdhanPreviewPlayer @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val player: ExoPlayer = ExoPlayer.Builder(context).build()
+    private val player: ExoPlayer by lazy {
+        ExoPlayer.Builder(context).build().apply {
+            addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_ENDED) {
+                        stop()
+                    }
+                }
+            })
+        }
+    }
     private val _previewingVoiceId = MutableStateFlow<String?>(null)
     val previewingVoiceId: StateFlow<String?> = _previewingVoiceId.asStateFlow()
-
-    init {
-        player.addListener(object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_ENDED) {
-                    stop()
-                }
-            }
-        })
-    }
 
     fun togglePreview(voiceId: String, @RawRes rawRes: Int) {
         if (_previewingVoiceId.value == voiceId && player.isPlaying) {

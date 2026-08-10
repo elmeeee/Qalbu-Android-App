@@ -18,30 +18,36 @@ import javax.inject.Singleton
 class PlaybackEngine @Inject constructor(
     @ApplicationContext context: Context
 ) {
-    val player: ExoPlayer = ExoPlayer.Builder(context)
-        .setAudioAttributes(
-            AudioAttributes.Builder()
-                .setUsage(C.USAGE_MEDIA)
-                .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
-                .build(),
-            /* handleAudioFocus= */ true
-        )
-        .setHandleAudioBecomingNoisy(true)
-        .setWakeMode(C.WAKE_MODE_NETWORK)
-        .build()
+    val player: ExoPlayer by lazy {
+        ExoPlayer.Builder(context)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
+                    .build(),
+                /* handleAudioFocus= */ true
+            )
+            .setHandleAudioBecomingNoisy(true)
+            .setWakeMode(C.WAKE_MODE_NETWORK)
+            .build()
+    }
 
-    private val sessionActivity = PendingIntent.getActivity(
-        context,
-        0,
-        Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        },
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
+    private val sessionActivity: PendingIntent by lazy {
+        PendingIntent.getActivity(
+            context,
+            0,
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
 
     @OptIn(UnstableApi::class)
-    val mediaSession: MediaSession = MediaSession.Builder(context, player)
-        .setId("SaatRecitation")
-        .setSessionActivity(sessionActivity)
-        .build()
+    val mediaSession: MediaSession by lazy {
+        MediaSession.Builder(context, player)
+            .setId("SaatRecitation")
+            .setSessionActivity(sessionActivity)
+            .build()
+    }
 }
