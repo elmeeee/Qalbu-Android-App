@@ -58,11 +58,11 @@ class MainActivity : ComponentActivity() {
         val startupError = try {
             AppReviewManager.recordAppLaunch(applicationContext)
             enableEdgeToEdge(
-                statusBarStyle = androidx.activity.SystemBarStyle.auto(
+                statusBarStyle = androidx.activity.SystemBarStyle.light(
                     android.graphics.Color.TRANSPARENT,
                     android.graphics.Color.TRANSPARENT
                 ),
-                navigationBarStyle = androidx.activity.SystemBarStyle.auto(
+                navigationBarStyle = androidx.activity.SystemBarStyle.light(
                     android.graphics.Color.TRANSPARENT,
                     android.graphics.Color.TRANSPARENT
                 )

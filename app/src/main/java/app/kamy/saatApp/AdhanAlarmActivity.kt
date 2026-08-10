@@ -76,11 +76,11 @@ class AdhanAlarmActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         volumeControlStream = android.media.AudioManager.STREAM_ALARM
         enableEdgeToEdge(
-            statusBarStyle = androidx.activity.SystemBarStyle.auto(
+            statusBarStyle = androidx.activity.SystemBarStyle.light(
                 android.graphics.Color.TRANSPARENT,
                 android.graphics.Color.TRANSPARENT
             ),
-            navigationBarStyle = androidx.activity.SystemBarStyle.auto(
+            navigationBarStyle = androidx.activity.SystemBarStyle.light(
                 android.graphics.Color.TRANSPARENT,
                 android.graphics.Color.TRANSPARENT
             )

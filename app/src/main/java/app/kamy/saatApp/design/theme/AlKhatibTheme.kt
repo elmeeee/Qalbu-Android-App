@@ -43,6 +43,18 @@ fun SaatTheme(
         onError = SaatColors.OffWhite
     )
 
+    val view = androidx.compose.ui.platform.LocalView.current
+    if (!view.isInEditMode) {
+        androidx.compose.runtime.SideEffect {
+            val window = (view.context as? android.app.Activity)?.window
+            if (window != null) {
+                val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, view)
+                insetsController.isAppearanceLightStatusBars = true
+                insetsController.isAppearanceLightNavigationBars = true
+            }
+        }
+    }
+
     MaterialTheme(
         colorScheme = dynamicColors,
         typography = SaatTypography,
