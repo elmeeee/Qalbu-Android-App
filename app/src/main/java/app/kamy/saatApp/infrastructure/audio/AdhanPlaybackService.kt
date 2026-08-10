@@ -64,15 +64,17 @@ class AdhanPlaybackService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        NotificationChannels.ensureAll(this)
+
         if (intent == null) {
-            stopSelf()
+            safePromoteToForegroundAndStop()
             return START_NOT_STICKY
         }
 
         when {
             intent.action == ACTION_STOP -> {
                 linkedNotificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, linkedNotificationId)
-                releaseAndStop()
+                safePromoteToForegroundAndStop()
                 return START_NOT_STICKY
             }
             intent.hasExtra(EXTRA_RAW_RES) || intent.hasExtra(EXTRA_SOUND_URI) || intent.getBooleanExtra(EXTRA_USE_SYSTEM_ALARM, false) -> {
@@ -83,18 +85,13 @@ class AdhanPlaybackService : Service() {
                 val rawRes = intent.getIntExtra(EXTRA_RAW_RES, 0)
                 val soundUriStr = intent.getStringExtra(EXTRA_SOUND_URI)
                 val useSystemAlarm = intent.getBooleanExtra(EXTRA_USE_SYSTEM_ALARM, false)
-                NotificationChannels.ensureAll(this)
-                runCatching {
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                        startForeground(
-                            NOTIFICATION_ID,
-                            buildForegroundNotification(title, body, prayerName),
-                            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-                        )
-                    } else {
-                        startForeground(NOTIFICATION_ID, buildForegroundNotification(title, body, prayerName))
-                    }
+
+                val fgSuccess = promoteToForeground(title, body, prayerName)
+                if (!fgSuccess) {
+                    releaseAndStop()
+                    return START_NOT_STICKY
                 }
+
                 acquireWakeLock()
                 if (AirplaneModeReceiver.isAirplaneModeOn(this)) {
                     // Airplane mode active — skip adhan audio but keep the visual
@@ -114,16 +111,37 @@ class AdhanPlaybackService : Service() {
                 }
             }
             else -> {
-                stopSelf()
+                safePromoteToForegroundAndStop()
                 return START_NOT_STICKY
             }
         }
         return START_NOT_STICKY
     }
 
+    private fun promoteToForeground(title: String, body: String, prayerName: String?): Boolean {
+        return runCatching {
+            val notification = buildForegroundNotification(title, body, prayerName)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+        }.isSuccess
+    }
+
+    private fun safePromoteToForegroundAndStop() {
+        promoteToForeground("", "", null)
+        releaseAndStop()
+    }
+
     override fun onDestroy() {
         releasePlayer()
         releaseWakeLock()
+        cancelLinkedNotifications()
         super.onDestroy()
     }
 
@@ -414,14 +432,19 @@ class AdhanPlaybackService : Service() {
         }
 
         fun stop(context: Context, notificationId: Int = -1) {
-            val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            val appContext = context.applicationContext
+            val intent = Intent(appContext, AdhanPlaybackService::class.java).apply {
                 action = ACTION_STOP
                 if (notificationId >= 0) {
                     putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                 }
             }
-            runCatching {
-                androidx.core.content.ContextCompat.startForegroundService(context.applicationContext, intent)
+            val stopped = runCatching { appContext.stopService(intent) }.getOrDefault(false)
+            if (!stopped) {
+                if (notificationId >= 0) {
+                    runCatching { NotificationManagerCompat.from(appContext).cancel(notificationId) }
+                }
+                runCatching { NotificationManagerCompat.from(appContext).cancel(NOTIFICATION_ID) }
             }
         }
     }

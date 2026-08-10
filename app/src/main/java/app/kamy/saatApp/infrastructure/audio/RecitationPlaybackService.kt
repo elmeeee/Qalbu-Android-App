@@ -48,33 +48,44 @@ class RecitationPlaybackService : MediaSessionService() {
             intent == null ||
             intent.action == Intent.ACTION_BOOT_COMPLETED
         if (isBoot) {
-            stopSelf()
+            safePromoteToForegroundAndStop()
             return START_NOT_STICKY
         }
 
-        val fgStarted = runCatching {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                startForeground(
-                    NOTIFICATION_ID,
-                    buildPlaceholderNotification(),
-                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-                )
-            } else {
-                startForeground(NOTIFICATION_ID, buildPlaceholderNotification())
-            }
-        }.isSuccess
+        val fgStarted = promoteToForeground()
 
         if (!fgStarted && !isPlaying) {
-            stopSelf()
+            safePromoteToForegroundAndStop()
             return START_NOT_STICKY
         }
 
         return try {
             super.onStartCommand(intent, flags, startId)
         } catch (e: Exception) {
-            stopSelf()
+            safePromoteToForegroundAndStop()
             START_NOT_STICKY
         }
+    }
+
+    private fun promoteToForeground(): Boolean {
+        return runCatching {
+            val notification = buildPlaceholderNotification()
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+        }.isSuccess
+    }
+
+    private fun safePromoteToForegroundAndStop() {
+        promoteToForeground()
+        runCatching { stopForeground(STOP_FOREGROUND_REMOVE) }
+        stopSelf()
     }
 
     @OptIn(UnstableApi::class)
