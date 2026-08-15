@@ -139,6 +139,7 @@ class AdhanPlaybackService : Service() {
     }
 
     override fun onDestroy() {
+        runCatching { sendBroadcast(Intent(ACTION_ADHAN_STOPPED).setPackage(packageName)) }
         releasePlayer()
         releaseWakeLock()
         cancelLinkedNotifications()
@@ -319,7 +320,10 @@ class AdhanPlaybackService : Service() {
     }
 
     private fun cancelLinkedNotifications() {
-        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
+        if (linkedNotificationId >= 0) {
+            runCatching { NotificationManagerCompat.from(this).cancel(linkedNotificationId) }
+        }
+        runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID) }
         linkedNotificationId = -1
     }
 
@@ -433,19 +437,17 @@ class AdhanPlaybackService : Service() {
 
         fun stop(context: Context, notificationId: Int = -1) {
             val appContext = context.applicationContext
+            if (notificationId >= 0) {
+                runCatching { NotificationManagerCompat.from(appContext).cancel(notificationId) }
+            }
+            runCatching { NotificationManagerCompat.from(appContext).cancel(NOTIFICATION_ID) }
             val intent = Intent(appContext, AdhanPlaybackService::class.java).apply {
                 action = ACTION_STOP
                 if (notificationId >= 0) {
                     putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                 }
             }
-            val stopped = runCatching { appContext.stopService(intent) }.getOrDefault(false)
-            if (!stopped) {
-                if (notificationId >= 0) {
-                    runCatching { NotificationManagerCompat.from(appContext).cancel(notificationId) }
-                }
-                runCatching { NotificationManagerCompat.from(appContext).cancel(NOTIFICATION_ID) }
-            }
+            runCatching { appContext.stopService(intent) }
         }
     }
 }
