@@ -539,7 +539,7 @@ private fun SelectedDaySummaryCard(
                     color = if (dayProgress.isPerfectDay) SaatColors.GoldDeep.copy(alpha = 0.15f) else SaatColors.DeepEmerald.copy(alpha = 0.08f)
                 ) {
                     Text(
-                        text = "${dayProgress.completedCount}/5 Selesai",
+                        text = "${dayProgress.completedCount}/${dayProgress.totalCount} ${stringResource(R.string.done)}",
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
