@@ -250,6 +250,11 @@ fun RootScreen(
                     onOpenQiyam = { navController.navigate("tools/qiyam") }
                 )
             }
+            composable("tools/fidyah") {
+                app.kamy.saatApp.features.tools.fidyah.FidyahCalculatorScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
 
             composable("tools/faraidh",
                 enterTransition = { slideInHorizontally(tween(280)) { it } + fadeIn(tween(200)) },

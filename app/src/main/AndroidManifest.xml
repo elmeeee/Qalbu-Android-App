@@ -127,6 +127,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".infrastructure.notifications.FidyahReminderReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".infrastructure.notifications.SurahReminderReceiver"
             android:exported="false">
             <intent-filter>

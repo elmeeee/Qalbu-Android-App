@@ -142,6 +142,12 @@ class PrayerTrackerViewModel @Inject constructor(
                 OptionalWorshipHabit.QIYAMUL_LAIL -> true
                 OptionalWorshipHabit.MONDAY_THURSDAY_FAST -> monThu
                 OptionalWorshipHabit.AYYAMUL_BIDH_SAHUR -> ayyamulBidh
+                OptionalWorshipHabit.DHIKR_MORNING -> true
+                OptionalWorshipHabit.DHIKR_EVENING -> true
+                OptionalWorshipHabit.READ_QURAN -> true
+                OptionalWorshipHabit.DAILY_CHARITY -> true
+                OptionalWorshipHabit.DHUHA -> true
+                OptionalWorshipHabit.RAWATIB -> true
             }
             if (!applicable) return@mapNotNull null
             OptionalHabitUiItem(
@@ -157,5 +163,11 @@ class PrayerTrackerViewModel @Inject constructor(
         OptionalWorshipHabit.QIYAMUL_LAIL -> app.kamy.saatApp.R.string.optional_qiyam
         OptionalWorshipHabit.MONDAY_THURSDAY_FAST -> app.kamy.saatApp.R.string.optional_mon_thu_fast
         OptionalWorshipHabit.AYYAMUL_BIDH_SAHUR -> app.kamy.saatApp.R.string.optional_ayyamul_bidh
+        OptionalWorshipHabit.DHIKR_MORNING -> app.kamy.saatApp.R.string.optional_dhikr_morning
+        OptionalWorshipHabit.DHIKR_EVENING -> app.kamy.saatApp.R.string.optional_dhikr_evening
+        OptionalWorshipHabit.READ_QURAN -> app.kamy.saatApp.R.string.optional_read_quran
+        OptionalWorshipHabit.DAILY_CHARITY -> app.kamy.saatApp.R.string.optional_daily_charity
+        OptionalWorshipHabit.DHUHA -> app.kamy.saatApp.R.string.optional_dhuha
+        OptionalWorshipHabit.RAWATIB -> app.kamy.saatApp.R.string.optional_rawatib
     }
 }

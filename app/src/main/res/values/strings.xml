@@ -143,6 +143,13 @@
     <string name="optional_qiyam">Qiyamul lail</string>
     <string name="optional_mon_thu_fast">Mon &amp; Thu fast</string>
     <string name="optional_ayyamul_bidh">Ayyamul bidh sahur</string>
+    <string name="optional_dhikr_morning">Morning Dhikr</string>
+    <string name="optional_dhikr_evening">Evening Dhikr</string>
+    <string name="optional_read_quran">Quran Recitation</string>
+    <string name="optional_daily_charity">Daily Charity</string>
+    <string name="optional_dhuha">Dhuha Prayer</string>
+    <string name="optional_rawatib">Rawatib Sunnah</string>
+    <string name="fidyah_title">Fidyah Calculator &amp; Tracker</string>
     <string name="prayer_tracker_open_calendar">Calendar</string>
     <string name="prayer_tracker_calendar_title">Prayer challenge</string>
     <string name="prayer_tracker_calendar_subtitle">Track your daily salah streak</string>

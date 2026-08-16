@@ -163,6 +163,13 @@
     <string name="optional_qiyam">Qiyamul lail</string>
     <string name="optional_mon_thu_fast">Puasa Senin &amp; Kamis</string>
     <string name="optional_ayyamul_bidh">Sahur Ayyamul Bidh</string>
+    <string name="optional_dhikr_morning">Dzikir Pagi</string>
+    <string name="optional_dhikr_evening">Dzikir Petang</string>
+    <string name="optional_read_quran">Tilawah Al-Qur\'an</string>
+    <string name="optional_daily_charity">Sedekah Harian</string>
+    <string name="optional_dhuha">Sholat Dhuha</string>
+    <string name="optional_rawatib">Sunnah Rawatib</string>
+    <string name="fidyah_title">Kalkulator &amp; Tracker Fidyah</string>
     <string name="prayer_tracker_open_calendar">Kalender</string>
     <string name="prayer_tracker_calendar_title">Tantangan sholat</string>
     <string name="prayer_tracker_calendar_subtitle">Lacak streak sholat harian</string>

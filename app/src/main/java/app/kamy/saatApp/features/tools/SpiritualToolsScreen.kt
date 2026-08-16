@@ -134,6 +134,13 @@ fun SpiritualToolsScreen(
                 "sunnah-prayer",
                 SaatColors.GoldDeep,
                 SaatColors.DeepEmerald
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_rice,
+                R.string.fidyah_title,
+                "fidyah",
+                SaatColors.Teal,
+                SaatColors.GoldDeep
             )
         )
     }
