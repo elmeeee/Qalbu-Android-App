@@ -89,7 +89,6 @@
     <string name="adhan_playback_body">Memainkan panggilan solat</string>
     <string name="adhan_stop">Hentikan azan</string>
     <string name="alarm_stop">Hentikan penggera</string>
-    <string name="recitation_notification_channel">Tilawah Al-Quran</string>
     <string name="exact_alarm_rationale">Benarkan penggera tepat supaya azan dan peringatan solat sampai tepat masa.</string>
     <string name="exact_alarm_rationale_title">Peringatan solat tepat masa</string>
     <string name="fullscreen_intent_rationale">"Saat" Ingin Memaparkan Azan Skrin Penuh Apabila Skrin Dikunci.</string>
@@ -132,11 +131,7 @@
     <string name="quran_subtitle_juz">30 Juz · Al-Quran</string>
     <string name="quran_tab_surah">Surah</string>
     <string name="quran_tab_juz">Juz</string>
-    <string name="prayer_tracker_title">Solat</string>
     <string name="prayer_marked_success">%1$s ditanda ✓</string>
-    <string name="prayer_tracker_subtitle">%1$d daripada %2$d selesai</string>
-    <string name="prayer_streak_current">Streak semasa</string>
-    <string name="prayer_streak_best">Streak terbaik</string>
     <string name="optional_qiyam">Qiyamul lail</string>
     <string name="optional_mon_thu_fast">Puasa Isnin &amp; Khamis</string>
     <string name="optional_ayyamul_bidh">Sahur Ayyamul Bidh</string>
@@ -149,16 +144,12 @@
     <string name="fidyah_title">Tracker Fidyah</string>
     <string name="fidyah_subtitle">Kiraan Hukum 4 Mazhab &amp; Rekod Qada</string>
     <string name="prayer_tracker_open_calendar">Kalendar</string>
-    <string name="prayer_tracker_calendar_title">Cabaran solat</string>
-    <string name="prayer_tracker_calendar_subtitle">Jejaki streak solat harian</string>
     <string name="prayer_check_notif_title">Sudah solat %1$s?</string>
     <string name="prayer_check_notif_body">Ketik untuk tanda solat hari ini dan kekalkan streak.</string>
     <string name="prayer_wrapup_notif_title">Lengkapkan solat hari ini</string>
     <string name="prayer_wrapup_notif_body">Masih %1$d solat belum ditanda. Habiskan sebelum hari tamat.</string>
     <string name="channel_prayer_tracker">Checklist solat</string>
     <string name="channel_prayer_tracker_desc">Peringatan untuk menandakan solat</string>
-    <string name="previous_month">Bulan sebelumnya</string>
-    <string name="next_month">Bulan seterusnya</string>
     <string name="juz_load_failed">Gagal memuat senarai juz</string>
     <string name="juz_starts_at">Bermula pada %1$s</string>
     <string name="one_surah_found">1 surah dijumpai</string>
@@ -509,7 +500,6 @@
     <string name="reading_section_reading_notif">Pemberitahuan Bacaan</string>
     <string name="reading_section_writing">Penulisan</string>
     <string name="reading_daily_verse">Ayat Harian</string>
-    <string name="reading_daily_verse_time">Masa Ayat Harian</string>
     <string name="reading_show_latin">Papar Latin</string>
     <string name="reading_show_translation">Papar Terjemahan</string>
     <string name="reading_translator">Penterjemah</string>
@@ -537,8 +527,4 @@
     <string name="adhan_tab_general">Azan Umum</string>
     <string name="adhan_tab_fajr">Azan Subuh</string>
 
-    <string name="qibla_point_phone">Halakan telefon anda ke jalan atau kawasan terbuka</string>
-    <string name="qibla_already_facing">Anda sudah menghadap Kiblat</string>
-    <string name="qibla_in_your_left">Kiblat di sebelah kiri anda</string>
-    <string name="qibla_in_your_right">Kiblat di sebelah kanan anda</string>
 </resources>
