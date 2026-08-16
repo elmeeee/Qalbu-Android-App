@@ -9,16 +9,14 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,14 +24,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -53,20 +50,25 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.OptionalWorshipHabit
 import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.features.today.OptionalHabitUiItem
 import app.kamy.saatApp.features.today.PrayerTrackerUiState
 import app.kamy.saatApp.infrastructure.notifications.AppNotificationCopy
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerTrackerStore
 import app.kamy.saatApp.ui.feedback.rememberTapHaptic
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PrayerTrackerCard(
     state: PrayerTrackerUiState,
@@ -76,135 +78,278 @@ fun PrayerTrackerCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val currentLang = remember(context) { AppLanguageStore.from(context).current() }
     var isExpanded by remember { mutableStateOf(true) }
     val arrowRotation by animateFloatAsState(
         targetValue = if (isExpanded) 180f else 0f,
         label = "arrowRotation"
     )
 
+    val completedFardhuCount = state.completedPrayers.size
+    val totalFardhuCount = PrayerTrackerStore.TRACKED_PRAYERS.size
+    val percentInt = if (totalFardhuCount > 0) ((completedFardhuCount.toFloat() / totalFardhuCount.toFloat()) * 100).toInt() else 0
+
+    // 3-Language Localization
+    val titleText = when (currentLang) {
+        AppLanguage.MALAY -> "Jurnal Solat Harian"
+        AppLanguage.ENGLISH -> "Daily Prayer Journal"
+        else -> "Jurnal Shalat Harian"
+    }
+
+    val subtitleText = when (currentLang) {
+        AppLanguage.MALAY -> "$completedFardhuCount/$totalFardhuCount Solat Fardu ($percentInt%)"
+        AppLanguage.ENGLISH -> "$completedFardhuCount/$totalFardhuCount Obligatory ($percentInt%)"
+        else -> "$completedFardhuCount/$totalFardhuCount Shalat Fardhu ($percentInt%)"
+    }
+
+    val streakUnitText = when (currentLang) {
+        AppLanguage.ENGLISH -> "Days"
+        else -> "Hari"
+    }
+
+    val fardhuSectionTitle = when (currentLang) {
+        AppLanguage.MALAY -> "Solat Fardu"
+        AppLanguage.ENGLISH -> "Obligatory Prayers"
+        else -> "Shalat Fardhu"
+    }
+
+    val fardhuSubTitle = when (currentLang) {
+        AppLanguage.MALAY -> "5 Waktu"
+        AppLanguage.ENGLISH -> "5 Prayers"
+        else -> "5 Waktu"
+    }
+
+    val sunnahSectionTitle = when (currentLang) {
+        AppLanguage.MALAY -> "Amalan Sunah Hari Ini"
+        AppLanguage.ENGLISH -> "Today's Sunnah Acts"
+        else -> "Amalan Sunnah Hari Ini"
+    }
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = Color.White,
+        color = SaatColors.PureWhite,
         shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.6f))
     ) {
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
+            // Header Row (Compact & Sleek)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { isExpanded = !isExpanded },
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.prayer_tracker_title),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.prayer_tracker_subtitle,
-                            state.todayProgress.completedCount,
-                            state.todayProgress.totalCount
-                        ),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = SaatColors.Slate500
-                    )
-                }
                 Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(SaatColors.AmberWash)
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_streak_custom),
-                        contentDescription = null,
-                        tint = SaatColors.DeepEmerald,
-                        modifier = Modifier.size(14.dp)
-                    )
-                    Text(
-                        text = state.streak.toString(),
-                        modifier = Modifier.padding(start = 4.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
-                    )
-                }
-                IconButton(onClick = onOpenCalendar, modifier = Modifier.size(36.dp)) {
-                    Icon(
-                        painter = androidx.compose.ui.res.painterResource(R.drawable.month_icon),
-                        contentDescription = stringResource(R.string.prayer_tracker_open_calendar),
-                        tint = SaatColors.Teal,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                IconButton(onClick = { isExpanded = !isExpanded }, modifier = Modifier.size(36.dp)) {
-                    Icon(
-                        Icons.Filled.KeyboardArrowDown,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
-                        tint = SaatColors.Slate500,
+                    Box(
                         modifier = Modifier
-                            .size(22.dp)
-                            .rotate(arrowRotation)
-                    )
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(SaatColors.DeepEmerald.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_prayer_rug),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = titleText,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.DeepEmerald,
+                            fontSize = 13.sp
+                        )
+                        Text(
+                            text = subtitleText,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SaatColors.Slate500,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    // Streak Pill
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = SaatColors.AmberWash,
+                        border = BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.3f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_streak_custom),
+                                contentDescription = null,
+                                tint = SaatColors.GoldDeep,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(Modifier.width(3.dp))
+                            Text(
+                                text = "${state.streak} $streakUnitText",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = SaatColors.GoldDeep,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+
+                    // Calendar Button
+                    IconButton(onClick = onOpenCalendar, modifier = Modifier.size(30.dp)) {
+                        Icon(
+                            painter = painterResource(R.drawable.month_icon),
+                            contentDescription = stringResource(R.string.prayer_tracker_open_calendar),
+                            tint = SaatColors.Teal,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    // Expand/Collapse Arrow
+                    IconButton(onClick = { isExpanded = !isExpanded }, modifier = Modifier.size(30.dp)) {
+                        Icon(
+                            imageVector = Icons.Filled.KeyboardArrowDown,
+                            contentDescription = if (isExpanded) "Collapse" else "Expand",
+                            tint = SaatColors.Slate500,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .rotate(arrowRotation)
+                        )
+                    }
                 }
             }
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
 
-            // Progress bar stays ALWAYS VISIBLE
+            // Linear Progress Indicator
             LinearProgressIndicator(
                 progress = { state.todayProgress.fraction },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(6.dp)
+                    .height(5.dp)
                     .clip(RoundedCornerShape(3.dp)),
                 color = SaatColors.Teal,
                 trackColor = SaatColors.LightGrey,
                 strokeCap = StrokeCap.Round
             )
 
-            // Chips section expands/collapses smoothly
+            // Content Section
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
                 Column(Modifier.fillMaxWidth()) {
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(10.dp))
 
+                    // 1. Shalat Fardhu Header & Compact Horizontal Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = fardhuSectionTitle,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.DeepEmerald
+                        )
+                        Text(
+                            text = fardhuSubTitle,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = SaatColors.Slate500
+                        )
+                    }
+
+                    Spacer(Modifier.height(6.dp))
+
+                    // Ultra-compact 5-prayer horizontal row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         PrayerTrackerStore.TRACKED_PRAYERS.forEach { prayer ->
                             val done = state.completedPrayers.contains(prayer)
                             val enabled = done || prayer in state.availablePrayers
-                            PrayerCheckChip(
+                            CompactPrayerTile(
+                                prayer = prayer,
                                 label = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
                                 completed = done,
                                 enabled = enabled,
-                                onClick = { onTogglePrayer(prayer) }
+                                onClick = { onTogglePrayer(prayer) },
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
 
+                    // 2. Amalan Sunnah Section (Horizontal Scrollable LazyRow)
                     if (state.optionalHabits.isNotEmpty()) {
-                        Spacer(Modifier.height(12.dp))
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        Spacer(Modifier.height(10.dp))
+                        HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
+                        Spacer(Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            state.optionalHabits.forEach { item ->
-                                OptionalHabitChip(
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "✦ ",
+                                    fontSize = 11.sp,
+                                    color = SaatColors.GoldDeep,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = sunnahSectionTitle,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SaatColors.DeepEmerald
+                                )
+                            }
+                            val completedCount = state.optionalHabits.count { it.completed }
+                            Surface(
+                                shape = CircleShape,
+                                color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                            ) {
+                                Text(
+                                    text = "$completedCount/${state.optionalHabits.size}",
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SaatColors.DeepEmerald
+                                )
+                            }
+                        }
+
+                        Spacer(Modifier.height(6.dp))
+
+                        // Horizontal Scroll LazyRow (Does not wrap vertically!)
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            contentPadding = PaddingValues(horizontal = 2.dp)
+                        ) {
+                            items(state.optionalHabits, key = { it.habit.name }) { item ->
+                                HorizontalOptionalHabitChip(
                                     item = item,
                                     onClick = { onToggleOptional(item.habit) }
                                 )
@@ -218,125 +363,186 @@ fun PrayerTrackerCard(
 }
 
 @Composable
-private fun OptionalHabitChip(
-    item: OptionalHabitUiItem,
-    onClick: () -> Unit
-) {
-    val bg = if (item.completed) SaatColors.DeepEmerald.copy(alpha = 0.12f) else SaatColors.LightGrey
-    val border = if (item.completed) SaatColors.DeepEmerald else SaatColors.SoftGrey
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(bg)
-            .border(1.dp, border, RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_check_custom),
-            contentDescription = null,
-            tint = if (item.completed) SaatColors.DeepEmerald else Color.Transparent,
-            modifier = Modifier.size(14.dp)
-        )
-        Spacer(Modifier.width(4.dp))
-        Text(
-            text = stringResource(item.labelRes),
-            style = MaterialTheme.typography.labelSmall,
-            color = if (item.completed) SaatColors.DeepEmerald else SaatColors.Slate800,
-            fontWeight = if (item.completed) FontWeight.SemiBold else FontWeight.Normal
-        )
-    }
-}
-
-@Composable
-private fun PrayerCheckChip(
+private fun CompactPrayerTile(
+    prayer: PrayerType,
     label: String,
     completed: Boolean,
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val performTapHaptic = rememberTapHaptic()
-    val bg by animateColorAsState(
+
+    val iconRes = when (prayer) {
+        PrayerType.FAJR -> R.drawable.ic_prayer_fajr
+        PrayerType.DHUHR -> R.drawable.ic_prayer_dhuhr
+        PrayerType.ASR -> R.drawable.ic_prayer_asr
+        PrayerType.MAGHRIB -> R.drawable.ic_prayer_maghrib
+        PrayerType.ISHA -> R.drawable.ic_prayer_isha
+        else -> R.drawable.ic_prayer_rug
+    }
+
+    val tileBg by animateColorAsState(
         targetValue = when {
             completed -> SaatColors.DeepEmerald
-            enabled -> Color.Transparent
-            else -> SaatColors.LightGrey.copy(alpha = 0.35f)
+            enabled -> SaatColors.MintWash
+            else -> SaatColors.LightGrey.copy(alpha = 0.4f)
         },
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "chipBg"
+        label = "compactTileBg"
     )
+
     val borderColor by animateColorAsState(
         targetValue = when {
             completed -> SaatColors.DeepEmerald
-            enabled -> SaatColors.SoftGrey
-            else -> SaatColors.SoftGrey.copy(alpha = 0.45f)
+            enabled -> SaatColors.DeepEmerald.copy(alpha = 0.25f)
+            else -> SaatColors.SoftGrey.copy(alpha = 0.4f)
         },
-        label = "chipBorder"
+        label = "compactTileBorder"
     )
-    val labelColor by animateColorAsState(
+
+    val contentColor by animateColorAsState(
         targetValue = when {
-            completed -> SaatColors.DeepEmerald
-            enabled -> SaatColors.Slate500
-            else -> SaatColors.Slate500.copy(alpha = 0.45f)
+            completed -> Color.White
+            enabled -> SaatColors.DeepEmerald
+            else -> SaatColors.Slate500.copy(alpha = 0.5f)
         },
-        label = "chipLabel"
+        label = "compactContentColor"
     )
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+
+    Surface(
+        modifier = modifier
             .alpha(if (enabled || completed) 1f else 0.55f)
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(12.dp))
             .then(
                 if (enabled || completed) {
                     Modifier.clickable {
                         performTapHaptic()
                         onClick()
                     }
-                } else {
-                    Modifier
-                }
-            )
-            .padding(2.dp)
+                } else Modifier
+            ),
+        shape = RoundedCornerShape(12.dp),
+        color = tileBg,
+        border = BorderStroke(1.dp, borderColor)
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .then(
-                    if (completed) {
-                        Modifier.background(
-                            Brush.linearGradient(
-                                listOf(SaatColors.DeepEmerald, SaatColors.Teal)
-                            )
-                        )
-                    } else {
-                        Modifier.background(bg)
-                    }
-                )
-                .then(
-                    if (!completed) {
-                        Modifier.border(2.dp, borderColor, CircleShape)
-                    } else Modifier
-                ),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier.padding(vertical = 7.dp, horizontal = 2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = label,
+                tint = contentColor,
+                modifier = Modifier.size(16.dp)
+            )
+
+            Spacer(Modifier.height(3.dp))
+
+            Text(
+                text = label,
+                fontSize = 10.sp,
+                fontWeight = if (completed) FontWeight.Bold else FontWeight.Medium,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(2.dp))
+
             if (completed) {
                 Icon(
-                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_check_custom),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
+                    painter = painterResource(R.drawable.ic_check_custom),
+                    contentDescription = "Done",
+                    tint = SaatColors.GoldBright,
+                    modifier = Modifier.size(10.dp)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(contentColor.copy(alpha = 0.25f))
                 )
             }
         }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (completed) FontWeight.SemiBold else FontWeight.Normal,
-            color = labelColor,
-            maxLines = 1
-        )
+    }
+}
+
+@Composable
+private fun HorizontalOptionalHabitChip(
+    item: OptionalHabitUiItem,
+    onClick: () -> Unit
+) {
+    val performTapHaptic = rememberTapHaptic()
+
+    val habitIconRes = when (item.habit) {
+        OptionalWorshipHabit.QIYAMUL_LAIL -> R.drawable.ic_qiyam
+        OptionalWorshipHabit.MONDAY_THURSDAY_FAST,
+        OptionalWorshipHabit.AYYAMUL_BIDH_SAHUR -> R.drawable.ic_rice
+        OptionalWorshipHabit.DHIKR_MORNING,
+        OptionalWorshipHabit.DHIKR_EVENING -> R.drawable.ic_dhikr
+        OptionalWorshipHabit.READ_QURAN -> R.drawable.ic_quran_off
+        OptionalWorshipHabit.DAILY_CHARITY -> R.drawable.ic_cash_saving
+        OptionalWorshipHabit.DHUHA,
+        OptionalWorshipHabit.RAWATIB -> R.drawable.ic_prayer_rug
+    }
+
+    val bg by animateColorAsState(
+        targetValue = if (item.completed) SaatColors.DeepEmerald.copy(alpha = 0.12f) else SaatColors.LightGrey,
+        label = "horizHabitBg"
+    )
+    val border by animateColorAsState(
+        targetValue = if (item.completed) SaatColors.DeepEmerald else SaatColors.SoftGrey,
+        label = "horizHabitBorder"
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (item.completed) SaatColors.DeepEmerald else SaatColors.Slate800,
+        label = "horizHabitText"
+    )
+
+    Surface(
+        modifier = Modifier
+            .clip(RoundedCornerShape(14.dp))
+            .clickable {
+                performTapHaptic()
+                onClick()
+            },
+        shape = RoundedCornerShape(14.dp),
+        color = bg,
+        border = BorderStroke(1.dp, border)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(habitIconRes),
+                contentDescription = null,
+                tint = if (item.completed) SaatColors.DeepEmerald else SaatColors.Slate500,
+                modifier = Modifier.size(13.dp)
+            )
+
+            Spacer(Modifier.width(5.dp))
+
+            Text(
+                text = stringResource(item.labelRes),
+                fontSize = 10.sp,
+                color = textColor,
+                fontWeight = if (item.completed) FontWeight.Bold else FontWeight.Normal
+            )
+
+            if (item.completed) {
+                Spacer(Modifier.width(5.dp))
+                Icon(
+                    painter = painterResource(R.drawable.ic_check_custom),
+                    contentDescription = null,
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.size(11.dp)
+                )
+            }
+        }
     }
 }
