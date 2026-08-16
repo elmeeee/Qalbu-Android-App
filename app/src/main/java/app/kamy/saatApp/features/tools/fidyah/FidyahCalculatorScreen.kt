@@ -108,33 +108,36 @@ fun FidyahCalculatorScreen(
     val focusManager = LocalFocusManager.current
     val currentLang = AppLanguageStore.from(context).current()
 
+    val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
+
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collect { msg ->
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            snackbarHostState.showSnackbar(msg)
         }
     }
 
     val screenTitle = stringResource(R.string.fidyah_title)
     val subtitle = stringResource(R.string.fidyah_subtitle)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        SaatColors.ScreenBackground,
-                        SaatColors.SageMist.copy(alpha = 0.4f),
-                        SaatColors.ScreenBackground
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            SaatColors.ScreenBackground,
+                            SaatColors.SageMist.copy(alpha = 0.4f),
+                            SaatColors.ScreenBackground
+                        )
                     )
                 )
-            )
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = { focusManager.clearFocus() })
-            }
-            .tabContentStatusBarInset()
-            .imePadding()
-    ) {
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { focusManager.clearFocus() })
+                }
+                .tabContentStatusBarInset()
+                .imePadding()
+        ) {
         // Sticky Premium Header Bar (Without redundant Dua icon)
         Row(
             modifier = Modifier
@@ -300,13 +303,70 @@ fun FidyahCalculatorScreen(
                 }
             }
         }
-    }
+        }
 
-    if (state.showDuaDialog) {
-        FidyahDuaModalSheet(
-            language = currentLang,
-            onDismiss = { viewModel.setShowDuaDialog(false) }
-        )
+        if (state.showDuaDialog) {
+            FidyahDuaModalSheet(
+                language = currentLang,
+                onDismiss = { viewModel.setShowDuaDialog(false) }
+            )
+        }
+
+        // Custom Floating Pill Toast / Snackbar matching Prayer Tracker & TodayScreen
+        androidx.compose.material3.SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 24.dp, start = 16.dp, end = 16.dp)
+        ) { snackbarData ->
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = SaatColors.PureWhite,
+                shadowElevation = 10.dp,
+                border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.35f)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    SaatColors.MintWash,
+                                    SaatColors.PureWhite
+                                )
+                            )
+                        )
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(SaatColors.DeepEmerald.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "Success",
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    Text(
+                        text = snackbarData.visuals.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = SaatColors.Slate900,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
     }
 }
 

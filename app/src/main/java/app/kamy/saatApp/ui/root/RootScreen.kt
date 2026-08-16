@@ -170,7 +170,18 @@ fun RootScreen(
                 PrayerCalendarScreen(onBack = { navController.popBackStack() })
             }
             composable("prayer/tracker/calendar") {
-                PrayerTrackerCalendarScreen(onBack = { navController.popBackStack() })
+                PrayerTrackerCalendarScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenSunnahPrayer = {
+                        navController.navigate("tools/sunnah") { launchSingleTop = true }
+                    },
+                    onOpenQuran = {
+                        navController.navigate(RootTab.Quran.route) { launchSingleTop = true }
+                    },
+                    onOpenDhikr = {
+                        navController.navigate("tools/dhikr") { launchSingleTop = true }
+                    }
+                )
             }
             composable(
                 route = RootTab.Quran.route,

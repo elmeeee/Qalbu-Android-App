@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -40,9 +41,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -69,6 +71,7 @@ import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerDayProgress
 import app.kamy.saatApp.infrastructure.preferences.PrayerTrackerStore
 import app.kamy.saatApp.ui.feedback.rememberTapHaptic
+import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.text.DateFormatSymbols
 import java.util.Calendar
 import java.util.Locale
@@ -76,6 +79,9 @@ import java.util.Locale
 @Composable
 fun PrayerTrackerCalendarScreen(
     onBack: () -> Unit,
+    onOpenSunnahPrayer: () -> Unit = {},
+    onOpenQuran: () -> Unit = {},
+    onOpenDhikr: () -> Unit = {},
     vm: PrayerTrackerCalendarViewModel = hiltViewModel(),
     trackerVm: PrayerTrackerViewModel = hiltViewModel()
 ) {
@@ -91,6 +97,8 @@ fun PrayerTrackerCalendarScreen(
     }
 
     val todayKey = PrayerTrackerStore.todayKey()
+    var selectedDayKey by remember { mutableStateOf(todayKey) }
+
     val leadingBlanks = remember(state.year, state.month) {
         Calendar.getInstance().apply {
             set(state.year, state.month - 1, 1)
@@ -107,9 +115,9 @@ fun PrayerTrackerCalendarScreen(
     }
 
     val subtitleText = when (currentLang) {
-        AppLanguage.MALAY -> "Pantau konsistensi solat fardu & amalan sunah harian"
-        AppLanguage.ENGLISH -> "Track daily obligatory prayers & sunnah habits"
-        else -> "Pantau konsistensi shalat fardhu & amalan sunnah harian"
+        AppLanguage.MALAY -> "Pantau rekod solat fardu & hub amalan sunah"
+        AppLanguage.ENGLISH -> "View prayer logs & sunnah practice hub"
+        else -> "Lihat catatan shalat & hub amalan sunnah"
     }
 
     val currentStreakLabel = when (currentLang) {
@@ -124,22 +132,18 @@ fun PrayerTrackerCalendarScreen(
         else -> "Rekor Terbaik"
     }
 
-    val journalSectionTitle = when (currentLang) {
-        AppLanguage.MALAY -> "Jurnal Solat & Amalan Hari Ini"
-        AppLanguage.ENGLISH -> "Today's Prayer & Sunnah Journal"
-        else -> "Jurnal Shalat & Amalan Sunnah Hari Ini"
+    val practiceHubTitle = when (currentLang) {
+        AppLanguage.MALAY -> "Panduan & Amalan Sunah"
+        AppLanguage.ENGLISH -> "Sunnah Practice Hub & Guides"
+        else -> "Panduan & Amalan Sunnah"
     }
 
-    val fardhuTitle = when (currentLang) {
-        AppLanguage.MALAY -> "Solat Fardu 5 Waktu"
-        AppLanguage.ENGLISH -> "5 Obligatory Prayers"
-        else -> "Shalat Fardhu 5 Waktu"
-    }
-
-    val sunnahTitle = when (currentLang) {
-        AppLanguage.MALAY -> "Amalan Sunah Hari Ini"
-        AppLanguage.ENGLISH -> "Today's Sunnah Acts"
-        else -> "Amalan Sunnah Hari Ini"
+    val selectedDayProgress = remember(selectedDayKey, state.days) {
+        state.days.find { it.dayKey == selectedDayKey } ?: PrayerDayProgress(
+            dayKey = selectedDayKey,
+            completedCount = PrayerTrackerStore.completedCount(context, selectedDayKey),
+            totalCount = 5
+        )
     }
 
     Column(
@@ -154,8 +158,9 @@ fun PrayerTrackerCalendarScreen(
                     )
                 )
             )
+            .tabContentStatusBarInset()
     ) {
-        // Sticky Header Bar
+        // Sticky Clean Header Bar (Clean padding below status bar)
         Row(
             Modifier
                 .fillMaxWidth()
@@ -199,9 +204,9 @@ fun PrayerTrackerCalendarScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Stats Surface Card
+            // 1. Stats Surface Card
             item {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -230,7 +235,7 @@ fun PrayerTrackerCalendarScreen(
                 }
             }
 
-            // Month Navigation Bar
+            // 2. Month Navigation Bar
             item {
                 Row(
                     Modifier.fillMaxWidth(),
@@ -252,7 +257,7 @@ fun PrayerTrackerCalendarScreen(
                 }
             }
 
-            // Weekday Headers
+            // 3. Weekday Headers
             item {
                 Row(
                     Modifier.fillMaxWidth(),
@@ -271,11 +276,11 @@ fun PrayerTrackerCalendarScreen(
                 }
             }
 
-            // Calendar Grid Container (Fixed height grid inside item)
+            // 4. Monthly Calendar Grid
             item {
                 val totalCells = leadingBlanks + state.days.size
                 val rows = (totalCells + 6) / 7
-                val gridHeight = (rows * 48).dp
+                val gridHeight = (rows * 50).dp
 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(7),
@@ -294,13 +299,24 @@ fun PrayerTrackerCalendarScreen(
                         CalendarDayCell(
                             dayNumber = dayNumber,
                             progress = day,
-                            isToday = day.dayKey == todayKey
+                            isToday = day.dayKey == todayKey,
+                            isSelected = day.dayKey == selectedDayKey,
+                            onClick = { selectedDayKey = day.dayKey }
                         )
                     }
                 }
             }
 
-            // Today's Journal & Sunnah Acts Breakdown Section
+            // 5. Selected Day Read-Only Log Card
+            item {
+                SelectedDaySummaryCard(
+                    dayProgress = selectedDayProgress,
+                    isToday = selectedDayKey == todayKey,
+                    language = currentLang
+                )
+            }
+
+            // 6. Sunnah Practice Hub & Dedicated Feature Navigators (Not duplicated checkboxes)
             item {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
@@ -312,21 +328,21 @@ fun PrayerTrackerCalendarScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_prayer_rug),
-                                contentDescription = null,
-                                tint = SaatColors.DeepEmerald,
-                                modifier = Modifier.size(18.dp)
+                            Text(
+                                text = "✦ ",
+                                fontSize = 12.sp,
+                                color = SaatColors.GoldDeep,
+                                fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = journalSectionTitle,
+                                text = practiceHubTitle,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = SaatColors.DeepEmerald
@@ -335,85 +351,339 @@ fun PrayerTrackerCalendarScreen(
 
                         HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
 
-                        // 1. Shalat Fardhu Status
-                        Text(
-                            text = fardhuTitle,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald
+                        SunnahPracticeNavigationRow(
+                            iconRes = R.drawable.ic_prayer_rug,
+                            title = when (currentLang) {
+                                AppLanguage.MALAY -> "Solat Sunah (Dhuha, Rawatib, Tahajud)"
+                                AppLanguage.ENGLISH -> "Sunnah Prayers (Dhuha, Rawatib, Qiyam)"
+                                else -> "Shalat Sunnah (Dhuha, Rawatib, Tahajud)"
+                            },
+                            subtitle = when (currentLang) {
+                                AppLanguage.MALAY -> "Buka panduan niat & tatacara solat sunah"
+                                AppLanguage.ENGLISH -> "Open intention & step-by-step guides"
+                                else -> "Buka panduan niat & tata cara shalat sunnah"
+                            },
+                            onClick = onOpenSunnahPrayer
                         )
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            PrayerTrackerStore.TRACKED_PRAYERS.forEach { prayer ->
-                                val done = trackerState.completedPrayers.contains(prayer)
-                                val enabled = done || prayer in trackerState.availablePrayers
-                                CompactDetailPrayerTile(
-                                    prayer = prayer,
-                                    label = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
-                                    completed = done,
-                                    enabled = enabled,
-                                    onClick = { trackerVm.togglePrayer(prayer) },
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                        }
+                        SunnahPracticeNavigationRow(
+                            iconRes = R.drawable.ic_quran_off,
+                            title = when (currentLang) {
+                                AppLanguage.MALAY -> "Membaca Al-Quran Harian"
+                                AppLanguage.ENGLISH -> "Daily Quran Recitation"
+                                else -> "Membaca Al-Qur'an Harian"
+                            },
+                            subtitle = when (currentLang) {
+                                AppLanguage.MALAY -> "Buka senarai surah & pembacaan Quran"
+                                AppLanguage.ENGLISH -> "Open Quran reader & surah list"
+                                else -> "Buka daftar surah & pembacaan Qur'an"
+                            },
+                            onClick = onOpenQuran
+                        )
 
-                        // 2. Amalan Sunnah Status (Horizontal Scroll)
-                        if (trackerState.optionalHabits.isNotEmpty()) {
-                            HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = "✦ ",
-                                        fontSize = 11.sp,
-                                        color = SaatColors.GoldDeep,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = sunnahTitle,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = SaatColors.DeepEmerald
-                                    )
-                                }
-                                val completedCount = trackerState.optionalHabits.count { it.completed }
-                                Surface(
-                                    shape = CircleShape,
-                                    color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
-                                ) {
-                                    Text(
-                                        text = "$completedCount/${trackerState.optionalHabits.size}",
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = SaatColors.DeepEmerald
-                                    )
-                                }
-                            }
-
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                contentPadding = PaddingValues(horizontal = 2.dp)
-                            ) {
-                                items(trackerState.optionalHabits, key = { it.habit.name }) { item ->
-                                    DetailOptionalHabitChip(
-                                        item = item,
-                                        onClick = { trackerVm.toggleOptionalHabit(item.habit) }
-                                    )
-                                }
-                            }
-                        }
+                        SunnahPracticeNavigationRow(
+                            iconRes = R.drawable.ic_dhikr,
+                            title = when (currentLang) {
+                                AppLanguage.MALAY -> "Zikir Pagi & Petang"
+                                AppLanguage.ENGLISH -> "Morning & Evening Dhikr"
+                                else -> "Dzikir Pagi & Petang"
+                            },
+                            subtitle = when (currentLang) {
+                                AppLanguage.MALAY -> "Tasbih digital & himpunan zikir"
+                                AppLanguage.ENGLISH -> "Digital tasbih & dhikr collection"
+                                else -> "Tasbih digital & kumpulan dzikir"
+                            },
+                            onClick = onOpenDhikr
+                        )
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun CalendarDayCell(
+    dayNumber: Int,
+    progress: PrayerDayProgress,
+    isToday: Boolean,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val performTapHaptic = rememberTapHaptic()
+    val complete = progress.isPerfectDay
+    val partial = progress.completedCount > 0
+
+    Box(
+        modifier = Modifier
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                when {
+                    complete -> Brush.linearGradient(
+                        listOf(SaatColors.DeepEmerald, SaatColors.Teal)
+                    )
+                    partial -> Brush.linearGradient(
+                        listOf(
+                            SaatColors.Teal.copy(alpha = 0.25f),
+                            SaatColors.Teal.copy(alpha = 0.12f)
+                        )
+                    )
+                    else -> Brush.linearGradient(
+                        listOf(SaatColors.LightGrey, SaatColors.LightGrey)
+                    )
+                }
+            )
+            .clickable {
+                performTapHaptic()
+                onClick()
+            }
+            .then(
+                if (isSelected) {
+                    Modifier.border(2.dp, SaatColors.GoldDeep, RoundedCornerShape(12.dp))
+                } else if (isToday) {
+                    Modifier.border(1.5.dp, SaatColors.DeepEmerald, RoundedCornerShape(12.dp))
+                } else {
+                    Modifier
+                }
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = dayNumber.toString(),
+                fontSize = 12.sp,
+                fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = when {
+                    complete -> Color.White
+                    partial -> SaatColors.DeepEmerald
+                    else -> SaatColors.Slate500
+                }
+            )
+            if (complete) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(11.dp)
+                )
+            } else if (partial) {
+                Text(
+                    text = "${progress.completedCount}/5",
+                    fontSize = 9.sp,
+                    color = SaatColors.DeepEmerald,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectedDaySummaryCard(
+    dayProgress: PrayerDayProgress,
+    isToday: Boolean,
+    language: AppLanguage
+) {
+    val context = LocalContext.current
+    val headerTitle = if (isToday) {
+        when (language) {
+            AppLanguage.MALAY -> "Ringkasan Solat Hari Ini"
+            AppLanguage.ENGLISH -> "Today's Prayer Summary"
+            else -> "Ringkasan Shalat Hari Ini"
+        }
+    } else {
+        when (language) {
+            AppLanguage.MALAY -> "Ringkasan Solat Tarikh Terpilih"
+            AppLanguage.ENGLISH -> "Selected Date Summary"
+            else -> "Ringkasan Shalat Tanggal Terpilih"
+        }
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = SaatColors.PureWhite,
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.6f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_prayer_rug),
+                        contentDescription = null,
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = headerTitle,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.DeepEmerald
+                    )
+                }
+
+                Surface(
+                    shape = CircleShape,
+                    color = if (dayProgress.isPerfectDay) SaatColors.GoldDeep.copy(alpha = 0.15f) else SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                ) {
+                    Text(
+                        text = "${dayProgress.completedCount}/5 Selesai",
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = if (dayProgress.isPerfectDay) SaatColors.GoldDeep else SaatColors.DeepEmerald
+                    )
+                }
+            }
+
+            HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                PrayerTrackerStore.TRACKED_PRAYERS.forEach { prayer ->
+                    val done = PrayerTrackerStore.isCompleted(context, prayer, dayProgress.dayKey)
+                    ReadOnlyPrayerBadge(
+                        prayerName = AppNotificationCopy.prayerDisplayName(context, prayer.aladhanKey),
+                        completed = done,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReadOnlyPrayerBadge(
+    prayerName: String,
+    completed: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = if (completed) SaatColors.MintWash else SaatColors.LightGrey.copy(alpha = 0.4f),
+        border = BorderStroke(1.dp, if (completed) SaatColors.DeepEmerald else SaatColors.SoftGrey.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = prayerName,
+                fontSize = 10.sp,
+                fontWeight = if (completed) FontWeight.Bold else FontWeight.Medium,
+                color = if (completed) SaatColors.DeepEmerald else SaatColors.Slate500,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            if (completed) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_check_custom),
+                    contentDescription = "Done",
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.size(12.dp)
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(SaatColors.SoftGrey)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SunnahPracticeNavigationRow(
+    iconRes: Int,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    val performTapHaptic = rememberTapHaptic()
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable {
+                performTapHaptic()
+                onClick()
+            },
+        shape = RoundedCornerShape(14.dp),
+        color = SaatColors.MintWash,
+        border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.2f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(SaatColors.DeepEmerald.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = null,
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = title,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
+                    )
+                    Text(
+                        text = subtitle,
+                        fontSize = 11.sp,
+                        color = SaatColors.Slate500
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = "Open",
+                tint = SaatColors.DeepEmerald,
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
@@ -446,259 +716,6 @@ private fun ChallengeStat(
             color = SaatColors.Slate500,
             fontWeight = FontWeight.Medium
         )
-    }
-}
-
-@Composable
-private fun CalendarDayCell(
-    dayNumber: Int,
-    progress: PrayerDayProgress,
-    isToday: Boolean
-) {
-    val complete = progress.isPerfectDay
-    val partial = progress.completedCount > 0
-
-    Box(
-        modifier = Modifier
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                when {
-                    complete -> Brush.linearGradient(
-                        listOf(SaatColors.DeepEmerald, SaatColors.Teal)
-                    )
-                    partial -> Brush.linearGradient(
-                        listOf(
-                            SaatColors.Teal.copy(alpha = 0.25f),
-                            SaatColors.Teal.copy(alpha = 0.12f)
-                        )
-                    )
-                    else -> Brush.linearGradient(
-                        listOf(SaatColors.LightGrey, SaatColors.LightGrey)
-                    )
-                }
-            )
-            .then(
-                if (isToday) {
-                    Modifier.border(2.dp, SaatColors.GoldDeep, RoundedCornerShape(12.dp))
-                } else {
-                    Modifier
-                }
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = dayNumber.toString(),
-                fontSize = 12.sp,
-                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium,
-                color = when {
-                    complete -> Color.White
-                    partial -> SaatColors.DeepEmerald
-                    else -> SaatColors.Slate500
-                }
-            )
-            if (complete) {
-                Icon(
-                    Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(11.dp)
-                )
-            } else if (partial) {
-                Text(
-                    text = "${progress.completedCount}/${progress.totalCount}",
-                    fontSize = 9.sp,
-                    color = SaatColors.DeepEmerald,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun CompactDetailPrayerTile(
-    prayer: PrayerType,
-    label: String,
-    completed: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val performTapHaptic = rememberTapHaptic()
-
-    val iconRes = when (prayer) {
-        PrayerType.FAJR -> R.drawable.ic_prayer_fajr
-        PrayerType.DHUHR -> R.drawable.ic_prayer_dhuhr
-        PrayerType.ASR -> R.drawable.ic_prayer_asr
-        PrayerType.MAGHRIB -> R.drawable.ic_prayer_maghrib
-        PrayerType.ISHA -> R.drawable.ic_prayer_isha
-        else -> R.drawable.ic_prayer_rug
-    }
-
-    // Clean MintWash tile background (Not solid green!)
-    val tileBg by animateColorAsState(
-        targetValue = when {
-            enabled || completed -> SaatColors.MintWash
-            else -> SaatColors.LightGrey.copy(alpha = 0.4f)
-        },
-        animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "detailTileBg"
-    )
-
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            completed -> SaatColors.DeepEmerald
-            enabled -> SaatColors.DeepEmerald.copy(alpha = 0.25f)
-            else -> SaatColors.SoftGrey.copy(alpha = 0.4f)
-        },
-        label = "detailTileBorder"
-    )
-
-    val contentColor by animateColorAsState(
-        targetValue = when {
-            enabled || completed -> SaatColors.DeepEmerald
-            else -> SaatColors.Slate500.copy(alpha = 0.5f)
-        },
-        label = "detailContentColor"
-    )
-
-    Surface(
-        modifier = modifier
-            .alpha(if (enabled || completed) 1f else 0.55f)
-            .clip(RoundedCornerShape(12.dp))
-            .then(
-                if (enabled || completed) {
-                    Modifier.clickable {
-                        performTapHaptic()
-                        onClick()
-                    }
-                } else Modifier
-            ),
-        shape = RoundedCornerShape(12.dp),
-        color = tileBg,
-        border = BorderStroke(1.dp, borderColor)
-    ) {
-        Column(
-            modifier = Modifier.padding(vertical = 7.dp, horizontal = 2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = label,
-                tint = contentColor,
-                modifier = Modifier.size(16.dp)
-            )
-
-            Spacer(Modifier.height(3.dp))
-
-            Text(
-                text = label,
-                fontSize = 10.sp,
-                fontWeight = if (completed) FontWeight.Bold else FontWeight.Medium,
-                color = contentColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(Modifier.height(3.dp))
-
-            // Checkmark vs Uncheck indicator
-            if (completed) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_check_custom),
-                    contentDescription = "Done",
-                    tint = SaatColors.DeepEmerald,
-                    modifier = Modifier.size(12.dp)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .border(1.dp, SaatColors.Slate500.copy(alpha = 0.4f), CircleShape)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DetailOptionalHabitChip(
-    item: OptionalHabitUiItem,
-    onClick: () -> Unit
-) {
-    val performTapHaptic = rememberTapHaptic()
-
-    val habitIconRes = when (item.habit) {
-        OptionalWorshipHabit.QIYAMUL_LAIL -> R.drawable.ic_qiyam
-        OptionalWorshipHabit.MONDAY_THURSDAY_FAST,
-        OptionalWorshipHabit.AYYAMUL_BIDH_SAHUR -> R.drawable.ic_rice
-        OptionalWorshipHabit.DHIKR_MORNING,
-        OptionalWorshipHabit.DHIKR_EVENING -> R.drawable.ic_dhikr
-        OptionalWorshipHabit.READ_QURAN -> R.drawable.ic_quran_off
-        OptionalWorshipHabit.DAILY_CHARITY -> R.drawable.ic_cash_saving
-        OptionalWorshipHabit.DHUHA,
-        OptionalWorshipHabit.RAWATIB -> R.drawable.ic_prayer_rug
-    }
-
-    val bg by animateColorAsState(
-        targetValue = if (item.completed) SaatColors.DeepEmerald.copy(alpha = 0.12f) else SaatColors.LightGrey,
-        label = "detailHabitBg"
-    )
-    val border by animateColorAsState(
-        targetValue = if (item.completed) SaatColors.DeepEmerald else SaatColors.SoftGrey,
-        label = "detailHabitBorder"
-    )
-    val textColor by animateColorAsState(
-        targetValue = if (item.completed) SaatColors.DeepEmerald else SaatColors.Slate800,
-        label = "detailHabitText"
-    )
-
-    Surface(
-        modifier = Modifier
-            .clip(RoundedCornerShape(14.dp))
-            .clickable {
-                performTapHaptic()
-                onClick()
-            },
-        shape = RoundedCornerShape(14.dp),
-        color = bg,
-        border = BorderStroke(1.dp, border)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(habitIconRes),
-                contentDescription = null,
-                tint = if (item.completed) SaatColors.DeepEmerald else SaatColors.Slate500,
-                modifier = Modifier.size(13.dp)
-            )
-
-            Spacer(Modifier.width(5.dp))
-
-            Text(
-                text = stringResource(item.labelRes),
-                fontSize = 10.sp,
-                color = textColor,
-                fontWeight = if (item.completed) FontWeight.Bold else FontWeight.Normal
-            )
-
-            if (item.completed) {
-                Spacer(Modifier.width(5.dp))
-                Icon(
-                    painter = painterResource(R.drawable.ic_check_custom),
-                    contentDescription = null,
-                    tint = SaatColors.DeepEmerald,
-                    modifier = Modifier.size(11.dp)
-                )
-            }
-        }
     }
 }
 
