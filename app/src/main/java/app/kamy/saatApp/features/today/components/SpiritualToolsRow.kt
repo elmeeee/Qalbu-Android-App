@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,7 +27,6 @@ fun SpiritualToolsRow(
     onOpenQibla: () -> Unit,
     onOpenDhikr: () -> Unit,
     onOpenZakat: () -> Unit,
-    onOpenQiyam: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -46,7 +44,6 @@ fun SpiritualToolsRow(
             ToolItem(Icons.Filled.Explore, stringResource(R.string.qibla_title), onOpenQibla)
             ToolItem(Icons.Filled.Favorite, stringResource(R.string.dhikr_title), onOpenDhikr)
             ToolItem(Icons.Filled.Calculate, stringResource(R.string.zakat_title), onOpenZakat)
-            ToolItem(Icons.Filled.NightsStay, stringResource(R.string.qiyam_title), onOpenQiyam)
         }
     }
 }

@@ -384,8 +384,7 @@ private fun CompactPrayerTile(
 
     val tileBg by animateColorAsState(
         targetValue = when {
-            completed -> SaatColors.DeepEmerald
-            enabled -> SaatColors.MintWash
+            enabled || completed -> SaatColors.MintWash
             else -> SaatColors.LightGrey.copy(alpha = 0.4f)
         },
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
@@ -403,8 +402,7 @@ private fun CompactPrayerTile(
 
     val contentColor by animateColorAsState(
         targetValue = when {
-            completed -> Color.White
-            enabled -> SaatColors.DeepEmerald
+            enabled || completed -> SaatColors.DeepEmerald
             else -> SaatColors.Slate500.copy(alpha = 0.5f)
         },
         label = "compactContentColor"
@@ -450,21 +448,22 @@ private fun CompactPrayerTile(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(Modifier.height(2.dp))
+            Spacer(Modifier.height(3.dp))
 
+            // Indikator centang vs uncheck (Icon Check/Uncheck)
             if (completed) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check_custom),
                     contentDescription = "Done",
-                    tint = SaatColors.GoldBright,
-                    modifier = Modifier.size(10.dp)
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.size(12.dp)
                 )
             } else {
                 Box(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(contentColor.copy(alpha = 0.25f))
+                        .border(1.dp, SaatColors.Slate500.copy(alpha = 0.4f), CircleShape)
                 )
             }
         }

@@ -146,7 +146,8 @@
     <string name="optional_daily_charity">Sedekah Harian</string>
     <string name="optional_dhuha">Solat Duha</string>
     <string name="optional_rawatib">Sunat Rawatib</string>
-    <string name="fidyah_title">Kalkulator &amp; Jejak Fidyah</string>
+    <string name="fidyah_title">Tracker Fidyah</string>
+    <string name="fidyah_subtitle">Kiraan Hukum 4 Mazhab &amp; Rekod Qada</string>
     <string name="prayer_tracker_open_calendar">Kalendar</string>
     <string name="prayer_tracker_calendar_title">Cabaran solat</string>
     <string name="prayer_tracker_calendar_subtitle">Jejaki streak solat harian</string>

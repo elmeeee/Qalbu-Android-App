@@ -115,13 +115,6 @@ fun SpiritualToolsScreen(
                 SaatColors.DeepEmerald
             ),
             SpiritualToolItem(
-                R.drawable.ic_qiyam,
-                R.string.qiyam_title,
-                "qiyam",
-                SaatColors.DeepEmerald,
-                SaatColors.IndigoAccent
-            ),
-            SpiritualToolItem(
                 R.drawable.ic_manzil,
                 R.string.manzil_title,
                 "manzil",

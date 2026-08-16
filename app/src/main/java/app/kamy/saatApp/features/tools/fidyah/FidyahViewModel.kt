@@ -11,8 +11,11 @@ import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.FidyahStore
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -116,6 +119,9 @@ class FidyahViewModel @Inject constructor(
         _uiState.update { it.copy(showDuaDialog = show) }
     }
 
+    private val _toastMessage = kotlinx.coroutines.flow.MutableSharedFlow<String>(extraBufferCapacity = 1)
+    val toastMessage: kotlinx.coroutines.flow.SharedFlow<String> = _toastMessage.asSharedFlow()
+
     fun saveCurrentCalculation() {
         val res = _uiState.value.calculationResult ?: return
         val totalAmount = res.totalFidyahDaysMultiplier * _uiState.value.pricePerDay
@@ -134,6 +140,14 @@ class FidyahViewModel @Inject constructor(
         )
         fidyahStore.saveRecord(record)
         loadRecords()
+
+        val lang = AppLanguageStore.from(getApplication()).current()
+        val msg = when (lang) {
+            app.kamy.saatApp.core.locale.AppLanguage.MALAY -> "Rekod fidyah berjaya disimpan!"
+            app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> "Fidyah record saved successfully!"
+            else -> "Catatan fidyah berhasil disimpan!"
+        }
+        viewModelScope.launch { _toastMessage.emit(msg) }
     }
 
     fun toggleRecordPaid(record: FidyahRecord) {
@@ -145,6 +159,14 @@ class FidyahViewModel @Inject constructor(
         )
         fidyahStore.saveRecord(updated)
         loadRecords()
+
+        val lang = AppLanguageStore.from(getApplication()).current()
+        val msg = when (lang) {
+            app.kamy.saatApp.core.locale.AppLanguage.MALAY -> "Status bayaran fidyah dikemaskini"
+            app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> "Fidyah payment status updated"
+            else -> "Status pembayaran fidyah diperbarui"
+        }
+        viewModelScope.launch { _toastMessage.emit(msg) }
     }
 
     fun incrementQadhaDay(record: FidyahRecord) {
@@ -157,6 +179,14 @@ class FidyahViewModel @Inject constructor(
         )
         fidyahStore.saveRecord(updated)
         loadRecords()
+
+        val lang = AppLanguageStore.from(getApplication()).current()
+        val msg = when (lang) {
+            app.kamy.saatApp.core.locale.AppLanguage.MALAY -> "+1 Hari qada puasa dicatat"
+            app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> "+1 Qadha fast day logged"
+            else -> "+1 Hari qadha puasa dicatat"
+        }
+        viewModelScope.launch { _toastMessage.emit(msg) }
     }
 
     fun toggleQadhaCompleted(record: FidyahRecord) {
@@ -173,6 +203,14 @@ class FidyahViewModel @Inject constructor(
     fun deleteRecord(recordId: String) {
         fidyahStore.deleteRecord(recordId)
         loadRecords()
+
+        val lang = AppLanguageStore.from(getApplication()).current()
+        val msg = when (lang) {
+            app.kamy.saatApp.core.locale.AppLanguage.MALAY -> "Rekod fidyah dihapuskan"
+            app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> "Fidyah record deleted"
+            else -> "Catatan fidyah dihapus"
+        }
+        viewModelScope.launch { _toastMessage.emit(msg) }
     }
 
     private fun recalculate() {

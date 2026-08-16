@@ -59,17 +59,6 @@ object PrayerTrackerStore {
         habit: OptionalWorshipHabit,
         dayKey: String = todayKey()
     ): Boolean {
-        if (habit == OptionalWorshipHabit.QIYAMUL_LAIL) {
-            if (QiyamTrackerStore.isLogged(context, dayKey)) return true
-            val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            val legacyKey = optionalPrefKey(habit, dayKey)
-            if (prefs.getBoolean(legacyKey, false)) {
-                QiyamTrackerStore.setLogged(context, true, dayKey)
-                prefs.edit().remove(legacyKey).apply()
-                return true
-            }
-            return false
-        }
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getBoolean(optionalPrefKey(habit, dayKey), false)
     }
@@ -80,14 +69,6 @@ object PrayerTrackerStore {
         completed: Boolean,
         dayKey: String = todayKey()
     ) {
-        if (habit == OptionalWorshipHabit.QIYAMUL_LAIL) {
-            QiyamTrackerStore.setLogged(context, completed, dayKey)
-            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .edit()
-                .remove(optionalPrefKey(habit, dayKey))
-                .apply()
-            return
-        }
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putBoolean(optionalPrefKey(habit, dayKey), completed)

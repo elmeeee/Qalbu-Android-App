@@ -1,5 +1,6 @@
 package app.kamy.saatApp.features.tools.fidyah
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -7,6 +8,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -56,6 +59,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,12 +70,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -96,19 +105,17 @@ fun FidyahCalculatorScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     val currentLang = AppLanguageStore.from(context).current()
 
-    val screenTitle = when (currentLang) {
-        AppLanguage.MALAY -> "Kalkulator & Tracker Fidyah"
-        AppLanguage.ENGLISH -> "Fidyah Calculator & Tracker"
-        else -> "Kalkulator & Tracker Fidyah"
+    LaunchedEffect(Unit) {
+        viewModel.toastMessage.collect { msg ->
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
     }
 
-    val subtitle = when (currentLang) {
-        AppLanguage.MALAY -> "Kiraan Hukum 4 Mazhab & Rekod Qada"
-        AppLanguage.ENGLISH -> "4 Madhhab Rules & Qadha Tracker"
-        else -> "Perhitungan 4 Mazhab & Catatan Qadha"
-    }
+    val screenTitle = stringResource(R.string.fidyah_title)
+    val subtitle = stringResource(R.string.fidyah_subtitle)
 
     Column(
         modifier = Modifier
@@ -122,6 +129,9 @@ fun FidyahCalculatorScreen(
                     )
                 )
             )
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { focusManager.clearFocus() })
+            }
             .tabContentStatusBarInset()
             .imePadding()
     ) {
@@ -578,6 +588,8 @@ private fun FidyahInputsSection(
 
             HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
 
+            val focusManager = LocalFocusManager.current
+
             // Hijri Year Label
             OutlinedTextField(
                 value = hijriYear,
@@ -591,6 +603,8 @@ private fun FidyahInputsSection(
                         }
                     )
                 },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
@@ -618,7 +632,8 @@ private fun FidyahInputsSection(
                     )
                 },
                 prefix = { Text("$userCurrencySymbol ", fontWeight = FontWeight.Bold, color = SaatColors.DeepEmerald) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
@@ -789,15 +804,16 @@ private fun FidyahResultCard(
                     onClick = onSaveRecord,
                     colors = ButtonDefaults.buttonColors(containerColor = SaatColors.GoldDeep, contentColor = Color.Black),
                     modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
                     shape = RoundedCornerShape(14.dp)
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_faraidh_save),
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(15.dp),
                         tint = Color.Black
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = when (language) {
                             AppLanguage.MALAY -> "Simpan Rekod"
@@ -805,22 +821,26 @@ private fun FidyahResultCard(
                             else -> "Simpan Catatan"
                         },
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 OutlinedButton(
                     onClick = onOpenDua,
                     modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 8.dp),
                     shape = RoundedCornerShape(14.dp),
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f))
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_dua),
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(15.dp),
                         tint = Color.White
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = when (language) {
                             AppLanguage.MALAY -> "Doa & Niat"
@@ -829,7 +849,10 @@ private fun FidyahResultCard(
                         },
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        softWrap = false,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

@@ -41,7 +41,6 @@ import app.kamy.saatApp.features.quran.ChaptersScreen
 import app.kamy.saatApp.features.tools.DoaZikirScreen
 import app.kamy.saatApp.features.tools.DhikrScreen
 import app.kamy.saatApp.features.tools.QiblaScreen
-import app.kamy.saatApp.features.tools.QiyamScreen
 import app.kamy.saatApp.features.tools.ManzilScreen
 import app.kamy.saatApp.features.tools.SpiritualToolsScreen
 import app.kamy.saatApp.features.tools.ZakatCalculatorScreen
@@ -226,9 +225,6 @@ fun RootScreen(
             composable("tools/zakat") {
                 ZakatCalculatorScreen(onBack = { navController.popBackStack() })
             }
-            composable("tools/qiyam") {
-                QiyamScreen(onBack = { navController.popBackStack() })
-            }
             composable("tools/manzil") {
                 ManzilScreen(onBack = { navController.popBackStack() })
             }
@@ -246,8 +242,7 @@ fun RootScreen(
             composable("tools/sunnah-prayer") {
                 app.kamy.saatApp.features.tools.sunnah.SunnahPrayerScreen(
                     onBack = { navController.popBackStack() },
-                    onOpenDoaZikir = { navController.navigate("tools/doa-zikir") },
-                    onOpenQiyam = { navController.navigate("tools/qiyam") }
+                    onOpenDoaZikir = { navController.navigate("tools/doa-zikir") }
                 )
             }
             composable("tools/fidyah") {

@@ -169,7 +169,8 @@
     <string name="optional_daily_charity">Sedekah Harian</string>
     <string name="optional_dhuha">Sholat Dhuha</string>
     <string name="optional_rawatib">Sunnah Rawatib</string>
-    <string name="fidyah_title">Kalkulator &amp; Tracker Fidyah</string>
+    <string name="fidyah_title">Tracker Fidyah</string>
+    <string name="fidyah_subtitle">Perhitungan 4 Mazhab &amp; Catatan Qadha</string>
     <string name="prayer_tracker_open_calendar">Kalender</string>
     <string name="prayer_tracker_calendar_title">Tantangan sholat</string>
     <string name="prayer_tracker_calendar_subtitle">Lacak streak sholat harian</string>

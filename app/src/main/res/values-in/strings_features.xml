@@ -85,19 +85,6 @@
     <string name="prayer_widget_next_title">Sholat berikutnya</string>
     <string name="qibla_account_subtitle">Kiblat AR</string>
     <string name="qibla_title">Kiblat</string>
-    <string name="qiyam_account_subtitle">Pelacak tahajud &amp; panduan bacaan</string>
-    <string name="qiyam_explain">Qiyam adalah sholat sunnah malam — sering disebut tahajud setelah tidur.</string>
-    <string name="qiyam_explain_detail">Sepertiga malam terakhir adalah waktu mulia untuk doa dan sholat tambahan. Catat di sini saat Anda qiyam malam ini.</string>
-    <string name="qiyam_stats">%1$d malam bulan ini · streak %2$d hari</string>
-    <string name="qiyam_title">Qiyam / Tahajud</string>
-    <string name="qiyam_tonight_hint">Pelacak pribadi</string>
-    <string name="qiyam_tonight_label">Sudah qiyam malam ini</string>
-    <string name="qiyam_premium_subtitle">Pelacak &amp; panduan sholat malam</string>
-    <string name="qiyam_tab_tracker">Pelacak</string>
-    <string name="qiyam_tab_guide">Bacaan</string>
-    <string name="qiyam_streak_label">Streak hari</string>
-    <string name="qiyam_month_label">Bulan ini</string>
-    <string name="qiyam_week_label">7 hari terakhir</string>
     <string name="tahajud_guide_intro">Buka setiap bagian untuk teks Arab, transliterasi, dan panduan langkah demi langkah tahajud / qiyam.</string>
     <string name="tahajud_cat_preparation">Persiapan</string>
     <string name="tahajud_cat_prayer">Sholat (2 rakaat berpasang)</string>
@@ -518,9 +505,8 @@
     <string name="sunnah_section_doa_features">3. Doa Khusus &amp; Amalan Sunnah</string>
     <string name="sunnah_special_doa_title">Doa Khusus</string>
     <string name="sunnah_open_doa_collection">Buka Koleksi Doa &amp; Zikir Lengkap</string>
-    <string name="sunnah_open_qiyam_tracker">Buka Tracker Salat Malam (Qiyam)</string>
 
     <!-- Adhan Notification Helper Strings (Indonesian) -->
-    <string name="notif_off_default_sound_hint">Mati (Tetap notif dengan suara bawaan)</string>
+    <string name="notif_off_default_sound_hint">Mati (Bunyi bawaan)</string>
     <string name="notif_adhan_section_info">💡 Saat suara Azan dimatikan, pengingat shalat tetap akan muncul menggunakan suara notifikasi bawaan HP.</string>
 </resources>

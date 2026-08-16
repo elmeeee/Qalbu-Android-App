@@ -149,7 +149,8 @@
     <string name="optional_daily_charity">Daily Charity</string>
     <string name="optional_dhuha">Dhuha Prayer</string>
     <string name="optional_rawatib">Rawatib Sunnah</string>
-    <string name="fidyah_title">Fidyah Calculator &amp; Tracker</string>
+    <string name="fidyah_title">Fidyah Tracker</string>
+    <string name="fidyah_subtitle">4 Madhhab Rules &amp; Qadha Tracker</string>
     <string name="prayer_tracker_open_calendar">Calendar</string>
     <string name="prayer_tracker_calendar_title">Prayer challenge</string>
     <string name="prayer_tracker_calendar_subtitle">Track your daily salah streak</string>
@@ -424,19 +425,6 @@
     <string name="zakat_net_wealth">Net zakatable wealth</string>
     <string name="zakat_due">Zakat due (2.5%)</string>
     <string name="zakat_below_nisab">Your total wealth is below the nisab threshold. Zakat is not mandatory, but voluntary charity (sadaqah) is encouraged.</string>
-    <string name="qiyam_title">Qiyam / Tahajud</string>
-    <string name="qiyam_stats">%1$d nights this month · %2$d day streak</string>
-    <string name="qiyam_explain">Qiyam is voluntary night prayer — often called tahajud when prayed after sleep.</string>
-    <string name="qiyam_explain_detail">The last third of the night is a blessed time for dua and extra rakah. Log here when you stand for qiyam tonight.</string>
-    <string name="qiyam_tonight_label">Prayed qiyam tonight</string>
-    <string name="qiyam_tonight_hint">Private tracker</string>
-    <string name="qiyam_premium_subtitle">Night prayer tracker &amp; guide</string>
-    <string name="qiyam_tab_tracker">Tracker</string>
-    <string name="qiyam_tab_guide">Readings</string>
-    <string name="qiyam_streak_label">Day streak</string>
-    <string name="qiyam_month_label">This month</string>
-    <string name="qiyam_week_label">Last 7 days</string>
-    <string name="qiyam_account_subtitle">Tahajud tracker &amp; prayer guide</string>
     <string name="tahajud_guide_intro">Expand each section for Arabic text, transliteration, and step-by-step guidance for tahajud / qiyam.</string>
     <string name="tahajud_cat_preparation">Preparation</string>
     <string name="tahajud_cat_prayer">Prayer (2 rakah pairs)</string>
@@ -1049,7 +1037,6 @@
     <string name="sunnah_section_doa_features">3. Special Supplication &amp; Recommended Actions</string>
     <string name="sunnah_special_doa_title">Special Supplication (Dua)</string>
     <string name="sunnah_open_doa_collection">Open Full Doa &amp; Dhikr Collection</string>
-    <string name="sunnah_open_qiyam_tracker">Open Qiyam Night Tracker</string>
 
     <!-- Adhan Notification Helper Strings -->
     <string name="notif_off_default_sound_hint">Off (Still notify with default sound)</string>

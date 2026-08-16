@@ -643,27 +643,6 @@ private fun SunnahPrayerDetailFullScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
-
-                        if (item.id == "tahajjud" || item.category == "MALAM") {
-                            Button(
-                                onClick = onOpenQiyam,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(14.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_qiyam),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = Color.White
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = stringResource(R.string.sunnah_open_qiyam_tracker),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
                     }
 
                     Spacer(Modifier.height(36.dp))
