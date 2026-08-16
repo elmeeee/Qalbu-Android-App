@@ -173,10 +173,16 @@ fun RootScreen(
                 PrayerTrackerCalendarScreen(
                     onBack = { navController.popBackStack() },
                     onOpenSunnahPrayer = {
-                        navController.navigate("tools/sunnah") { launchSingleTop = true }
+                        navController.navigate("tools/sunnah-prayer") { launchSingleTop = true }
                     },
                     onOpenQuran = {
-                        navController.navigate(RootTab.Quran.route) { launchSingleTop = true }
+                        navController.navigate(RootTab.Quran.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     },
                     onOpenDhikr = {
                         navController.navigate("tools/dhikr") { launchSingleTop = true }
@@ -368,7 +374,7 @@ fun RootScreen(
                                     saveState = true
                                 }
                                 launchSingleTop = true
-                                restoreState = true
+                                restoreState = (tab.route != RootTab.Default.route)
                             }
                         }
                     },
