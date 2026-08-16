@@ -185,7 +185,7 @@ fun RootScreen(
                         }
                     },
                     onOpenDhikr = {
-                        navController.navigate("tools/dhikr") { launchSingleTop = true }
+                        navController.navigate("tools/doa-zikir") { launchSingleTop = true }
                     }
                 )
             }
