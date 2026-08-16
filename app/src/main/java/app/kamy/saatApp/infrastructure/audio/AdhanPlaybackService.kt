@@ -88,8 +88,7 @@ class AdhanPlaybackService : Service() {
 
                 val fgSuccess = promoteToForeground(title, body, prayerName)
                 if (!fgSuccess) {
-                    releaseAndStop()
-                    return START_NOT_STICKY
+                    android.util.Log.w("AdhanPlaybackService", "promoteToForeground failed; proceeding with background playback")
                 }
 
                 acquireWakeLock()

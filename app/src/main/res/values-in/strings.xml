@@ -546,6 +546,10 @@
 
     <!-- Spiritual Tools -->
     <string name="sunnah_prayer_title">Panduan &amp; Amalan Sunnah</string>
+    <string name="jenazah_prayer_title">Panduan Shalat Jenazah</string>
+    <string name="jenazah_prayer_subtitle">Panduan lengkap fardhu kifayah, niat, posisi imam &amp; tata cara 4 takbir</string>
+    <string name="sunnah_prayers_tab">Shalat Sunnah</string>
+    <string name="sunnah_deeds_tab">Amalan Sunnah Harian</string>
     <!-- Sahabat Saat -->
     <string name="tanya_saat_ai_title">Sahabat Saat</string>
     <string name="tanya_saat_ai_subtitle">Teman Curhat &amp; Panduan Ayat Al-Qur\'an</string>

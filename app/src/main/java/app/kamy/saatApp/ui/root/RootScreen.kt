@@ -262,6 +262,11 @@ fun RootScreen(
                     onOpenDoaZikir = { navController.navigate("tools/doa-zikir") }
                 )
             }
+            composable("tools/jenazah") {
+                app.kamy.saatApp.features.tools.janazah.JanazahPrayerScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
             composable("tools/fidyah") {
                 app.kamy.saatApp.features.tools.fidyah.FidyahCalculatorScreen(
                     onNavigateBack = { navController.popBackStack() }

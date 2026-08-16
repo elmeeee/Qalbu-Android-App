@@ -42,10 +42,10 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         val shouldPlayAdhan = playAdhan && globalAdhanSoundEnabled
 
         val isTahajud = kind?.contains("LAST_THIRD") == true || kind?.contains("tahajud") == true || prayerName?.equals("tahajud", ignoreCase = true) == true
-        var adhanPlaying = false
         var adhanRawRes: Int? = null
         if (playAdhan && isTahajud) {
-            adhanPlaying = AdhanPlaybackService.start(
+            adhanRawRes = app.kamy.saatApp.R.raw.tahajud_alarm
+            AdhanPlaybackService.start(
                 context = appContext,
                 rawRes = app.kamy.saatApp.R.raw.tahajud_alarm,
                 title = title,
@@ -59,7 +59,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
             val fajrVoice = store.currentFajrVoice()
             val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice, fajrVoice)
             adhanRawRes = rawRes
-            adhanPlaying = AdhanPlaybackService.start(
+            AdhanPlaybackService.start(
                 context = appContext,
                 rawRes = rawRes,
                 title = title,
@@ -69,7 +69,8 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
             )
         }
 
-        if (title.isNotEmpty() && !adhanPlaying) {
+        // ALWAYS show push notification so the notification is 100% guaranteed to appear in drawer & heads-up
+        if (title.isNotEmpty()) {
             val alertChannel = when {
                 kind?.startsWith("prayer_") == true || kind == "imsak" -> {
                     NotificationChannels.PRAYER_ALERT
@@ -83,8 +84,8 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 title = title,
                 body = body,
                 silent = false,
-                showStopAdhan = false,
-                adhanSoundRes = null,
+                showStopAdhan = (shouldPlayAdhan || (playAdhan && isTahajud)),
+                adhanSoundRes = if (shouldPlayAdhan) adhanRawRes else null,
                 kind = kind,
                 useFullScreenIntent = isTahajud
             )

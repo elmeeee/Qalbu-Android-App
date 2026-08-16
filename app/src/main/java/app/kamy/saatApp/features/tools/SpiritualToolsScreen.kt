@@ -129,6 +129,13 @@ fun SpiritualToolsScreen(
                 SaatColors.DeepEmerald
             ),
             SpiritualToolItem(
+                R.drawable.ic_prayer_rug,
+                R.string.jenazah_prayer_title,
+                "jenazah",
+                SaatColors.DeepEmerald,
+                SaatColors.GoldDeep
+            ),
+            SpiritualToolItem(
                 R.drawable.ic_rice,
                 R.string.fidyah_title,
                 "fidyah",

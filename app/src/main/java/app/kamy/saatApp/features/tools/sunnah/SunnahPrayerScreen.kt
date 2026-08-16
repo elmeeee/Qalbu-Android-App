@@ -80,13 +80,13 @@ import app.kamy.saatApp.domain.model.SunnahNeedItem
 import app.kamy.saatApp.domain.model.SunnahPrayerItem
 import app.kamy.saatApp.features.quran.tajweed.TajweedEngine
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 
 private enum class SunnahCategoryFilter(val labelId: String, val labelMs: String, val labelEn: String) {
-    ALL("Semua Shalat", "Semua Solat", "All Prayers"),
-    HARIAN("Shalat Harian", "Solat Harian", "Daily"),
-    MALAM("Shalat Malam", "Solat Malam", "Night"),
-    KEBUTUHAN("Hajat & Taubat", "Hajat & Taubat", "Needs & Taubat"),
-    JENAZAH("Shalat Jenazah", "Solat Jenazah", "Janazah");
+    ALL("Semua Shalat Sunnah", "Semua Solat Sunat", "All Sunnah"),
+    HARIAN("Shalat Harian & Rawatib", "Solat Harian & Rawatib", "Daily & Rawatib"),
+    MALAM("Shalat Malam (Qiyam)", "Solat Malam (Qiyam)", "Night (Qiyam)"),
+    KEBUTUHAN("Hajat, Taubat & Khusus", "Hajat, Taubat & Khusus", "Needs & Occasions");
 
     fun label(lang: AppLanguage): String = when (lang) {
         AppLanguage.ENGLISH -> labelEn
@@ -139,7 +139,6 @@ fun SunnahPrayerScreen(
                 SunnahCategoryFilter.HARIAN -> item.category == "HARIAN"
                 SunnahCategoryFilter.MALAM -> item.category == "MALAM"
                 SunnahCategoryFilter.KEBUTUHAN -> item.category == "KEBUTUHAN"
-                SunnahCategoryFilter.JENAZAH -> item.category == "JENAZAH"
             }
         }
     }
@@ -183,7 +182,7 @@ fun SunnahPrayerScreen(
                             Icon(
                                 Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(R.string.back),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = SaatColors.DeepEmerald
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
@@ -191,16 +190,17 @@ fun SunnahPrayerScreen(
                                 text = stringResource(R.string.sunnah_prayer_title),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = SaatColors.DeepEmerald
                             )
                             Text(
                                 text = when (appLanguage) {
                                     AppLanguage.ENGLISH -> "Complete sunnah prayers & life-intention deeds with Hadiths"
-                                    AppLanguage.MALAY -> "Solat sunnah & amalan kehidupan dengan dalil shahih"
+                                    AppLanguage.MALAY -> "Solat sunat & amalan kehidupan dengan dalil sahih"
                                     else -> "Shalat sunnah & amalan kehidupan dengan dalil shahih"
                                 },
                                 style = MaterialTheme.typography.labelSmall,
-                                color = SaatColors.Slate500
+                                color = SaatColors.GoldDeep,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
@@ -220,6 +220,9 @@ fun SunnahPrayerScreen(
                                     shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
                                 ) {}
                             }
+                        },
+                        divider = {
+                            HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
                         }
                     ) {
                         Tab(
@@ -227,12 +230,9 @@ fun SunnahPrayerScreen(
                             onClick = { activeTab = 0 },
                             text = {
                                 Text(
-                                    text = when (appLanguage) {
-                                        AppLanguage.ENGLISH -> "Sunnah Prayers"
-                                        AppLanguage.MALAY -> "Shalat Sunnah"
-                                        else -> "Shalat Sunnah"
-                                    },
-                                    fontWeight = if (activeTab == 0) FontWeight.Bold else FontWeight.Medium
+                                    text = stringResource(R.string.sunnah_prayers_tab),
+                                    fontWeight = if (activeTab == 0) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (activeTab == 0) SaatColors.DeepEmerald else SaatColors.Slate500
                                 )
                             }
                         )
@@ -241,12 +241,9 @@ fun SunnahPrayerScreen(
                             onClick = { activeTab = 1 },
                             text = {
                                 Text(
-                                    text = when (appLanguage) {
-                                        AppLanguage.ENGLISH -> "Amalan Kehidupan"
-                                        AppLanguage.MALAY -> "Amalan Kehidupan"
-                                        else -> "Amalan Kehidupan"
-                                    },
-                                    fontWeight = if (activeTab == 1) FontWeight.Bold else FontWeight.Medium
+                                    text = stringResource(R.string.sunnah_deeds_tab),
+                                    fontWeight = if (activeTab == 1) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (activeTab == 1) SaatColors.DeepEmerald else SaatColors.Slate500
                                 )
                             }
                         )
@@ -280,7 +277,7 @@ fun SunnahPrayerScreen(
                         start = SaatSpacing.screenHorizontal,
                         end = SaatSpacing.screenHorizontal,
                         top = 4.dp,
-                        bottom = 32.dp
+                        bottom = floatingNavBottomPadding() + 32.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
@@ -318,7 +315,7 @@ fun SunnahPrayerScreen(
                         start = SaatSpacing.screenHorizontal,
                         end = SaatSpacing.screenHorizontal,
                         top = 4.dp,
-                        bottom = 32.dp
+                        bottom = floatingNavBottomPadding() + 32.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {

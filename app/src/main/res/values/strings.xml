@@ -890,6 +890,10 @@
 
     <!-- Spiritual Tools -->
     <string name="sunnah_prayer_title">Sunnah Practices &amp; Guides</string>
+    <string name="jenazah_prayer_title">Janazah Prayer Guide</string>
+    <string name="jenazah_prayer_subtitle">Complete funeral prayer guide, rulings, intentions &amp; step-by-step 4 takbirs</string>
+    <string name="sunnah_prayers_tab">Sunnah Prayers</string>
+    <string name="sunnah_deeds_tab">Daily Sunnah Deeds</string>
     <!-- Sahabat Saat -->
     <string name="tanya_saat_ai_title">Sahabat Saat</string>
     <string name="tanya_saat_ai_subtitle">Spiritual Companion &amp; Quranic Guidance</string>
