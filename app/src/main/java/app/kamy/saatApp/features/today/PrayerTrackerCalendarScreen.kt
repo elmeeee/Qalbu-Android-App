@@ -663,7 +663,7 @@ private fun SunnahPracticeNavigationRow(
 
                 Spacer(Modifier.width(12.dp))
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = title,
                         fontSize = 13.sp,

@@ -261,7 +261,7 @@ fun SunnahPrayerScreen(
                         FilterChip(
                             selected = selectedPrayerCategory == cat,
                             onClick = { selectedPrayerCategory = cat },
-                            label = { Text(cat.label(appLanguage)) },
+                            label = { Text(cat.label(appLanguage), maxLines = 1, softWrap = false) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = SaatColors.DeepEmerald,
                                 selectedLabelColor = SaatColors.PureWhite
@@ -299,7 +299,7 @@ fun SunnahPrayerScreen(
                         FilterChip(
                             selected = selectedNeedCategory == cat,
                             onClick = { selectedNeedCategory = cat },
-                            label = { Text(cat.label(appLanguage)) },
+                            label = { Text(cat.label(appLanguage), maxLines = 1, softWrap = false) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = SaatColors.DeepEmerald,
                                 selectedLabelColor = SaatColors.PureWhite
@@ -384,18 +384,22 @@ private fun SunnahPrayerCard(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = SaatColors.DeepEmerald.copy(alpha = 0.1f)
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.1f),
+                    modifier = Modifier.weight(1f, fill = false)
                 ) {
                     Text(
                         text = item.category,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
+                        color = SaatColors.DeepEmerald,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
                 item.hadithReference?.let { ref ->
+                    Spacer(Modifier.width(8.dp))
                     Surface(
                         shape = CircleShape,
                         color = SaatColors.GoldDeep.copy(alpha = 0.12f)
@@ -405,7 +409,9 @@ private fun SunnahPrayerCard(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = SaatColors.GoldDeep
+                            color = SaatColors.GoldDeep,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -415,7 +421,9 @@ private fun SunnahPrayerCard(
                 text = item.title(appLanguage),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Text(
@@ -431,38 +439,56 @@ private fun SunnahPrayerCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.weight(1f, fill = false),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         imageVector = Icons.Default.Schedule,
                         contentDescription = null,
                         tint = SaatColors.Slate500,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
                         text = item.waktu(appLanguage),
                         style = MaterialTheme.typography.labelSmall,
-                        color = SaatColors.Slate500
+                        color = SaatColors.Slate500,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "View Guide"
-                            AppLanguage.MALAY -> "Lihat Panduan"
-                            else -> "Lihat Panduan"
-                        },
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = null,
-                        tint = SaatColors.DeepEmerald,
-                        modifier = Modifier.size(18.dp)
-                    )
+                Spacer(Modifier.width(8.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = when (appLanguage) {
+                                AppLanguage.ENGLISH -> "View Guide"
+                                AppLanguage.MALAY -> "Lihat Panduan"
+                                else -> "Lihat Panduan"
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.DeepEmerald,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                        Spacer(Modifier.width(2.dp))
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -495,16 +521,21 @@ private fun SunnahNeedCard(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = SaatColors.DeepEmerald.copy(alpha = 0.1f)
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.1f),
+                    modifier = Modifier.weight(1f, fill = false)
                 ) {
                     Text(
                         text = item.category.replace("_", " "),
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
+                        color = SaatColors.DeepEmerald,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
+
+                Spacer(Modifier.width(8.dp))
 
                 Surface(
                     shape = CircleShape,
@@ -515,7 +546,9 @@ private fun SunnahNeedCard(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = SaatColors.GoldDeep
+                        color = SaatColors.GoldDeep,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -524,7 +557,9 @@ private fun SunnahNeedCard(
                 text = item.title(appLanguage),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Text(
@@ -540,12 +575,15 @@ private fun SunnahNeedCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.weight(1f, fill = false),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         imageVector = Icons.Default.AutoAwesome,
                         contentDescription = null,
                         tint = SaatColors.GoldDeep,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
@@ -556,27 +594,42 @@ private fun SunnahNeedCard(
                         },
                         style = MaterialTheme.typography.labelSmall,
                         color = SaatColors.Slate500,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Open Amalan"
-                            AppLanguage.MALAY -> "Buka Amalan"
-                            else -> "Buka Amalan"
-                        },
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = null,
-                        tint = SaatColors.DeepEmerald,
-                        modifier = Modifier.size(18.dp)
-                    )
+                Spacer(Modifier.width(8.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = when (appLanguage) {
+                                AppLanguage.ENGLISH -> "Open Amalan"
+                                AppLanguage.MALAY -> "Buka Amalan"
+                                else -> "Buka Amalan"
+                            },
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.DeepEmerald,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                        Spacer(Modifier.width(2.dp))
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
