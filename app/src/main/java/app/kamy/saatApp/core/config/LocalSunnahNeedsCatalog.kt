@@ -43,7 +43,9 @@ object LocalSunnahNeedsCatalog {
                         descEn = s.optString("descEn"),
                         arabic = s.optString("arabic").takeIf { it.isNotBlank() },
                         latin = s.optString("latin").takeIf { it.isNotBlank() },
-                        targetCount = s.optString("targetCount").takeIf { it.isNotBlank() }
+                        targetCountId = s.optString("targetCountId").ifBlank { s.optString("targetCount") }.takeIf { it.isNotBlank() },
+                        targetCountMs = s.optString("targetCountMs").ifBlank { s.optString("targetCount") }.takeIf { it.isNotBlank() },
+                        targetCountEn = s.optString("targetCountEn").ifBlank { s.optString("targetCount") }.takeIf { it.isNotBlank() }
                     )
                 )
             }

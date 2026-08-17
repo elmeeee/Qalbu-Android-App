@@ -26,7 +26,9 @@
         "descId": "Dikerjakan pagi hari setelah syuruq (~20 menit setelah terbit matahari). Berfungsi sebagai pengganti sedekah seluruh persendian tubuh.",
         "descMs": "Dikerjakan pagi hari selepas syuruq (~20 minit selepas terbit matahari). Bertindak sebagai pengganti sedekah seluruh persendian badan.",
         "descEn": "Performed in the morning ~20 mins after sunrise. Serves as charity for every joint in your body.",
-        "targetCount": "2 - 8 Rakaat"
+        "targetCountId": "2 - 8 Rakaat",
+        "targetCountMs": "2 - 8 Rakaat",
+        "targetCountEn": "2 - 8 Rak'ahs"
       },
       {
         "stepNumber": 2,
@@ -38,7 +40,9 @@
         "descEn": "Recite istighfar at least 100 times daily to remove sins blocking your provision.",
         "arabic": "أَسْتَغْفِرُ اللّٰهَ الْعَظِيْمَ وَأَتُوْبُ إِلَيْهِ",
         "latin": "Astaghfirullahal-'azhima wa atubu ilaih.",
-        "targetCount": "100x Sehari"
+        "targetCountId": "100x Sehari",
+        "targetCountMs": "100x Sehari",
+        "targetCountEn": "100x Daily"
       },
       {
         "stepNumber": 3,
@@ -48,7 +52,9 @@
         "descId": "Bersedekah di pagi hari walau sedikit. Dua malaikat berdoa setiap pagi: 'Ya Allah berikan ganti bagi orang yang menginfakkan hartanya.'",
         "descMs": "Bersedekah di pagi hari walau sedikit. Dua malaikat berdoa setiap pagi untuk orang yang berinfak.",
         "descEn": "Give charity every morning. Angels supplicate daily: 'O Allah, compensate the one who spends.'",
-        "targetCount": "Setiap Pagi"
+        "targetCountId": "Setiap Pagi",
+        "targetCountMs": "Setiap Pagi",
+        "targetCountEn": "Every Morning"
       },
       {
         "stepNumber": 4,
@@ -58,7 +64,9 @@
         "descId": "Membaca Surah Al-Waqi'ah setiap malam sebagai benteng dari kemiskinan dan kesempitan hidup (HR. Ibn Asakir).",
         "descMs": "Membaca Surah Al-Waqi'ah setiap malam sebagai pelindung daripada kesempitan hidup.",
         "descEn": "Recite Surah Al-Waqi'ah every night as a shield against poverty and hardship.",
-        "targetCount": "1x Setiap Malam"
+        "targetCountId": "1x Setiap Malam",
+        "targetCountMs": "1x Setiap Malam",
+        "targetCountEn": "1x Every Night"
       }
     ]
   },
@@ -91,7 +99,9 @@
         "descEn": "Recite before exams, interviews, or public speaking for inner peace and fluent speech.",
         "arabic": "رَبِّ اشْرَحْ لِي صَدْرِي ۝ وَيَسِّرْ لِي أَمْرِي ۝ وَاحْلُلْ عُقْدَةً مِّن لِّسَانِي ۝ يَفْقَهُوا قَوْلِي",
         "latin": "Rabbisy-rah li shadri. Wa yassir li amri. Wahlul 'uqdatam mil-lisani. Yafqahu qauli.",
-        "targetCount": "3x Sebelum Beraktivitas"
+        "targetCountId": "3x Sebelum Beraktivitas",
+        "targetCountMs": "3x Sebelum Beraktiviti",
+        "targetCountEn": "3x Before Activities"
       },
       {
         "stepNumber": 2,
@@ -101,7 +111,9 @@
         "descId": "Dikerjakan saat memiliki keinginan/hajat khusus. Setelah salam, sujud memohon kelancaran urusan kepada Allah SWT.",
         "descMs": "Dikerjakan apabila mempunyai hajat khusus. Selepas salam, mohon kelancaran urusan.",
         "descEn": "Pray 2 rak'ahs when facing specific needs, then supplicate with full sincerity.",
-        "targetCount": "2 Rakaat"
+        "targetCountId": "2 Rakaat",
+        "targetCountMs": "2 Rakaat",
+        "targetCountEn": "2 Rak'ahs"
       },
       {
         "stepNumber": 3,
@@ -113,7 +125,9 @@
         "descEn": "A treasure from Paradise acknowledging that all strength belongs to Allah alone.",
         "arabic": "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ الْعَلِيِّ الْعَظِيْمِ",
         "latin": "La haula wa la quwwata illa billahil-'aliyyil-'azhim.",
-        "targetCount": "Perbanyak Sesuai Kemampuan"
+        "targetCountId": "Perbanyak Sesuai Kemampuan",
+        "targetCountMs": "Perbanyakkan Mengikut Kemampuan",
+        "targetCountEn": "Abundant as Able"
       }
     ]
   },
@@ -144,7 +158,9 @@
         "descId": "Dibaca secara rutin setiap pagi (setelah Subuh) dan petang (setelah Ashar/Maghrib).",
         "descMs": "Dibaca secara rutin setiap pagi (selepas Subuh) dan petang (selepas Asar/Maghrib).",
         "descEn": "Recite regularly every morning (after Fajr) and evening (after Asr/Maghrib).",
-        "targetCount": "3x Pagi & Petang"
+        "targetCountId": "3x Pagi & Petang",
+        "targetCountMs": "3x Pagi & Petang",
+        "targetCountEn": "3x Morning & Evening"
       },
       {
         "stepNumber": 2,
@@ -156,7 +172,9 @@
         "descEn": "The master of forgiveness to unlock mercy and release burdens caused by shortcomings.",
         "arabic": "اَللّٰهُمَّ أَنْتَ رَبِّيْ لَا إِلٰهَ إِلَّا أَنْتَ خَلَقْتَنِيْ وَأَنَا عَبْدُكَ وَأَنَا عَلٰى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ أَبُوْءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوْءُ بِذَنْبِيْ فَاغْفِرْ لِيْ فَإِنَّهُ لَا يَغْفِرُ الذُّنُوْبَ إِلَّا أَنْتَ",
         "latin": "Allahumma anta rabbi la ilaha illa anta khalaqtani wa ana 'abduka wa ana 'ala 'ahdika wa wa'dika mastatha'tu, abu'u laka bini'matika 'alayya wa abu'u bidzanbi faghfirli fa-innahu la yaghfirudz-dzunuba illa anta.",
-        "targetCount": "1x Pagi & Petang"
+        "targetCountId": "1x Pagi & Petang",
+        "targetCountMs": "1x Pagi & Petang",
+        "targetCountEn": "1x Morning & Evening"
       }
     ]
   },
@@ -187,7 +205,9 @@
         "descId": "Membaca doa ini saat merasa sesak dada, cemas, atau menghadapi jalan buntu.",
         "descMs": "Membaca doa ini apabila merasa sesak dada atau cemas.",
         "descEn": "Recite this dua whenever feeling anxious, overwhelmed, or stuck in life.",
-        "targetCount": "40x atau Tanpa Batas"
+        "targetCountId": "40x atau Tanpa Batas",
+        "targetCountMs": "40x atau Tanpa Had",
+        "targetCountEn": "40x or Unlimited"
       },
       {
         "stepNumber": 2,
@@ -199,7 +219,9 @@
         "descEn": "Words of Prophet Abraham when thrown into fire, granting absolute inner tranquility.",
         "arabic": "حَسْبُنَا اللّٰهُ وَنِعْمَ الْوَكِيْلُ n نِعْمَ الْمَوْلَى وَنِعْمَ النَّصِيْرُ",
         "latin": "Hasbunallahu wa ni'mal-wakil, ni'mal-maula wa ni'man-nashir.",
-        "targetCount": "100x Sehari"
+        "targetCountId": "100x Sehari",
+        "targetCountMs": "100x Sehari",
+        "targetCountEn": "100x Daily"
       },
       {
         "stepNumber": 3,
@@ -209,7 +231,9 @@
         "descId": "Momen paling dekat antara hamba dan Allah. Tempat curhat terbaik di mana semua doa diijabah.",
         "descMs": "Momen paling dekat antara hamba dan Allah. Tempat luahan hati terbaik.",
         "descEn": "The closest moment between servant and Allah. The ultimate space for sincere prayers.",
-        "targetCount": "Min 2 Rakaat Tahajud + 1 Witir"
+        "targetCountId": "Min 2 Rakaat Tahajud + 1 Witir",
+        "targetCountMs": "Min 2 Rakaat Tahajud + 1 Witir",
+        "targetCountEn": "Min 2 Rak'ahs Tahajjud + 1 Witr"
       }
     ]
   },
@@ -240,7 +264,9 @@
         "descId": "Dibaca setiap selesai shalat fardhu agar rumah tangga diselimuti kasih sayang dan jodoh disegerakan.",
         "descMs": "Dibaca setiap selepas solat fardu agar rumah tangga diselimuti kasih sayang.",
         "descEn": "Recite after obligatory prayers for domestic affection and a blessed marriage.",
-        "targetCount": "Setiap Selesai Shalat"
+        "targetCountId": "Setiap Selesai Shalat",
+        "targetCountMs": "Setiap Selepas Solat",
+        "targetCountEn": "After Every Prayer"
       },
       {
         "stepNumber": 2,
@@ -250,7 +276,9 @@
         "descId": "Dikerjakan 2 rakaat ketika ragu atau menentukan calon pasangan/keputusan keluarga penting.",
         "descMs": "Dikerjakan 2 rakaat ketika ragu menentukan calon pasangan atau keputusan penting.",
         "descEn": "Pray 2 rak'ahs when making a choice regarding a prospective spouse or key family decision.",
-        "targetCount": "2 Rakaat"
+        "targetCountId": "2 Rakaat",
+        "targetCountMs": "2 Rakaat",
+        "targetCountEn": "2 Rak'ahs"
       }
     ]
   },
@@ -283,7 +311,9 @@
         "descEn": "Place hand on painful area, say 'Bismillah' 3 times, then recite protection dua 7 times.",
         "arabic": "أَعُوْذُ بِاللّٰهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ",
         "latin": "A'udzu billahi wa qudratihi min syarri ma ajidu wa uhadzir.",
-        "targetCount": "Bismillah 3x + Doa 7x"
+        "targetCountId": "Bismillah 3x + Doa 7x",
+        "targetCountMs": "Bismillah 3x + Doa 7x",
+        "targetCountEn": "Bismillah 3x + Dua 7x"
       },
       {
         "stepNumber": 2,
@@ -293,7 +323,9 @@
         "descId": "Membaca Surah Al-Ikhlas, Al-Falaq, An-Nas pada telapak tangan, ditiup lembut, lalu diusapkan ke seluruh tubuh.",
         "descMs": "Membaca Surah Al-Ikhlas, Al-Falaq, An-Nas pada telapak tangan, ditiup, lalu diusap ke seluruh badan.",
         "descEn": "Recite Al-Ikhlas, Al-Falaq, An-Nas into palms, blow gently, then wipe over whole body.",
-        "targetCount": "3x Sebelum Tidur"
+        "targetCountId": "3x Sebelum Tidur",
+        "targetCountMs": "3x Sebelum Tidur",
+        "targetCountEn": "3x Before Sleep"
       }
     ]
   },
@@ -324,7 +356,9 @@
         "descId": "Dikerjakan 2 rakaat secara khusyuk. Setelah salam, menyesali dosa dan bertekad kuat tidak mengulanginya.",
         "descMs": "Dikerjakan 2 rakaat secara khusyuk. Selepas salam, menyesali dosa dan berazam tidak mengulangi.",
         "descEn": "Pray 2 rak'ahs with humility. After salam, feel genuine remorse and resolve never to repeat the sin.",
-        "targetCount": "2 Rakaat"
+        "targetCountId": "2 Rakaat",
+        "targetCountMs": "2 Rakaat",
+        "targetCountEn": "2 Rak'ahs"
       },
       {
         "stepNumber": 2,
@@ -334,7 +368,9 @@
         "descId": "Menjaga benteng spiritual harian dengan membaca kumpulan dzikir shahih pagi dan petang.",
         "descMs": "Menjaga benteng spiritual harian dengan membaca zikir shahih pagi dan petang.",
         "descEn": "Maintain your daily spiritual fortress by reciting morning and evening remembrance.",
-        "targetCount": "Rutin Pagi & Petang"
+        "targetCountId": "Rutin Pagi & Petang",
+        "targetCountMs": "Rutin Pagi & Petang",
+        "targetCountEn": "Daily Morning & Evening"
       }
     ]
   }

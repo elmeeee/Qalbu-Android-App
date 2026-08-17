@@ -48,6 +48,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -120,7 +121,8 @@ fun SunnahPrayerScreen(
     onOpenQiyam: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val appLanguage = remember(context) { AppLanguageStore.from(context).current() }
+    val store = remember(context) { AppLanguageStore.from(context) }
+    val appLanguage by store.currentFlow.collectAsState()
     var activeTab by remember { mutableIntStateOf(0) } // 0: Shalat Sunnah, 1: Amalan Kehidupan
 
     var selectedPrayerCategory by remember { mutableStateOf(SunnahCategoryFilter.ALL) }
@@ -817,7 +819,7 @@ private fun SunnahActionStepCard(step: SunnahActionStep, appLanguage: AppLanguag
                         modifier = Modifier.weight(1f)
                     )
 
-                    step.targetCount?.let { count ->
+                    step.targetCount(appLanguage)?.let { count ->
                         Surface(
                             shape = CircleShape,
                             color = SaatColors.GoldDeep.copy(alpha = 0.12f)

@@ -66,18 +66,21 @@ import app.kamy.saatApp.features.quran.tajweed.TajweedEngine
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 
+import androidx.compose.runtime.collectAsState
+
 @Composable
 fun JanazahPrayerScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val appLanguage = remember(context) { AppLanguageStore.from(context).current() }
+    val store = remember(context) { AppLanguageStore.from(context) }
+    val appLanguage by store.currentFlow.collectAsState()
     val guide = remember(context) { LocalJanazahGuideCatalog.getGuide(context) }
     var activeTab by remember { mutableIntStateOf(0) }
 
     val tabTitles = remember(appLanguage) {
         when (appLanguage) {
-            AppLanguage.ENGLISH -> listOf("Tata Cara 4 Takbir", "Niyyah (Intentions)", "Imam & Body Position", "Rulings & Rewards", "Duas After Prayer")
+            AppLanguage.ENGLISH -> listOf("4 Takbirs Step-by-Step", "Niyyah (Intentions)", "Imam & Body Position", "Rulings & Rewards", "Duas After Prayer")
             AppLanguage.MALAY -> listOf("Tatacara 4 Takbir", "Pilihan Niat", "Kedudukan Imam & Jenazah", "Syarat & Keutamaan", "Doa Selepas Solat")
             else -> listOf("Tata Cara 4 Takbir", "Pilihan Niat", "Posisi Imam & Jenazah", "Syarat & Keutamaan", "Doa Ba'da Shalat")
         }
@@ -301,9 +304,21 @@ private fun JanazahStepCard(step: JanazahTakbirStep, appLanguage: AppLanguage) {
                     Text(
                         text = when (step.takbirNumber) {
                             1 -> "Surah Al-Fatihah"
-                            2 -> "Shalawat Nabi"
-                            3 -> "Doa Utama Jenazah"
-                            else -> "Doa Penutup & Salam"
+                            2 -> when (appLanguage) {
+                                AppLanguage.ENGLISH -> "Salawat upon Prophet"
+                                AppLanguage.MALAY -> "Selawat Nabi"
+                                else -> "Shalawat Nabi"
+                            }
+                            3 -> when (appLanguage) {
+                                AppLanguage.ENGLISH -> "Main Supplication"
+                                AppLanguage.MALAY -> "Doa Utama Jenazah"
+                                else -> "Doa Utama Jenazah"
+                            }
+                            else -> when (appLanguage) {
+                                AppLanguage.ENGLISH -> "Closing Dua & Salam"
+                                AppLanguage.MALAY -> "Doa Penutup & Salam"
+                                else -> "Doa Penutup & Salam"
+                            }
                         },
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
@@ -510,12 +525,36 @@ private fun JanazahNiatCard(item: JanazahNiatItem, appLanguage: AppLanguage) {
                     color = SaatColors.DeepEmerald,
                     modifier = Modifier.weight(1f)
                 )
+                Spacer(Modifier.width(8.dp))
                 Surface(
                     shape = CircleShape,
                     color = SaatColors.DeepEmerald.copy(alpha = 0.1f)
                 ) {
+                    val categoryLabel = when (item.category) {
+                        "LAKI" -> when (appLanguage) {
+                            AppLanguage.ENGLISH -> "MALE"
+                            AppLanguage.MALAY -> "LELAKI"
+                            else -> "LAKI-LAKI"
+                        }
+                        "PEREMPUAN" -> when (appLanguage) {
+                            AppLanguage.ENGLISH -> "FEMALE"
+                            AppLanguage.MALAY -> "PEREMPUAN"
+                            else -> "PEREMPUAN"
+                        }
+                        "ANAK" -> when (appLanguage) {
+                            AppLanguage.ENGLISH -> "CHILD"
+                            AppLanguage.MALAY -> "KANAK-KANAK"
+                            else -> "ANAK-ANAK"
+                        }
+                        "GHAIB" -> when (appLanguage) {
+                            AppLanguage.ENGLISH -> "ABSENT"
+                            AppLanguage.MALAY -> "GHAIB"
+                            else -> "GHAIB"
+                        }
+                        else -> item.category
+                    }
                     Text(
-                        text = item.category,
+                        text = categoryLabel,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
@@ -581,6 +620,52 @@ private fun JanazahPositionTab(positions: List<JanazahPositionGuide>, appLanguag
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Essential Header Card for Position Guide
+        item {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = SaatColors.PureWhite,
+                shadowElevation = 1.5.dp,
+                border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.15f))
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Place,
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = when (appLanguage) {
+                                AppLanguage.ENGLISH -> "Sunnah Standing Positions"
+                                AppLanguage.MALAY -> "Panduan Kedudukan Imam & Saf"
+                                else -> "Panduan Posisi Imam & Saf Jenazah"
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.DeepEmerald
+                        )
+                    }
+                    Text(
+                        text = when (appLanguage) {
+                            AppLanguage.ENGLISH -> "The Imam stands in line with the HEAD for a male deceased, and in line with the WAIST/MIDDLE for a female deceased, as established in the authentic Sunnah."
+                            AppLanguage.MALAY -> "Imam berdiri bersetentangan KEPALA bagi jenazah lelaki, dan bersetentangan PINGGANG/TENGAH bagi jenazah perempuan mengikut Sunnah Shahih."
+                            else -> "Imam berdiri sejajar KEPALA untuk jenazah laki-laki, dan sejajar PINGGANG/TENGAH badan untuk jenazah perempuan sesuai Sunnah Shahih."
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = SaatColors.Slate700,
+                        lineHeight = 22.sp
+                    )
+                }
+            }
+        }
+
         items(positions) { pos ->
             JanazahPositionCard(guide = pos, appLanguage = appLanguage)
         }
@@ -613,8 +698,10 @@ private fun JanazahPositionCard(guide: JanazahPositionGuide, appLanguage: AppLan
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
                 )
+                Spacer(Modifier.width(8.dp))
                 Surface(
                     shape = CircleShape,
                     color = SaatColors.GoldDeep.copy(alpha = 0.12f)
@@ -624,7 +711,9 @@ private fun JanazahPositionCard(guide: JanazahPositionGuide, appLanguage: AppLan
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = SaatColors.GoldDeep
+                        color = SaatColors.GoldDeep,
+                        maxLines = 1,
+                        softWrap = false
                     )
                 }
             }
@@ -650,7 +739,8 @@ private fun JanazahPositionCard(guide: JanazahPositionGuide, appLanguage: AppLan
                         text = imamPos,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
+                        color = SaatColors.DeepEmerald,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }

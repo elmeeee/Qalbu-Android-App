@@ -12,7 +12,9 @@ data class SunnahActionStep(
     val descEn: String,
     val arabic: String? = null,
     val latin: String? = null,
-    val targetCount: String? = null
+    val targetCountId: String? = null,
+    val targetCountMs: String? = null,
+    val targetCountEn: String? = null
 ) {
     fun title(lang: AppLanguage): String = when (lang) {
         AppLanguage.ENGLISH -> titleEn
@@ -24,6 +26,12 @@ data class SunnahActionStep(
         AppLanguage.ENGLISH -> descEn
         AppLanguage.MALAY -> descMs
         AppLanguage.INDONESIAN -> descId
+    }
+
+    fun targetCount(lang: AppLanguage): String? = when (lang) {
+        AppLanguage.ENGLISH -> targetCountEn ?: targetCountId
+        AppLanguage.MALAY -> targetCountMs ?: targetCountId
+        AppLanguage.INDONESIAN -> targetCountId
     }
 }
 

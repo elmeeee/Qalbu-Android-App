@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -92,7 +93,8 @@ fun DhikrScreen(onBack: () -> Unit) {
     val pagerState = rememberPagerState(initialPage = 0) { DhikrStore.presets.size }
     val selectedIndex = pagerState.currentPage
     val preset = DhikrStore.presets[selectedIndex]
-    var count by remember(preset.id) { mutableIntStateOf(DhikrStore.sessionCount(context, preset.id)) }
+    var sessionVersion by remember { mutableIntStateOf(0) }
+    val currentPresetCount = remember(preset.id, sessionVersion) { DhikrStore.sessionCount(context, preset.id) }
     var pulseKey by remember { mutableIntStateOf(0) }
     val chipListState = rememberLazyListState()
 
@@ -118,8 +120,8 @@ fun DhikrScreen(onBack: () -> Unit) {
         }
     }
 
-    LaunchedEffect(count, preset.target) {
-        if (count > 0 && count % preset.target == 0) confirmHaptic()
+    LaunchedEffect(currentPresetCount, preset.target) {
+        if (currentPresetCount > 0 && currentPresetCount % preset.target == 0) confirmHaptic()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -190,11 +192,8 @@ fun DhikrScreen(onBack: () -> Unit) {
                     .fillMaxWidth()
             ) { pageIndex ->
                 val activePreset = DhikrStore.presets[pageIndex]
-                var pageCount by remember(activePreset.id) {
-                    mutableIntStateOf(DhikrStore.sessionCount(context, activePreset.id))
-                }
-                if (pageIndex == selectedIndex && pageCount != count) {
-                    pageCount = count
+                val pageCount = remember(activePreset.id, sessionVersion) {
+                    DhikrStore.sessionCount(context, activePreset.id)
                 }
 
                 val leftCount = (activePreset.target - pageCount).coerceAtLeast(0)
@@ -203,39 +202,26 @@ fun DhikrScreen(onBack: () -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
                         .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Spacer(Modifier.height(8.dp))
-
-                    // 1. Subhanallah (Dhikr Label Title)
-                    Text(
-                        text = dhikrLabel(context, activePreset),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.Slate900,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    // 2. Arabic
+                    // 1. Arabic
                     Text(
                         text = activePreset.arabic,
-                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp, lineHeight = 44.sp),
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 30.sp, lineHeight = 46.sp),
                         color = SaatColors.DeepEmerald,
                         textAlign = TextAlign.Center
                     )
 
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(8.dp))
 
-                    // 3. Arti (Transliteration & Meaning)
+                    // 2. Transliteration & Meaning
                     Text(
                         text = dhikrString(context, activePreset.transliterationResKey),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = SaatColors.Teal,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(2.dp))
@@ -248,17 +234,52 @@ fun DhikrScreen(onBack: () -> Unit) {
 
                     Spacer(Modifier.height(14.dp))
 
-                    // 4. Target
-                    Text(
-                        text = stringResource(R.string.tasbih_target_left, activePreset.target, leftCount),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = SaatColors.Slate500,
-                        textAlign = TextAlign.Center
-                    )
+                    // 3. Target & Page Nav
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        if (pageIndex > 0) {
+                            IconButton(
+                                onClick = { scope.launch { pagerState.animateScrollToPage(pageIndex - 1) } },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Previous",
+                                    tint = SaatColors.Slate500,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                            Spacer(Modifier.width(6.dp))
+                        }
+
+                        Text(
+                            text = stringResource(R.string.tasbih_target_left, activePreset.target, leftCount),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = SaatColors.Slate500,
+                            textAlign = TextAlign.Center
+                        )
+
+                        if (pageIndex < DhikrStore.presets.size - 1) {
+                            Spacer(Modifier.width(6.dp))
+                            IconButton(
+                                onClick = { scope.launch { pagerState.animateScrollToPage(pageIndex + 1) } },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = "Next",
+                                    tint = SaatColors.Slate500,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
 
                     Spacer(Modifier.height(6.dp))
 
-                    // 5. Progress
+                    // 4. Progress
                     LinearProgressIndicator(
                         progress = { progress },
                         modifier = Modifier
@@ -271,11 +292,11 @@ fun DhikrScreen(onBack: () -> Unit) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    // 6. Counter (Tasbeeh Counter Device Widget)
+                    // 5. Counter (Tasbeeh Counter Device Widget)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(340.dp)
+                            .height(326.dp)
                             .coachMarkTarget(
                                 coachMarkState,
                                 0,
@@ -290,11 +311,31 @@ fun DhikrScreen(onBack: () -> Unit) {
                             counterWidth = 270.dp,
                             counterHeight = 326.dp,
                             onTap = {
-                                val newCount = DhikrStore.increment(context, activePreset.id)
-                                pageCount = newCount
-                                count = newCount
-                                pulseKey++
-                                tapHaptic()
+                                if (pageCount >= activePreset.target) {
+                                    confirmHaptic()
+                                    if (pageIndex < DhikrStore.presets.size - 1) {
+                                        scope.launch {
+                                            pagerState.animateScrollToPage(pageIndex + 1)
+                                        }
+                                    } else {
+                                        showEndBottomSheet = true
+                                    }
+                                } else {
+                                    val newCount = DhikrStore.increment(context, activePreset.id)
+                                    sessionVersion++
+                                    pulseKey++
+                                    tapHaptic()
+
+                                    if (newCount >= activePreset.target) {
+                                        confirmHaptic()
+                                        scope.launch {
+                                            kotlinx.coroutines.delay(300)
+                                            if (pageIndex < DhikrStore.presets.size - 1) {
+                                                pagerState.animateScrollToPage(pageIndex + 1)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         )
                     }
@@ -303,11 +344,11 @@ fun DhikrScreen(onBack: () -> Unit) {
 
             Spacer(Modifier.height(12.dp))
 
-            // Bottom Actions Bar (White Pill Button: Reset or End)
+            // Action Buttons (Reset & Finish)
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
                 color = Color.Transparent
             ) {
                 Row(
@@ -364,11 +405,11 @@ fun DhikrScreen(onBack: () -> Unit) {
         // Bottom Sheets for Reset and End
         if (showResetBottomSheet) {
             TasbihResetBottomSheet(
-                count = count,
+                count = currentPresetCount,
                 onDismiss = { showResetBottomSheet = false },
                 onConfirmReset = {
                     DhikrStore.resetSession(context, preset.id)
-                    count = 0
+                    sessionVersion++
                     showResetBottomSheet = false
                 }
             )
@@ -376,11 +417,11 @@ fun DhikrScreen(onBack: () -> Unit) {
 
         if (showEndBottomSheet) {
             TasbihEndBottomSheet(
-                count = count,
+                count = currentPresetCount,
                 onDismiss = { showEndBottomSheet = false },
                 onConfirmEnd = {
                     DhikrStore.resetSession(context, preset.id)
-                    count = 0
+                    sessionVersion++
                     showEndBottomSheet = false
                     onBack()
                 }
