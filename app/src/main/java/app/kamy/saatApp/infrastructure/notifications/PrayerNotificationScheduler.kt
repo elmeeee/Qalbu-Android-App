@@ -426,13 +426,9 @@ object PrayerNotificationScheduler {
             }
             val fireTime = fireCal.timeInMillis
 
-            if (fireTime < nowTime) return@runCatching
+            if (fireTime <= nowTime) return@runCatching
 
-            val actualFireAt = if (fireTime == nowTime) {
-                currentMillis + 1000L
-            } else {
-                fireAt
-            }
+            val actualFireAt = fireAt
 
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(context, PrayerNotificationReceiver::class.java).apply {
@@ -521,18 +517,11 @@ object PrayerNotificationScheduler {
         cal.set(Calendar.MILLISECOND, 0)
 
         val targetMs = cal.timeInMillis
-        val diff = from - targetMs
-
-        return when {
-            // Same minute (e.g., testing for 10:40 while current time is 10:40:15) -> fire in 2 seconds
-            diff in 0L..59_999L -> from + 2000L
-            // Target time is in the past today -> roll over to tomorrow
-            diff > 59_999L -> {
-                cal.add(Calendar.DAY_OF_YEAR, 1)
-                cal.timeInMillis
-            }
-            // Target time is in the future today
-            else -> targetMs
+        return if (from >= targetMs) {
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+            cal.timeInMillis
+        } else {
+            targetMs
         }
     }
 
@@ -550,7 +539,7 @@ object PrayerNotificationScheduler {
                 if (cal.timeInMillis > nowTime) {
                     add(cal.timeInMillis)
                 }
-                cal.add(Calendar.WEEK_OF_YEAR, 1)
+                cal.add(Calendar.DAY_OF_YEAR, 7)
             }
         }
     }

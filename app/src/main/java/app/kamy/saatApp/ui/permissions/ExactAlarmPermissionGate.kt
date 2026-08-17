@@ -30,9 +30,7 @@ fun ExactAlarmPermissionGate() {
     val lifecycleOwner = LocalLifecycleOwner.current
     var autoPromptedThisSession by remember { mutableStateOf(false) }
     var showRationale by remember { mutableStateOf(false) }
-    val needsExactAlarmPrompt =
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+    val needsExactAlarmPrompt = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
     fun reschedule() {
         runCatching { DailyVerseNotificationScheduler.reschedule(context) }

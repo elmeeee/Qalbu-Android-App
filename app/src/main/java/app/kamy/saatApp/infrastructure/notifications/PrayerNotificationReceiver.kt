@@ -43,7 +43,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
 
         val isTahajud = kind?.contains("LAST_THIRD") == true || kind?.contains("tahajud") == true || prayerName?.equals("tahajud", ignoreCase = true) == true
         var adhanRawRes: Int? = null
-        if (playAdhan && isTahajud) {
+        val isPlaybackStarted = if (playAdhan && isTahajud) {
             adhanRawRes = app.kamy.saatApp.R.raw.tahajud_alarm
             AdhanPlaybackService.start(
                 context = appContext,
@@ -67,10 +67,13 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
                 notificationId = notificationId,
                 prayerName = prayerName
             )
+        } else {
+            false
         }
 
-        // ALWAYS show push notification so the notification is 100% guaranteed to appear in drawer & heads-up
-        if (title.isNotEmpty()) {
+        // Only show separate push notification if AdhanPlaybackService was NOT started,
+        // preventing duplicate/double notifications when adhan plays.
+        if (title.isNotEmpty() && !isPlaybackStarted) {
             val alertChannel = when {
                 kind?.startsWith("prayer_") == true || kind == "imsak" -> {
                     NotificationChannels.PRAYER_ALERT

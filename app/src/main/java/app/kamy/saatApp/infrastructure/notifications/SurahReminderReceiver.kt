@@ -24,8 +24,13 @@ class SurahReminderReceiver : BroadcastReceiver() {
 
         if (reminder == null || !reminder.enabled) return
 
-        val globalEnabled = app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore.from(appContext).isYasinReminderEnabled()
-        if (!globalEnabled) return
+        val prefs = app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore.from(appContext)
+        val isGlobalEnabled = when (surahNumber) {
+            36 -> prefs.isYasinReminderEnabled()
+            18 -> prefs.isKahfReminderEnabled()
+            else -> true
+        }
+        if (!isGlobalEnabled) return
 
         // Localized context for 3-language support (EN / ID / MS)
         val lang = AppLanguageStore.from(appContext).current()

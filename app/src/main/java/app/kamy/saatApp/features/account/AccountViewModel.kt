@@ -545,6 +545,7 @@ class AccountViewModel @Inject constructor(
 
     fun setKahfReminderEnabled(enabled: Boolean) {
         prayerNotificationPrefs.setKahfReminderEnabled(enabled)
+        surahReminderStore.rescheduleAlarms(surahReminderStore.getReminders())
         reschedulePrayerNotifications()
     }
 
