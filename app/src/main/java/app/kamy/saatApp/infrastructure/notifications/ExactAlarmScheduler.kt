@@ -4,10 +4,8 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import androidx.core.content.ContextCompat
 import app.kamy.saatApp.MainActivity
 
 object ExactAlarmScheduler {
