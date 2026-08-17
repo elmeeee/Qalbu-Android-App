@@ -13,11 +13,7 @@ import androidx.core.net.toUri
 fun Context.canScheduleExactAlarms(): Boolean {
     val alarmManager = getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return true
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
-    if (alarmManager.canScheduleExactAlarms()) return true
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        return ContextCompat.checkSelfPermission(this, android.Manifest.permission.USE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED
-    }
-    return false
+    return alarmManager.canScheduleExactAlarms()
 }
 
 fun Context.openExactAlarmSettings() {

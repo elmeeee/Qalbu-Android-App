@@ -22,11 +22,7 @@ object ExactAlarmScheduler {
         // API < 31: exact alarms are always allowed — no permission check needed.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (alarmManager.canScheduleExactAlarms()) return true
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return ContextCompat.checkSelfPermission(context, android.Manifest.permission.USE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED
-        }
-        return false
+        return alarmManager.canScheduleExactAlarms()
     }
 
     fun schedule(
