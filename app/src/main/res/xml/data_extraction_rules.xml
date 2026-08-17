@@ -5,15 +5,13 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <include domain="sharedpref" path="."/>
+        <exclude domain="sharedpref" path="saat_onboarding.xml"/>
+        <exclude domain="sharedpref" path="saat_reader_onboarding.xml"/>
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <include domain="sharedpref" path="."/>
+        <exclude domain="sharedpref" path="saat_onboarding.xml"/>
+        <exclude domain="sharedpref" path="saat_reader_onboarding.xml"/>
     </device-transfer>
-    -->
 </data-extraction-rules>
