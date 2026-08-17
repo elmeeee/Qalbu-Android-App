@@ -19,35 +19,46 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,17 +68,19 @@ import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.SaatSpacing
-import app.kamy.saatApp.features.tools.dhikr.PremiumTasbihCounter
+import app.kamy.saatApp.features.tools.dhikr.TasbeehCounterWidget
 import app.kamy.saatApp.infrastructure.preferences.DhikrPreset
 import app.kamy.saatApp.infrastructure.preferences.DhikrStore
-import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
-import app.kamy.saatApp.ui.feedback.rememberTapHaptic
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.ui.components.CoachMarkOverlay
 import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
+import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
+import app.kamy.saatApp.ui.feedback.rememberTapHaptic
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DhikrScreen(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -82,6 +95,9 @@ fun DhikrScreen(onBack: () -> Unit) {
     var count by remember(preset.id) { mutableIntStateOf(DhikrStore.sessionCount(context, preset.id)) }
     var pulseKey by remember { mutableIntStateOf(0) }
     val chipListState = rememberLazyListState()
+
+    var showResetBottomSheet by remember { mutableStateOf(false) }
+    var showEndBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (!onboardingStore.hasShownDhikrCoachMark()) {
@@ -112,143 +128,231 @@ fun DhikrScreen(onBack: () -> Unit) {
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(SaatColors.ScreenBackground, SaatColors.SageMist, SaatColors.PrayerMint)
+                        listOf(Color(0xFFFBF8F3), SaatColors.ScreenBackground, Color(0xFFF7F3EB))
                     )
                 )
                 .tabContentStatusBarInset()
                 .navigationBarsPadding()
         ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-            }
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.dhikr_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.dhikr_premium_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SaatColors.Slate500
-                )
-            }
-        }
-
-        LazyRow(
-            state = chipListState,
-            contentPadding = PaddingValues(horizontal = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            itemsIndexed(DhikrStore.presets) { index, item ->
-                FilterChip(
-                    selected = index == selectedIndex,
-                    onClick = {
-                        scope.launch { pagerState.animateScrollToPage(index) }
-                    },
-                    label = { Text(dhikrLabel(context, item)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = SaatColors.DeepEmerald,
-                        selectedLabelColor = SaatColors.PureWhite
-                    )
-                )
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-        ) { pageIndex ->
-            val activePreset = DhikrStore.presets[pageIndex]
-            var pageCount by remember(activePreset.id) {
-                mutableIntStateOf(DhikrStore.sessionCount(context, activePreset.id))
-            }
-            if (pageIndex == selectedIndex && pageCount != count) {
-                pageCount = count
-            }
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            // Top Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                DhikrReadingCard(preset = activePreset)
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .coachMarkTarget(
-                            coachMarkState,
-                            0,
-                            R.string.coach_mark_dhikr_title,
-                            R.string.coach_mark_dhikr_desc
-                        )
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) {
-                            val newCount = DhikrStore.increment(context, activePreset.id)
-                            pageCount = newCount
-                            count = newCount
-                            pulseKey++
-                            tapHaptic()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    PremiumTasbihCounter(
-                        count = pageCount,
-                        target = activePreset.target,
-                        pulseKey = if (pageIndex == selectedIndex) pulseKey else 0,
-                        subtitle = stringResource(R.string.dhikr_of_target, activePreset.target),
-                        counterSize = 220.dp
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                }
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.dhikr_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
                     )
                     Text(
-                        text = stringResource(R.string.dhikr_tap_hint),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = SaatColors.Slate500.copy(alpha = 0.85f),
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 12.dp)
+                        text = stringResource(R.string.dhikr_premium_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SaatColors.Slate500
                     )
+                }
+            }
+
+            // Top Category Chips for Presets
+            LazyRow(
+                state = chipListState,
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(DhikrStore.presets) { index, item ->
+                    FilterChip(
+                        selected = index == selectedIndex,
+                        onClick = {
+                            scope.launch { pagerState.animateScrollToPage(index) }
+                        },
+                        label = { Text(dhikrLabel(context, item), maxLines = 1, softWrap = false) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = SaatColors.DeepEmerald,
+                            selectedLabelColor = SaatColors.PureWhite
+                        )
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            // Main Content Pager
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) { pageIndex ->
+                val activePreset = DhikrStore.presets[pageIndex]
+                var pageCount by remember(activePreset.id) {
+                    mutableIntStateOf(DhikrStore.sessionCount(context, activePreset.id))
+                }
+                if (pageIndex == selectedIndex && pageCount != count) {
+                    pageCount = count
+                }
+
+                val leftCount = (activePreset.target - pageCount).coerceAtLeast(0)
+                val progress = (pageCount.toFloat() / activePreset.target.coerceAtLeast(1)).coerceIn(0f, 1f)
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Header Target & Progress Indicator
+                    Text(
+                        text = dhikrLabel(context, activePreset),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(R.string.tasbih_target_left, activePreset.target, leftCount),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = SaatColors.Slate500
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth(0.7f)
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp)),
+                        color = SaatColors.Teal,
+                        trackColor = SaatColors.SageTint
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Reading Card for active dhikr/tasbih
+                    DhikrReadingCard(preset = activePreset)
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Center Tasbeeh Counter Device Widget
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(340.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                0,
+                                R.string.coach_mark_dhikr_title,
+                                R.string.coach_mark_dhikr_desc
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TasbeehCounterWidget(
+                            count = pageCount,
+                            pulseKey = if (pageIndex == selectedIndex) pulseKey else 0,
+                            counterWidth = 270.dp,
+                            counterHeight = 326.dp,
+                            onTap = {
+                                val newCount = DhikrStore.increment(context, activePreset.id)
+                                pageCount = newCount
+                                count = newCount
+                                pulseKey++
+                                tapHaptic()
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Bottom Actions Bar (White Pill Button: Reset or End)
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                color = Color.Transparent
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Surface(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(26.dp))
+                            .clickable { showResetBottomSheet = true },
+                        shape = RoundedCornerShape(26.dp),
+                        color = SaatColors.PureWhite,
+                        shadowElevation = 2.dp,
+                        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = stringResource(R.string.tasbih_reset_button),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = SaatColors.DeepEmerald
+                            )
+                        }
+                    }
+
+                    Surface(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(26.dp))
+                            .clickable { showEndBottomSheet = true },
+                        shape = RoundedCornerShape(26.dp),
+                        color = SaatColors.PureWhite,
+                        shadowElevation = 2.dp,
+                        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = stringResource(R.string.tasbih_end_button),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = SaatColors.DeepEmerald
+                            )
+                        }
+                    }
                 }
             }
         }
 
-        Spacer(Modifier.height(8.dp))
+        CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding(),
-            color = SaatColors.PureWhite,
-            shadowElevation = 4.dp,
-            tonalElevation = 2.dp,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-        ) {
-            DhikrStatsRow(
+        // Bottom Sheets for Reset and End
+        if (showResetBottomSheet) {
+            TasbihResetBottomSheet(
                 count = count,
-                target = preset.target,
-                lifetime = DhikrStore.totalCount(context, preset.id),
-                onReset = {
+                onDismiss = { showResetBottomSheet = false },
+                onConfirmReset = {
                     DhikrStore.resetSession(context, preset.id)
                     count = 0
+                    showResetBottomSheet = false
+                }
+            )
+        }
+
+        if (showEndBottomSheet) {
+            TasbihEndBottomSheet(
+                count = count,
+                onDismiss = { showEndBottomSheet = false },
+                onConfirmEnd = {
+                    DhikrStore.resetSession(context, preset.id)
+                    count = 0
+                    showEndBottomSheet = false
                 }
             )
         }
     }
-}
-CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable
@@ -257,23 +361,23 @@ private fun DhikrReadingCard(preset: DhikrPreset) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 4.dp),
         shape = RoundedCornerShape(20.dp),
         color = SaatColors.PureWhite,
-        shadowElevation = 4.dp,
+        shadowElevation = 2.dp,
         border = BorderStroke(
             1.dp,
             Brush.linearGradient(listOf(SaatColors.Teal.copy(0.25f), SaatColors.Gold.copy(0.2f)))
         )
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = preset.arabic,
-                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 28.sp, lineHeight = 44.sp),
+                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp, lineHeight = 42.sp),
                 color = SaatColors.DeepEmerald,
                 textAlign = TextAlign.Center
             )
@@ -294,38 +398,200 @@ private fun DhikrReadingCard(preset: DhikrPreset) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DhikrStatsRow(
+private fun TasbihResetBottomSheet(
     count: Int,
-    target: Int,
-    lifetime: Int,
-    onReset: () -> Unit
+    onDismiss: () -> Unit,
+    onConfirmReset: () -> Unit
 ) {
-    val progress = if (target > 0) (count * 100 / target).coerceIn(0, 100) else 0
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = SaatColors.PureWhite,
+        scrimColor = Color.Black.copy(alpha = 0.4f),
+        dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(Modifier.height(4.dp))
             Text(
-                text = stringResource(R.string.dhikr_session_progress, progress),
-                style = MaterialTheme.typography.labelMedium,
-                color = SaatColors.DeepEmerald,
-                fontWeight = FontWeight.SemiBold
+                text = stringResource(R.string.tasbih_reset_dialog_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = SaatColors.Slate900,
+                textAlign = TextAlign.Center
             )
-            Text(
-                text = stringResource(R.string.dhikr_total, lifetime),
-                style = MaterialTheme.typography.bodySmall,
-                color = SaatColors.Slate500
-            )
+
+            Spacer(Modifier.height(18.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                color = Color(0xFFFAF7F2),
+                border = BorderStroke(1.dp, Color(0xFFF3EFE6))
+            ) {
+                Text(
+                    text = stringResource(R.string.tasbih_reset_dialog_desc, count),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = SaatColors.Slate700,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 22.sp,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onConfirmReset,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SaatColors.DeepEmerald,
+                        contentColor = SaatColors.PureWhite
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.tasbih_reset_dialog_confirm),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = SaatColors.Slate700
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.tasbih_reset_dialog_cancel),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
         }
-        TextButton(onClick = onReset) {
-            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.width(18.dp))
-            Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.dhikr_reset))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TasbihEndBottomSheet(
+    count: Int,
+    onDismiss: () -> Unit,
+    onConfirmEnd: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = SaatColors.PureWhite,
+        scrimColor = Color.Black.copy(alpha = 0.4f),
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .navigationBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.tasbih_end_dialog_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = SaatColors.Slate900,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(18.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                color = Color(0xFFFAF7F2),
+                border = BorderStroke(1.dp, Color(0xFFF3EFE6))
+            ) {
+                Text(
+                    text = stringResource(R.string.tasbih_end_dialog_desc, count),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = SaatColors.Slate700,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 22.sp,
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onConfirmEnd,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SaatColors.DeepEmerald,
+                        contentColor = SaatColors.PureWhite
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.tasbih_end_dialog_confirm),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, Color(0xFFCBD5E1)),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = SaatColors.Slate700
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.tasbih_end_dialog_cancel),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
         }
     }
 }
