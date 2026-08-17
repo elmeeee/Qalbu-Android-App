@@ -69,6 +69,13 @@ fun TasbeehCounterWidget(
             contentScale = ContentScale.Fit
         )
 
+        val baseScale = (counterWidth / 270.dp).coerceAtLeast(0.2f)
+        val fontSize = (24 * baseScale).sp
+        val letterSpacing = (1.2f * baseScale).sp
+        val cornerRadius = (12 * baseScale).dp
+        val paddingH = (6 * baseScale).dp
+        val paddingV = (2 * baseScale).dp
+
         Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -79,9 +86,9 @@ fun TasbeehCounterWidget(
                 modifier = Modifier
                     .width(counterWidth * 0.68f)
                     .height(counterHeight * 0.20f)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(cornerRadius))
                     .background(Color(0xFF1E1E1E))
-                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                    .padding(horizontal = paddingH, vertical = paddingV),
                 contentAlignment = Alignment.Center
             ) {
                 val safeCount = count.coerceIn(0, 999999)
@@ -95,21 +102,25 @@ fun TasbeehCounterWidget(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = inactiveStr,
-                        color = Color(0xFF3E3E3E),
-                        fontSize = 30.sp,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
-                    )
+                    if (inactiveStr.isNotEmpty()) {
+                        Text(
+                            text = inactiveStr,
+                            color = Color(0xFF3E3E3E),
+                            fontSize = fontSize,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = letterSpacing,
+                            maxLines = 1
+                        )
+                    }
                     Text(
                         text = activeStr,
                         color = Color.White,
-                        fontSize = 30.sp,
+                        fontSize = fontSize,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
+                        letterSpacing = letterSpacing,
+                        maxLines = 1
                     )
                 }
             }

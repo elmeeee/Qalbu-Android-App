@@ -207,20 +207,58 @@ fun DhikrScreen(onBack: () -> Unit) {
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Header Target & Progress Indicator
+                    Spacer(Modifier.height(8.dp))
+
+                    // 1. Subhanallah (Dhikr Label Title)
                     Text(
                         text = dhikrLabel(context, activePreset),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = SaatColors.Slate900
+                        color = SaatColors.Slate900,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(Modifier.height(8.dp))
+
+                    // 2. Arabic
+                    Text(
+                        text = activePreset.arabic,
+                        style = MaterialTheme.typography.headlineMedium.copy(fontSize = 28.sp, lineHeight = 44.sp),
+                        color = SaatColors.DeepEmerald,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(Modifier.height(6.dp))
+
+                    // 3. Arti (Transliteration & Meaning)
+                    Text(
+                        text = dhikrString(context, activePreset.transliterationResKey),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = SaatColors.Teal,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
+                        text = dhikrString(context, activePreset.meaningResKey),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SaatColors.Slate500,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(Modifier.height(14.dp))
+
+                    // 4. Target
+                    Text(
                         text = stringResource(R.string.tasbih_target_left, activePreset.target, leftCount),
                         style = MaterialTheme.typography.labelMedium,
-                        color = SaatColors.Slate500
+                        color = SaatColors.Slate500,
+                        textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(8.dp))
+
+                    Spacer(Modifier.height(6.dp))
+
+                    // 5. Progress
                     LinearProgressIndicator(
                         progress = { progress },
                         modifier = Modifier
@@ -233,12 +271,7 @@ fun DhikrScreen(onBack: () -> Unit) {
 
                     Spacer(Modifier.height(16.dp))
 
-                    // Reading Card for active dhikr/tasbih
-                    DhikrReadingCard(preset = activePreset)
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // Center Tasbeeh Counter Device Widget
+                    // 6. Counter (Tasbeeh Counter Device Widget)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -349,50 +382,8 @@ fun DhikrScreen(onBack: () -> Unit) {
                     DhikrStore.resetSession(context, preset.id)
                     count = 0
                     showEndBottomSheet = false
+                    onBack()
                 }
-            )
-        }
-    }
-}
-
-@Composable
-private fun DhikrReadingCard(preset: DhikrPreset) {
-    val context = LocalContext.current
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp),
-        shape = RoundedCornerShape(20.dp),
-        color = SaatColors.PureWhite,
-        shadowElevation = 2.dp,
-        border = BorderStroke(
-            1.dp,
-            Brush.linearGradient(listOf(SaatColors.Teal.copy(0.25f), SaatColors.Gold.copy(0.2f)))
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = preset.arabic,
-                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 26.sp, lineHeight = 42.sp),
-                color = SaatColors.DeepEmerald,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = dhikrString(context, preset.transliterationResKey),
-                style = MaterialTheme.typography.bodyMedium,
-                color = SaatColors.Teal,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = dhikrString(context, preset.meaningResKey),
-                style = MaterialTheme.typography.bodySmall,
-                color = SaatColors.Slate500,
-                textAlign = TextAlign.Center
             )
         }
     }
