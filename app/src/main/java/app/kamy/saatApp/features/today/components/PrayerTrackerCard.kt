@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -373,45 +374,38 @@ private fun CompactPrayerTile(
 ) {
     val performTapHaptic = rememberTapHaptic()
 
-    val iconRes = when (prayer) {
-        PrayerType.FAJR -> R.drawable.ic_prayer_fajr
-        PrayerType.DHUHR -> R.drawable.ic_prayer_dhuhr
-        PrayerType.ASR -> R.drawable.ic_prayer_asr
-        PrayerType.MAGHRIB -> R.drawable.ic_prayer_maghrib
-        PrayerType.ISHA -> R.drawable.ic_prayer_isha
-        else -> R.drawable.ic_prayer_rug
-    }
-
-    val tileBg by animateColorAsState(
+    val circleBg by animateColorAsState(
         targetValue = when {
-            enabled || completed -> SaatColors.MintWash
+            completed -> SaatColors.DeepEmerald
+            enabled -> SaatColors.MintWash
             else -> SaatColors.LightGrey.copy(alpha = 0.4f)
         },
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
-        label = "compactTileBg"
+        label = "compactCircleBg"
     )
 
-    val borderColor by animateColorAsState(
+    val circleBorderColor by animateColorAsState(
         targetValue = when {
             completed -> SaatColors.DeepEmerald
-            enabled -> SaatColors.DeepEmerald.copy(alpha = 0.25f)
+            enabled -> SaatColors.DeepEmerald.copy(alpha = 0.35f)
             else -> SaatColors.SoftGrey.copy(alpha = 0.4f)
         },
-        label = "compactTileBorder"
+        label = "compactCircleBorder"
     )
 
-    val contentColor by animateColorAsState(
+    val labelColor by animateColorAsState(
         targetValue = when {
-            enabled || completed -> SaatColors.DeepEmerald
+            completed -> SaatColors.DeepEmerald
+            enabled -> SaatColors.Slate800
             else -> SaatColors.Slate500.copy(alpha = 0.5f)
         },
-        label = "compactContentColor"
+        label = "compactLabelColor"
     )
 
-    Surface(
+    Column(
         modifier = modifier
             .alpha(if (enabled || completed) 1f else 0.55f)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(8.dp))
             .then(
                 if (enabled || completed) {
                     Modifier.clickable {
@@ -419,54 +413,42 @@ private fun CompactPrayerTile(
                         onClick()
                     }
                 } else Modifier
-            ),
-        shape = RoundedCornerShape(12.dp),
-        color = tileBg,
-        border = BorderStroke(1.dp, borderColor)
+            )
+            .padding(vertical = 4.dp, horizontal = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            modifier = Modifier.padding(vertical = 7.dp, horizontal = 2.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        // 1. Circle Checkbox (Top)
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(circleBg)
+                .border(1.5.dp, circleBorderColor, CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = label,
-                tint = contentColor,
-                modifier = Modifier.size(16.dp)
-            )
-
-            Spacer(Modifier.height(3.dp))
-
-            Text(
-                text = label,
-                fontSize = 10.sp,
-                fontWeight = if (completed) FontWeight.Bold else FontWeight.Medium,
-                color = contentColor,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(Modifier.height(3.dp))
-
-            // Indikator centang vs uncheck (Icon Check/Uncheck)
             if (completed) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_check_custom),
-                    contentDescription = "Done",
-                    tint = SaatColors.DeepEmerald,
-                    modifier = Modifier.size(12.dp)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .border(1.dp, SaatColors.Slate500.copy(alpha = 0.4f), CircleShape)
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Completed",
+                    tint = SaatColors.PureWhite,
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }
+
+        Spacer(Modifier.height(4.dp))
+
+        // 2. Prayer Name (Bottom)
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            fontWeight = if (completed) FontWeight.Bold else FontWeight.Medium,
+            color = labelColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
