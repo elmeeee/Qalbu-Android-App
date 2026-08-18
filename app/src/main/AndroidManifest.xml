@@ -13,7 +13,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
@@ -57,13 +60,6 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
-        <!--
-            Dedicated lightweight Activity for the adhan full-screen alarm overlay.
-            showWhenLocked + turnScreenOn are the reliable way to appear above the lock
-            screen on API 27+ without requiring FLAG_DISMISS_KEYGUARD.
-            excludeFromRecents keeps it out of the recent-apps switcher.
-            singleInstance ensures only one alarm screen exists at a time.
-        -->
         <activity
             android:name=".AdhanAlarmActivity"
             android:exported="false"
@@ -82,13 +78,6 @@
             android:name=".infrastructure.notifications.PrayerNotificationReceiver"
             android:exported="false" />
 
-        <!--
-            Android 15+: BOOT_COMPLETED is handled by a dedicated receiver class.
-            BootCompletedReceiver ONLY reschedules AlarmManager alarms — it does NOT
-            start any foreground service of any type. This satisfies the Android 15
-            restriction on restricted foreground service types (mediaPlayback, camera, etc.)
-            being started from BOOT_COMPLETED broadcast receivers.
-        -->
         <receiver
             android:name=".infrastructure.notifications.BootCompletedReceiver"
             android:exported="true">
