@@ -90,12 +90,19 @@ class SurahReminderStore @Inject constructor(
     }
 
     fun rescheduleAlarms(list: List<SurahReminder>) {
-        val globalEnabled = PrayerNotificationPreferencesStore.from(context).isYasinReminderEnabled()
+        val prefs = PrayerNotificationPreferencesStore.from(context)
         // Cancel first
         list.forEach { cancelAlarm(it.id) }
-        // Schedule if enabled both globally and per-reminder
-        if (globalEnabled) {
-            list.filter { it.enabled }.forEach { scheduleAlarm(it) }
+        // Schedule if enabled both per-reminder and per-surah preference
+        list.filter { it.enabled }.forEach { reminder ->
+            val isGlobalEnabled = when (reminder.surahNumber) {
+                36 -> prefs.isYasinReminderEnabled()
+                18 -> prefs.isKahfReminderEnabled()
+                else -> true
+            }
+            if (isGlobalEnabled) {
+                scheduleAlarm(reminder)
+            }
         }
     }
 

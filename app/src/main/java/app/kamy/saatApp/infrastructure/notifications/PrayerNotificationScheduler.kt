@@ -104,7 +104,7 @@ object PrayerNotificationScheduler {
             val enabled = when (division.kind) {
                 NightDivisionKind.MIDNIGHT -> options.midnightEnabled
                 NightDivisionKind.FIRST_THIRD -> options.firstThirdEnabled
-                NightDivisionKind.LAST_THIRD -> options.lastThirdEnabled
+                NightDivisionKind.LAST_THIRD -> false // Managed exclusively by custom Tahajud alarm scheduler
             }
             if (!enabled) return@forEach
             val codeOffset = division.kind.ordinal
