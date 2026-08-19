@@ -302,6 +302,27 @@ fun TodayScreen(
             else (listState.firstVisibleItemScrollOffset / 160f).coerceIn(0f, 1f)
         }
     }
+
+    val view = androidx.compose.ui.platform.LocalView.current
+    val isHeaderLightBackground = scrollProgress >= 0.5f
+
+    androidx.compose.runtime.SideEffect {
+        val window = (view.context as? android.app.Activity)?.window
+        if (window != null) {
+            val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, view)
+            insetsController.isAppearanceLightStatusBars = isHeaderLightBackground
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            val window = (view.context as? android.app.Activity)?.window
+            if (window != null) {
+                val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, view)
+                insetsController.isAppearanceLightStatusBars = true
+            }
+        }
+    }
     val targetPrayer = prayerState.nextPrayer ?: prayerState.activePrayer ?: app.kamy.saatApp.domain.model.PrayerType.MAGHRIB
     val cardDrawable = getPrayerCardDrawable(targetPrayer)
 
