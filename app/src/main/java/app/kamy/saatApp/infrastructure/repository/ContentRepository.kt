@@ -137,7 +137,7 @@ class ContentRepository @Inject constructor(
         ayahKey: String,
         sourceId: String = LocalQuranConfig.TAFSIR_WAJIZ_ID
     ): TafsirPayload? {
-        return local.getTafsirByAyah(ayahKey, sourceId)
+        return local.getTafsirByAyah(ayahKey, sourceId, language = appLanguageStore.current().tag)
     }
 
     suspend fun getJalalaynByAyah(ayahKey: String): TafsirPayload? {

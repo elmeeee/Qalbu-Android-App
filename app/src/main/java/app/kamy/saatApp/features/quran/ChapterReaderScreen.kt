@@ -129,7 +129,6 @@ import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.displayTransliteration
 import app.kamy.saatApp.domain.model.transliterationUsesHtml
 import app.kamy.saatApp.domain.model.ArabicTextType
-import app.kamy.saatApp.features.reader.HadithSheet
 import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.features.today.components.TafsirSheet
 import app.kamy.saatApp.ui.common.TajweedHtmlView
@@ -604,10 +603,6 @@ fun ChapterReaderScreen(
                             onTafsir = {
                                 verseMenuExpanded.value = false
                                 currentVerse?.verseKey?.let(vm::openTafsir)
-                            },
-                            onHadith = {
-                                verseMenuExpanded.value = false
-                                currentVerse?.verseKey?.let(vm::openHadith)
                             }
                         )
                     }
@@ -690,19 +685,6 @@ fun ChapterReaderScreen(
         onDismiss = { vm.dismissTafsir() },
         onReload = { vm.reloadTafsir() },
         onSelectSource = { vm.selectTafsirSource(it) }
-    )
-
-    HadithSheet(
-        isVisible = state.hadithVisible,
-        isLoading = state.hadithLoading,
-        isLoadingMore = state.hadithLoadingMore,
-        hasMore = state.hadithHasMore,
-        hadiths = state.hadiths,
-        verseReference = activeVerseReference,
-        error = state.hadithError,
-        onDismiss = { vm.dismissHadith() },
-        onReload = { vm.reloadHadith() },
-        onLoadMore = { vm.loadMoreHadith() }
     )
 
     AiShareSheet(
@@ -995,8 +977,7 @@ private fun ReaderVerseActionsMenu(
     onHifz: () -> Unit,
     onAiShare: () -> Unit,
     onShareImage: () -> Unit,
-    onTafsir: () -> Unit,
-    onHadith: () -> Unit
+    onTafsir: () -> Unit
 ) {
     Column(
         modifier = modifier,
@@ -1097,19 +1078,6 @@ private fun ReaderVerseActionsMenu(
                         onClick = onTafsir
                     )
                 }
-                ReaderActionPill(
-                    icon = {
-                        Icon(
-                            Icons.Filled.Forum,
-                            contentDescription = null,
-                            tint = SaatColors.Teal,
-                            modifier = Modifier.size(17.dp)
-                        )
-                    },
-                    label = stringResource(R.string.hadith),
-                    accent = SaatColors.Teal,
-                    onClick = onHadith
-                )
             }
         }
 

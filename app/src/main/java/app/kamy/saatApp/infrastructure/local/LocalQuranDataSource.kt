@@ -341,22 +341,61 @@ class LocalQuranDataSource @Inject constructor(
         )
     }
 
-    suspend fun getTafsirByAyah(ayahKey: String, resourceId: String = LocalQuranConfig.TAFSIR_WAJIZ_ID): TafsirPayload? =
-        withContext(Dispatchers.IO) {
+    suspend fun getTafsirByAyah(
+        ayahKey: String,
+        resourceId: String = LocalQuranConfig.TAFSIR_WAJIZ_ID,
+        language: String = "id"
+    ): TafsirPayload? = withContext(Dispatchers.IO) {
         val parts = ayahKey.split(":")
         if (parts.size != 2) return@withContext null
         val sura = parts[0].toIntOrNull() ?: return@withContext null
         val aya = parts[1].toIntOrNull() ?: return@withContext null
+
+        val lang = language.lowercase()
+        val isEnglish = lang.startsWith("en")
+        val isMalay = lang.startsWith("ms")
+
+        val jalalaynName = when {
+            isEnglish -> "Tafsir Jalalayn"
+            isMalay -> "Tafsir Jalalayn"
+            else -> "Tafsir Jalalayn"
+        }
+
+        val wajizName = when {
+            isEnglish -> "Tafsir Wajiz (Concise Commentary)"
+            isMalay -> "Tafsir Wajiz (Ringkas)"
+            else -> "Tafsir Wajiz (Kemenag RI)"
+        }
+
+        val tahliliName = when {
+            isEnglish -> "Tafsir Tahlili (In-Depth Commentary)"
+            isMalay -> "Tafsir Tahlili (Mendalam)"
+            else -> "Tafsir Tahlili (Kemenag RI)"
+        }
+
+        val englishVerseTranslation = if (isEnglish) {
+            database.openReadable().stringQuery(
+                "SELECT translation_en FROM ayas WHERE sura = ? AND aya = ?",
+                arrayOf(sura.toString(), aya.toString())
+            )?.takeIf { it.isNotBlank() }
+        } else null
 
         if (resourceId == LocalQuranConfig.TAFSIR_JALALAYN_ID) {
             val jalalayn = database.openReadable().stringQuery(
                 "SELECT jalalayn FROM ayas WHERE sura = ? AND aya = ?",
                 arrayOf(sura.toString(), aya.toString())
             )?.takeIf { it.isNotBlank() } ?: return@withContext null
+
+            val finalText = if (!englishVerseTranslation.isNullOrBlank()) {
+                "[Verse Translation - Sahih International]\n$englishVerseTranslation\n\n[Tafsir Commentary]\n$jalalayn"
+            } else {
+                jalalayn
+            }
+
             return@withContext TafsirPayload(
-                text = jalalayn,
+                text = finalText,
                 resourceId = 0,
-                resourceName = "Tafsir Jalalayn"
+                resourceName = jalalaynName
             )
         }
 
@@ -366,14 +405,20 @@ class LocalQuranDataSource @Inject constructor(
         ) ?: return@withContext null
 
         val entry = tafsirEntries().getOrNull(index - 1) ?: return@withContext null
-        val (text, name) = when (resourceId) {
-            LocalQuranConfig.TAFSIR_TAHLILI_ID -> entry.tahlili to "Tafsir Tahlili (Kemenag RI)"
-            else -> entry.wajiz to "Tafsir Wajiz (Kemenag RI)"
+        val (rawText, name) = when (resourceId) {
+            LocalQuranConfig.TAFSIR_TAHLILI_ID -> entry.tahlili to tahliliName
+            else -> entry.wajiz to wajizName
         }
 
-        val cleanText = text.trim().takeIf { it.isNotBlank() } ?: return@withContext null
+        val cleanText = rawText.trim().takeIf { it.isNotBlank() } ?: return@withContext null
+        val finalText = if (!englishVerseTranslation.isNullOrBlank()) {
+            "[Verse Translation - Sahih International]\n$englishVerseTranslation\n\n[Tafsir Commentary]\n$cleanText"
+        } else {
+            cleanText
+        }
+
         TafsirPayload(
-            text = cleanText,
+            text = finalText,
             resourceId = 0,
             resourceName = name
         )
