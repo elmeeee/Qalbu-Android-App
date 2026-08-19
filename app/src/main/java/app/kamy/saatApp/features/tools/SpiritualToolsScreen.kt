@@ -141,6 +141,13 @@ fun SpiritualToolsScreen(
                 "fidyah",
                 SaatColors.Teal,
                 SaatColors.GoldDeep
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_faraidh_doc,
+                R.string.encyclopedia_title,
+                "encyclopedia",
+                SaatColors.DeepEmerald,
+                SaatColors.Teal
             )
         )
     }

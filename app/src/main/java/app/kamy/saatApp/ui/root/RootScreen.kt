@@ -1,5 +1,6 @@
 package app.kamy.saatApp.ui.root
 
+import android.content.Intent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -270,6 +271,30 @@ fun RootScreen(
             composable("tools/fidyah") {
                 app.kamy.saatApp.features.tools.fidyah.FidyahCalculatorScreen(
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable("tools/encyclopedia") {
+                app.kamy.saatApp.features.tools.encyclopedia.EncyclopediaScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenTopic = { topicId ->
+                        navController.navigate("tools/encyclopedia/$topicId")
+                    }
+                )
+            }
+            composable(
+                route = "tools/encyclopedia/{topicId}",
+                arguments = listOf(navArgument("topicId") { type = NavType.StringType })
+            ) {
+                val context = LocalContext.current
+                app.kamy.saatApp.features.tools.encyclopedia.EncyclopediaDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onAskAi = { title, summary ->
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, "Pertanyaan Ensiklopedi Islam ($title):\n$summary\n\nBagaimana penjelasan lebih mendalam menurut pandangan ulama Islam?")
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Tanyakan ke AI"))
+                    }
                 )
             }
 

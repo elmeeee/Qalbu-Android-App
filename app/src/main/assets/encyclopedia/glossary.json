@@ -1,0 +1,234 @@
+[
+  {
+    "id": "term-aqidah",
+    "term": "Aqidah",
+    "termAr": "عَقِيدَة",
+    "definition": "Keyakinan dan keimanan yang kokoh di dalam hati terhadap Allah SWT, Malaikat, Kitab, Rasul, Hari Kiamat, dan Qada & Qadar.",
+    "definitionEn": "Firm belief and unshakeable faith in Allah, Angels, Books, Messengers, Day of Judgment, and Divine Decree.",
+    "definitionMs": "Keyakinan dan keimanan yang kukuh di dalam hati terhadap Allah SWT, Malaikat, Kitab, Rasul, Hari Kiamat, dan Qada & Qadar."
+  },
+  {
+    "id": "term-akhlaq",
+    "term": "Akhlaq",
+    "termAr": "أَخْلَاق",
+    "definition": "Budi pekerti, perangai, atau tingkah laku terpuji yang bersumber dari Al-Qur'an dan Sunnah.",
+    "definitionEn": "Moral character, manners, and ethical behavior rooted in Islamic teachings.",
+    "definitionMs": "Budi pekerti, perangai, atau tingkah laku terpuji yang bersumber dari Al-Quran dan Sunnah."
+  },
+  {
+    "id": "term-al-quran",
+    "term": "Al-Qur'an",
+    "termAr": "الْقُرْآن",
+    "definition": "Kalam Allah SWT yang diturunkan kepada Nabi Muhammad SAW melalui Malaikat Jibril sebagai mukjizat.",
+    "definitionEn": "The literal Word of Allah revealed to Prophet Muhammad (PBUH) through Angel Jibril.",
+    "definitionMs": "Kalam Allah SWT yang diturunkan kepada Nabi Muhammad SAW melalui Malaikat Jibril."
+  },
+  {
+    "id": "term-as-sunnah",
+    "term": "As-Sunnah",
+    "termAr": "السُّنَّة",
+    "definition": "Segala perkataan, perbuatan, ketetapan, dan sifat Nabi Muhammad SAW.",
+    "definitionEn": "All sayings, actions, approvals, and characteristics of Prophet Muhammad (PBUH).",
+    "definitionMs": "Segala perkataan, perbuatan, ketetapan, dan sifat Nabi Muhammad SAW."
+  },
+  {
+    "id": "term-bidah",
+    "term": "Bid'ah",
+    "termAr": "بِدْعَة",
+    "definition": "Perkara baru yang diada-adakan dalam urusan agama (peribadatan) tanpa dalil syar'i.",
+    "definitionEn": "An innovation or newly invented matter in core religious worship lacking basis in Islam.",
+    "definitionMs": "Perkara baharu yang diada-adakan dalam urusan agama tanpa dalil syarak."
+  },
+  {
+    "id": "term-fiqh",
+    "term": "Fiqh",
+    "termAr": "فِقْه",
+    "definition": "Ilmu tentang hukum-hukum syariat Islam praktis yang digali dari Al-Qur'an dan As-Sunnah.",
+    "definitionEn": "Islamic jurisprudence understanding practical rulings derived from Qur'an and Sunnah.",
+    "definitionMs": "Ilmu tentang hukum-hukum syariat Islam praktikal daripada Al-Quran dan As-Sunnah."
+  },
+  {
+    "id": "term-hadith",
+    "term": "Hadits",
+    "termAr": "حَدِيث",
+    "definition": "Catatan riwayat sabda, perbuatan, atau persetujuan Nabi Muhammad SAW.",
+    "definitionEn": "Transmitted narration documenting the words, actions, or approvals of Prophet Muhammad (PBUH).",
+    "definitionMs": "Catatan riwayat sabda, perbuatan, atau persetujuan Nabi Muhammad SAW."
+  },
+  {
+    "id": "term-halal",
+    "term": "Halal",
+    "termAr": "حَلَال",
+    "definition": "Segala sesuatu yang diperbolehkan dan diizinkan oleh hukum syariat Islam.",
+    "definitionEn": "Anything permitted and lawful under Islamic law.",
+    "definitionMs": "Segala sesuatu yang dibolehkan dan diizinkan oleh hukum syariat Islam."
+  },
+  {
+    "id": "term-haram",
+    "term": "Haram",
+    "termAr": "حَرَام",
+    "definition": "Segala sesuatu yang dilarang keras oleh syariat Islam.",
+    "definitionEn": "Strictly forbidden by Islamic law.",
+    "definitionMs": "Segala sesuatu yang dilarang keras oleh syariat Islam."
+  },
+  {
+    "id": "term-hijrah",
+    "term": "Hijrah",
+    "termAr": "هِجْرَة",
+    "definition": "Perpindahan dari Makkah ke Madinah, atau meninggalkan keburukan menuju kebaikan.",
+    "definitionEn": "Migration from Makkah to Madinah, or spiritual transition from sin to righteousness.",
+    "definitionMs": "Perpindahan dari Makkah ke Madinah, atau meninggalkan keburukan menuju kebaikan."
+  },
+  {
+    "id": "term-ibadah",
+    "term": "Ibadah",
+    "termAr": "عِبَادَة",
+    "definition": "Segala sesuatu yang dicintai dan diridhai Allah SWT baik perkataan maupun perbuatan.",
+    "definitionEn": "All speech and actions, outward or inward, that Allah loves and is pleased with.",
+    "definitionMs": "Segala sesuatu yang dicintai dan diredhai Allah SWT."
+  },
+  {
+    "id": "term-ihsan",
+    "term": "Ihsan",
+    "termAr": "إِحْسَان",
+    "definition": "Beribadah kepada Allah seolah-olah melihat-Nya, atau meyakini Allah selalu melihat kita.",
+    "definitionEn": "Worshipping Allah as if you see Him, knowing that He sees you.",
+    "definitionMs": "Beribadah kepada Allah seolah-olah melihat-Nya, atau meyakini Allah sentiasa melihat kita."
+  },
+  {
+    "id": "term-ijtihad",
+    "term": "Ijtihad",
+    "termAr": "إِجْتِهَاد",
+    "definition": "Usaha sungguh-sungguh ahli fikih menetapkan hukum masalah baru berdasarkan Al-Qur'an & Sunnah.",
+    "definitionEn": "Strenuous effort by a jurist to derive legal rulings based on Islamic sources.",
+    "definitionMs": "Usaha bersungguh-sungguh ahli fikih menetapkan hukum masalah baharu."
+  },
+  {
+    "id": "term-iman",
+    "term": "Iman",
+    "termAr": "إِيمَان",
+    "definition": "Pembenaran dengan hati, pengucapan dengan lisan, dan pengamalan dengan anggota badan.",
+    "definitionEn": "Faith verified by heart, spoken by tongue, and demonstrated through actions.",
+    "definitionMs": "Pembenaran dengan hati, pengucapan dengan lisan, dan pengamalan dengan anggota badan."
+  },
+  {
+    "id": "term-isra-miraj",
+    "term": "Isra' Mi'raj",
+    "termAr": "إِسْرَاء وَمِعْرَاج",
+    "definition": "Perjalanan malam Nabi Muhammad SAW ke Masjidil Aqsha lalu ke Sidratul Muntaha.",
+    "definitionEn": "Night journey of Prophet Muhammad to Jerusalem and ascension to the heavens.",
+    "definitionMs": "Perjalanan malam Nabi Muhammad SAW ke Masjidil Aqsha lalu ke Sidratul Muntaha."
+  },
+  {
+    "id": "term-istighfar",
+    "term": "Istighfar",
+    "termAr": "إِسْتِغْفَار",
+    "definition": "Kalimat memohon ampunan kepada Allah SWT dengan kesadaran hati.",
+    "definitionEn": "Seeking Allah's forgiveness through sincere repentance.",
+    "definitionMs": "Kalimat memohon keampunan kepada Allah SWT dengan kesedaran hati."
+  },
+  {
+    "id": "term-jannah",
+    "term": "Jannah",
+    "termAr": "جَنَّة",
+    "definition": "Surga tempat kenikmatan abadi yang dijanjikan Allah bagi orang beriman.",
+    "definitionEn": "Paradise of eternal bliss promised by Allah to faithful servants.",
+    "definitionMs": "Syurga tempat kenikmatan abadi yang dijanjikan Allah bagi orang beriman."
+  },
+  {
+    "id": "term-niat",
+    "term": "Niat",
+    "termAr": "نِيَّة",
+    "definition": "Kehendak hati melakukan ibadah karena Allah SWT.",
+    "definitionEn": "Intention of the heart to perform an act of worship purely for Allah.",
+    "definitionMs": "Kehendak hati melakukan ibadah kerana Allah SWT."
+  },
+  {
+    "id": "term-qada-qadar",
+    "term": "Qada & Qadar",
+    "termAr": "قَضَاء وَقَدَر",
+    "definition": "Ketetapan dan takdir Allah SWT sejak zaman azali.",
+    "definitionEn": "Divine Decree and Destiny established by Allah.",
+    "definitionMs": "Ketetapan dan takdir Allah SWT sejak zaman azali."
+  },
+  {
+    "id": "term-riba",
+    "term": "Riba",
+    "termAr": "رِبَا",
+    "definition": "Penambahan atau kelebihan pembayaran dalam utang-piutang yang dilarang keras.",
+    "definitionEn": "Unlawful interest or usury added in loans.",
+    "definitionMs": "Penambahan atau faedah dalam hutang yang dilarang keras."
+  },
+  {
+    "id": "term-shadaqah",
+    "term": "Shadaqah",
+    "termAr": "صَدَقَة",
+    "definition": "Pemberian sukarela harta atau kebaikan mengharap ridha Allah SWT.",
+    "definitionEn": "Voluntary charity involving money or good deeds seeking Allah's pleasure.",
+    "definitionMs": "Pemberian sukarela harta atau kebaikan mengharap keredhaan Allah."
+  },
+  {
+    "id": "term-syahadat",
+    "term": "Syahadat",
+    "termAr": "شَهَادَة",
+    "definition": "Persaksian utama Islam: Tiada Tuhan selain Allah dan Muhammad Utusan Allah.",
+    "definitionEn": "Islamic declaration of faith: There is no god but Allah, Muhammad is His Messenger.",
+    "definitionMs": "Persaksian utama Islam: Tiada Tuhan melainkan Allah, Muhammad Utusan Allah."
+  },
+  {
+    "id": "term-syariat",
+    "term": "Syariat",
+    "termAr": "شَرِيعَة",
+    "definition": "Hukum dan aturan keagamaan yang ditetapkan Allah bagi Umat Islam.",
+    "definitionEn": "Divine law ordained by Allah governing all aspects of life.",
+    "definitionMs": "Hukum dan aturan agama yang ditetapkan Allah bagi Umat Islam."
+  },
+  {
+    "id": "term-tafsir",
+    "term": "Tafsir",
+    "termAr": "تَفْسِير",
+    "definition": "Ilmu menjelaskan kandungan makna ayat-ayat Al-Qur'an.",
+    "definitionEn": "Exegesis explaining the meanings and context of Qur'anic verses.",
+    "definitionMs": "Ilmu menjelaskan makna ayat-ayat Al-Quran."
+  },
+  {
+    "id": "term-tajwid",
+    "term": "Tajwid",
+    "termAr": "تَجْوِيد",
+    "definition": "Kaidah membaca Al-Qur'an dengan benar sesuai makhraj dan sifat huruf.",
+    "definitionEn": "Rules and proper pronunciation standards for reciting the Holy Qur'an.",
+    "definitionMs": "Kaidah membaca Al-Quran dengan betul mengikut makhraj huruf."
+  },
+  {
+    "id": "term-takwa",
+    "term": "Takwa",
+    "termAr": "تَقْوَى",
+    "definition": "Menjalankan perintah Allah dan menjauhi larangan-Nya.",
+    "definitionEn": "Fulfilling commands of Allah and avoiding His prohibitions.",
+    "definitionMs": "Menjalankan perintah Allah dan menjauhi larangan-Nya."
+  },
+  {
+    "id": "term-tawakal",
+    "term": "Tawakal",
+    "termAr": "تَوَكُّل",
+    "definition": "Berserah diri sepenuhnya kepada Allah SWT setelah berikhtiar.",
+    "definitionEn": "Relying entirely on Allah after putting forth best effort.",
+    "definitionMs": "Berserah diri sepenuhnya kepada Allah SWT selepas berusaha."
+  },
+  {
+    "id": "term-tawhid",
+    "term": "Tawhid",
+    "termAr": "تَوْحِيد",
+    "definition": "Mengesakan Allah dalam Rububiyah, Uluhiyah, dan Asma wa Sifat.",
+    "definitionEn": "The core doctrine of pure monotheism in Islam.",
+    "definitionMs": "Mengesakan Allah dalam Rububiyah, Uluhiyah, dan Asma wa Sifat."
+  },
+  {
+    "id": "term-zakat",
+    "term": "Zakat",
+    "termAr": "زَكَاة",
+    "definition": "Kewajiban mengeluarkan sebagian harta tertentu yang mencapai nisab & haul.",
+    "definitionEn": "Obligatory alms-giving on qualifying wealth reaching Nisab.",
+    "definitionMs": "Kewajipan mengeluarkan sebahagian harta yang cukup nisab & haul."
+  }
+]
