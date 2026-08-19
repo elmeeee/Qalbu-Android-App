@@ -64,7 +64,7 @@ class LocalEncyclopediaDataSource @Inject constructor(
                         subtitle = obj.optString("subtitle"),
                         subtitleEn = obj.optString("subtitleEn"),
                         subtitleMs = obj.optString("subtitleMs"),
-                        icon = obj.optString("icon", "ic_faraidh_doc"),
+                        icon = obj.optString("icon", "ic_encyclopedia_custom"),
                         readTimeMinutes = obj.optInt("readTimeMinutes", 5),
                         summary = obj.optString("summary"),
                         summaryEn = obj.optString("summaryEn"),

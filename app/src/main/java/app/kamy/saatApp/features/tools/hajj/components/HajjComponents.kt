@@ -1053,6 +1053,27 @@ fun MiqatCard(
                             lineHeight = 16.sp
                         )
                     }
+                    if (miqat.facilities.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            miqat.facilities.forEach { facility ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_check_custom),
+                                        contentDescription = null,
+                                        tint = SaatColors.DeepEmerald,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        text = facility.get(appLanguage),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = SaatColors.Slate700
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

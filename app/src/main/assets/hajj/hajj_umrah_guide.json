@@ -1670,6 +1670,80 @@
           "ms": "Teksi & bas 24 jam ke Masjidil Haram"
         }
       ]
+    },
+    {
+      "id": "miqat_dzat_irq",
+      "name": "Dzat 'Irq (Al-'Aqaq / Az-Zubarah)",
+      "arabicName": "ذَاتُ عِرْقٍ (الْعَقَاق)",
+      "distanceFromMakkah": {
+        "id": "± 94 km (Timur Laut)",
+        "en": "± 94 km (Northeast)",
+        "ms": "± 94 km (Timur Laut)"
+      },
+      "direction": {
+        "id": "Dari arah Iraq, Iran, Khorasan, dan wilayah Timur",
+        "en": "From Iraq, Iran, and Eastern regions",
+        "ms": "Dari arah Iraq, Iran, dan kawasan Timur"
+      },
+      "dedicatedFor": {
+        "id": "Penduduk Iraq, Iran, Asia Tengah, dan jamaah yang melintasi jalur darat/udara dari arah timur laut.",
+        "en": "Pilgrims traveling from Iraq, Iran, Central Asia, and northeastern routes.",
+        "ms": "Jemaah dari Iraq, Iran, Asia Tengah, dan laluan timur laut."
+      },
+      "description": {
+        "id": "Miqat Makani ke-5 ketetapan Syariat (HR. An-Nasa'i & Abu Dawud / Sayyidina Umar RA) untuk jamaah dari wilayah timur.",
+        "en": "The 5th primary Miqat Makani designated by Hadith and Caliph Umar (RA) for eastern pilgrims.",
+        "ms": "Miqat Makani ke-5 yang ditetapkan oleh Syariat untuk jemaah dari kawasan timur."
+      },
+      "facilities": [
+        {
+          "id": "Masjid Miqat Dzat 'Irq baru",
+          "en": "New Dzat 'Irq Miqat Mosque",
+          "ms": "Masjid Miqat Dzat 'Irq baharu"
+        },
+        {
+          "id": "Fasilitas bersuci & tempat istirahat",
+          "en": "Ablution & rest amenities",
+          "ms": "Kemudahan bersuci & tempat rehat"
+        }
+      ]
+    },
+    {
+      "id": "miqat_jiranah",
+      "name": "Masjid Al-Ji'ranah",
+      "arabicName": "الْجِعْرَانَةُ (مَسْجِدُ الْجِعْرَانَةِ)",
+      "distanceFromMakkah": {
+        "id": "± 22 km (Timur Laut)",
+        "en": "± 22 km (Northeast)",
+        "ms": "± 22 km (Timur Laut)"
+      },
+      "direction": {
+        "id": "Batas Tanah Halal Makkah (Arah Taif)",
+        "en": "Halal ground boundary northeast of Makkah",
+        "ms": "Sempadan Tanah Halal timur laut Makkah"
+      },
+      "dedicatedFor": {
+        "id": "Jamaah yang sudah berada di Makkah dan ingin berniat Umrah sunnah berikutnya.",
+        "en": "Pilgrims staying in Makkah wishing to perform subsequent repeat Umrahs.",
+        "ms": "Jemaah di Makkah yang ingin berniat Umrah sunat seterusnya."
+      },
+      "description": {
+        "id": "Tempat bersejarah di mana Rasulullah SAW berniat Umrah dan memakai kain ihram seusai pembagian ghanimah Perang Hunain.",
+        "en": "Historic location where Prophet Muhammad (ﷺ) assumed Ihram for Umrah following the Battle of Hunain.",
+        "ms": "Tempat bersejarah Rasulullah SAW berniat Umrah selepas Perang Hunain."
+      },
+      "facilities": [
+        {
+          "id": "Masjid Al-Ji'ranah yang luas",
+          "en": "Spacious Al-Ji'ranah Mosque",
+          "ms": "Masjid Al-Ji'ranah yang luas"
+        },
+        {
+          "id": "Fasilitas wudhu & mandi lengkap",
+          "en": "Complete wudu & shower amenities",
+          "ms": "Kemudahan wuduk & mandi lengkap"
+        }
+      ]
     }
   ],
   "historicSites": [
@@ -1984,8 +2058,8 @@
         {
           "id": "tech_powerbank",
           "label": {
-            "id": "Power bank (maksimal 20.000 mAh di tas kabin) & Universal travel adapter",
-            "en": "Power bank (max 20,000 mAh in carry-on) & Universal UK/Saudi adapter",
+            "id": "Power bank (maksimal 20.000 mAh di tas kabin) & universal travel adapter",
+            "en": "Power bank (max 20,000 mAh in carry-on) & universal UK/Saudi adapter",
             "ms": "Power bank (maks 20,000 mAh dalam beg kabin) & Penyesuai soket universal"
           },
           "isCrucial": true
@@ -1993,9 +2067,9 @@
         {
           "id": "tech_tasbih",
           "label": {
-            "id": "Tasbih digital / Aplikasi Qalbu Dhikr untuk menghitung putaran thawaf",
-            "en": "Digital finger tally counter or Qalbu Dhikr app for Tawaf counting",
-            "ms": "Tasbih digital jari / Aplikasi Qalbu Dhikr untuk kiraan tawaf"
+            "id": "Tasbih digital / Aplikasi Saat Dhikr untuk menghitung putaran thawaf",
+            "en": "Digital finger tally counter or Saat Dhikr app for Tawaf counting",
+            "ms": "Tasbih digital jari / Aplikasi Saat Dhikr untuk kiraan tawaf"
           },
           "isCrucial": false
         },

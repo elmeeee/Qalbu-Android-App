@@ -108,7 +108,7 @@ fun SpiritualToolsScreen(
                 SaatColors.Teal
             ),
             SpiritualToolItem(
-                R.drawable.ic_zakat,
+                R.drawable.ic_faraidh_heritage,
                 R.string.faraidh_title,
                 "faraidh",
                 SaatColors.GoldDeep,
@@ -143,7 +143,7 @@ fun SpiritualToolsScreen(
                 SaatColors.GoldDeep
             ),
             SpiritualToolItem(
-                R.drawable.ic_faraidh_doc,
+                R.drawable.ic_encyclopedia_custom,
                 R.string.encyclopedia_title,
                 "encyclopedia",
                 SaatColors.DeepEmerald,

@@ -9,7 +9,7 @@ enum class EncyclopediaCategory(
     @StringRes val labelRes: Int,
     val iconRes: Int
 ) {
-    ALL("all", R.string.encyclopedia_cat_all, R.drawable.ic_faraidh_doc),
+    ALL("all", R.string.encyclopedia_cat_all, R.drawable.ic_encyclopedia_custom),
     PROPHETS("prophets", R.string.encyclopedia_cat_prophets, R.drawable.ic_faraidh_people),
     COMPANIONS("companions", R.string.encyclopedia_cat_companions, R.drawable.ic_faraidh_people),
     FIQH("fiqh", R.string.encyclopedia_cat_fiqh, R.drawable.ic_faraidh_terms),

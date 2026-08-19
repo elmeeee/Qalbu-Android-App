@@ -72,8 +72,8 @@ fun HajjUmrahScreen(
     data class HajjTabItem(val title: String, val iconRes: Int)
 
     val tabs = listOf(
-        HajjTabItem(stringResource(R.string.hajj_tab_umrah), R.drawable.ic_kaaba_hajj),
-        HajjTabItem(stringResource(R.string.hajj_tab_hajj), R.drawable.ic_kaaba_hajj),
+        HajjTabItem(stringResource(R.string.hajj_tab_umrah), R.drawable.ic_qibla_old),
+        HajjTabItem(stringResource(R.string.hajj_tab_hajj), R.drawable.ic_qibla_old),
         HajjTabItem(stringResource(R.string.hajj_tab_doa), R.drawable.ic_dua),
         HajjTabItem(stringResource(R.string.hajj_tab_dalil), R.drawable.ic_tafsir),
         HajjTabItem(stringResource(R.string.hajj_tab_fiqh), R.drawable.ic_madhab_custom),

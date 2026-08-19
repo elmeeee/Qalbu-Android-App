@@ -325,7 +325,7 @@ private fun TopicCardItem(
                             "prophets" -> R.drawable.ic_faraidh_people
                             "companions" -> R.drawable.ic_faraidh_people
                             "fiqh" -> R.drawable.ic_faraidh_terms
-                            else -> R.drawable.ic_faraidh_doc
+                            else -> R.drawable.ic_encyclopedia_custom
                         }
                     ),
                     contentDescription = null,
@@ -419,7 +419,7 @@ private fun EmptyStateView() {
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            painter = painterResource(R.drawable.ic_faraidh_doc),
+            painter = painterResource(R.drawable.ic_encyclopedia_custom),
             contentDescription = null,
             tint = SaatColors.Slate500,
             modifier = Modifier.size(64.dp)
