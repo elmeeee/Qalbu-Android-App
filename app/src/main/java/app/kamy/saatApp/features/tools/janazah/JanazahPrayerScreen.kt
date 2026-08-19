@@ -66,7 +66,7 @@ import app.kamy.saatApp.features.quran.tajweed.TajweedEngine
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun JanazahPrayerScreen(
@@ -74,7 +74,7 @@ fun JanazahPrayerScreen(
 ) {
     val context = LocalContext.current
     val store = remember(context) { AppLanguageStore.from(context) }
-    val appLanguage by store.currentFlow.collectAsState()
+    val appLanguage by store.currentFlow.collectAsStateWithLifecycle(initialValue = AppLanguage.INDONESIAN)
     val guide = remember(context) { LocalJanazahGuideCatalog.getGuide(context) }
     var activeTab by remember { mutableIntStateOf(0) }
 

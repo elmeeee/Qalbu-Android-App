@@ -117,7 +117,11 @@ fun ManasikStepCard(
                 ) {
                     Icon(
                         Icons.Filled.KeyboardArrowDown,
-                        contentDescription = "Expand",
+                        contentDescription = when (appLanguage) {
+                            AppLanguage.ENGLISH -> "Expand details"
+                            AppLanguage.MALAY -> "Kembangkan butiran"
+                            else -> "Buka detail"
+                        },
                         tint = SaatColors.Slate500,
                         modifier = Modifier.rotate(arrowRotation)
                     )
@@ -454,7 +458,16 @@ fun HajjDoaCard(
                         },
                         modifier = Modifier.size(32.dp)
                     ) {
-                        Icon(Icons.Filled.ContentCopy, contentDescription = "Copy", tint = SaatColors.Slate500, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Filled.ContentCopy,
+                            contentDescription = when (appLanguage) {
+                                AppLanguage.ENGLISH -> "Copy prayer"
+                                AppLanguage.MALAY -> "Salin doa"
+                                else -> "Salin doa"
+                            },
+                            tint = SaatColors.Slate500,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
 
                     Spacer(modifier = Modifier.width(4.dp))
@@ -472,7 +485,16 @@ fun HajjDoaCard(
                         },
                         modifier = Modifier.size(32.dp)
                     ) {
-                        Icon(Icons.Filled.Share, contentDescription = "Share", tint = SaatColors.Slate500, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Filled.Share,
+                            contentDescription = when (appLanguage) {
+                                AppLanguage.ENGLISH -> "Share prayer"
+                                AppLanguage.MALAY -> "Kongsi doa"
+                                else -> "Bagikan doa"
+                            },
+                            tint = SaatColors.Slate500,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
             }

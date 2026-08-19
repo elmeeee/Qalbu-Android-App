@@ -97,13 +97,15 @@ import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.text.NumberFormat
 import java.util.Locale
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FidyahCalculatorScreen(
     onNavigateBack: () -> Unit,
     viewModel: FidyahViewModel = hiltViewModel()
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val currentLang = AppLanguageStore.from(context).current()

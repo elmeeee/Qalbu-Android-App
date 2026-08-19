@@ -1,6 +1,7 @@
 package app.kamy.saatApp.features.tools.sunnah
 
 import android.content.Context
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -122,7 +123,7 @@ fun SunnahPrayerScreen(
 ) {
     val context = LocalContext.current
     val store = remember(context) { AppLanguageStore.from(context) }
-    val appLanguage by store.currentFlow.collectAsState()
+    val appLanguage by store.currentFlow.collectAsStateWithLifecycle(initialValue = AppLanguage.INDONESIAN)
     var activeTab by remember { mutableIntStateOf(0) } // 0: Shalat Sunnah, 1: Amalan Kehidupan
 
     var selectedPrayerCategory by remember { mutableStateOf(SunnahCategoryFilter.ALL) }

@@ -1,7 +1,9 @@
 package app.kamy.saatApp.features.tools.hajj.model
 
+import androidx.compose.runtime.Immutable
 import app.kamy.saatApp.core.locale.AppLanguage
 
+@Immutable
 data class LocalizedText(
     val id: String,
     val en: String,
@@ -23,6 +25,7 @@ enum class ManasikType {
     HAJJ_QIRAN
 }
 
+@Immutable
 data class ManasikStep(
     val id: String,
     val stepNumber: Int,
@@ -41,6 +44,7 @@ data class ManasikStep(
     val practicalTips: List<LocalizedText> = emptyList()
 )
 
+@Immutable
 data class HajjDoaItem(
     val id: String,
     val title: LocalizedText,
@@ -53,6 +57,7 @@ data class HajjDoaItem(
     val occasions: LocalizedText
 )
 
+@Immutable
 data class HajjDalilItem(
     val id: String,
     val title: LocalizedText,
@@ -66,6 +71,7 @@ data class HajjDalilItem(
     val keyLessons: List<LocalizedText>
 )
 
+@Immutable
 data class MadhhabRuling(
     val id: String,
     val topic: LocalizedText,
@@ -77,6 +83,7 @@ data class MadhhabRuling(
     val rajihConclusion: LocalizedText
 )
 
+@Immutable
 data class DamRuleItem(
     val id: String,
     val violation: LocalizedText,
@@ -86,6 +93,7 @@ data class DamRuleItem(
     val dalil: String
 )
 
+@Immutable
 data class MiqatLocation(
     val id: String,
     val name: String,
@@ -97,6 +105,7 @@ data class MiqatLocation(
     val facilities: List<LocalizedText>
 )
 
+@Immutable
 data class HistoricZiarahSite(
     val id: String,
     val name: LocalizedText,
@@ -105,12 +114,14 @@ data class HistoricZiarahSite(
     val adabAndDoa: LocalizedText
 )
 
+@Immutable
 data class HajjChecklistCategory(
     val id: String,
     val title: LocalizedText,
     val items: List<HajjChecklistItem>
 )
 
+@Immutable
 data class HajjChecklistItem(
     val id: String,
     val label: LocalizedText,

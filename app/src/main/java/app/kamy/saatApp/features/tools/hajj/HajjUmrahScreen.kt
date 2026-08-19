@@ -36,6 +36,8 @@ import app.kamy.saatApp.features.tools.hajj.model.ManasikType
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HajjUmrahScreen(
@@ -43,7 +45,7 @@ fun HajjUmrahScreen(
 ) {
     val context = LocalContext.current
     val store = remember(context) { AppLanguageStore.from(context) }
-    val appLanguage by store.currentFlow.collectAsState()
+    val appLanguage by store.currentFlow.collectAsStateWithLifecycle(initialValue = AppLanguage.INDONESIAN)
     val hajjData = remember(context) { HajjUmrahCatalog.getData(context) }
 
     var activeTab by rememberSaveable { mutableIntStateOf(0) }
