@@ -71,21 +71,22 @@ fun ManasikStepCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(SaatColors.DeepEmerald, SaatColors.Teal)
-                                )
-                            ),
+                        modifier = Modifier.size(38.dp),
                         contentAlignment = Alignment.Center
                     ) {
+                        Icon(
+                            painter = painterResource(R.drawable.frame_number_icon),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.fillMaxSize()
+                        )
                         Text(
                             text = "${step.stepNumber}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = if (step.stepNumber >= 100) 11.sp else 12.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = SaatColors.Slate900
                         )
                     }
                     Spacer(modifier = Modifier.width(10.dp))
@@ -231,19 +232,24 @@ fun ManasikStepCard(
                                 .padding(vertical = 4.dp),
                             verticalAlignment = Alignment.Top
                         ) {
-                            Surface(
-                                shape = CircleShape,
-                                color = SaatColors.DeepEmerald.copy(alpha = 0.15f),
-                                modifier = Modifier.size(20.dp)
+                            Box(
+                                modifier = Modifier.size(24.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Text(
-                                        text = "${idx + 1}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = SaatColors.DeepEmerald
-                                    )
-                                }
+                                Icon(
+                                    painter = painterResource(R.drawable.frame_number_icon),
+                                    contentDescription = null,
+                                    tint = SaatColors.DeepEmerald,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                                Text(
+                                    text = "${idx + 1}",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = SaatColors.Slate900
+                                )
                             }
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
@@ -671,13 +677,23 @@ fun HajjDalilCard(
                 }
             }
 
+            if (!dalil.latin.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = dalil.latin,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontStyle = FontStyle.Italic,
+                    color = SaatColors.DeepEmerald,
+                    lineHeight = 22.sp
+                )
+            }
+
             Spacer(modifier = Modifier.height(12.dp))
 
             // Translation
             Text(
                 text = "\"${dalil.translation.get(appLanguage)}\"",
                 style = MaterialTheme.typography.bodyMedium,
-                fontStyle = FontStyle.Italic,
                 color = SaatColors.Slate800,
                 lineHeight = 22.sp
             )

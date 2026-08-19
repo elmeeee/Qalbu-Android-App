@@ -788,19 +788,24 @@ private fun SunnahActionStepCard(step: SunnahActionStep, appLanguage: AppLanguag
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Surface(
-                shape = CircleShape,
-                color = SaatColors.DeepEmerald,
-                modifier = Modifier.size(32.dp)
+            Box(
+                modifier = Modifier.size(36.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = step.stepNumber.toString(),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
+                Icon(
+                    painter = painterResource(app.kamy.saatApp.R.drawable.frame_number_icon),
+                    contentDescription = null,
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Text(
+                    text = step.stepNumber.toString(),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = if (step.stepNumber >= 100) 11.sp else 12.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = SaatColors.Slate900
+                )
             }
 
             Column(
@@ -1213,19 +1218,24 @@ private fun StepCard(step: PrayerStepItem, appLanguage: AppLanguage) {
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Surface(
-                shape = CircleShape,
-                color = SaatColors.DeepEmerald,
-                modifier = Modifier.size(32.dp)
+            Box(
+                modifier = Modifier.size(36.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = step.stepNumber.toString(),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
+                Icon(
+                    painter = painterResource(app.kamy.saatApp.R.drawable.frame_number_icon),
+                    contentDescription = null,
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Text(
+                    text = step.stepNumber.toString(),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = if (step.stepNumber >= 100) 11.sp else 12.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = SaatColors.Slate900
+                )
             }
 
             Column(

@@ -28,6 +28,8 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -275,19 +277,24 @@ private fun JanazahStepCard(step: JanazahTakbirStep, appLanguage: AppLanguage) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = SaatColors.DeepEmerald,
-                        modifier = Modifier.size(34.dp)
+                    Box(
+                        modifier = Modifier.size(36.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = "${step.takbirNumber}",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
+                        Icon(
+                            painter = painterResource(app.kamy.saatApp.R.drawable.frame_number_icon),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Text(
+                            text = "${step.takbirNumber}",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = SaatColors.Slate900
+                        )
                     }
                     Text(
                         text = "Takbir ${step.takbirNumber}",

@@ -1134,6 +1134,7 @@
       "isQuran": true,
       "surahOrNarrator": "QS. Al-Baqarah (2): 196",
       "arabic": "وَأَتِمُّوا الْحَجَّ وَالْعُمْرَةَ لِلَّهِ ۚ فَإِنْ أُحْصِرْتُمْ فَمَا اسْتَيْسَرَ مِنَ الْهَدْيِ ۖ وَلَا تَحْلِقُوا رُءُوسَكُمْ حَتَّىٰ يَبْلُغَ الْهَدْيُ مَحِلَّهُ",
+      "latin": "Wa atimmul-ḥajja wal-'umrata lillāh, fa-in uḥṣirtum famastaisara minal-hady, wa lā taḥliqū ru'ūsakum ḥattā yablugal-hadyu maḥillah...",
       "translation": {
         "id": "Dan sempurnakanlah ibadah haji dan umrah karena Allah. Tetapi jika kamu terkepung (terhalang oleh musuh atau sakit), maka (sembelihlah) hadyu yang mudah didapat, dan jangan kamu mencukur kepalamu, sebelum hadyu sampai di tempat penyembelihannya...",
         "en": "And complete the Hajj and 'Umrah for Allah. But if you are prevented, then [offer] what can be obtained with ease of sacrificial animals. And do not shave your heads until the sacrificial animal has reached its place of slaughter...",
@@ -1172,6 +1173,7 @@
       "isQuran": true,
       "surahOrNarrator": "QS. Ali 'Imran (3): 97",
       "arabic": "فِيهِ آيَاتٌ بَيِّنَاتٌ مَّقَامُ إِبْرَاهِيمَ ۖ وَمَن دَخَلَهُ كَانَ آمِنًا ۗ وَلِلَّهِ عَلَى النَّاسِ حِجُّ الْبَيْتِ مَنِ اسْتَطَاعَ إِلَيْهِ سَبِيلًا ۚ وَمَن كَفَرَ فَإِنَّ اللَّهَ غَنِيٌّ عَنِ الْعَالَمِينَ",
+      "latin": "Fīhi āyātum bayyinātum maqāmu Ibrāhīm, wa man dakhalahū kāna āminā, wa lillāhi 'alan-nāsi ḥijjul-baiti manistaṭā'a ilaihi sabīlā, wa man kafara fa-innallāha ganiyyun 'anil-'ālamīn.",
       "translation": {
         "id": "Di sana terdapat tanda-tanda yang jelas, (di antaranya) Maqam Ibrahim. Barangsiapa memasukinya (Baitullah) amanlah dia. Dan (di antara) kewajiban manusia terhadap Allah adalah melaksanakan ibadah haji ke Baitullah, yaitu bagi orang-orang yang mampu mengadakan perjalanan ke sana. Barangsiapa mengingkari (kewajiban haji), maka sesungguhnya Allah Maha Kaya (tidak memerlukan sesuatu) dari seluruh alam.",
         "en": "In it are clear signs [such as] the standing place of Abraham. And whoever enters it shall be safe. And [due] to Allah from the people is a pilgrimage to the House - for whoever is able to find thereto a way. But whoever disbelieves - then indeed, Allah is free from need of the worlds.",
@@ -1205,6 +1207,7 @@
       "isQuran": true,
       "surahOrNarrator": "QS. Al-Hajj (22): 27–28",
       "arabic": "وَأَذِّن فِي النَّاسِ بِالْحَجِّ يَأْتُوكَ رِجَالًا وَعَلَىٰ كُلِّ ضَامِرٍ يَأْتِينَ مِن كُلِّ فَجٍّ عَمِيقٍ * لِّيَشْهَدُوا مَنَافِعَ لَهُمْ وَيَذْكُرُوا اسْمَ اللَّهِ فِي أَيَّامٍ مَّعْلُومَاتٍ",
+      "latin": "Wa azzin fin-nāsi bil-ḥajji ya'tūka rijālaw-wa 'alā kulli ḍāmiriy-ya'tīna min kulli fajjin 'amīq, liyash-hadū manāfi'a lahum wa yazkurusmallāhi fī ayyāmim-ma'lūmāt...",
       "translation": {
         "id": "Dan berserulah kepada manusia untuk mengerjakan haji, niscaya mereka akan datang kepadamu dengan berjalan kaki, dan mengendarai unta yang kurus yang datang dari segenap penjuru yang jauh. Agar mereka menyaksikan berbagai manfaat untuk mereka dan agar mereka menyebut nama Allah pada beberapa hari yang telah ditentukan...",
         "en": "And proclaim to the people the Hajj [pilgrimage]; they will come to you on foot and on every lean camel; they will come from every distant pass - That they may witness benefits for themselves and mention the name of Allah on known days...",
@@ -1236,8 +1239,9 @@
         "ms": "Hadis Sahih"
       },
       "isQuran": false,
-      "surahOrNarrator": "Shahih Muslim no. 1218 (Diriwayatkan dari Jabir bin Abdillah RA)",
+      "surahOrNarrator": "Shahih Muslim no. 1218",
       "arabic": "خُذُوا عَنِّي مَنَاسِكَكُمْ، فَإِنِّي لَا أَدْرِي لَعَلِّي لَا أَحُجُّ بَعْدَ حَجَّتِي هَذِهِ",
+      "latin": "Khuzū 'annī manāsikakum, fa-innī lā adrī la'allī lā aḥujju ba'da ḥajjatī hāẕih.",
       "translation": {
         "id": "Rasulullah SAW bersabda: 'Ambillah dariku tata cara manasik (haji dan umrah) kalian, karena sesungguhnya aku tidak tahu barangkali aku tidak dapat berhaji lagi setelah hajiku ini.'",
         "en": "The Messenger of Allah (ﷺ) said: 'Take from me your pilgrimage rituals, for I do not know whether I will perform Hajj after this Hajj of mine.'",
@@ -1269,8 +1273,9 @@
         "ms": "Hadis Sahih"
       },
       "isQuran": false,
-      "surahOrNarrator": "Shahih Bukhari no. 1773 & Shahih Muslim no. 1349 (Abu Hurairah RA)",
+      "surahOrNarrator": "Shahih Bukhari no. 1773 & Shahih Muslim no. 1349",
       "arabic": "الْعُمْرَةُ إِلَى الْعُمْرَةِ كَفَّارَةٌ لِمَا بَيْنَهُمَا، وَالْحَجُّ الْمَبْرُورُ لَيْسَ لَهُ جَزَاءٌ إِلَّا الْجَنَّةُ",
+      "latin": "Al-'umratu ilal-'umrati kaffāratul-limā bainahumā, wal-ḥajjul-mabrūru laisa lahū jazā'un illal-jannah.",
       "translation": {
         "id": "Dari satu umrah ke umrah berikutnya adalah penghapus dosa di antara keduanya, dan haji yang mabrur tidak ada balasan baginya selain Surga.",
         "en": "An 'Umrah to the next 'Umrah is an expiation for whatever sins occur between them, and an accepted Hajj (Mabrur) brings no reward less than Paradise.",

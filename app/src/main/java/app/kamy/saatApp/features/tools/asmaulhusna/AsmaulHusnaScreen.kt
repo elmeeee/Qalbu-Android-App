@@ -56,6 +56,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -435,19 +437,24 @@ private fun AsmaulHusnaCardItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = SaatColors.DeepEmerald.copy(alpha = 0.1f),
-                    modifier = Modifier.size(28.dp)
+                Box(
+                    modifier = Modifier.size(32.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "${item.number}",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(app.kamy.saatApp.R.drawable.frame_number_icon),
+                        contentDescription = null,
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    Text(
+                        text = "${item.number}",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = if (item.number >= 100) 10.sp else 11.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = SaatColors.Slate900
+                    )
                 }
 
                 IconButton(

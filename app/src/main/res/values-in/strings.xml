@@ -641,9 +641,9 @@
     <string name="hajj_share_doa">Bagikan Doa</string>
     <string name="hajj_copied_toast">Teks doa berhasil disalin!</string>
 
-    <string name="hajj_mandatory_badge">WAJIB</string>
-    <string name="hajj_rukun_badge">RUKUN WAJIB</string>
-    <string name="hajj_wajib_badge">WAJIB HAJI</string>
+    <string name="hajj_mandatory_badge">Wajib</string>
+    <string name="hajj_rukun_badge">Rukun</string>
+    <string name="hajj_wajib_badge">Wajib</string>
     <string name="hajj_expand_details">Buka detail</string>
 
     <string name="hajj_detailed_steps_header">Urutan Pelaksanaan:</string>
