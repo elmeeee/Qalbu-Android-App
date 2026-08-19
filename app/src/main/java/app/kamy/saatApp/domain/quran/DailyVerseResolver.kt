@@ -64,6 +64,79 @@ object DailyVerseResolver {
         )
     )
 
+    // 1. Muharram (Hijrah, Taubat, Empat Bulan Haram)
+    private val muharramRotation = listOf(
+        "9:36", "2:218", "9:100", "5:54", "10:90",
+        "2:156", "3:135", "9:40", "39:53", "59:18"
+    )
+
+    // 2. Safar (Tawakkal, Keselamatan, & Keteguhan)
+    private val safarRotation = listOf(
+        "65:3", "9:51", "3:160", "11:56", "14:7",
+        "16:128", "26:78", "2:256", "67:15", "39:38"
+    )
+
+    // 3. Rabi'ul Awwal (Maulid Nabi & Sholawat)
+    private val rabiulAwalRotation = listOf(
+        "33:56", "33:21", "9:128", "68:4", "3:144",
+        "48:29", "3:31", "21:107", "48:1", "94:1"
+    )
+
+    // 4. Rabi'ul Akhir (Tadabbur, Ilmu, & Keagungan Qur'an)
+    private val rabiulAkhirRotation = listOf(
+        "3:190", "3:191", "20:114", "35:28", "59:21",
+        "17:82", "39:9", "58:11", "96:1", "67:2"
+    )
+
+    // 5. Jumada al-Ula (Keluarga, Ukhuwah, & Bakti Orang Tua)
+    private val jumadilAwalRotation = listOf(
+        "30:21", "17:23", "49:10", "31:14", "4:36",
+        "66:6", "25:74", "17:24", "46:15", "49:13"
+    )
+
+    // 6. Jumada al-Akhirah (Syukur Nikmat & Istiqamah)
+    private val jumadilAkhirRotation = listOf(
+        "14:7", "16:97", "2:152", "41:30", "65:2",
+        "65:3", "55:60", "28:77", "93:11", "2:261"
+    )
+
+    // 7. Rajab (Persiapan Ibadah & Isra' Mi'raj)
+    private val rajabRotation = listOf(
+        "17:1", "9:36", "17:78", "17:79", "39:53",
+        "3:133", "11:114", "50:16", "23:118", "73:8"
+    )
+
+    // 8. Sya'ban (Penyerahan Amal & Nisfu Sya'ban)
+    private val syabanRotation = listOf(
+        "44:3", "33:56", "2:144", "35:10", "14:41",
+        "3:135", "59:18", "25:63", "53:39", "89:27"
+    )
+
+    // 9. Ramadan (Puasa, Nuzulul Qur'an, & Lailatul Qadr)
+    private val ramadanRotation = listOf(
+        "2:183", "2:185", "2:186", "2:201", "3:133",
+        "25:74", "3:191", "59:21", "97:1", "97:3",
+        "2:184", "48:4"
+    )
+
+    // 10. Syawal (Fitrah, Idul Fitri, & Kemenangan)
+    private val syawalRotation = listOf(
+        "2:185", "87:14", "87:15", "5:3", "3:134",
+        "49:10", "16:97", "2:197", "55:60", "93:5"
+    )
+
+    // 11. Dhu al-Qi'dah (Bulan Haram, Ketenangan, & Persiapan Haji)
+    private val dzulqadahRotation = listOf(
+        "9:36", "2:197", "49:12", "13:28", "23:1",
+        "23:2", "50:18", "33:70", "41:33", "67:12"
+    )
+
+    // 12. Dhu al-Hijjah (10 Hari Pertama, Arafah, Qurban, & Tasyrik)
+    private val dzulhijjahRotation = listOf(
+        "89:1", "89:2", "22:28", "22:37", "2:198",
+        "5:3", "108:2", "2:203", "37:102", "22:34"
+    )
+
     /** Short, meaningful ayat — one anchor per surah for a full-year rotation. */
     private val curatedRotation = listOf(
         "1:5", "2:152", "2:186", "3:139", "3:173", "4:147", "5:6", "6:162", "7:180", "8:2",
@@ -82,7 +155,7 @@ object DailyVerseResolver {
 
     fun resolve(context: DailyVerseContext): DailyVersePick {
         matchEvent(context.eventTitle)?.let { return it }
-        matchHijriLabel(context.hijriLabel, context.isRamadanSeason)?.let { return it }
+        matchHijriLabel(context.hijriLabel, context.dayOfYear, context.isRamadanSeason)?.let { return it }
 
         // Day of week thematic picks
         when (context.dayOfWeek) {
@@ -131,23 +204,124 @@ object DailyVerseResolver {
         }?.pick
     }
 
-    private fun matchHijriLabel(label: String?, isRamadanSeason: Boolean): DailyVersePick? {
+    private fun extractHijriDay(label: String?): Int? {
+        if (label.isNullOrBlank()) return null
+        val regex = Regex("\\b([1-9]|[12][0-9]|30)\\b")
+        val match = regex.find(label) ?: return null
+        return match.value.toIntOrNull()
+    }
+
+    private fun matchHijriLabel(label: String?, dayOfYear: Int, isRamadanSeason: Boolean): DailyVersePick? {
         val text = label?.lowercase().orEmpty()
+        val dayNumber = extractHijriDay(label)
+
         if (text.isEmpty()) {
-            return if (isRamadanSeason) DailyVersePick("2:183", DailyVerseOccasion.Ramadan) else null
+            return if (isRamadanSeason) {
+                val pick = ramadanRotation[(dayOfYear - 1).coerceAtLeast(0) % ramadanRotation.size]
+                DailyVersePick(pick, DailyVerseOccasion.Ramadan)
+            } else null
         }
+
         return when {
-            text.contains("ramadan") || text.contains("ramadhan") ->
-                DailyVersePick("2:183", DailyVerseOccasion.Ramadan)
-            text.contains("syawal") || text.contains("shawwal") ->
-                DailyVersePick("2:185", DailyVerseOccasion.EidFitr)
-            text.contains("dzulhijjah") || text.contains("dhu al-hijjah") || text.contains("zulhijjah") ->
-                DailyVersePick("22:37", DailyVerseOccasion.EidAdha)
-            text.contains("muharram") ->
-                DailyVersePick("9:36", DailyVerseOccasion.Muharram)
-            text.contains("rabi") && (text.contains("awal") || text.contains("awwal")) ->
-                DailyVersePick("21:107", DailyVerseOccasion.Maulid)
-            else -> if (isRamadanSeason) DailyVersePick("2:183", DailyVerseOccasion.Ramadan) else null
+            // 1. Muharram
+            text.contains("muharram") || text.contains("muharam") -> {
+                when (dayNumber) {
+                    1 -> DailyVersePick("9:36", DailyVerseOccasion.Muharram)
+                    9, 10 -> DailyVersePick("5:54", DailyVerseOccasion.Ashura)
+                    else -> {
+                        val pick = muharramRotation[(dayOfYear - 1).coerceAtLeast(0) % muharramRotation.size]
+                        DailyVersePick(pick, DailyVerseOccasion.Muharram)
+                    }
+                }
+            }
+            // 2. Safar
+            text.contains("safar") || text.contains("saphar") -> {
+                val pick = safarRotation[(dayOfYear - 1).coerceAtLeast(0) % safarRotation.size]
+                DailyVersePick(pick, DailyVerseOccasion.Daily)
+            }
+            // 3. Rabiul Awal
+            text.contains("rabi") && (text.contains("awal") || text.contains("awwal")) -> {
+                if (dayNumber == 12) {
+                    DailyVersePick("21:107", DailyVerseOccasion.Maulid)
+                } else {
+                    val pick = rabiulAwalRotation[(dayOfYear - 1).coerceAtLeast(0) % rabiulAwalRotation.size]
+                    DailyVersePick(pick, DailyVerseOccasion.Maulid)
+                }
+            }
+            // 4. Rabiul Akhir
+            text.contains("rabi") && (text.contains("akhir") || text.contains("thani") || text.contains("tsani")) -> {
+                val pick = rabiulAkhirRotation[(dayOfYear - 1).coerceAtLeast(0) % rabiulAkhirRotation.size]
+                DailyVersePick(pick, DailyVerseOccasion.Daily)
+            }
+            // 5. Jumadil Awal
+            text.contains("jumad") && (text.contains("awal") || text.contains("ula") || text.contains("awwal")) -> {
+                val pick = jumadilAwalRotation[(dayOfYear - 1).coerceAtLeast(0) % jumadilAwalRotation.size]
+                DailyVersePick(pick, DailyVerseOccasion.Daily)
+            }
+            // 6. Jumadil Akhir
+            text.contains("jumad") && (text.contains("akhir") || text.contains("thani") || text.contains("tsani") || text.contains("akhirah")) -> {
+                val pick = jumadilAkhirRotation[(dayOfYear - 1).coerceAtLeast(0) % jumadilAkhirRotation.size]
+                DailyVersePick(pick, DailyVerseOccasion.Daily)
+            }
+            // 7. Rajab
+            text.contains("rajab") -> {
+                if (dayNumber == 27) {
+                    DailyVersePick("17:1", DailyVerseOccasion.IsraMiraj)
+                } else {
+                    val pick = rajabRotation[(dayOfYear - 1).coerceAtLeast(0) % rajabRotation.size]
+                    DailyVersePick(pick, DailyVerseOccasion.Daily)
+                }
+            }
+            // 8. Sya'ban
+            text.contains("sya") || text.contains("sha'b") || text.contains("shab") -> {
+                if (dayNumber == 15) {
+                    DailyVersePick("44:3", DailyVerseOccasion.Daily)
+                } else {
+                    val pick = syabanRotation[(dayOfYear - 1).coerceAtLeast(0) % syabanRotation.size]
+                    DailyVersePick(pick, DailyVerseOccasion.Daily)
+                }
+            }
+            // 9. Ramadan
+            text.contains("ramadan") || text.contains("ramadhan") || isRamadanSeason -> {
+                if (dayNumber == 17) {
+                    DailyVersePick("97:1", DailyVerseOccasion.LailatulQadr)
+                } else if (dayNumber in listOf(21, 23, 25, 27, 29)) {
+                    DailyVersePick("97:3", DailyVerseOccasion.LailatulQadr)
+                } else {
+                    val pick = ramadanRotation[(dayOfYear - 1).coerceAtLeast(0) % ramadanRotation.size]
+                    DailyVersePick(pick, DailyVerseOccasion.Ramadan)
+                }
+            }
+            // 10. Syawal
+            text.contains("syawal") || text.contains("shawwal") -> {
+                if (dayNumber == 1) {
+                    DailyVersePick("2:185", DailyVerseOccasion.EidFitr)
+                } else {
+                    val pick = syawalRotation[(dayOfYear - 1).coerceAtLeast(0) % syawalRotation.size]
+                    DailyVersePick(pick, DailyVerseOccasion.Daily)
+                }
+            }
+            // 11. Dzulqa'dah
+            text.contains("dzulqa") || text.contains("zulqa") || text.contains("qi'd") || text.contains("qida") -> {
+                val pick = dzulqadahRotation[(dayOfYear - 1).coerceAtLeast(0) % dzulqadahRotation.size]
+                DailyVersePick(pick, DailyVerseOccasion.Daily)
+            }
+            // 12. Dzulhijjah
+            text.contains("dzulhijjah") || text.contains("zulhijjah") || text.contains("hijjah") || text.contains("hajj") -> {
+                when (dayNumber) {
+                    9 -> DailyVersePick("2:198", DailyVerseOccasion.Hajj)
+                    10 -> DailyVersePick("22:37", DailyVerseOccasion.EidAdha)
+                    11, 12, 13 -> DailyVersePick("2:203", DailyVerseOccasion.Tasyrik)
+                    else -> {
+                        val pick = dzulhijjahRotation[(dayOfYear - 1).coerceAtLeast(0) % dzulhijjahRotation.size]
+                        DailyVersePick(pick, DailyVerseOccasion.Hajj)
+                    }
+                }
+            }
+            else -> if (isRamadanSeason) {
+                val pick = ramadanRotation[(dayOfYear - 1).coerceAtLeast(0) % ramadanRotation.size]
+                DailyVersePick(pick, DailyVerseOccasion.Ramadan)
+            } else null
         }
     }
 
