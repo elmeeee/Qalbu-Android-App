@@ -226,6 +226,9 @@
     <string name="pause">Pause</string>
     <string name="audio">Audio</string>
     <string name="tafsir">Tafsir</string>
+    <string name="tafsir_wajiz">Tafsir Wajiz</string>
+    <string name="tafsir_tahlili">Tafsir Tahlili</string>
+    <string name="tafsir_jalalayn">Tafsir Jalalayn</string>
     <string name="hadith">Hadith</string>
     <string name="no_verse_retry">No verse available. Pull to retry.</string>
     <string name="tafsir_load_error">Couldn\'t load tafsir</string>

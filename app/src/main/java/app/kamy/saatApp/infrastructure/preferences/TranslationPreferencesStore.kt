@@ -41,9 +41,14 @@ class TranslationPreferencesStore @Inject constructor(
     private val _fontScale = MutableStateFlow(loadFontScale())
     val fontScale: StateFlow<Float> = _fontScale.asStateFlow()
 
+    private val _tafsirSource = MutableStateFlow(loadTafsirSource())
+    val tafsirSource: StateFlow<String> = _tafsirSource.asStateFlow()
+
     fun currentTranslationId(): Int = _translationId.value
 
     fun currentRecitationId(): Int = _recitationId.value
+
+    fun currentTafsirSource(): String = _tafsirSource.value
 
     fun setTranslation(id: Int, displayName: String) {
         prefs.edit()
@@ -86,6 +91,11 @@ class TranslationPreferencesStore @Inject constructor(
         _fontScale.value = clamped
     }
 
+    fun setTafsirSource(sourceId: String) {
+        prefs.edit().putString(KEY_TAFSIR_SOURCE, sourceId).apply()
+        _tafsirSource.value = sourceId
+    }
+
     private fun loadFontScale(): Float {
         return prefs.getFloat(KEY_FONT_SCALE, 1.0f).coerceIn(0.85f, 2.0f)
     }
@@ -124,6 +134,16 @@ class TranslationPreferencesStore @Inject constructor(
         return runCatching { ArabicTextType.valueOf(saved!!) }.getOrDefault(ArabicTextType.INDOPAK)
     }
 
+    private fun loadTafsirSource(): String {
+        val saved = prefs.getString(KEY_TAFSIR_SOURCE, null)
+        return when (saved) {
+            LocalQuranConfig.TAFSIR_WAJIZ_ID,
+            LocalQuranConfig.TAFSIR_TAHLILI_ID,
+            LocalQuranConfig.TAFSIR_JALALAYN_ID -> saved
+            else -> LocalQuranConfig.TAFSIR_WAJIZ_ID
+        }
+    }
+
     companion object {
         const val DEFAULT_RECITATION_ID = LocalQuranConfig.DEFAULT_RECITATION_ID
         private const val PREFS_NAME = "saat_reader_prefs"
@@ -135,5 +155,6 @@ class TranslationPreferencesStore @Inject constructor(
         private const val KEY_ARABIC_TEXT_TYPE = "chapterReaderArabicTextType"
         private const val KEY_TAJWEED_ENABLED = "chapterReaderTajweedEnabled"
         private const val KEY_FONT_SCALE = "chapterReaderFontScale"
+        private const val KEY_TAFSIR_SOURCE = "chapterReaderTafsirSource"
     }
 }

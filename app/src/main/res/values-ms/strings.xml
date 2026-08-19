@@ -249,6 +249,9 @@
     <string name="pause">Jeda</string>
     <string name="audio">Audio</string>
     <string name="tafsir">Tafsir</string>
+    <string name="tafsir_wajiz">Tafsir Wajiz</string>
+    <string name="tafsir_tahlili">Tafsir Tahlili</string>
+    <string name="tafsir_jalalayn">Tafsir Jalalayn</string>
     <string name="hadith">Hadis</string>
     <string name="no_verse_retry">Ayat tidak tersedia. Tarik untuk cuba lagi.</string>
     <string name="tafsir_load_error">Gagal memuatkan tafsir</string>

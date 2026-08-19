@@ -140,30 +140,11 @@ class ContentRepository @Inject constructor(
     suspend fun getTranslations(): List<QFTranslation> =
         LocalQuranConfig.translations
 
-    suspend fun getTafsirByAyah(ayahKey: String): TafsirPayload? {
-        val translationId = selectedTranslationId()
-        if (NetworkMonitor.isOnline(context)) {
-            val onlineTafsirId = when (translationId) {
-                LocalQuranConfig.TRANSLATION_ENGLISH -> "169" // English Tafsir Ibn Kathir
-                LocalQuranConfig.TRANSLATION_MALAY -> "30" // Malay
-                LocalQuranConfig.TRANSLATION_INDONESIAN -> "156" // Kemenag
-                else -> "169"
-            }
-            runCatching {
-                apiService.get().getTafsirByAyah(onlineTafsirId, ayahKey).tafsir
-            }.getOrNull()?.let { return it }
-        }
-
-        return when (translationId) {
-            LocalQuranConfig.TRANSLATION_INDONESIAN -> {
-                local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
-                    ?: local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)
-            }
-            else -> {
-                local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_JALALAYN_ID)
-                    ?: local.getTafsirByAyah(ayahKey, LocalQuranConfig.TAFSIR_RESOURCE_ID)
-            }
-        }
+    suspend fun getTafsirByAyah(
+        ayahKey: String,
+        sourceId: String = LocalQuranConfig.TAFSIR_WAJIZ_ID
+    ): TafsirPayload? {
+        return local.getTafsirByAyah(ayahKey, sourceId)
     }
 
     suspend fun getJalalaynByAyah(ayahKey: String): TafsirPayload? {

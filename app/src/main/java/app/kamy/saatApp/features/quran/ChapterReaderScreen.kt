@@ -685,9 +685,11 @@ fun ChapterReaderScreen(
         isLoading = state.tafsirLoading,
         tafsir = state.tafsir,
         verseReference = activeVerseReference,
+        selectedSource = state.selectedTafsirSource,
         error = state.tafsirError,
         onDismiss = { vm.dismissTafsir() },
-        onReload = { vm.reloadTafsir() }
+        onReload = { vm.reloadTafsir() },
+        onSelectSource = { vm.selectTafsirSource(it) }
     )
 
     HadithSheet(

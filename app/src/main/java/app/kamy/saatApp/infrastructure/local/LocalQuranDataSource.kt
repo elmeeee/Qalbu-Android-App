@@ -40,8 +40,13 @@ class LocalQuranDataSource @Inject constructor(
         """
     }
 
+    private data class LocalTafsirEntry(
+        val wajiz: String,
+        val tahlili: String
+    )
+
     @Volatile
-    private var tafsirByIndex: List<String>? = null
+    private var tafsirEntriesCache: List<LocalTafsirEntry>? = null
 
     suspend fun getChapters(language: AppLanguage = AppLanguage.INDONESIAN): List<QuranChapter> =
         withContext(Dispatchers.IO) {
@@ -336,7 +341,7 @@ class LocalQuranDataSource @Inject constructor(
         )
     }
 
-    suspend fun getTafsirByAyah(ayahKey: String, resourceId: String = LocalQuranConfig.TAFSIR_RESOURCE_ID): TafsirPayload? =
+    suspend fun getTafsirByAyah(ayahKey: String, resourceId: String = LocalQuranConfig.TAFSIR_WAJIZ_ID): TafsirPayload? =
         withContext(Dispatchers.IO) {
         val parts = ayahKey.split(":")
         if (parts.size != 2) return@withContext null
@@ -359,12 +364,18 @@ class LocalQuranDataSource @Inject constructor(
             "SELECT \"index\" FROM ayas WHERE sura = ? AND aya = ?",
             arrayOf(sura.toString(), aya.toString())
         ) ?: return@withContext null
-        val text = tafsirTexts().getOrNull(index - 1)?.takeIf { it.isNotBlank() }
-            ?: return@withContext null
+
+        val entry = tafsirEntries().getOrNull(index - 1) ?: return@withContext null
+        val (text, name) = when (resourceId) {
+            LocalQuranConfig.TAFSIR_TAHLILI_ID -> entry.tahlili to "Tafsir Tahlili (Kemenag RI)"
+            else -> entry.wajiz to "Tafsir Wajiz (Kemenag RI)"
+        }
+
+        val cleanText = text.trim().takeIf { it.isNotBlank() } ?: return@withContext null
         TafsirPayload(
-            text = text,
+            text = cleanText,
             resourceId = 0,
-            resourceName = "Tafsir Indonesia (lokal)"
+            resourceName = name
         )
     }
 
@@ -457,26 +468,35 @@ class LocalQuranDataSource @Inject constructor(
         }
     }
 
-    private fun tafsirTexts(): List<String> {
-        tafsirByIndex?.let { return it }
+    private fun tafsirEntries(): List<LocalTafsirEntry> {
+        tafsirEntriesCache?.let { return it }
         val assetNames = context.assets.list("quran").orEmpty().toSet()
         val loaded = when {
-            "tafsir.json" in assetNames -> readTafsirJson(context.assets.open("quran/tafsir.json"))
+            "tafsir.json" in assetNames -> readTafsirEntriesJson(context.assets.open("quran/tafsir.json"))
             "tafsir.json.gz" in assetNames -> context.assets.open("quran/tafsir.json.gz").use { input ->
-                GZIPInputStream(input).use { gzip -> readTafsirJson(gzip) }
+                GZIPInputStream(input).use { gzip -> readTafsirEntriesJson(gzip) }
             }
             else -> emptyList()
         }
-        tafsirByIndex = loaded
+        tafsirEntriesCache = loaded
         return loaded
     }
 
-    private fun readTafsirJson(input: java.io.InputStream): List<String> {
+    private fun readTafsirEntriesJson(input: java.io.InputStream): List<LocalTafsirEntry> {
         val text = input.bufferedReader().readText()
+        if (text.isBlank()) return emptyList()
         val array = org.json.JSONArray(text)
         return buildList {
             for (i in 0 until array.length()) {
-                add(array.optString(i, ""))
+                val obj = array.optJSONObject(i)
+                if (obj != null) {
+                    val wajiz = obj.optString("tafsir_wajiz", obj.optString("wajiz", ""))
+                    val tahlili = obj.optString("tafsir_tahlili", obj.optString("tahlili", ""))
+                    add(LocalTafsirEntry(wajiz = wajiz, tahlili = tahlili))
+                } else {
+                    val str = array.optString(i, "")
+                    add(LocalTafsirEntry(wajiz = str, tahlili = str))
+                }
             }
         }
     }

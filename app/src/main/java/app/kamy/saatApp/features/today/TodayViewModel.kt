@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import android.content.Context
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.config.AppConfig
+import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.error.AppErrorKind
 import app.kamy.saatApp.core.error.isAuthenticationFailure
@@ -46,6 +47,7 @@ data class TodayUiState(
     val translationId: Int = AppConfig.defaultTranslationId,
     val error: AppError? = null,
     val tafsirLoading: Boolean = false,
+    val selectedTafsirSource: String = LocalQuranConfig.TAFSIR_WAJIZ_ID,
     val tafsir: TafsirPayload? = null,
     val tafsirError: AppError? = null,
     val showTafsir: Boolean = false,
@@ -80,6 +82,7 @@ class TodayViewModel @Inject constructor(
             it.copy(
                 translationId = translationStore.currentTranslationId(),
                 selectedRecitationId = translationStore.currentRecitationId(),
+                selectedTafsirSource = translationStore.currentTafsirSource(),
                 showTranslation = translationStore.showTranslation.value,
                 showTransliteration = translationStore.showTransliteration.value
             )
@@ -213,9 +216,18 @@ class TodayViewModel @Inject constructor(
         viewModelScope.launch { loadTafsir(verseKey) }
     }
 
+    fun selectTafsirSource(sourceId: String) {
+        translationStore.setTafsirSource(sourceId)
+        _state.update { it.copy(selectedTafsirSource = sourceId, tafsirLoading = true, tafsirError = null) }
+        val verseKey = _state.value.verse?.verseKey ?: return
+        viewModelScope.launch { loadTafsir(verseKey) }
+    }
+
     private suspend fun loadTafsir(verseKey: String) {
+        val sourceId = translationStore.currentTafsirSource()
+        _state.update { it.copy(selectedTafsirSource = sourceId) }
         try {
-            val tafsir = contentRepository.getTafsirByAyah(ayahKey = verseKey)
+            val tafsir = contentRepository.getTafsirByAyah(ayahKey = verseKey, sourceId = sourceId)
             _state.update { it.copy(tafsir = tafsir, tafsirLoading = false, tafsirError = null) }
         } catch (t: Throwable) {
             _state.update {

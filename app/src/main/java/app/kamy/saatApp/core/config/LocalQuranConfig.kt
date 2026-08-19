@@ -28,8 +28,10 @@ object LocalQuranConfig {
 
     const val DEFAULT_RECITATION_ID = RECITATION_ALAFASY
 
-    const val TAFSIR_RESOURCE_ID = "local"
+    const val TAFSIR_WAJIZ_ID = "wajiz"
+    const val TAFSIR_TAHLILI_ID = "tahlili"
     const val TAFSIR_JALALAYN_ID = "jalalayn"
+    const val TAFSIR_RESOURCE_ID = TAFSIR_WAJIZ_ID
 
     const val MUROTTAL_CDN = "https://cdn.islamic.network/quran/audio/128"
 

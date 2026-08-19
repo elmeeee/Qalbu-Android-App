@@ -65,6 +65,7 @@ data class ChapterReaderUiState(
     val error: AppError? = null,
     val tafsirVisible: Boolean = false,
     val tafsirLoading: Boolean = false,
+    val selectedTafsirSource: String = LocalQuranConfig.TAFSIR_WAJIZ_ID,
     val tafsir: TafsirPayload? = null,
     val tafsirError: AppError? = null,
     val hadithVisible: Boolean = false,
@@ -153,6 +154,7 @@ class ChapterReaderViewModel @Inject constructor(
                 selectedTranslationId = LocalQuranConfig.normalizeTranslationId(
                     translationStore.currentTranslationId()
                 ),
+                selectedTafsirSource = translationStore.currentTafsirSource(),
                 hifzModeEnabled = QuranPersonalStore.isHifzModeEnabled(appContext),
                 fontScale = translationStore.fontScale.value
             )
@@ -644,9 +646,24 @@ class ChapterReaderViewModel @Inject constructor(
         viewModelScope.launch { loadTafsir(key) }
     }
 
+    fun selectTafsirSource(sourceId: String) {
+        translationStore.setTafsirSource(sourceId)
+        _state.update {
+            it.copy(
+                selectedTafsirSource = sourceId,
+                tafsirLoading = true,
+                tafsirError = null
+            )
+        }
+        val key = _state.value.activeAyahKey ?: return
+        viewModelScope.launch { loadTafsir(key) }
+    }
+
     private suspend fun loadTafsir(ayahKey: String) {
+        val sourceId = translationStore.currentTafsirSource()
+        _state.update { it.copy(selectedTafsirSource = sourceId) }
         try {
-            val t = contentRepository.getTafsirByAyah(ayahKey)
+            val t = contentRepository.getTafsirByAyah(ayahKey, sourceId)
             _state.update { it.copy(tafsir = t, tafsirLoading = false, tafsirError = null) }
         } catch (e: Throwable) {
             _state.update {

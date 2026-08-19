@@ -641,9 +641,11 @@ fun TodayScreen(
         isLoading = todayState.tafsirLoading,
         tafsir = todayState.tafsir,
         verseReference = todayState.verseReferenceLabel.orEmpty(),
+        selectedSource = todayState.selectedTafsirSource,
         error = todayState.tafsirError,
         onDismiss = { todayVm.dismissTafsir() },
-        onReload = { todayVm.reloadTafsir() }
+        onReload = { todayVm.reloadTafsir() },
+        onSelectSource = todayVm::selectTafsirSource
     )
 
     AiShareSheet(

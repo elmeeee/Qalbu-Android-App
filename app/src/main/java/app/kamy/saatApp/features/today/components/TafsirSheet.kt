@@ -1,22 +1,25 @@
 package app.kamy.saatApp.features.today.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import app.kamy.saatApp.R
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import app.kamy.saatApp.R
+import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.TafsirPayload
@@ -39,9 +42,11 @@ fun TafsirSheet(
     isLoading: Boolean,
     tafsir: TafsirPayload?,
     verseReference: String,
+    selectedSource: String = LocalQuranConfig.TAFSIR_WAJIZ_ID,
     error: AppError? = null,
     onDismiss: () -> Unit,
-    onReload: () -> Unit = {}
+    onReload: () -> Unit = {},
+    onSelectSource: (String) -> Unit = {}
 ) {
     if (!isVisible) return
     val commentaryLabel = stringResource(R.string.commentary)
@@ -69,6 +74,39 @@ fun TafsirSheet(
                     else -> commentaryLabel
                 }
             )
+
+            // Source Selector Filter Chips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val sources = listOf(
+                    LocalQuranConfig.TAFSIR_WAJIZ_ID to stringResource(R.string.tafsir_wajiz),
+                    LocalQuranConfig.TAFSIR_TAHLILI_ID to stringResource(R.string.tafsir_tahlili),
+                    LocalQuranConfig.TAFSIR_JALALAYN_ID to stringResource(R.string.tafsir_jalalayn)
+                )
+                sources.forEach { (sourceId, label) ->
+                    val isSelected = selectedSource == sourceId
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { onSelectSource(sourceId) },
+                        label = {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = SaatColors.DeepEmerald,
+                            selectedLabelColor = SaatColors.PureWhite
+                        )
+                    )
+                }
+            }
+
             ReaderSheetDivider()
 
             when {
