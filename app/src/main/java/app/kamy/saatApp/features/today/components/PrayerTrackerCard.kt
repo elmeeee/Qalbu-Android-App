@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.ui.layout.layout
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -344,10 +345,11 @@ fun PrayerTrackerCard(
 
                         Spacer(Modifier.height(6.dp))
 
-                        // Horizontal Scroll LazyRow (Does not wrap vertically!)
+                        // Horizontal Scroll LazyRow
                         LazyRow(
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            contentPadding = PaddingValues(horizontal = 2.dp)
+                            contentPadding = PaddingValues(horizontal = 0.dp)
                         ) {
                             items(state.optionalHabits, key = { it.habit.name }) { item ->
                                 HorizontalOptionalHabitChip(

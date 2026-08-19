@@ -292,6 +292,8 @@
     <string name="encyclopedia_empty_title">Topik tidak ditemukan</string>
     <string name="encyclopedia_empty_desc">Coba cari dengan kata kunci nabi, sahabat, atau istilah lain.</string>
     <string name="encyclopedia_ask_ai">Tanyakan ke AI Assistant</string>
+    <string name="encyclopedia_quran_references">Dalil &amp; Referensi Al-Qur\'an</string>
+    <string name="encyclopedia_surah_label">Surah %1$s (%2$d) : %3$s</string>
     <string name="hadith_load_error">Gagal memuat hadits</string>
     <string name="hadith_empty">Belum ada hadits di sini</string>
     <string name="ai_share_placeholder">Refleksi Anda akan muncul di sini…</string>

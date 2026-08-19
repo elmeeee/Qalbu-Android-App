@@ -18,10 +18,10 @@ class EncyclopediaRepository @Inject constructor(
         language: AppLanguage = AppLanguage.INDONESIAN
     ): List<EncyclopediaTopic> {
         val all = localDataSource.getTopics()
-        val filteredCategory = if (category == EncyclopediaCategory.ALL || category == EncyclopediaCategory.GLOSSARY) {
-            all
-        } else {
-            all.filter { it.categoryId.equals(category.id, ignoreCase = true) }
+        val filteredCategory = when (category) {
+            EncyclopediaCategory.ALL -> all
+            EncyclopediaCategory.GLOSSARY -> emptyList()
+            else -> all.filter { it.categoryId.equals(category.id, ignoreCase = true) }
         }
 
         if (query.isBlank()) return filteredCategory

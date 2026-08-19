@@ -35,7 +35,19 @@ import app.kamy.saatApp.domain.model.EncyclopediaTopic
 import app.kamy.saatApp.domain.model.GlossaryTerm
 import app.kamy.saatApp.design.theme.SaatColors
 
-@OptIn(ExperimentalMaterial3Api::class)
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun EncyclopediaScreen(
     onBack: () -> Unit,
@@ -43,6 +55,17 @@ fun EncyclopediaScreen(
     viewModel: EncyclopediaViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val focusManager = LocalFocusManager.current
+
+    val isImeVisible = WindowInsets.isImeVisible
+    var wasImeVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isImeVisible) {
+        if (wasImeVisible && !isImeVisible) {
+            focusManager.clearFocus()
+        }
+        wasImeVisible = isImeVisible
+    }
 
     Scaffold(
         topBar = {
@@ -56,7 +79,10 @@ fun EncyclopediaScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = {
+                        focusManager.clearFocus()
+                        onBack()
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
@@ -75,18 +101,30 @@ fun EncyclopediaScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
         ) {
             // Search Bar
             SearchBar(
                 query = state.searchQuery,
                 onQueryChange = viewModel::onSearchQueryChanged,
-                onClear = { viewModel.onSearchQueryChanged("") }
+                onClear = {
+                    viewModel.onSearchQueryChanged("")
+                    focusManager.clearFocus()
+                },
+                focusManager = focusManager
             )
 
             // Category Chips Row
             CategoryChipsRow(
                 selectedCategory = state.selectedCategory,
-                onSelectCategory = viewModel::selectCategory
+                onSelectCategory = { category ->
+                    focusManager.clearFocus()
+                    viewModel.selectCategory(category)
+                }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -103,7 +141,13 @@ fun EncyclopediaScreen(
                 EmptyStateView()
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTapGestures(onTap = {
+                                focusManager.clearFocus()
+                            })
+                        },
                     contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
                     // Articles Section
@@ -121,7 +165,10 @@ fun EncyclopediaScreen(
                             TopicCardItem(
                                 topic = topic,
                                 state = state,
-                                onClick = { onOpenTopic(topic.id) }
+                                onClick = {
+                                    focusManager.clearFocus()
+                                    onOpenTopic(topic.id)
+                                }
                             )
                         }
                     }
@@ -152,7 +199,8 @@ fun EncyclopediaScreen(
 private fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    onClear: () -> Unit
+    onClear: () -> Unit,
+    focusManager: FocusManager
 ) {
     Surface(
         modifier = Modifier
@@ -186,6 +234,8 @@ private fun SearchBar(
                 },
                 modifier = Modifier.weight(1f),
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,

@@ -245,6 +245,8 @@
     <string name="encyclopedia_empty_title">No topics found</string>
     <string name="encyclopedia_empty_desc">Try searching for another prophet, companion, or keyword.</string>
     <string name="encyclopedia_ask_ai">Ask AI Assistant</string>
+    <string name="encyclopedia_quran_references">Qur\'an Proofs &amp; References</string>
+    <string name="encyclopedia_surah_label">Surah %1$s (%2$d) : %3$s</string>
     <string name="hadith_load_error">Couldn\'t load hadith</string>
     <string name="hadith_empty">No hadith here</string>
     <string name="ai_share_placeholder">Your reflection will appear here…</string>

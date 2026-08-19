@@ -23,14 +23,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 
+import androidx.compose.ui.platform.LocalContext
+import app.kamy.saatApp.features.today.TanyaSaatViewModel
+import app.kamy.saatApp.ui.components.TanyaSaatFullScreen
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncyclopediaDetailScreen(
     onBack: () -> Unit,
-    onAskAi: (title: String, summary: String) -> Unit,
-    viewModel: EncyclopediaDetailViewModel = hiltViewModel()
+    onOpenVerse: (surahNumber: Int, ayahNumber: Int) -> Unit = { _, _ -> },
+    viewModel: EncyclopediaDetailViewModel = hiltViewModel(),
+    tanyaSaatVm: TanyaSaatViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val tanyaSaatState by tanyaSaatVm.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     val topic = state.topic
     val title = topic?.localizedTitle(state.currentLanguage).orEmpty()
@@ -38,72 +45,33 @@ fun EncyclopediaDetailScreen(
     val summary = topic?.localizedSummary(state.currentLanguage).orEmpty()
     val content = topic?.localizedContent(state.currentLanguage).orEmpty()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = title,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = SaatColors.DeepEmerald,
-                        maxLines = 1
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = SaatColors.DeepEmerald
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = title,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = SaatColors.DeepEmerald,
+                            maxLines = 1
                         )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-            )
-        },
-        bottomBar = {
-            if (topic != null) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shadowElevation = 8.dp,
-                    color = Color.White
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Button(
-                            onClick = { onAskAi(title, summary) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
-                            shape = RoundedCornerShape(24.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = SaatColors.DeepEmerald,
-                                contentColor = Color.White
-                            )
-                        ) {
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_dua),
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.encyclopedia_ask_ai),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back),
+                                tint = SaatColors.DeepEmerald
                             )
                         }
-                    }
-                }
-            }
-        },
-        containerColor = Color(0xFFF8FAF9)
-    ) { innerPadding ->
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                )
+            },
+            containerColor = Color(0xFFF8FAF9)
+        ) { innerPadding ->
         if (state.isLoading) {
             Box(
                 modifier = Modifier
@@ -168,7 +136,7 @@ fun EncyclopediaDetailScreen(
                 if (topic.quranReferences.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(
-                        text = "Dalil & Referensi Al-Qur'an",
+                        text = stringResource(R.string.encyclopedia_quran_references),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.DeepEmerald,
@@ -187,7 +155,12 @@ fun EncyclopediaDetailScreen(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "Surah ${qRef.localizedSurahName(state.currentLanguage)} (${qRef.surahNumber}) : ${qRef.ayahRange}",
+                                    text = stringResource(
+                                        R.string.encyclopedia_surah_label,
+                                        qRef.localizedSurahName(state.currentLanguage),
+                                        qRef.surahNumber,
+                                        qRef.ayahRange
+                                    ),
                                     fontSize = 15.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = SaatColors.GoldDeep
@@ -240,4 +213,23 @@ fun EncyclopediaDetailScreen(
             }
         }
     }
+
+    if (tanyaSaatState.isSheetVisible) {
+        TanyaSaatFullScreen(
+            state = tanyaSaatState,
+            onDismiss = { tanyaSaatVm.closeSheet() },
+            onMoodSelected = tanyaSaatVm::onMoodSelected,
+            onInputChanged = tanyaSaatVm::onInputTextChanged,
+            onSendMessage = { tanyaSaatVm.sendMessage() },
+            onOpenVerseInReader = { chapter, verse ->
+                tanyaSaatVm.closeSheet()
+                onOpenVerse(chapter, verse)
+            },
+            onBookmarkVerse = { verseData ->
+                tanyaSaatVm.bookmarkVerse(context, verseData)
+            },
+            onClearToast = tanyaSaatVm::clearToast
+        )
+    }
+}
 }

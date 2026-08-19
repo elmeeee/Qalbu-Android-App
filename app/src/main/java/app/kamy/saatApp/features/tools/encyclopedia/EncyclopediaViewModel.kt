@@ -61,7 +61,7 @@ class EncyclopediaViewModel @Inject constructor(
             val query = _state.value.searchQuery
 
             val topics = repository.getTopicsByCategory(category, query, currentLang)
-            val glossary = if (category == EncyclopediaCategory.GLOSSARY || (category == EncyclopediaCategory.ALL && query.isNotBlank())) {
+            val glossary = if (category == EncyclopediaCategory.GLOSSARY || category == EncyclopediaCategory.ALL) {
                 repository.getGlossaryTerms(query, currentLang)
             } else {
                 emptyList()

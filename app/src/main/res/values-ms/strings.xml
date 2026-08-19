@@ -268,6 +268,8 @@
     <string name="encyclopedia_empty_title">Topik tidak ditemui</string>
     <string name="encyclopedia_empty_desc">Cuba cari dengan kata kunci nabi, sahabat, atau istilah lain.</string>
     <string name="encyclopedia_ask_ai">Tanya Pembantu AI</string>
+    <string name="encyclopedia_quran_references">Dalil &amp; Rujukan Al-Quran</string>
+    <string name="encyclopedia_surah_label">Surah %1$s (%2$d) : %3$s</string>
     <string name="hadith_load_error">Gagal memuatkan hadis</string>
     <string name="hadith_empty">Tiada hadis di sini</string>
     <string name="ai_share_placeholder">Refleksi anda akan muncul di sini…</string>
