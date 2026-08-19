@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -310,12 +311,23 @@ private fun SchedulePrayerSlot(
 
     val iconRes = getPrayerIconRes(type)
 
+    val activeGradient = remember {
+        Brush.linearGradient(
+            colors = listOf(
+                Color(0xFF0D9488), // Modern Teal Emerald
+                Color(0xFF059669)  // Deep Emerald
+            )
+        )
+    }
+
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
             .then(
                 if (isActive) {
-                    Modifier.background(Color(0xFF0F8A5F))
+                    Modifier
+                        .background(activeGradient)
+                        .border(1.dp, Color(0xFF34D399).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
                 } else {
                     Modifier
                 }
@@ -331,7 +343,7 @@ private fun SchedulePrayerSlot(
                 text = prayerDisplayShort(type),
                 color = if (isActive) Color.White else Color(0xFF1E293B),
                 fontSize = 11.5.sp,
-                fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
+                fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
@@ -339,7 +351,7 @@ private fun SchedulePrayerSlot(
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = null,
-                tint = if (isActive) Color.White else Color(0xFF1E293B),
+                tint = if (isActive) Color.White else Color(0xFF334155),
                 modifier = Modifier.size(22.dp)
             )
             Text(

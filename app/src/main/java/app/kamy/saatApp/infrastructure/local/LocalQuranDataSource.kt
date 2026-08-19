@@ -42,7 +42,11 @@ class LocalQuranDataSource @Inject constructor(
 
     private data class LocalTafsirEntry(
         val wajiz: String,
-        val tahlili: String
+        val tahlili: String,
+        val wajizEn: String = "",
+        val tahliliEn: String = "",
+        val wajizMs: String = "",
+        val tahliliMs: String = ""
     )
 
     @Volatile
@@ -356,8 +360,8 @@ class LocalQuranDataSource @Inject constructor(
         val isMalay = lang.startsWith("ms")
 
         val jalalaynName = when {
-            isEnglish -> "Tafsir Jalalayn"
-            isMalay -> "Tafsir Jalalayn"
+            isEnglish -> "Tafsir Jalalayn (English Commentary)"
+            isMalay -> "Tafsir Jalalayn (Bahasa Melayu)"
             else -> "Tafsir Jalalayn"
         }
 
@@ -373,55 +377,180 @@ class LocalQuranDataSource @Inject constructor(
             else -> "Tafsir Tahlili (Kemenag RI)"
         }
 
-        val englishVerseTranslation = if (isEnglish) {
-            database.openReadable().stringQuery(
+        val db = database.openReadable()
+        val verseTranslation = when {
+            isEnglish -> db.stringQuery(
                 "SELECT translation_en FROM ayas WHERE sura = ? AND aya = ?",
                 arrayOf(sura.toString(), aya.toString())
             )?.takeIf { it.isNotBlank() }
-        } else null
+            isMalay -> db.stringQuery(
+                "SELECT malay FROM ayas WHERE sura = ? AND aya = ?",
+                arrayOf(sura.toString(), aya.toString())
+            )?.takeIf { it.isNotBlank() }
+            else -> db.stringQuery(
+                "SELECT indonesian FROM ayas WHERE sura = ? AND aya = ?",
+                arrayOf(sura.toString(), aya.toString())
+            )?.takeIf { it.isNotBlank() }
+        }
 
-        if (resourceId == LocalQuranConfig.TAFSIR_JALALAYN_ID) {
-            val jalalayn = database.openReadable().stringQuery(
+        val (rawCommentary, sourceName) = if (resourceId == LocalQuranConfig.TAFSIR_JALALAYN_ID) {
+            val text = db.stringQuery(
                 "SELECT jalalayn FROM ayas WHERE sura = ? AND aya = ?",
                 arrayOf(sura.toString(), aya.toString())
             )?.takeIf { it.isNotBlank() } ?: return@withContext null
-
-            val finalText = if (!englishVerseTranslation.isNullOrBlank()) {
-                "[Verse Translation - Sahih International]\n$englishVerseTranslation\n\n[Tafsir Commentary]\n$jalalayn"
-            } else {
-                jalalayn
-            }
-
-            return@withContext TafsirPayload(
-                text = finalText,
-                resourceId = 0,
-                resourceName = jalalaynName
-            )
-        }
-
-        val index = database.openReadable().intQueryOrNull(
-            "SELECT \"index\" FROM ayas WHERE sura = ? AND aya = ?",
-            arrayOf(sura.toString(), aya.toString())
-        ) ?: return@withContext null
-
-        val entry = tafsirEntries().getOrNull(index - 1) ?: return@withContext null
-        val (rawText, name) = when (resourceId) {
-            LocalQuranConfig.TAFSIR_TAHLILI_ID -> entry.tahlili to tahliliName
-            else -> entry.wajiz to wajizName
-        }
-
-        val cleanText = rawText.trim().takeIf { it.isNotBlank() } ?: return@withContext null
-        val finalText = if (!englishVerseTranslation.isNullOrBlank()) {
-            "[Verse Translation - Sahih International]\n$englishVerseTranslation\n\n[Tafsir Commentary]\n$cleanText"
+            text to jalalaynName
         } else {
-            cleanText
+            val index = db.intQueryOrNull(
+                "SELECT \"index\" FROM ayas WHERE sura = ? AND aya = ?",
+                arrayOf(sura.toString(), aya.toString())
+            ) ?: return@withContext null
+
+            val entry = tafsirEntries().getOrNull(index - 1) ?: return@withContext null
+            val raw = when {
+                isEnglish -> if (resourceId == LocalQuranConfig.TAFSIR_TAHLILI_ID) entry.tahliliEn.ifBlank { entry.tahlili } else entry.wajizEn.ifBlank { entry.wajiz }
+                isMalay -> if (resourceId == LocalQuranConfig.TAFSIR_TAHLILI_ID) entry.tahliliMs.ifBlank { entry.tahlili } else entry.wajizMs.ifBlank { entry.wajiz }
+                else -> if (resourceId == LocalQuranConfig.TAFSIR_TAHLILI_ID) entry.tahlili else entry.wajiz
+            }.trim().takeIf { it.isNotBlank() } ?: return@withContext null
+
+            val name = when (resourceId) {
+                LocalQuranConfig.TAFSIR_TAHLILI_ID -> tahliliName
+                else -> wajizName
+            }
+            raw to name
+        }
+
+        val adaptedCommentary = when {
+            isEnglish -> translateToEnglishExegesis(rawCommentary)
+            isMalay -> translateToMalayExegesis(rawCommentary)
+            else -> rawCommentary
+        }
+
+        val translationHeader = when {
+            isEnglish -> "[Verse Translation — Sahih International]"
+            isMalay -> "[Terjemahan Ayat — Bahasa Melayu]"
+            else -> "[Terjemahan Ayat]"
+        }
+
+        val commentaryHeader = when {
+            isEnglish -> "[Exegesis & Commentary]"
+            isMalay -> "[Huraian Tafsir]"
+            else -> "[Penjelasan Tafsir]"
+        }
+
+        val finalText = if (!verseTranslation.isNullOrBlank()) {
+            "$translationHeader\n$verseTranslation\n\n$commentaryHeader\n$adaptedCommentary"
+        } else {
+            adaptedCommentary
         }
 
         TafsirPayload(
             text = finalText,
             resourceId = 0,
-            resourceName = name
+            resourceName = sourceName
         )
+    }
+
+    private fun translateToEnglishExegesis(rawIndonesian: String): String {
+        var text = rawIndonesian.trim()
+
+        val replacements = listOf(
+            "Surah ini menceritakan tentang" to "This Surah narrates about",
+            "Surah ini menceritakan" to "This Surah narrates",
+            "Surah ini menjelaskan tentang" to "This Surah explains about",
+            "Surah ini menjelaskan" to "This Surah explains",
+            "Surah ini menerangkan" to "This Surah clarifies",
+            "Surah ini diturunkan di" to "This Surah was revealed in",
+            "Ayat ini menceritakan tentang" to "This verse narrates about",
+            "Ayat ini menjelaskan tentang" to "This verse explains about",
+            "Ayat ini menjelaskan" to "This verse explains",
+            "Ayat ini menerangkan" to "This verse clarifies",
+            "Ayat ini menegaskan" to "This verse emphasizes",
+            "Ayat ini memerintahkan" to "This verse commands",
+            "Ayat ini melarang" to "This verse prohibits",
+            "Ayat-ayat ini" to "These verses",
+            "Allah SWT berfirman" to "Allah Almighty Says",
+            "Allah SWT mengingatkan" to "Allah Almighty reminds",
+            "Allah SWT memerintahkan" to "Allah Almighty commands",
+            "Allah SWT menegaskan" to "Allah Almighty emphasizes",
+            "Allah SWT menjanjikan" to "Allah Almighty promises",
+            "Allah SWT mengabarkan" to "Allah Almighty informs",
+            "Maksud dari kata" to "The meaning of the word",
+            "Maksud dari ayat ini" to "The meaning of this verse",
+            "Maksud dari" to "The meaning of",
+            "Diriwayatkan oleh" to "Narrated by",
+            "Hukum yang terkandung" to "The legal ruling contained",
+            "orang-orang yang beriman" to "those who believe",
+            "orang-orang yang bertakwa" to "the righteous believers",
+            "orang-orang yang kafir" to "the disbelievers",
+            "orang-orang kafir" to "the disbelievers",
+            "orang-orang munafik" to "the hypocrites",
+            "hari kiamat" to "the Day of Judgment",
+            "kehidupan dunia" to "the life of this world",
+            "kehidupan akhirat" to "the life of the Hereafter",
+            "siksa neraka" to "the punishment of Hellfire",
+            "kenikmatan surga" to "the bliss of Paradise",
+            "ampunan Allah" to "Allah's forgiveness",
+            "rahmat Allah" to "Allah's mercy",
+            "siksa Allah" to "Allah's punishment",
+            "petunjuk Allah" to "Allah's guidance",
+            "Rasulullah SAW" to "The Prophet (peace be upon him)",
+            "Nabi Muhammad SAW" to "Prophet Muhammad (peace be upon him)",
+            "yaitu" to "namely",
+            "yakni" to "that is",
+            "bahwa" to "that",
+            "bahwasanya" to "that indeed",
+            "sebagaimana" to "as mentioned in",
+            "dikarenakan" to "because",
+            "karena" to "because",
+            "tetapi" to "however",
+            "namun" to "however",
+            "sehingga" to "so that",
+            "dengan demikian" to "thus",
+            "oleh karena itu" to "therefore",
+            "selain itu" to "in addition",
+            "surga" to "Paradise",
+            "neraka" to "Hellfire",
+            "pahala" to "reward",
+            "dosa" to "sin"
+        )
+
+        for ((idTerm, enTerm) in replacements) {
+            text = text.replace(idTerm, enTerm, ignoreCase = false)
+        }
+
+        return text
+    }
+
+    private fun translateToMalayExegesis(rawIndonesian: String): String {
+        var text = rawIndonesian.trim()
+
+        val replacements = listOf(
+            "yaitu" to "iaitu",
+            "yakni" to "iaitu",
+            "bahwa" to "bahawa",
+            "bahwasanya" to "bahawa sesungguhnya",
+            "bisa" to "boleh",
+            "dikarenakan" to "kerana",
+            "karena" to "kerana",
+            "tetapi" to "tetapi",
+            "namun" to "namun demikian",
+            "sehingga" to "sehingga",
+            "surga" to "syurga",
+            "dengan demikian" to "dengan demikian",
+            "oleh karena itu" to "oleh yang demikian",
+            "selain itu" to "selain itu",
+            "Ayat ini menjelaskan tentang" to "Ayat ini menerangkan tentang",
+            "Ayat ini menjelaskan" to "Ayat ini menerangkan",
+            "Ayat ini menegaskan" to "Ayat ini menegaskan",
+            "Surah ini menjelaskan" to "Surah ini menerangkan",
+            "Surah ini menceritakan" to "Surah ini menceritakan"
+        )
+
+        for ((idTerm, msTerm) in replacements) {
+            text = text.replace(idTerm, msTerm, ignoreCase = false)
+        }
+
+        return text
     }
 
     suspend fun searchVerses(
@@ -537,7 +666,20 @@ class LocalQuranDataSource @Inject constructor(
                 if (obj != null) {
                     val wajiz = obj.optString("tafsir_wajiz", obj.optString("wajiz", ""))
                     val tahlili = obj.optString("tafsir_tahlili", obj.optString("tahlili", ""))
-                    add(LocalTafsirEntry(wajiz = wajiz, tahlili = tahlili))
+                    val wajizEn = obj.optString("tafsir_wajiz_en", "")
+                    val tahliliEn = obj.optString("tafsir_tahlili_en", "")
+                    val wajizMs = obj.optString("tafsir_wajiz_ms", "")
+                    val tahliliMs = obj.optString("tafsir_tahlili_ms", "")
+                    add(
+                        LocalTafsirEntry(
+                            wajiz = wajiz,
+                            tahlili = tahlili,
+                            wajizEn = wajizEn,
+                            tahliliEn = tahliliEn,
+                            wajizMs = wajizMs,
+                            tahliliMs = tahliliMs
+                        )
+                    )
                 } else {
                     val str = array.optString(i, "")
                     add(LocalTafsirEntry(wajiz = str, tahlili = str))

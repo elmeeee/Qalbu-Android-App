@@ -376,8 +376,8 @@ private fun CompactPrayerTile(
 
     val circleBg by animateColorAsState(
         targetValue = when {
-            completed -> SaatColors.DeepEmerald
-            enabled -> SaatColors.MintWash
+            completed -> Color(0xFF059669)
+            enabled -> Color(0xFFE6F4EA)
             else -> SaatColors.LightGrey.copy(alpha = 0.4f)
         },
         animationSpec = spring(stiffness = Spring.StiffnessMedium),
@@ -386,8 +386,8 @@ private fun CompactPrayerTile(
 
     val circleBorderColor by animateColorAsState(
         targetValue = when {
-            completed -> SaatColors.DeepEmerald
-            enabled -> SaatColors.DeepEmerald.copy(alpha = 0.35f)
+            completed -> Color(0xFF34D399)
+            enabled -> Color(0xFF059669).copy(alpha = 0.4f)
             else -> SaatColors.SoftGrey.copy(alpha = 0.4f)
         },
         label = "compactCircleBorder"
@@ -395,7 +395,7 @@ private fun CompactPrayerTile(
 
     val labelColor by animateColorAsState(
         targetValue = when {
-            completed -> SaatColors.DeepEmerald
+            completed -> Color(0xFF047857)
             enabled -> SaatColors.Slate800
             else -> SaatColors.Slate500.copy(alpha = 0.5f)
         },
