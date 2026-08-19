@@ -15,25 +15,18 @@ import app.kamy.saatApp.infrastructure.local.LocalHadithDataSource
 import app.kamy.saatApp.infrastructure.local.LocalQuranDataSource
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
-import android.content.Context
-import app.kamy.saatApp.infrastructure.network.api.ContentApiService
-import app.kamy.saatApp.infrastructure.network.NetworkMonitor
-import dagger.Lazy
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Quran content from bundled SQLite ([qurannew.db]) — fallback to Quran Foundation Content API for Tafsir.
+ * Quran content from bundled SQLite ([qurannew.db]) and local Tafsir/Hadith assets.
  */
 @Singleton
 class ContentRepository @Inject constructor(
     private val local: LocalQuranDataSource,
     private val hadith: LocalHadithDataSource,
     private val translationStore: TranslationPreferencesStore,
-    private val appLanguageStore: AppLanguageStore,
-    @ApplicationContext private val context: Context,
-    private val apiService: Lazy<ContentApiService>
+    private val appLanguageStore: AppLanguageStore
 ) {
     private fun selectedTranslationId(): Int =
         LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
