@@ -281,6 +281,11 @@ fun RootScreen(
                     }
                 )
             }
+            composable("tools/hajj-umrah") {
+                app.kamy.saatApp.features.tools.hajj.HajjUmrahScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
             composable(
                 route = "tools/encyclopedia/{topicId}",
                 arguments = listOf(navArgument("topicId") { type = NavType.StringType })

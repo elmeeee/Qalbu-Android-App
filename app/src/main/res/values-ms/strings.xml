@@ -257,6 +257,7 @@
     <string name="tafsir_load_error">Gagal memuatkan tafsir</string>
     <string name="tafsir_empty">Tiada tafsir di sini</string>
     <string name="encyclopedia_title">Ensiklopedia Islam</string>
+    <string name="hajj_umrah_title">Haji &amp; Umrah</string>
     <string name="encyclopedia_search_hint">Cari kisah nabi, sahabat, fikah, istilah…</string>
     <string name="encyclopedia_cat_all">Semua</string>
     <string name="encyclopedia_cat_prophets">Nabi &amp; Rasul</string>

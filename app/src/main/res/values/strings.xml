@@ -234,6 +234,7 @@
     <string name="tafsir_load_error">Couldn\'t load tafsir</string>
     <string name="tafsir_empty">No commentary here</string>
     <string name="encyclopedia_title">Islamic Encyclopedia</string>
+    <string name="hajj_umrah_title">Hajj &amp; Umrah</string>
     <string name="encyclopedia_search_hint">Search prophets, companions, fiqh, terms…</string>
     <string name="encyclopedia_cat_all">All</string>
     <string name="encyclopedia_cat_prophets">Prophets</string>

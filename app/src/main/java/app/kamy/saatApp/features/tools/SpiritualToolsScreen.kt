@@ -148,6 +148,13 @@ fun SpiritualToolsScreen(
                 "encyclopedia",
                 SaatColors.DeepEmerald,
                 SaatColors.Teal
+            ),
+            SpiritualToolItem(
+                R.drawable.ic_kaaba_hajj,
+                R.string.hajj_umrah_title,
+                "hajj-umrah",
+                SaatColors.DeepEmerald,
+                SaatColors.GoldDeep
             )
         )
     }
