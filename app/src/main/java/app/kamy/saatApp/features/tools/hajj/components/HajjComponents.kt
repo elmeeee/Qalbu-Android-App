@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -55,6 +56,7 @@ fun ManasikStepCard(
         elevation = CardDefaults.cardElevation(defaultElevation = if (isExpanded) 4.dp else 1.dp),
         modifier = Modifier
             .fillMaxWidth()
+            .animateContentSize()
             .clickable { isExpanded = !isExpanded }
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -749,7 +751,9 @@ fun MadhhabRulingCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, SaatColors.SoftGrey),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             // Header
@@ -861,7 +865,9 @@ fun DamRuleCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, SaatColors.SoftGrey),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             // Category Badge
@@ -960,7 +966,9 @@ fun MiqatCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, SaatColors.SoftGrey),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
@@ -1041,7 +1049,9 @@ fun HistoricSiteCard(
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, SaatColors.SoftGrey),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(

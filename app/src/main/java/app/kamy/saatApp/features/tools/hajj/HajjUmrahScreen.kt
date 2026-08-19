@@ -52,6 +52,20 @@ fun HajjUmrahScreen(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedHajjType by rememberSaveable { mutableStateOf(ManasikType.HAJJ_TAMATTU) }
 
+    val filteredDoas = remember(searchQuery, appLanguage, hajjData) {
+        if (searchQuery.isBlank()) {
+            hajjData.manasikDuas
+        } else {
+            val q = searchQuery.lowercase()
+            hajjData.manasikDuas.filter { doa ->
+                doa.title.get(appLanguage).lowercase().contains(q) ||
+                        doa.latin.lowercase().contains(q) ||
+                        doa.translation.get(appLanguage).lowercase().contains(q) ||
+                        doa.category.get(appLanguage).lowercase().contains(q)
+            }
+        }
+    }
+
     // Persistent checklist state using SharedPreferences
     val prefs = remember(context) { context.getSharedPreferences("hajj_checklist_prefs", Context.MODE_PRIVATE) }
     var checkedItems by remember {
@@ -303,18 +317,6 @@ fun HajjUmrahScreen(
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
-
-                val filteredDoas: List<HajjDoaItem> = if (searchQuery.isBlank()) {
-                    hajjData.manasikDuas
-                } else {
-                    val q = searchQuery.lowercase()
-                    hajjData.manasikDuas.filter { doa ->
-                        doa.title.get(appLanguage).lowercase().contains(q) ||
-                                doa.latin.lowercase().contains(q) ||
-                                doa.translation.get(appLanguage).lowercase().contains(q) ||
-                                doa.category.get(appLanguage).lowercase().contains(q)
-                    }
                 }
 
                 if (filteredDoas.isEmpty()) {
