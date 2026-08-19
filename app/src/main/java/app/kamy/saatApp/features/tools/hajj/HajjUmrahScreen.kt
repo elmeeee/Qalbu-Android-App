@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,8 +32,7 @@ import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.features.tools.hajj.components.*
 import app.kamy.saatApp.features.tools.hajj.data.HajjUmrahCatalog
-import app.kamy.saatApp.features.tools.hajj.model.HajjDoaItem
-import app.kamy.saatApp.features.tools.hajj.model.ManasikType
+import app.kamy.saatApp.features.tools.hajj.model.*
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 
@@ -49,22 +49,7 @@ fun HajjUmrahScreen(
     val hajjData = remember(context) { HajjUmrahCatalog.getData(context) }
 
     var activeTab by rememberSaveable { mutableIntStateOf(0) }
-    var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedHajjType by rememberSaveable { mutableStateOf(ManasikType.HAJJ_TAMATTU) }
-
-    val filteredDoas = remember(searchQuery, appLanguage, hajjData) {
-        if (searchQuery.isBlank()) {
-            hajjData.manasikDuas
-        } else {
-            val q = searchQuery.lowercase()
-            hajjData.manasikDuas.filter { doa ->
-                doa.title.get(appLanguage).lowercase().contains(q) ||
-                        doa.latin.lowercase().contains(q) ||
-                        doa.translation.get(appLanguage).lowercase().contains(q) ||
-                        doa.category.get(appLanguage).lowercase().contains(q)
-            }
-        }
-    }
 
     // Persistent checklist state using SharedPreferences
     val prefs = remember(context) { context.getSharedPreferences("hajj_checklist_prefs", Context.MODE_PRIVATE) }
@@ -84,88 +69,61 @@ fun HajjUmrahScreen(
         prefs.edit().putStringSet("checked_items", updated).apply()
     }
 
-    val tabTitles = remember(appLanguage) {
-        when (appLanguage) {
-            AppLanguage.ENGLISH -> listOf(
-                "🕋 Umrah",
-                "⛺ Hajj",
-                "🤲 Du'a & Dzikir",
-                "📖 Quran & Hadith",
-                "⚖️ 4-Madhhab & Dam",
-                "📍 Miqat & Sights",
-                "✅ Checklist"
-            )
-            AppLanguage.MALAY -> listOf(
-                "🕋 Umrah",
-                "⛺ Haji",
-                "🤲 Doa & Zikir",
-                "📖 Dalil & Hadis",
-                "⚖️ 4 Mazhab & Dam",
-                "📍 Miqat & Ziarah",
-                "✅ Senarai Semak"
-            )
-            else -> listOf(
-                "🕋 Umrah",
-                "⛺ Haji",
-                "🤲 Doa & Dzikir",
-                "📖 Dalil & Hadits",
-                "⚖️ 4 Mazhab & Dam",
-                "📍 Miqat & Ziarah",
-                "✅ Checklist"
-            )
-        }
-    }
+    data class HajjTabItem(val title: String, val iconRes: Int)
+
+    val tabs = listOf(
+        HajjTabItem(stringResource(R.string.hajj_tab_umrah), R.drawable.ic_kaaba_hajj),
+        HajjTabItem(stringResource(R.string.hajj_tab_hajj), R.drawable.ic_prayer_rug),
+        HajjTabItem(stringResource(R.string.hajj_tab_doa), R.drawable.ic_dua),
+        HajjTabItem(stringResource(R.string.hajj_tab_dalil), R.drawable.ic_tafsir),
+        HajjTabItem(stringResource(R.string.hajj_tab_fiqh), R.drawable.ic_madhab_custom),
+        HajjTabItem(stringResource(R.string.hajj_tab_miqat), R.drawable.ic_location_custom),
+        HajjTabItem(stringResource(R.string.hajj_tab_checklist), R.drawable.ic_check_custom)
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(SaatColors.ScreenBackground)
     ) {
-        // Sticky Header with Title & Back Button
+        // Sticky Header / Top Bar
         Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = SaatColors.PureWhite,
-            shadowElevation = 3.dp
+            color = Color.White,
+            shadowElevation = 2.dp,
+            modifier = Modifier.fillMaxWidth()
         ) {
             Column {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back),
-                            tint = SaatColors.DeepEmerald
+                            tint = SaatColors.Slate700
                         )
                     }
+                    Spacer(modifier = Modifier.width(4.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = when (appLanguage) {
-                                AppLanguage.ENGLISH -> "Hajj & Umrah Companion"
-                                AppLanguage.MALAY -> "Panduan Lengkap Haji & Umrah"
-                                else -> "Panduan Haji & Umrah"
-                            },
+                            text = stringResource(R.string.hajj_top_bar_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = SaatColors.DeepEmerald
                         )
                         Text(
-                            text = when (appLanguage) {
-                                AppLanguage.ENGLISH -> "Authentic Manasik, Du'as, Dalil & Fiqh"
-                                AppLanguage.MALAY -> "Tatacara Sahih, Doa, Dalil & Fikih 4 Mazhab"
-                                else -> "Manasik Shahih, Doa, Dalil & Fikih 4 Mazhab"
-                            },
+                            text = stringResource(R.string.hajj_top_bar_subtitle),
                             style = MaterialTheme.typography.labelSmall,
                             color = SaatColors.Slate500
                         )
                     }
                 }
 
-                // Scrollable Tabs
+                // Scrollable Tabs with Vector Icons
                 ScrollableTabRow(
                     selectedTabIndex = activeTab,
                     containerColor = Color.Transparent,
@@ -180,15 +138,23 @@ fun HajjUmrahScreen(
                     },
                     divider = { HorizontalDivider(color = SaatColors.SoftGrey, thickness = 1.dp) }
                 ) {
-                    tabTitles.forEachIndexed { index, title ->
+                    tabs.forEachIndexed { index, item ->
                         Tab(
                             selected = activeTab == index,
                             onClick = { activeTab = index },
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = item.iconRes),
+                                    contentDescription = null,
+                                    tint = if (activeTab == index) SaatColors.DeepEmerald else SaatColors.Slate500,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
                             text = {
                                 Text(
-                                    text = title,
+                                    text = item.title,
                                     fontWeight = if (activeTab == index) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 14.sp,
+                                    fontSize = 13.sp,
                                     color = if (activeTab == index) SaatColors.DeepEmerald else SaatColors.Slate700
                                 )
                             }
@@ -217,16 +183,8 @@ fun HajjUmrahScreen(
 
                 item(key = "umrah_intro") {
                     SectionIntroCard(
-                        title = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "5 Core Stages of Umrah"
-                            AppLanguage.MALAY -> "5 Rukun & Peringkat Ibadah Umrah"
-                            else -> "5 Tahapan Inti Ibadah Umrah"
-                        },
-                        subtitle = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Follow these consecutive steps with pure intention from Miqat to Tahallul."
-                            AppLanguage.MALAY -> "Ikuti urutan manasik secara tertib bermula dari Miqat hingga Tahallul."
-                            else -> "Ikuti urutan manasik secara tertib mulai dari Miqat hingga Tahallul."
-                        }
+                        title = stringResource(R.string.hajj_umrah_intro_title),
+                        subtitle = stringResource(R.string.hajj_umrah_intro_subtitle)
                     )
                 }
 
@@ -257,16 +215,8 @@ fun HajjUmrahScreen(
 
                 item(key = "hajj_intro") {
                     SectionIntroCard(
-                        title = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Daily Timeline of Hajj (8–13 Dhul-Hijjah)"
-                            AppLanguage.MALAY -> "Kronologi Hari-Hari Haji (8–13 Zulhijjah)"
-                            else -> "Kronologi Harian Haji (8–13 Dzulhijjah)"
-                        },
-                        subtitle = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Detailed guide for Tarwiyah, Arafah, Muzdalifah, Jamarat, and Tashreeq."
-                            AppLanguage.MALAY -> "Panduan lengkap hari Tarwiyah, Arafah, Muzdalifah, Jamarat, dan Tasyrik."
-                            else -> "Panduan lengkap hari Tarwiyah, Arafah, Muzdalifah, Jamarat, dan Tasyriq."
-                        }
+                        title = stringResource(R.string.hajj_intro_title),
+                        subtitle = stringResource(R.string.hajj_intro_subtitle)
                     )
                 }
 
@@ -283,73 +233,8 @@ fun HajjUmrahScreen(
 
             // Tab 2: Doa & Dzikir
             if (activeTab == 2) {
-                item(key = "doa_search") {
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = {
-                            Text(
-                                text = when (appLanguage) {
-                                    AppLanguage.ENGLISH -> "Search du'a, talbiyah, or occasion..."
-                                    AppLanguage.MALAY -> "Cari doa, talbiyah, atau tempat..."
-                                    else -> "Cari doa manasik, talbiyah, tempat..."
-                                },
-                                color = SaatColors.Slate500,
-                                fontSize = 14.sp
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Filled.Search, contentDescription = null, tint = SaatColors.Slate500)
-                        },
-                        trailingIcon = {
-                            if (searchQuery.isNotEmpty()) {
-                                IconButton(onClick = { searchQuery = "" }) {
-                                    Icon(Icons.Filled.Close, contentDescription = "Clear", tint = SaatColors.Slate500)
-                                }
-                            }
-                        },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White,
-                            focusedBorderColor = SaatColors.DeepEmerald,
-                            unfocusedBorderColor = SaatColors.SoftGrey
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
-                if (filteredDoas.isEmpty()) {
-                    item(key = "doa_empty") {
-                        Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = Color.White,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 32.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(24.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text("🔍", fontSize = 32.sp)
-                                Spacer(modifier = Modifier.height(10.dp))
-                                Text(
-                                    text = when (appLanguage) {
-                                        AppLanguage.ENGLISH -> "No du'a found for '$searchQuery'"
-                                        AppLanguage.MALAY -> "Tiada doa dijumpai untuk '$searchQuery'"
-                                        else -> "Doa tidak ditemukan untuk kata kunci '$searchQuery'"
-                                    },
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = SaatColors.Slate700
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    items(filteredDoas, key = { it.id }) { doa ->
-                        HajjDoaCard(doa = doa, appLanguage = appLanguage)
-                    }
+                items(hajjData.manasikDuas, key = { it.id }) { doa ->
+                    HajjDoaCard(doa = doa, appLanguage = appLanguage)
                 }
             }
 
@@ -357,16 +242,8 @@ fun HajjUmrahScreen(
             if (activeTab == 3) {
                 item(key = "dalil_intro") {
                     SectionIntroCard(
-                        title = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Foundational Qur'an & Sahih Hadith Dalil"
-                            AppLanguage.MALAY -> "Dalil Al-Qur'an & Hadis Sahih"
-                            else -> "Landasan Dalil Al-Qur'an & Hadits Shahih"
-                        },
-                        subtitle = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Primary scriptural evidence from Surah Al-Baqarah, Ali 'Imran, Al-Hajj & Sahih Muslim."
-                            AppLanguage.MALAY -> "Dalil utama dari Surah Al-Baqarah, Ali 'Imran, Al-Hajj & Sahih Muslim."
-                            else -> "Rujukan nash Al-Qur'an dan Hadits Shahih perawi utama (Bukhari & Muslim)."
-                        }
+                        title = stringResource(R.string.hajj_dalil_intro_title),
+                        subtitle = stringResource(R.string.hajj_dalil_intro_subtitle)
                     )
                 }
 
@@ -379,26 +256,14 @@ fun HajjUmrahScreen(
             if (activeTab == 4) {
                 item(key = "fiqh_intro") {
                     SectionIntroCard(
-                        title = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "4-Madhhab Fiqh & Penalty (Dam) Guide"
-                            AppLanguage.MALAY -> "Fikih 4 Mazhab & Panduan Dam (Denda)"
-                            else -> "Komparasi Fikih 4 Mazhab & Panduan Dam"
-                        },
-                        subtitle = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Comparative jurisprudence between Shafi'i, Hanafi, Maliki, Hanbali schools."
-                            AppLanguage.MALAY -> "Perbandingan hukum antara Mazhab Syafi'i, Hanafi, Maliki, dan Hanbali."
-                            else -> "Perbandingan pandangan hukum Mazhab Syafi'i, Hanafi, Maliki, dan Hanbali."
-                        }
+                        title = stringResource(R.string.hajj_madhhab_intro_title),
+                        subtitle = stringResource(R.string.hajj_madhhab_intro_subtitle)
                     )
                 }
 
                 item(key = "fiqh_rulings_header") {
                     Text(
-                        text = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "⚖️ Jurisprudence Matrix"
-                            AppLanguage.MALAY -> "⚖️ Perbandingan Hukum 4 Mazhab"
-                            else -> "⚖️ Matriks Perbandingan 4 Mazhab"
-                        },
+                        text = stringResource(R.string.hajj_madhhab_matrix_header),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.Slate900
@@ -412,11 +277,7 @@ fun HajjUmrahScreen(
                 item(key = "dam_header") {
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "🐑 Penalty (Dam / Fidyah) Rules"
-                            AppLanguage.MALAY -> "🐑 Panduan Dam & Tebusan Fidyah"
-                            else -> "🐑 Rincian Dam (Denda) & Fidyah Pelanggaran"
-                        },
+                        text = stringResource(R.string.hajj_dam_rules_header),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.Slate900
@@ -432,26 +293,27 @@ fun HajjUmrahScreen(
             if (activeTab == 5) {
                 item(key = "miqat_intro") {
                     SectionIntroCard(
-                        title = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "5 Miqat Boundaries & Historic Ziyarah Sites"
-                            AppLanguage.MALAY -> "5 Lokasi Miqat & Tempat Bersejarah"
-                            else -> "Peta 5 Miqat Makani & Tempat Ziarah Bersejarah"
-                        },
-                        subtitle = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Geographical stations of Ihram established by the Prophet (ﷺ) and holy sights in Makkah & Madinah."
-                            AppLanguage.MALAY -> "Sempadan Miqat yang ditetapkan Rasulullah SAW dan tempat ziarah utama."
-                            else -> "Titik batas Miqat Makani ketetapan Rasulullah SAW serta tempat bersejarah Makkah & Madinah."
-                        }
+                        title = stringResource(R.string.hajj_miqat_intro_title),
+                        subtitle = stringResource(R.string.hajj_miqat_intro_subtitle)
                     )
                 }
 
                 item(key = "miqat_sub_header") {
-                    Text(
-                        text = "📍 Miqat Makani",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.Slate900
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_location_custom),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.hajj_miqat_boundaries_header),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.Slate900
+                        )
+                    }
                 }
 
                 items(hajjData.miqatLocations, key = { it.id }) { miqat ->
@@ -460,12 +322,21 @@ fun HajjUmrahScreen(
 
                 item(key = "ziarah_sub_header") {
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = "🕌 Tempat Ziarah Bersejarah Makkah & Madinah",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.Slate900
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_institution_custom),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.hajj_ziarah_sites_header),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.Slate900
+                        )
+                    }
                 }
 
                 items(hajjData.historicSites, key = { it.id }) { site ->
@@ -493,11 +364,7 @@ fun HajjUmrahScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = when (appLanguage) {
-                                        AppLanguage.ENGLISH -> "Pilgrim Preparation Progress"
-                                        AppLanguage.MALAY -> "Kemajuan Persediaan Jemaah"
-                                        else -> "Progres Kesiapan Jamaah"
-                                    },
+                                    text = stringResource(R.string.hajj_checklist_progress_title),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = SaatColors.Slate900
@@ -584,7 +451,7 @@ private fun HeroUmrahBanner(appLanguage: AppLanguage) {
                     color = Color.White.copy(alpha = 0.2f)
                 ) {
                     Text(
-                        text = "MANASIK UMRAH",
+                        text = stringResource(R.string.hajj_hero_umrah_badge),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.Gold,
@@ -593,22 +460,14 @@ private fun HeroUmrahBanner(appLanguage: AppLanguage) {
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = when (appLanguage) {
-                        AppLanguage.ENGLISH -> "Umrah Step-by-Step"
-                        AppLanguage.MALAY -> "Panduan Manasik Umrah"
-                        else -> "Panduan Manasik Umrah"
-                    },
+                    text = stringResource(R.string.hajj_hero_umrah_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = when (appLanguage) {
-                        AppLanguage.ENGLISH -> "From Ihram at Miqat to Final Tahallul"
-                        AppLanguage.MALAY -> "Daripada Ihram di Miqat hingga Tahallul"
-                        else -> "Dari Niat di Miqat hingga Tahallul Sempurna"
-                    },
+                    text = stringResource(R.string.hajj_hero_umrah_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.85f)
                 )
@@ -622,7 +481,12 @@ private fun HeroUmrahBanner(appLanguage: AppLanguage) {
                     .background(Color.White.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("🕋", fontSize = 32.sp)
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_kaaba_hajj),
+                    contentDescription = null,
+                    tint = SaatColors.Gold,
+                    modifier = Modifier.size(36.dp)
+                )
             }
         }
     }
@@ -663,7 +527,7 @@ private fun HeroHajjBanner(appLanguage: AppLanguage) {
                     color = Color.White.copy(alpha = 0.2f)
                 ) {
                     Text(
-                        text = "RUKUN ISLAM KE-5",
+                        text = stringResource(R.string.hajj_hero_hajj_badge),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -672,22 +536,14 @@ private fun HeroHajjBanner(appLanguage: AppLanguage) {
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = when (appLanguage) {
-                        AppLanguage.ENGLISH -> "Hajj Pilgrimage Guide"
-                        AppLanguage.MALAY -> "Panduan Manasik Haji"
-                        else -> "Panduan Manasik Haji"
-                    },
+                    text = stringResource(R.string.hajj_hero_hajj_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = when (appLanguage) {
-                        AppLanguage.ENGLISH -> "Day-by-Day Journey (8–13 Dhul-Hijjah)"
-                        AppLanguage.MALAY -> "Perjalanan Lengkap (8–13 Zulhijjah)"
-                        else -> "Perjalanan Lengkap (8–13 Dzulhijjah)"
-                    },
+                    text = stringResource(R.string.hajj_hero_hajj_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.85f)
                 )
@@ -701,7 +557,12 @@ private fun HeroHajjBanner(appLanguage: AppLanguage) {
                     .background(Color.White.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text("⛺", fontSize = 32.sp)
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_kaaba_hajj),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(36.dp)
+                )
             }
         }
     }
@@ -721,11 +582,7 @@ private fun HajjTypeSelector(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = when (appLanguage) {
-                    AppLanguage.ENGLISH -> "Select Type of Hajj:"
-                    AppLanguage.MALAY -> "Pilih Jenis Ibadah Haji:"
-                    else -> "Pilihan Jenis Ibadah Haji:"
-                },
+                text = stringResource(R.string.hajj_select_type_label),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = SaatColors.Slate700
@@ -762,21 +619,9 @@ private fun HajjTypeSelector(
             ) {
                 Text(
                     text = when (selected) {
-                        ManasikType.HAJJ_TAMATTU -> when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Tamattu': Umrah first in Shawwal/Dhul-Qa'dah/Dhul-Hijjah, Tahallul, then enter Hajj on 8th Dhul-Hijjah (Dam Hady mandatory). Standard choice for Southeast Asian pilgrims."
-                            AppLanguage.MALAY -> "Tamattu': Mengerjakan Umrah terlebih dahulu, bertahallul, kemudian memakai ihram Haji pada 8 Zulhijjah (Wajib Dam Hadyu). Pilihan utama jemaah Malaysia/Nusantara."
-                            else -> "Tamattu': Mengerjakan Umrah terlebih dahulu di bulan haji, bertahallul, lalu berihram Haji pada 8 Dzulhijjah (Wajib membayar Dam Hadyu). Pilihan umum jamaah Indonesia."
-                        }
-                        ManasikType.HAJJ_IFRAD -> when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Ifrad: Performing Hajj first until complete, then performing Umrah afterwards (No Dam mandatory)."
-                            AppLanguage.MALAY -> "Ifrad: Mengerjakan Haji dahulu sehingga selesai, kemudian mengerjakan Umrah selepasnya (Tidak wajib Dam)."
-                            else -> "Ifrad: Mengerjakan Haji terlebih dahulu hingga selesai, baru kemudian mengerjakan Umrah (Tidak wajib bayar Dam)."
-                        }
-                        ManasikType.HAJJ_QIRAN -> when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Qiran: Combining intention of Hajj & Umrah in one single Ihram without breaking ihram between them (Dam mandatory)."
-                            AppLanguage.MALAY -> "Qiran: Menggabungkan niat Haji & Umrah sekali gus dalam satu ihram berterusan (Wajib Dam)."
-                            else -> "Qiran: Menggabungkan niat Haji dan Umrah sekaligus dalam satu ihram tanpa melepas ihram di antaranya (Wajib bayar Dam)."
-                        }
+                        ManasikType.HAJJ_TAMATTU -> stringResource(R.string.hajj_tamattu_desc)
+                        ManasikType.HAJJ_IFRAD -> stringResource(R.string.hajj_ifrad_desc)
+                        ManasikType.HAJJ_QIRAN -> stringResource(R.string.hajj_qiran_desc)
                         else -> ""
                     },
                     style = MaterialTheme.typography.bodySmall,

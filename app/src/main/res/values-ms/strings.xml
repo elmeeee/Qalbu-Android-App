@@ -549,4 +549,72 @@
     <string name="adhan_tab_general">Azan Umum</string>
     <string name="adhan_tab_fajr">Azan Subuh</string>
 
+    <!-- Hajj & Umrah Screen Strings (Malay) -->
+    <string name="hajj_top_bar_title">Panduan Lengkap Haji &amp; Umrah</string>
+    <string name="hajj_top_bar_subtitle">Tatacara Sahih, Doa, Dalil &amp; Fikih 4 Mazhab</string>
+
+    <string name="hajj_tab_umrah">Manasik Umrah</string>
+    <string name="hajj_tab_hajj">Manasik Haji</string>
+    <string name="hajj_tab_doa">Doa &amp; Zikir</string>
+    <string name="hajj_tab_dalil">Dalil Al-Qur\'an &amp; Hadis</string>
+    <string name="hajj_tab_fiqh">Fikih 4 Mazhab</string>
+    <string name="hajj_tab_miqat">Miqat &amp; Ziarah</string>
+    <string name="hajj_tab_checklist">Senarai Semak Jemaah</string>
+
+    <string name="hajj_umrah_intro_title">5 Rukun &amp; Peringkat Ibadah Umrah</string>
+    <string name="hajj_umrah_intro_subtitle">Ikuti urutan manasik secara tertib bermula dari Miqat hingga Tahallul.</string>
+
+    <string name="hajj_intro_title">Kronologi Hari-Hari Haji (8–13 Zulhijjah)</string>
+    <string name="hajj_intro_subtitle">Panduan lengkap hari Tarwiyah, Arafah, Muzdalifah, Jamarat, dan Tasyrik.</string>
+
+    <string name="hajj_dalil_intro_title">Dalil Al-Qur\'an &amp; Hadis Sahih</string>
+    <string name="hajj_dalil_intro_subtitle">Dalil utama dari Surah Al-Baqarah, Ali \'Imran, Al-Hajj &amp; Sahih Muslim.</string>
+
+    <string name="hajj_madhhab_intro_title">Fikih 4 Mazhab &amp; Panduan Dam (Denda)</string>
+    <string name="hajj_madhhab_intro_subtitle">Perbandingan hukum antara Mazhab Syafi\'i, Hanafi, Maliki, dan Hanbali.</string>
+    <string name="hajj_madhhab_matrix_header">Perbandingan Hukum 4 Mazhab</string>
+    <string name="hajj_dam_rules_header">Panduan Dam &amp; Tebusan Fidyah</string>
+
+    <string name="hajj_miqat_intro_title">5 Lokasi Miqat &amp; Tempat Bersejarah</string>
+    <string name="hajj_miqat_intro_subtitle">Sempadan Miqat yang ditetapkan Rasulullah SAW dan tempat ziarah utama.</string>
+    <string name="hajj_miqat_boundaries_header">Sempadan Miqat</string>
+    <string name="hajj_ziarah_sites_header">Tempat Ziarah Bersejarah Makkah &amp; Madinah</string>
+
+    <string name="hajj_checklist_progress_title">Kemajuan Persediaan Jemaah</string>
+
+    <string name="hajj_hero_umrah_badge">MANASIK UMRAH</string>
+    <string name="hajj_hero_umrah_title">Panduan Manasik Umrah</string>
+    <string name="hajj_hero_umrah_subtitle">Daripada Ihram di Miqat hingga Tahallul</string>
+
+    <string name="hajj_hero_hajj_badge">RUKUN ISLAM KE-5</string>
+    <string name="hajj_hero_hajj_title">Panduan Manasik Haji</string>
+    <string name="hajj_hero_hajj_subtitle">Perjalanan Lengkap (8–13 Zulhijjah)</string>
+
+    <string name="hajj_select_type_label">Pilih Jenis Ibadah Haji:</string>
+    <string name="hajj_tamattu_desc">Tamattu\': Mengerjakan Umrah terlebih dahulu, bertahallul, kemudian memakai ihram Haji pada 8 Zulhijjah (Wajib Dam Hadyu). Pilihan utama jemaah Malaysia/Nusantara.</string>
+    <string name="hajj_ifrad_desc">Ifrad: Mengerjakan Haji dahulu sehingga selesai, kemudian mengerjakan Umrah selepasnya (Tidak wajib Dam).</string>
+    <string name="hajj_qiran_desc">Qiran: Menggabungkan niat Haji &amp; Umrah sekali gus dalam satu ihram berterusan (Wajib Dam).</string>
+
+    <string name="hajj_view_related_doa">Lihat Doa &amp; Zikir Berkaitan</string>
+    <string name="hajj_prohibitions_header">Larangan Semasa Tahap Ini:</string>
+    <string name="hajj_practical_tips_header">Tips Praktikal Jemaah:</string>
+    <string name="hajj_mistakes_header">Kesalahan Lazim Perlu Dielakkan:</string>
+    <string name="hajj_alternative_options_header">Pilihan Gantian (Jika tidak mampu):</string>
+
+    <string name="hajj_copy_doa">Salin Doa</string>
+    <string name="hajj_share_doa">Kongsi Doa</string>
+    <string name="hajj_copied_toast">Doa berjaya disalin!</string>
+
+    <string name="hajj_mandatory_badge">WAJIB</string>
+    <string name="hajj_rukun_badge">RUKUN MUTLAK</string>
+    <string name="hajj_wajib_badge">WAJIB MANASIK</string>
+    <string name="hajj_expand_details">Kembangkan butiran</string>
+
+    <string name="hajj_detailed_steps_header">Panduan Langkah demi Langkah:</string>
+    <string name="hajj_tafsir_explanation_header">Huraian Tafsir &amp; Konteks:</string>
+    <string name="hajj_rajih_conclusion_header">Kesimpulan Tarjih &amp; Praktikal:</string>
+    <string name="hajj_penalty_header">Kadar Dam / Denda:</string>
+
+    <string name="hajj_copy_prayer">Salin doa</string>
+    <string name="hajj_share_prayer">Kongsi doa</string>
 </resources>

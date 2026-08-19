@@ -35,6 +35,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.TajweedFontFamily
@@ -92,19 +95,7 @@ fun ManasikStepCard(
                         border = BorderStroke(1.dp, if (step.isRukun) SaatColors.DeepEmerald.copy(alpha = 0.3f) else SaatColors.GoldDeep.copy(alpha = 0.4f))
                     ) {
                         Text(
-                            text = if (step.isRukun) {
-                                when (appLanguage) {
-                                    AppLanguage.ENGLISH -> "PILLAR (RUKUN)"
-                                    AppLanguage.MALAY -> "RUKUN MUTLAK"
-                                    else -> "RUKUN WAJIB"
-                                }
-                            } else {
-                                when (appLanguage) {
-                                    AppLanguage.ENGLISH -> "MANDATORY (WAJIB)"
-                                    AppLanguage.MALAY -> "WAJIB MANASIK"
-                                    else -> "WAJIB HAJI"
-                                }
-                            },
+                            text = if (step.isRukun) stringResource(R.string.hajj_rukun_badge) else stringResource(R.string.hajj_wajib_badge),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.ExtraBold,
                             color = if (step.isRukun) SaatColors.DeepEmerald else SaatColors.GoldDeep,
@@ -119,11 +110,7 @@ fun ManasikStepCard(
                 ) {
                     Icon(
                         Icons.Filled.KeyboardArrowDown,
-                        contentDescription = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Expand details"
-                            AppLanguage.MALAY -> "Kembangkan butiran"
-                            else -> "Buka detail"
-                        },
+                        contentDescription = stringResource(R.string.hajj_expand_details),
                         tint = SaatColors.Slate500,
                         modifier = Modifier.rotate(arrowRotation)
                     )
@@ -230,11 +217,7 @@ fun ManasikStepCard(
 
                     // Detailed steps list
                     Text(
-                        text = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Step-by-Step Instructions:"
-                            AppLanguage.MALAY -> "Panduan Langkah demi Langkah:"
-                            else -> "Urutan Pelaksanaan:"
-                        },
+                        text = stringResource(R.string.hajj_detailed_steps_header),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.DeepEmerald
@@ -291,11 +274,7 @@ fun ManasikStepCard(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = when (appLanguage) {
-                                            AppLanguage.ENGLISH -> "Prohibitions to Watch Out:"
-                                            AppLanguage.MALAY -> "Larangan Semasa Tahap Ini:"
-                                            else -> "Larangan yang Harus Dihindari:"
-                                        },
+                                        text = stringResource(R.string.hajj_prohibitions_header),
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF991B1B)
@@ -333,11 +312,7 @@ fun ManasikStepCard(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = when (appLanguage) {
-                                            AppLanguage.ENGLISH -> "Practical Pilgrim Tips:"
-                                            AppLanguage.MALAY -> "Tips Praktikal Jemaah:"
-                                            else -> "Tips Praktis di Lapangan:"
-                                        },
+                                        text = stringResource(R.string.hajj_practical_tips_header),
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF92400E)
@@ -345,13 +320,25 @@ fun ManasikStepCard(
                                 }
                                 Spacer(modifier = Modifier.height(6.dp))
                                 step.practicalTips.forEach { tip ->
-                                    Text(
-                                        text = "💡 ${tip.get(appLanguage)}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color(0xFF78350F),
-                                        lineHeight = 17.sp,
-                                        modifier = Modifier.padding(vertical = 2.dp)
-                                    )
+                                    Row(
+                                        modifier = Modifier.padding(vertical = 2.dp),
+                                        verticalAlignment = Alignment.Top
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_daily_verse_custom),
+                                            contentDescription = null,
+                                            tint = Color(0xFFD97706),
+                                            modifier = Modifier
+                                                .padding(top = 2.dp, end = 6.dp)
+                                                .size(14.dp)
+                                        )
+                                        Text(
+                                            text = tip.get(appLanguage),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = Color(0xFF78350F),
+                                            lineHeight = 17.sp
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -367,21 +354,39 @@ fun ManasikStepCard(
                         ) {
                             Column(modifier = Modifier.padding(10.dp)) {
                                 if (step.dalilQuran != null) {
-                                    Text(
-                                        text = "📖 ${step.dalilQuran}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontStyle = FontStyle.Italic,
-                                        color = SaatColors.Slate700
-                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_tafsir),
+                                            contentDescription = null,
+                                            tint = SaatColors.DeepEmerald,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = step.dalilQuran.get(appLanguage),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontStyle = FontStyle.Italic,
+                                            color = SaatColors.Slate700
+                                        )
+                                    }
                                 }
                                 if (step.dalilHadits != null) {
-                                    if (step.dalilQuran != null) Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "📜 ${step.dalilHadits}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontStyle = FontStyle.Italic,
-                                        color = SaatColors.Slate700
-                                    )
+                                    if (step.dalilQuran != null) Spacer(modifier = Modifier.height(6.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_faraidh_dalil),
+                                            contentDescription = null,
+                                            tint = SaatColors.DeepEmerald,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = step.dalilHadits.get(appLanguage),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontStyle = FontStyle.Italic,
+                                            color = SaatColors.Slate700
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -399,11 +404,7 @@ fun ManasikStepCard(
                             Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = when (appLanguage) {
-                                    AppLanguage.ENGLISH -> "View Related Du'a & Dzikir"
-                                    AppLanguage.MALAY -> "Lihat Doa & Zikir Berkaitan"
-                                    else -> "Buka Doa & Dzikir Terkait"
-                                },
+                                text = stringResource(R.string.hajj_view_related_doa),
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.labelMedium
                             )
@@ -462,11 +463,7 @@ fun HajjDoaCard(
                     ) {
                         Icon(
                             Icons.Filled.ContentCopy,
-                            contentDescription = when (appLanguage) {
-                                AppLanguage.ENGLISH -> "Copy prayer"
-                                AppLanguage.MALAY -> "Salin doa"
-                                else -> "Salin doa"
-                            },
+                            contentDescription = stringResource(R.string.hajj_copy_prayer),
                             tint = SaatColors.Slate500,
                             modifier = Modifier.size(18.dp)
                         )
@@ -489,11 +486,7 @@ fun HajjDoaCard(
                     ) {
                         Icon(
                             Icons.Filled.Share,
-                            contentDescription = when (appLanguage) {
-                                AppLanguage.ENGLISH -> "Share prayer"
-                                AppLanguage.MALAY -> "Kongsi doa"
-                                else -> "Bagikan doa"
-                            },
+                            contentDescription = stringResource(R.string.hajj_share_prayer),
                             tint = SaatColors.Slate500,
                             modifier = Modifier.size(18.dp)
                         )
@@ -699,11 +692,7 @@ fun HajjDalilCard(
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Text(
-                        text = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Tafsir & Contextual Explanation:"
-                            AppLanguage.MALAY -> "Huraian Tafsir & Konteks:"
-                            else -> "Penjelasan Tafsir & Konteks:"
-                        },
+                        text = stringResource(R.string.hajj_tafsir_explanation_header),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.DeepEmerald
@@ -802,11 +791,7 @@ fun MadhhabRulingCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = when (appLanguage) {
-                                AppLanguage.ENGLISH -> "Fatwa & Practical Conclusion:"
-                                AppLanguage.MALAY -> "Kesimpulan Tarjih & Praktikal:"
-                                else -> "Kesimpulan Tarjih & Praktis Jamaah:"
-                            },
+                            text = stringResource(R.string.hajj_rajih_conclusion_header),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF166534)
@@ -906,11 +891,7 @@ fun DamRuleCard(
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Text(
-                        text = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Required Dam / Penalty:"
-                            AppLanguage.MALAY -> "Kadar Dam / Denda:"
-                            else -> "Bentuk Dam / Denda:"
-                        },
+                        text = stringResource(R.string.hajj_penalty_header),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.DeepEmerald
@@ -926,11 +907,7 @@ fun DamRuleCard(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = when (appLanguage) {
-                            AppLanguage.ENGLISH -> "Alternative Options (If unable):"
-                            AppLanguage.MALAY -> "Pilihan Gantian (Jika tidak mampu):"
-                            else -> "Pilihan Alternatif / Gantian:"
-                        },
+                        text = stringResource(R.string.hajj_alternative_options_header),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.GoldDeep
@@ -946,12 +923,21 @@ fun DamRuleCard(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "📜 Dalil: ${dam.dalil}",
-                style = MaterialTheme.typography.labelSmall,
-                fontStyle = FontStyle.Italic,
-                color = SaatColors.Slate500
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_faraidh_dalil),
+                    contentDescription = null,
+                    tint = SaatColors.Slate500,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Dalil: ${dam.dalil}",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontStyle = FontStyle.Italic,
+                    color = SaatColors.Slate500
+                )
+            }
         }
     }
 }
@@ -988,7 +974,7 @@ fun MiqatCard(
                     color = SaatColors.Gold.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = miqat.distanceFromMakkah,
+                        text = miqat.distanceFromMakkah.get(appLanguage),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.GoldDeep,
@@ -1020,19 +1006,37 @@ fun MiqatCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(10.dp)) {
-                    Text(
-                        text = "📍 ${miqat.direction.get(appLanguage)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = SaatColors.Slate800
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "👥 ${miqat.dedicatedFor.get(appLanguage)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = SaatColors.Slate700,
-                        lineHeight = 16.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_location_custom),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = miqat.direction.get(appLanguage),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = SaatColors.Slate800
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_faraidh_people),
+                            contentDescription = null,
+                            tint = SaatColors.Slate500,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = miqat.dedicatedFor.get(appLanguage),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SaatColors.Slate700,
+                            lineHeight = 16.sp
+                        )
+                    }
                 }
             }
         }
@@ -1098,8 +1102,14 @@ fun HistoricSiteCard(
                     modifier = Modifier.padding(10.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    Text("🕌", fontSize = 14.sp)
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_institution_custom),
+                        contentDescription = null,
+                        tint = Color(0xFF166534),
+                        modifier = Modifier
+                            .padding(top = 2.dp, end = 6.dp)
+                            .size(14.dp)
+                    )
                     Text(
                         text = site.adabAndDoa.get(appLanguage),
                         style = MaterialTheme.typography.labelSmall,
@@ -1169,7 +1179,7 @@ fun HajjChecklistTile(
                     color = Color(0xFFFEF2F2)
                 ) {
                     Text(
-                        text = "WAJIB",
+                        text = stringResource(R.string.hajj_mandatory_badge),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFFDC2626),

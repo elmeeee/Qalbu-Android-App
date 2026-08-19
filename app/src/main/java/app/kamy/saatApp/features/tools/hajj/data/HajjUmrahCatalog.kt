@@ -107,8 +107,22 @@ object HajjUmrahCatalog {
                     description = parseLocalizedText(obj.optJSONObject("description")),
                     detailedSteps = parseLocalizedList(obj.optJSONArray("detailedSteps")),
                     doaRefId = obj.optString("doaRefId").takeIf { it.isNotBlank() },
-                    dalilQuran = obj.optString("dalilQuran").takeIf { it.isNotBlank() },
-                    dalilHadits = obj.optString("dalilHadits").takeIf { it.isNotBlank() },
+                    dalilQuran = if (obj.has("dalilQuran")) {
+                        if (obj.optJSONObject("dalilQuran") != null) {
+                            parseLocalizedText(obj.optJSONObject("dalilQuran"))
+                        } else {
+                            val s = obj.optString("dalilQuran")
+                            if (s.isNotBlank()) LocalizedText(s, s, s) else null
+                        }
+                    } else null,
+                    dalilHadits = if (obj.has("dalilHadits")) {
+                        if (obj.optJSONObject("dalilHadits") != null) {
+                            parseLocalizedText(obj.optJSONObject("dalilHadits"))
+                        } else {
+                            val s = obj.optString("dalilHadits")
+                            if (s.isNotBlank()) LocalizedText(s, s, s) else null
+                        }
+                    } else null,
                     prohibitions = parseLocalizedList(obj.optJSONArray("prohibitions")),
                     commonMistakes = parseLocalizedList(obj.optJSONArray("commonMistakes")),
                     practicalTips = parseLocalizedList(obj.optJSONArray("practicalTips"))
@@ -213,7 +227,12 @@ object HajjUmrahCatalog {
                     id = obj.optString("id"),
                     name = obj.optString("name"),
                     arabicName = obj.optString("arabicName"),
-                    distanceFromMakkah = obj.optString("distanceFromMakkah"),
+                    distanceFromMakkah = if (obj.optJSONObject("distanceFromMakkah") != null) {
+                        parseLocalizedText(obj.optJSONObject("distanceFromMakkah"))
+                    } else {
+                        val d = obj.optString("distanceFromMakkah")
+                        LocalizedText(d, d, d)
+                    },
                     direction = parseLocalizedText(obj.optJSONObject("direction")),
                     dedicatedFor = parseLocalizedText(obj.optJSONObject("dedicatedFor")),
                     description = parseLocalizedText(obj.optJSONObject("description")),

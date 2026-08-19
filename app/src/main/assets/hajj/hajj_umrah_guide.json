@@ -57,8 +57,16 @@
         }
       ],
       "doaRefId": "doa_talbiyah",
-      "dalilQuran": "QS. Al-Baqarah: 196 — 'Dan sempurnakanlah ibadah haji dan umrah karena Allah...'",
-      "dalilHadits": "HR. Bukhari no. 1524 & Muslim no. 1181: Penentuan 5 titik Miqat oleh Rasulullah SAW.",
+      "dalilQuran": {
+        "id": "QS. Al-Baqarah: 196 — 'Dan sempurnakanlah ibadah haji dan umrah karena Allah...'",
+        "en": "Surah Al-Baqarah 2:196 — 'And complete the Hajj and 'Umrah for Allah...'",
+        "ms": "Surah Al-Baqarah 2:196 — 'Dan sempurnakanlah ibadah haji dan umrah kerana Allah...'"
+      },
+      "dalilHadits": {
+        "id": "HR. Bukhari no. 1524 & Muslim no. 1181: Penentuan 5 titik Miqat oleh Rasulullah SAW.",
+        "en": "Sahih al-Bukhari 1524 & Muslim 1181: Specification of the 5 Miqat boundaries by the Prophet (ﷺ).",
+        "ms": "Hadis Riwayat Bukhari no. 1524 & Muslim no. 1181: Penentuan 5 titik Miqat oleh Rasulullah SAW."
+      },
       "prohibitions": [
         {
           "id": "Pria: Memakai pakaian berjahit melingkar (celana, kemeja, underwear) dan menutup kepala dengan peci/topi.",
@@ -146,8 +154,16 @@
         }
       ],
       "doaRefId": "doa_rukun_yamani_hajar_aswad",
-      "dalilQuran": "QS. Al-Hajj: 29 — '...dan hendaklah mereka melakukan thawaf sekeliling rumah yang tua itu (Baitullah).'",
-      "dalilHadits": "HR. Muslim no. 1218 (Hadits Jabir): Rasulullah SAW ber-istilam di Hajar Aswad lalu thawaf 7 putaran.",
+      "dalilQuran": {
+        "id": "QS. Al-Hajj: 29 — '...dan hendaklah mereka melakukan thawaf sekeliling rumah yang tua itu (Baitullah).' ",
+        "en": "Surah Al-Hajj 22:29 — '...and perform Tawaf around the Ancient House (the Kaaba).' ",
+        "ms": "Surah Al-Hajj 22:29 — '...dan hendaklah mereka tawaf mengelilingi Rumah Tua (Baitullah) itu.' "
+      },
+      "dalilHadits": {
+        "id": "HR. Muslim no. 1218 (Hadits Jabir): Rasulullah SAW ber-istilam di Hajar Aswad lalu thawaf 7 putaran.",
+        "en": "Sahih Muslim 1218 (Hadith Jabir): The Messenger of Allah (ﷺ) touched the Black Stone and performed 7 Tawaf circuits.",
+        "ms": "Hadis Riwayat Muslim no. 1218 (Hadis Jabir): Rasulullah SAW mengusap Hajarul Aswad lalu bertawaf 7 pusingan."
+      },
       "commonMistakes": [
         {
           "id": "Memaksa mencium Hajar Aswad hingga menyakiti jamaah lain (cukup istilam dari kejauhan).",
@@ -220,8 +236,16 @@
         }
       ],
       "doaRefId": "doa_zamzam",
-      "dalilQuran": "QS. Al-Baqarah: 125 — 'Dan jadikanlah sebagian Maqam Ibrahim tempat shalat...'",
-      "dalilHadits": "HR. Ibnu Majah no. 3062: 'Air Zamzam itu sesuai dengan niat orang yang meminumnya.'",
+      "dalilQuran": {
+        "id": "QS. Al-Baqarah: 125 — 'Dan jadikanlah sebagian Maqam Ibrahim tempat shalat...'",
+        "en": "Surah Al-Baqarah 2:125 — 'And take from the standing place of Abraham a place of prayer...'",
+        "ms": "Surah Al-Baqarah 2:125 — 'Dan jadikanlah sebahagian Maqam Ibrahim itu tempat solat...'"
+      },
+      "dalilHadits": {
+        "id": "HR. Ibnu Majah no. 3062: 'Air Zamzam itu sesuai dengan niat orang yang meminumnya.'",
+        "en": "Sunan Ibn Majah 3062: 'The water of Zamzam is for whatever intention it is drunk for.'",
+        "ms": "Hadis Riwayat Ibn Majah no. 3062: 'Air Zamzam itu mengikut niat orang yang meminumnya.'"
+      },
       "practicalTips": [
         {
           "id": "Jika area Maqam Ibrahim sangat padat, shalat sunnah thawaf boleh dilakukan di lantai 2, atap, atau bagian mana saja di Masjidil Haram.",
@@ -287,8 +311,16 @@
         }
       ],
       "doaRefId": "doa_shafa_marwah_dzikir",
-      "dalilQuran": "QS. Al-Baqarah: 158 — 'Sesungguhnya Shafa dan Marwah adalah sebahagian dari syi'ar Allah...'",
-      "dalilHadits": "HR. Muslim no. 1218: Nabi SAW bersabda 'Mulailah dengan apa yang Allah mulai dengannya (Shafa).'",
+      "dalilQuran": {
+        "id": "QS. Al-Baqarah: 158 — 'Sesungguhnya Shafa dan Marwah adalah sebahagian dari syi'ar Allah...'",
+        "en": "Surah Al-Baqarah 2:158 — 'Indeed, Safa and Marwah are among the symbols of Allah...'",
+        "ms": "Surah Al-Baqarah 2:158 — 'Sesungguhnya Safa dan Marwah itu adalah sebahagian daripada syiar Allah...'"
+      },
+      "dalilHadits": {
+        "id": "HR. Muslim no. 1218: Nabi SAW bersabda 'Mulailah dengan apa yang Allah mulai dengannya (Shafa).'",
+        "en": "Sahih Muslim 1218: The Prophet (ﷺ) said: 'Begin with what Allah began with (Safa).'",
+        "ms": "Hadis Riwayat Muslim no. 1218: Nabi SAW bersabda: 'Mulakanlah dengan apa yang dimulakan oleh Allah (Safa).'"
+      },
       "practicalTips": [
         {
           "id": "Wudhu disunnahkan untuk Sa'i namun tidak menjadi syarat sah (wanita haid yang sudah thawaf boleh melakukan sa'i).",
@@ -349,8 +381,16 @@
         }
       ],
       "doaRefId": "doa_tahallul",
-      "dalilQuran": "QS. Al-Fath: 27 — '...dengan mencukur rambut kepalamu dan mengguntingnya, sedang kamu tidak merasa takut.'",
-      "dalilHadits": "HR. Bukhari no. 1727 & Muslim no. 1301: 'Ya Allah ampunilah mereka yang mencukur gundul (3x), dan yang memendekkan (1x).'",
+      "dalilQuran": {
+        "id": "QS. Al-Fath: 27 — '...dengan mencukur rambut kepalamu dan mengguntingnya, sedang kamu tidak merasa takut.'",
+        "en": "Surah Al-Fath 48:27 — '...with your heads shaved and hair shortened, having no fear.'",
+        "ms": "Surah Al-Fath 48:27 — '...dengan mencukur kepala kamu dan mengguntingnya, tanpa merasa takut.'"
+      },
+      "dalilHadits": {
+        "id": "HR. Bukhari no. 1727 & Muslim no. 1301: 'Ya Allah ampunilah mereka yang mencukur gundul (3x), dan yang memendekkan (1x).'",
+        "en": "Sahih al-Bukhari 1727 & Muslim 1301: 'O Allah, forgive those who shave their heads (3x), and those who shorten (1x).'",
+        "ms": "Hadis Riwayat Bukhari no. 1727 & Muslim no. 1301: 'Ya Allah ampunilah mereka yang mencukur gundul (3x), dan yang memendekkan (1x).'"
+      },
       "practicalTips": [
         {
           "id": "Jangan saling memotong rambut sebelum orang yang memotongkan tersebut sudah bertahallul untuk dirinya sendiri.",
@@ -413,7 +453,11 @@
         }
       ],
       "doaRefId": "doa_talbiyah",
-      "dalilHadits": "HR. Muslim no. 1218: Rasulullah SAW keluar menuju Mina pada hari Tarwiyah dan shalat 5 waktu di sana."
+      "dalilHadits": {
+        "id": "HR. Muslim no. 1218: Rasulullah SAW keluar menuju Mina pada hari Tarwiyah dan shalat 5 waktu di sana.",
+        "en": "Sahih Muslim 1218: The Prophet (ﷺ) departed to Mina on the Day of Tarwiyah and offered 5 daily prayers there.",
+        "ms": "Hadis Riwayat Muslim no. 1218: Rasulullah SAW keluar menuju ke Mina pada hari Tarwiyah dan bersolat 5 waktu di sana."
+      }
     },
     {
       "id": "hajj_step_2",
@@ -472,8 +516,16 @@
         }
       ],
       "doaRefId": "doa_arafah",
-      "dalilQuran": "QS. Al-Baqarah: 198 — 'Maka apabila kamu telah bertolak dari Arafah, berdzikirlah kepada Allah di Masy'aril Haram...'",
-      "dalilHadits": "HR. Tirmidzi no. 889: Rasulullah SAW bersabda: 'Al-Hajju 'Arafah' (Haji itu adalah wukuf di Arafah)."
+      "dalilQuran": {
+        "id": "QS. Al-Baqarah: 198 — 'Maka apabila kamu telah bertolak dari Arafah, berdzikirlah kepada Allah di Masy'aril Haram...'",
+        "en": "Surah Al-Baqarah 2:198 — 'Then when you depart from Arafat, remember Allah at al-Mash'ar al-Haram...'",
+        "ms": "Surah Al-Baqarah 2:198 — 'Maka bertolaklah kamu dari Arafah, berzikirlah mengingati Allah di Masy'aril Haram...'"
+      },
+      "dalilHadits": {
+        "id": "HR. Tirmidzi no. 889: Rasulullah SAW bersabda: 'Al-Hajju 'Arafah' (Haji itu adalah wukuf di Arafah).",
+        "en": "Jami' at-Tirmidhi 889: The Prophet (ﷺ) declared: 'Hajj is 'Arafah.'",
+        "ms": "Hadis Riwayat Tirmidzi no. 889: Rasulullah SAW bersabda: 'Al-Hajju 'Arafah' (Haji itu adalah wukuf di Arafah)."
+      }
     },
     {
       "id": "hajj_step_3",
@@ -527,7 +579,11 @@
         }
       ],
       "doaRefId": "doa_muzdalifah",
-      "dalilQuran": "QS. Al-Baqarah: 198 — '...berdzikirlah kepada Allah di Masy'aril Haram...'"
+      "dalilQuran": {
+        "id": "QS. Al-Baqarah: 198 — '...berdzikirlah kepada Allah di Masy'aril Haram...'",
+        "en": "Surah Al-Baqarah 2:198 — '...remember Allah at al-Mash'ar al-Haram...'",
+        "ms": "Surah Al-Baqarah 2:198 — '...berzikirlah mengingati Allah di Masy'aril Haram...'"
+      }
     },
     {
       "id": "hajj_step_4",
@@ -591,7 +647,11 @@
         }
       ],
       "doaRefId": "doa_jumrah",
-      "dalilHadits": "HR. Bukhari no. 1735: Sahabat bertanya tentang urutan amalan hari Nahar yang tertukar, Rasulullah SAW menjawab: 'Lakukanlah, tidak mengapa.'"
+      "dalilHadits": {
+        "id": "HR. Bukhari no. 1735: Sahabat bertanya tentang urutan amalan hari Nahar yang tertukar, Rasulullah SAW menjawab: 'Lakukanlah, tidak mengapa.'",
+        "en": "Sahih al-Bukhari 1735: Companions asked about performing Nahr rites out of order; the Prophet (ﷺ) replied: 'Do so, no harm.'",
+        "ms": "Hadis Riwayat Bukhari no. 1735: Sahabat bertanya tentang urutan amalan hari Nahar yang tertukar, Rasulullah SAW menjawab: 'Lakukanlah, tidak mengapa.'"
+      }
     },
     {
       "id": "hajj_step_5",
@@ -645,8 +705,16 @@
         }
       ],
       "doaRefId": "doa_jumrah",
-      "dalilQuran": "QS. Al-Baqarah: 203 — 'Dan berdzikirlah (dengan menyebut) Allah dalam beberapa hari yang berbilang...'",
-      "dalilHadits": "HR. Muslim no. 1141: 'Hari-hari Tasyriq adalah hari makan, minum, dan berdzikir kepada Allah.'"
+      "dalilQuran": {
+        "id": "QS. Al-Baqarah: 203 — 'Dan berdzikirlah (dengan menyebut) Allah dalam beberapa hari yang berbilang...'",
+        "en": "Surah Al-Baqarah 2:203 — 'And remember Allah during specific numbered days...'",
+        "ms": "Surah Al-Baqarah 2:203 — 'Dan berzikirlah mengingati Allah dalam beberapa hari yang terbilang...'"
+      },
+      "dalilHadits": {
+        "id": "HR. Muslim no. 1141: 'Hari-hari Tasyriq adalah hari makan, minum, dan berdzikir kepada Allah.'",
+        "en": "Sahih Muslim 1141: 'The days of Tashreeq are days of eating, drinking, and remembering Allah.'",
+        "ms": "Hadis Riwayat Muslim no. 1141: 'Hari-hari Tasyrik adalah hari makan, minum, dan berzikir kepada Allah.'"
+      }
     },
     {
       "id": "hajj_step_6",
@@ -700,7 +768,11 @@
         }
       ],
       "doaRefId": "doa_wada",
-      "dalilHadits": "HR. Bukhari no. 1755 & Muslim no. 1328: 'Janganlah salah seorang dari kalian pulang hingga menjadikan akhir perjumpaannya adalah dengan Baitullah.'"
+      "dalilHadits": {
+        "id": "HR. Bukhari no. 1755 & Muslim no. 1328: 'Janganlah salah seorang dari kalian pulang hingga menjadikan akhir perjumpaannya adalah dengan Baitullah.'",
+        "en": "Sahih al-Bukhari 1755 & Muslim 1328: 'None of you should leave until his last act is Tawaf around the House.'",
+        "ms": "Hadis Riwayat Bukhari no. 1755 & Muslim no. 1328: 'Janganlah seseorang daripada kamu pulang sehinggalah amalan terakhirnya ialah di Baitullah.'"
+      }
     }
   ],
   "manasikDuas": [
@@ -1413,7 +1485,11 @@
       "id": "miqat_bir_ali",
       "name": "Dzulhulaifah (Masjid Bir Ali / Abyar Ali)",
       "arabicName": "ذُو الْحُلَيْفَةِ (مَسْجِد الشَّجَرَة)",
-      "distanceFromMakkah": "± 450 km (Utara)",
+      "distanceFromMakkah": {
+        "id": "± 450 km (Utara)",
+        "en": "± 450 km (North)",
+        "ms": "± 450 km (Utara)"
+      },
       "direction": {
         "id": "Dari arah Madinah Al-Munawwarah",
         "en": "From the direction of Madinah",
@@ -1451,7 +1527,11 @@
       "id": "miqat_juhfah",
       "name": "Al-Juhfah (Dekat Rabigh)",
       "arabicName": "الْجُحْفَةُ (رَابِغ)",
-      "distanceFromMakkah": "± 187 km (Barat Laut)",
+      "distanceFromMakkah": {
+        "id": "± 187 km (Barat Laut)",
+        "en": "± 187 km (Northwest)",
+        "ms": "± 187 km (Barat Laut)"
+      },
       "direction": {
         "id": "Dari arah Syam, Mesir, dan Afrika Utara",
         "en": "From Levant (Syria/Jordan), Egypt, and North Africa",
@@ -1484,7 +1564,11 @@
       "id": "miqat_qarnul_manazil",
       "name": "Qarnul Manazil (As-Sail Al-Kabir / As-Sail Ash-Shaghir)",
       "arabicName": "قَرْنُ الْمَنَازِلِ (السَّيْل الْكَبِير)",
-      "distanceFromMakkah": "± 75 km (Timur)",
+      "distanceFromMakkah": {
+        "id": "± 75 km (Timur)",
+        "en": "± 75 km (East)",
+        "ms": "± 75 km (Timur)"
+      },
       "direction": {
         "id": "Dari arah Riyadh, Najd, Teluk, dan Penerbangan Pesawat Asia Tenggara",
         "en": "From Najd, Riyadh, GCC Gulf states, and Southeast Asia flight paths",
@@ -1517,7 +1601,11 @@
       "id": "miqat_yalamlam",
       "name": "Yalamlam (As-Sa'diyyah)",
       "arabicName": "يَلَمْلَمُ (السَّعْدِيَّة)",
-      "distanceFromMakkah": "± 100 km (Selatan)",
+      "distanceFromMakkah": {
+        "id": "± 100 km (Selatan)",
+        "en": "± 100 km (South)",
+        "ms": "± 100 km (Selatan)"
+      },
       "direction": {
         "id": "Dari arah Yaman, Samudera Hindia, dan Asia Selatan",
         "en": "From Yemen, Indian Ocean maritime routes, and South Asia",
@@ -1545,7 +1633,11 @@
       "id": "miqat_tanim",
       "name": "Masjid Tan'im (Masjid Sayyidah Aisyah)",
       "arabicName": "التَّنْعِيمُ (مَسْجِدُ عَائِشَةَ رَضِيَ اللَّهُ عَنْهَا)",
-      "distanceFromMakkah": "± 7.5 km (Utara)",
+      "distanceFromMakkah": {
+        "id": "± 7.5 km (Utara)",
+        "en": "± 7.5 km (North)",
+        "ms": "± 7.5 km (Utara)"
+      },
       "direction": {
         "id": "Miqat Tanah Halal terdekat dari Masjidil Haram Makkah",
         "en": "Closest Halal ground Miqat from Masjid al-Haram",

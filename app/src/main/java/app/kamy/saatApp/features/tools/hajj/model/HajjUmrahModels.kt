@@ -37,8 +37,8 @@ data class ManasikStep(
     val description: LocalizedText,
     val detailedSteps: List<LocalizedText>,
     val doaRefId: String? = null,
-    val dalilQuran: String? = null,
-    val dalilHadits: String? = null,
+    val dalilQuran: LocalizedText? = null,
+    val dalilHadits: LocalizedText? = null,
     val prohibitions: List<LocalizedText> = emptyList(),
     val commonMistakes: List<LocalizedText> = emptyList(),
     val practicalTips: List<LocalizedText> = emptyList()
@@ -98,7 +98,7 @@ data class MiqatLocation(
     val id: String,
     val name: String,
     val arabicName: String,
-    val distanceFromMakkah: String,
+    val distanceFromMakkah: LocalizedText,
     val direction: LocalizedText,
     val dedicatedFor: LocalizedText,
     val description: LocalizedText,
@@ -120,6 +120,8 @@ data class HajjChecklistCategory(
     val title: LocalizedText,
     val items: List<HajjChecklistItem>
 )
+
+
 
 @Immutable
 data class HajjChecklistItem(

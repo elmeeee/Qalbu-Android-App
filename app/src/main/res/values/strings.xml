@@ -988,4 +988,73 @@
     <!-- Adhan Notification Helper Strings -->
     <string name="notif_off_default_sound_hint">Off (Still notify with default sound)</string>
     <string name="notif_adhan_section_info">💡 When Adhan sound is turned off, prayer alerts will still be delivered using your device\'s default notification sound.</string>
+
+    <!-- Hajj & Umrah Screen Strings -->
+    <string name="hajj_top_bar_title">Hajj &amp; Umrah Companion</string>
+    <string name="hajj_top_bar_subtitle">Manasik, Du\'as, Dalil &amp; Fiqh</string>
+
+    <string name="hajj_tab_umrah">Umrah Rites</string>
+    <string name="hajj_tab_hajj">Hajj Rites</string>
+    <string name="hajj_tab_doa">Du\'as &amp; Dzikir</string>
+    <string name="hajj_tab_dalil">Dalil &amp; Evidence</string>
+    <string name="hajj_tab_fiqh">4-Madhhab Fiqh</string>
+    <string name="hajj_tab_miqat">Miqat &amp; Sites</string>
+    <string name="hajj_tab_checklist">Checklist</string>
+
+    <string name="hajj_umrah_intro_title">5 Core Stages of Umrah</string>
+    <string name="hajj_umrah_intro_subtitle">Follow these consecutive steps with pure intention from Miqat to Tahallul.</string>
+
+    <string name="hajj_intro_title">Daily Timeline of Hajj (8–13 Dhul-Hijjah)</string>
+    <string name="hajj_intro_subtitle">Detailed guide for Tarwiyah, Arafah, Muzdalifah, Jamarat, and Tashreeq.</string>
+
+    <string name="hajj_dalil_intro_title">Foundational Qur\'an &amp; Sahih Hadith Dalil</string>
+    <string name="hajj_dalil_intro_subtitle">Primary scriptural evidence from Surah Al-Baqarah, Ali \'Imran, Al-Hajj &amp; Sahih Muslim.</string>
+
+    <string name="hajj_madhhab_intro_title">4-Madhhab Fiqh &amp; Penalty (Dam) Guide</string>
+    <string name="hajj_madhhab_intro_subtitle">Comparative jurisprudence between Shafi\'i, Hanafi, Maliki, Hanbali schools.</string>
+    <string name="hajj_madhhab_matrix_header">Jurisprudence Matrix</string>
+    <string name="hajj_dam_rules_header">Penalty (Dam / Fidyah) Rules</string>
+
+    <string name="hajj_miqat_intro_title">5 Miqat Boundaries &amp; Historic Ziyarah Sites</string>
+    <string name="hajj_miqat_intro_subtitle">Geographical stations of Ihram established by the Prophet (ﷺ) and holy sights in Makkah &amp; Madinah.</string>
+    <string name="hajj_miqat_boundaries_header">Miqat Boundaries</string>
+    <string name="hajj_ziarah_sites_header">Historical Holy Sites (Makkah &amp; Madinah)</string>
+
+    <string name="hajj_checklist_progress_title">Pilgrim Preparation Progress</string>
+
+    <string name="hajj_hero_umrah_badge">UMRAH RITES</string>
+    <string name="hajj_hero_umrah_title">Umrah Step-by-Step</string>
+    <string name="hajj_hero_umrah_subtitle">From Ihram at Miqat to Final Tahallul</string>
+
+    <string name="hajj_hero_hajj_badge">5TH PILLAR OF ISLAM</string>
+    <string name="hajj_hero_hajj_title">Hajj Pilgrimage Guide</string>
+    <string name="hajj_hero_hajj_subtitle">Day-by-Day Journey (8–13 Dhul-Hijjah)</string>
+
+    <string name="hajj_select_type_label">Select Type of Hajj:</string>
+    <string name="hajj_tamattu_desc">Tamattu\': Umrah first in Shawwal/Dhul-Qa\'dah/Dhul-Hijjah, Tahallul, then enter Hajj on 8th Dhul-Hijjah (Dam Hady mandatory). Standard choice for Southeast Asian pilgrims.</string>
+    <string name="hajj_ifrad_desc">Ifrad: Performing Hajj first until complete, then performing Umrah afterwards (No Dam mandatory).</string>
+    <string name="hajj_qiran_desc">Qiran: Combining intention of Hajj &amp; Umrah in one single Ihram without breaking ihram between them (Dam mandatory).</string>
+
+    <string name="hajj_view_related_doa">View Related Du\'a &amp; Dzikir</string>
+    <string name="hajj_prohibitions_header">Prohibitions to Watch Out:</string>
+    <string name="hajj_practical_tips_header">Practical Pilgrim Tips:</string>
+    <string name="hajj_mistakes_header">Common Mistakes to Avoid:</string>
+    <string name="hajj_alternative_options_header">Alternative Options (If unable):</string>
+
+    <string name="hajj_copy_doa">Copy Du\'a</string>
+    <string name="hajj_share_doa">Share Du\'a</string>
+    <string name="hajj_copied_toast">Du\'a copied to clipboard!</string>
+
+    <string name="hajj_mandatory_badge">MANDATORY</string>
+    <string name="hajj_rukun_badge">PILLAR (RUKUN)</string>
+    <string name="hajj_wajib_badge">MANDATORY (WAJIB)</string>
+    <string name="hajj_expand_details">Expand details</string>
+
+    <string name="hajj_detailed_steps_header">Step-by-Step Instructions:</string>
+    <string name="hajj_tafsir_explanation_header">Tafsir &amp; Contextual Explanation:</string>
+    <string name="hajj_rajih_conclusion_header">Fatwa &amp; Practical Conclusion:</string>
+    <string name="hajj_penalty_header">Required Dam / Penalty:</string>
+
+    <string name="hajj_copy_prayer">Copy prayer</string>
+    <string name="hajj_share_prayer">Share prayer</string>
 </resources>
