@@ -176,7 +176,7 @@ fun TodayHeader(
 
                         Text(
                             text = dateText,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = textColor,
                             maxLines = 1,
