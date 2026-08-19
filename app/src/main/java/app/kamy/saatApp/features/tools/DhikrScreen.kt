@@ -78,6 +78,7 @@ import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
 import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
 import app.kamy.saatApp.ui.feedback.rememberTapHaptic
+import app.kamy.saatApp.ui.feedback.rememberTasbihSoundPlayer
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import kotlinx.coroutines.launch
 
@@ -89,6 +90,7 @@ fun DhikrScreen(onBack: () -> Unit) {
     val coachMarkState = rememberCoachMarkState()
     val tapHaptic = rememberTapHaptic()
     val confirmHaptic = rememberConfirmHaptic()
+    val soundPlayer = rememberTasbihSoundPlayer()
     val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = 0) { DhikrStore.presets.size }
     val selectedIndex = pagerState.currentPage
@@ -121,7 +123,10 @@ fun DhikrScreen(onBack: () -> Unit) {
     }
 
     LaunchedEffect(currentPresetCount, preset.target) {
-        if (currentPresetCount > 0 && currentPresetCount % preset.target == 0) confirmHaptic()
+        if (currentPresetCount > 0 && currentPresetCount % preset.target == 0) {
+            confirmHaptic()
+            soundPlayer.playStop()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -313,6 +318,7 @@ fun DhikrScreen(onBack: () -> Unit) {
                             onTap = {
                                 if (pageCount >= activePreset.target) {
                                     confirmHaptic()
+                                    soundPlayer.playStop()
                                     if (pageIndex < DhikrStore.presets.size - 1) {
                                         scope.launch {
                                             pagerState.animateScrollToPage(pageIndex + 1)
@@ -325,9 +331,11 @@ fun DhikrScreen(onBack: () -> Unit) {
                                     sessionVersion++
                                     pulseKey++
                                     tapHaptic()
+                                    soundPlayer.playClick()
 
                                     if (newCount >= activePreset.target) {
                                         confirmHaptic()
+                                        soundPlayer.playStop()
                                         scope.launch {
                                             kotlinx.coroutines.delay(300)
                                             if (pageIndex < DhikrStore.presets.size - 1) {

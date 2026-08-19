@@ -78,6 +78,7 @@ import app.kamy.saatApp.design.theme.TajweedFontFamily
 import app.kamy.saatApp.features.tools.DoaZikirUiState
 import app.kamy.saatApp.ui.feedback.rememberConfirmHaptic
 import app.kamy.saatApp.ui.feedback.rememberTapHaptic
+import app.kamy.saatApp.ui.feedback.rememberTasbihSoundPlayer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -101,6 +102,7 @@ fun DhikrSessionView(
 ) {
     val tapHaptic = rememberTapHaptic()
     val confirmHaptic = rememberConfirmHaptic()
+    val soundPlayer = rememberTasbihSoundPlayer()
     val scope = rememberCoroutineScope()
 
     val sessionItems = remember(state.dhikrBundles) {
@@ -172,6 +174,8 @@ fun DhikrSessionView(
     fun incrementCount() {
         if (isCompleted) return
         if (currentCount >= activeItem.repeatCount) {
+            confirmHaptic()
+            soundPlayer.playStop()
             scope.launch {
                 if (currentItemIndex < sessionItems.size - 1) {
                     pagerState.animateScrollToPage(currentItemIndex + 1)
@@ -185,9 +189,11 @@ fun DhikrSessionView(
         currentCountState.intValue = nextCount
         pulseKey++
         tapHaptic()
+        soundPlayer.playClick()
 
         if (nextCount == activeItem.repeatCount) {
             confirmHaptic()
+            soundPlayer.playStop()
             scope.launch {
                 delay(320)
                 if (currentItemIndex < sessionItems.size - 1) {
