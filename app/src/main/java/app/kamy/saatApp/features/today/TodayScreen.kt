@@ -42,6 +42,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.offset
@@ -58,6 +59,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import app.kamy.saatApp.features.today.components.getPrayerCardDrawable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -291,7 +295,65 @@ fun TodayScreen(
 
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    val listState = rememberLazyListState()
+    val scrollProgress by remember {
+        derivedStateOf {
+            if (listState.firstVisibleItemIndex > 0) 1f
+            else (listState.firstVisibleItemScrollOffset / 160f).coerceIn(0f, 1f)
+        }
+    }
+    val targetPrayer = prayerState.nextPrayer ?: prayerState.activePrayer ?: app.kamy.saatApp.domain.model.PrayerType.MAGHRIB
+    val cardDrawable = getPrayerCardDrawable(targetPrayer)
+
+    Box(modifier = Modifier.fillMaxSize().background(SaatColors.PureWhite)) {
+        if (scrollProgress < 1f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(350.dp)
+                    .graphicsLayer { alpha = 1f - scrollProgress }
+            ) {
+                Image(
+                    painter = painterResource(cardDrawable),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Top dark scrim for status bar and header text legibility
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Black.copy(alpha = 0.40f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
+
+                // Bottom smooth gradient fade into app's main pure white background
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.Transparent,
+                                    Color.White.copy(alpha = 0.30f),
+                                    Color.White.copy(alpha = 0.75f),
+                                    Color.White
+                                )
+                            )
+                        )
+                )
+            }
+        }
+
         SaatPullToRefresh(
             isRefreshing = isPullRefreshing,
             onRefresh = {
@@ -316,9 +378,10 @@ fun TodayScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background),
+                    .background(Color.Transparent),
                 contentPadding = PaddingValues(top = 0.dp, bottom = listBottomPadding + 12.dp),
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(14.dp)
             ) {
@@ -334,6 +397,7 @@ fun TodayScreen(
                         },
                         hijriLabel = prayerState.hijriLabel,
                         gregorianLabel = prayerState.gregorianLabel,
+                        scrollProgress = scrollProgress,
                         onLocationClick = prayerVm::openLocationSheet,
                         onCalendarClick = onOpenPrayerCalendar,
                         modifier = Modifier
@@ -363,7 +427,8 @@ fun TodayScreen(
                     PrayerDashboardCard(
                         state = prayerState,
                         onRetry = { scope.launch { prayerVm.refresh(force = true) } },
-                        onOpenCalendar = {},
+                        onOpenCalendar = onOpenPrayerCalendar,
+                        onLocationClick = prayerVm::openLocationSheet,
                         modifier = Modifier
                             .padding(horizontal = 20.dp)
                             .coachMarkTarget(

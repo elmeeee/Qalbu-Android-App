@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,7 +51,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @DrawableRes
-private fun getPrayerCardDrawable(type: PrayerType?): Int {
+fun getPrayerCardDrawable(type: PrayerType?): Int {
     return when (type) {
         PrayerType.FAJR -> R.drawable.bg_fajr_card
         PrayerType.DHUHR -> R.drawable.bg_dhur_card
@@ -107,6 +108,7 @@ fun PrayerDashboardCard(
     state: PrayerUiState,
     onRetry: () -> Unit = {},
     onOpenCalendar: () -> Unit = {},
+    onLocationClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val fetchErrorDisplay = state.error
@@ -119,11 +121,7 @@ fun PrayerDashboardCard(
         }
     }
     val headline = rememberHeadline(state)
-    val targetPrayer = state.nextPrayer ?: state.activePrayer ?: PrayerType.DHUHR
-    val cardDrawable = getPrayerCardDrawable(targetPrayer)
-
-    val context = LocalContext.current
-    val is24Hour = context.is24HourClock()
+    val targetPrayer = state.nextPrayer ?: state.activePrayer ?: PrayerType.MAGHRIB
 
     val activeSlotType = remember(state.timings, state.activePrayer, state.nextPrayer) {
         if (state.timings.isEmpty()) null
@@ -134,115 +132,74 @@ fun PrayerDashboardCard(
         }
     }
 
-    val nextPrayerEntry = state.timings.find { it.type == targetPrayer }
-    val formattedTime = nextPrayerEntry?.date?.let {
-        val pattern = if (is24Hour) "HH.mm" else "hh.mm a"
-        SimpleDateFormat(pattern, Locale.getDefault()).format(it)
-    } ?: ""
-
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        // 1. Top Card: Prayer Info Header Card with Illustration & Linear Gradient (#085E43 -> #F7DC8B)
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = Color.Transparent,
-            shadowElevation = 4.dp
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                Color(0xFF085E43),
-                                Color(0xFFF7DC8B)
-                            )
-                        )
-                    )
-            ) {
-                // Background Card Illustration Image (h = 99dp, aligned to bottom edge "mentok kebawah", starting at Y = 21dp)
-                Image(
-                    painter = painterResource(cardDrawable),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.BottomEnd,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .fillMaxWidth()
-                        .height(120.dp)
+        // Middle Section: Next Prayer & Countdown
+        when {
+            state.isLoading && state.timings.isEmpty() -> {
+                PrayerCardLoading()
+            }
+            fetchErrorDisplay != null && state.timings.isEmpty() -> {
+                SaatErrorStateDark(
+                    display = fetchErrorDisplay,
+                    onRetry = onRetry,
+                    modifier = Modifier.fillMaxWidth()
                 )
-
-                // Text Overlay Content
+            }
+            else -> {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.SpaceBetween
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) {
-                    when {
-                        state.isLoading && state.timings.isEmpty() -> PrayerCardLoading()
-                        fetchErrorDisplay != null && state.timings.isEmpty() -> SaatErrorStateDark(
-                            display = fetchErrorDisplay,
-                            onRetry = onRetry,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        else -> {
-                            Column {
-                                Text(
-                                    text = headline.label,
-                                    color = Color.White.copy(alpha = 0.9f),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Spacer(Modifier.height(2.dp))
-                                Text(
-                                    text = headline.title,
-                                    color = Color.White,
-                                    fontSize = 28.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-
-                            if (state.countdown.isNotBlank()) {
-                                val formattedCountdown = if (state.isGracePeriod) {
-                                    stringResource(R.string.prayer_countdown_passed, state.countdown, headline.title)
-                                } else {
-                                    stringResource(R.string.prayer_countdown_until, state.countdown, headline.title)
-                                }
-                                Text(
-                                    text = formattedCountdown,
-                                    color = Color.White.copy(alpha = 0.95f),
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
+                    Text(
+                        text = stringResource(R.string.prayer_widget_next_label),
+                        color = Color.White.copy(alpha = 0.92f),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(Modifier.height(1.dp))
+                    Text(
+                        text = headline.title,
+                        color = Color.White,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    if (state.countdown.isNotBlank() && state.countdown != "--:--:--") {
+                        val countdownText = if (state.isGracePeriod) {
+                            stringResource(R.string.prayer_countdown_passed, state.countdown, headline.title)
+                        } else {
+                            stringResource(R.string.prayer_countdown_until, state.countdown, headline.title)
                         }
+                        Text(
+                            text = countdownText,
+                            color = Color.White.copy(alpha = 0.95f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
         }
 
-        // 2. Bottom Card: 6 Prayer Schedule Slots Row with SVG Icons (Including Terbit)
+        // Bottom Section: 6 Prayer Schedule Slots Row (Inside White Rounded Card)
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             color = Color.White,
-            shadowElevation = 2.dp,
-            border = BorderStroke(1.dp, Color(0xFFEEEEEE))
+            shadowElevation = 0.dp
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 6.dp, horizontal = 4.dp),
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -355,32 +312,25 @@ private fun SchedulePrayerSlot(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .then(
                 if (isActive) {
-                    Modifier.background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color(0xFF085E43),
-                                Color(0xFF15AA7C)
-                            )
-                        )
-                    )
+                    Modifier.background(Color(0xFF0F8A5F))
                 } else {
                     Modifier
                 }
             )
-            .padding(vertical = 6.dp, horizontal = 1.dp),
+            .padding(vertical = 8.dp, horizontal = 2.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = prayerDisplayShort(type),
-                color = if (isActive) Color.White else Color(0xFF334155),
-                fontSize = 10.5.sp,
+                color = if (isActive) Color.White else Color(0xFF1E293B),
+                fontSize = 11.5.sp,
                 fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -389,14 +339,14 @@ private fun SchedulePrayerSlot(
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = null,
-                tint = if (isActive) Color.White else Color(0xFF475569),
-                modifier = Modifier.size(20.dp)
+                tint = if (isActive) Color.White else Color(0xFF1E293B),
+                modifier = Modifier.size(22.dp)
             )
             Text(
                 text = timeText,
-                color = if (isActive) Color.White else Color(0xFF1E293B),
-                fontSize = 11.sp,
-                fontWeight = if (isActive) FontWeight.Bold else FontWeight.SemiBold,
+                color = if (isActive) Color.White else Color(0xFF0F172A),
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 textAlign = TextAlign.Center
             )

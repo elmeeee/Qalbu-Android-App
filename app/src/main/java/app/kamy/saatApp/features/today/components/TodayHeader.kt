@@ -47,12 +47,16 @@ import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.util.Calendar
 
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.unit.lerp
+
 @Composable
 fun TodayHeader(
     cityName: String?,
     locationStatus: String? = null,
     hijriLabel: String?,
     gregorianLabel: String?,
+    scrollProgress: Float = 0f,
     onLocationClick: () -> Unit = {},
     onCalendarClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -100,10 +104,21 @@ fun TodayHeader(
            .replace("Taman", "Tmn", ignoreCase = true)
     }
 
+    val progress = scrollProgress.coerceIn(0f, 1f)
+
+    val headerBgColor = lerp(Color.Transparent, SaatColors.PureWhite, progress)
+    val greetingColor = lerp(Color.White.copy(alpha = 0.95f), SaatColors.Slate500, progress)
+    val defaultDateColor = lerp(Color.White, SaatColors.Slate900, progress)
+    val badgeBgColor = lerp(Color.White.copy(alpha = 0.2f), SaatColors.MintWash, progress)
+    val badgeBorderColor = lerp(Color.White.copy(alpha = 0.4f), SaatColors.Teal.copy(alpha = 0.25f), progress)
+    val badgeContentColor = lerp(Color.White, SaatColors.DeepEmerald, progress)
+    val elevationDp = lerp(0.dp, 2.dp, progress)
+    val dividerColor = lerp(Color.Transparent, SaatColors.SoftGrey.copy(alpha = 0.4f), progress)
+
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = SaatColors.PureWhite,
-        shadowElevation = 2.dp
+        color = headerBgColor,
+        shadowElevation = elevationDp
     ) {
         Column(
             modifier = Modifier
@@ -124,7 +139,7 @@ fun TodayHeader(
                     Text(
                         text = "Assalamu'alaikum",
                         style = MaterialTheme.typography.labelSmall,
-                        color = SaatColors.Slate500,
+                        color = greetingColor,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -156,7 +171,8 @@ fun TodayHeader(
                                 "$prefix${gregorianLabel.orEmpty()}"
                             }
                         }
-                        val textColor = if (targetShowHijri) SaatColors.DeepEmerald else SaatColors.Slate900
+                        val targetDateColor = if (targetShowHijri) SaatColors.DeepEmerald else SaatColors.Slate900
+                        val textColor = lerp(Color.White, targetDateColor, progress)
 
                         Text(
                             text = dateText,
@@ -178,8 +194,8 @@ fun TodayHeader(
                 Surface(
                     onClick = onLocationClick,
                     shape = androidx.compose.foundation.shape.CircleShape,
-                    color = SaatColors.MintWash,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SaatColors.Teal.copy(alpha = 0.25f)),
+                    color = badgeBgColor,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, badgeBorderColor),
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
                     Row(
@@ -190,14 +206,14 @@ fun TodayHeader(
                         Icon(
                             painter = androidx.compose.ui.res.painterResource(R.drawable.ic_location_custom),
                             contentDescription = stringResource(R.string.location_enable),
-                            tint = SaatColors.DeepEmerald,
+                            tint = badgeContentColor,
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
                             text = displayLocation,
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald,
+                            color = badgeContentColor,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.widthIn(max = 140.dp)
@@ -205,7 +221,7 @@ fun TodayHeader(
                     }
                 }
             }
-            HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.4f), thickness = 0.5.dp)
+            HorizontalDivider(color = dividerColor, thickness = 0.5.dp)
         }
     }
 }
