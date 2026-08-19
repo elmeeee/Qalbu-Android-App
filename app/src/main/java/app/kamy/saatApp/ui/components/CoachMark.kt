@@ -1,6 +1,12 @@
 package app.kamy.saatApp.ui.components
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -20,6 +26,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
@@ -28,6 +35,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
@@ -62,6 +70,13 @@ class CoachMarkState {
         val maxKey = targets.keys.maxOrNull()
         return currentStep == maxKey || maxKey == null
     }
+
+    fun stepIndex(): Int {
+        val sorted = targets.keys.sorted()
+        return sorted.indexOf(currentStep) + 1
+    }
+
+    fun totalSteps(): Int = targets.size
 }
 
 data class CoachMarkTarget(
@@ -89,6 +104,13 @@ fun Modifier.coachMarkTarget(
     }
 }
 
+private val TOOLTIP_HORIZONTAL_PADDING = 20.dp
+private val TOOLTIP_VERTICAL_GAP = 12.dp
+private val ARROW_HEIGHT = 10.dp
+private val ARROW_HALF_WIDTH = 10.dp
+private val HIGHLIGHT_PADDING = 6.dp
+private val HIGHLIGHT_CORNER = 16.dp
+
 @Composable
 fun CoachMarkOverlay(
     state: CoachMarkState,
@@ -98,99 +120,223 @@ fun CoachMarkOverlay(
 
     val target = state.targets[state.currentStep]
     if (target == null) {
-        state.isVisible = false
+        // No bounds registered for this step — auto-advance
+        LaunchedEffect(state.currentStep) { state.next() }
         return
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectTapGestures { /* Block touches to underlying UI */ }
-            }
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer(alpha = 0.99f)
-        ) {
-            drawRect(Color.Black.copy(alpha = 0.8f))
-
-            val padding = 4.dp.toPx()
-            val corner = 20.dp.toPx()
-            drawRoundRect(
-                color = Color.Transparent,
-                topLeft = Offset(target.bounds.left - padding, target.bounds.top - padding),
-                size = Size(target.bounds.width + padding * 2, target.bounds.height + padding * 2),
-                cornerRadius = CornerRadius(corner, corner),
-                blendMode = BlendMode.Clear
-            )
-        }
+    AnimatedContent(
+        targetState = state.currentStep,
+        transitionSpec = {
+            (slideInVertically { it / 6 } + fadeIn()) togetherWith
+                    (slideOutVertically { -it / 6 } + fadeOut())
+        },
+        label = "coachMarkStep"
+    ) { step ->
+        val stepTarget = state.targets[step] ?: return@AnimatedContent
 
         val density = LocalDensity.current
-        val screenHeightDp = LocalConfiguration.current.screenHeightDp.dp
-        val topDp = with(density) { target.bounds.top.toDp() }
-        val bottomDp = with(density) { target.bounds.bottom.toDp() }
+        val config = LocalConfiguration.current
+        val screenHeightPx = with(density) { config.screenHeightDp.dp.toPx() }
 
-        val showAbove = topDp > (screenHeightDp / 2)
-        val yPadding = if (showAbove) {
-            (topDp - 220.dp).coerceAtLeast(40.dp)
-        } else {
-            (bottomDp + 16.dp).coerceAtMost(screenHeightDp - 220.dp)
+        val targetCenterY = (stepTarget.bounds.top + stepTarget.bounds.bottom) / 2f
+        val showAbove = targetCenterY > screenHeightPx / 2f
+
+        val targetCenterXPx = (stepTarget.bounds.left + stepTarget.bounds.right) / 2f
+        val arrowXDp: Dp = with(density) {
+            targetCenterXPx.toDp()
+                .coerceIn(40.dp, config.screenWidthDp.dp - 40.dp)
         }
 
-        Column(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = yPadding)
-                .padding(horizontal = 24.dp)
-                .background(Color.White, RoundedCornerShape(16.dp))
-                .padding(20.dp)
-        ) {
-            Text(
-                text = stringResource(target.titleRes),
-                style = MaterialTheme.typography.titleLarge,
-                color = SaatColors.Slate900,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(target.descriptionRes),
-                style = MaterialTheme.typography.bodyMedium,
-                color = SaatColors.Slate700
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextButton(
-                    onClick = {
-                        state.skip()
-                        onDismiss()
-                    }
-                ) {
-                    Text(stringResource(R.string.coach_mark_skip), color = SaatColors.Slate500)
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(
-                    onClick = {
-                        if (state.isLastStep()) {
-                            state.skip()
-                            onDismiss()
-                        } else {
-                            state.next()
+                .fillMaxSize()
+                .pointerInput(step) {
+                    detectTapGestures { tapOffset ->
+                        // Tap on highlighted element → advance to next
+                        val padPx = HIGHLIGHT_PADDING.toPx()
+                        val expanded = Rect(
+                            stepTarget.bounds.left - padPx,
+                            stepTarget.bounds.top - padPx,
+                            stepTarget.bounds.right + padPx,
+                            stepTarget.bounds.bottom + padPx
+                        )
+                        if (expanded.contains(tapOffset)) {
+                            if (state.isLastStep()) { state.skip(); onDismiss() }
+                            else state.next()
                         }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SaatColors.DeepEmerald
-                    )
+                        // Taps elsewhere are blocked (no-op)
+                    }
+                }
+        ) {
+            // Dark scrim with punched-out highlight
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer(alpha = 0.99f)
+            ) {
+                drawRect(Color.Black.copy(alpha = 0.75f))
+                val padPx    = HIGHLIGHT_PADDING.toPx()
+                val cornerPx = HIGHLIGHT_CORNER.toPx()
+                drawRoundRect(
+                    color = Color.Transparent,
+                    topLeft = Offset(
+                        stepTarget.bounds.left - padPx,
+                        stepTarget.bounds.top - padPx
+                    ),
+                    size = Size(
+                        stepTarget.bounds.width + padPx * 2,
+                        stepTarget.bounds.height + padPx * 2
+                    ),
+                    cornerRadius = CornerRadius(cornerPx, cornerPx),
+                    blendMode = BlendMode.Clear
+                )
+            }
+
+            // Tooltip + arrow
+            val highlightTopDp    = with(density) { stepTarget.bounds.top.toDp() }
+            val highlightBottomDp = with(density) { stepTarget.bounds.bottom.toDp() }
+            val screenHeightDp    = config.screenHeightDp.dp
+            val estimatedTooltipHeight = 200.dp
+            val gapTotal = TOOLTIP_VERTICAL_GAP + ARROW_HEIGHT + HIGHLIGHT_PADDING
+
+            val arrowOffsetX: Dp = (arrowXDp - ARROW_HALF_WIDTH - TOOLTIP_HORIZONTAL_PADDING)
+                .coerceIn(0.dp, config.screenWidthDp.dp - TOOLTIP_HORIZONTAL_PADDING * 2 - ARROW_HALF_WIDTH * 2)
+
+            if (showAbove) {
+                val tooltipBottom = (highlightTopDp - gapTotal)
+                    .coerceAtLeast(estimatedTooltipHeight + 24.dp)
+                val tooltipTop = (tooltipBottom - estimatedTooltipHeight).coerceAtLeast(24.dp)
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = tooltipTop,
+                            start = TOOLTIP_HORIZONTAL_PADDING,
+                            end = TOOLTIP_HORIZONTAL_PADDING
+                        )
                 ) {
-                    Text(if (state.isLastStep()) stringResource(R.string.coach_mark_finish) else stringResource(R.string.coach_mark_next))
+                    TooltipCard(state = state, step = step, onDismiss = onDismiss)
+                    // Arrow pointing DOWN
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Canvas(
+                            modifier = Modifier
+                                .width(ARROW_HALF_WIDTH * 2)
+                                .height(ARROW_HEIGHT)
+                                .align(Alignment.TopStart)
+                                .offset(x = arrowOffsetX)
+                        ) {
+                            val path = Path().apply {
+                                moveTo(0f, 0f)
+                                lineTo(size.width, 0f)
+                                lineTo(size.width / 2f, size.height)
+                                close()
+                            }
+                            drawPath(path, Color.White)
+                        }
+                    }
+                }
+            } else {
+                val tooltipTop = (highlightBottomDp + gapTotal)
+                    .coerceAtMost(screenHeightDp - estimatedTooltipHeight - 24.dp)
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = tooltipTop,
+                            start = TOOLTIP_HORIZONTAL_PADDING,
+                            end = TOOLTIP_HORIZONTAL_PADDING
+                        )
+                ) {
+                    // Arrow pointing UP
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Canvas(
+                            modifier = Modifier
+                                .width(ARROW_HALF_WIDTH * 2)
+                                .height(ARROW_HEIGHT)
+                                .align(Alignment.TopStart)
+                                .offset(x = arrowOffsetX)
+                        ) {
+                            val path = Path().apply {
+                                moveTo(0f, size.height)
+                                lineTo(size.width, size.height)
+                                lineTo(size.width / 2f, 0f)
+                                close()
+                            }
+                            drawPath(path, Color.White)
+                        }
+                    }
+                    TooltipCard(state = state, step = step, onDismiss = onDismiss)
                 }
             }
         }
     }
 }
 
+@Composable
+private fun TooltipCard(
+    state: CoachMarkState,
+    step: Int,
+    onDismiss: () -> Unit
+) {
+    val stepTarget = state.targets[step] ?: return
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .padding(20.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(stepTarget.titleRes),
+                style = MaterialTheme.typography.titleMedium,
+                color = SaatColors.Slate900,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "${state.stepIndex()}/${state.totalSteps()}",
+                style = MaterialTheme.typography.labelSmall,
+                color = SaatColors.Slate500,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(stepTarget.descriptionRes),
+            style = MaterialTheme.typography.bodyMedium,
+            color = SaatColors.Slate700
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = { state.skip(); onDismiss() }
+            ) {
+                Text(stringResource(R.string.coach_mark_skip), color = SaatColors.Slate500)
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    if (state.isLastStep()) { state.skip(); onDismiss() }
+                    else state.next()
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
+            ) {
+                Text(
+                    if (state.isLastStep()) stringResource(R.string.coach_mark_finish)
+                    else stringResource(R.string.coach_mark_next)
+                )
+            }
+        }
+    }
+}
