@@ -37,6 +37,16 @@ enum class AdhanVoice(
         id = "ust_daeng_syawal",
         displayName = "Ust. Daeng Syawal Mubarak",
         rawRes = R.raw.adhan_ust_daeng_syawal_indonesia
+    ),
+    HabibSyech(
+        id = "habib_syech",
+        displayName = "Habib Syech Bin Abdul Qadir Assegaf",
+        rawRes = R.raw.adhan_habib_syech
+    ),
+    MFikriIzzulKamil(
+        id = "m_fikri_izzul_kamil",
+        displayName = "M. Fikri Izzul Kamil",
+        rawRes = R.raw.adhan_m_fikri_izzul_kamil
     );
 
     companion object {
@@ -63,6 +73,11 @@ enum class FajrAdhanVoice(
         id = "fajr_bilal_attaki",
         displayName = "Ust. Bilal Attaki",
         rawRes = R.raw.adhan_fajr_ust_bilal_attaki
+    ),
+    MuhammadRohani(
+        id = "fajr_muhammad_rohani",
+        displayName = "Muhammad Rohani",
+        rawRes = R.raw.adhan_fajr_muhammad_rohani
     );
 
     companion object {
