@@ -29,6 +29,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -110,9 +114,8 @@ fun JamakPrayerScreen(
         modifier = modifier
             .fillMaxSize()
             .background(SaatColors.ScreenBackground)
-            .statusBarsPadding()
     ) {
-        // Header Bar
+        // Header Bar (Full screen behind status bar)
         HeaderBar(
             title = stringResource(R.string.jamak_prayer_title),
             subtitle = stringResource(R.string.jamak_prayer_subtitle),
@@ -178,22 +181,18 @@ private fun HeaderBar(
     onBack: () -> Unit
 ) {
     Surface(
+        modifier = Modifier.fillMaxWidth(),
         color = Color.White,
         shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .statusBarsPadding()
                 .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(SaatColors.DeepEmerald.copy(alpha = 0.08f))
-            ) {
+            IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
@@ -312,13 +311,24 @@ private fun DalilCardItem(
                         color = SaatColors.GoldDeep.copy(alpha = 0.12f),
                         modifier = Modifier.padding(top = 2.dp)
                     ) {
-                        Text(
-                            text = dalil.reference(currentLang),
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                            fontWeight = FontWeight.SemiBold,
-                            color = SaatColors.GoldDeep,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_faraidh_dalil),
+                                contentDescription = null,
+                                tint = SaatColors.GoldDeep,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = dalil.reference(currentLang),
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                fontWeight = FontWeight.SemiBold,
+                                color = SaatColors.GoldDeep
+                            )
+                        }
                     }
                 }
             }
@@ -403,7 +413,7 @@ private fun RulesTabContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_location_custom),
+                        painter = painterResource(R.drawable.ic_prayer_rug),
                         contentDescription = null,
                         tint = SaatColors.DeepEmerald,
                         modifier = Modifier.size(28.dp)
@@ -504,10 +514,10 @@ private fun RuleCardItem(
                 }
 
                 Icon(
-                    painter = painterResource(R.drawable.arow_icon),
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = null,
                     tint = Slate400,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
 
@@ -834,7 +844,7 @@ private fun NiatCardItem(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_share_custom),
+                        imageVector = Icons.Default.ContentCopy,
                         contentDescription = "Copy",
                         tint = Slate400,
                         modifier = Modifier.size(18.dp)
