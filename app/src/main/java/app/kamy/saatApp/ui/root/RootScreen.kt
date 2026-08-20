@@ -268,6 +268,11 @@ fun RootScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable("tools/jamak-qashar") {
+                app.kamy.saatApp.features.tools.jamak.JamakPrayerScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
             composable("tools/fidyah") {
                 app.kamy.saatApp.features.tools.fidyah.FidyahCalculatorScreen(
                     onNavigateBack = { navController.popBackStack() }

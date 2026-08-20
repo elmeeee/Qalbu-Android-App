@@ -57,11 +57,10 @@ android {
     androidResources {
         noCompress += listOf("gz", "db")
         ignoreAssetsPattern = "!*.bak"
-        localeFilters += listOf("en", "id", "ms")
     }
 
     bundle {
-        language { enableSplit = true }
+        language { enableSplit = false }
         density { enableSplit = true }
         abi { enableSplit = true }
     }

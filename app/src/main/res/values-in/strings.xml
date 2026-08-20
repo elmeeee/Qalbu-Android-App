@@ -566,6 +566,8 @@
     <string name="sunnah_prayer_title">Panduan &amp; Amalan Sunnah</string>
     <string name="jenazah_prayer_title">Panduan Shalat Jenazah</string>
     <string name="jenazah_prayer_subtitle">Panduan lengkap fardhu kifayah, niat, posisi imam &amp; tata cara 4 takbir</string>
+    <string name="jamak_prayer_title">Shalat Jamak &amp; Qashar</string>
+    <string name="jamak_prayer_subtitle">Panduan musafir: syarat, lafaz niat &amp; tata cara gabung / ringkas shalat</string>
     <string name="sunnah_prayers_tab">Shalat Sunnah</string>
     <string name="sunnah_deeds_tab">Amalan Sunnah Harian</string>
     <!-- Sahabat Saat -->
