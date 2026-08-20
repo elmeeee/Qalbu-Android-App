@@ -31,11 +31,10 @@ android {
         applicationId = "app.kamy.saatApp"
         minSdk = 30
         targetSdk = 36
-        versionCode = 12
+        versionCode = 13
         versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
     }
 
     signingConfigs {
@@ -58,6 +57,13 @@ android {
     androidResources {
         noCompress += listOf("gz", "db")
         ignoreAssetsPattern = "!*.bak"
+        localeFilters += listOf("en", "id", "ms")
+    }
+
+    bundle {
+        language { enableSplit = true }
+        density { enableSplit = true }
+        abi { enableSplit = true }
     }
 
     buildTypes {
