@@ -11,7 +11,7 @@ import android.media.RingtoneManager
 import app.kamy.saatApp.R
 
 object NotificationChannels {
-    const val DAILY_VERSE = "daily_verse_v4"
+    const val DAILY_VERSE = "daily_verse_v5"
     const val PRAYER = "prayer_times_v7"
     const val PRAYER_ALERT = "prayer_alert_v7"
     const val SUNNAH = "sunnah_reminders_v4"
@@ -22,6 +22,7 @@ object NotificationChannels {
 
     /** Old channel IDs that must be deleted so the new configuration takes effect. */
     private val DEPRECATED_CHANNELS = listOf(
+        "daily_verse_v4",
         "prayer_times_v4",
         "prayer_alert_v4",
         "prayer_times_v5",

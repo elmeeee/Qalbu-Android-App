@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
-import app.kamy.saatApp.infrastructure.audio.AdhanPlaybackService
+import app.kamy.saatApp.infrastructure.audio.AdhanPlaybackLauncher
 import app.kamy.saatApp.infrastructure.preferences.AdhanPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +45,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         var adhanRawRes: Int? = null
         val isPlaybackStarted = if (playAdhan && isTahajud) {
             adhanRawRes = app.kamy.saatApp.R.raw.tahajud_alarm
-            AdhanPlaybackService.start(
+            AdhanPlaybackLauncher.startAdhanPlayback(
                 context = appContext,
                 rawRes = app.kamy.saatApp.R.raw.tahajud_alarm,
                 title = title,
@@ -59,7 +59,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
             val fajrVoice = store.currentFajrVoice()
             val rawRes = AdhanVoiceCatalog.rawResForPrayer(prayerName, voice, fajrVoice)
             adhanRawRes = rawRes
-            AdhanPlaybackService.start(
+            AdhanPlaybackLauncher.startAdhanPlayback(
                 context = appContext,
                 rawRes = rawRes,
                 title = title,

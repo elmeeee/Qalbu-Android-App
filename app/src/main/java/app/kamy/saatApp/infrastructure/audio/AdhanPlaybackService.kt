@@ -118,10 +118,14 @@ class AdhanPlaybackService : Service() {
     }
 
     private fun promoteToForeground(title: String, body: String, prayerName: String?): Boolean {
+        if (Build.VERSION.SDK_INT >= 35 && BootContextChecker.isRecentlyBooted()) {
+            android.util.Log.w("AdhanPlaybackService", "Skipping promoteToForeground on Android 15+ during boot period")
+            return false
+        }
         return runCatching {
             val notification = buildForegroundNotification(title, body, prayerName)
             val fgId = if (linkedNotificationId >= 0) linkedNotificationId else NOTIFICATION_ID
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(
                     fgId,
                     notification,
@@ -130,7 +134,11 @@ class AdhanPlaybackService : Service() {
             } else {
                 startForeground(fgId, notification)
             }
-        }.isSuccess
+            true
+        }.getOrElse { e ->
+            android.util.Log.w("AdhanPlaybackService", "promoteToForeground failed: ${e.message}")
+            false
+        }
     }
 
     private fun safePromoteToForegroundAndStop() {
@@ -404,6 +412,7 @@ class AdhanPlaybackService : Service() {
         const val ACTION_STOP = AdhanStopReceiver.ACTION_STOP
         const val ACTION_ADHAN_STOPPED = "app.kamy.saatApp.action.ADHAN_STOPPED"
 
+        @JvmStatic
         fun start(
             context: Context,
             @RawRes rawRes: Int = 0,
@@ -414,6 +423,10 @@ class AdhanPlaybackService : Service() {
             notificationId: Int = -1,
             prayerName: String? = null
         ): Boolean {
+            if (Build.VERSION.SDK_INT >= 35 && BootContextChecker.isRecentlyBooted()) {
+                android.util.Log.w("AdhanPlaybackService", "Device recently booted on Android 15+; avoiding foreground service start.")
+                return false
+            }
             val intent = Intent(context, AdhanPlaybackService::class.java).apply {
                 putExtra(EXTRA_RAW_RES, rawRes)
                 if (soundUri != null) {
@@ -432,7 +445,11 @@ class AdhanPlaybackService : Service() {
             val appContext = context.applicationContext
             return runCatching {
                 androidx.core.content.ContextCompat.startForegroundService(appContext, intent)
-            }.isSuccess
+                true
+            }.getOrElse { e ->
+                android.util.Log.w("AdhanPlaybackService", "startForegroundService failed: ${e.message}")
+                false
+            }
         }
 
         fun stop(context: Context, notificationId: Int = -1) {
