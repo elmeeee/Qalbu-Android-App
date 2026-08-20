@@ -66,8 +66,12 @@ object PrayerNotificationBuilder {
         if (silent) {
             builder.setSilent(true)
         } else {
-            val soundRes = adhanSoundRes ?: R.raw.off_toggle_adzan
-            val soundUri = Uri.parse("android.resource://${context.packageName}/$soundRes")
+            val soundUri = if (adhanSoundRes != null && adhanSoundRes != 0) {
+                val resName = runCatching { context.resources.getResourceEntryName(adhanSoundRes) }.getOrNull() ?: "off_toggle_adzan"
+                Uri.parse("android.resource://${context.packageName}/raw/$resName")
+            } else {
+                Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
+            }
             builder.setSound(soundUri)
             builder.setPriority(NotificationCompat.PRIORITY_HIGH)
         }

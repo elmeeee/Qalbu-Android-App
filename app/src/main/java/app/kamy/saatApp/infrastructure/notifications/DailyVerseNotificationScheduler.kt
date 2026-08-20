@@ -137,7 +137,7 @@ object DailyVerseNotificationScheduler {
             openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/${R.raw.off_toggle_adzan}")
+        val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
         val vibrationPattern = longArrayOf(0, 400, 200, 400)
         val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
             .setSmallIcon(R.drawable.ic_stat_notification)

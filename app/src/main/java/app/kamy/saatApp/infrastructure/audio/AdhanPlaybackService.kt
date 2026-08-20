@@ -162,9 +162,13 @@ class AdhanPlaybackService : Service() {
         body: String,
         prayerName: String? = null
     ) {
-        val fallbackRawUri = Uri.parse("android.resource://$packageName/${R.raw.tahajud_alarm}")
+        val fallbackRawUri = Uri.parse("android.resource://$packageName/raw/tahajud_alarm")
         val primaryUri: Uri? = when {
-            rawRes != 0 -> Uri.parse("android.resource://$packageName/$rawRes")
+            rawRes != 0 -> {
+                val resName = runCatching { resources.getResourceEntryName(rawRes) }.getOrNull()
+                if (resName != null) Uri.parse("android.resource://$packageName/raw/$resName")
+                else Uri.parse("android.resource://$packageName/$rawRes")
+            }
             !soundUriStr.isNullOrBlank() -> Uri.parse(soundUriStr)
             useSystemAlarm -> fallbackRawUri
             else -> fallbackRawUri
