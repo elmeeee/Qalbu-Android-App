@@ -107,12 +107,15 @@ object FidyahReminderScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
+
         val builder = NotificationCompat.Builder(context, NotificationChannels.PRAYER_TRACKER)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(title)
             .setContentText(content)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setSound(soundUri)
             .setAutoCancel(true)
             .setContentIntent(contentPendingIntent)
 

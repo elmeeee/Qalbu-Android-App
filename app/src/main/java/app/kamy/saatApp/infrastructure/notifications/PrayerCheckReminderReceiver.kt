@@ -59,6 +59,8 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
+
         val notification = NotificationCompat.Builder(context, NotificationChannels.PRAYER_TRACKER)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(title)
@@ -67,8 +69,7 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
             .setContentIntent(openIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setSound(soundUri)
             .build()
 
         NotificationManagerCompat.from(context).notify(notificationId, notification)
@@ -91,6 +92,8 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
+
         val notification = NotificationCompat.Builder(context, NotificationChannels.PRAYER_TRACKER)
             .setSmallIcon(R.drawable.ic_stat_notification)
             .setContentTitle(title)
@@ -99,8 +102,7 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
             .setContentIntent(openIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setSound(soundUri)
             .build()
 
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID_WRAP_UP, notification)
