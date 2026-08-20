@@ -44,9 +44,7 @@ class RecitationPlaybackService : MediaSessionService() {
         val player = runCatching { playbackEngine.player }.getOrNull()
         val isPlaying = player?.playWhenReady == true || player?.isPlaying == true
 
-        val isBoot = BootContextChecker.isRecentlyBooted() ||
-            intent == null ||
-            intent.action == Intent.ACTION_BOOT_COMPLETED
+        val isBoot = BootContextChecker.isRecentlyBooted() || intent == null
         if (isBoot) {
             safePromoteToForegroundAndStop()
             return START_NOT_STICKY
