@@ -24,16 +24,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
@@ -58,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -256,8 +252,8 @@ private fun DalilTabContent(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(dalilList, key = { it.id }) { dalil ->
-            DalilCardItem(dalil = dalil, currentLang = currentLang)
+        itemsIndexed(dalilList, key = { _, item -> item.id }) { index, dalil ->
+            DalilCardItem(dalil = dalil, index = index + 1, currentLang = currentLang)
         }
     }
 }
@@ -265,6 +261,7 @@ private fun DalilTabContent(
 @Composable
 private fun DalilCardItem(
     dalil: JamakDalilItem,
+    index: Int,
     currentLang: AppLanguage
 ) {
     Card(
@@ -283,21 +280,26 @@ private fun DalilCardItem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = SaatColors.DeepEmerald.copy(alpha = 0.10f),
-                    modifier = Modifier.size(32.dp)
+                // Islamic Frame Number Icon
+                Box(
+                    modifier = Modifier.size(34.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                            contentDescription = null,
-                            tint = SaatColors.DeepEmerald,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.frame_number_icon),
+                        contentDescription = null,
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    Text(
+                        text = "$index",
+                        style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                        color = SaatColors.DeepEmerald
+                    )
                 }
+
                 Spacer(Modifier.width(10.dp))
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = dalil.title(currentLang),
@@ -401,7 +403,7 @@ private fun RulesTabContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Route,
+                        painter = painterResource(R.drawable.ic_location_custom),
                         contentDescription = null,
                         tint = SaatColors.DeepEmerald,
                         modifier = Modifier.size(28.dp)
@@ -433,8 +435,8 @@ private fun RulesTabContent(
             }
         }
 
-        items(rules, key = { it.id }) { rule ->
-            RuleCardItem(rule = rule, currentLang = currentLang)
+        itemsIndexed(rules, key = { _, item -> item.id }) { index, rule ->
+            RuleCardItem(rule = rule, index = index + 1, currentLang = currentLang)
         }
     }
 }
@@ -442,6 +444,7 @@ private fun RulesTabContent(
 @Composable
 private fun RuleCardItem(
     rule: JamakRuleItem,
+    index: Int,
     currentLang: AppLanguage
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -466,19 +469,22 @@ private fun RuleCardItem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = SaatColors.GoldDeep.copy(alpha = 0.12f),
-                    modifier = Modifier.size(36.dp)
+                // Islamic Frame Number Icon
+                Box(
+                    modifier = Modifier.size(34.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = SaatColors.GoldDeep,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.frame_number_icon),
+                        contentDescription = null,
+                        tint = SaatColors.GoldDeep,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    Text(
+                        text = "$index",
+                        style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                        color = SaatColors.GoldDeep
+                    )
                 }
 
                 Spacer(Modifier.width(12.dp))
@@ -498,10 +504,10 @@ private fun RuleCardItem(
                 }
 
                 Icon(
-                    imageVector = Icons.Default.ChevronRight,
+                    painter = painterResource(R.drawable.arow_icon),
                     contentDescription = null,
                     tint = Slate400,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(16.dp)
                 )
             }
 
@@ -635,19 +641,22 @@ private fun StepCardItem(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
-                    shape = CircleShape,
-                    color = SaatColors.DeepEmerald,
-                    modifier = Modifier.size(28.dp)
+                // Islamic Frame Number Icon for Step Number
+                Box(
+                    modifier = Modifier.size(34.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "${step.stepNumber}",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.frame_number_icon),
+                        contentDescription = null,
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    Text(
+                        text = "${step.stepNumber}",
+                        style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                        color = SaatColors.DeepEmerald
+                    )
                 }
 
                 Spacer(Modifier.width(10.dp))
@@ -753,8 +762,8 @@ private fun NiatTabContent(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(niatList, key = { it.id }) { niat ->
-            NiatCardItem(niat = niat, currentLang = currentLang, context = context)
+        itemsIndexed(niatList, key = { _, item -> item.id }) { index, niat ->
+            NiatCardItem(niat = niat, index = index + 1, currentLang = currentLang, context = context)
         }
     }
 }
@@ -762,6 +771,7 @@ private fun NiatTabContent(
 @Composable
 private fun NiatCardItem(
     niat: JamakNiatItem,
+    index: Int,
     currentLang: AppLanguage,
     context: Context
 ) {
@@ -782,13 +792,37 @@ private fun NiatCardItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = niat.title(currentLang),
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp),
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.DeepEmerald,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
-                )
+                ) {
+                    // Islamic Frame Number Icon
+                    Box(
+                        modifier = Modifier.size(34.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.frame_number_icon),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Text(
+                            text = "$index",
+                            style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                            color = SaatColors.DeepEmerald
+                        )
+                    }
+
+                    Spacer(Modifier.width(10.dp))
+
+                    Text(
+                        text = niat.title(currentLang),
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.DeepEmerald
+                    )
+                }
 
                 IconButton(
                     onClick = {
@@ -800,10 +834,10 @@ private fun NiatCardItem(
                     modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ContentCopy,
+                        painter = painterResource(R.drawable.ic_share_custom),
                         contentDescription = "Copy",
                         tint = Slate400,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
