@@ -7,7 +7,7 @@ import app.kamy.saatApp.domain.adhan.AdhanVoice
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.saatApp.domain.adhan.FajrAdhanVoice
 import app.kamy.saatApp.core.config.LocalQuranConfig
-import app.kamy.saatApp.domain.model.QFTranslation
+import app.kamy.saatApp.domain.model.QuranTranslation
 import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.saatApp.domain.prayer.PrayerMethodOption
@@ -16,7 +16,6 @@ import app.kamy.saatApp.infrastructure.audio.AdhanPreviewPlayer
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.error.AppErrorKind
 import app.kamy.saatApp.core.error.toAppError
-import app.kamy.saatApp.core.error.isAuthenticationFailure
 import app.kamy.saatApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.saatApp.infrastructure.notifications.PrayerNotificationCoordinator
 import app.kamy.saatApp.infrastructure.notifications.PrayerScheduleRefresher
@@ -50,7 +49,7 @@ data class AccountUiState(
     val showTranslatorSheet: Boolean = false,
     val showPrayerSheet: Boolean = false,
     val showNotifTimeSheet: Boolean = false,
-    val translations: List<QFTranslation> = emptyList(),
+    val translations: List<QuranTranslation> = emptyList(),
     val translationsLoading: Boolean = false,
     val translationsError: AppError? = null,
     val translatorQuery: String = "",
@@ -397,7 +396,7 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-    fun selectTranslation(translation: QFTranslation): Boolean {
+    fun selectTranslation(translation: QuranTranslation): Boolean {
         val label = LocalQuranConfig.translationDisplayLabel(translation)
         translationStore.setTranslation(translation.id, label)
         _state.update {
@@ -430,7 +429,7 @@ class AccountViewModel @Inject constructor(
             runCatching { quranRepository.getTranslations() }
                 .onSuccess { list ->
                     val sorted = list.sortedWith(
-                        compareByDescending<QFTranslation> {
+                        compareByDescending<QuranTranslation> {
                             it.languageName.equals(preferredTranslationLanguageName(), true)
                         }
                             .thenBy { it.languageName }
@@ -657,7 +656,7 @@ class AccountViewModel @Inject constructor(
         else -> R.string.prayer_fajr
     }
 
-    fun filteredTranslations(): List<QFTranslation> {
+    fun filteredTranslations(): List<QuranTranslation> {
         val q = _state.value.translatorQuery.trim().lowercase()
         val all = _state.value.translations
         if (q.isEmpty()) return all

@@ -276,7 +276,7 @@ data class ContentPagination(
 // ---- Translations resource ----
 
 @Serializable
-data class QFTranslation(
+data class QuranTranslation(
     val id: Int = 0,
     val name: String = "",
     val authorName: String = "",

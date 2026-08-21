@@ -1,15 +1,11 @@
 package app.kamy.saatApp.core.config
 
 import app.kamy.saatApp.core.locale.AppLanguage
-import app.kamy.saatApp.domain.model.QFTranslation
+import app.kamy.saatApp.domain.model.QuranTranslation
 import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.domain.model.RecitationTranslatedName
 import app.kamy.saatApp.domain.model.TranslatedSubName
 
-/**
- * Local Quran bundle IDs (not Quran Foundation resource IDs).
- * Maps to columns in bundled [qurannew.db].
- */
 object LocalQuranConfig {
     const val TRANSLATION_INDONESIAN = 1
     const val TRANSLATION_ENGLISH = 2
@@ -35,8 +31,8 @@ object LocalQuranConfig {
 
     const val MUROTTAL_CDN = "https://cdn.islamic.network/quran/audio/128"
 
-    val translations: List<QFTranslation> = listOf(
-        QFTranslation(
+    val translations: List<QuranTranslation> = listOf(
+        QuranTranslation(
             id = TRANSLATION_INDONESIAN,
             name = "Indonesian",
             authorName = "Kementerian Agama RI",
@@ -44,7 +40,7 @@ object LocalQuranConfig {
             languageName = "indonesian",
             translatedName = TranslatedSubName("Indonesian", "indonesian")
         ),
-        QFTranslation(
+        QuranTranslation(
             id = TRANSLATION_ENGLISH,
             name = "Sahih International",
             authorName = "Sahih International",
@@ -52,7 +48,7 @@ object LocalQuranConfig {
             languageName = "english",
             translatedName = TranslatedSubName("Sahih International", "english")
         ),
-        QFTranslation(
+        QuranTranslation(
             id = TRANSLATION_MALAY,
             name = "Malay",
             authorName = "DBP",
@@ -114,7 +110,7 @@ object LocalQuranConfig {
     fun transliterationUsesHtml(translationId: Int): Boolean =
         translationId == TRANSLATION_ENGLISH
 
-    fun translationForAppLanguage(language: AppLanguage): QFTranslation =
+    fun translationForAppLanguage(language: AppLanguage): QuranTranslation =
         when (language) {
             AppLanguage.ENGLISH -> translations.first { it.id == TRANSLATION_ENGLISH }
             AppLanguage.MALAY -> translations.first { it.id == TRANSLATION_MALAY }
@@ -129,7 +125,7 @@ object LocalQuranConfig {
             else -> null
         }
 
-    fun translationDisplayLabel(translation: QFTranslation): String =
+    fun translationDisplayLabel(translation: QuranTranslation): String =
         translation.authorName.ifBlank { translation.name }
 
     fun supportsTafsir(translationId: Int): Boolean = true

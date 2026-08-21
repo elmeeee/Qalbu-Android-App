@@ -8,8 +8,6 @@ import app.kamy.saatApp.core.config.AppConfig
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.error.AppErrorKind
-import app.kamy.saatApp.core.error.isAuthenticationFailure
-import app.kamy.saatApp.core.error.userFacingAuthOrApiMessage
 import app.kamy.saatApp.core.error.toAppError
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.infrastructure.network.NetworkMonitor

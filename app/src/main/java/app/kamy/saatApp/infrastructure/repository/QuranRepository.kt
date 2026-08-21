@@ -2,7 +2,7 @@ package app.kamy.saatApp.infrastructure.repository
 
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.domain.model.HadithsByAyahResponse
-import app.kamy.saatApp.domain.model.QFTranslation
+import app.kamy.saatApp.domain.model.QuranTranslation
 import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.QuranJuz
 import app.kamy.saatApp.domain.model.RandomAyahPayload
@@ -91,7 +91,7 @@ class QuranRepository @Inject constructor(
     suspend fun getRecitations(): List<RecitationPayload> =
         LocalQuranConfig.recitations
 
-    suspend fun getTranslations(): List<QFTranslation> =
+    suspend fun getTranslations(): List<QuranTranslation> =
         LocalQuranConfig.translations
 
     suspend fun getTafsirByAyah(

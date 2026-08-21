@@ -97,7 +97,7 @@ import app.kamy.saatApp.domain.adhan.AdhanVoice
 import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.saatApp.domain.adhan.FajrAdhanVoice
 import app.kamy.saatApp.domain.model.PrayerType
-import app.kamy.saatApp.domain.model.QFTranslation
+import app.kamy.saatApp.domain.model.QuranTranslation
 import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.saatApp.domain.prayer.PrayerMadhab
 import app.kamy.saatApp.domain.prayer.PrayerMethodOption
@@ -1527,11 +1527,11 @@ private fun AdhanVoiceSheet(
 private fun TranslatorSheet(
     query: String,
     selectedId: Int,
-    translations: List<QFTranslation>,
+    translations: List<QuranTranslation>,
     isLoading: Boolean,
     error: AppError?,
     onQueryChange: (String) -> Unit,
-    onPick: (QFTranslation) -> Unit,
+    onPick: (QuranTranslation) -> Unit,
     onDismiss: () -> Unit,
     onRetry: () -> Unit
 ) {
