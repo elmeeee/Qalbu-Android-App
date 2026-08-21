@@ -32,7 +32,7 @@ import app.kamy.saatApp.infrastructure.preferences.SurahReminderStore
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.widget.WidgetCoordinator
 import app.kamy.saatApp.infrastructure.repository.AlAdhanRepository
-import app.kamy.saatApp.infrastructure.repository.ContentRepository
+import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import app.kamy.saatApp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -117,7 +117,7 @@ data class AccountUiState(
 @HiltViewModel
 class AccountViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val contentRepository: ContentRepository,
+    private val quranRepository: QuranRepository,
     private val alAdhanRepository: AlAdhanRepository,
     private val prayerMethodStore: PrayerCalculationStore,
     private val translationStore: TranslationPreferencesStore,
@@ -380,7 +380,7 @@ class AccountViewModel @Inject constructor(
         val label = LocalQuranConfig.translationDisplayLabel(defaultTranslation)
         translationStore.setTranslation(defaultTranslation.id, label)
 
-        contentRepository.clearCache()
+        quranRepository.clearCache()
         shareComposer.clearCaches()
         viewModelScope.launch {
             PrayerNotificationCoordinator.rescheduleFromCache(appContext)
@@ -427,7 +427,7 @@ class AccountViewModel @Inject constructor(
     fun loadTranslations() {
         _state.update { it.copy(translationsLoading = true, translationsError = null) }
         viewModelScope.launch {
-            runCatching { contentRepository.getTranslations() }
+            runCatching { quranRepository.getTranslations() }
                 .onSuccess { list ->
                     val sorted = list.sortedWith(
                         compareByDescending<QFTranslation> {

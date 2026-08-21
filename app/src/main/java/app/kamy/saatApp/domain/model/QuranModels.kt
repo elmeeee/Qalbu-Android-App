@@ -114,65 +114,6 @@ data class WordTranslation(
     @SerialName("language_name") val languageName: String? = null
 )
 
-// ---- Mushaf pages ----
-
-@Serializable
-data class PagesLookupResponse(
-    @SerialName("lookup_range") val lookupRange: LookupRange? = null,
-    val pages: Map<String, PageInfo>? = null,
-    @SerialName("total_page") val totalPage: Int? = null
-)
-
-@Serializable
-data class LookupRange(
-    val from: String,
-    val to: String
-)
-
-@Serializable
-data class PageInfo(
-    val from: String,
-    val to: String,
-    @SerialName("first_verse_key") val firstVerseKey: String? = null,
-    @SerialName("last_verse_key") val lastVerseKey: String? = null
-)
-
-data class MushafLine(
-    val lineNumber: Int,
-    val words: List<QuranWord>
-)
-
-fun List<RandomAyahPayload>.groupIntoMushafLines(mushafPage: Int): List<MushafLine> {
-    val allWords = flatMap { verse ->
-        verse.words.orEmpty()
-            .filter { word ->
-                word.pageNumber == null || word.pageNumber == mushafPage
-            }
-    }
-    if (allWords.isEmpty()) {
-        return mapIndexed { index, verse ->
-            MushafLine(
-                lineNumber = index + 1,
-                words = listOf(
-                    QuranWord(
-                        textUthmani = verse.textUthmaniTajweed ?: verse.textUthmani,
-                        textUthmaniTajweed = verse.textUthmaniTajweed,
-                        charTypeName = "word",
-                        verseKey = verse.verseKey,
-                        pageNumber = mushafPage
-                    )
-                )
-            )
-        }
-    }
-    return allWords
-        .groupBy { it.lineNumber ?: 0 }
-        .toSortedMap()
-        .map { (lineNum, words) ->
-            MushafLine(lineNumber = lineNum, words = words)
-        }
-}
-
 // ---- Tafsir ----
 
 @Serializable

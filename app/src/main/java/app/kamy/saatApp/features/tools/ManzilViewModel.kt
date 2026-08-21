@@ -9,7 +9,7 @@ import app.kamy.saatApp.domain.tools.ManzilSectionDef
 import app.kamy.saatApp.domain.tools.manzilSections
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
-import app.kamy.saatApp.infrastructure.repository.ContentRepository
+import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.async
@@ -37,7 +37,7 @@ data class ManzilUiState(
 
 @HiltViewModel
 class ManzilViewModel @Inject constructor(
-    private val contentRepository: ContentRepository,
+    private val quranRepository: QuranRepository,
     private val translationStore: TranslationPreferencesStore,
     private val appLanguageStore: AppLanguageStore
 ) : ViewModel() {
@@ -71,7 +71,7 @@ class ManzilViewModel @Inject constructor(
         val loaded = coroutineScope {
             sectionDefs.map { def ->
                 async {
-                    val verses = contentRepository.getVersesByRange(
+                    val verses = quranRepository.getVersesByRange(
                         chapterNumber = def.surah,
                         startAyah = def.startAyah,
                         endAyah = def.endAyah,

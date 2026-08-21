@@ -7,7 +7,7 @@ import app.kamy.saatApp.domain.model.HadithReference
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.infrastructure.ai.AiReflectionRepository
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
-import app.kamy.saatApp.infrastructure.repository.ContentRepository
+import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import app.kamy.saatApp.ui.common.sanitizeTajweedArabicHtml
 import app.kamy.saatApp.ui.common.stripHtmlTags
 import app.kamy.saatApp.ui.common.toReaderPlainText
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 
 @Singleton
 class VerseShareTextComposer @Inject constructor(
-    private val contentRepository: ContentRepository,
+    private val quranRepository: QuranRepository,
     private val aiReflection: AiReflectionRepository,
     private val appLanguageStore: AppLanguageStore,
     private val strings: AppStrings
@@ -109,7 +109,7 @@ class VerseShareTextComposer @Inject constructor(
         shareTafsirCache[ayahKey]?.let { return it.ifBlank { null } }
         val value = withTimeoutOrNull(2_500L) {
             runCatching {
-                contentRepository.getTafsirByAyah(ayahKey = ayahKey)
+                quranRepository.getTafsirByAyah(ayahKey = ayahKey)
                     ?.text
                     ?.stripHtmlTags()
             }.getOrNull()
@@ -124,7 +124,7 @@ class VerseShareTextComposer @Inject constructor(
         shareHadithCache[ayahKey]?.let { return it.ifBlank { null } }
         val value = withTimeoutOrNull(2_500L) {
             runCatching {
-                contentRepository.getHadithsByAyah(ayahKey, limit = 3)
+                quranRepository.getHadithsByAyah(ayahKey, limit = 3)
                     .hadiths
                     .orEmpty()
                     .take(3)

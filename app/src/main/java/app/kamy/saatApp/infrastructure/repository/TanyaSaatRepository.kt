@@ -27,7 +27,7 @@ import javax.inject.Singleton
 class TanyaSaatRepository @Inject constructor(
     @Named("groq") private val httpClient: OkHttpClient,
     private val json: Json,
-    private val contentRepository: ContentRepository,
+    private val quranRepository: QuranRepository,
     private val doaRepository: DoaRepository,
     private val appLanguageStore: AppLanguageStore
 ) {
@@ -79,9 +79,9 @@ class TanyaSaatRepository @Inject constructor(
             if (env.chapterNumber != null && env.verseNumber != null) {
                 val key = "${env.chapterNumber}:${env.verseNumber}"
                 runCatching {
-                    val verse = contentRepository.getVerseByKey(key)
+                    val verse = quranRepository.getVerseByKey(key)
                     if (verse != null) {
-                        val chapters = contentRepository.getChapters()
+                        val chapters = quranRepository.getChapters()
                         val chapterMeta = chapters.firstOrNull { it.id == env.chapterNumber }
                         val uthmani = verse.textUthmani.orEmpty()
                         val indopak = verse.textIndopak.orEmpty()
@@ -205,8 +205,8 @@ class TanyaSaatRepository @Inject constructor(
 
         val verseData = reference?.let { (chap, ayah) ->
             val key = "$chap:$ayah"
-            val verse = runCatching { contentRepository.getVerseByKey(key) }.getOrNull()
-            val chapters = runCatching { contentRepository.getChapters() }.getOrNull().orEmpty()
+            val verse = runCatching { quranRepository.getVerseByKey(key) }.getOrNull()
+            val chapters = runCatching { quranRepository.getChapters() }.getOrNull().orEmpty()
             val chapterMeta = chapters.firstOrNull { it.id == chap }
 
             if (verse != null) {

@@ -1,9 +1,7 @@
 package app.kamy.saatApp.infrastructure.repository
 
 import app.kamy.saatApp.core.config.LocalQuranConfig
-import app.kamy.saatApp.core.config.MushafConfig
 import app.kamy.saatApp.domain.model.HadithsByAyahResponse
-import app.kamy.saatApp.domain.model.PagesLookupResponse
 import app.kamy.saatApp.domain.model.QFTranslation
 import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.QuranJuz
@@ -22,7 +20,7 @@ import javax.inject.Singleton
  * Quran content from bundled SQLite ([qurannew.db]) and local Tafsir/Hadith assets.
  */
 @Singleton
-class ContentRepository @Inject constructor(
+class QuranRepository @Inject constructor(
     private val local: LocalQuranDataSource,
     private val hadith: LocalHadithDataSource,
     private val translationStore: TranslationPreferencesStore,
@@ -45,7 +43,8 @@ class ContentRepository @Inject constructor(
 
     suspend fun getRandomAyah(
         translationId: Int = selectedTranslationId(),
-        audioRecitationId: Int = selectedRecitationId()
+        audioRecitationId: Int = selectedRecitationId(),
+        force: Boolean = false
     ): RandomAyahPayload? =
         local.getRandomAyah(translationId, audioRecitationId)
 
@@ -60,7 +59,8 @@ class ContentRepository @Inject constructor(
         page: Int = 1,
         perPage: Int = 50,
         translationId: Int = selectedTranslationId(),
-        audioRecitationId: Int = selectedRecitationId()
+        audioRecitationId: Int = selectedRecitationId(),
+        forceRefresh: Boolean = false
     ): VersesByChapterResponse =
         local.getVersesByChapter(chapterNumber, page, perPage, translationId, audioRecitationId)
 
@@ -72,45 +72,6 @@ class ContentRepository @Inject constructor(
         audioRecitationId: Int = selectedRecitationId()
     ): VersesByChapterResponse =
         local.getVersesByJuz(juzNumber, page, perPage, translationId, audioRecitationId)
-
-    suspend fun getVersesByMushafPage(
-        mushafPage: Int,
-        perPage: Int = 50,
-        translationId: Int = selectedTranslationId(),
-        mushafId: Int = MushafConfig.MUSHAF_ID,
-        forceRefresh: Boolean = false
-    ): VersesByChapterResponse =
-        local.getVersesByMushafPage(mushafPage, translationId, selectedRecitationId())
-
-    suspend fun getPagesLookup(
-        mushafId: Int = MushafConfig.MUSHAF_ID,
-        chapterNumber: Int? = null,
-        juzNumber: Int? = null,
-        pageNumber: Int? = null,
-        fromVerse: String? = null,
-        toVerse: String? = null
-    ): PagesLookupResponse =
-        local.getPagesLookup(chapterNumber, juzNumber, pageNumber, fromVerse, toVerse)
-
-    suspend fun firstMushafPageForJuz(juzNumber: Int, mushafId: Int = MushafConfig.MUSHAF_ID): Int? =
-        local.firstMushafPageForJuz(juzNumber)
-
-    suspend fun firstMushafPageForChapter(chapterNumber: Int, mushafId: Int = MushafConfig.MUSHAF_ID): Int? =
-        local.firstMushafPageForChapter(chapterNumber)
-
-    suspend fun mushafPageForVerse(
-        chapterNumber: Int,
-        verseNumber: Int,
-        mushafId: Int = MushafConfig.MUSHAF_ID
-    ): Int? = local.mushafPageForVerse(chapterNumber, verseNumber)
-
-    suspend fun mushafPageForVerseKey(verseKey: String, mushafId: Int = MushafConfig.MUSHAF_ID): Int? {
-        val parts = verseKey.split(":")
-        if (parts.size != 2) return null
-        val chapter = parts[0].toIntOrNull() ?: return null
-        val ayah = parts[1].toIntOrNull() ?: return null
-        return local.mushafPageForVerse(chapter, ayah)
-    }
 
     suspend fun getVerseByKey(
         verseKey: String,

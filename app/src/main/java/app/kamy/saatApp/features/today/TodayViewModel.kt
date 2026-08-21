@@ -19,7 +19,7 @@ import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.domain.model.TafsirPayload
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
-import app.kamy.saatApp.infrastructure.repository.ContentRepository
+import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
 import app.kamy.saatApp.domain.model.ReadingSession
 import android.util.Log
@@ -67,7 +67,7 @@ data class TodayUiState(
 @HiltViewModel
 class TodayViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val contentRepository: ContentRepository,
+    private val quranRepository: QuranRepository,
     private val shareComposer: VerseShareTextComposer,
     private val translationStore: TranslationPreferencesStore,
     private val dailyVerseLoader: DailyVerseLoader,
@@ -113,7 +113,7 @@ class TodayViewModel @Inject constructor(
             try {
                 val session = readingSessions.fetchMostRecent()
                 val chapterName = session?.let { s ->
-                    contentRepository.getChapters(force = false)
+                    quranRepository.getChapters(force = false)
                         .firstOrNull { it.id == s.chapterNumber }
                         ?.displayComplexName
                 }
@@ -143,7 +143,7 @@ class TodayViewModel @Inject constructor(
                 val verseDeferred = async { dailyVerseLoader.loadForToday(refreshTranslation) }
                 val recitationsDeferred = async {
                     if (_state.value.recitations.isEmpty()) {
-                        contentRepository.getRecitations()
+                        quranRepository.getRecitations()
                     } else {
                         _state.value.recitations
                     }
@@ -227,7 +227,7 @@ class TodayViewModel @Inject constructor(
         val sourceId = translationStore.currentTafsirSource()
         _state.update { it.copy(selectedTafsirSource = sourceId) }
         try {
-            val tafsir = contentRepository.getTafsirByAyah(ayahKey = verseKey, sourceId = sourceId)
+            val tafsir = quranRepository.getTafsirByAyah(ayahKey = verseKey, sourceId = sourceId)
             _state.update { it.copy(tafsir = tafsir, tafsirLoading = false, tafsirError = null) }
         } catch (t: Throwable) {
             _state.update {

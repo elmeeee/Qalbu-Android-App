@@ -4,14 +4,10 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import app.kamy.saatApp.core.config.LocalQuranConfig
-import app.kamy.saatApp.core.config.MushafConfig
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.model.AudioPayload
 import app.kamy.saatApp.domain.model.ContentPagination
 import app.kamy.saatApp.domain.model.InlineTranslation
-import app.kamy.saatApp.domain.model.LookupRange
-import app.kamy.saatApp.domain.model.PageInfo
-import app.kamy.saatApp.domain.model.PagesLookupResponse
 import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.QuranJuz
 import app.kamy.saatApp.domain.model.QuranWord
@@ -146,35 +142,6 @@ class LocalQuranDataSource @Inject constructor(
         paginatedResponse(verses, page, perPage, total)
     }
 
-    suspend fun getVersesByMushafPage(
-        mushafPage: Int,
-        translationId: Int,
-        recitationId: Int
-    ): VersesByChapterResponse = withContext(Dispatchers.IO) {
-        val db = database.openReadable()
-        val verses = db.rawQuery(
-            """
-            SELECT DISTINCT $AYAH_SELECT
-            FROM ayas a
-            JOIN suras s ON s."index" = a.sura
-            WHERE a.page = ?
-            ORDER BY a."index"
-            """.trimIndent(),
-            arrayOf(mushafPage.toString())
-        ).use { cursor ->
-            buildList {
-                while (cursor.moveToNext()) {
-                    val sura = cursor.getInt(cursor.getColumnIndexOrThrow("sura"))
-                    val aya = cursor.getInt(cursor.getColumnIndexOrThrow("aya"))
-                    val verse = cursor.toVersePayload(translationId, recitationId, loadWords = false)
-                    val words = loadWordsForVerse(db, sura, aya, mushafPage)
-                    add(verse.copy(words = words))
-                }
-            }
-        }
-        VersesByChapterResponse(verses = verses)
-    }
-
     suspend fun getRandomAyah(
         translationId: Int,
         recitationId: Int
@@ -275,74 +242,6 @@ class LocalQuranDataSource @Inject constructor(
             if (!cursor.moveToFirst()) return@withContext null
             cursor.toVersePayload(translationId, recitationId, loadWords = false)
         }
-    }
-
-    suspend fun mushafPageForVerse(chapterNumber: Int, verseNumber: Int): Int? =
-        withContext(Dispatchers.IO) {
-            database.openReadable().intQueryOrNull(
-                "SELECT page FROM ayas WHERE sura = ? AND aya = ?",
-                arrayOf(chapterNumber.toString(), verseNumber.toString())
-            )
-        }
-
-    suspend fun firstMushafPageForChapter(chapterNumber: Int): Int? =
-        withContext(Dispatchers.IO) {
-            database.openReadable().intQueryOrNull(
-                "SELECT MIN(page) FROM ayas WHERE sura = ?",
-                arrayOf(chapterNumber.toString())
-            )
-        }
-
-    suspend fun firstMushafPageForJuz(juzNumber: Int): Int? = withContext(Dispatchers.IO) {
-        val db = database.openReadable()
-        db.rawQuery(
-            "SELECT sura, aya FROM juzs WHERE \"index\" = ?",
-            arrayOf(juzNumber.toString())
-        ).use { cursor ->
-            if (!cursor.moveToFirst()) return@withContext null
-            val sura = cursor.getInt(0)
-            val aya = cursor.getInt(1)
-            db.intQueryOrNull(
-                "SELECT page FROM ayas WHERE sura = ? AND aya = ?",
-                arrayOf(sura.toString(), aya.toString())
-            )
-        }
-    }
-
-    suspend fun getPagesLookup(
-        chapterNumber: Int? = null,
-        juzNumber: Int? = null,
-        pageNumber: Int? = null,
-        fromVerse: String? = null,
-        toVerse: String? = null
-    ): PagesLookupResponse = withContext(Dispatchers.IO) {
-        val page = when {
-            pageNumber != null -> pageNumber
-            fromVerse != null -> mushafPageForVerseKey(fromVerse)
-            chapterNumber != null -> firstMushafPageForChapter(chapterNumber)
-            juzNumber != null -> firstMushafPageForJuz(juzNumber)
-            else -> null
-        } ?: return@withContext PagesLookupResponse()
-        val db = database.openReadable()
-        val first = db.stringQuery(
-            """
-            SELECT sura || ':' || aya FROM ayas
-            WHERE page = ? ORDER BY "index" LIMIT 1
-            """.trimIndent(),
-            arrayOf(page.toString())
-        ) ?: return@withContext PagesLookupResponse()
-        val last = db.stringQuery(
-            """
-            SELECT sura || ':' || aya FROM ayas
-            WHERE page = ? ORDER BY "index" DESC LIMIT 1
-            """.trimIndent(),
-            arrayOf(page.toString())
-        ) ?: first
-        PagesLookupResponse(
-            lookupRange = LookupRange(from = first, to = last),
-            pages = mapOf(page.toString() to PageInfo(from = first, to = last)),
-            totalPage = MushafConfig.TOTAL_PAGES
-        )
     }
 
     suspend fun getTafsirByAyah(
@@ -584,14 +483,6 @@ class LocalQuranDataSource @Inject constructor(
                 }
             }
         }
-    }
-
-    private suspend fun mushafPageForVerseKey(verseKey: String): Int? {
-        val parts = verseKey.split(":")
-        if (parts.size != 2) return null
-        val sura = parts[0].toIntOrNull() ?: return null
-        val aya = parts[1].toIntOrNull() ?: return null
-        return mushafPageForVerse(sura, aya)
     }
 
     private fun paginatedResponse(

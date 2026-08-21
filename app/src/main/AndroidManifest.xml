@@ -48,7 +48,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="saat" android:host="quran" />
-                <data android:scheme="saat" android:host="mushaf" />
                 <data android:scheme="saat" android:host="today" />
                 <data android:scheme="saat" android:host="bookmarks" />
                 <data android:scheme="saat" android:host="qibla" />

@@ -23,7 +23,7 @@ import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
 import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
-import app.kamy.saatApp.infrastructure.repository.ContentRepository
+import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
 import app.kamy.saatApp.infrastructure.preferences.LocalReadingProgressStore
 import java.text.SimpleDateFormat
@@ -108,7 +108,7 @@ private const val HADITH_PAGE_LIMIT = 4
 class ChapterReaderViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
     private val audioPlayer: AudioPlayerController,
-    private val contentRepository: ContentRepository,
+    private val quranRepository: QuranRepository,
     private val readingSessions: ReadingSessionRepository,
     private val shareComposer: VerseShareTextComposer,
     private val translationStore: TranslationPreferencesStore,
@@ -263,7 +263,7 @@ class ChapterReaderViewModel @Inject constructor(
     private fun loadChapterMeta() {
         viewModelScope.launch {
             runCatching {
-                val chapters = contentRepository.getChapters()
+                val chapters = quranRepository.getChapters()
                 val lookup = chapters.associate { it.id to it.displayComplexName }
                 val currentJuz = _state.value.juzNumber
                 if (currentJuz != null) {
@@ -410,13 +410,13 @@ class ChapterReaderViewModel @Inject constructor(
 
     private suspend fun fetchVersePage(page: Int) =
         if (_state.value.juzNumber != null) {
-            contentRepository.getVersesByJuz(
+            quranRepository.getVersesByJuz(
                 juzNumber = _state.value.juzNumber!!,
                 page = page,
                 audioRecitationId = _state.value.selectedRecitationId
             )
         } else {
-            contentRepository.getVersesByChapter(
+            quranRepository.getVersesByChapter(
                 chapterNumber = _state.value.chapterNumber,
                 page = page,
                 audioRecitationId = _state.value.selectedRecitationId
@@ -453,7 +453,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     private fun loadRecitations() {
         viewModelScope.launch {
-            runCatching { contentRepository.getRecitations() }
+            runCatching { quranRepository.getRecitations() }
                 .onSuccess { rs -> _state.update { it.copy(recitations = rs) } }
         }
     }
@@ -663,7 +663,7 @@ class ChapterReaderViewModel @Inject constructor(
         val sourceId = translationStore.currentTafsirSource()
         _state.update { it.copy(selectedTafsirSource = sourceId) }
         try {
-            val t = contentRepository.getTafsirByAyah(ayahKey, sourceId)
+            val t = quranRepository.getTafsirByAyah(ayahKey, sourceId)
             _state.update { it.copy(tafsir = t, tafsirLoading = false, tafsirError = null) }
         } catch (e: Throwable) {
             _state.update {
@@ -709,7 +709,7 @@ class ChapterReaderViewModel @Inject constructor(
             _state.update { it.copy(hadithLoadingMore = true) }
         }
         try {
-            val resp = contentRepository.getHadithsByAyah(ayahKey, page = page, limit = HADITH_PAGE_LIMIT)
+            val resp = quranRepository.getHadithsByAyah(ayahKey, page = page, limit = HADITH_PAGE_LIMIT)
             val batch = resp.hadiths.orEmpty()
             _state.update { s ->
                 s.copy(

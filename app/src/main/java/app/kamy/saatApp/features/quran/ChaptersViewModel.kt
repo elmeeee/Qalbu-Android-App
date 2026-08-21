@@ -14,7 +14,7 @@ import app.kamy.saatApp.domain.model.SearchVerseResult
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.network.NetworkMonitor
-import app.kamy.saatApp.infrastructure.repository.ContentRepository
+import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import app.kamy.saatApp.infrastructure.repository.ReadingSessionRepository
 import app.kamy.saatApp.infrastructure.repository.SearchRepository
 import app.kamy.saatApp.infrastructure.preferences.LocalReadingProgressStore
@@ -62,7 +62,7 @@ data class ChaptersUiState(
 @HiltViewModel
 class ChaptersViewModel @Inject constructor(
     @param:ApplicationContext private val appContext: Context,
-    private val contentRepository: ContentRepository,
+    private val quranRepository: QuranRepository,
     private val searchRepository: SearchRepository,
     private val translationStore: TranslationPreferencesStore,
     private val appLanguageStore: AppLanguageStore,
@@ -81,7 +81,7 @@ class ChaptersViewModel @Inject constructor(
         loadAll()
         viewModelScope.launch {
             appLanguageStore.currentFlow.drop(1).collect {
-                contentRepository.clearCache()
+                quranRepository.clearCache()
                 refresh(force = true)
             }
         }
@@ -108,7 +108,7 @@ class ChaptersViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
         }
         try {
-            val chapters = contentRepository.getChapters(force)
+            val chapters = quranRepository.getChapters(force)
             val continueReading = runCatching { readingSessions.fetchMostRecent() }.getOrNull()
             val readChapters = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.readChapters(appContext)
             val readJuzs = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.readJuzs(appContext)
@@ -292,7 +292,7 @@ class ChaptersViewModel @Inject constructor(
 
     private suspend fun loadJuzs(force: Boolean = false) {
         _state.update { it.copy(juzsLoading = true, juzsError = null) }
-        val result = runCatching { contentRepository.getJuzs(force) }
+        val result = runCatching { quranRepository.getJuzs(force) }
         _state.update {
             it.copy(
                 juzs = result.getOrDefault(emptyList()),
@@ -306,7 +306,7 @@ class ChaptersViewModel @Inject constructor(
     suspend fun resolveJuzStart(juzNumber: Int): Pair<Int, Int>? {
         val cached = _state.value.juzs.find { it.juzNumber == juzNumber }
         cached?.startChapterAndAyah()?.let { return it }
-        return contentRepository.getJuz(juzNumber)?.startChapterAndAyah()
+        return quranRepository.getJuz(juzNumber)?.startChapterAndAyah()
     }
 
     fun openJuz(juzNumber: Int, onOpen: (juzNumber: Int, verseKey: String?) -> Unit) {

@@ -37,7 +37,6 @@ object DeepLinkRoutes {
                 if (ayah != null && ayah > 0) "quran/reader/$chapter?ayah=$ayah"
                 else "quran/reader/$chapter?ayah=-1"
             }
-            "mushaf" -> RootTab.Quran.route
             "today" -> RootTab.Today.route
             "bookmarks" -> "quran/bookmarks"
             "qibla" -> "tools/qibla"

@@ -8,8 +8,8 @@ import app.kamy.saatApp.infrastructure.cache.PrayerDayCache
 import app.kamy.saatApp.infrastructure.cache.toVersePayload
 import app.kamy.saatApp.infrastructure.preferences.DailyVerseSnapshotStore
 import app.kamy.saatApp.infrastructure.preferences.RamadanPreferencesStore
-import app.kamy.saatApp.infrastructure.repository.ContentRepository
 import app.kamy.saatApp.infrastructure.repository.KhgtCalendarRepository
+import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,7 +24,7 @@ data class DailyVerseLoadResult(
 @Singleton
 class DailyVerseLoader @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val contentRepository: ContentRepository,
+    private val quranRepository: QuranRepository,
     private val khgtCalendarRepository: KhgtCalendarRepository
 ) {
 
@@ -34,9 +34,9 @@ class DailyVerseLoader @Inject constructor(
             var verse = cached.toVersePayload()
             if (verse.audio?.url.isNullOrBlank() || (verse.transliterationId.isNullOrBlank() && verse.transliterationEn.isNullOrBlank())) {
                 val key = cached.verseKey ?: "${cached.chapterNumber}:${cached.ayahNumber}"
-                contentRepository.getVerseByKey(key)?.let { fresh ->
+                quranRepository.getVerseByKey(key)?.let { fresh ->
                     val chapterName = fresh.chapterNumber?.let { num ->
-                        contentRepository.getChapters().find { it.id == num }?.displayComplexName
+                        quranRepository.getChapters().find { it.id == num }?.displayComplexName
                     }
                     DailyVerseSnapshotStore.save(
                         context = appContext,
@@ -57,7 +57,7 @@ class DailyVerseLoader @Inject constructor(
         }
 
         val verseKey = cached?.verseKey ?: resolveTodayVerseKey()
-        val verse = contentRepository.getVerseByKey(verseKey) ?: run {
+        val verse = quranRepository.getVerseByKey(verseKey) ?: run {
             if (cached != null) {
                 return DailyVerseLoadResult(
                     verse = cached.toVersePayload(),
@@ -66,7 +66,7 @@ class DailyVerseLoader @Inject constructor(
                     fromCache = true
                 )
             }
-            return contentRepository.getDailyAyah()?.let { fallback ->
+            return quranRepository.getDailyAyah()?.let { fallback ->
                 buildResult(fallback, DailyVerseOccasion.Daily, fromCache = false)
             }
         }
@@ -77,7 +77,7 @@ class DailyVerseLoader @Inject constructor(
             fromCache = false
         )
         val chapterName = verse.chapterNumber?.let { num ->
-            contentRepository.getChapters().find { it.id == num }?.displayComplexName
+            quranRepository.getChapters().find { it.id == num }?.displayComplexName
         }
         DailyVerseSnapshotStore.save(
             context = appContext,
@@ -105,7 +105,7 @@ class DailyVerseLoader @Inject constructor(
         occasion: DailyVerseOccasion,
         fromCache: Boolean
     ): DailyVerseLoadResult {
-        val chapters = contentRepository.getChapters()
+        val chapters = quranRepository.getChapters()
         val chapterName = verse.chapterNumber?.let { num ->
             chapters.find { it.id == num }?.displayComplexName
         }
