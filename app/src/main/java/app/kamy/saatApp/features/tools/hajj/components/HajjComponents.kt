@@ -483,7 +483,7 @@ fun HajjDoaCard(
                                 type = "text/plain"
                                 putExtra(
                                     Intent.EXTRA_TEXT,
-                                    "🤲 ${doa.title.get(appLanguage)}\n\n${doa.arabic}\n\n${doa.latin}\n\nArtinya:\n\"${doa.translation.get(appLanguage)}\"\n\nRef: ${doa.reference}\n\n(Dibagikan via Qalbu App)"
+                                    "🤲 ${doa.title.get(appLanguage)}\n\n${doa.arabic}\n\n${doa.latin}\n\nArtinya:\n\"${doa.translation.get(appLanguage)}\"\n\nRef: ${doa.reference}\n\n(Dibagikan via Saat App)"
                                 )
                             }
                             context.startActivity(Intent.createChooser(shareIntent, "Bagikan Doa"))

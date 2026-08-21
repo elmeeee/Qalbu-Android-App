@@ -301,7 +301,7 @@
     <string name="khatam_progress_title">Progress Khatam</string>
     <string name="khatam_last_read">Terakhir dibaca: Juz %1$d · Ayat %2$d</string>
     <string name="force_update_title">Kemaskini Baru Tersedia</string>
-    <string name="force_update_desc">Versi baharu Qalbu kini tersedia di Play Store. Sila kemaskini untuk meneruskan pengalaman membaca Al-Quran dan ibadah terbaik.</string>
+    <string name="force_update_desc">Versi baharu Saat kini tersedia di Play Store. Sila kemaskini untuk meneruskan pengalaman membaca Al-Quran dan ibadah terbaik.</string>
     <string name="force_update_button">Kemaskini Sekarang</string>
     <string name="ai_label">AI</string>
     <string name="clear_search_a11y">Kosongkan carian</string>

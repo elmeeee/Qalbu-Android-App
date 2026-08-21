@@ -311,7 +311,7 @@
     <string name="khatam_progress_title">Khatam Progress</string>
     <string name="khatam_last_read">Last read: Juz %1$d · Ayah %2$d</string>
     <string name="force_update_title">Update Available</string>
-    <string name="force_update_desc">A new version of Qalbu is available on the Play Store. Please update to continue enjoying the best Quran reading experience.</string>
+    <string name="force_update_desc">A new version of Saat is available on the Play Store. Please update to continue enjoying the best Quran reading experience.</string>
     <string name="force_update_button">Update Now</string>
     <string name="share_as_image">Share as Image</string>
     <string name="share_verse_image_chooser">Share verse image via…</string>

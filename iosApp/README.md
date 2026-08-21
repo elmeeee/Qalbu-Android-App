@@ -1,4 +1,4 @@
-# Saat (Al-khatib-Qalbu)
+# Saat
 
 **A daily Quran companion for iOS** — read with tajweed and audio, understand with tafsir and hadith, reflect with the community, and pick up where you left off.
 
