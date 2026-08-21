@@ -124,7 +124,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
                     val progress = if (dur > 0L) (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f) else 0f
                     _state.value = _state.value.copy(progress = progress, durationMs = dur, currentPositionMs = pos)
                 }
-                delay(100L)
+                delay(300L)
             }
         }
     }
