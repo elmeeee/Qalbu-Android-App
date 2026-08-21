@@ -44,7 +44,7 @@ data class TodayUiState(
     val verseReferenceLabel: String? = null,
     val recitations: List<RecitationPayload> = emptyList(),
     val selectedRecitationId: Int = 6,
-    val translationId: Int = AppConfig.defaultTranslationId,
+    val translationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
     val error: AppError? = null,
     val tafsirLoading: Boolean = false,
     val selectedTafsirSource: String = LocalQuranConfig.TAFSIR_WAJIZ_ID,

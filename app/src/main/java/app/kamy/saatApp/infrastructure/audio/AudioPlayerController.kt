@@ -138,7 +138,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         ayahNumber: Int? = null
     ) {
         if (AirplaneModeReceiver.isAirplaneModeOn(context)) return
-        val absolute = AppConfig.absoluteVerseMediaUrl(url)
+        val absolute = AppConfig.formatAudioUrl(url)
         val parsed = parseVerseKey(ayahLabel)
         val chapter = chapterNumber ?: parsed?.first
         val ayah = ayahNumber ?: parsed?.second
@@ -211,7 +211,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
     ) {
         if (items.isEmpty()) return
         if (AirplaneModeReceiver.isAirplaneModeOn(context)) return
-        val resolved = items.map { it.copy(url = AppConfig.absoluteVerseMediaUrl(it.url)) }
+        val resolved = items.map { it.copy(url = AppConfig.formatAudioUrl(it.url)) }
         val mediaItems = resolved.map { item ->
             buildMediaItem(item.url, surahTitle, item.label, reciterName)
         }
@@ -259,7 +259,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
 
     fun isPlayingUrl(url: String?): Boolean {
         if (url == null) return false
-        val absolute = AppConfig.absoluteVerseMediaUrl(url)
+        val absolute = AppConfig.formatAudioUrl(url)
         return _state.value.currentUrl == absolute && _state.value.isPlaying
     }
 
