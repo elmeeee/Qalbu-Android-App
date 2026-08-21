@@ -3,7 +3,7 @@ package app.kamy.saatApp.domain.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// ---- Verse payloads (shared by the local Quran database and the Content API) ----
+// ---- Verse payloads (local Quran database) ----
 
 @Serializable
 data class RandomAyahPayload(

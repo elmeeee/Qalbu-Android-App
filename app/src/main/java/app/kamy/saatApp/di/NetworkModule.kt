@@ -1,8 +1,6 @@
 package app.kamy.saatApp.di
 
 import app.kamy.saatApp.BuildConfig
-import app.kamy.saatApp.infrastructure.network.HostFallbackInterceptor
-import app.kamy.saatApp.infrastructure.network.NetworkDebugger
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,16 +36,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHostFallbackInterceptor(): HostFallbackInterceptor = HostFallbackInterceptor()
-
-    @Provides
-    @Singleton
     @Named("groq")
     fun provideGroqOkHttp(logging: HttpLoggingInterceptor): OkHttpClient =
         OkHttpClient.Builder()
             .connectTimeout(45, TimeUnit.SECONDS)
             .readTimeout(90, TimeUnit.SECONDS)
-            .let(NetworkDebugger::applyTo)
             .addInterceptor(logging)
             .build()
 }
