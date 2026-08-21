@@ -14,7 +14,7 @@ import app.kamy.saatApp.infrastructure.audio.AdhanStopReceiver
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.ThemePreferencesStore
 import app.kamy.saatApp.ui.adhan.AdhanFullScreenOverlay
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 
 /**
@@ -94,8 +94,8 @@ class AdhanAlarmActivity : ComponentActivity() {
         val themeStore = ThemePreferencesStore.from(applicationContext)
 
         setContent {
-            val currentTheme by themeStore.themeFlow.collectAsState(
-                initial = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD
+            val currentTheme by themeStore.themeFlow.collectAsStateWithLifecycle(
+                initialValue = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD
             )
             SaatTheme(theme = currentTheme) {
                 AdhanFullScreenOverlay(
