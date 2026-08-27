@@ -2,6 +2,14 @@
 <resources xmlns:ns0="http://schemas.android.com/tools" ns0:ignore="Typos,MissingTranslation">
     <string name="app_name">Saat</string>
     <string name="app_name_launcher">Saat</string>
+    <string name="prayer_countdown_until_label">until prayer</string>
+    <string name="todays_journey_title">Today\'s Journey</string>
+    <string name="todays_journey_subtitle">Complete your daily worship</string>
+    <string name="journey_badge_prayer">Prayer</string>
+    <string name="journey_badge_quran">Quran</string>
+    <string name="journey_badge_dhikr">Dhikr</string>
+    <string name="journey_badge_sunnah">Sunnah</string>
+    <string name="prayer_badge_not_after_isha">Prayer can be checked after Isha or 5 prayers completed</string>
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="language_malay">Bahasa Melayu</string>

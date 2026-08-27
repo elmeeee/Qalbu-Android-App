@@ -36,10 +36,16 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
+import app.kamy.saatApp.infrastructure.repository.DailyQuoteRepository
+import app.kamy.saatApp.infrastructure.repository.DailyQuoteItem
+import app.kamy.saatApp.infrastructure.repository.KhgtCalendarRepository
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+
 data class TodayUiState(
     val isLoading: Boolean = false,
     val verse: RandomAyahPayload? = null,
     val verseReferenceLabel: String? = null,
+    val dailyQuote: DailyQuoteItem? = null,
     val recitations: List<RecitationPayload> = emptyList(),
     val selectedRecitationId: Int = 6,
     val translationId: Int = LocalQuranConfig.DEFAULT_TRANSLATION_ID,
@@ -70,7 +76,9 @@ class TodayViewModel @Inject constructor(
     private val shareComposer: VerseShareTextComposer,
     private val translationStore: TranslationPreferencesStore,
     private val dailyVerseLoader: DailyVerseLoader,
-    private val readingSessions: ReadingSessionRepository
+    private val readingSessions: ReadingSessionRepository,
+    private val dailyQuoteRepository: DailyQuoteRepository,
+    private val khgtCalendarRepository: KhgtCalendarRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TodayUiState())
@@ -88,6 +96,17 @@ class TodayViewModel @Inject constructor(
         }
         loadDailyAyahWithRecitations()
         loadContinueReading()
+        viewModelScope.launch {
+            val khgtInfo = runCatching { khgtCalendarRepository.todayInfo() }.getOrNull()
+            val currentLang = AppLanguageStore.from(appContext).current()
+            val initialQuote = dailyQuoteRepository.getTodayQuote(currentLang, khgtInfo?.eventTitle)
+            _state.update { it.copy(dailyQuote = initialQuote) }
+
+            AppLanguageStore.from(appContext).currentFlow.collect { lang ->
+                val updatedQuote = dailyQuoteRepository.getTodayQuote(lang, khgtInfo?.eventTitle)
+                _state.update { it.copy(dailyQuote = updatedQuote) }
+            }
+        }
         viewModelScope.launch {
             translationStore.translationId.drop(1).collect {
                 _state.update { it.copy(translationId = translationStore.currentTranslationId()) }

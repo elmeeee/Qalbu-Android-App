@@ -1,0 +1,137 @@
+package app.kamy.saatApp.infrastructure.repository
+
+import android.content.Context
+import app.kamy.saatApp.core.locale.AppLanguage
+import dagger.hilt.android.qualifiers.ApplicationContext
+import org.json.JSONArray
+import java.util.Calendar
+import javax.inject.Inject
+import javax.inject.Singleton
+
+data class DailyQuoteItem(
+    val id: Int,
+    val dayOfYear: Int,
+    val category: String,
+    val theme: String,
+    val quoteText: String,
+    val referenceLabel: String
+)
+
+@Singleton
+class DailyQuoteRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val khgtCalendarRepository: KhgtCalendarRepository? = null
+) {
+    private var quotesList: List<DailyQuoteItemRaw> = emptyList()
+
+    private data class DailyQuoteItemRaw(
+        val id: Int,
+        val dayOfYear: Int,
+        val category: String,
+        val theme: String,
+        val referenceMap: Map<String, String>,
+        val quoteMap: Map<String, String>
+    )
+
+    init {
+        loadQuotesFromAssets()
+    }
+
+    private fun loadQuotesFromAssets() {
+        runCatching {
+            val jsonString = context.assets.open("daily_quotes.json").bufferedReader().use { it.readText() }
+            val jsonArray = JSONArray(jsonString)
+            val list = mutableListOf<DailyQuoteItemRaw>()
+
+            for (i in 0 until jsonArray.length()) {
+                val obj = jsonArray.getJSONObject(i)
+                val id = obj.optInt("id", i + 1)
+                val dayOfYear = obj.optInt("day_of_year", i + 1)
+                val category = obj.optString("category", "QURAN")
+                val theme = obj.optString("theme", "GENERAL")
+
+                val refObj = obj.optJSONObject("reference")
+                val refMap = mapOf(
+                    "id" to (refObj?.optString("id") ?: "Qur'an"),
+                    "ms" to (refObj?.optString("ms") ?: "Al-Quran"),
+                    "en" to (refObj?.optString("en") ?: "Qur'an")
+                )
+
+                val qtObj = obj.optJSONObject("quote")
+                val qtMap = mapOf(
+                    "id" to (qtObj?.optString("id") ?: ""),
+                    "ms" to (qtObj?.optString("ms") ?: ""),
+                    "en" to (qtObj?.optString("en") ?: "")
+                )
+
+                list.add(DailyQuoteItemRaw(id, dayOfYear, category, theme, refMap, qtMap))
+            }
+            quotesList = list
+        }.onFailure {
+            it.printStackTrace()
+        }
+    }
+
+    fun getTodayQuote(language: AppLanguage, eventTitle: String? = null): DailyQuoteItem {
+        val date = Calendar.getInstance()
+        val dayOfYear = date.get(Calendar.DAY_OF_YEAR)
+        return getQuoteForDay(dayOfYear, language, eventTitle, isFriday = date.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY)
+    }
+
+    fun getQuoteForDay(
+        dayOfYear: Int,
+        language: AppLanguage,
+        eventTitle: String? = null,
+        isFriday: Boolean = false
+    ): DailyQuoteItem {
+        if (quotesList.isEmpty()) {
+            loadQuotesFromAssets()
+        }
+
+        // Match KHGT Event or Friday theme if available
+        val matchedTheme = when {
+            !eventTitle.isNullOrBlank() && (eventTitle.contains("Ramadan", ignoreCase = true) || eventTitle.contains("Ramadhan", ignoreCase = true)) -> "RAMADAN"
+            !eventTitle.isNullOrBlank() && (eventTitle.contains("Fitri", ignoreCase = true) || eventTitle.contains("Eid", ignoreCase = true)) -> "EID_FITR"
+            !eventTitle.isNullOrBlank() && (eventTitle.contains("Adha", ignoreCase = true) || eventTitle.contains("Kurban", ignoreCase = true) || eventTitle.contains("Korban", ignoreCase = true)) -> "EID_ADHA"
+            !eventTitle.isNullOrBlank() && eventTitle.contains("Arafah", ignoreCase = true) -> "ARAFAH"
+            !eventTitle.isNullOrBlank() && (eventTitle.contains("Isra", ignoreCase = true) || eventTitle.contains("Mi'raj", ignoreCase = true)) -> "ISRA_MIRAJ"
+            !eventTitle.isNullOrBlank() && (eventTitle.contains("Maulid", ignoreCase = true) || eventTitle.contains("Nabi", ignoreCase = true)) -> "MAWLID"
+            isFriday -> "JUMAH"
+            else -> null
+        }
+
+        val raw = (if (matchedTheme != null) quotesList.find { it.theme == matchedTheme } else null)
+            ?: quotesList.find { it.dayOfYear == dayOfYear }
+            ?: quotesList.getOrNull((dayOfYear - 1) % quotesList.size.coerceAtLeast(1))
+            ?: DailyQuoteItemRaw(
+                id = 1,
+                dayOfYear = dayOfYear,
+                category = "QURAN",
+                theme = "GENERAL",
+                referenceMap = mapOf("id" to "Qur'an 15:99", "ms" to "Al-Quran 15:99", "en" to "Qur'an 15:99"),
+                quoteMap = mapOf(
+                    "id" to "Dan sembahlah Tuhanmu sampai datang kepadamu keyakinan (ajal).",
+                    "ms" to "Dan sembahlah Tuhanmu sehingga datang kepadamu keyakinan (ajal).",
+                    "en" to "And worship your Lord until there comes to you the certainty (i.e. death)."
+                )
+            )
+
+        val langKey = when (language) {
+            AppLanguage.MALAY -> "ms"
+            AppLanguage.ENGLISH -> "en"
+            else -> "id"
+        }
+
+        val quoteText = raw.quoteMap[langKey] ?: raw.quoteMap["id"] ?: raw.quoteMap["en"].orEmpty()
+        val refLabel = raw.referenceMap[langKey] ?: raw.referenceMap["id"] ?: raw.referenceMap["en"].orEmpty()
+
+        return DailyQuoteItem(
+            id = raw.id,
+            dayOfYear = raw.dayOfYear,
+            category = raw.category,
+            theme = raw.theme,
+            quoteText = "\"$quoteText\"",
+            referenceLabel = refLabel
+        )
+    }
+}

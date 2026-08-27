@@ -39,6 +39,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,11 +76,15 @@ import androidx.compose.foundation.Image
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.ui.common.toVerseTranslationPlainText
 
+import app.kamy.saatApp.infrastructure.repository.DailyQuoteItem
+import app.kamy.saatApp.infrastructure.repository.DailyQuoteRepository
+
 @Composable
 fun PrayerTrackerCard(
     state: PrayerTrackerUiState,
     verse: RandomAyahPayload? = null,
     referenceLabel: String? = null,
+    dailyQuote: DailyQuoteItem? = null,
     isAfterIsha: Boolean = false,
     isQuranReadToday: Boolean = false,
     onShowToastMessage: (String) -> Unit = {},
@@ -102,6 +107,14 @@ fun PrayerTrackerCard(
     var isSunnahDone by remember {
         mutableStateOf(PrayerTrackerStore.isOptionalCompleted(context, OptionalWorshipHabit.DHUHA))
     }
+
+    val titleText = stringResource(R.string.todays_journey_title)
+    val subtitleText = stringResource(R.string.todays_journey_subtitle)
+    val prayerBadgeLabel = stringResource(R.string.journey_badge_prayer)
+    val quranBadgeLabel = stringResource(R.string.journey_badge_quran)
+    val dhikrBadgeLabel = stringResource(R.string.journey_badge_dhikr)
+    val sunnahBadgeLabel = stringResource(R.string.journey_badge_sunnah)
+    val notAfterIshaMsg = stringResource(R.string.prayer_badge_not_after_isha)
 
     val completedFardhuCount = state.completedPrayers.size
     val isPrayerClickable = isAfterIsha || completedFardhuCount >= 5
@@ -128,13 +141,13 @@ fun PrayerTrackerCard(
             ) {
                 Column {
                     Text(
-                        text = "Today's Journey",
+                        text = titleText,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF1E293B)
                     )
                     Text(
-                        text = "Complete your daily worship",
+                        text = subtitleText,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Normal,
                         color = Color(0xFF64748B)
@@ -163,7 +176,7 @@ fun PrayerTrackerCard(
             ) {
                 // 1. Prayer
                 JourneyBadge(
-                    label = "Prayer",
+                    label = prayerBadgeLabel,
                     isCompleted = isPrayerDone,
                     onClick = {
                         if (isPrayerClickable) {
@@ -172,15 +185,14 @@ fun PrayerTrackerCard(
                             PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.QIYAMUL_LAIL, next)
                             onToggleOptional(OptionalWorshipHabit.QIYAMUL_LAIL)
                         } else {
-                            val msg = "Shalat dapat dicentang setelah waktu Isya atau 5 shalat selesai"
-                            onShowToastMessage(msg)
+                            onShowToastMessage(notAfterIshaMsg)
                         }
                     }
                 )
 
                 // 2. Quran
                 JourneyBadge(
-                    label = "Quran",
+                    label = quranBadgeLabel,
                     isCompleted = isQuranDone,
                     onClick = {
                         val next = !isQuranDone
@@ -192,7 +204,7 @@ fun PrayerTrackerCard(
 
                 // 3. Dhikr
                 JourneyBadge(
-                    label = "Dhikr",
+                    label = dhikrBadgeLabel,
                     isCompleted = isDhikrDone,
                     onClick = {
                         val next = !isDhikrDone
@@ -204,7 +216,7 @@ fun PrayerTrackerCard(
 
                 // 4. Sunnah
                 JourneyBadge(
-                    label = "Sunnah",
+                    label = sunnahBadgeLabel,
                     isCompleted = isSunnahDone,
                     onClick = {
                         val next = !isSunnahDone
@@ -241,11 +253,19 @@ fun PrayerTrackerCard(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
+                        val currentLang by AppLanguageStore.from(context).currentFlow.collectAsStateWithLifecycle()
+                        val activeQuote = remember(currentLang, dailyQuote) {
+                            DailyQuoteRepository(context).getTodayQuote(currentLang)
+                        }
+
                         val rawTranslation = verse?.translations?.firstOrNull()?.text?.toVerseTranslationPlainText()
-                        val translationText = if (!rawTranslation.isNullOrBlank()) {
-                            "\"$rawTranslation\""
-                        } else {
-                            "\"And keep your prayer, and worship your Lord until there comes to you the certainty (i.e. death).\""
+                        val translationText = activeQuote.quoteText.ifEmpty {
+                            if (!rawTranslation.isNullOrBlank()) "\"$rawTranslation\""
+                            else "\"And keep your prayer, and worship your Lord until there comes to you the certainty (i.e. death).\""
+                        }
+
+                        val refText = activeQuote.referenceLabel.ifEmpty {
+                            referenceLabel ?: "Qur'an 15:99"
                         }
 
                         Text(
@@ -259,30 +279,12 @@ fun PrayerTrackerCard(
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = referenceLabel ?: "Qur'an 15:99",
-                                color = Color(0xFF64748B),
-                                fontSize = 11.5.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-
-                            IconButton(
-                                onClick = onShareVerse,
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_share_custom),
-                                    contentDescription = "Share",
-                                    tint = Color(0xFF475569),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
+                        Text(
+                            text = refText,
+                            color = Color(0xFF64748B),
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }

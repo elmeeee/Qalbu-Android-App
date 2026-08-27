@@ -1,5 +1,13 @@
 <resources>
     <string name="app_name">Saat</string>
+    <string name="prayer_countdown_until_label">menuju shalat</string>
+    <string name="todays_journey_title">Perjalanan Hari Ini</string>
+    <string name="todays_journey_subtitle">Lengkapkan amalan ibadah harian Anda</string>
+    <string name="journey_badge_prayer">Shalat</string>
+    <string name="journey_badge_quran">Quran</string>
+    <string name="journey_badge_dhikr">Zikir</string>
+    <string name="journey_badge_sunnah">Sunnah</string>
+    <string name="prayer_badge_not_after_isha">Shalat dapat dicentang setelah waktu Isya atau 5 shalat selesai</string>
 
 
     <string name="language_english">English</string>

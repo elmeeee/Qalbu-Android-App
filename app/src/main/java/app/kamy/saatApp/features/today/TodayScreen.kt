@@ -467,6 +467,7 @@ fun TodayScreen(
                         state = trackerState,
                         verse = todayState.verse,
                         referenceLabel = todayState.verseReferenceLabel,
+                        dailyQuote = todayState.dailyQuote,
                         isAfterIsha = isAfterIsha,
                         isQuranReadToday = todayState.continueReading != null,
                         onShowToastMessage = { msg ->

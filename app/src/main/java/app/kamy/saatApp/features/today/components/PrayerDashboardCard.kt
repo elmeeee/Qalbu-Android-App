@@ -36,6 +36,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -233,6 +236,7 @@ private fun PrayerArcCountdown(
     prayerType: PrayerType? = null,
     modifier: Modifier = Modifier
 ) {
+    val untilPrayerText = stringResource(R.string.prayer_countdown_until_label)
     val iconRes = getPrayerIconRes(prayerType ?: PrayerType.DHUHR)
 
     Box(
@@ -269,11 +273,11 @@ private fun PrayerArcCountdown(
             )
         }
 
-        // Dynamic prayer icon placed on arc (top right)
+        // Precise icon placement centered on arc endpoint (315deg tip)
         Box(
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = (-10).dp, y = 6.dp)
+                .align(Alignment.TopStart)
+                .offset(x = 105.dp, y = 12.dp)
         ) {
             Icon(
                 painter = painterResource(iconRes),
@@ -294,7 +298,7 @@ private fun PrayerArcCountdown(
                 color = Color(0xFF0F172A)
             )
             Text(
-                text = "until prayer",
+                text = untilPrayerText,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color(0xFF64748B)

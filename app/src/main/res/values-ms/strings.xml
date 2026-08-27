@@ -1,6 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Saat</string>
+    <string name="prayer_countdown_until_label">sehingga solat</string>
+    <string name="todays_journey_title">Perjalanan Hari Ini</string>
+    <string name="todays_journey_subtitle">Lengkapkan amalan ibadah harian anda</string>
+    <string name="journey_badge_prayer">Solat</string>
+    <string name="journey_badge_quran">Al-Quran</string>
+    <string name="journey_badge_dhikr">Zikir</string>
+    <string name="journey_badge_sunnah">Sunnah</string>
+    <string name="prayer_badge_not_after_isha">Solat boleh ditanda selepas waktu Isyak atau 5 solat selesai</string>
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="language_malay">Bahasa Melayu</string>
