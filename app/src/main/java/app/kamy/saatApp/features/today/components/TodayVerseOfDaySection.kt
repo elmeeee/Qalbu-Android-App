@@ -20,13 +20,16 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.foundation.Image
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,208 +68,113 @@ fun TodayVerseOfDaySection(
     occasion: DailyVerseOccasion? = null,
     isLoading: Boolean,
     error: AppError? = null,
-    isPlaying: Boolean,
+    isPlaying: Boolean = false,
     reciterName: String? = null,
     aiShareLoading: Boolean = false,
-    onPlayAudio: () -> Unit,
+    onPlayAudio: () -> Unit = {},
     onReciterClick: () -> Unit = {},
-    onAiShare: () -> Unit,
-    onTafsir: () -> Unit,
+    onAiShare: () -> Unit = {},
+    onTafsir: () -> Unit = {},
     onRetry: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val errorDisplay = error.rememberErrorDisplay(R.string.verse_of_day_load_failed)
-    Column(
-        modifier = modifier.fillMaxWidth()
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp)),
+        shape = RoundedCornerShape(24.dp),
+        color = SaatColors.LastReadBg,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.5f))
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(22.dp))
-                .background(SaatColors.PureWhite)
-                .border(
-                    width = 1.dp,
-                    color = SaatColors.SoftGrey.copy(alpha = 0.75f),
-                    shape = RoundedCornerShape(22.dp)
-                )
-        ) {
-            Box(
+        if (verse != null) {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                SaatColors.DeepEmerald.copy(alpha = 0.16f),
-                                SaatColors.Teal.copy(alpha = 0.08f),
-                                SaatColors.Gold.copy(alpha = 0.05f)
-                            )
-                        )
-                    )
-                    .padding(horizontal = 18.dp, vertical = 16.dp)
+                    .padding(horizontal = 18.dp, vertical = 18.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Column {
+                // Mascot illustration
+                Image(
+                    painter = painterResource(R.drawable.mascot_quran_qoute),
+                    contentDescription = null,
+                    modifier = Modifier.size(90.dp)
+                )
+
+                // Translation & Reference Column
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    val rawTranslation = verse.translations?.firstOrNull()?.text?.toVerseTranslationPlainText()
+                    val translationText = if (!rawTranslation.isNullOrBlank()) {
+                        "\"$rawTranslation\""
+                    } else {
+                        "\"And keep your prayer, and worship your Lord until there comes to you the certainty (i.e. death).\""
+                    }
+
+                    Text(
+                        text = translationText,
+                        color = Color(0xFF1E293B),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 13.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 20.sp,
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.verse_of_day),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald
+                            text = referenceLabel ?: "Qur'an 15:99",
+                            color = Color(0xFF64748B),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
                         )
-                        occasion?.takeIf { it != DailyVerseOccasion.Daily }?.let {
-                            OccasionChip(label = stringResource(it.labelRes))
-                        }
-                    }
-                    referenceLabel?.let { label ->
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            color = SaatColors.Slate500,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-            }
 
-            if (verse != null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 18.dp, vertical = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(SaatColors.DeepEmerald.copy(alpha = 0.04f))
-                            .border(
-                                width = 1.dp,
-                                color = SaatColors.DeepEmerald.copy(alpha = 0.15f),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .padding(horizontal = 16.dp, vertical = 16.dp)
-                    ) {
-                        TajweedHtmlView(
-                            textUthmani = verse.textUthmani,
-                            ayahNumber = verse.resolvedVerseNumber,
-                            fontSizeSp = 28,
-                            compact = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-
-                    verse.displayTransliteration(translationId)?.takeIf { showTransliteration }?.let { latin ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(SaatColors.LightGrey.copy(alpha = 0.35f))
-                                .border(
-                                    width = 1.dp,
-                                    color = SaatColors.SoftGrey.copy(alpha = 0.5f),
-                                    shape = RoundedCornerShape(14.dp)
-                                )
-                                .padding(horizontal = 14.dp, vertical = 10.dp)
+                        IconButton(
+                            onClick = onAiShare,
+                            modifier = Modifier.size(32.dp)
                         ) {
-                            TransliterationView(
-                                text = latin,
-                                useHtml = verse.transliterationUsesHtml(translationId),
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
+                            Icon(
+                                painter = painterResource(R.drawable.ic_share_custom),
+                                contentDescription = "Share",
+                                tint = Color(0xFF475569),
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
-
-                    if (showTranslation) {
-                        verse.translations?.firstOrNull()?.text?.let { translation ->
-                            val clean = translation.toVerseTranslationPlainText()
-                            if (clean.isNotEmpty()) {
-                                Text(
-                                    text = clean,
-                                    color = SaatColors.Slate800,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    lineHeight = 26.sp,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        }
-                    }
                 }
-
-                reciterName?.takeIf { it.isNotBlank() }?.let { name ->
-                    TextButton(
-                        onClick = onReciterClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp)
-                    ) {
-                        Text(
-                            text = "${stringResource(R.string.reciter)}: $name",
-                            color = SaatColors.Slate500,
-                            style = MaterialTheme.typography.labelMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    VerseActionButton(
-                        iconRes = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
-                        tint = SaatColors.DeepEmerald,
-                        onClick = onPlayAudio,
-                        modifier = Modifier.weight(1f)
-                    )
-                    VerseActionButton(
-                        iconRes = R.drawable.ic_ai,
-                        tint = SaatColors.GoldDeep,
-                        onClick = onAiShare,
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (LocalQuranConfig.supportsTafsir(translationId)) {
-                        VerseActionButton(
-                            iconRes = R.drawable.ic_tafsir,
-                            tint = SaatColors.IndigoAccent,
-                            onClick = onTafsir,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            } else if (isLoading) {
-                TodayVerseCardSkeleton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp)
-                )
-            } else if (errorDisplay != null) {
-                SaatErrorStateCompact(
-                    display = errorDisplay,
-                    onRetry = onRetry,
-                    modifier = Modifier.padding(18.dp)
-                )
-            } else {
-                Text(
-                    text = stringResource(R.string.no_verse_retry),
-                    color = SaatColors.Slate500,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(18.dp),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodySmall
-                )
             }
+        } else if (isLoading) {
+            TodayVerseCardSkeleton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp)
+            )
+        } else if (errorDisplay != null) {
+            SaatErrorStateCompact(
+                display = errorDisplay,
+                onRetry = onRetry,
+                modifier = Modifier.padding(18.dp)
+            )
+        } else {
+            Text(
+                text = stringResource(R.string.no_verse_retry),
+                color = SaatColors.Slate500,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }

@@ -53,7 +53,15 @@ object SaatColors {
     var IndigoAccent by mutableStateOf(Color(0xFF085E43))
     var BlueLink by mutableStateOf(Color(0xFF15AA7C))
 
-    // Constants
+    // Constants & Revamp Theme Colors
+    val HomeBg = Color(0xFFF9F4EC)
+    val LastReadBg = Color(0xFFFFFFFF)
+    val JourneyCardBg = Color(0xFFFAF6F0)
+    val HomeDarkGreen = Color(0xFF176345)
+    val TimelineGreen = Color(0xFFB9CBBE)
+    val ArcGold = Color(0xFFE7B75C)
+    val ArcInactive = Color(0xFFF4EFE2)
+
     val Gold = Color(0xFFB45309)
     val GoldBright = Color(0xFFD4A017)
     val GoldDeep = Color(0xFFD97706)

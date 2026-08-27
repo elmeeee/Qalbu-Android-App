@@ -59,7 +59,8 @@ data class TodayUiState(
     val showTranslation: Boolean = true,
     val verseOccasion: DailyVerseOccasion? = null,
     val continueReading: ReadingSession? = null,
-    val continueReadingChapterName: String? = null
+    val continueReadingChapterName: String? = null,
+    val continueReadingTotalVerses: Int? = null
 )
 
 @HiltViewModel
@@ -110,15 +111,15 @@ class TodayViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val session = readingSessions.fetchMostRecent()
-                val chapterName = session?.let { s ->
-                    quranRepository.getChapters(force = false)
-                        .firstOrNull { it.id == s.chapterNumber }
-                        ?.displayComplexName
-                }
+                val chapters = quranRepository.getChapters(force = false)
+                val targetChapter = session?.let { s -> chapters.firstOrNull { it.id == s.chapterNumber } }
+                val chapterName = targetChapter?.displayComplexName
+                val totalVerses = targetChapter?.versesCount
                 _state.update {
                     it.copy(
                         continueReading = session,
-                        continueReadingChapterName = chapterName
+                        continueReadingChapterName = chapterName,
+                        continueReadingTotalVerses = totalVerses
                     )
                 }
             } catch (e: Throwable) {

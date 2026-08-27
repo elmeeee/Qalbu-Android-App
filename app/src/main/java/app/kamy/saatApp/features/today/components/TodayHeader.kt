@@ -106,14 +106,14 @@ fun TodayHeader(
 
     val progress = scrollProgress.coerceIn(0f, 1f)
 
-    val headerBgColor = lerp(Color.Transparent, SaatColors.PureWhite, progress)
-    val greetingColor = lerp(Color.White.copy(alpha = 0.95f), SaatColors.Slate500, progress)
-    val defaultDateColor = lerp(Color.White, SaatColors.Slate900, progress)
-    val badgeBgColor = lerp(Color.White.copy(alpha = 0.2f), SaatColors.MintWash, progress)
-    val badgeBorderColor = lerp(Color.White.copy(alpha = 0.4f), SaatColors.Teal.copy(alpha = 0.25f), progress)
-    val badgeContentColor = lerp(Color.White, SaatColors.DeepEmerald, progress)
+    val headerBgColor = lerp(Color.Transparent, SaatColors.HomeBg, progress)
+    val greetingColor = SaatColors.HomeDarkGreen
+    val defaultDateColor = SaatColors.HomeDarkGreen
+    val badgeBgColor = lerp(SaatColors.HomeDarkGreen.copy(alpha = 0.10f), SaatColors.HomeDarkGreen.copy(alpha = 0.15f), progress)
+    val badgeBorderColor = lerp(SaatColors.HomeDarkGreen.copy(alpha = 0.25f), SaatColors.HomeDarkGreen.copy(alpha = 0.35f), progress)
+    val badgeContentColor = SaatColors.HomeDarkGreen
     val elevationDp = lerp(0.dp, 2.dp, progress)
-    val dividerColor = lerp(Color.Transparent, SaatColors.SoftGrey.copy(alpha = 0.4f), progress)
+    val dividerColor = lerp(Color.Transparent, SaatColors.HomeDarkGreen.copy(alpha = 0.15f), progress)
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -171,8 +171,7 @@ fun TodayHeader(
                                 "$prefix${gregorianLabel.orEmpty()}"
                             }
                         }
-                        val targetDateColor = if (targetShowHijri) SaatColors.DeepEmerald else SaatColors.Slate900
-                        val textColor = lerp(Color.White, targetDateColor, progress)
+                        val textColor = SaatColors.HomeDarkGreen
 
                         Text(
                             text = dateText,

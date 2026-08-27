@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -326,37 +327,22 @@ fun TodayScreen(
     val targetPrayer = prayerState.nextPrayer ?: prayerState.activePrayer ?: app.kamy.saatApp.domain.model.PrayerType.MAGHRIB
     val cardDrawable = getPrayerCardDrawable(targetPrayer)
 
-    Box(modifier = Modifier.fillMaxSize().background(SaatColors.PureWhite)) {
+    Box(modifier = Modifier.fillMaxSize().background(SaatColors.HomeBg)) {
         if (scrollProgress < 1f) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(350.dp)
+                    .aspectRatio(393f / 238f)
                     .graphicsLayer { alpha = 1f - scrollProgress }
             ) {
                 Image(
                     painter = painterResource(cardDrawable),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.FillWidth,
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Top dark scrim for status bar and header text legibility
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp)
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Black.copy(alpha = 0.40f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                )
-
-                // Bottom smooth gradient fade into app's main pure white background
+                // Subtle bottom smooth gradient fade into app background
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -365,9 +351,9 @@ fun TodayScreen(
                                 colors = listOf(
                                     Color.Transparent,
                                     Color.Transparent,
-                                    Color.White.copy(alpha = 0.30f),
-                                    Color.White.copy(alpha = 0.75f),
-                                    Color.White
+                                    Color.Transparent,
+                                    SaatColors.HomeBg.copy(alpha = 0.30f),
+                                    SaatColors.HomeBg
                                 )
                             )
                         )
@@ -431,18 +417,9 @@ fun TodayScreen(
                             )
                     )
                 }
-                item(key = "khgt_banner") {
-                    TodayImportantDayBanner(
-                        info = prayerState.khgtToday,
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .coachMarkTarget(
-                                coachMarkState,
-                                1,
-                                R.string.coach_mark_today_khgt_title,
-                                R.string.coach_mark_today_khgt_desc
-                            )
-                    )
+
+                item(key = "top_header_spacer") {
+                    Spacer(modifier = Modifier.height(100.dp))
                 }
                 item(key = "prayer_card") {
                     PrayerDashboardCard(
@@ -461,28 +438,12 @@ fun TodayScreen(
                     )
                 }
 
-                item(key = "prayer_tracker") {
-                    PrayerTrackerCard(
-                        state = trackerState,
-                        onTogglePrayer = trackerVm::togglePrayer,
-                        onToggleOptional = trackerVm::toggleOptionalHabit,
-                        onOpenCalendar = onOpenTrackerCalendar,
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .coachMarkTarget(
-                                coachMarkState,
-                                3,
-                                R.string.coach_mark_today_tracker_title,
-                                R.string.coach_mark_today_tracker_desc
-                            )
-                    )
-                }
-
                 todayState.continueReading?.let { session ->
                     item(key = "continue_reading") {
                         TodayContinueReadingCard(
                             session = session,
                             chapterName = todayState.continueReadingChapterName,
+                            totalVerses = todayState.continueReadingTotalVerses,
                             onTap = {
                                 onOpenChapterReader(session.chapterNumber, session.verseNumber)
                             },
@@ -490,7 +451,7 @@ fun TodayScreen(
                                 .padding(horizontal = 20.dp)
                                 .coachMarkTarget(
                                     coachMarkState,
-                                    4,
+                                    3,
                                     R.string.coach_mark_today_continue_title,
                                     R.string.coach_mark_today_continue_desc
                                 )
@@ -498,52 +459,32 @@ fun TodayScreen(
                     }
                 }
 
-                item(key = "quran_of_day") {
-                    TodayVerseOfDaySection(
+                item(key = "prayer_tracker") {
+                    val isAfterIsha = remember(prayerState.activePrayer, prayerState.nextPrayer) {
+                        prayerState.activePrayer == app.kamy.saatApp.domain.model.PrayerType.ISHA
+                    }
+                    PrayerTrackerCard(
+                        state = trackerState,
                         verse = todayState.verse,
                         referenceLabel = todayState.verseReferenceLabel,
-                        translationId = todayState.translationId,
-                        showTranslation = todayState.showTranslation,
-                        showTransliteration = todayState.showTransliteration,
-                        occasion = todayState.verseOccasion,
-                        isLoading = todayState.isLoading,
-                        error = todayState.error,
-                        isPlaying = audioPlayer.isPlayingUrl(todayState.verse?.audio?.url),
-                        reciterName = todayState.recitations
-                            .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
-                            ?.displayName,
-                        onReciterClick = todayVm::openReciterSheet,
-                        onPlayAudio = {
-                            val url = todayState.verse?.audio?.url ?: return@TodayVerseOfDaySection
-                            if (audioPlayer.isPlayingUrl(url)) {
-                                audioPlayer.toggle()
-                            } else {
-                                val surahTitle = todayState.verseReferenceLabel
-                                    ?.substringBefore(" - ")
-                                    ?.trim()
-                                    .orEmpty()
-                                    .ifBlank { verseOfDayTitle }
-                                audioPlayer.playVerse(
-                                    url = url,
-                                    surahTitle = surahTitle,
-                                    ayahLabel = todayState.verse?.verseKey.orEmpty(),
-                                    reciterName = todayState.recitations
-                                        .firstOrNull { it.identifiableId == todayState.selectedRecitationId }
-                                        ?.displayName.orEmpty()
-                                )
+                        isAfterIsha = isAfterIsha,
+                        isQuranReadToday = todayState.continueReading != null,
+                        onShowToastMessage = { msg ->
+                            scope.launch {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                snackbarHostState.showSnackbar(msg)
                             }
                         },
-                        aiShareLoading = todayState.aiShareLoading,
-                        onAiShare = { todayVm.openAiShare() },
-                        onTafsir = { todayVm.openTafsir() },
-                        onRetry = { scope.launch { todayVm.refreshContent(refreshTranslation = true) } },
+                        onTogglePrayer = trackerVm::togglePrayer,
+                        onOpenCalendar = onOpenTrackerCalendar,
+                        onShareVerse = { todayVm.openAiShare() },
                         modifier = Modifier
                             .padding(horizontal = 20.dp)
                             .coachMarkTarget(
                                 coachMarkState,
-                                5,
-                                R.string.coach_mark_today_verse_title,
-                                R.string.coach_mark_today_verse_desc
+                                4,
+                                R.string.coach_mark_today_tracker_title,
+                                R.string.coach_mark_today_tracker_desc
                             )
                     )
                 }
@@ -558,39 +499,32 @@ fun TodayScreen(
         ) { snackbarData ->
             Surface(
                 shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.surface,
+                color = SaatColors.HomeDarkGreen,
                 shadowElevation = 10.dp,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+                border = BorderStroke(1.dp, SaatColors.ArcGold.copy(alpha = 0.5f)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(24.dp))
             ) {
                 Row(
                     modifier = Modifier
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f),
-                                    MaterialTheme.colorScheme.surface
-                                )
-                            )
-                        )
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                        .background(SaatColors.HomeDarkGreen)
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(34.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                            .background(Color(0xFFE6F4EA)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = "Success",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp)
+                            contentDescription = "Notification",
+                            tint = SaatColors.HomeDarkGreen,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
@@ -598,7 +532,7 @@ fun TodayScreen(
                         text = snackbarData.visuals.message,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = Color.White,
                         modifier = Modifier.weight(1f)
                     )
 
@@ -692,76 +626,94 @@ fun TodayScreen(
 private fun TodayContinueReadingCard(
     session: ReadingSession,
     chapterName: String?,
+    totalVerses: Int?,
     onTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+    val percentInt = remember(session.verseNumber, totalVerses) {
+        if (totalVerses != null && totalVerses > 0) {
+            ((session.verseNumber.toFloat() / totalVerses.toFloat()) * 100).toInt().coerceIn(1, 100)
+        } else 50
+    }
+    val fillFraction = (percentInt / 100f).coerceIn(0.05f, 1f)
+
+    Surface(
+        onClick = onTap,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp)),
+        shape = RoundedCornerShape(24.dp),
+        color = SaatColors.LastReadBg,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.5f))
     ) {
-        Surface(
-            onClick = onTap,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp),
-            shape = RoundedCornerShape(20.dp),
-            color = Color.Transparent,
-            shadowElevation = 4.dp
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(20.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
             ) {
-                // Background image
-                Image(
-                    painter = painterResource(R.drawable.last_read_bg),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                Text(
+                    text = stringResource(R.string.today_continue_reading_title),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SaatColors.HomeDarkGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-
-                // Text overlay
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .fillMaxWidth(0.6f)
-                        .padding(start = 20.dp),
-                    verticalArrangement = Arrangement.Center
+                Spacer(Modifier.height(4.dp))
+                val surahTitle = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber)
+                val verseTitle = stringResource(R.string.today_continue_reading_verse, session.verseNumber)
+                Text(
+                    text = "$surahTitle • $verseTitle",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = SaatColors.HomeDarkGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.today_continue_reading_title),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = Color.White.copy(alpha = 0.85f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = "$percentInt%",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.HomeDarkGreen
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = chapterName ?: stringResource(R.string.surah_number, session.chapterNumber),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        ),
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Normal
-                        ),
-                        color = Color.White.copy(alpha = 0.75f),
-                        maxLines = 1
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(4.dp)
+                            .clip(CircleShape)
+                            .background(SaatColors.TimelineGreen)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fillFraction)
+                                .height(4.dp)
+                                .clip(CircleShape)
+                                .background(SaatColors.HomeDarkGreen)
+                        )
+                    }
                 }
             }
+
+            Image(
+                painter = painterResource(R.drawable.last_read),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(90.dp, 60.dp)
+                    .padding(start = 8.dp)
+            )
         }
     }
 }
