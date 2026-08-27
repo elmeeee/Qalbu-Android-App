@@ -4,12 +4,20 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,46 +26,63 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CompassCalibration
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Mosque
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.Image
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLanguage
-import app.kamy.saatApp.core.locale.AppStrings
-import app.kamy.saatApp.design.theme.SaatColors
-import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.domain.model.PrayerType
-import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.launch
+import app.kamy.saatApp.design.theme.SaatColors
 import kotlinx.coroutines.delay
-import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+
+private val OnboardingDarkGreen = Color(0xFF133E2E)
+private val OnboardingCardBg = Color(0xFFFDFBF7)
+private val OnboardingCardBorder = Color(0xFFEAE3D2)
+private val OnboardingSubtext = Color(0xFF64748B)
 
 @Composable
 fun OnboardingScreen(
@@ -65,489 +90,758 @@ fun OnboardingScreen(
     vm: OnboardingViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
-    val strings = vm.strings
-    var showLocationRationale by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var showLocationRationale by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-        val locationPermissionLauncher = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { vm.onLocationPermissionResult(it.values.any { granted -> granted }) }
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { vm.onLocationPermissionResult(it.values.any { granted -> granted }) }
 
-        val notificationPermissionLauncher = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { vm.onNotificationPermissionResult() }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { vm.onNotificationPermissionResult() }
 
-        val stepIndex = when (state.step) {
-            OnboardingStep.LANGUAGE -> 1
-            OnboardingStep.WELCOME -> 2
-            OnboardingStep.LOCATION -> 3
-            OnboardingStep.NOTIFICATIONS -> 4
-            OnboardingStep.PRAYER_NOTIFICATIONS -> 5
-        }
+    val currentStepNumber = when (state.step) {
+        OnboardingStep.LANGUAGE -> 1
+        OnboardingStep.WELCOME -> 2
+        OnboardingStep.LOCATION -> 3
+        OnboardingStep.NOTIFICATIONS -> 4
+        OnboardingStep.PRAYER_NOTIFICATIONS -> 5
+    }
 
-        if (showLocationRationale) {
-            androidx.compose.material3.AlertDialog(
-                onDismissRequest = { showLocationRationale = false },
-                title = {
-                    Text(
-                        text = strings.getString(R.string.onboarding_location_rationale_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = SaatColors.Slate900
-                    )
-                },
-                text = {
-                    Text(
-                        text = strings.getString(R.string.onboarding_location_rationale_body),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = SaatColors.Slate700
-                    )
-                },
-                confirmButton = {
-                    androidx.compose.material3.TextButton(
-                        onClick = {
-                            showLocationRationale = false
-                            locationPermissionLauncher.launch(
-                                arrayOf(
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_COARSE_LOCATION
-                                )
+    val bgDrawable = when (state.step) {
+        OnboardingStep.LANGUAGE -> R.drawable.bg_onboarding_1
+        OnboardingStep.WELCOME -> R.drawable.bg_onboarding_2
+        OnboardingStep.LOCATION -> R.drawable.bg_onboarding_3
+        OnboardingStep.NOTIFICATIONS -> R.drawable.bg_onboarding_4
+        OnboardingStep.PRAYER_NOTIFICATIONS -> R.drawable.bg_onboarding_5
+    }
+
+    if (showLocationRationale) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showLocationRationale = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.onboarding_location_rationale_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = OnboardingDarkGreen,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.onboarding_location_rationale_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = OnboardingSubtext
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLocationRationale = false
+                        locationPermissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
                             )
-                        }
-                    ) {
-                        Text(
-                            text = strings.getString(android.R.string.ok),
-                            color = SaatColors.DeepEmerald,
-                            fontWeight = FontWeight.Bold
                         )
                     }
-                },
-                dismissButton = {
-                    androidx.compose.material3.TextButton(
-                        onClick = { showLocationRationale = false }
-                    ) {
-                        Text(
-                            text = strings.getString(android.R.string.cancel),
-                            color = SaatColors.Slate500
-                        )
-                    }
-                },
-                shape = RoundedCornerShape(16.dp),
-                containerColor = Color.White
-            )
-        }
+                ) {
+                    Text(
+                        text = stringResource(android.R.string.ok),
+                        color = OnboardingDarkGreen,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLocationRationale = false }) {
+                    Text(text = stringResource(android.R.string.cancel), color = OnboardingSubtext)
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = Color.White
+        )
+    }
 
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Full screen device-fitted background illustration
+        Image(
+            painter = painterResource(id = bgDrawable),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+
+        // Overlay UI Content
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFF085E43),
-                            Color(0xFF15AA7C)
-                        )
-                    )
-                )
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(24.dp)
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                Text(
-                    text = strings.getString(R.string.onboarding_step_progress, stepIndex, 5),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color.White.copy(alpha = 0.75f),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                LinearProgressIndicator(
-                    progress = { stepIndex / 5f },
-                    modifier = Modifier.fillMaxWidth(),
-                    color = SaatColors.GoldBright,
-                    trackColor = Color.White.copy(alpha = 0.2f)
-                )
+            // STEP CONTENT (Top / Middle / Card)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                when (state.step) {
+                    OnboardingStep.LANGUAGE -> LanguageStep(
+                        selected = state.selectedLanguage,
+                        onSelect = vm::selectLanguage
+                    )
+                    OnboardingStep.WELCOME -> WelcomeStep()
+                    OnboardingStep.LOCATION -> LocationStep()
+                    OnboardingStep.NOTIFICATIONS -> NotificationStep()
+                    OnboardingStep.PRAYER_NOTIFICATIONS -> PrayerNotificationsStep(
+                        toggles = state.prayerAdzanToggles,
+                        onToggle = vm::togglePrayerAdzan
+                    )
+                }
             }
 
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            when (state.step) {
-                OnboardingStep.LANGUAGE -> LanguageStep(
-                    selected = state.selectedLanguage,
-                    onSelect = vm::selectLanguage,
-                    strings = strings
-                )
-                OnboardingStep.WELCOME -> WelcomeStep(strings = strings)
-                OnboardingStep.LOCATION -> LocationStep(
-                    query = state.locationQuery,
-                    saving = state.savingLocation,
-                    error = state.locationError,
-                    onQueryChange = vm::updateLocationQuery,
-                    onUseGps = { showLocationRationale = true },
-                    strings = strings
-                )
-                OnboardingStep.NOTIFICATIONS -> NotificationsStep(strings = strings)
-                OnboardingStep.PRAYER_NOTIFICATIONS -> PrayerNotificationsStep(
-                    toggles = state.prayerAdzanToggles,
-                    onToggle = vm::togglePrayerAdzan,
-                    strings = strings
-                )
-            }
-        }
-
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(
-                onClick = {
-                    when (state.step) {
-                        OnboardingStep.LANGUAGE -> {
-                            vm.selectLanguage(state.selectedLanguage)
-                            vm.nextStep()
-                        }
-                        OnboardingStep.WELCOME -> vm.nextStep()
-                        OnboardingStep.LOCATION -> {
-                            if (state.locationQuery.isNotBlank()) {
-                                vm.saveManualLocation()
-                            } else {
-                                showLocationRationale = true
-                            }
-                        }
-                        OnboardingStep.NOTIFICATIONS -> {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            } else {
+            // BOTTOM ACTION CONTROLS & PAGE INDICATOR
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // PRIMARY ACTION BUTTON
+                Button(
+                    onClick = {
+                        when (state.step) {
+                            OnboardingStep.LANGUAGE -> {
+                                vm.selectLanguage(state.selectedLanguage)
                                 vm.nextStep()
                             }
-                        }
-                        OnboardingStep.PRAYER_NOTIFICATIONS -> {
-                            scope.launch {
-                                vm.completeOnboarding()
-                                delay(200)
-                                onFinished()
+                            OnboardingStep.WELCOME -> vm.nextStep()
+                            OnboardingStep.LOCATION -> showLocationRationale = true
+                            OnboardingStep.NOTIFICATIONS -> {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    vm.nextStep()
+                                }
                             }
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !state.savingLocation,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SaatColors.GoldBright,
-                    contentColor = SaatColors.DeepEmerald,
-                    disabledContainerColor = SaatColors.GoldBright.copy(alpha = 0.4f),
-                    disabledContentColor = SaatColors.DeepEmerald.copy(alpha = 0.5f)
-                )
-            ) {
-                Text(
-                    when (state.step) {
-                        OnboardingStep.LANGUAGE -> strings.getString(R.string.onboarding_continue)
-                        OnboardingStep.PRAYER_NOTIFICATIONS -> strings.getString(R.string.onboarding_get_started)
-                        OnboardingStep.NOTIFICATIONS -> strings.getString(R.string.onboarding_enable_notifications)
-                        else -> strings.getString(R.string.onboarding_continue)
-                    }
-                )
-            }
-            if (state.step != OnboardingStep.LANGUAGE) {
-                OnboardingSecondaryButton(
-                    onClick = {
-                        if (state.step == OnboardingStep.NOTIFICATIONS) {
-                            vm.skipNotifications()
-                        } else if (state.step == OnboardingStep.LOCATION) {
-                            vm.skipLocation()
-                        } else if (state.step == OnboardingStep.PRAYER_NOTIFICATIONS) {
-                            scope.launch {
-                                vm.completeOnboarding()
-                                delay(200)
-                                onFinished()
+                            OnboardingStep.PRAYER_NOTIFICATIONS -> {
+                                scope.launch {
+                                    vm.completeOnboarding()
+                                    delay(200)
+                                    onFinished()
+                                }
                             }
-                        } else {
-                            vm.nextStep()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    labelColor = SaatColors.GoldBright
-                ) {
-                    Text(
-                        when (state.step) {
-                            OnboardingStep.LOCATION -> strings.getString(R.string.onboarding_skip_location)
-                            OnboardingStep.PRAYER_NOTIFICATIONS -> strings.getString(R.string.onboarding_skip)
-                            OnboardingStep.NOTIFICATIONS -> strings.getString(R.string.onboarding_skip_notifications)
-                            else -> strings.getString(R.string.onboarding_skip)
-                        }
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = OnboardingDarkGreen,
+                        contentColor = Color.White
                     )
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = when (state.step) {
+                                OnboardingStep.LANGUAGE -> "Continue"
+                                OnboardingStep.WELCOME -> "Let's Begin"
+                                OnboardingStep.LOCATION -> "Allow Location"
+                                OnboardingStep.NOTIFICATIONS -> "Allow Notifications"
+                                OnboardingStep.PRAYER_NOTIFICATIONS -> "Continue"
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        if (state.step == OnboardingStep.LANGUAGE || state.step == OnboardingStep.WELCOME || state.step == OnboardingStep.PRAYER_NOTIFICATIONS) {
+                            Spacer(Modifier.width(8.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+
+                // SECONDARY BUTTON / FOOTER TEXT
+                when (state.step) {
+                    OnboardingStep.LOCATION -> {
+                        TextButton(onClick = { vm.skipLocation() }) {
+                            Text(
+                                text = "Not Now",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = OnboardingSubtext,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                    OnboardingStep.NOTIFICATIONS -> {
+                        TextButton(onClick = { vm.skipNotifications() }) {
+                            Text(
+                                text = "Not Now",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = OnboardingSubtext,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+                    OnboardingStep.PRAYER_NOTIFICATIONS -> {
+                        Text(
+                            text = "You can change this later in settings",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = OnboardingSubtext,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    else -> Spacer(Modifier.height(10.dp))
+                }
+
+                Spacer(Modifier.height(4.dp))
+
+                // 5-DOT PAGE INDICATOR
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    for (i in 1..5) {
+                        val isActive = i == currentStepNumber
+                        Box(
+                            modifier = Modifier
+                                .size(if (isActive) 9.dp else 7.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isActive) OnboardingDarkGreen else Color(0xFFCBD5E1)
+                                )
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-@Composable
-private fun WelcomeStep(strings: AppStrings) {
-    Text("☪", style = MaterialTheme.typography.displayMedium, color = SaatColors.GoldBright)
-    Spacer(Modifier.height(16.dp))
-    Text(
-        text = strings.getString(R.string.onboarding_welcome_title),
-        style = MaterialTheme.typography.headlineMedium,
-        fontWeight = FontWeight.Bold,
-        color = androidx.compose.ui.graphics.Color.White,
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(12.dp))
-    Text(
-        text = strings.getString(R.string.onboarding_welcome_body),
-        style = MaterialTheme.typography.bodyLarge,
-        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.82f),
-        textAlign = TextAlign.Center
-    )
-}
-
+// -----------------------------------------------------------------------------
+// STEP 1: LANGUAGE SELECTION (3 Languages Only - Arabic Removed)
+// -----------------------------------------------------------------------------
 @Composable
 private fun LanguageStep(
     selected: AppLanguage,
-    onSelect: (AppLanguage) -> Unit,
-    strings: AppStrings
+    onSelect: (AppLanguage) -> Unit
 ) {
-    Text(
-        text = strings.getString(R.string.onboarding_language_title),
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-        color = androidx.compose.ui.graphics.Color.White,
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(12.dp))
-    Text(
-        text = strings.getString(R.string.onboarding_language_body),
-        style = MaterialTheme.typography.bodyMedium,
-        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(24.dp))
-    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        AppLanguage.entries.forEach { lang ->
-            val isSelected = lang == selected
-            val flagRes = when (lang) {
-                AppLanguage.INDONESIAN -> R.drawable.ic_flag_id
-                AppLanguage.ENGLISH -> R.drawable.ic_flag_en
-                AppLanguage.MALAY -> R.drawable.ic_flag_ms
-            }
-            Surface(
-                onClick = { onSelect(lang) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                color = if (isSelected) {
-                    SaatColors.DeepEmerald.copy(alpha = 0.15f)
-                } else {
-                    SaatColors.LightGrey.copy(alpha = 0.35f)
-                },
-                border = if (isSelected) {
-                    BorderStroke(1.5.dp, SaatColors.GoldBright)
-                } else {
-                    BorderStroke(1.dp, androidx.compose.ui.graphics.Color.White.copy(alpha = 0.35f))
-                }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(Modifier.height(12.dp))
+
+        // Top Arch Badge Header
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(OnboardingDarkGreen),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Language,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(26.dp)
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "Choose your language",
+            style = MaterialTheme.typography.headlineMedium,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = OnboardingDarkGreen,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        Text(
+            text = "Select your preferred language\nto get started",
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingSubtext,
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        // Language Selection List Card (3 languages only)
+        val languages = listOf(
+            Triple(AppLanguage.ENGLISH, "English", "English"),
+            Triple(AppLanguage.INDONESIAN, "Bahasa Indonesia", "Indonesian"),
+            Triple(AppLanguage.MALAY, "Bahasa Melayu", "Malay")
+        )
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            languages.forEach { (lang, title, subtitle) ->
+                val isSelected = lang == selected
+                Surface(
+                    onClick = { onSelect(lang) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    color = OnboardingCardBg,
+                    border = BorderStroke(
+                        width = if (isSelected) 1.8.dp else 1.dp,
+                        color = if (isSelected) OnboardingDarkGreen else OnboardingCardBorder
+                    )
                 ) {
-                    Image(
-                        painter = androidx.compose.ui.res.painterResource(id = flagRes),
-                        contentDescription = null,
-                        modifier = Modifier.size(width = 28.dp, height = 20.dp)
-                    )
-                    Spacer(Modifier.width(14.dp))
-                    Text(
-                        text = strings.getString(lang.labelRes),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                        color = androidx.compose.ui.graphics.Color.White,
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (isSelected) {
-                        Text(
-                            text = "✓",
-                            color = SaatColors.GoldBright,
-                            fontWeight = FontWeight.Bold
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = OnboardingDarkGreen
+                            )
+                            Text(
+                                text = subtitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = OnboardingSubtext
+                            )
+                        }
+
+                        if (isSelected) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(OnboardingDarkGreen),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+// -----------------------------------------------------------------------------
+// STEP 2: WELCOME SCREEN
+// -----------------------------------------------------------------------------
+@Composable
+private fun WelcomeStep() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = "Welcome to",
+            style = MaterialTheme.typography.titleLarge,
+            fontFamily = FontFamily.Serif,
+            color = OnboardingDarkGreen
+        )
+
+        Text(
+            text = "SĀĀT",
+            style = MaterialTheme.typography.displayLarge.copy(fontSize = 38.sp),
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = OnboardingDarkGreen,
+            letterSpacing = 3.sp
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        Text(
+            text = "Your daily companion\nfor a better you.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingSubtext,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        // Features List Card
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            color = OnboardingCardBg,
+            border = BorderStroke(1.dp, OnboardingCardBorder)
+        ) {
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                FeatureRowItem(
+                    icon = Icons.Default.Mosque,
+                    title = "Prayer on time",
+                    subtitle = "Accurate prayer times\nand adzan reminders"
+                )
+                FeatureRowItem(
+                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                    title = "Quran & Reflection",
+                    subtitle = "Read, reflect and grow with\nthe Quran"
+                )
+                FeatureRowItem(
+                    icon = Icons.Default.Favorite,
+                    title = "Spiritual tools",
+                    subtitle = "Dhikr, Qibla, Zakat, and\nmore tools for you"
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun FeatureRowItem(
+    icon: ImageVector,
+    title: String,
+    subtitle: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(OnboardingDarkGreen),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = OnboardingDarkGreen
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = OnboardingSubtext,
+                lineHeight = 15.sp
+            )
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// STEP 3: LOCATION ACCESS
+// -----------------------------------------------------------------------------
+@Composable
+private fun LocationStep() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(Modifier.height(12.dp))
+
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(OnboardingDarkGreen),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Place,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(26.dp)
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "Allow Location\nAccess",
+            style = MaterialTheme.typography.headlineMedium,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = OnboardingDarkGreen,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        Text(
+            text = "We use your location to show\naccurate prayer times\nand Qibla direction.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingSubtext,
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        // Benefits Card
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            color = OnboardingCardBg,
+            border = BorderStroke(1.dp, OnboardingCardBorder)
+        ) {
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                BenefitRowItem(icon = Icons.Default.AccessTime, text = "Accurate prayer times for your area")
+                BenefitRowItem(icon = Icons.Default.CompassCalibration, text = "Precise Qibla direction")
+                BenefitRowItem(icon = Icons.Default.Settings, text = "Works offline after setup")
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+// -----------------------------------------------------------------------------
+// STEP 4: NOTIFICATIONS
+// -----------------------------------------------------------------------------
+@Composable
+private fun NotificationStep() {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(Modifier.height(12.dp))
+
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(OnboardingDarkGreen),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Notifications,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(26.dp)
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "Stay\nConnected",
+            style = MaterialTheme.typography.headlineMedium,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = OnboardingDarkGreen,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        Text(
+            text = "Allow notifications to never miss\nprayer times and important\nreminders.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingSubtext,
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        // Benefits Card
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            color = OnboardingCardBg,
+            border = BorderStroke(1.dp, OnboardingCardBorder)
+        ) {
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                BenefitRowItem(icon = Icons.Default.Notifications, text = "Prayer time reminders")
+                BenefitRowItem(icon = Icons.Default.Favorite, text = "Daily dhikr & motivation")
+                BenefitRowItem(icon = Icons.Default.Shield, text = "Important updates & news")
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun BenefitRowItem(icon: ImageVector, text: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = OnboardingDarkGreen,
+            modifier = Modifier.size(20.dp)
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingDarkGreen,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+// -----------------------------------------------------------------------------
+// STEP 5: ADHAN REMINDERS SELECTION
+// -----------------------------------------------------------------------------
+@Composable
+private fun PrayerNotificationsStep(
+    toggles: Map<PrayerType, Boolean>,
+    onToggle: (PrayerType, Boolean) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(Modifier.height(12.dp))
+
+        Box(
+            modifier = Modifier
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(OnboardingDarkGreen),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.AccessTime,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(26.dp)
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "Adhan\nReminders",
+            style = MaterialTheme.typography.headlineMedium,
+            fontFamily = FontFamily.Serif,
+            fontWeight = FontWeight.Bold,
+            color = OnboardingDarkGreen,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        Text(
+            text = "Select the prayer times you want\nto be reminded with adhan.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingSubtext,
+            textAlign = TextAlign.Center,
+            lineHeight = 18.sp
+        )
+
+        Spacer(Modifier.weight(1f))
+
+        // Prayer Adhan Reminders Card
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            color = OnboardingCardBg,
+            border = BorderStroke(1.dp, OnboardingCardBorder)
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { type ->
+                    val checked = toggles[type] ?: true
+                    val (prayerName, prayerIcon) = when (type) {
+                        PrayerType.FAJR -> "Fajr" to R.drawable.ic_prayer_fajr
+                        PrayerType.DHUHR -> "Dhuhr" to R.drawable.ic_prayer_dhuhr
+                        PrayerType.ASR -> "Asr" to R.drawable.ic_prayer_asr
+                        PrayerType.MAGHRIB -> "Maghrib" to R.drawable.ic_prayer_maghrib
+                        PrayerType.ISHA -> "Isha" to R.drawable.ic_prayer_isha
+                        else -> "" to R.drawable.ic_prayer_fajr
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = prayerIcon),
+                                contentDescription = null,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Text(
+                                text = prayerName,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = OnboardingDarkGreen
+                            )
+                        }
+
+                        Switch(
+                            checked = checked,
+                            onCheckedChange = { onToggle(type, it) },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = OnboardingDarkGreen,
+                                uncheckedThumbColor = Color.White,
+                                uncheckedTrackColor = Color(0xFFCBD5E1),
+                                uncheckedBorderColor = Color.Transparent
+                            )
                         )
                     }
                 }
             }
         }
+
+        Spacer(Modifier.height(16.dp))
     }
 }
-
-@Composable
-private fun LocationStep(
-    query: String,
-    saving: Boolean,
-    error: String?,
-    onQueryChange: (String) -> Unit,
-    onUseGps: () -> Unit,
-    strings: AppStrings
-) {
-    Text(
-        text = strings.getString(R.string.onboarding_location_title),
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-        color = androidx.compose.ui.graphics.Color.White,
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(12.dp))
-    Text(
-        text = strings.getString(R.string.onboarding_location_body),
-        style = MaterialTheme.typography.bodyMedium,
-        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(20.dp))
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        modifier = Modifier.fillMaxWidth(),
-        label = { Text(strings.getString(R.string.location_city_hint)) },
-        singleLine = true,
-        isError = error != null,
-        supportingText = error?.let { { Text(it, color = Color.White.copy(alpha = 0.85f)) } },
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedBorderColor = SaatColors.GoldBright,
-            unfocusedBorderColor = Color.White.copy(alpha = 0.45f),
-            focusedLabelColor = SaatColors.GoldBright,
-            unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-            cursorColor = SaatColors.GoldBright,
-            errorBorderColor = MaterialTheme.colorScheme.error,
-            errorLabelColor = MaterialTheme.colorScheme.error,
-            errorSupportingTextColor = Color.White.copy(alpha = 0.9f)
-        )
-    )
-    Spacer(Modifier.height(8.dp))
-    OnboardingSecondaryButton(
-        onClick = onUseGps,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = !saving
-    ) {
-        if (saving) {
-            CircularProgressIndicator(
-                modifier = Modifier.height(20.dp),
-                color = Color.White,
-                strokeWidth = 2.dp
-            )
-        } else {
-            Text(strings.getString(R.string.location_use_gps))
-        }
-    }
-}
-
-@Composable
-private fun OnboardingSecondaryButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    labelColor: Color = Color.White,
-    content: @Composable () -> Unit
-) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = modifier,
-        enabled = enabled,
-        border = BorderStroke(1.dp, labelColor.copy(alpha = if (enabled) 0.65f else 0.35f)),
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = labelColor,
-            disabledContentColor = labelColor.copy(alpha = 0.38f)
-        )
-    ) {
-        content()
-    }
-}
-
-@Composable
-private fun NotificationsStep(strings: AppStrings) {
-    Text(
-        text = strings.getString(R.string.onboarding_notifications_title),
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-        color = androidx.compose.ui.graphics.Color.White,
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(12.dp))
-    Text(
-        text = strings.getString(R.string.onboarding_notifications_body),
-        style = MaterialTheme.typography.bodyMedium,
-        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
-        textAlign = TextAlign.Center
-    )
-}
-
-@Composable
-private fun WidgetStep(strings: AppStrings) {
-    Text(
-        text = strings.getString(R.string.onboarding_widget_title),
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-        color = androidx.compose.ui.graphics.Color.White,
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(12.dp))
-    Text(
-        text = strings.getString(R.string.onboarding_widget_body),
-        style = MaterialTheme.typography.bodyMedium,
-        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
-        textAlign = TextAlign.Center
-    )
-}
-
-@Composable
-private fun PrayerNotificationsStep(
-    toggles: Map<PrayerType, Boolean>,
-    onToggle: (PrayerType, Boolean) -> Unit,
-    strings: AppStrings
-) {
-    Text(
-        text = strings.getString(R.string.onboarding_prayer_config_title),
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-        color = androidx.compose.ui.graphics.Color.White,
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(12.dp))
-    Text(
-        text = strings.getString(R.string.onboarding_prayer_config_body),
-        style = MaterialTheme.typography.bodyMedium,
-        color = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f),
-        textAlign = TextAlign.Center
-    )
-    Spacer(Modifier.height(24.dp))
-    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { type ->
-            val checked = toggles[type] ?: true
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                val prayerName = when (type) {
-                    PrayerType.FAJR -> strings.getString(R.string.prayer_fajr)
-                    PrayerType.DHUHR -> strings.getString(R.string.prayer_dhuhr)
-                    PrayerType.ASR -> strings.getString(R.string.prayer_asr)
-                    PrayerType.MAGHRIB -> strings.getString(R.string.prayer_maghrib)
-                    PrayerType.ISHA -> strings.getString(R.string.prayer_isha)
-                    else -> ""
-                }
-                Text(prayerName, color = Color.White, style = MaterialTheme.typography.titleMedium)
-                androidx.compose.material3.Switch(
-                    checked = checked,
-                    onCheckedChange = { onToggle(type, it) },
-                    colors = androidx.compose.material3.SwitchDefaults.colors(
-                        checkedThumbColor = SaatColors.DeepEmerald,
-                        checkedTrackColor = SaatColors.GoldBright,
-                        uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = Color.White.copy(alpha = 0.3f),
-                        uncheckedBorderColor = Color.Transparent
-                    )
-                )
-            }
-        }
-    }
-}
-
-
