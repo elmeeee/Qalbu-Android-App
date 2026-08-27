@@ -11,12 +11,14 @@ import java.util.Locale
 data class PrayerDayProgress(
     val dayKey: String,
     val completedCount: Int,
-    val totalCount: Int = PrayerType.ADZAN_NOTIFICATION_PRAYERS.size,
-    val optionalCompletedCount: Int = 0,
-    val optionalTotalCount: Int = 0
+    val totalCount: Int = 4,
+    val isPrayerDone: Boolean = false,
+    val isQuranDone: Boolean = false,
+    val isSunnahDone: Boolean = false,
+    val isDhikrDone: Boolean = false
 ) {
     val fraction: Float get() = completedCount.toFloat() / totalCount.coerceAtLeast(1)
-    val isPerfectDay: Boolean get() = completedCount >= totalCount
+    val isPerfectDay: Boolean get() = isPrayerDone && isQuranDone && isSunnahDone && isDhikrDone
 }
 
 object PrayerTrackerStore {
@@ -73,6 +75,7 @@ object PrayerTrackerStore {
             .edit()
             .putBoolean(optionalPrefKey(habit, dayKey), completed)
             .apply()
+        updateBestStreakIfNeeded(context)
     }
 
     fun toggleOptional(
@@ -88,11 +91,24 @@ object PrayerTrackerStore {
     fun completedCount(context: Context, dayKey: String = todayKey()): Int =
         TRACKED_PRAYERS.count { isCompleted(context, it, dayKey) }
 
-    fun dayProgress(context: Context, dayKey: String = todayKey()): PrayerDayProgress =
-        PrayerDayProgress(
+    fun dayProgress(context: Context, dayKey: String = todayKey()): PrayerDayProgress {
+        val isPrayerDone = completedCount(context, dayKey) >= TRACKED_PRAYERS.size || isOptionalCompleted(context, OptionalWorshipHabit.QIYAMUL_LAIL, dayKey)
+        val isQuranDone = isOptionalCompleted(context, OptionalWorshipHabit.READ_QURAN, dayKey)
+        val isSunnahDone = isOptionalCompleted(context, OptionalWorshipHabit.DHUHA, dayKey) || isOptionalCompleted(context, OptionalWorshipHabit.RAWATIB, dayKey)
+        val isDhikrDone = isOptionalCompleted(context, OptionalWorshipHabit.DHIKR_MORNING, dayKey) || isOptionalCompleted(context, OptionalWorshipHabit.DHIKR_EVENING, dayKey)
+
+        val journeyCount = listOf(isPrayerDone, isQuranDone, isSunnahDone, isDhikrDone).count { it }
+
+        return PrayerDayProgress(
             dayKey = dayKey,
-            completedCount = completedCount(context, dayKey)
+            completedCount = journeyCount,
+            totalCount = 4,
+            isPrayerDone = isPrayerDone,
+            isQuranDone = isQuranDone,
+            isSunnahDone = isSunnahDone,
+            isDhikrDone = isDhikrDone
         )
+    }
 
     fun weekProgress(context: Context): List<PrayerDayProgress> {
         val cal = Calendar.getInstance()
@@ -121,11 +137,11 @@ object PrayerTrackerStore {
         var streak = 0
         repeat(400) {
             val key = dayKeyFormat.format(cal.time)
-            val count = completedCount(context, key)
-            if (count >= TRACKED_PRAYERS.size) {
+            val progress = dayProgress(context, key)
+            if (progress.isPerfectDay) {
                 streak++
                 cal.add(Calendar.DAY_OF_YEAR, -1)
-            } else if (streak == 0 && key == todayKey() && count > 0) {
+            } else if (streak == 0 && key == todayKey() && progress.completedCount > 0) {
                 cal.add(Calendar.DAY_OF_YEAR, -1)
             } else {
                 return streak

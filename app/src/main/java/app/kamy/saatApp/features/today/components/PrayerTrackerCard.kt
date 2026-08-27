@@ -90,10 +90,18 @@ fun PrayerTrackerCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var isPrayerOverridden by remember { mutableStateOf<Boolean?>(null) }
-    var isQuranDone by remember(isQuranReadToday) { mutableStateOf(isQuranReadToday) }
-    var isDhikrDone by remember { mutableStateOf(false) }
-    var isSunnahDone by remember { mutableStateOf(false) }
+    var isPrayerOverridden by remember {
+        mutableStateOf<Boolean?>(if (PrayerTrackerStore.isOptionalCompleted(context, OptionalWorshipHabit.QIYAMUL_LAIL)) true else null)
+    }
+    var isQuranDone by remember(isQuranReadToday) {
+        mutableStateOf(isQuranReadToday || PrayerTrackerStore.isOptionalCompleted(context, OptionalWorshipHabit.READ_QURAN))
+    }
+    var isDhikrDone by remember {
+        mutableStateOf(PrayerTrackerStore.isOptionalCompleted(context, OptionalWorshipHabit.DHIKR_MORNING))
+    }
+    var isSunnahDone by remember {
+        mutableStateOf(PrayerTrackerStore.isOptionalCompleted(context, OptionalWorshipHabit.DHUHA))
+    }
 
     val completedFardhuCount = state.completedPrayers.size
     val isPrayerClickable = isAfterIsha || completedFardhuCount >= 5
@@ -159,15 +167,13 @@ fun PrayerTrackerCard(
                     isCompleted = isPrayerDone,
                     onClick = {
                         if (isPrayerClickable) {
-                            isPrayerOverridden = !isPrayerDone
+                            val next = !isPrayerDone
+                            isPrayerOverridden = next
+                            PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.QIYAMUL_LAIL, next)
+                            onToggleOptional(OptionalWorshipHabit.QIYAMUL_LAIL)
                         } else {
                             val msg = "Shalat dapat dicentang setelah waktu Isya atau 5 shalat selesai"
                             onShowToastMessage(msg)
-                            android.widget.Toast.makeText(
-                                context,
-                                msg,
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
                         }
                     }
                 )
@@ -176,21 +182,36 @@ fun PrayerTrackerCard(
                 JourneyBadge(
                     label = "Quran",
                     isCompleted = isQuranDone,
-                    onClick = { isQuranDone = !isQuranDone }
+                    onClick = {
+                        val next = !isQuranDone
+                        isQuranDone = next
+                        PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.READ_QURAN, next)
+                        onToggleOptional(OptionalWorshipHabit.READ_QURAN)
+                    }
                 )
 
                 // 3. Dhikr
                 JourneyBadge(
                     label = "Dhikr",
                     isCompleted = isDhikrDone,
-                    onClick = { isDhikrDone = !isDhikrDone }
+                    onClick = {
+                        val next = !isDhikrDone
+                        isDhikrDone = next
+                        PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.DHIKR_MORNING, next)
+                        onToggleOptional(OptionalWorshipHabit.DHIKR_MORNING)
+                    }
                 )
 
                 // 4. Sunnah
                 JourneyBadge(
                     label = "Sunnah",
                     isCompleted = isSunnahDone,
-                    onClick = { isSunnahDone = !isSunnahDone }
+                    onClick = {
+                        val next = !isSunnahDone
+                        isSunnahDone = next
+                        PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.DHUHA, next)
+                        onToggleOptional(OptionalWorshipHabit.DHUHA)
+                    }
                 )
             }
 
