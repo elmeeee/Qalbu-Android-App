@@ -285,19 +285,42 @@
     <string name="prayer_calendar_hint">Tap a day to see all prayer times for that date.</string>
     <string name="prayer_calendar_loading_day">Loading prayer times…</string>
     <string name="offline_banner_message">Offline — showing saved data</string>
-    <string name="onboarding_welcome_title">Welcome to Saat</string>
-    <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
+    <string name="onboarding_welcome_subhead">Welcome to</string>
+    <string name="onboarding_welcome_title">SĀĀT</string>
+    <string name="onboarding_welcome_body">Your daily companion\nfor a better you.</string>
+    <string name="onboarding_welcome_feat1_title">Prayer on time</string>
+    <string name="onboarding_welcome_feat1_sub">Accurate prayer times\nand adzan reminders</string>
+    <string name="onboarding_welcome_feat2_title">Quran &amp; Reflection</string>
+    <string name="onboarding_welcome_feat2_sub">Read, reflect and grow with\nthe Quran</string>
+    <string name="onboarding_welcome_feat3_title">Spiritual tools</string>
+    <string name="onboarding_welcome_feat3_sub">Dhikr, Qibla, Zakat, and\nmore tools for you</string>
+    <string name="onboarding_welcome_btn">Let\'s Begin</string>
+
     <string name="onboarding_language_title">Choose your language</string>
-    <string name="onboarding_language_body">Select the language you want to use in the app. You can change this later in Settings.</string>
-    <string name="onboarding_location_title">Where do you pray?</string>
-    <string name="onboarding_location_body">We need your location to calculate accurate prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha). Your location is stored only on this device and never sent to our servers.</string>
+    <string name="onboarding_language_body">Select your preferred language\nto get started</string>
+
+    <string name="onboarding_location_title">Allow Location\nAccess</string>
+    <string name="onboarding_location_body">We use your location to show\naccurate prayer times\nand Qibla direction.</string>
     <string name="onboarding_location_denied">Location denied. You can type a city name below to set your prayer location manually.</string>
     <string name="onboarding_location_rationale_title">Why location?</string>
     <string name="onboarding_location_rationale_body">Prayer times differ by location. GPS gives you the most accurate times without manual setup.</string>
-    <string name="onboarding_notifications_title">Stay on time</string>
-    <string name="onboarding_notifications_body">Enable notifications for adhan reminders and your daily verse. You can customize each prayer notification in Settings.</string>
-    <string name="onboarding_widget_title">Add a home widget</string>
-    <string name="onboarding_widget_body">Long-press your home screen → Widgets → Saat to pin prayer times at a glance.</string>
+    <string name="onboarding_location_item1">Accurate prayer times for your area</string>
+    <string name="onboarding_location_item2">Precise Qibla direction</string>
+    <string name="onboarding_location_item3">Works offline after setup</string>
+    <string name="onboarding_btn_allow_location">Allow Location</string>
+    <string name="onboarding_btn_not_now">Not Now</string>
+
+    <string name="onboarding_notif_title">Stay\nConnected</string>
+    <string name="onboarding_notif_body">Allow notifications to never miss\nprayer times and important\nreminders.</string>
+    <string name="onboarding_notif_item1">Prayer time reminders</string>
+    <string name="onboarding_notif_item2">Daily dhikr &amp; motivation</string>
+    <string name="onboarding_notif_item3">Important updates &amp; news</string>
+    <string name="onboarding_btn_allow_notif">Allow Notifications</string>
+
+    <string name="onboarding_adhan_title">Adhan\nReminders</string>
+    <string name="onboarding_adhan_body">Select the prayer times you want\nto be reminded with adhan.</string>
+    <string name="onboarding_adhan_footer">You can change this later in settings</string>
+
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_enable_notifications">Enable notifications</string>

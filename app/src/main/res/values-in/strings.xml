@@ -231,18 +231,41 @@
     <string name="prayer_widget_in_progress">Sekarang</string>
     <string name="prayer_widget_at_time">Adzan pukul %1$s</string>
     <string name="prayer_calendar_title">Kalender sholat</string>
-    <string name="onboarding_welcome_title">Selamat datang di Saat</string>
-    <string name="onboarding_welcome_body">Teman Quran harian Anda — jadwal sholat, refleksi, dan komunitas dalam satu aplikasi.</string>
-    <string name="onboarding_language_title">Pilih bahasa</string>
-    <string name="onboarding_language_body">Pilih bahasa yang ingin kamu gunakan di aplikasi ini. Kamu bisa mengubahnya nanti di Pengaturan.</string>
-    <string name="onboarding_location_title">Di mana Anda sholat?</string>
-    <string name="onboarding_location_body">Lokasi digunakan untuk jadwal sholat yang akurat. Cari kota atau izinkan GPS.</string>
+    <string name="onboarding_welcome_subhead">Selamat datang di</string>
+    <string name="onboarding_welcome_title">SĀĀT</string>
+    <string name="onboarding_welcome_body">Teman harian Anda\nuntuk diri yang lebih baik.</string>
+    <string name="onboarding_welcome_feat1_title">Shalat tepat waktu</string>
+    <string name="onboarding_welcome_feat1_sub">Jadwal shalat akurat\ndan pengingat adzan</string>
+    <string name="onboarding_welcome_feat2_title">Al-Qur\'an &amp; Tadabbur</string>
+    <string name="onboarding_welcome_feat2_sub">Baca, renungkan, dan berkembang bersama\nAl-Qur\'an</string>
+    <string name="onboarding_welcome_feat3_title">Fitur spiritual</string>
+    <string name="onboarding_welcome_feat3_sub">Zikir, Kiblat, Zakat, dan\nbanyak fitur lainnya</string>
+    <string name="onboarding_welcome_btn">Mari Mulai</string>
+
+    <string name="onboarding_language_title">Pilih bahasa Anda</string>
+    <string name="onboarding_language_body">Pilih bahasa pilihan Anda\nuntuk memulai</string>
+
+    <string name="onboarding_location_title">Izin Akses\nLokasi</string>
+    <string name="onboarding_location_body">Kami menggunakan lokasi Anda untuk menampilkan\njadwal shalat &amp; arah Kiblat yang akurat.</string>
     <string name="onboarding_location_denied">Izin lokasi ditolak. Anda bisa mencari kota secara manual.</string>
-    <string name="onboarding_notifications_title">Tetap tepat waktu</string>
-    <string name="onboarding_notifications_body">Aktifkan notifikasi untuk pengingat adzan dan ayat harian.</string>
-    <string name="onboarding_widget_title">Tambahkan widget</string>
-    <string name="onboarding_widget_body">Tekan lama layar utama → Widget → Saat untuk memasang jadwal sholat.</string>
-    <string name="onboarding_continue">Lanjut</string>
+    <string name="onboarding_location_item1">Jadwal shalat akurat untuk wilayah Anda</string>
+    <string name="onboarding_location_item2">Arah Kiblat yang presisi</string>
+    <string name="onboarding_location_item3">Bisa digunakan offline setelah diatur</string>
+    <string name="onboarding_btn_allow_location">Izinkan Lokasi</string>
+    <string name="onboarding_btn_not_now">Nanti Saja</string>
+
+    <string name="onboarding_notif_title">Tetap\nTerhubung</string>
+    <string name="onboarding_notif_body">Izinkan notifikasi agar tidak pernah terlewat\nwaktu shalat dan pengingat penting.</string>
+    <string name="onboarding_notif_item1">Pengingat waktu shalat</string>
+    <string name="onboarding_notif_item2">Zikir harian &amp; motivasi</string>
+    <string name="onboarding_notif_item3">Pemberitahuan &amp; informasi penting</string>
+    <string name="onboarding_btn_allow_notif">Izinkan Notifikasi</string>
+
+    <string name="onboarding_adhan_title">Pengingat\nAdzan</string>
+    <string name="onboarding_adhan_body">Pilih waktu shalat yang ingin\nAnda ingatkan dengan adzan.</string>
+    <string name="onboarding_adhan_footer">Anda dapat mengubahnya nanti di pengaturan</string>
+
+    <string name="onboarding_continue">Lanjutkan</string>
     <string name="onboarding_get_started">Mulai</string>
     <string name="onboarding_enable_notifications">Aktifkan notifikasi</string>
     <string name="onboarding_skip">Lewati</string>

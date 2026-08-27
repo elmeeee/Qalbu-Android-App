@@ -38,8 +38,6 @@ enum class OnboardingStep {
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.LANGUAGE,
     val selectedLanguage: AppLanguage = AppLanguage.ENGLISH,
-    val locationQuery: String = "",
-    val savingLocation: Boolean = false,
     val locationError: String? = null,
     val prayerAdzanToggles: Map<PrayerType, Boolean> = emptyMap()
 )
@@ -85,39 +83,6 @@ class OnboardingViewModel @Inject constructor(
     fun selectLanguage(language: AppLanguage) {
         appLanguageStore.set(language)
         _state.update { it.copy(selectedLanguage = language) }
-    }
-
-    fun updateLocationQuery(query: String) {
-        _state.update { it.copy(locationQuery = query, locationError = null) }
-    }
-
-    fun saveManualLocation() {
-        val query = _state.value.locationQuery.trim()
-        if (query.isEmpty()) return
-        viewModelScope.launch {
-            _state.update { it.copy(savingLocation = true, locationError = null) }
-            val geocoded = locationProvider.forwardGeocode(query)
-            if (geocoded?.latitude == null || geocoded.longitude == null) {
-                _state.update {
-                    it.copy(
-                        savingLocation = false,
-                        locationError = appStrings.getString(R.string.location_search_not_found)
-                    )
-                }
-                return@launch
-            }
-            locationPrefs.saveManual(
-                SavedManualLocation(
-                    latitude = geocoded.latitude,
-                    longitude = geocoded.longitude,
-                    label = geocoded.cityName ?: query,
-                    countryCode = geocoded.countryCode
-                )
-            )
-            locationPrefs.saveActiveLabel(geocoded.cityName ?: query)
-            _state.update { it.copy(savingLocation = false) }
-            nextStep()
-        }
     }
 
     fun onLocationPermissionResult(granted: Boolean) {

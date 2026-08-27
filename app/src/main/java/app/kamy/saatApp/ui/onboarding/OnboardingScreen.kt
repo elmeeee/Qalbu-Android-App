@@ -4,20 +4,14 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,7 +33,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
@@ -63,8 +56,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -74,14 +67,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.core.locale.AppStrings
 import app.kamy.saatApp.domain.model.PrayerType
-import app.kamy.saatApp.design.theme.SaatColors
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val OnboardingDarkGreen = Color(0xFF133E2E)
-private val OnboardingCardBg = Color(0xFFFDFBF7)
-private val OnboardingCardBorder = Color(0xFFEAE3D2)
+private val OnboardingCardBg = Color(0xFFFDFBF7).copy(alpha = 0.45f)
+private val OnboardingCardBorder = Color(0xFFEAE3D2).copy(alpha = 0.40f)
 private val OnboardingSubtext = Color(0xFF64748B)
 
 @Composable
@@ -90,8 +84,14 @@ fun OnboardingScreen(
     vm: OnboardingViewModel = hiltViewModel()
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
-    var showLocationRationale by remember { mutableStateOf(false) }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var showLocationRationale by remember { mutableStateOf(false) }
+
+    // Dynamically resolve strings for current language store selection
+    val strings = remember(state.selectedLanguage) {
+        AppStrings(context.applicationContext, AppLanguageStore.from(context))
+    }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -122,7 +122,7 @@ fun OnboardingScreen(
             onDismissRequest = { showLocationRationale = false },
             title = {
                 Text(
-                    text = stringResource(R.string.onboarding_location_rationale_title),
+                    text = strings.getString(R.string.onboarding_location_rationale_title),
                     style = MaterialTheme.typography.titleLarge,
                     color = OnboardingDarkGreen,
                     fontWeight = FontWeight.Bold
@@ -130,7 +130,7 @@ fun OnboardingScreen(
             },
             text = {
                 Text(
-                    text = stringResource(R.string.onboarding_location_rationale_body),
+                    text = strings.getString(R.string.onboarding_location_rationale_body),
                     style = MaterialTheme.typography.bodyMedium,
                     color = OnboardingSubtext
                 )
@@ -148,7 +148,7 @@ fun OnboardingScreen(
                     }
                 ) {
                     Text(
-                        text = stringResource(android.R.string.ok),
+                        text = strings.getString(android.R.string.ok),
                         color = OnboardingDarkGreen,
                         fontWeight = FontWeight.Bold
                     )
@@ -156,7 +156,7 @@ fun OnboardingScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showLocationRationale = false }) {
-                    Text(text = stringResource(android.R.string.cancel), color = OnboardingSubtext)
+                    Text(text = strings.getString(android.R.string.cancel), color = OnboardingSubtext)
                 }
             },
             shape = RoundedCornerShape(16.dp),
@@ -165,12 +165,12 @@ fun OnboardingScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Full screen device-fitted background illustration
+        // Full screen device-fitted background illustration (FillBounds prevents cropping)
         Image(
             painter = painterResource(id = bgDrawable),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds
         )
 
         // Overlay UI Content
@@ -193,14 +193,16 @@ fun OnboardingScreen(
                 when (state.step) {
                     OnboardingStep.LANGUAGE -> LanguageStep(
                         selected = state.selectedLanguage,
-                        onSelect = vm::selectLanguage
+                        onSelect = vm::selectLanguage,
+                        strings = strings
                     )
-                    OnboardingStep.WELCOME -> WelcomeStep()
-                    OnboardingStep.LOCATION -> LocationStep()
-                    OnboardingStep.NOTIFICATIONS -> NotificationStep()
+                    OnboardingStep.WELCOME -> WelcomeStep(strings = strings)
+                    OnboardingStep.LOCATION -> LocationStep(strings = strings)
+                    OnboardingStep.NOTIFICATIONS -> NotificationStep(strings = strings)
                     OnboardingStep.PRAYER_NOTIFICATIONS -> PrayerNotificationsStep(
                         toggles = state.prayerAdzanToggles,
-                        onToggle = vm::togglePrayerAdzan
+                        onToggle = vm::togglePrayerAdzan,
+                        strings = strings
                     )
                 }
             }
@@ -252,11 +254,11 @@ fun OnboardingScreen(
                     ) {
                         Text(
                             text = when (state.step) {
-                                OnboardingStep.LANGUAGE -> "Continue"
-                                OnboardingStep.WELCOME -> "Let's Begin"
-                                OnboardingStep.LOCATION -> "Allow Location"
-                                OnboardingStep.NOTIFICATIONS -> "Allow Notifications"
-                                OnboardingStep.PRAYER_NOTIFICATIONS -> "Continue"
+                                OnboardingStep.LANGUAGE -> strings.getString(R.string.onboarding_continue)
+                                OnboardingStep.WELCOME -> strings.getString(R.string.onboarding_welcome_btn)
+                                OnboardingStep.LOCATION -> strings.getString(R.string.onboarding_btn_allow_location)
+                                OnboardingStep.NOTIFICATIONS -> strings.getString(R.string.onboarding_btn_allow_notif)
+                                OnboardingStep.PRAYER_NOTIFICATIONS -> strings.getString(R.string.onboarding_continue)
                             },
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
@@ -279,7 +281,7 @@ fun OnboardingScreen(
                     OnboardingStep.LOCATION -> {
                         TextButton(onClick = { vm.skipLocation() }) {
                             Text(
-                                text = "Not Now",
+                                text = strings.getString(R.string.onboarding_btn_not_now),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = OnboardingSubtext,
                                 fontWeight = FontWeight.SemiBold
@@ -289,7 +291,7 @@ fun OnboardingScreen(
                     OnboardingStep.NOTIFICATIONS -> {
                         TextButton(onClick = { vm.skipNotifications() }) {
                             Text(
-                                text = "Not Now",
+                                text = strings.getString(R.string.onboarding_btn_not_now),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = OnboardingSubtext,
                                 fontWeight = FontWeight.SemiBold
@@ -298,7 +300,7 @@ fun OnboardingScreen(
                     }
                     OnboardingStep.PRAYER_NOTIFICATIONS -> {
                         Text(
-                            text = "You can change this later in settings",
+                            text = strings.getString(R.string.onboarding_adhan_footer),
                             style = MaterialTheme.typography.bodySmall,
                             color = OnboardingSubtext,
                             textAlign = TextAlign.Center
@@ -338,34 +340,17 @@ fun OnboardingScreen(
 @Composable
 private fun LanguageStep(
     selected: AppLanguage,
-    onSelect: (AppLanguage) -> Unit
+    onSelect: (AppLanguage) -> Unit,
+    strings: AppStrings
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(12.dp))
-
-        // Top Arch Badge Header
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(OnboardingDarkGreen),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Language,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(26.dp)
-            )
-        }
-
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(105.dp))
 
         Text(
-            text = "Choose your language",
+            text = strings.getString(R.string.onboarding_language_title),
             style = MaterialTheme.typography.headlineMedium,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -376,14 +361,14 @@ private fun LanguageStep(
         Spacer(Modifier.height(6.dp))
 
         Text(
-            text = "Select your preferred language\nto get started",
+            text = strings.getString(R.string.onboarding_language_body),
             style = MaterialTheme.typography.bodyMedium,
             color = OnboardingSubtext,
             textAlign = TextAlign.Center,
             lineHeight = 18.sp
         )
 
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(24.dp))
 
         // Language Selection List Card (3 languages only)
         val languages = listOf(
@@ -450,7 +435,7 @@ private fun LanguageStep(
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.weight(1f))
     }
 }
 
@@ -458,22 +443,22 @@ private fun LanguageStep(
 // STEP 2: WELCOME SCREEN
 // -----------------------------------------------------------------------------
 @Composable
-private fun WelcomeStep() {
+private fun WelcomeStep(strings: AppStrings) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(105.dp))
 
         Text(
-            text = "Welcome to",
+            text = strings.getString(R.string.onboarding_welcome_subhead),
             style = MaterialTheme.typography.titleLarge,
             fontFamily = FontFamily.Serif,
             color = OnboardingDarkGreen
         )
 
         Text(
-            text = "SĀĀT",
+            text = strings.getString(R.string.onboarding_welcome_title),
             style = MaterialTheme.typography.displayLarge.copy(fontSize = 38.sp),
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -484,7 +469,7 @@ private fun WelcomeStep() {
         Spacer(Modifier.height(4.dp))
 
         Text(
-            text = "Your daily companion\nfor a better you.",
+            text = strings.getString(R.string.onboarding_welcome_body),
             style = MaterialTheme.typography.bodyMedium,
             color = OnboardingSubtext,
             textAlign = TextAlign.Center
@@ -505,18 +490,18 @@ private fun WelcomeStep() {
             ) {
                 FeatureRowItem(
                     icon = Icons.Default.Mosque,
-                    title = "Prayer on time",
-                    subtitle = "Accurate prayer times\nand adzan reminders"
+                    title = strings.getString(R.string.onboarding_welcome_feat1_title),
+                    subtitle = strings.getString(R.string.onboarding_welcome_feat1_sub)
                 )
                 FeatureRowItem(
                     icon = Icons.AutoMirrored.Filled.MenuBook,
-                    title = "Quran & Reflection",
-                    subtitle = "Read, reflect and grow with\nthe Quran"
+                    title = strings.getString(R.string.onboarding_welcome_feat2_title),
+                    subtitle = strings.getString(R.string.onboarding_welcome_feat2_sub)
                 )
                 FeatureRowItem(
                     icon = Icons.Default.Favorite,
-                    title = "Spiritual tools",
-                    subtitle = "Dhikr, Qibla, Zakat, and\nmore tools for you"
+                    title = strings.getString(R.string.onboarding_welcome_feat3_title),
+                    subtitle = strings.getString(R.string.onboarding_welcome_feat3_sub)
                 )
             }
         }
@@ -571,32 +556,15 @@ private fun FeatureRowItem(
 // STEP 3: LOCATION ACCESS
 // -----------------------------------------------------------------------------
 @Composable
-private fun LocationStep() {
+private fun LocationStep(strings: AppStrings) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(12.dp))
-
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(OnboardingDarkGreen),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Place,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(26.dp)
-            )
-        }
-
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(105.dp))
 
         Text(
-            text = "Allow Location\nAccess",
+            text = strings.getString(R.string.onboarding_location_title),
             style = MaterialTheme.typography.headlineMedium,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -607,7 +575,7 @@ private fun LocationStep() {
         Spacer(Modifier.height(6.dp))
 
         Text(
-            text = "We use your location to show\naccurate prayer times\nand Qibla direction.",
+            text = strings.getString(R.string.onboarding_location_body),
             style = MaterialTheme.typography.bodyMedium,
             color = OnboardingSubtext,
             textAlign = TextAlign.Center,
@@ -627,9 +595,9 @@ private fun LocationStep() {
                 modifier = Modifier.padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                BenefitRowItem(icon = Icons.Default.AccessTime, text = "Accurate prayer times for your area")
-                BenefitRowItem(icon = Icons.Default.CompassCalibration, text = "Precise Qibla direction")
-                BenefitRowItem(icon = Icons.Default.Settings, text = "Works offline after setup")
+                BenefitRowItem(icon = Icons.Default.AccessTime, text = strings.getString(R.string.onboarding_location_item1))
+                BenefitRowItem(icon = Icons.Default.CompassCalibration, text = strings.getString(R.string.onboarding_location_item2))
+                BenefitRowItem(icon = Icons.Default.Settings, text = strings.getString(R.string.onboarding_location_item3))
             }
         }
 
@@ -641,45 +609,28 @@ private fun LocationStep() {
 // STEP 4: NOTIFICATIONS
 // -----------------------------------------------------------------------------
 @Composable
-private fun NotificationStep() {
+private fun NotificationStep(strings: AppStrings) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(12.dp))
-
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(OnboardingDarkGreen),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Notifications,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(26.dp)
-            )
-        }
-
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(105.dp))
 
         Text(
-            text = "Stay\nConnected",
+            text = strings.getString(R.string.onboarding_notif_title),
             style = MaterialTheme.typography.headlineMedium,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
-            color = OnboardingDarkGreen,
+            color = Color.White,
             textAlign = TextAlign.Center
         )
 
         Spacer(Modifier.height(6.dp))
 
         Text(
-            text = "Allow notifications to never miss\nprayer times and important\nreminders.",
+            text = strings.getString(R.string.onboarding_notif_body),
             style = MaterialTheme.typography.bodyMedium,
-            color = OnboardingSubtext,
+            color = Color.White.copy(alpha = 0.92f),
             textAlign = TextAlign.Center,
             lineHeight = 18.sp
         )
@@ -697,9 +648,9 @@ private fun NotificationStep() {
                 modifier = Modifier.padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                BenefitRowItem(icon = Icons.Default.Notifications, text = "Prayer time reminders")
-                BenefitRowItem(icon = Icons.Default.Favorite, text = "Daily dhikr & motivation")
-                BenefitRowItem(icon = Icons.Default.Shield, text = "Important updates & news")
+                BenefitRowItem(icon = Icons.Default.Notifications, text = strings.getString(R.string.onboarding_notif_item1))
+                BenefitRowItem(icon = Icons.Default.Favorite, text = strings.getString(R.string.onboarding_notif_item2))
+                BenefitRowItem(icon = Icons.Default.Shield, text = strings.getString(R.string.onboarding_notif_item3))
             }
         }
 
@@ -734,33 +685,17 @@ private fun BenefitRowItem(icon: ImageVector, text: String) {
 @Composable
 private fun PrayerNotificationsStep(
     toggles: Map<PrayerType, Boolean>,
-    onToggle: (PrayerType, Boolean) -> Unit
+    onToggle: (PrayerType, Boolean) -> Unit,
+    strings: AppStrings
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(12.dp))
-
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(OnboardingDarkGreen),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.AccessTime,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(26.dp)
-            )
-        }
-
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(105.dp))
 
         Text(
-            text = "Adhan\nReminders",
+            text = strings.getString(R.string.onboarding_adhan_title),
             style = MaterialTheme.typography.headlineMedium,
             fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.Bold,
@@ -771,7 +706,7 @@ private fun PrayerNotificationsStep(
         Spacer(Modifier.height(6.dp))
 
         Text(
-            text = "Select the prayer times you want\nto be reminded with adhan.",
+            text = strings.getString(R.string.onboarding_adhan_body),
             style = MaterialTheme.typography.bodyMedium,
             color = OnboardingSubtext,
             textAlign = TextAlign.Center,
@@ -780,64 +715,49 @@ private fun PrayerNotificationsStep(
 
         Spacer(Modifier.weight(1f))
 
-        // Prayer Adhan Reminders Card
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = OnboardingCardBg,
-            border = BorderStroke(1.dp, OnboardingCardBorder)
+        // Prayer Adhan Reminders (Transparent background, no card, no left icons)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { type ->
-                    val checked = toggles[type] ?: true
-                    val (prayerName, prayerIcon) = when (type) {
-                        PrayerType.FAJR -> "Fajr" to R.drawable.ic_prayer_fajr
-                        PrayerType.DHUHR -> "Dhuhr" to R.drawable.ic_prayer_dhuhr
-                        PrayerType.ASR -> "Asr" to R.drawable.ic_prayer_asr
-                        PrayerType.MAGHRIB -> "Maghrib" to R.drawable.ic_prayer_maghrib
-                        PrayerType.ISHA -> "Isha" to R.drawable.ic_prayer_isha
-                        else -> "" to R.drawable.ic_prayer_fajr
-                    }
+            PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { type ->
+                val checked = toggles[type] ?: true
+                val prayerName = when (type) {
+                    PrayerType.FAJR -> strings.getString(R.string.prayer_fajr)
+                    PrayerType.DHUHR -> strings.getString(R.string.prayer_dhuhr)
+                    PrayerType.ASR -> strings.getString(R.string.prayer_asr)
+                    PrayerType.MAGHRIB -> strings.getString(R.string.prayer_maghrib)
+                    PrayerType.ISHA -> strings.getString(R.string.prayer_isha)
+                    else -> ""
+                }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = prayerIcon),
-                                contentDescription = null,
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Text(
-                                text = prayerName,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = OnboardingDarkGreen
-                            )
-                        }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = prayerName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = OnboardingDarkGreen
+                    )
 
-                        Switch(
-                            checked = checked,
-                            onCheckedChange = { onToggle(type, it) },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = OnboardingDarkGreen,
-                                uncheckedThumbColor = Color.White,
-                                uncheckedTrackColor = Color(0xFFCBD5E1),
-                                uncheckedBorderColor = Color.Transparent
-                            )
+                    Switch(
+                        checked = checked,
+                        onCheckedChange = { onToggle(type, it) },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = OnboardingDarkGreen,
+                            uncheckedThumbColor = Color.White,
+                            uncheckedTrackColor = Color(0xFFCBD5E1),
+                            uncheckedBorderColor = Color.Transparent
                         )
-                    }
+                    )
                 }
             }
         }
