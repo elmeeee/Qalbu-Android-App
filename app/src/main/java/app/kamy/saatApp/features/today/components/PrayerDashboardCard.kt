@@ -60,7 +60,19 @@ import java.util.Locale
 
 @DrawableRes
 fun getPrayerCardDrawable(type: PrayerType?): Int {
-    return R.drawable.day
+    return when (type) {
+        PrayerType.FAJR, PrayerType.SUNRISE, PrayerType.DHUHR -> R.drawable.day
+        PrayerType.ASR, PrayerType.MAGHRIB -> R.drawable.sunset
+        PrayerType.ISHA -> R.drawable.night
+        null -> {
+            val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            when (hour) {
+                in 5..14 -> R.drawable.day
+                in 15..18 -> R.drawable.sunset
+                else -> R.drawable.night
+            }
+        }
+    }
 }
 
 @DrawableRes
@@ -122,14 +134,18 @@ fun PrayerDashboardCard(
         }
     }
     val headline = rememberHeadline(state)
-    val targetPrayer = state.nextPrayer ?: state.activePrayer ?: PrayerType.MAGHRIB
+    val targetPrayer = state.nextPrayer ?: state.activePrayer ?: PrayerType.DHUHR
 
     val singleActiveType = remember(state.activePrayer, state.nextPrayer, state.timings) {
-        state.activePrayer ?: state.nextPrayer ?: PrayerType.ASR
+        state.nextPrayer ?: state.activePrayer ?: PrayerType.DHUHR
     }
 
     val activeIndex = remember(singleActiveType) {
         DISPLAY_PRAYER_SLOTS.indexOf(singleActiveType).coerceAtLeast(0)
+    }
+
+    val progressRatio = remember(state.timings, state.nextPrayer, state.activePrayer, state.countdown) {
+        calculatePrayerProgress(state)
     }
 
     Surface(
@@ -184,7 +200,8 @@ fun PrayerDashboardCard(
                         // Right: Circular Arc Countdown Widget
                         PrayerArcCountdown(
                             countdown = if (state.countdown.isNotBlank() && state.countdown != "--:--:--") state.countdown else "00:00:00",
-                            prayerType = targetPrayer
+                            prayerType = targetPrayer,
+                            progress = progressRatio
                         )
                     }
 
@@ -230,17 +247,44 @@ fun PrayerDashboardCard(
     }
 }
 
+private fun calculatePrayerProgress(state: PrayerUiState): Float {
+    val timings = state.timings.ifEmpty { return 0.5f }
+    val now = System.currentTimeMillis()
+    val nextType = state.nextPrayer ?: return 0.5f
+    val nextEntry = timings.find { it.type == nextType } ?: return 0.5f
+
+    val sorted = timings.sortedBy { it.date.time }
+    val nextIndex = sorted.indexOfFirst { it.type == nextType }
+    val prevEntry = if (nextIndex > 0) sorted[nextIndex - 1] else null
+
+    val nextTime = nextEntry.date.time
+    val prevTime = prevEntry?.date?.time ?: (nextTime - 3 * 3600 * 1000L)
+
+    val totalMs = (nextTime - prevTime).coerceAtLeast(1L)
+    val elapsedMs = (now - prevTime).coerceAtLeast(0L)
+
+    return (elapsedMs.toFloat() / totalMs.toFloat()).coerceIn(0.08f, 1f)
+}
+
 @Composable
 private fun PrayerArcCountdown(
     countdown: String,
     prayerType: PrayerType? = null,
+    progress: Float = 0.5f,
     modifier: Modifier = Modifier
 ) {
     val untilPrayerText = stringResource(R.string.prayer_countdown_until_label)
     val iconRes = getPrayerIconRes(prayerType ?: PrayerType.DHUHR)
+    val sweepAngle = (180f * progress).coerceIn(12f, 180f)
+
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val iconOffsetX = remember { androidx.compose.runtime.mutableStateOf(0.dp) }
+    val iconOffsetY = remember { androidx.compose.runtime.mutableStateOf(0.dp) }
 
     Box(
-        modifier = modifier.width(135.dp).height(80.dp),
+        modifier = modifier
+            .width(135.dp)
+            .height(80.dp),
         contentAlignment = Alignment.Center
     ) {
         androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
@@ -258,26 +302,45 @@ private fun PrayerArcCountdown(
                 useCenter = false,
                 topLeft = topLeft,
                 size = arcSize,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokePx, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = strokePx,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
             )
 
-            // Active golden top arch
+            // Active golden top arch (progress-driven sweep angle)
             drawArc(
                 color = SaatColors.ArcGold,
                 startAngle = 180f,
-                sweepAngle = 135f,
+                sweepAngle = sweepAngle,
                 useCenter = false,
                 topLeft = topLeft,
                 size = arcSize,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = strokePx, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = strokePx,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
             )
+
+            // Calculate precise icon position at endpoint of active arc
+            val rad = Math.toRadians((180f + sweepAngle).toDouble())
+            val radius = diameter / 2f
+            val cx = w / 2f
+            val cy = strokePx / 2f + radius
+            val endX = cx + radius * Math.cos(rad).toFloat()
+            val endY = cy + radius * Math.sin(rad).toFloat()
+
+            with(density) {
+                iconOffsetX.value = (endX - 9.dp.toPx()).toDp()
+                iconOffsetY.value = (endY - 9.dp.toPx()).toDp()
+            }
         }
 
-        // Precise icon placement centered on arc endpoint (315deg tip)
+        // Dynamic icon placement centered on active arc endpoint
         Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .offset(x = 105.dp, y = 12.dp)
+                .offset(x = iconOffsetX.value, y = iconOffsetY.value)
         ) {
             Icon(
                 painter = painterResource(iconRes),
@@ -289,7 +352,7 @@ private fun PrayerArcCountdown(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(top = 20.dp)
+            modifier = Modifier.padding(top = 22.dp)
         ) {
             Text(
                 text = countdown,
@@ -327,22 +390,22 @@ private fun PrayerTimelineProgressTrack(
         val endX = width - (slotWidth / 2f)
         val activeX = (startX + activeIndex * slotWidth).coerceIn(startX, endX)
 
-        // 1. Unfilled light green track line (from startX to endX)
+        // 1. Unfilled track line (from startX to endX)
         drawLine(
-            color = Color(0xFFB9CBBE),
+            color = Color(0xFFD1D5DB),
             start = Offset(startX, centerY),
             end = Offset(endX, centerY),
-            strokeWidth = 2.5.dp.toPx(),
+            strokeWidth = 3.dp.toPx(),
             cap = StrokeCap.Round
         )
 
         // 2. Active dark green track line (from startX to activeX)
-        if (activeX > startX) {
+        if (activeIndex > 0) {
             drawLine(
                 color = Color(0xFF176345),
                 start = Offset(startX, centerY),
                 end = Offset(activeX, centerY),
-                strokeWidth = 2.5.dp.toPx(),
+                strokeWidth = 3.dp.toPx(),
                 cap = StrokeCap.Round
             )
         }
@@ -351,13 +414,21 @@ private fun PrayerTimelineProgressTrack(
         for (i in 0 until totalSlots) {
             val dotX = startX + i * slotWidth
             val isPassedOrActive = i <= activeIndex
-            val dotColor = Color(0xFF176345)
+            val dotColor = if (isPassedOrActive) Color(0xFF176345) else Color(0xFFCBD5E1)
+            val dotRadius = if (i == activeIndex) 5.dp.toPx() else 3.5.dp.toPx()
 
             drawCircle(
                 color = dotColor,
-                radius = 3.5.dp.toPx(),
+                radius = dotRadius,
                 center = Offset(dotX, centerY)
             )
+            if (i == activeIndex) {
+                drawCircle(
+                    color = Color.White,
+                    radius = 2.dp.toPx(),
+                    center = Offset(dotX, centerY)
+                )
+            }
         }
     }
 }

@@ -304,8 +304,11 @@ fun TodayScreen(
         }
     }
 
+    val targetPrayer = prayerState.activePrayer ?: prayerState.nextPrayer
+    val cardDrawable = getPrayerCardDrawable(targetPrayer)
+
     val view = androidx.compose.ui.platform.LocalView.current
-    val isHeaderLightBackground = scrollProgress >= 0.5f
+    val isHeaderLightBackground = scrollProgress >= 0.5f || cardDrawable == R.drawable.day
 
     androidx.compose.runtime.SideEffect {
         val window = (view.context as? android.app.Activity)?.window
@@ -324,8 +327,6 @@ fun TodayScreen(
             }
         }
     }
-    val targetPrayer = prayerState.nextPrayer ?: prayerState.activePrayer ?: app.kamy.saatApp.domain.model.PrayerType.MAGHRIB
-    val cardDrawable = getPrayerCardDrawable(targetPrayer)
 
     Box(modifier = Modifier.fillMaxSize().background(SaatColors.HomeBg)) {
         if (scrollProgress < 1f) {
@@ -405,6 +406,7 @@ fun TodayScreen(
                         hijriLabel = prayerState.hijriLabel,
                         gregorianLabel = prayerState.gregorianLabel,
                         scrollProgress = scrollProgress,
+                        isDarkBackground = cardDrawable != R.drawable.day,
                         onLocationClick = prayerVm::openLocationSheet,
                         onCalendarClick = onOpenPrayerCalendar,
                         modifier = Modifier

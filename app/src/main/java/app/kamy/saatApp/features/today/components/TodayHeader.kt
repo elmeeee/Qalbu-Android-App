@@ -57,6 +57,7 @@ fun TodayHeader(
     hijriLabel: String?,
     gregorianLabel: String?,
     scrollProgress: Float = 0f,
+    isDarkBackground: Boolean = false,
     onLocationClick: () -> Unit = {},
     onCalendarClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -107,11 +108,24 @@ fun TodayHeader(
     val progress = scrollProgress.coerceIn(0f, 1f)
 
     val headerBgColor = lerp(Color.Transparent, SaatColors.HomeBg, progress)
-    val greetingColor = SaatColors.HomeDarkGreen
-    val defaultDateColor = SaatColors.HomeDarkGreen
-    val badgeBgColor = lerp(SaatColors.HomeDarkGreen.copy(alpha = 0.10f), SaatColors.HomeDarkGreen.copy(alpha = 0.15f), progress)
-    val badgeBorderColor = lerp(SaatColors.HomeDarkGreen.copy(alpha = 0.25f), SaatColors.HomeDarkGreen.copy(alpha = 0.35f), progress)
-    val badgeContentColor = SaatColors.HomeDarkGreen
+
+    val initialTextColor = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
+    val targetTextColor = SaatColors.HomeDarkGreen
+    val greetingColor = lerp(initialTextColor, targetTextColor, progress)
+    val dateTextColor = lerp(initialTextColor, targetTextColor, progress)
+
+    val initialBadgeBg = if (isDarkBackground) Color.White.copy(alpha = 0.22f) else SaatColors.HomeDarkGreen.copy(alpha = 0.10f)
+    val targetBadgeBg = SaatColors.HomeDarkGreen.copy(alpha = 0.15f)
+    val badgeBgColor = lerp(initialBadgeBg, targetBadgeBg, progress)
+
+    val initialBadgeBorder = if (isDarkBackground) Color.White.copy(alpha = 0.45f) else SaatColors.HomeDarkGreen.copy(alpha = 0.25f)
+    val targetBadgeBorder = SaatColors.HomeDarkGreen.copy(alpha = 0.35f)
+    val badgeBorderColor = lerp(initialBadgeBorder, targetBadgeBorder, progress)
+
+    val initialBadgeContent = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
+    val targetBadgeContent = SaatColors.HomeDarkGreen
+    val badgeContentColor = lerp(initialBadgeContent, targetBadgeContent, progress)
+
     val elevationDp = lerp(0.dp, 2.dp, progress)
     val dividerColor = lerp(Color.Transparent, SaatColors.HomeDarkGreen.copy(alpha = 0.15f), progress)
 
@@ -171,13 +185,12 @@ fun TodayHeader(
                                 "$prefix${gregorianLabel.orEmpty()}"
                             }
                         }
-                        val textColor = SaatColors.HomeDarkGreen
 
                         Text(
                             text = dateText,
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = textColor,
+                            color = dateTextColor,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.clickable(
