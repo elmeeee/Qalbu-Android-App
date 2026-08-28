@@ -283,7 +283,7 @@ fun OnboardingScreen(
                             Text(
                                 text = strings.getString(R.string.onboarding_btn_not_now),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = OnboardingSubtext,
+                                color = Color.White,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -293,7 +293,7 @@ fun OnboardingScreen(
                             Text(
                                 text = strings.getString(R.string.onboarding_btn_not_now),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = OnboardingSubtext,
+                                color = Color.White,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -302,7 +302,7 @@ fun OnboardingScreen(
                         Text(
                             text = strings.getString(R.string.onboarding_adhan_footer),
                             style = MaterialTheme.typography.bodySmall,
-                            color = OnboardingSubtext,
+                            color = Color.White,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -368,7 +368,7 @@ private fun LanguageStep(
             lineHeight = 18.sp
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.weight(1f))
 
         // Language Selection List Card (3 languages only)
         val languages = listOf(
@@ -476,79 +476,6 @@ private fun WelcomeStep(strings: AppStrings) {
         )
 
         Spacer(Modifier.weight(1f))
-
-        // Features List Card
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = OnboardingCardBg,
-            border = BorderStroke(1.dp, OnboardingCardBorder)
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                FeatureRowItem(
-                    icon = Icons.Default.Mosque,
-                    title = strings.getString(R.string.onboarding_welcome_feat1_title),
-                    subtitle = strings.getString(R.string.onboarding_welcome_feat1_sub)
-                )
-                FeatureRowItem(
-                    icon = Icons.AutoMirrored.Filled.MenuBook,
-                    title = strings.getString(R.string.onboarding_welcome_feat2_title),
-                    subtitle = strings.getString(R.string.onboarding_welcome_feat2_sub)
-                )
-                FeatureRowItem(
-                    icon = Icons.Default.Favorite,
-                    title = strings.getString(R.string.onboarding_welcome_feat3_title),
-                    subtitle = strings.getString(R.string.onboarding_welcome_feat3_sub)
-                )
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-    }
-}
-
-@Composable
-private fun FeatureRowItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(OnboardingDarkGreen),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = OnboardingDarkGreen
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = OnboardingSubtext,
-                lineHeight = 15.sp
-            )
-        }
     }
 }
 
@@ -583,25 +510,6 @@ private fun LocationStep(strings: AppStrings) {
         )
 
         Spacer(Modifier.weight(1f))
-
-        // Benefits Card
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = OnboardingCardBg,
-            border = BorderStroke(1.dp, OnboardingCardBorder)
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                BenefitRowItem(icon = Icons.Default.AccessTime, text = strings.getString(R.string.onboarding_location_item1))
-                BenefitRowItem(icon = Icons.Default.CompassCalibration, text = strings.getString(R.string.onboarding_location_item2))
-                BenefitRowItem(icon = Icons.Default.Settings, text = strings.getString(R.string.onboarding_location_item3))
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -636,46 +544,6 @@ private fun NotificationStep(strings: AppStrings) {
         )
 
         Spacer(Modifier.weight(1f))
-
-        // Benefits Card
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = OnboardingCardBg,
-            border = BorderStroke(1.dp, OnboardingCardBorder)
-        ) {
-            Column(
-                modifier = Modifier.padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                BenefitRowItem(icon = Icons.Default.Notifications, text = strings.getString(R.string.onboarding_notif_item1))
-                BenefitRowItem(icon = Icons.Default.Favorite, text = strings.getString(R.string.onboarding_notif_item2))
-                BenefitRowItem(icon = Icons.Default.Shield, text = strings.getString(R.string.onboarding_notif_item3))
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-    }
-}
-
-@Composable
-private fun BenefitRowItem(icon: ImageVector, text: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = OnboardingDarkGreen,
-            modifier = Modifier.size(20.dp)
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = OnboardingDarkGreen,
-            fontWeight = FontWeight.Medium
-        )
     }
 }
 
@@ -715,53 +583,58 @@ private fun PrayerNotificationsStep(
 
         Spacer(Modifier.weight(1f))
 
-        // Prayer Adhan Reminders (Transparent background, no card, no left icons)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+        // Prayer Adhan Reminders Card (with card background like language selection)
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = OnboardingCardBg,
+            border = BorderStroke(1.dp, OnboardingCardBorder)
         ) {
-            PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { type ->
-                val checked = toggles[type] ?: true
-                val prayerName = when (type) {
-                    PrayerType.FAJR -> strings.getString(R.string.prayer_fajr)
-                    PrayerType.DHUHR -> strings.getString(R.string.prayer_dhuhr)
-                    PrayerType.ASR -> strings.getString(R.string.prayer_asr)
-                    PrayerType.MAGHRIB -> strings.getString(R.string.prayer_maghrib)
-                    PrayerType.ISHA -> strings.getString(R.string.prayer_isha)
-                    else -> ""
-                }
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                PrayerType.ADZAN_NOTIFICATION_PRAYERS.forEach { type ->
+                    val checked = toggles[type] ?: true
+                    val prayerName = when (type) {
+                        PrayerType.FAJR -> strings.getString(R.string.prayer_fajr)
+                        PrayerType.DHUHR -> strings.getString(R.string.prayer_dhuhr)
+                        PrayerType.ASR -> strings.getString(R.string.prayer_asr)
+                        PrayerType.MAGHRIB -> strings.getString(R.string.prayer_maghrib)
+                        PrayerType.ISHA -> strings.getString(R.string.prayer_isha)
+                        else -> ""
+                    }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = prayerName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = OnboardingDarkGreen
-                    )
-
-                    Switch(
-                        checked = checked,
-                        onCheckedChange = { onToggle(type, it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = OnboardingDarkGreen,
-                            uncheckedThumbColor = Color.White,
-                            uncheckedTrackColor = Color(0xFFCBD5E1),
-                            uncheckedBorderColor = Color.Transparent
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = prayerName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = OnboardingDarkGreen
                         )
-                    )
+
+                        Switch(
+                            checked = checked,
+                            onCheckedChange = { onToggle(type, it) },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = OnboardingDarkGreen,
+                                uncheckedThumbColor = Color.White,
+                                uncheckedTrackColor = Color(0xFFCBD5E1),
+                                uncheckedBorderColor = Color.Transparent
+                            )
+                        )
+                    }
                 }
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.weight(1f))
     }
 }

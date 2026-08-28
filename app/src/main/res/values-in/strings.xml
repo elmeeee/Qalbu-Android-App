@@ -242,7 +242,7 @@
     <string name="onboarding_welcome_feat3_sub">Zikir, Kiblat, Zakat, dan\nbanyak fitur lainnya</string>
     <string name="onboarding_welcome_btn">Mari Mulai</string>
 
-    <string name="onboarding_language_title">Pilih bahasa Anda</string>
+    <string name="onboarding_language_title">Pilih\nbahasa anda</string>
     <string name="onboarding_language_body">Pilih bahasa pilihan Anda\nuntuk memulai</string>
 
     <string name="onboarding_location_title">Izin Akses\nLokasi</string>
