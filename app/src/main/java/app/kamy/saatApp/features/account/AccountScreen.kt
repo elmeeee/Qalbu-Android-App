@@ -309,7 +309,7 @@ private fun AccountSettingsContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
+            .background(SaatColors.HomeBg)
     ) {
         // Clean Header bar
         Column(
@@ -495,12 +495,12 @@ fun NotificationAdhanScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
+            .background(SaatColors.HomeBg)
     ) {
         // Sticky Header bar
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFFF7F7F7),
+            color = SaatColors.HomeBg,
             shadowElevation = 0.5.dp
         ) {
             Row(
@@ -745,12 +745,12 @@ fun ReadingNotificationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
+            .background(SaatColors.HomeBg)
     ) {
         // Sticky Header bar
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFFF7F7F7),
+            color = SaatColors.HomeBg,
             shadowElevation = 0.5.dp
         ) {
             Row(

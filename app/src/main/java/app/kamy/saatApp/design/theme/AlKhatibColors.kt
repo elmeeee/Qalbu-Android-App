@@ -35,8 +35,8 @@ object SaatColors {
     )
 
     // Layout variables
-    var OffWhite by mutableStateOf(Color(0xFFF9F9F8))
-    var ScreenBackground by mutableStateOf(Color(0xFFF8FAFC))
+    var OffWhite by mutableStateOf(Color(0xFFF9F4EC))
+    var ScreenBackground by mutableStateOf(Color(0xFFF9F4EC))
     var PureWhite by mutableStateOf(Color(0xFFFFFFFF))
     var SoftGrey by mutableStateOf(Color(0xFFE5E7EB))
     var LightGrey by mutableStateOf(Color(0xFFF3F4F6))
@@ -72,8 +72,8 @@ object SaatColors {
     fun applyTheme(theme: AppThemeColor = AppThemeColor.EMERALD) {
         // Unified app theme using linear gradient #085E43 to #15AA7C across all screens
         PureWhite = Color(0xFFFFFFFF)
-        OffWhite = Color(0xFFF9F9F8)
-        ScreenBackground = Color(0xFFF8FAFC)
+        OffWhite = Color(0xFFF9F4EC)
+        ScreenBackground = Color(0xFFF9F4EC)
         LightGrey = Color(0xFFF3F4F6)
         PanelGrey = Color(0xFFE8EBEF)
         PanelGreyAlt = Color(0xFFEEF2EE)
