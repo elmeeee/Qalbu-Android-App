@@ -10,6 +10,10 @@
     <string name="journey_badge_dhikr">Dhikr</string>
     <string name="journey_badge_sunnah">Sunnah</string>
     <string name="prayer_badge_not_after_isha">Prayer can be checked after Isha or 5 prayers completed</string>
+    <string name="journey_toast_prayer_success">Prayer habit marked as complete! ✨</string>
+    <string name="journey_toast_quran_success">Al-Quran reading habit marked as complete! ✨</string>
+    <string name="journey_toast_dhikr_success">Dhikr habit marked as complete! ✨</string>
+    <string name="journey_toast_sunnah_success">Sunnah worship habit marked as complete! ✨</string>
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="language_malay">Bahasa Melayu</string>

@@ -115,6 +115,10 @@ fun PrayerTrackerCard(
     val dhikrBadgeLabel = stringResource(R.string.journey_badge_dhikr)
     val sunnahBadgeLabel = stringResource(R.string.journey_badge_sunnah)
     val notAfterIshaMsg = stringResource(R.string.prayer_badge_not_after_isha)
+    val prayerSuccessMsg = stringResource(R.string.journey_toast_prayer_success)
+    val quranSuccessMsg = stringResource(R.string.journey_toast_quran_success)
+    val dhikrSuccessMsg = stringResource(R.string.journey_toast_dhikr_success)
+    val sunnahSuccessMsg = stringResource(R.string.journey_toast_sunnah_success)
 
     val completedFardhuCount = state.completedPrayers.size
     val isPrayerClickable = isAfterIsha || completedFardhuCount >= 5
@@ -184,6 +188,7 @@ fun PrayerTrackerCard(
                             isPrayerOverridden = next
                             PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.QIYAMUL_LAIL, next)
                             onToggleOptional(OptionalWorshipHabit.QIYAMUL_LAIL)
+                            if (next) onShowToastMessage(prayerSuccessMsg)
                         } else {
                             onShowToastMessage(notAfterIshaMsg)
                         }
@@ -199,6 +204,7 @@ fun PrayerTrackerCard(
                         isQuranDone = next
                         PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.READ_QURAN, next)
                         onToggleOptional(OptionalWorshipHabit.READ_QURAN)
+                        if (next) onShowToastMessage(quranSuccessMsg)
                     }
                 )
 
@@ -211,6 +217,7 @@ fun PrayerTrackerCard(
                         isDhikrDone = next
                         PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.DHIKR_MORNING, next)
                         onToggleOptional(OptionalWorshipHabit.DHIKR_MORNING)
+                        if (next) onShowToastMessage(dhikrSuccessMsg)
                     }
                 )
 
@@ -223,6 +230,7 @@ fun PrayerTrackerCard(
                         isSunnahDone = next
                         PrayerTrackerStore.setOptionalCompleted(context, OptionalWorshipHabit.DHUHA, next)
                         onToggleOptional(OptionalWorshipHabit.DHUHA)
+                        if (next) onShowToastMessage(sunnahSuccessMsg)
                     }
                 )
             }

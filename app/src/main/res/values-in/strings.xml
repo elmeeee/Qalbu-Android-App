@@ -8,6 +8,10 @@
     <string name="journey_badge_dhikr">Zikir</string>
     <string name="journey_badge_sunnah">Sunnah</string>
     <string name="prayer_badge_not_after_isha">Shalat dapat dicentang setelah waktu Isya atau 5 shalat selesai</string>
+    <string name="journey_toast_prayer_success">Habit Shalat berhasil ditandai! ✨</string>
+    <string name="journey_toast_quran_success">Habit Al-Qur\'an berhasil ditandai! ✨</string>
+    <string name="journey_toast_dhikr_success">Habit Dzikir berhasil ditandai! ✨</string>
+    <string name="journey_toast_sunnah_success">Habit Sunnah berhasil ditandai! ✨</string>
 
 
     <string name="language_english">English</string>

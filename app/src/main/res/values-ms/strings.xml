@@ -9,6 +9,10 @@
     <string name="journey_badge_dhikr">Zikir</string>
     <string name="journey_badge_sunnah">Sunnah</string>
     <string name="prayer_badge_not_after_isha">Solat boleh ditanda selepas waktu Isyak atau 5 solat selesai</string>
+    <string name="journey_toast_prayer_success">Habit Solat berjaya ditanda! ✨</string>
+    <string name="journey_toast_quran_success">Habit Al-Quran berjaya ditanda! ✨</string>
+    <string name="journey_toast_dhikr_success">Habit Zikir berjaya ditanda! ✨</string>
+    <string name="journey_toast_sunnah_success">Habit Sunnah berjaya ditanda! ✨</string>
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="language_malay">Bahasa Melayu</string>
