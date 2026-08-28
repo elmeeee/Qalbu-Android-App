@@ -277,7 +277,7 @@ private fun CalendarDayCell(
     onClick: () -> Unit
 ) {
     val performTapHaptic = rememberTapHaptic()
-    val complete = progress.isPerfectDay
+    val complete = progress.isPerfectDay || progress.completedCount >= progress.totalCount
     val partial = progress.completedCount > 0
 
     val cellBgColor = when {
@@ -328,7 +328,7 @@ private fun CalendarDayCell(
                 )
             } else if (partial) {
                 Text(
-                    text = "${progress.completedCount}/5",
+                    text = "${progress.completedCount}/${progress.totalCount}",
                     fontSize = 9.5.sp,
                     color = SaatColors.HomeDarkGreen,
                     fontWeight = FontWeight.Bold

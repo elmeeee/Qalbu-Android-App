@@ -18,7 +18,7 @@ data class PrayerDayProgress(
     val isDhikrDone: Boolean = false
 ) {
     val fraction: Float get() = completedCount.toFloat() / totalCount.coerceAtLeast(1)
-    val isPerfectDay: Boolean get() = isPrayerDone && isQuranDone && isSunnahDone && isDhikrDone
+    val isPerfectDay: Boolean get() = completedCount >= totalCount || (isPrayerDone && isQuranDone && isSunnahDone && isDhikrDone)
 }
 
 object PrayerTrackerStore {
