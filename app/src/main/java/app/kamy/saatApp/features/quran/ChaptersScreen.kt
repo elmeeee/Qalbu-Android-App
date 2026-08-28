@@ -776,73 +776,91 @@ private fun ContinueReadingCard(
     onTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+    val totalVerses = chapter?.versesCount
+    val percentInt = remember(session.verseNumber, totalVerses) {
+        if (totalVerses != null && totalVerses > 0) {
+            ((session.verseNumber.toFloat() / totalVerses.toFloat()) * 100).toInt().coerceIn(1, 100)
+        } else 50
+    }
+    val fillFraction = (percentInt / 100f).coerceIn(0.05f, 1f)
+
+    Surface(
+        onClick = onTap,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp)),
+        shape = RoundedCornerShape(24.dp),
+        color = SaatColors.LastReadBg,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.5f))
     ) {
-        Surface(
-            onClick = onTap,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp),
-            shape = RoundedCornerShape(20.dp),
-            color = Color.Transparent,
-            shadowElevation = 4.dp
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(20.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
             ) {
-                // Background image
-                Image(
-                    painter = painterResource(R.drawable.last_read_bg),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                Text(
+                    text = stringResource(R.string.today_continue_reading_title),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SaatColors.HomeDarkGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
-
-                // Text overlay
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .fillMaxWidth(0.6f)
-                        .padding(start = 20.dp),
-                    verticalArrangement = Arrangement.Center
+                Spacer(Modifier.height(4.dp))
+                val surahTitle = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber)
+                val verseTitle = stringResource(R.string.today_continue_reading_verse, session.verseNumber)
+                Text(
+                    text = "$surahTitle • $verseTitle",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = SaatColors.HomeDarkGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.today_continue_reading_title),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = Color.White.copy(alpha = 0.85f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = "$percentInt%",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.HomeDarkGreen
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        ),
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Normal
-                        ),
-                        color = Color.White.copy(alpha = 0.75f),
-                        maxLines = 1
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(4.dp)
+                            .clip(CircleShape)
+                            .background(SaatColors.TimelineGreen)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fillFraction)
+                                .height(4.dp)
+                                .clip(CircleShape)
+                                .background(SaatColors.HomeDarkGreen)
+                        )
+                    }
                 }
             }
+
+            Image(
+                painter = painterResource(R.drawable.last_read),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(90.dp, 60.dp)
+                    .padding(start = 8.dp)
+            )
         }
     }
 }
