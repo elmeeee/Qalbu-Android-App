@@ -35,9 +35,9 @@
     <string name="madhab_hanafi">Hanafi</string>
     <string name="madhab_settings_title">Calculation School (Madhab)</string>
     <string name="nav_home">Home</string>
-    <string name="nav_spiritual">Spiritual</string>
+    <string name="nav_spiritual">Worship</string>
     <string name="nav_quran">Quran</string>
-    <string name="nav_setting">Setting</string>
+    <string name="nav_setting">More</string>
     <string name="back">Back</string>
     <string name="loading">Loading…</string>
     <string name="locating">Locating…</string>

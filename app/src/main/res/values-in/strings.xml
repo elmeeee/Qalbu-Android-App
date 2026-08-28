@@ -43,9 +43,9 @@
     <string name="madhab_settings_title">Mazhab Perhitungan</string>
 
     <string name="nav_home">Beranda</string>
-    <string name="nav_spiritual">Spiritual</string>
+    <string name="nav_spiritual">Ibadah</string>
     <string name="nav_quran">Al-Quran</string>
-    <string name="nav_setting">Pengaturan</string>
+    <string name="nav_setting">Lainnya</string>
 
     <string name="back">Kembali</string>
     <string name="loading">Memuat…</string>

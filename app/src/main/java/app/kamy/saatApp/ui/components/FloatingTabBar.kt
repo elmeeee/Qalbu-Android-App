@@ -59,8 +59,8 @@ fun FloatingTabBar(
             )
             .clip(CircleShape),
         shape = CircleShape,
-        color = Color(0xFFF9FBF9),
-        border = androidx.compose.foundation.BorderStroke(1.2.dp, Color(0xFFCBD5E1)),
+        color = Color(0xFFFEFBF5),
+        border = androidx.compose.foundation.BorderStroke(1.2.dp, Color(0xFFE2E8F0)),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
@@ -91,8 +91,8 @@ private fun FloatingTabItem(
 ) {
     val activeGradient = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF085E43),
-            Color(0xFF15AA7C)
+            Color(0xFF145A43),
+            Color(0xFF287A55)
         )
     )
 

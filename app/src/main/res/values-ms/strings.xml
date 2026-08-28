@@ -34,9 +34,9 @@
     <string name="madhab_hanafi">Hanafi</string>
     <string name="madhab_settings_title">Mazhab Perhitungan</string>
     <string name="nav_home">Laman Utama</string>
-    <string name="nav_spiritual">Spiritual</string>
+    <string name="nav_spiritual">Ibadah</string>
     <string name="nav_quran">Al-Quran</string>
-    <string name="nav_setting">Tetapan</string>
+    <string name="nav_setting">Lainnya</string>
     <string name="back">Kembali</string>
     <string name="loading">Memuatkan…</string>
     <string name="locating">Mencari lokasi…</string>
