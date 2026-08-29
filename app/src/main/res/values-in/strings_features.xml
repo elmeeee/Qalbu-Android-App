@@ -21,6 +21,7 @@
     <string name="dhikr_subhanallah">SubhanAllah</string>
     <string name="dhikr_title">Tasbih</string>
     <string name="tasbih_target_left">Target: %1$d  |  Sisa: %2$d</string>
+    <string name="tasbih_tap_instruction">Ketuk atau geser untuk menghitung</string>
     <string name="tasbih_reset_button">Riset</string>
     <string name="tasbih_end_button">Akhiri</string>
     <string name="tasbih_reset_dialog_title">Apakah Anda yakin ingin Meriset?</string>

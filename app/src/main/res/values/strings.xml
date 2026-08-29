@@ -470,6 +470,7 @@
     <string name="qibla_title">Qibla</string>
     <string name="dhikr_title">Tasbih</string>
     <string name="tasbih_target_left">Target: %1$d  |  Left: %2$d</string>
+    <string name="tasbih_tap_instruction">Tap or swipe to count</string>
     <string name="tasbih_reset_button">Reset</string>
     <string name="tasbih_end_button">End</string>
     <string name="tasbih_reset_dialog_title">Are you sure to Reset?</string>

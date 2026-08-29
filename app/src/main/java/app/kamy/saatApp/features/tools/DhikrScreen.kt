@@ -301,7 +301,7 @@ fun DhikrScreen(onBack: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(326.dp)
+                            .height(360.dp)
                             .coachMarkTarget(
                                 coachMarkState,
                                 0,
@@ -313,8 +313,8 @@ fun DhikrScreen(onBack: () -> Unit) {
                         TasbeehCounterWidget(
                             count = pageCount,
                             pulseKey = if (pageIndex == selectedIndex) pulseKey else 0,
-                            counterWidth = 270.dp,
-                            counterHeight = 326.dp,
+                            counterWidth = 340.dp,
+                            counterHeight = 360.dp,
                             onTap = {
                                 if (pageCount >= activePreset.target) {
                                     confirmHaptic()

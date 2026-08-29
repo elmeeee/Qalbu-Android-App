@@ -21,6 +21,7 @@
     <string name="dhikr_subhanallah">SubhanAllah</string>
     <string name="dhikr_title">Tasbih</string>
     <string name="tasbih_target_left">Sasaran: %1$d  |  Baki: %2$d</string>
+    <string name="tasbih_tap_instruction">Ketik atau leret untuk mengira</string>
     <string name="tasbih_reset_button">Set Semula</string>
     <string name="tasbih_end_button">Tamatkan</string>
     <string name="tasbih_reset_dialog_title">Adakah anda pasti untuk Mengeset Semula?</string>
