@@ -304,6 +304,16 @@ fun TodayScreen(
         }
     }
 
+    val scrollOffset by remember {
+        derivedStateOf {
+            if (listState.firstVisibleItemIndex == 0) {
+                listState.firstVisibleItemScrollOffset.toFloat()
+            } else {
+                1000f
+            }
+        }
+    }
+
     val targetPrayer = prayerState.activePrayer ?: prayerState.nextPrayer
     val cardDrawable = getPrayerCardDrawable(targetPrayer)
 
@@ -334,12 +344,15 @@ fun TodayScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(393f / 238f)
-                    .graphicsLayer { alpha = 1f - scrollProgress }
+                    .graphicsLayer {
+                        alpha = (1f - scrollProgress).coerceIn(0f, 1f)
+                        translationY = -scrollOffset * 0.45f
+                    }
             ) {
                 Image(
                     painter = painterResource(cardDrawable),
                     contentDescription = null,
-                    contentScale = ContentScale.FillWidth,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
 

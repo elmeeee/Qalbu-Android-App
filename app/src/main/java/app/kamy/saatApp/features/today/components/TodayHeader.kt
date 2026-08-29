@@ -47,6 +47,12 @@ import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.util.Calendar
 
+import android.os.Build
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.lerp
 
@@ -128,12 +134,46 @@ fun TodayHeader(
 
     val elevationDp = lerp(0.dp, 2.dp, progress)
     val dividerColor = lerp(Color.Transparent, SaatColors.HomeDarkGreen.copy(alpha = 0.15f), progress)
+    val isScrolled = progress > 0.05f
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = headerBgColor,
-        shadowElevation = elevationDp
+    Box(
+        modifier = modifier.fillMaxWidth()
     ) {
+        // Parallax Glass Backdrop Layer
+        if (isScrolled) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        translationY = (-progress * 20f).coerceIn(-30f, 0f)
+                    }
+                    .then(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            Modifier.blur(radius = 16.dp * progress)
+                        } else Modifier
+                    )
+                    .background(
+                        SaatColors.HomeBg.copy(alpha = 0.88f * progress)
+                    )
+                    .drawWithContent {
+                        drawContent()
+                        if (progress > 0.1f) {
+                            drawLine(
+                                color = SaatColors.HomeDarkGreen.copy(alpha = 0.12f * progress),
+                                start = Offset(0f, size.height),
+                                end = Offset(size.width, size.height),
+                                strokeWidth = 1.dp.toPx()
+                            )
+                        }
+                    }
+            )
+        }
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = if (isScrolled) Color.Transparent else headerBgColor,
+            shadowElevation = if (isScrolled) 0.dp else elevationDp
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -236,5 +276,6 @@ fun TodayHeader(
             HorizontalDivider(color = dividerColor, thickness = 0.5.dp)
         }
     }
+}
 }
 
