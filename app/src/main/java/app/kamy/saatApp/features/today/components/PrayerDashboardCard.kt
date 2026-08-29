@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.offset
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.components.SaatErrorStateDark
+import app.kamy.saatApp.design.components.SaatSkeletonBlock
 import app.kamy.saatApp.design.components.SaatSkeletonOnDark
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.PrayerType
@@ -162,7 +163,7 @@ fun PrayerDashboardCard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             when {
-                state.isLoading && state.timings.isEmpty() -> {
+                state.isLoading || state.timings.isEmpty() -> {
                     PrayerCardLoading()
                 }
                 fetchErrorDisplay != null && state.timings.isEmpty() -> {
@@ -568,25 +569,91 @@ private fun SchedulePrayerSlot(
 
 @Composable
 private fun PrayerCardLoading() {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SaatSkeletonOnDark(
-            modifier = Modifier
-                .fillMaxWidth(0.4f)
-                .height(14.dp)
-        )
-        Spacer(Modifier.height(8.dp))
-        SaatSkeletonOnDark(
-            modifier = Modifier
-                .fillMaxWidth(0.65f)
-                .height(28.dp)
-        )
-        Spacer(Modifier.height(16.dp))
-        SaatSkeletonOnDark(
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Top Row Skeleton: Left text lines + Right circular arc countdown skeleton
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                SaatSkeletonBlock(
+                    modifier = Modifier
+                        .fillMaxWidth(0.35f)
+                        .height(14.dp),
+                    shape = RoundedCornerShape(4.dp),
+                    color = Color(0xFFCBD5E1)
+                )
+                Spacer(Modifier.height(8.dp))
+                SaatSkeletonBlock(
+                    modifier = Modifier
+                        .fillMaxWidth(0.60f)
+                        .height(26.dp),
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color(0xFFE2E8F0)
+                )
+            }
+
+            // Circular arc countdown skeleton
+            SaatSkeletonBlock(
+                modifier = Modifier.size(72.dp),
+                shape = CircleShape,
+                color = Color(0xFFE2E8F0)
+            )
+        }
+
+        // Horizontal Timeline Track Skeleton
+        SaatSkeletonBlock(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp)
+                .height(6.dp),
+            shape = RoundedCornerShape(3.dp),
+            color = Color(0xFFE2E8F0)
         )
+
+        // 6 Prayer Slots Skeleton
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            repeat(6) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        SaatSkeletonBlock(
+                            modifier = Modifier
+                                .width(28.dp)
+                                .height(10.dp),
+                            shape = RoundedCornerShape(3.dp),
+                            color = Color(0xFFCBD5E1)
+                        )
+                        SaatSkeletonBlock(
+                            modifier = Modifier.size(22.dp),
+                            shape = CircleShape,
+                            color = Color(0xFFE2E8F0)
+                        )
+                        SaatSkeletonBlock(
+                            modifier = Modifier
+                                .width(30.dp)
+                                .height(11.dp),
+                            shape = RoundedCornerShape(3.dp),
+                            color = Color(0xFFCBD5E1)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -604,20 +671,24 @@ private fun SchedulePrayerSlotSkeleton(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            SaatSkeletonOnDark(
+            SaatSkeletonBlock(
                 modifier = Modifier
                     .width(26.dp)
-                    .height(10.dp)
+                    .height(10.dp),
+                shape = RoundedCornerShape(3.dp),
+                color = Color(0xFFCBD5E1)
             )
-            SaatSkeletonOnDark(
-                modifier = Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
+            SaatSkeletonBlock(
+                modifier = Modifier.size(20.dp),
+                shape = CircleShape,
+                color = Color(0xFFE2E8F0)
             )
-            SaatSkeletonOnDark(
+            SaatSkeletonBlock(
                 modifier = Modifier
                     .width(28.dp)
-                    .height(11.dp)
+                    .height(11.dp),
+                shape = RoundedCornerShape(3.dp),
+                color = Color(0xFFCBD5E1)
             )
         }
     }

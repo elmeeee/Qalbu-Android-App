@@ -431,26 +431,6 @@ class PrayerDashboardViewModel @Inject constructor(
             PrayerTheme.DAYLIGHT
         }
 
-        if (lastPassed != null) {
-            val elapsedMs = now.time - lastPassed.date.time
-            if (elapsedMs in 0 until PRAYER_GRACE_PERIOD_MS) {
-                _state.update {
-                    it.copy(
-                        activePrayer = active,
-                        nextPrayer = null,
-                        countdown = formatDurationMs(elapsedMs),
-                        countdownSubtitle = strings.getString(
-                            R.string.prayer_grace_passed,
-                            prayerDisplayName(lastPassed.type)
-                        ),
-                        isGracePeriod = true,
-                        theme = theme
-                    )
-                }
-                return
-            }
-        }
-
         val next = resolveNextPrayerEntry(timings, now)
         val deltaMs = (next.date.time - now.time).coerceAtLeast(0L)
         _state.update {
