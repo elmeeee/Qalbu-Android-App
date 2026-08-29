@@ -98,6 +98,52 @@
     <string name="remove_bookmark">Hapus bookmark</string>
     <string name="shortcut_continue_quran">Lanjutkan Quran</string>
     <string name="shortcut_prayer_today">Jadwal sholat</string>
+    <!-- Worship / Spiritual Screen Revamp -->
+    <string name="worship_header_title">Ibadah</string>
+    <string name="worship_header_subtitle">Jalanmu menuju Allah</string>
+
+    <string name="tool_qibla_title">Kiblat</string>
+    <string name="tool_qibla_desc">Cari arah Kiblat Ka\'bah</string>
+
+    <string name="tool_radio_title">Radio</string>
+    <string name="tool_radio_desc">Dengarkan stasiun radio Islami</string>
+
+    <string name="tool_dua_dhikr_title">Doa &amp; Zikir</string>
+    <string name="tool_dua_dhikr_desc">Kumpulan doa dan zikir</string>
+
+    <string name="tool_asmaul_husna_title">Asmaul Husna</string>
+    <string name="tool_asmaul_husna_desc">Temukan 99 Nama Allah</string>
+
+    <string name="tool_faraidh_title">Faraidh</string>
+    <string name="tool_faraidh_desc">Pelajari waris Islam</string>
+
+    <string name="tool_zakah_title">Zakat</string>
+    <string name="tool_zakah_desc">Hitung dan bayar zakatmu</string>
+
+    <string name="tool_tasbih_title">Tasbih</string>
+    <string name="tool_tasbih_desc">Hitung zikirmu dengan mudah</string>
+
+    <string name="tool_manzil_title">Manzil</string>
+    <string name="tool_manzil_desc">Doa harian untuk perlindungan</string>
+
+    <string name="tool_hajj_umrah_title">Haji &amp; Umrah</string>
+    <string name="tool_hajj_umrah_desc">Panduan haji dan umrah</string>
+
+    <string name="tool_jamak_guide_title">Panduan Shalat Jamak</string>
+    <string name="tool_jamak_guide_desc">Pelajari cara menjamak shalat</string>
+
+    <string name="tool_sunnah_practices_title">Amalan Sunnah</string>
+    <string name="tool_sunnah_practices_desc">Temukan amalan sunnah harian</string>
+
+    <string name="tool_janazah_guide_title">Panduan Shalat Jenazah</string>
+    <string name="tool_janazah_guide_desc">Pelajari tata cara shalat jenazah</string>
+
+    <string name="tool_encyclopedia_title">Ensiklopedia</string>
+    <string name="tool_encyclopedia_desc">Jelajahi pengetahuan Islam</string>
+
+    <string name="tool_fidyah_tracker_title">Pelacak Fidyah</string>
+    <string name="tool_fidyah_tracker_desc">Catat pembayaran fidyahmu</string>
+
     <string name="spiritual_tools_tab_subtitle">Kiblat, doa, zikir, dan lainnya</string>
     <string name="spiritual_tools_title">Alat spiritual</string>
     <string name="verse_key_label">Ayat %1$s</string>

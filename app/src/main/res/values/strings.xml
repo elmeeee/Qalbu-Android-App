@@ -420,6 +420,52 @@
     <string name="hifz_marked_learning">Marked as learning</string>
     <string name="hifz_marked_memorized">Marked as memorized</string>
     <string name="hifz_marked_review">Marked for review</string>
+    <!-- Worship / Spiritual Screen Revamp -->
+    <string name="worship_header_title">Worship</string>
+    <string name="worship_header_subtitle">Your path to Allah</string>
+
+    <string name="tool_qibla_title">Qibla</string>
+    <string name="tool_qibla_desc">Find the direction of the Kaaba</string>
+
+    <string name="tool_radio_title">Radio</string>
+    <string name="tool_radio_desc">Listen to islamic radio stations</string>
+
+    <string name="tool_dua_dhikr_title">Du’a &amp; Dhikr</string>
+    <string name="tool_dua_dhikr_desc">Collection of duas and dhikr</string>
+
+    <string name="tool_asmaul_husna_title">Asmaul Husna</string>
+    <string name="tool_asmaul_husna_desc">Discover the 99 Names of Allah</string>
+
+    <string name="tool_faraidh_title">Faraidh</string>
+    <string name="tool_faraidh_desc">Learn islamic inheritance</string>
+
+    <string name="tool_zakah_title">Zakah</string>
+    <string name="tool_zakah_desc">Calculate and pay your zakah</string>
+
+    <string name="tool_tasbih_title">Tasbih</string>
+    <string name="tool_tasbih_desc">Count your dhikr with ease</string>
+
+    <string name="tool_manzil_title">Manzil</string>
+    <string name="tool_manzil_desc">Daily prayers for protection</string>
+
+    <string name="tool_hajj_umrah_title">Hajj &amp; Umrah</string>
+    <string name="tool_hajj_umrah_desc">Guides for hajj and umrah</string>
+
+    <string name="tool_jamak_guide_title">Jamak Prayer Guide</string>
+    <string name="tool_jamak_guide_desc">Learn how to combine prayers</string>
+
+    <string name="tool_sunnah_practices_title">Sunnah Practices</string>
+    <string name="tool_sunnah_practices_desc">Discover daily Sunnah practices</string>
+
+    <string name="tool_janazah_guide_title">Janazah Prayer Guide</string>
+    <string name="tool_janazah_guide_desc">Learn the Janazah prayer</string>
+
+    <string name="tool_encyclopedia_title">Encyclopedia</string>
+    <string name="tool_encyclopedia_desc">Explore Islamic knowledge</string>
+
+    <string name="tool_fidyah_tracker_title">Fidyah Tracker</string>
+    <string name="tool_fidyah_tracker_desc">Track your Fidyah payments</string>
+
     <string name="spiritual_tools_title">Spiritual tools</string>
     <string name="qibla_title">Qibla</string>
     <string name="dhikr_title">Tasbih</string>

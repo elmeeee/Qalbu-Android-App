@@ -1,7 +1,10 @@
 package app.kamy.saatApp.features.tools
 
+import android.os.Build
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,54 +13,57 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
-import app.kamy.saatApp.design.theme.SaatColors
-import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 private data class SpiritualToolItem(
     @DrawableRes val iconRes: Int,
-    val titleRes: Int,
-    val route: String,
-    val accentStart: Color,
-    val accentEnd: Color
+    @StringRes val titleRes: Int,
+    @StringRes val descRes: Int,
+    val route: String
 )
+
+private val SpiritualCardColor = Color(0xFFF8F4E9)
+private val SpiritualTextColor = Color(0xFF124C31)
 
 @Composable
 fun SpiritualToolsScreen(
@@ -66,191 +72,216 @@ fun SpiritualToolsScreen(
     val tools = remember {
         listOf(
             SpiritualToolItem(
-                R.drawable.ic_radio_custom,
-                R.string.radio_quran_title,
-                "radio",
-                SaatColors.DeepEmerald,
-                SaatColors.Gold
+                R.drawable.ic_qibla_3d,
+                R.string.tool_qibla_title,
+                R.string.tool_qibla_desc,
+                "qibla"
             ),
             SpiritualToolItem(
-                R.drawable.ic_asmaulhusna_custom,
-                R.string.asmaul_husna_title,
-                "asmaul-husna",
-                SaatColors.GoldDeep,
-                SaatColors.DeepEmerald
+                R.drawable.ic_radio_3d,
+                R.string.tool_radio_title,
+                R.string.tool_radio_desc,
+                "radio"
             ),
             SpiritualToolItem(
-                R.drawable.ic_qibla,
-                R.string.qibla_title,
-                "qibla",
-                SaatColors.DeepEmerald,
-                SaatColors.Teal
+                R.drawable.ic_doazikir_3d,
+                R.string.tool_dua_dhikr_title,
+                R.string.tool_dua_dhikr_desc,
+                "doa-zikir"
             ),
             SpiritualToolItem(
-                R.drawable.ic_dua,
-                R.string.doa_zikir_title,
-                "doa-zikir",
-                SaatColors.Teal,
-                SaatColors.DeepEmerald
+                R.drawable.ic_asmaulhusna_3d,
+                R.string.tool_asmaul_husna_title,
+                R.string.tool_asmaul_husna_desc,
+                "asmaul-husna"
             ),
             SpiritualToolItem(
-                R.drawable.ic_dhikr,
-                R.string.dhikr_title,
-                "dhikr",
-                SaatColors.GoldDeep,
-                SaatColors.Gold
+                R.drawable.ic_faraidh_3d,
+                R.string.tool_faraidh_title,
+                R.string.tool_faraidh_desc,
+                "faraidh"
             ),
             SpiritualToolItem(
-                R.drawable.ic_zakat,
-                R.string.zakat_title,
-                "zakat",
-                SaatColors.IndigoAccent,
-                SaatColors.Teal
+                R.drawable.ic_zakat_3d,
+                R.string.tool_zakah_title,
+                R.string.tool_zakah_desc,
+                "zakat"
             ),
             SpiritualToolItem(
-                R.drawable.ic_faraidh_heritage,
-                R.string.faraidh_title,
-                "faraidh",
-                SaatColors.GoldDeep,
-                SaatColors.DeepEmerald
+                R.drawable.ic_tasbih_3d,
+                R.string.tool_tasbih_title,
+                R.string.tool_tasbih_desc,
+                "dhikr"
             ),
             SpiritualToolItem(
-                R.drawable.ic_manzil,
-                R.string.manzil_title,
-                "manzil",
-                SaatColors.DeepEmerald,
-                SaatColors.GoldDeep
+                R.drawable.ic_manzil_3d,
+                R.string.tool_manzil_title,
+                R.string.tool_manzil_desc,
+                "manzil"
             ),
             SpiritualToolItem(
-                R.drawable.ic_prayer_rug,
-                R.string.sunnah_prayer_title,
-                "sunnah-prayer",
-                SaatColors.GoldDeep,
-                SaatColors.DeepEmerald
+                R.drawable.ic_hajj_umrah_3d,
+                R.string.tool_hajj_umrah_title,
+                R.string.tool_hajj_umrah_desc,
+                "hajj-umrah"
             ),
             SpiritualToolItem(
-                R.drawable.ic_prayer_rug,
-                R.string.jenazah_prayer_title,
-                "jenazah",
-                SaatColors.DeepEmerald,
-                SaatColors.GoldDeep
+                R.drawable.ic_jamak_3d,
+                R.string.tool_jamak_guide_title,
+                R.string.tool_jamak_guide_desc,
+                "jamak-qashar"
             ),
             SpiritualToolItem(
-                R.drawable.ic_prayer_rug,
-                R.string.jamak_prayer_title,
-                "jamak-qashar",
-                SaatColors.GoldDeep,
-                SaatColors.DeepEmerald
+                R.drawable.ic_sunnah_3d,
+                R.string.tool_sunnah_practices_title,
+                R.string.tool_sunnah_practices_desc,
+                "sunnah-prayer"
             ),
             SpiritualToolItem(
-                R.drawable.ic_rice,
-                R.string.fidyah_title,
-                "fidyah",
-                SaatColors.Teal,
-                SaatColors.GoldDeep
+                R.drawable.ic_jenazah_3d,
+                R.string.tool_janazah_guide_title,
+                R.string.tool_janazah_guide_desc,
+                "jenazah"
             ),
             SpiritualToolItem(
-                R.drawable.ic_encyclopedia_custom,
-                R.string.encyclopedia_title,
-                "encyclopedia",
-                SaatColors.DeepEmerald,
-                SaatColors.Teal
+                R.drawable.ic_encyclopedia_3d,
+                R.string.tool_encyclopedia_title,
+                R.string.tool_encyclopedia_desc,
+                "encyclopedia"
             ),
             SpiritualToolItem(
-                R.drawable.ic_kaaba_hajj,
-                R.string.hajj_umrah_title,
-                "hajj-umrah",
-                SaatColors.DeepEmerald,
-                SaatColors.GoldDeep
+                R.drawable.ic_fidyah_3d,
+                R.string.tool_fidyah_tracker_title,
+                R.string.tool_fidyah_tracker_desc,
+                "fidyah"
             )
         )
     }
 
-    Column(
+    val gridState = rememberLazyGridState()
+
+    val scrollOffset by remember {
+        derivedStateOf {
+            if (gridState.firstVisibleItemIndex == 0) {
+                gridState.firstVisibleItemScrollOffset.toFloat()
+            } else {
+                1000f
+            }
+        }
+    }
+
+    val scrollProgress by remember {
+        derivedStateOf {
+            (scrollOffset / 120f).coerceIn(0f, 1f)
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SaatColors.ScreenBackground)
-            .tabContentStatusBarInset()
+            .background(Color(0xFFFAF7F2))
     ) {
-        Column(
+        // Full width Parallax Header Background Image (Edge to Edge, 0.45x Parallax Speed)
+        Image(
+            painter = painterResource(R.drawable.bg_worship_header),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    horizontal = SaatSpacing.screenHorizontal,
-                    vertical = SaatSpacing.md
-                )
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "✦",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = SaatColors.GoldDeep,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(Modifier.width(SaatSpacing.sm))
-                    Text(
-                        text = stringResource(R.string.spiritual_tools_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        color = SaatColors.DeepEmerald,
-                        fontWeight = FontWeight.Bold
-                    )
+                .height(230.dp)
+                .graphicsLayer {
+                    translationY = -scrollOffset * 0.45f
                 }
+        )
 
-                Surface(
-                    shape = CircleShape,
-                    color = SaatColors.DeepEmerald.copy(alpha = 0.1f)
-                ) {
-                    Text(
-                        text = stringResource(R.string.spiritual_tools_badge_count, tools.size),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-            }
-            Text(
-                text = stringResource(R.string.spiritual_tools_tab_subtitle),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 18.dp, top = 4.dp)
-            )
-            Spacer(Modifier.height(SaatSpacing.sm))
-            Box(
-                modifier = Modifier
-                    .height(2.5.dp)
-                    .width(52.dp)
-                    .background(
-                        Brush.horizontalGradient(
-                            listOf(
-                                SaatColors.GoldDeep,
-                                SaatColors.GoldDeep.copy(alpha = 0.1f)
-                            )
-                        )
-                    )
-            )
-        }
-
+        // Scrollable Grid Content
         LazyVerticalGrid(
+            state = gridState,
             columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = SaatSpacing.screenHorizontal,
-                end = SaatSpacing.screenHorizontal,
-                bottom = floatingNavBottomPadding() + 20.dp
+                start = 20.dp,
+                end = 20.dp,
+                top = 175.dp,
+                bottom = floatingNavBottomPadding() + 24.dp
             ),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(tools, key = { it.route }) { tool ->
                 SpiritualToolGridCard(
                     tool = tool,
                     onClick = { onOpenTool(tool.route) }
+                )
+            }
+        }
+
+        // Pinned Header Bar with Parallax Backdrop Glass Effect & Crisp Text Layer
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+        ) {
+            // 1. Parallax Glass Backdrop Layer (Translates with subtle parallax motion & blurs on scroll)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        translationY = (-scrollOffset * 0.15f).coerceIn(-40f, 0f)
+                    }
+                    .then(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && scrollProgress > 0.05f) {
+                            Modifier.blur(radius = 16.dp * scrollProgress)
+                        } else Modifier
+                    )
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFFFAF7F2).copy(alpha = 0.88f * scrollProgress),
+                                Color(0xFFFAF7F2).copy(alpha = 0.72f * scrollProgress)
+                            )
+                        )
+                    )
+                    .drawWithContent {
+                        drawContent()
+                        if (scrollProgress > 0.1f) {
+                            // Glass bottom hairline border
+                            drawLine(
+                                color = Color(0xFF124C31).copy(alpha = 0.08f * scrollProgress),
+                                start = Offset(0f, size.height),
+                                end = Offset(size.width, size.height),
+                                strokeWidth = 1.dp.toPx()
+                            )
+                        }
+                    }
+            )
+
+            // 2. Crisp, Sharp Header Text Layer (Unblurred)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .tabContentStatusBarInset()
+                    .padding(top = 16.dp, bottom = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = stringResource(R.string.worship_header_title),
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = SpiritualTextColor
+                    ),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.worship_header_subtitle),
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Light,
+                        color = SpiritualTextColor
+                    ),
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -263,60 +294,80 @@ private fun SpiritualToolGridCard(
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val titleStr = stringResource(tool.titleRes)
-    val borderGradient = remember(tool.accentStart, tool.accentEnd) {
-        Brush.linearGradient(
-            colors = listOf(
-                tool.accentStart.copy(alpha = 0.30f),
-                tool.accentEnd.copy(alpha = 0.10f)
-            )
-        )
-    }
+    val cardShape = RoundedCornerShape(16.dp)
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(136.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .aspectRatio(156f / 169f)
+            .shadow(
+                elevation = 4.dp,
+                shape = cardShape,
+                ambientColor = Color(0x30124C31),
+                spotColor = Color(0x20000000)
+            )
+            .border(
+                border = BorderStroke(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.9f),
+                            Color(0xFFE4DDD0)
+                        )
+                    )
+                ),
+                shape = cardShape
+            )
+            .clip(cardShape)
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = tool.accentStart.copy(alpha = 0.15f)),
+                indication = ripple(color = SpiritualTextColor.copy(alpha = 0.1f)),
                 onClick = onClick
             ),
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        border = BorderStroke(1.dp, borderGradient),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = cardShape,
+        color = SpiritualCardColor
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+                .padding(horizontal = 8.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Large Colored Vector Icon
-            Icon(
+            Image(
                 painter = painterResource(tool.iconRes),
                 contentDescription = null,
-                tint = tool.accentStart,
-                modifier = Modifier.size(42.dp)
+                modifier = Modifier
+                    .size(width = 88.dp, height = 94.dp)
+                    .padding(bottom = 4.dp),
+                contentScale = ContentScale.Fit
             )
 
-            Spacer(Modifier.height(8.dp))
-
-            // Centered Feature Title Name
             Text(
-                text = titleStr,
-                style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp, lineHeight = 16.sp),
-                fontWeight = FontWeight.SemiBold,
-                color = SaatColors.Slate900,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                text = stringResource(tool.titleRes),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SpiritualTextColor,
+                    textAlign = TextAlign.Center
+                ),
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = stringResource(tool.descRes),
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Light,
+                    color = SpiritualTextColor,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 13.sp
+                ),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
