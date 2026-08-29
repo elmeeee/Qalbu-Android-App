@@ -601,6 +601,15 @@ class ChapterReaderViewModel @Inject constructor(
         }
     }
 
+    fun toggleAudioPlay(index: Int = _state.value.currentVerseIndex) {
+        onTapAyah(index)
+    }
+
+    fun stopAudio() {
+        audioPlayer.stop()
+        _state.update { it.copy(currentlyPlayingVerseKey = null) }
+    }
+
     private fun playAyahAtIndex(index: Int, page: RandomAyahPayload) {
         val s = _state.value
         val chapterNum = page.chapterNumber ?: s.chapterNumber
@@ -831,15 +840,8 @@ class ChapterReaderViewModel @Inject constructor(
         val chapter = verse.chapterNumber ?: _state.value.chapterNumber
         val ayah = verse.resolvedVerseNumber ?: return
         val surah = _state.value.chapterDisplayName
-        val added = QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
+        QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
         refreshPersonalVerseState(index)
-        _state.update {
-            it.copy(
-                publishMessage = appContext.getString(
-                    if (added) R.string.bookmark_added else R.string.bookmark_removed
-                )
-            )
-        }
     }
 
     fun openHifzPicker(index: Int = _state.value.currentVerseIndex) {

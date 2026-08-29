@@ -127,7 +127,7 @@ fun RootScreen(
     var isAccountDetailScreen by rememberSaveable { mutableStateOf(false) }
     var isTanyaSaatOpen by remember { mutableStateOf(false) }
     val showBottomBar = shouldShowBottomBar(currentRoute, isAccountDetailScreen) && !isTanyaSaatOpen
-    val showAudioBar = audioState.currentUrl != null && !isTanyaSaatOpen
+    val showAudioBar = audioState.currentUrl != null && !isTanyaSaatOpen && !isReaderRoute
     val audioBarBottomPadding = if (showBottomBar) {
         floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
     } else {
