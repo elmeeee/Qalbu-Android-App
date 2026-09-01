@@ -254,8 +254,28 @@ fun ChapterReaderScreen(
     val totalPageCount = verseCount + pageOffset + (if (showNextTransition) 1 else 0)
 
     val currentChapterKey = "${s.chapterNumber}_${s.juzNumber}"
+    val originChapterNumber = remember { s.chapterNumber }
+    val originJuzNumber = remember { s.juzNumber }
+    val isOriginChapter = s.chapterNumber == originChapterNumber && s.juzNumber == originJuzNumber
+
+    val defaultInitialVerseIdx = remember(currentChapterKey) {
+        if (!isOriginChapter) {
+            0
+        } else {
+            when {
+                !initialVerseKey.isNullOrBlank() -> {
+                    val verseNum = initialVerseKey.substringAfterLast(':').toIntOrNull()
+                    if (verseNum != null && verseNum > 0) verseNum - 1 else 0
+                }
+                initialVerseNumber != null && initialVerseNumber > 0 -> initialVerseNumber - 1
+                else -> 0
+            }
+        }
+    }
+    val calculatedInitialPage = pageOffset + defaultInitialVerseIdx
+
     val pagerState = key(currentChapterKey) {
-        rememberPagerState(initialPage = pageOffset) { totalPageCount.coerceAtLeast(1) }
+        rememberPagerState(initialPage = calculatedInitialPage) { totalPageCount.coerceAtLeast(1) }
     }
     val currentVerseIndex = (pagerState.currentPage - pageOffset).coerceIn(0, (verseCount - 1).coerceAtLeast(0))
     val currentVerse = s.verses.getOrNull(currentVerseIndex)
@@ -319,7 +339,7 @@ fun ChapterReaderScreen(
     LaunchedEffect(currentChapterKey, verseCount, pageOffset) {
         if (verseCount == 0 || hasAlignedInitialPage) return@LaunchedEffect
         hasAlignedInitialPage = true
-        val isDeepLink = !initialVerseKey.isNullOrBlank() || initialVerseNumber != null
+        val isDeepLink = isOriginChapter && (!initialVerseKey.isNullOrBlank() || initialVerseNumber != null)
         if (!isDeepLink && pagerState.currentPage != pageOffset) {
             pagerState.scrollToPage(pageOffset)
         }
@@ -327,6 +347,10 @@ fun ChapterReaderScreen(
 
     LaunchedEffect(currentChapterKey, verseCount, initialVerseNumber, initialVerseKey, state.hasMore, state.isLoadingMore) {
         if (verseCount == 0 || hasScrolledToInitial) return@LaunchedEffect
+        if (!isOriginChapter) {
+            hasScrolledToInitial = true
+            return@LaunchedEffect
+        }
         val idx = when {
             !initialVerseKey.isNullOrBlank() ->
                 state.verses.indexOfFirst { it.verseKey == initialVerseKey }
