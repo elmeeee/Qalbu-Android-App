@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import app.kamy.saatApp.design.theme.SaatColors
 import kotlin.math.PI
 import kotlin.math.abs
@@ -49,14 +48,9 @@ fun PageCurlPager(
         beyondViewportPageCount = 1,
         key = { it }
     ) { pageIndex ->
-        val pageOffset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
-        val isTurningPage = pageOffset > 0f && pageOffset < 1f
-        val zIndexVal = if (isTurningPage) 2f else 1f
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .zIndex(zIndexVal)
                 .background(SaatColors.ScreenBackground)
                 .graphicsLayer {
                     val offset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
