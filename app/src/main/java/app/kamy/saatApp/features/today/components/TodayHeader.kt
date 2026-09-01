@@ -1,6 +1,5 @@
 package app.kamy.saatApp.features.today.components
 
-import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -32,8 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -130,18 +129,16 @@ fun TodayHeader(
     Box(
         modifier = modifier.fillMaxWidth()
     ) {
-        // Pure iOS Frosted Glass Backdrop Blur (No Bottom Border / Line)
+        // Frosted Glass Backdrop Layer
         if (isScrolled) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .then(
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            Modifier.blur(radius = 24.dp * progress)
-                        } else Modifier
-                    )
+                    .graphicsLayer {
+                        alpha = progress
+                    }
                     .background(
-                        SaatColors.HomeBg.copy(alpha = 0.88f * progress)
+                        SaatColors.HomeBg.copy(alpha = 0.95f)
                     )
             )
         }

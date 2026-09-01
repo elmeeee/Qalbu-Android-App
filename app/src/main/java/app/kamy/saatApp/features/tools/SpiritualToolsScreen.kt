@@ -1,6 +1,5 @@
 package app.kamy.saatApp.features.tools
 
-import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
@@ -29,12 +28,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
@@ -160,21 +157,6 @@ fun SpiritualToolsScreen(
 
     val gridState = rememberLazyGridState()
 
-    val scrollOffset by remember {
-        derivedStateOf {
-            if (gridState.firstVisibleItemIndex == 0) {
-                gridState.firstVisibleItemScrollOffset.toFloat()
-            } else {
-                1000f
-            }
-        }
-    }
-
-    val scrollProgress by remember {
-        derivedStateOf {
-            (scrollOffset / 120f).coerceIn(0f, 1f)
-        }
-    }
 
     Box(
         modifier = Modifier
@@ -190,7 +172,12 @@ fun SpiritualToolsScreen(
                 .fillMaxWidth()
                 .height(230.dp)
                 .graphicsLayer {
-                    translationY = -scrollOffset * 0.45f
+                    val offset = if (gridState.firstVisibleItemIndex == 0) {
+                        gridState.firstVisibleItemScrollOffset.toFloat()
+                    } else {
+                        1000f
+                    }
+                    translationY = -offset * 0.45f
                 }
         )
 
@@ -222,37 +209,37 @@ fun SpiritualToolsScreen(
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
         ) {
-            // 1. Parallax Glass Backdrop Layer (Translates with subtle parallax motion & blurs on scroll)
+            // 1. Parallax Glass Backdrop Layer (Translates with subtle parallax motion & fades on scroll)
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .graphicsLayer {
-                        translationY = (-scrollOffset * 0.15f).coerceIn(-40f, 0f)
+                        val offset = if (gridState.firstVisibleItemIndex == 0) {
+                            gridState.firstVisibleItemScrollOffset.toFloat()
+                        } else {
+                            1000f
+                        }
+                        val progress = (offset / 120f).coerceIn(0f, 1f)
+                        translationY = (-offset * 0.15f).coerceIn(-40f, 0f)
+                        alpha = progress
                     }
-                    .then(
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && scrollProgress > 0.05f) {
-                            Modifier.blur(radius = 16.dp * scrollProgress)
-                        } else Modifier
-                    )
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
-                                Color(0xFFFAF7F2).copy(alpha = 0.88f * scrollProgress),
-                                Color(0xFFFAF7F2).copy(alpha = 0.72f * scrollProgress)
+                                Color(0xFFFAF7F2).copy(alpha = 0.95f),
+                                Color(0xFFFAF7F2).copy(alpha = 0.85f)
                             )
                         )
                     )
                     .drawWithContent {
                         drawContent()
-                        if (scrollProgress > 0.1f) {
-                            // Glass bottom hairline border
-                            drawLine(
-                                color = Color(0xFF124C31).copy(alpha = 0.08f * scrollProgress),
-                                start = Offset(0f, size.height),
-                                end = Offset(size.width, size.height),
-                                strokeWidth = 1.dp.toPx()
-                            )
-                        }
+                        // Glass bottom hairline border
+                        drawLine(
+                            color = Color(0xFF124C31).copy(alpha = 0.08f),
+                            start = Offset(0f, size.height),
+                            end = Offset(size.width, size.height),
+                            strokeWidth = 1.dp.toPx()
+                        )
                     }
             )
 
