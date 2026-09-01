@@ -205,8 +205,18 @@ class ChapterReaderViewModel @Inject constructor(
         // Sync ViewModel with player state to update currently playing verse key UI and auto-advance page.
         viewModelScope.launch {
             audioPlayer.state.collect { audio ->
-                val nextPlayingVerseKey =
-                    if (audio.currentUrl != null) audio.trackSubtitle.ifBlank { null } else null
+                if (audio.currentUrl == null) {
+                    _state.update { it.copy(currentlyPlayingVerseKey = null) }
+                    return@collect
+                }
+                val activeIdx = audio.activeIndex
+                val nextPlayingVerseKey = if (activeIdx != null && activeIdx in audio.queue.indices) {
+                    audio.queue[activeIdx].verseKey
+                } else {
+                    val ch = audio.chapterNumber
+                    val ay = audio.ayahNumber
+                    if (ch != null && ay != null && ay > 0) "$ch:$ay" else null
+                }
                 val currentIndex = _state.value.currentVerseIndex
                 val nextIndex = if (nextPlayingVerseKey != null) {
                     _state.value.verses.indexOfFirst { it.verseKey == nextPlayingVerseKey }

@@ -90,8 +90,11 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                if (mediaItem == null || player.playbackState == Player.STATE_IDLE) return
                 val current = _state.value
+                if (current.currentUrl == null || current.queue.isEmpty()) return
                 val newIndex = player.currentMediaItemIndex
+                if (newIndex < 0 || newIndex >= current.queue.size) return
                 val item = current.queue.getOrNull(newIndex)
                 if (item != null) {
                     val parsed = parseVerseKey(item.verseKey)
@@ -242,9 +245,9 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
     fun pause() = player.pause()
 
     fun stop() {
+        _state.value = AudioPlaybackState(lastError = _state.value.lastError)
         runCatching { player.stop() }
         runCatching { player.clearMediaItems() }
-        _state.value = AudioPlaybackState(lastError = _state.value.lastError)
         runCatching {
             context.stopService(Intent(context, RecitationPlaybackService::class.java))
         }

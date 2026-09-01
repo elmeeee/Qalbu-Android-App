@@ -274,16 +274,6 @@ fun ChapterReaderScreen(
 
     val pagerState = rememberPagerState(initialPage = calculatedInitialPage) { totalPageCount.coerceAtLeast(1) }
 
-    val lastKnownChapter = remember { mutableStateOf(s.chapterNumber) }
-    val lastKnownJuz = remember { mutableStateOf(s.juzNumber) }
-    LaunchedEffect(s.chapterNumber, s.juzNumber) {
-        if (s.chapterNumber != lastKnownChapter.value || s.juzNumber != lastKnownJuz.value) {
-            lastKnownChapter.value = s.chapterNumber
-            lastKnownJuz.value = s.juzNumber
-            pagerState.scrollToPage(pageOffset)
-        }
-    }
-
     val currentVerseIndex = (pagerState.currentPage - pageOffset).coerceIn(0, (verseCount - 1).coerceAtLeast(0))
     val currentVerse = s.verses.getOrNull(currentVerseIndex)
     val surahTitle = when {
@@ -296,11 +286,6 @@ fun ChapterReaderScreen(
         else -> state.chapterDisplayName ?: stringResource(R.string.surah_number, state.chapterNumber)
     }
     val loadErrorDisplay = state.error.rememberErrorDisplay(R.string.verses_load_failed)
-
-    // These long-lived effects below outlive many recompositions, so they must not capture
-    // verseCount/pageOffset/totalPageCount directly: those are 0/0/1 on the first composition
-    // (before verses load) and the captured values would stay stale forever, silently
-    // discarding every page-change and auto-scroll event.
     val latestVerseCount by rememberUpdatedState(verseCount)
     val latestPageOffset by rememberUpdatedState(pageOffset)
     val latestTotalPageCount by rememberUpdatedState(totalPageCount)
@@ -378,10 +363,6 @@ fun ChapterReaderScreen(
         }
     }
 
-    // Safety net for audio-follow scrolling. The events above go through a droppable
-    // tryEmit(buffer = 1, no replay), so a missed emission would leave the pager stuck on an
-    // earlier ayah with no way back in sync. Reconciling against the playing verse key here
-    // means playback position always wins eventually, even if an event was lost.
     val playingVerseKey = state.currentlyPlayingVerseKey
     LaunchedEffect(playingVerseKey, verseCount) {
         if (playingVerseKey.isNullOrBlank() || verseCount == 0) return@LaunchedEffect
