@@ -3,6 +3,7 @@
 package app.kamy.saatApp.features.quran
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -41,6 +42,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import app.kamy.saatApp.features.quran.components.PageCurlPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.key
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -179,11 +181,23 @@ fun ChapterReaderScreen(
     val audioPlaybackState by vm.audioPlaybackState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-    DisposableEffect(Unit) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    DisposableEffect(view) {
         val activity = context as? android.app.Activity
         activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val root = activity?.window?.decorView ?: view
+            root.post {
+                val rect = android.graphics.Rect(0, 0, root.width, root.height)
+                root.systemGestureExclusionRects = listOf(rect)
+            }
+        }
         onDispose {
             activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val root = activity?.window?.decorView ?: view
+                root.systemGestureExclusionRects = emptyList()
+            }
         }
     }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -212,9 +226,23 @@ fun ChapterReaderScreen(
     var hasScrolledToInitial by remember { mutableStateOf(false) }
     var hasAlignedInitialPage by remember { mutableStateOf(false) }
 
+    // Intercept system gesture navigation swipe-back so Quran ayah swiping is never interrupted.
+    // Closes any open dialogs/sheets first, and requires user to use the top app bar back button to exit.
+    BackHandler(enabled = true) {
+        when {
+            showImageShareSheet.value -> showImageShareSheet.value = false
+            activeTajweedType.value != null -> activeTajweedType.value = null
+            verseMenuExpanded.value -> verseMenuExpanded.value = false
+            settingsVisible.value -> settingsVisible.value = false
+            else -> {
+                // Consume gesture so swiping pages does not trigger Android OS back navigation
+            }
+        }
+    }
+
     val s = state
     val verseCount = s.verses.size
-    val showPreviousTransition = verseCount > 0 && (
+    val showPreviousTransition = (
         (s.juzNumber != null && s.juzNumber > 1) ||
         (s.juzNumber == null && s.chapterNumber > 1)
     )
@@ -224,7 +252,11 @@ fun ChapterReaderScreen(
     )
     val pageOffset = if (showPreviousTransition) 1 else 0
     val totalPageCount = verseCount + pageOffset + (if (showNextTransition) 1 else 0)
-    val pagerState = rememberPagerState(initialPage = pageOffset) { totalPageCount.coerceAtLeast(1) }
+
+    val currentChapterKey = "${s.chapterNumber}_${s.juzNumber}"
+    val pagerState = key(currentChapterKey) {
+        rememberPagerState(initialPage = pageOffset) { totalPageCount.coerceAtLeast(1) }
+    }
     val currentVerseIndex = (pagerState.currentPage - pageOffset).coerceIn(0, (verseCount - 1).coerceAtLeast(0))
     val currentVerse = s.verses.getOrNull(currentVerseIndex)
     val surahTitle = when {
@@ -245,6 +277,11 @@ fun ChapterReaderScreen(
     val latestVerseCount by rememberUpdatedState(verseCount)
     val latestPageOffset by rememberUpdatedState(pageOffset)
     val latestTotalPageCount by rememberUpdatedState(totalPageCount)
+
+    LaunchedEffect(currentChapterKey) {
+        hasScrolledToInitial = false
+        hasAlignedInitialPage = false
+    }
 
     LaunchedEffect(pagerState) {
         // verseCount/pageOffset are part of the snapshot so the flow also re-emits once the
@@ -271,7 +308,7 @@ fun ChapterReaderScreen(
             }
     }
 
-    LaunchedEffect(verseCount) {
+    LaunchedEffect(verseCount, pageOffset) {
         if (verseCount == 0) return@LaunchedEffect
         val lastIndex = verseCount - 1 + pageOffset
         if (pagerState.currentPage > lastIndex) {
@@ -279,20 +316,16 @@ fun ChapterReaderScreen(
         }
     }
 
-    // rememberPagerState captured initialPage while verseCount was still 0, i.e. before
-    // pageOffset could become 1. Once the leading transition page appears, page 0 is that
-    // transition page, so align onto the first real ayah instead of opening on it.
-    LaunchedEffect(verseCount, pageOffset) {
-        if (verseCount == 0 || pageOffset == 0 || hasAlignedInitialPage) return@LaunchedEffect
+    LaunchedEffect(currentChapterKey, verseCount, pageOffset) {
+        if (verseCount == 0 || hasAlignedInitialPage) return@LaunchedEffect
         hasAlignedInitialPage = true
         val isDeepLink = !initialVerseKey.isNullOrBlank() || initialVerseNumber != null
-        if (isDeepLink) return@LaunchedEffect
-        if (pagerState.currentPage == 0) {
+        if (!isDeepLink && pagerState.currentPage != pageOffset) {
             pagerState.scrollToPage(pageOffset)
         }
     }
 
-    LaunchedEffect(verseCount, initialVerseNumber, initialVerseKey, state.hasMore, state.isLoadingMore) {
+    LaunchedEffect(currentChapterKey, verseCount, initialVerseNumber, initialVerseKey, state.hasMore, state.isLoadingMore) {
         if (verseCount == 0 || hasScrolledToInitial) return@LaunchedEffect
         val idx = when {
             !initialVerseKey.isNullOrBlank() ->
