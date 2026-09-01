@@ -30,14 +30,6 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
                 if (PrayerTrackerStore.isCompleted(appContext, prayer, dayKey)) return
                 showPrayerReminder(appContext, prayer)
             }
-            PrayerCheckReminderScheduler.KIND_WRAP_UP -> {
-                if (PrayerTrackerStore.completedCount(appContext, dayKey) >=
-                    PrayerTrackerStore.TRACKED_PRAYERS.size
-                ) {
-                    return
-                }
-                showWrapUpReminder(appContext)
-            }
         }
         PrayerCheckReminderScheduler.reschedule(appContext)
     }

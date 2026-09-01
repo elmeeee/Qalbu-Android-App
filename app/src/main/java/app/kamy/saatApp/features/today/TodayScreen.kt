@@ -138,6 +138,11 @@ fun TodayScreen(
         onTanyaSaatOpenChanged(tanyaSaatState.isSheetVisible)
     }
 
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        trackerVm.refresh()
+        onPauseOrDispose {}
+    }
+
     val locationPermissions = rememberMultiplePermissionsState(
         listOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -479,14 +484,14 @@ fun TodayScreen(
                         referenceLabel = todayState.verseReferenceLabel,
                         dailyQuote = todayState.dailyQuote,
                         isAfterIsha = isAfterIsha,
-                        isQuranReadToday = todayState.continueReading != null,
                         onShowToastMessage = { msg ->
                             scope.launch {
                                 snackbarHostState.currentSnackbarData?.dismiss()
                                 snackbarHostState.showSnackbar(msg)
                             }
                         },
-                        onTogglePrayer = trackerVm::togglePrayer,
+                        onToggleDailyPrayer = trackerVm::toggleDailyPrayer,
+                        onToggleOptional = trackerVm::toggleOptionalHabit,
                         onOpenCalendar = onOpenTrackerCalendar,
                         onShareVerse = { todayVm.openAiShare() },
                         modifier = Modifier

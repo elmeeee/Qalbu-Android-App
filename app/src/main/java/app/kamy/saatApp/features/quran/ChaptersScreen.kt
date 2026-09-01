@@ -265,7 +265,7 @@ fun ChaptersScreen(
                         onSearchFocusChange = vm::onSearchActiveChange,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(SaatColors.ScreenBackground)
                             .coachMarkTarget(
                                 coachMarkState,
                                 0,
@@ -556,6 +556,8 @@ fun ChaptersScreen(
     }
 }
 
+private val QuranHeaderTextColor = Color(0xFF124C31)
+
 @Composable
 private fun QuranListHeader(
     searchQuery: String,
@@ -573,103 +575,138 @@ private fun QuranListHeader(
     modifier: Modifier = Modifier,
     onSearchFocusChange: (Boolean) -> Unit = {}
 ) {
-    Column(
-        modifier = modifier
-            .tabContentStatusBarInset()
-            .padding(
-                horizontal = SaatSpacing.screenHorizontal,
-                vertical = SaatSpacing.md
-            )
+    Box(
+        modifier = modifier.fillMaxWidth()
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "✦",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.tertiary,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.width(SaatSpacing.sm))
-            Text(
-                text = stringResource(R.string.quran_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        val defaultSubtitle = when (browseMode) {
-            QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
-            QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
-        }
-        val noMatchesSubtitle = stringResource(R.string.no_matches)
-        val oneSurahSubtitle = stringResource(R.string.one_surah_found)
-        val subtitle = when (resultCount) {
-            null -> defaultSubtitle
-            0 -> noMatchesSubtitle
-            1 -> oneSurahSubtitle
-            else -> stringResource(R.string.search_results_found, resultCount)
-        }
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 18.dp, top = 4.dp)
+        // Full width header background image matching original proportions (synchronously loaded)
+        Image(
+            painter = painterResource(R.drawable.bg_quran_header),
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            alignment = Alignment.TopCenter,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(125.dp)
         )
-        Spacer(Modifier.height(SaatSpacing.sm))
+
+        // Gradient overlay for smooth transition into ScreenBackground
         Box(
             modifier = Modifier
-                .height(2.dp)
-                .width(48.dp)
+                .fillMaxWidth()
+                .height(125.dp)
                 .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.tertiary,
-                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Transparent,
+                            SaatColors.ScreenBackground.copy(alpha = 0.5f),
+                            SaatColors.ScreenBackground
                         )
                     )
                 )
         )
-        Spacer(Modifier.height(SaatSpacing.md))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .tabContentStatusBarInset()
+                .padding(
+                    start = SaatSpacing.screenHorizontal,
+                    end = SaatSpacing.screenHorizontal,
+                    top = 8.dp,
+                    bottom = SaatSpacing.sm
+                )
         ) {
-            QuranChapterSearchBar(
-                query = searchQuery,
-                onQueryChange = onSearchQueryChange,
-                onClear = onClearSearch,
-                onFocusChange = onSearchFocusChange,
-                onDismiss = onClearSearch,
-                enabled = searchEnabled,
-                focusRequester = searchFocusRequester,
-                placeholder = stringResource(R.string.search_quran_placeholder),
-                modifier = Modifier.weight(1f)
-            )
-            if (isSearching && searchEnabled) {
-                Spacer(Modifier.width(8.dp))
-                TextButton(
-                    onClick = onClearSearch,
-                    contentPadding = PaddingValues(horizontal = 12.dp)
+            // Header Title & Subtitle (Centered, matching SpiritualToolsScreen font)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.cancel),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = SaatColors.DeepEmerald,
-                        fontWeight = FontWeight.SemiBold
+                        text = "🍃",
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        text = stringResource(R.string.quran_title),
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = QuranHeaderTextColor
+                        ),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
+                val defaultSubtitle = when (browseMode) {
+                    QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
+                    QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
+                }
+                val noMatchesSubtitle = stringResource(R.string.no_matches)
+                val oneSurahSubtitle = stringResource(R.string.one_surah_found)
+                val subtitle = when (resultCount) {
+                    null -> defaultSubtitle
+                    0 -> noMatchesSubtitle
+                    1 -> oneSurahSubtitle
+                    else -> stringResource(R.string.search_results_found, resultCount)
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Light,
+                        color = QuranHeaderTextColor
+                    ),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
             }
-        }
-        if (showSuggestions && searchEnabled) {
-            Spacer(Modifier.height(SaatSpacing.sm))
-            QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
-        }
-        if (showBrowseTabs) {
-            Spacer(Modifier.height(SaatSpacing.md))
-            QuranBrowseTabs(
-                browseMode = browseMode,
-                onBrowseModeChange = onBrowseModeChange,
-                modifier = Modifier.fillMaxWidth()
-            )
+
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                QuranChapterSearchBar(
+                    query = searchQuery,
+                    onQueryChange = onSearchQueryChange,
+                    onClear = onClearSearch,
+                    onFocusChange = onSearchFocusChange,
+                    onDismiss = onClearSearch,
+                    enabled = searchEnabled,
+                    focusRequester = searchFocusRequester,
+                    placeholder = stringResource(R.string.search_quran_placeholder),
+                    modifier = Modifier.weight(1f)
+                )
+                if (isSearching && searchEnabled) {
+                    Spacer(Modifier.width(8.dp))
+                    TextButton(
+                        onClick = onClearSearch,
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = SaatColors.DeepEmerald,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+            if (showSuggestions && searchEnabled) {
+                Spacer(Modifier.height(SaatSpacing.sm))
+                QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
+            }
+            if (showBrowseTabs) {
+                Spacer(Modifier.height(12.dp))
+                QuranBrowseTabs(
+                    browseMode = browseMode,
+                    onBrowseModeChange = onBrowseModeChange,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }

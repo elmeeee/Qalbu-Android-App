@@ -42,23 +42,7 @@ object PrayerCheckReminderScheduler {
             )
         }
 
-        if (PrayerTrackerStore.completedCount(appContext, today) < PrayerTrackerStore.TRACKED_PRAYERS.size) {
-            val wrapUp = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, WRAP_UP_HOUR)
-                set(Calendar.MINUTE, WRAP_UP_MINUTE)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }
-            if (wrapUp.timeInMillis <= now) return
-            scheduleOne(
-                context = appContext,
-                requestCode = WRAP_UP_REQUEST,
-                fireAt = wrapUp.timeInMillis,
-                prayer = null,
-                dayKey = today,
-                kind = KIND_WRAP_UP
-            )
-        }
+        // Individual prayer check reminders only, wrap-up notification removed.
     }
 
     fun onPrayerMarked(context: Context, prayer: PrayerType) {

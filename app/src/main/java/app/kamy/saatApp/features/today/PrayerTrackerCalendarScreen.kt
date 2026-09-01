@@ -78,6 +78,11 @@ fun PrayerTrackerCalendarScreen(
     val context = LocalContext.current
     val currentLang = remember(context) { AppLanguageStore.from(context).current() }
 
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        vm.refresh()
+        onPauseOrDispose {}
+    }
+
     val monthLabel = remember(state.year, state.month) {
         val symbols = DateFormatSymbols.getInstance(Locale.getDefault())
         val monthName = symbols.months.getOrNull(state.month - 1).orEmpty()

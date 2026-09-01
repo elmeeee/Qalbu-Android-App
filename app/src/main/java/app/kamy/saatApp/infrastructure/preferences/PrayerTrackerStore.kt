@@ -91,8 +91,24 @@ object PrayerTrackerStore {
     fun completedCount(context: Context, dayKey: String = todayKey()): Int =
         TRACKED_PRAYERS.count { isCompleted(context, it, dayKey) }
 
+    fun isDailyPrayerCompleted(context: Context, dayKey: String = todayKey()): Boolean {
+        return isOptionalCompleted(context, OptionalWorshipHabit.QIYAMUL_LAIL, dayKey) ||
+            completedCount(context, dayKey) >= TRACKED_PRAYERS.size
+    }
+
+    fun setDailyPrayerCompleted(
+        context: Context,
+        completed: Boolean,
+        dayKey: String = todayKey()
+    ) {
+        setOptionalCompleted(context, OptionalWorshipHabit.QIYAMUL_LAIL, completed, dayKey)
+        TRACKED_PRAYERS.forEach { prayer ->
+            setCompleted(context, prayer, completed, dayKey)
+        }
+    }
+
     fun dayProgress(context: Context, dayKey: String = todayKey()): PrayerDayProgress {
-        val isPrayerDone = completedCount(context, dayKey) >= TRACKED_PRAYERS.size || isOptionalCompleted(context, OptionalWorshipHabit.QIYAMUL_LAIL, dayKey)
+        val isPrayerDone = isDailyPrayerCompleted(context, dayKey)
         val isQuranDone = isOptionalCompleted(context, OptionalWorshipHabit.READ_QURAN, dayKey)
         val isSunnahDone = isOptionalCompleted(context, OptionalWorshipHabit.DHUHA, dayKey) || isOptionalCompleted(context, OptionalWorshipHabit.RAWATIB, dayKey)
         val isDhikrDone = isOptionalCompleted(context, OptionalWorshipHabit.DHIKR_MORNING, dayKey) || isOptionalCompleted(context, OptionalWorshipHabit.DHIKR_EVENING, dayKey)

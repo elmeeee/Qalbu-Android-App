@@ -110,6 +110,13 @@ class PrayerTrackerViewModel @Inject constructor(
         refresh()
     }
 
+    fun toggleDailyPrayer() {
+        val today = PrayerTrackerStore.todayKey()
+        val current = PrayerTrackerStore.isDailyPrayerCompleted(appContext, today)
+        PrayerTrackerStore.setDailyPrayerCompleted(appContext, !current, today)
+        refresh()
+    }
+
     fun toggleOptionalHabit(habit: OptionalWorshipHabit) {
         PrayerTrackerStore.toggleOptional(appContext, habit)
         refresh()
