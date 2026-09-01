@@ -90,18 +90,7 @@ fun FloatingAudioBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 5.dp, end = 8.dp, top = 4.dp, bottom = 4.dp)
-                    .then(
-                        if (onOpenPlayback != null) {
-                            Modifier.clickable(
-                                interactionSource = openPlaybackInteractionSource,
-                                indication = null,
-                                onClick = onOpenPlayback
-                            )
-                        } else {
-                            Modifier
-                        }
-                    ),
+                    .padding(start = 5.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(7.dp)
             ) {
@@ -132,7 +121,18 @@ fun FloatingAudioBar(
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 2.dp),
+                        .padding(end = 2.dp)
+                        .then(
+                            if (onOpenPlayback != null) {
+                                Modifier.clickable(
+                                    interactionSource = openPlaybackInteractionSource,
+                                    indication = null,
+                                    onClick = onOpenPlayback
+                                )
+                            } else {
+                                Modifier
+                            }
+                        ),
                     verticalArrangement = Arrangement.Center
                 ) {
                     val surahTitle = state.trackTitle.ifBlank { stringResource(R.string.playing) }

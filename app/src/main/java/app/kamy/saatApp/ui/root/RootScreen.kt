@@ -367,6 +367,7 @@ fun RootScreen(
                 onToggle = { audioPlayer.toggle() },
                 onDismiss = { audioPlayer.stop() },
                 onOpenPlayback = {
+                    if (isReaderRoute) return@FloatingAudioBar
                     val chapter = audioState.chapterNumber ?: return@FloatingAudioBar
                     val ayah = audioState.ayahNumber ?: -1
                     val readerRoute = "quran/reader/$chapter?ayah=$ayah"
@@ -375,7 +376,7 @@ fun RootScreen(
                             launchSingleTop = true
                         }
                     }
-                }.takeIf { audioState.hasReaderNavigation },
+                }.takeIf { audioState.hasReaderNavigation && !isReaderRoute },
                 reserveTrailingSpace = if (isReaderRoute) 52.dp else 0.dp,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)

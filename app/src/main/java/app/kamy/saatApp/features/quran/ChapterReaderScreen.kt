@@ -223,8 +223,6 @@ fun ChapterReaderScreen(
     val verseMenuExpanded = remember { mutableStateOf(false) }
     val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
     val showImageShareSheet = remember { mutableStateOf(false) }
-    var hasScrolledToInitial by remember { mutableStateOf(false) }
-    var hasAlignedInitialPage by remember { mutableStateOf(false) }
 
     // Intercept system gesture navigation swipe-back so Quran ayah swiping is never interrupted.
     // Closes any open dialogs/sheets first, and requires user to use the top app bar back button to exit.
@@ -274,9 +272,18 @@ fun ChapterReaderScreen(
     }
     val calculatedInitialPage = pageOffset + defaultInitialVerseIdx
 
-    val pagerState = key(currentChapterKey) {
-        rememberPagerState(initialPage = calculatedInitialPage) { totalPageCount.coerceAtLeast(1) }
+    val pagerState = rememberPagerState(initialPage = calculatedInitialPage) { totalPageCount.coerceAtLeast(1) }
+
+    val lastKnownChapter = remember { mutableStateOf(s.chapterNumber) }
+    val lastKnownJuz = remember { mutableStateOf(s.juzNumber) }
+    LaunchedEffect(s.chapterNumber, s.juzNumber) {
+        if (s.chapterNumber != lastKnownChapter.value || s.juzNumber != lastKnownJuz.value) {
+            lastKnownChapter.value = s.chapterNumber
+            lastKnownJuz.value = s.juzNumber
+            pagerState.scrollToPage(pageOffset)
+        }
     }
+
     val currentVerseIndex = (pagerState.currentPage - pageOffset).coerceIn(0, (verseCount - 1).coerceAtLeast(0))
     val currentVerse = s.verses.getOrNull(currentVerseIndex)
     val surahTitle = when {
@@ -298,15 +305,7 @@ fun ChapterReaderScreen(
     val latestPageOffset by rememberUpdatedState(pageOffset)
     val latestTotalPageCount by rememberUpdatedState(totalPageCount)
 
-    LaunchedEffect(currentChapterKey) {
-        hasScrolledToInitial = false
-        hasAlignedInitialPage = false
-    }
-
     LaunchedEffect(pagerState) {
-        // verseCount/pageOffset are part of the snapshot so the flow also re-emits once the
-        // verses finish loading. Without that, staying on the very first page produces no
-        // further emission and the opening ayah is never recorded as last read.
         snapshotFlow {
             ReaderPageSnapshot(
                 page = pagerState.currentPage,
@@ -333,36 +332,6 @@ fun ChapterReaderScreen(
         val lastIndex = verseCount - 1 + pageOffset
         if (pagerState.currentPage > lastIndex) {
             pagerState.scrollToPage(lastIndex)
-        }
-    }
-
-    // Clean initial page alignment is already guaranteed at frame 0 by rememberPagerState(initialPage = calculatedInitialPage).
-
-    LaunchedEffect(currentChapterKey, verseCount, initialVerseNumber, initialVerseKey, state.hasMore, state.isLoadingMore) {
-        if (verseCount == 0 || hasScrolledToInitial) return@LaunchedEffect
-        if (!isOriginChapter) {
-            hasScrolledToInitial = true
-            return@LaunchedEffect
-        }
-        val idx = when {
-            !initialVerseKey.isNullOrBlank() ->
-                state.verses.indexOfFirst { it.verseKey == initialVerseKey }
-            initialVerseNumber != null ->
-                state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
-            else -> -1
-        }
-        if (idx >= 0) {
-            val targetPage = idx + pageOffset
-            if (pagerState.currentPage != targetPage) {
-                pagerState.scrollToPage(targetPage)
-            }
-            hasScrolledToInitial = true
-        } else if (initialVerseKey.isNullOrBlank() && initialVerseNumber == null) {
-            hasScrolledToInitial = true
-        } else if (state.hasMore && !state.isLoadingMore) {
-            vm.loadMoreIfNeeded(state.verses.size - 1)
-        } else if (!state.hasMore) {
-            hasScrolledToInitial = true
         }
     }
 
