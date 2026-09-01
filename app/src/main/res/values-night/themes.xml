@@ -6,9 +6,9 @@
 <!-- Splash screen: gradient bg with centered logo icon.
          Same on dark mode; logo uses its light backdrop. -->
      <style name="Theme.Saat.Splash" parent="Theme.SplashScreen">
-         <item name="windowSplashScreenBackground">@drawable/splash_gradient_background</item>
+         <item name="windowSplashScreenBackground">@color/splash_background</item>
          <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wrapper</item>
-         <item name="android:windowBackground">@drawable/splash_gradient_background</item>
+         <item name="android:windowBackground">@color/splash_background</item>
          <item name="postSplashScreenTheme">@style/Theme.Saat</item>
      </style>
 </resources>

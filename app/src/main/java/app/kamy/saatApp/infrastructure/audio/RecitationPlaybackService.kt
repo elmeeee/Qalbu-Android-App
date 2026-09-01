@@ -128,7 +128,7 @@ class RecitationPlaybackService : MediaSessionService() {
         }
 
         return NotificationCompat.Builder(this, NotificationChannels.MEDIA_PLAYBACK)
-            .setSmallIcon(R.drawable.ic_stat_notification)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(text)
             .setContentIntent(

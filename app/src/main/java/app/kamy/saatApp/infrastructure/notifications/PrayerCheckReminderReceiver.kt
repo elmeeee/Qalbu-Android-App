@@ -62,7 +62,7 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
         val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
 
         val notification = NotificationCompat.Builder(context, NotificationChannels.PRAYER_TRACKER)
-            .setSmallIcon(R.drawable.ic_stat_notification)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
@@ -95,7 +95,7 @@ class PrayerCheckReminderReceiver : BroadcastReceiver() {
         val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
 
         val notification = NotificationCompat.Builder(context, NotificationChannels.PRAYER_TRACKER)
-            .setSmallIcon(R.drawable.ic_stat_notification)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))

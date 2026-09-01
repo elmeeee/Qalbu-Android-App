@@ -341,7 +341,7 @@ class AdhanPlaybackService : Service() {
 
     private fun buildForegroundNotification(title: String, body: String, prayerName: String? = null) =
         NotificationCompat.Builder(this, NotificationChannels.ADHAN_PLAYBACK)
-            .setSmallIcon(R.drawable.ic_stat_notification)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title.ifBlank { getString(R.string.adhan_playback_title) })
             .setContentText(body.ifBlank { getString(R.string.adhan_playback_body) })
             .setContentIntent(

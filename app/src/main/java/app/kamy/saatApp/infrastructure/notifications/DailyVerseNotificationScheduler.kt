@@ -140,7 +140,7 @@ object DailyVerseNotificationScheduler {
         val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
         val vibrationPattern = longArrayOf(0, 400, 200, 400)
         val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
-            .setSmallIcon(R.drawable.ic_stat_notification)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(localContext.getString(R.string.daily_verse_notif_title))
             .setContentText(displayBody)
             .setStyle(NotificationCompat.BigTextStyle().bigText(displayBody))
