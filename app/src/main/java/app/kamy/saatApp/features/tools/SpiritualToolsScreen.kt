@@ -285,35 +285,14 @@ private fun SpiritualToolGridCard(
     val cardShape = RoundedCornerShape(16.dp)
 
     Surface(
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(156f / 169f)
-            .shadow(
-                elevation = 4.dp,
-                shape = cardShape,
-                ambientColor = Color(0x30124C31),
-                spotColor = Color(0x20000000)
-            )
-            .border(
-                border = BorderStroke(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.9f),
-                            Color(0xFFE4DDD0)
-                        )
-                    )
-                ),
-                shape = cardShape
-            )
-            .clip(cardShape)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = ripple(color = SpiritualTextColor.copy(alpha = 0.1f)),
-                onClick = onClick
-            ),
+            .aspectRatio(156f / 169f),
         shape = cardShape,
-        color = SpiritualCardColor
+        color = SpiritualCardColor,
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, Color(0xFFE4DDD0))
     ) {
         Column(
             modifier = Modifier

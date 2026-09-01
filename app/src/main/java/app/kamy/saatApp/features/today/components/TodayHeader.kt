@@ -54,7 +54,7 @@ fun TodayHeader(
     locationStatus: String? = null,
     hijriLabel: String?,
     gregorianLabel: String?,
-    scrollProgress: Float = 0f,
+    isScrolled: Boolean = false,
     isDarkBackground: Boolean = false,
     onLocationClick: () -> Unit = {},
     onCalendarClick: () -> Unit = {},
@@ -103,28 +103,18 @@ fun TodayHeader(
            .replace("Taman", "Tmn", ignoreCase = true)
     }
 
-    val progress = scrollProgress.coerceIn(0f, 1f)
-
-    val headerBgColor = lerp(Color.Transparent, SaatColors.HomeBg, progress)
-
     val initialTextColor = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
-    val targetTextColor = SaatColors.HomeDarkGreen
-    val greetingColor = lerp(initialTextColor, targetTextColor, progress)
-    val dateTextColor = lerp(initialTextColor, targetTextColor, progress)
+    val greetingColor = if (isScrolled) SaatColors.HomeDarkGreen else initialTextColor
+    val dateTextColor = if (isScrolled) SaatColors.HomeDarkGreen else initialTextColor
 
     val initialBadgeBg = if (isDarkBackground) Color.White.copy(alpha = 0.22f) else SaatColors.HomeDarkGreen.copy(alpha = 0.10f)
-    val targetBadgeBg = SaatColors.HomeDarkGreen.copy(alpha = 0.15f)
-    val badgeBgColor = lerp(initialBadgeBg, targetBadgeBg, progress)
+    val badgeBgColor = if (isScrolled) SaatColors.HomeDarkGreen.copy(alpha = 0.12f) else initialBadgeBg
 
     val initialBadgeBorder = if (isDarkBackground) Color.White.copy(alpha = 0.45f) else SaatColors.HomeDarkGreen.copy(alpha = 0.25f)
-    val targetBadgeBorder = SaatColors.HomeDarkGreen.copy(alpha = 0.35f)
-    val badgeBorderColor = lerp(initialBadgeBorder, targetBadgeBorder, progress)
+    val badgeBorderColor = if (isScrolled) SaatColors.HomeDarkGreen.copy(alpha = 0.25f) else initialBadgeBorder
 
     val initialBadgeContent = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
-    val targetBadgeContent = SaatColors.HomeDarkGreen
-    val badgeContentColor = lerp(initialBadgeContent, targetBadgeContent, progress)
-
-    val isScrolled = progress > 0.02f
+    val badgeContentColor = if (isScrolled) SaatColors.HomeDarkGreen else initialBadgeContent
 
     Box(
         modifier = modifier.fillMaxWidth()
@@ -134,18 +124,13 @@ fun TodayHeader(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .graphicsLayer {
-                        alpha = progress
-                    }
-                    .background(
-                        SaatColors.HomeBg.copy(alpha = 0.95f)
-                    )
+                    .background(SaatColors.HomeBg.copy(alpha = 0.96f))
             )
         }
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = if (isScrolled) Color.Transparent else headerBgColor,
+            color = Color.Transparent,
             shadowElevation = 0.dp
         ) {
             Column(

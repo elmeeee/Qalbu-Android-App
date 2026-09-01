@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -166,8 +167,8 @@ fun OnboardingScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Full screen device-fitted background illustration (FillBounds prevents cropping)
-        Image(
-            painter = painterResource(id = bgDrawable),
+        AsyncImage(
+            model = bgDrawable,
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillBounds
@@ -231,11 +232,8 @@ fun OnboardingScreen(
                                 }
                             }
                             OnboardingStep.PRAYER_NOTIFICATIONS -> {
-                                scope.launch {
-                                    vm.completeOnboarding()
-                                    delay(200)
-                                    onFinished()
-                                }
+                                vm.completeOnboarding()
+                                onFinished()
                             }
                         }
                     },

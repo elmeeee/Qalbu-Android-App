@@ -896,30 +896,15 @@ private fun ChapterRow(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .shadow(
-                elevation = 3.dp,
-                shape = RoundedCornerShape(20.dp),
-                ambientColor = Color.Black.copy(alpha = 0.04f),
-                spotColor = Color.Black.copy(alpha = 0.03f)
-            ),
-        shape = RoundedCornerShape(20.dp),
-        color = Color.White.copy(alpha = 0.85f),
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.95f))
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, Color(0xFFECE7DE))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            Color.White.copy(alpha = 0.90f),
-                            Color.White.copy(alpha = 0.65f)
-                        )
-                    )
-                )
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1021,30 +1006,15 @@ private fun JuzRow(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .shadow(
-                elevation = 3.dp,
-                shape = RoundedCornerShape(20.dp),
-                ambientColor = Color.Black.copy(alpha = 0.04f),
-                spotColor = Color.Black.copy(alpha = 0.03f)
-            ),
-        shape = RoundedCornerShape(20.dp),
-        color = Color.White.copy(alpha = 0.85f),
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.95f))
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, Color(0xFFECE7DE))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            Color.White.copy(alpha = 0.90f),
-                            Color.White.copy(alpha = 0.65f)
-                        )
-                    )
-                )
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

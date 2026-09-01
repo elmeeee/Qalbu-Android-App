@@ -65,28 +65,21 @@ fun FloatingTabBar(
             .navigationBarsPadding()
             .padding(horizontal = 24.dp, vertical = 10.dp)
             .shadow(
-                elevation = 14.dp,
+                elevation = 16.dp,
                 shape = CircleShape,
-                ambientColor = Color.Black.copy(alpha = 0.12f),
+                ambientColor = Color.Black.copy(alpha = 0.10f),
                 spotColor = Color.Black.copy(alpha = 0.08f)
             ),
         shape = CircleShape,
-        color = Color.White.copy(alpha = 0.68f),
-        border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.85f)),
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(0xFFECE7DE)),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    Brush.linearGradient(
-                        listOf(
-                            Color.White.copy(alpha = 0.40f),
-                            Color.White.copy(alpha = 0.15f)
-                        )
-                    )
-                )
+                .background(Color.White)
                 .padding(horizontal = 6.dp, vertical = 6.dp)
         ) {
             val totalWidthDp = maxWidth
@@ -106,17 +99,10 @@ fun FloatingTabBar(
                     .height(52.dp)
                     .padding(horizontal = 2.dp)
                     .clip(RoundedCornerShape(26.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                SaatColors.DeepEmerald.copy(alpha = 0.18f),
-                                SaatColors.DeepEmerald.copy(alpha = 0.10f)
-                            )
-                        )
-                    )
+                    .background(SaatColors.DeepEmerald.copy(alpha = 0.10f))
                     .border(
                         1.dp,
-                        SaatColors.DeepEmerald.copy(alpha = 0.22f),
+                        SaatColors.DeepEmerald.copy(alpha = 0.20f),
                         RoundedCornerShape(26.dp)
                     )
             )

@@ -298,20 +298,9 @@ fun TodayScreen(
 
 
     val listState = rememberLazyListState()
-    val scrollProgress by remember {
+    val isScrolled by remember {
         derivedStateOf {
-            if (listState.firstVisibleItemIndex > 0) 1f
-            else (listState.firstVisibleItemScrollOffset / 160f).coerceIn(0f, 1f)
-        }
-    }
-
-    val scrollOffset by remember {
-        derivedStateOf {
-            if (listState.firstVisibleItemIndex == 0) {
-                listState.firstVisibleItemScrollOffset.toFloat()
-            } else {
-                1000f
-            }
+            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 40
         }
     }
 
@@ -319,7 +308,7 @@ fun TodayScreen(
     val cardDrawable = getPrayerCardDrawable(targetPrayer)
 
     val view = androidx.compose.ui.platform.LocalView.current
-    val isHeaderLightBackground = scrollProgress >= 0.5f || cardDrawable == R.drawable.day
+    val isHeaderLightBackground = isScrolled || cardDrawable == R.drawable.day
 
     androidx.compose.runtime.SideEffect {
         val window = (view.context as? android.app.Activity)?.window
@@ -340,40 +329,45 @@ fun TodayScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(SaatColors.HomeBg)) {
-        if (scrollProgress < 1f) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(393f / 238f)
+                .graphicsLayer {
+                    val progress = if (listState.firstVisibleItemIndex > 0) 1f
+                    else (listState.firstVisibleItemScrollOffset / 160f).coerceIn(0f, 1f)
+                    val offset = if (listState.firstVisibleItemIndex == 0) {
+                        listState.firstVisibleItemScrollOffset.toFloat()
+                    } else {
+                        1000f
+                    }
+                    alpha = (1f - progress).coerceIn(0f, 1f)
+                    translationY = -offset * 0.45f
+                }
+        ) {
+            AsyncImage(
+                model = cardDrawable,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // Subtle bottom smooth gradient fade into app background
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(393f / 238f)
-                    .graphicsLayer {
-                        alpha = (1f - scrollProgress).coerceIn(0f, 1f)
-                        translationY = -scrollOffset * 0.45f
-                    }
-            ) {
-                AsyncImage(
-                    model = cardDrawable,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                // Subtle bottom smooth gradient fade into app background
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Transparent,
-                                    Color.Transparent,
-                                    SaatColors.HomeBg.copy(alpha = 0.30f),
-                                    SaatColors.HomeBg
-                                )
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Transparent,
+                                Color.Transparent,
+                                SaatColors.HomeBg.copy(alpha = 0.30f),
+                                SaatColors.HomeBg
                             )
                         )
-                )
-            }
+                    )
+            )
         }
 
         SaatPullToRefresh(
@@ -419,7 +413,7 @@ fun TodayScreen(
                         },
                         hijriLabel = prayerState.hijriLabel,
                         gregorianLabel = prayerState.gregorianLabel,
-                        scrollProgress = scrollProgress,
+                        isScrolled = isScrolled,
                         isDarkBackground = cardDrawable != R.drawable.day,
                         onLocationClick = prayerVm::openLocationSheet,
                         onCalendarClick = onOpenPrayerCalendar,
