@@ -7,6 +7,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -22,14 +23,16 @@ import kotlin.math.abs
 import kotlin.math.sin
 
 /**
- * A realistic Quran book page-turn pager.
+ * High-performance, realistic 3D Quran book page-turn pager.
  *
- * Features:
- * 1. 3D perspective with spine-hinged rotation along the left binding.
+ * Implements a physical paper page turn with:
+ * 1. 3D perspective and spine-hinged rotation along the left binding ($0^\circ \to -180^\circ$).
  * 2. Stationary revealed page underneath (neutralizing horizontal sliding).
- * 3. Soft, warm book shading (crease shadow, gutter cast shadow, edge bevel) with NO white glare/artifacts.
- * 4. System gesture exclusion to prevent Android OS back-swipe gesture from interfering with Quran page turns.
- * 5. 60/120 FPS draw-phase performance without frame allocations or recompositions.
+ * 3. Front-face lifting & dynamic curl lighting ($0^\circ \to -90^\circ$).
+ * 4. Back-face paper rendering with spine crease ($ -90^\circ \to -180^\circ$).
+ * 5. Dynamic gutter cast shadow on the revealed page.
+ * 6. Zero-allocation draw pass for 60/120 FPS buttery smooth performance.
+ * 7. System gesture exclusion to prevent OS back-swipe interference.
  */
 @Composable
 fun PageCurlPager(
@@ -38,6 +41,32 @@ fun PageCurlPager(
     userScrollEnabled: Boolean = true,
     content: @Composable (pageIndex: Int) -> Unit
 ) {
+    // Pre-create reusable brushes once to avoid allocations on draw passes
+    val spineShadowBrush = remember {
+        Brush.horizontalGradient(
+            listOf(Color.Black.copy(alpha = 0.22f), Color.Transparent)
+        )
+    }
+    val gutterCastBrush = remember {
+        Brush.horizontalGradient(
+            listOf(
+                Color.Black.copy(alpha = 0.32f),
+                Color.Black.copy(alpha = 0.10f),
+                Color.Transparent
+            )
+        )
+    }
+    val permanentSpineBrush = remember {
+        Brush.horizontalGradient(
+            listOf(Color.Black.copy(alpha = 0.05f), Color.Transparent)
+        )
+    }
+    val backSpineBrush = remember {
+        Brush.horizontalGradient(
+            listOf(Color.Transparent, Color.Black.copy(alpha = 0.22f))
+        )
+    }
+
     HorizontalPager(
         state = state,
         modifier = modifier
@@ -60,21 +89,16 @@ fun PageCurlPager(
                         return@graphicsLayer
                     }
 
-                    cameraDistance = 28f * density
+                    cameraDistance = 32f * density
 
                     when {
                         // Turning page (folding forward around the spine hinge at the left)
                         offset > 0f && offset < 1f -> {
                             translationX = offset * size.width
                             transformOrigin = TransformOrigin(0f, 0.5f)
-                            // 3D rotation around the left spine hinge
-                            rotationY = -120f * offset
-                            // Smoothly dissolve as the page opens wide to reveal the next ayah underneath
-                            alpha = if (offset > 0.38f) {
-                                (1f - (offset - 0.38f) * 1.6f).coerceIn(0f, 1f)
-                            } else {
-                                1f
-                            }
+                            // Full physical 3D rotation: 0 deg to -180 deg
+                            rotationY = -180f * offset
+                            alpha = 1f
                         }
                         // Stationary page underneath being revealed
                         offset < 0f && offset > -1f -> {
@@ -94,8 +118,6 @@ fun PageCurlPager(
                     }
                 }
                 .drawWithContent {
-                    drawContent()
-
                     val offset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
                     val w = size.width
                     val h = size.height
@@ -105,73 +127,100 @@ fun PageCurlPager(
                     }
 
                     when {
-                        // Page turning over (offset in 0f..1f)
+                        // Turning page (offset in 0f..1f)
                         offset > 0f && offset < 1f -> {
                             val p = offset
-                            val sinP = sin(p * PI).toFloat()
+                            if (p <= 0.5f) {
+                                // Front face of turning page (0 deg -> -90 deg)
+                                drawContent()
 
-                            // 1. Spine Crease Shadow (near left hinge x = 0)
-                            val spineShadowWidth = w * 0.16f
-                            val spineAlpha = 0.20f * sinP
-                            if (spineAlpha > 0.005f) {
+                                val sinP = sin(p * PI).toFloat()
+
+                                // 1. Spine Crease Shadow (near left hinge x = 0)
+                                val spineWidth = w * 0.16f
                                 drawRect(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            Color.Black.copy(alpha = spineAlpha),
-                                            Color.Transparent
-                                        ),
-                                        startX = 0f,
-                                        endX = spineShadowWidth
-                                    ),
-                                    size = Size(spineShadowWidth, h)
+                                    brush = spineShadowBrush,
+                                    topLeft = Offset.Zero,
+                                    size = Size(spineWidth, h),
+                                    alpha = sinP
                                 )
-                            }
 
-                            // 2. Ambient Paper Tilt Darkening (soft warm shading as paper angles away from light)
-                            val tiltAlpha = 0.14f * sinP
-                            if (tiltAlpha > 0.005f) {
+                                // 2. Ambient Tilt Darkening (as the paper tilts away from direct light)
+                                val tiltAlpha = 0.18f * sinP
+                                if (tiltAlpha > 0.005f) {
+                                    drawRect(
+                                        color = Color.Black.copy(alpha = tiltAlpha),
+                                        size = size
+                                    )
+                                }
+
+                                // 3. Tactile Right Edge Bevel (paper thickness)
+                                val edgeAlpha = 0.16f * (1f - p * 2f)
+                                if (edgeAlpha > 0.01f) {
+                                    drawRect(
+                                        color = Color.Black.copy(alpha = edgeAlpha),
+                                        topLeft = Offset(w - 2.dp.toPx(), 0f),
+                                        size = Size(2.dp.toPx(), h)
+                                    )
+                                }
+                            } else {
+                                // Back face of turning page (-90 deg -> -180 deg)
+                                // Draw pristine paper background to simulate the physical back-side
+                                val backP = (p - 0.5f) * 2f // 0 to 1
+
                                 drawRect(
-                                    color = Color.Black.copy(alpha = tiltAlpha),
+                                    color = SaatColors.ScreenBackground,
                                     size = size
                                 )
-                            }
 
-                            // 3. Right Paper Edge Bevel (tactile paper thickness)
-                            val edgeAlpha = 0.14f * (1f - p)
-                            if (edgeAlpha > 0.01f) {
+                                // Spine crease shadow on the right side of the back-face
+                                val backSpineWidth = w * 0.18f
+                                val backSpineAlpha = 1f - backP
                                 drawRect(
-                                    color = Color.Black.copy(alpha = edgeAlpha),
-                                    topLeft = Offset(w - 2.dp.toPx(), 0f),
-                                    size = Size(2.dp.toPx(), h)
+                                    brush = backSpineBrush,
+                                    topLeft = Offset(w - backSpineWidth, 0f),
+                                    size = Size(backSpineWidth, h),
+                                    alpha = backSpineAlpha
                                 )
+
+                                // Ambient shadow as the back face flattens onto the left
+                                val backAmbient = 0.15f * (1f - backP)
+                                if (backAmbient > 0.005f) {
+                                    drawRect(
+                                        color = Color.Black.copy(alpha = backAmbient),
+                                        size = size
+                                    )
+                                }
+
+                                // Left edge subtle paper stroke
+                                if (backP > 0.1f) {
+                                    drawRect(
+                                        color = Color.Black.copy(alpha = 0.12f * backP),
+                                        topLeft = Offset.Zero,
+                                        size = Size(2.dp.toPx(), h)
+                                    )
+                                }
                             }
                         }
 
                         // Stationary under-page (offset in -1f..0f)
                         offset < 0f && offset > -1f -> {
+                            drawContent()
+
                             val revealProgress = 1f + offset // 0 = fully covered, 1 = fully open
                             val unrevealAmount = 1f - revealProgress // 1 = covered, 0 = open
 
                             // 1. Spine Gutter Cast Shadow (cast by the lifting page onto the under-page)
-                            val castShadowWidth = w * (0.20f + 0.25f * unrevealAmount)
-                            val castShadowAlpha = 0.32f * unrevealAmount
-                            if (castShadowAlpha > 0.005f) {
-                                drawRect(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            Color.Black.copy(alpha = castShadowAlpha),
-                                            Color.Black.copy(alpha = castShadowAlpha * 0.3f),
-                                            Color.Transparent
-                                        ),
-                                        startX = 0f,
-                                        endX = castShadowWidth
-                                    ),
-                                    size = Size(castShadowWidth, h)
-                                )
-                            }
+                            val castShadowWidth = w * (0.22f + 0.25f * unrevealAmount)
+                            drawRect(
+                                brush = gutterCastBrush,
+                                topLeft = Offset.Zero,
+                                size = Size(castShadowWidth, h),
+                                alpha = unrevealAmount
+                            )
 
-                            // 2. Ambient occlusion across under-page while covered
-                            val ambientCoverAlpha = 0.10f * unrevealAmount
+                            // 2. Ambient contact shadow across under-page while partially covered
+                            val ambientCoverAlpha = 0.12f * unrevealAmount
                             if (ambientCoverAlpha > 0.005f) {
                                 drawRect(
                                     color = Color.Black.copy(alpha = ambientCoverAlpha),
@@ -182,17 +231,13 @@ fun PageCurlPager(
 
                         // Resting page
                         else -> {
-                            // Subtle permanent spine depth on the left edge (feeling of a bound book)
+                            drawContent()
+
+                            // Subtle permanent spine depth on the left edge (bound book feel)
                             val permanentSpineWidth = 6.dp.toPx()
                             drawRect(
-                                brush = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        Color.Black.copy(alpha = 0.04f),
-                                        Color.Transparent
-                                    ),
-                                    startX = 0f,
-                                    endX = permanentSpineWidth
-                                ),
+                                brush = permanentSpineBrush,
+                                topLeft = Offset.Zero,
                                 size = Size(permanentSpineWidth, h)
                             )
                         }

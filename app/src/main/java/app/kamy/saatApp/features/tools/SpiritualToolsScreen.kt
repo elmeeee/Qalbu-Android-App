@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -164,8 +165,8 @@ fun SpiritualToolsScreen(
             .background(Color(0xFFFAF7F2))
     ) {
         // Full width Parallax Header Background Image (Edge to Edge, 0.45x Parallax Speed)
-        Image(
-            painter = painterResource(R.drawable.bg_worship_header),
+        AsyncImage(
+            model = R.drawable.bg_worship_header,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -321,8 +322,8 @@ private fun SpiritualToolGridCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                painter = painterResource(tool.iconRes),
+            AsyncImage(
+                model = tool.iconRes,
                 contentDescription = null,
                 modifier = Modifier
                     .size(width = 88.dp, height = 94.dp)

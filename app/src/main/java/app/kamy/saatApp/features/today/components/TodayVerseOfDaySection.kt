@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.foundation.Image
+import coil.compose.AsyncImage
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -98,8 +99,8 @@ fun TodayVerseOfDaySection(
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 // Mascot illustration
-                Image(
-                    painter = painterResource(R.drawable.mascot_quran_qoute),
+                AsyncImage(
+                    model = R.drawable.mascot_quran_qoute,
                     contentDescription = null,
                     modifier = Modifier.size(90.dp)
                 )

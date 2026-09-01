@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.lazy.LazyColumn
+import coil.compose.AsyncImage
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
@@ -349,8 +350,8 @@ fun TodayScreen(
                         translationY = -scrollOffset * 0.45f
                     }
             ) {
-                Image(
-                    painter = painterResource(cardDrawable),
+                AsyncImage(
+                    model = cardDrawable,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
@@ -722,8 +723,8 @@ private fun TodayContinueReadingCard(
                 }
             }
 
-            Image(
-                painter = painterResource(R.drawable.last_read),
+            AsyncImage(
+                model = R.drawable.last_read,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier

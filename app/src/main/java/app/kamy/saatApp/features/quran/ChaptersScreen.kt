@@ -13,6 +13,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
@@ -867,8 +868,8 @@ private fun ContinueReadingCard(
                 }
             }
 
-            Image(
-                painter = painterResource(R.drawable.last_read),
+            AsyncImage(
+                model = R.drawable.last_read,
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -990,8 +991,8 @@ private fun ChapterRow(
                     .border(1.dp, Color.White.copy(alpha = 0.8f), RoundedCornerShape(14.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(if (chapter.isMeccan) R.drawable.mecca else R.drawable.medina),
+                AsyncImage(
+                    model = if (chapter.isMeccan) R.drawable.mecca else R.drawable.medina,
                     contentDescription = null,
                     modifier = Modifier.size(42.dp),
                     contentScale = ContentScale.Fit
