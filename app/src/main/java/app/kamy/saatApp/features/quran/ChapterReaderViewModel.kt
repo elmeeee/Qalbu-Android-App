@@ -202,18 +202,26 @@ class ChapterReaderViewModel @Inject constructor(
             }
         }
 
-        // Sync ViewModel with player state to update currently playing verse key UI.
+        // Sync ViewModel with player state to update currently playing verse key UI and auto-advance page.
         viewModelScope.launch {
             audioPlayer.state.collect { audio ->
                 val nextPlayingVerseKey =
                     if (audio.currentUrl != null) audio.trackSubtitle.ifBlank { null } else null
-                _state.update { it.copy(currentlyPlayingVerseKey = nextPlayingVerseKey) }
+                val currentIndex = _state.value.currentVerseIndex
+                val nextIndex = if (nextPlayingVerseKey != null) {
+                    _state.value.verses.indexOfFirst { it.verseKey == nextPlayingVerseKey }
+                } else -1
+
+                if (nextIndex >= 0 && nextIndex != currentIndex) {
+                    _state.update { it.copy(currentlyPlayingVerseKey = nextPlayingVerseKey, currentVerseIndex = nextIndex) }
+                    _events.tryEmit(ReaderEvent.AutoAdvanceToPage(currentIndex, nextIndex))
+                } else {
+                    _state.update { it.copy(currentlyPlayingVerseKey = nextPlayingVerseKey) }
+                }
             }
         }
 
         // Subscribe to track-ended callback for reliable auto-advance (no race condition).
-        // Must dispatch to viewModelScope because the callback fires on the Media3 listener
-        // thread, while player manipulation and state updates require the Main dispatcher.
         audioPlayer.onTrackEnded = {
             viewModelScope.launch { maybeAutoAdvanceAfterCompletion() }
         }
@@ -221,11 +229,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        // Clear the callback to avoid leaking this ViewModel reference.
-        if (audioPlayer.onTrackEnded != null) {
-            audioPlayer.onTrackEnded = null
-            audioPlayer.stop()
-        }
+        // Keep background audio and queue playing smoothly across navigation
     }
 
     private fun maybeAutoAdvanceAfterCompletion() {
@@ -622,6 +626,30 @@ class ChapterReaderViewModel @Inject constructor(
         val url = page.audio?.url ?: return
         lastStartedVerseKey = page.verseKey
         _state.update { it.copy(currentVerseIndex = index, currentlyPlayingVerseKey = page.verseKey) }
+
+        if (s.playbackMode == AyahPlaybackMode.CONTINUOUS && s.verses.isNotEmpty()) {
+            val queueItems = s.verses.mapNotNull { v ->
+                val audioUrl = v.audio?.url?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                AudioQueueItem(
+                    verseKey = v.verseKey.orEmpty(),
+                    ayahNumber = v.resolvedVerseNumber ?: 0,
+                    url = audioUrl,
+                    label = v.verseKey.orEmpty()
+                )
+            }
+            val queueStartIndex = queueItems.indexOfFirst { it.verseKey == page.verseKey }.coerceAtLeast(0)
+            if (queueItems.isNotEmpty()) {
+                audioPlayer.playSequence(
+                    items = queueItems,
+                    surahTitle = surahTitle,
+                    reciterName = reciterName,
+                    startIndex = queueStartIndex,
+                    chapterNumber = chapterNum
+                )
+                return
+            }
+        }
+
         audioPlayer.playVerse(
             url = url,
             surahTitle = surahTitle,
@@ -840,8 +868,14 @@ class ChapterReaderViewModel @Inject constructor(
         val chapter = verse.chapterNumber ?: _state.value.chapterNumber
         val ayah = verse.resolvedVerseNumber ?: return
         val surah = _state.value.chapterDisplayName
-        QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
+        val isNowBookmarked = QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
         refreshPersonalVerseState(index)
+        val msg = if (isNowBookmarked) {
+            appContext.getString(R.string.bookmark_added)
+        } else {
+            appContext.getString(R.string.bookmark_removed)
+        }
+        _events.tryEmit(ReaderEvent.ShowToast(msg, isNowBookmarked))
     }
 
     fun openHifzPicker(index: Int = _state.value.currentVerseIndex) {
@@ -1086,4 +1120,5 @@ class ChapterReaderViewModel @Inject constructor(
 sealed interface ReaderEvent {
     data class AnimateToPage(val index: Int) : ReaderEvent
     data class AutoAdvanceToPage(val previousIndex: Int, val nextIndex: Int) : ReaderEvent
+    data class ShowToast(val message: String, val isBookmarked: Boolean) : ReaderEvent
 }

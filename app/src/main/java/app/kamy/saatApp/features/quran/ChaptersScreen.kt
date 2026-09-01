@@ -66,6 +66,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -680,24 +681,25 @@ private fun QuranBrowseTabs(
 ) {
     val surahLabel = stringResource(R.string.quran_tab_surah)
     val juzLabel = stringResource(R.string.quran_tab_juz)
-    val tabShape = RoundedCornerShape(22.dp)
 
-    Box(
+    Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(26.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        SaatColors.DeepEmerald.copy(alpha = 0.08f),
-                        SaatColors.GoldDeep.copy(alpha = 0.05f)
-                    )
-                )
-            )
-            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(26.dp))
-            .padding(4.dp)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(24.dp),
+                ambientColor = Color.Black.copy(alpha = 0.06f),
+                spotColor = Color.Black.copy(alpha = 0.04f)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        color = Color.White.copy(alpha = 0.75f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.9f)),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             QuranBrowseTab(
@@ -705,16 +707,14 @@ private fun QuranBrowseTabs(
                 selected = browseMode == QuranBrowseMode.SURAH,
                 drawableResId = R.drawable.ic_quran_on,
                 onClick = { onBrowseModeChange(QuranBrowseMode.SURAH) },
-                modifier = Modifier.weight(1f),
-                shape = tabShape
+                modifier = Modifier.weight(1f)
             )
             QuranBrowseTab(
                 label = juzLabel,
                 selected = browseMode == QuranBrowseMode.JUZ,
                 drawableResId = R.drawable.ic_tafsir,
                 onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
-                modifier = Modifier.weight(1f),
-                shape = tabShape
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -727,7 +727,7 @@ private fun QuranBrowseTab(
     drawableResId: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: RoundedCornerShape = RoundedCornerShape(22.dp)
+    shape: RoundedCornerShape = RoundedCornerShape(20.dp)
 ) {
     val bgColor by animateColorAsState(
         targetValue = if (selected) SaatColors.DeepEmerald else Color.Transparent,
@@ -758,10 +758,10 @@ private fun QuranBrowseTab(
                 tint = if (selected) Color.White else SaatColors.DeepEmerald,
                 modifier = Modifier.size(16.dp)
             )
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(8.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                 color = textColor
             )
@@ -788,16 +788,30 @@ private fun ContinueReadingCard(
         onClick = onTap,
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp)),
-        shape = RoundedCornerShape(24.dp),
-        color = SaatColors.LastReadBg,
-        shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.5f))
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(22.dp),
+                ambientColor = Color.Black.copy(alpha = 0.05f),
+                spotColor = Color.Black.copy(alpha = 0.04f)
+            ),
+        shape = RoundedCornerShape(22.dp),
+        color = Color.White.copy(alpha = 0.85f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.95f)),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 18.dp),
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            SaatColors.LastReadBg.copy(alpha = 0.95f),
+                            SaatColors.LastReadBg.copy(alpha = 0.70f)
+                        )
+                    )
+                )
+                .padding(horizontal = 20.dp, vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -807,19 +821,19 @@ private fun ContinueReadingCard(
             ) {
                 Text(
                     text = stringResource(R.string.today_continue_reading_title),
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = SaatColors.HomeDarkGreen,
+                    color = SaatColors.HomeDarkGreen.copy(alpha = 0.85f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(3.dp))
                 val surahTitle = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber)
                 val verseTitle = stringResource(R.string.today_continue_reading_verse, session.verseNumber)
                 Text(
                     text = "$surahTitle • $verseTitle",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
                     color = SaatColors.HomeDarkGreen,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -840,7 +854,7 @@ private fun ContinueReadingCard(
                             .fillMaxWidth(0.8f)
                             .height(4.dp)
                             .clip(CircleShape)
-                            .background(SaatColors.TimelineGreen)
+                            .background(SaatColors.TimelineGreen.copy(alpha = 0.5f))
                     ) {
                         Box(
                             modifier = Modifier
@@ -858,7 +872,7 @@ private fun ContinueReadingCard(
                 contentDescription = null,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
-                    .size(90.dp, 60.dp)
+                    .size(80.dp, 56.dp)
                     .padding(start = 8.dp)
             )
         }
@@ -877,93 +891,109 @@ private fun ChapterRow(
         meanings.getOrNull(chapter.id - 1) ?: chapter.displayTranslatedName
     }
 
-    Box(
+    Surface(
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        contentAlignment = Alignment.Center
+            .padding(vertical = 4.dp)
+            .shadow(
+                elevation = 3.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = Color.Black.copy(alpha = 0.04f),
+                spotColor = Color.Black.copy(alpha = 0.03f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White.copy(alpha = 0.85f),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.95f))
     ) {
-        Surface(
-            onClick = onClick,
+        Row(
             modifier = Modifier
-                .width(345.dp)
-                .height(104.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = SaatColors.PureWhite,
-            shadowElevation = 1.dp,
-            border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.90f),
+                            Color.White.copy(alpha = 0.65f)
+                        )
+                    )
+                )
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
+            ChapterNumberBadge(number = chapter.id)
+            Spacer(Modifier.width(14.dp))
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .weight(1f)
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.Center
             ) {
-                ChapterNumberBadge(number = chapter.id)
-                Spacer(Modifier.width(16.dp))
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 10.dp),
-                    verticalArrangement = Arrangement.Center
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = chapter.displayComplexName,
-                            style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.Slate900,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                    Text(
+                        text = chapter.displayComplexName,
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (isRead) {
+                        Spacer(Modifier.width(6.dp))
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.Check,
+                            contentDescription = stringResource(R.string.khatam_completed),
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(16.dp)
                         )
-                        if (isRead) {
-                            Spacer(Modifier.width(6.dp))
-                            Icon(
-                                imageVector = androidx.compose.material.icons.Icons.Default.Check,
-                                contentDescription = stringResource(R.string.khatam_completed),
-                                tint = SaatColors.DeepEmerald,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                    if (meaning.isNotEmpty()) {
-                        Text(
-                            text = meaning,
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = SaatColors.Slate500,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 2.dp)
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        if (chapter.revelationLabel.isNotEmpty()) {
-                            SaatRevelationChip(
-                                label = chapter.revelationLabel,
-                                isMeccan = chapter.isMeccan
-                            )
-                        }
-                        chapter.versesCount?.let { count ->
-                            Text(
-                                text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = SaatColors.Slate500
-                            )
-                        }
                     }
                 }
-                Spacer(Modifier.width(8.dp))
+                if (meaning.isNotEmpty()) {
+                    Text(
+                        text = meaning,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                        color = SaatColors.Slate500,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (chapter.revelationLabel.isNotEmpty()) {
+                        SaatRevelationChip(
+                            label = chapter.revelationLabel,
+                            isMeccan = chapter.isMeccan
+                        )
+                    }
+                    chapter.versesCount?.let { count ->
+                        Text(
+                            text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = SaatColors.Slate500
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color.White.copy(alpha = 0.6f))
+                    .border(1.dp, Color.White.copy(alpha = 0.8f), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
                 Image(
                     painter = painterResource(if (chapter.isMeccan) R.drawable.mecca else R.drawable.medina),
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(52.dp),
+                    modifier = Modifier.size(42.dp),
                     contentScale = ContentScale.Fit
                 )
             }
@@ -990,20 +1020,35 @@ private fun JuzRow(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = SaatColors.PureWhite,
-        shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
+            .padding(vertical = 4.dp)
+            .shadow(
+                elevation = 3.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = Color.Black.copy(alpha = 0.04f),
+                spotColor = Color.Black.copy(alpha = 0.03f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White.copy(alpha = 0.85f),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.95f))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.90f),
+                            Color.White.copy(alpha = 0.65f)
+                        )
+                    )
+                )
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             ChapterNumberBadge(number = juz.juzNumber)
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -1043,12 +1088,20 @@ private fun JuzRow(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = SaatColors.Teal.copy(alpha = 0.6f),
-                modifier = Modifier.size(20.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(SaatColors.Teal.copy(alpha = 0.10f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = SaatColors.Teal,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }

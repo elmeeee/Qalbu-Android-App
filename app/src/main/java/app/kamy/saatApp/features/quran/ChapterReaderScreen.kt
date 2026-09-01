@@ -105,7 +105,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -344,6 +344,15 @@ fun ChapterReaderScreen(
                                 runCatching { pagerState.animateScrollToPage(target) }
                             }
                         }
+                    }
+                }
+                is ReaderEvent.ShowToast -> {
+                    scope.launch {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = androidx.compose.material3.SnackbarDuration.Short
+                        )
                     }
                 }
             }
@@ -788,8 +797,60 @@ fun ChapterReaderScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = if (audioBarVisible) 100.dp else 24.dp)
-        )
+                .navigationBarsPadding()
+                .padding(bottom = if (audioBarVisible) 110.dp else 68.dp, start = 20.dp, end = 20.dp)
+        ) { snackbarData ->
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = Color.White.copy(alpha = 0.92f),
+                shadowElevation = 0.dp,
+                tonalElevation = 0.dp,
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.95f)),
+                modifier = Modifier
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(50),
+                        ambientColor = Color.Black.copy(alpha = 0.08f),
+                        spotColor = Color.Black.copy(alpha = 0.06f)
+                    )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    SaatColors.DeepEmerald.copy(alpha = 0.08f),
+                                    Color.White.copy(alpha = 0.92f)
+                                )
+                            )
+                        )
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(SaatColors.DeepEmerald.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_bookmark_custom),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(13.dp)
+                        )
+                    }
+                    Text(
+                        text = snackbarData.visuals.message,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = SaatColors.Slate900
+                    )
+                }
+            }
+        }
 
         if (showScrollHint && state.verses.isNotEmpty()) {
             ReaderScrollHint(

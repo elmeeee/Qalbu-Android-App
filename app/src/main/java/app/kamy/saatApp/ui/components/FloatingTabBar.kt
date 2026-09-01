@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -35,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.ui.navigation.RootTab
 
 @Composable
@@ -56,39 +59,43 @@ fun FloatingTabBar(
         tabs.indexOfFirst { it.route == selectedRoute }.coerceAtLeast(0)
     }
 
-    val activeChipColor = Color(0xFFB9CBBE) // Soft Sage Timeline Green (#B9CBBE)
-
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 10.dp)
+            .padding(horizontal = 24.dp, vertical = 10.dp)
             .shadow(
-                elevation = 12.dp,
+                elevation = 14.dp,
                 shape = CircleShape,
-                clip = false,
-                ambientColor = Color.Black.copy(alpha = 0.08f),
-                spotColor = Color.Black.copy(alpha = 0.06f)
-            )
-            .clip(CircleShape),
+                ambientColor = Color.Black.copy(alpha = 0.12f),
+                spotColor = Color.Black.copy(alpha = 0.08f)
+            ),
         shape = CircleShape,
-        color = Color(0xFFFEFBF5), // Container background matching app theme (warm cream)
-        border = BorderStroke(1.2.dp, Color(0xFFE2E8F0)), // Light theme glass border
+        color = Color.White.copy(alpha = 0.68f),
+        border = BorderStroke(1.2.dp, Color.White.copy(alpha = 0.85f)),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.40f),
+                            Color.White.copy(alpha = 0.15f)
+                        )
+                    )
+                )
                 .padding(horizontal = 6.dp, vertical = 6.dp)
         ) {
             val totalWidthDp = maxWidth
             val tabWidthDp = totalWidthDp / tabs.size
 
-            // 1. Super Smooth Sliding Active Pill Capsule (Solid #B9CBBE Color)
+            // 1. Super Smooth Sliding Liquid Active Pill (Netflix style)
             val animatedPillOffset by animateDpAsState(
                 targetValue = tabWidthDp * selectedIndex,
-                animationSpec = spring(dampingRatio = 0.80f, stiffness = 320f),
+                animationSpec = spring(dampingRatio = 0.76f, stiffness = 380f),
                 label = "pill_slide"
             )
 
@@ -100,8 +107,17 @@ fun FloatingTabBar(
                     .padding(horizontal = 2.dp)
                     .clip(RoundedCornerShape(26.dp))
                     .background(
-                        color = activeChipColor,
-                        shape = RoundedCornerShape(26.dp)
+                        Brush.linearGradient(
+                            listOf(
+                                SaatColors.DeepEmerald.copy(alpha = 0.18f),
+                                SaatColors.DeepEmerald.copy(alpha = 0.10f)
+                            )
+                        )
+                    )
+                    .border(
+                        1.dp,
+                        SaatColors.DeepEmerald.copy(alpha = 0.22f),
+                        RoundedCornerShape(26.dp)
                     )
             )
 
@@ -145,7 +161,7 @@ private fun NetflixTabItem(
         label = "item_scale"
     )
 
-    val activeContentColor = Color(0xFF0F382C) // Deep dark green for high contrast on #B9CBBE chip
+    val activeContentColor = SaatColors.DeepEmerald
 
     Column(
         modifier = modifier
@@ -154,7 +170,7 @@ private fun NetflixTabItem(
             .clip(RoundedCornerShape(26.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = Color.Black.copy(alpha = 0.08f)),
+                indication = ripple(bounded = true, color = SaatColors.DeepEmerald.copy(alpha = 0.12f)),
                 role = Role.Tab,
                 onClick = onClick
             ),
@@ -175,8 +191,8 @@ private fun NetflixTabItem(
         Text(
             text = stringResource(tab.labelRes),
             fontSize = 11.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) activeContentColor else Color(0xFF64748B),
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = if (isSelected) activeContentColor else SaatColors.Slate500,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
