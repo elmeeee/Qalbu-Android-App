@@ -39,22 +39,15 @@ class ReadingSessionRepository @Inject constructor(
         val local = LocalReadingProgressStore.load(appContext)
         val personal = QuranPersonalStore.lastReadProgress(appContext)
         return when {
-            local == null -> personal
-            personal == null -> local
-            personal.updatedAtMillis == 0L -> {
-                // Legacy Khatam entries carry no timestamp. Treat them as current only when they
-                // actually point somewhere else, otherwise the plain store is the better source.
-                if (
-                    personal.chapterNumber != local.chapterNumber ||
-                    personal.verseNumber != local.verseNumber
-                ) {
-                    personal.copy(updatedAtMillis = System.currentTimeMillis())
+            local != null && local.chapterNumber > 0 && local.verseNumber > 0 -> {
+                if (personal != null && personal.updatedAtMillis > local.updatedAtMillis && personal.chapterNumber > 0 && personal.verseNumber > 0) {
+                    personal
                 } else {
                     local
                 }
             }
-            personal.updatedAtMillis >= local.updatedAtMillis -> personal
-            else -> local
+            personal != null && personal.chapterNumber > 0 && personal.verseNumber > 0 -> personal
+            else -> null
         }
     }
 }

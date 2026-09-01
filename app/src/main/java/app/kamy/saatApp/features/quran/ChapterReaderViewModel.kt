@@ -305,6 +305,14 @@ class ChapterReaderViewModel @Inject constructor(
         targetVerseIndex: Int = 0,
         autoPlayAfterLoad: Boolean = false
     ) {
+        val targetKey = targetVerseKey ?: pendingScrollVerseKey
+        val targetAyahNum = targetKey?.substringAfterLast(':')?.toIntOrNull() ?: (targetVerseIndex + 1)
+        val initialPerPage = if (targetAyahNum > 50) {
+            (((targetAyahNum - 1) / 50) + 1) * 50
+        } else {
+            50
+        }
+
         _state.update {
             it.copy(
                 isLoading = true,
@@ -317,7 +325,7 @@ class ChapterReaderViewModel @Inject constructor(
         }
         viewModelScope.launch {
             runCatching {
-                fetchVersePage(page = 1)
+                fetchVersePage(page = 1, perPage = initialPerPage)
             }.onSuccess { resp ->
                 val trans = translationStore.showTranslation.value
                 val translit = translationStore.showTransliteration.value
@@ -326,18 +334,20 @@ class ChapterReaderViewModel @Inject constructor(
                 val rec = translationStore.currentRecitationId()
                 val tid = LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
 
-                val restoredIndex = if (targetVerseKey != null) {
-                    resp.verses.indexOfFirst { it.verseKey == targetVerseKey }.takeIf { it >= 0 } ?: targetVerseIndex
+                val restoredIndex = if (targetKey != null) {
+                    resp.verses.indexOfFirst { it.verseKey == targetKey }.takeIf { it >= 0 } ?: targetVerseIndex
                 } else {
                     targetVerseIndex
                 }.coerceIn(0, (resp.verses.size - 1).coerceAtLeast(0))
+
+                val equivalentPage = (initialPerPage / 50)
 
                 _state.update { 
                     it.copy(
                         isLoading = false,
                         verses = resp.verses,
                         currentVerseIndex = restoredIndex,
-                        loadedApiPage = resp.pagination?.currentPage ?: 1,
+                        loadedApiPage = maxOf(resp.pagination?.currentPage ?: 1, equivalentPage),
                         hasMore = resp.pagination?.hasNextPage ?: false,
                         selectedTranslationId = tid,
                         showTranslation = trans,
@@ -420,17 +430,19 @@ class ChapterReaderViewModel @Inject constructor(
         logCurrentVerseReading(force = true)
     }
 
-    private suspend fun fetchVersePage(page: Int) =
+    private suspend fun fetchVersePage(page: Int, perPage: Int = 50) =
         if (_state.value.juzNumber != null) {
             quranRepository.getVersesByJuz(
                 juzNumber = _state.value.juzNumber!!,
                 page = page,
+                perPage = perPage,
                 audioRecitationId = _state.value.selectedRecitationId
             )
         } else {
             quranRepository.getVersesByChapter(
                 chapterNumber = _state.value.chapterNumber,
                 page = page,
+                perPage = perPage,
                 audioRecitationId = _state.value.selectedRecitationId
             )
         }

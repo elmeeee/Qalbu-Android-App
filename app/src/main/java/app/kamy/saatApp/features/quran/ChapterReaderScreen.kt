@@ -332,7 +332,7 @@ fun ChapterReaderScreen(
                     val target = event.index + latestPageOffset
                     if (event.index in verses.indices && target in 0 until latestTotalPageCount) {
                         scope.launch {
-                            runCatching { pagerState.animateScrollToPage(target) }
+                            runCatching { pagerState.scrollToPage(target) }
                         }
                     }
                 }

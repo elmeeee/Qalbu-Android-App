@@ -145,6 +145,11 @@ fun ChaptersScreen(
             coachMarkState.show()
         }
     }
+
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        vm.onScreenVisible()
+        onPauseOrDispose {}
+    }
     val focusManager = LocalFocusManager.current
 
     BackHandler(enabled = state.isSearchActive || state.searchQuery.isNotEmpty()) {

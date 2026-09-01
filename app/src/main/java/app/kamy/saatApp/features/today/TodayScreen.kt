@@ -140,6 +140,7 @@ fun TodayScreen(
 
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
         trackerVm.refresh()
+        todayVm.loadContinueReading()
         onPauseOrDispose {}
     }
 
