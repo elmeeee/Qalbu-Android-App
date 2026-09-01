@@ -12,7 +12,7 @@
          Works on API 30+ via compat library and API 31+ via platform. -->
     <style name="Theme.Saat.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wrapper</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
         <item name="android:windowBackground">@color/splash_background</item>
         <item name="postSplashScreenTheme">@style/Theme.Saat</item>
     </style>
