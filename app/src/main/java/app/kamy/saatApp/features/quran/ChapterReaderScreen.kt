@@ -336,14 +336,7 @@ fun ChapterReaderScreen(
         }
     }
 
-    LaunchedEffect(currentChapterKey, verseCount, pageOffset) {
-        if (verseCount == 0 || hasAlignedInitialPage) return@LaunchedEffect
-        hasAlignedInitialPage = true
-        val isDeepLink = isOriginChapter && (!initialVerseKey.isNullOrBlank() || initialVerseNumber != null)
-        if (!isDeepLink && pagerState.currentPage != pageOffset) {
-            pagerState.scrollToPage(pageOffset)
-        }
-    }
+    // Clean initial page alignment is already guaranteed at frame 0 by rememberPagerState(initialPage = calculatedInitialPage).
 
     LaunchedEffect(currentChapterKey, verseCount, initialVerseNumber, initialVerseKey, state.hasMore, state.isLoadingMore) {
         if (verseCount == 0 || hasScrolledToInitial) return@LaunchedEffect

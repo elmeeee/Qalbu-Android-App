@@ -138,7 +138,7 @@ fun PrayerDashboardCard(
     val targetPrayer = state.nextPrayer ?: state.activePrayer ?: PrayerType.DHUHR
 
     val singleActiveType = remember(state.activePrayer, state.nextPrayer, state.timings) {
-        state.nextPrayer ?: state.activePrayer ?: PrayerType.DHUHR
+        state.activePrayer ?: state.nextPrayer ?: PrayerType.DHUHR
     }
 
     val activeIndex = remember(singleActiveType) {
@@ -252,14 +252,28 @@ private fun calculatePrayerProgress(state: PrayerUiState): Float {
     val timings = state.timings.ifEmpty { return 0.5f }
     val now = System.currentTimeMillis()
     val nextType = state.nextPrayer ?: return 0.5f
-    val nextEntry = timings.find { it.type == nextType } ?: return 0.5f
 
     val sorted = timings.sortedBy { it.date.time }
-    val nextIndex = sorted.indexOfFirst { it.type == nextType }
-    val prevEntry = if (nextIndex > 0) sorted[nextIndex - 1] else null
+    val ishaEntry = timings.find { it.type == PrayerType.ISHA }
+    val fajrEntry = timings.find { it.type == PrayerType.FAJR }
 
-    val nextTime = nextEntry.date.time
-    val prevTime = prevEntry?.date?.time ?: (nextTime - 3 * 3600 * 1000L)
+    val isNightInterval = nextType == PrayerType.FAJR && (state.activePrayer == PrayerType.ISHA || (ishaEntry != null && now >= ishaEntry.date.time))
+
+    val prevTime: Long
+    val nextTime: Long
+
+    if (isNightInterval) {
+        prevTime = ishaEntry?.date?.time ?: (now - 3600 * 1000L)
+        val todayFajrTime = fajrEntry?.date?.time ?: (prevTime + 9 * 3600 * 1000L)
+        nextTime = if (todayFajrTime <= now) todayFajrTime + 24 * 3600 * 1000L else todayFajrTime
+    } else {
+        val nextEntry = timings.find { it.type == nextType } ?: return 0.5f
+        val nextIndex = sorted.indexOfFirst { it.type == nextType }
+        val prevEntry = if (nextIndex > 0) sorted[nextIndex - 1] else null
+
+        nextTime = nextEntry.date.time
+        prevTime = prevEntry?.date?.time ?: (nextTime - 3 * 3600 * 1000L)
+    }
 
     val totalMs = (nextTime - prevTime).coerceAtLeast(1L)
     val elapsedMs = (now - prevTime).coerceAtLeast(0L)

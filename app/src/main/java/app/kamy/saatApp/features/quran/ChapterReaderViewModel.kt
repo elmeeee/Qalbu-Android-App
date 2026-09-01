@@ -561,9 +561,23 @@ class ChapterReaderViewModel @Inject constructor(
     fun onPageSettled(index: Int) {
         val s = _state.value
         if (index !in s.verses.indices) return
+        val previousIndex = s.currentVerseIndex
         _state.update { it.copy(currentVerseIndex = index) }
         logCurrentVerseReading()
         refreshPersonalVerseState(index)
+
+        // If audio is currently playing and user manually swiped to a different ayah,
+        // immediately switch audio playback to the newly displayed ayah.
+        val isAudioActive = s.currentlyPlayingVerseKey != null && audioPlayer.state.value.currentUrl != null
+        if (isAudioActive && previousIndex != index) {
+            val newVerse = s.verses.getOrNull(index)
+            if (newVerse?.verseKey != null && newVerse.verseKey != s.currentlyPlayingVerseKey) {
+                val audioUrl = newVerse.audio?.url
+                if (!audioUrl.isNullOrBlank()) {
+                    playAyahAtIndex(index, newVerse)
+                }
+            }
+        }
     }
 
     private fun logCurrentVerseReading(force: Boolean = false) {
