@@ -290,16 +290,6 @@ fun ChapterReaderScreen(
     val latestPageOffset by rememberUpdatedState(pageOffset)
     val latestTotalPageCount by rememberUpdatedState(totalPageCount)
 
-    LaunchedEffect(s.chapterNumber, s.juzNumber) {
-        if (s.chapterNumber > 0) {
-            app.kamy.saatApp.core.analytics.AppAnalytics.trackSurahOpened(
-                surahNumber = s.chapterNumber,
-                surahName = surahTitle,
-                startingAyah = defaultInitialVerseIdx + 1
-            )
-        }
-    }
-
     LaunchedEffect(pagerState) {
         snapshotFlow {
             ReaderPageSnapshot(
@@ -639,11 +629,6 @@ fun ChapterReaderScreen(
                             },
                             onTafsir = {
                                 verseMenuExpanded.value = false
-                                currentVerse?.let { v ->
-                                    val c = v.chapterNumber ?: state.chapterNumber
-                                    val a = v.resolvedVerseNumber ?: 1
-                                    app.kamy.saatApp.core.analytics.AppAnalytics.trackTafsirOpened(c, a)
-                                }
                                 currentVerse?.verseKey?.let(vm::openTafsir)
                             }
                         )

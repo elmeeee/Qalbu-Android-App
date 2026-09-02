@@ -458,7 +458,6 @@ fun SpiritualToolsScreen(
                         tool = tool,
                         onClick = {
                             haptic()
-                            app.kamy.saatApp.core.analytics.AppAnalytics.trackToolOpened(tool.route)
                             onOpenTool(tool.route)
                         }
                     )

@@ -325,15 +325,7 @@ fun TodayScreen(
         }
     }
 
-    var showMasjidkuBanner by remember {
-        mutableStateOf(app.kamy.saatApp.core.analytics.AppAnalytics.isFeatureEnabled("show_masjidku_banner", defaultValue = true))
-    }
-
-    LaunchedEffect(Unit) {
-        app.kamy.saatApp.core.analytics.AppAnalytics.reloadFeatureFlags {
-            showMasjidkuBanner = app.kamy.saatApp.core.analytics.AppAnalytics.isFeatureEnabled("show_masjidku_banner", defaultValue = true)
-        }
-    }
+    val showMasjidkuBanner = true
 
     Box(modifier = Modifier.fillMaxSize().background(SaatColors.HomeBg)) {
         Box(

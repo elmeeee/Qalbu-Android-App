@@ -57,21 +57,6 @@ class SaatApplication : Application(), androidx.work.Configuration.Provider {
             runCatching {
                 androidx.work.WorkManager.initialize(this, workManagerConfiguration)
             }
-            runCatching {
-                if (BuildConfig.POSTHOG_API_KEY.isNotBlank()) {
-                    val postHogConfig = com.posthog.android.PostHogAndroidConfig(
-                        apiKey = BuildConfig.POSTHOG_API_KEY,
-                        host = BuildConfig.POSTHOG_HOST
-                    ).apply {
-                        debug = BuildConfig.DEBUG
-                        captureApplicationLifecycleEvents = true
-                        captureScreenViews = true
-                        captureDeepLinks = true
-                        preloadFeatureFlags = true
-                    }
-                    com.posthog.android.PostHogAndroid.setup(this@SaatApplication, postHogConfig)
-                }
-            }
             runCatching { SmartDefaultsInitializer.applyIfNeeded(this) }
             runCatching { DailyVerseNotificationScheduler.reschedule(this) }
             runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }

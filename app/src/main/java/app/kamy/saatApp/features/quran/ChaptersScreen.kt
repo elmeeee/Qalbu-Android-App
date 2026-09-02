@@ -405,13 +405,7 @@ fun ChaptersScreen(
                                         ChapterRow(
                                             chapter = chapter,
                                             isRead = chapter.id in state.readChapters,
-                                            onClick = {
-                                                app.kamy.saatApp.core.analytics.AppAnalytics.trackSurahOpened(
-                                                    surahNumber = chapter.id,
-                                                    surahName = chapter.nameSimple.orEmpty()
-                                                )
-                                                onOpenChapter(chapter, null)
-                                            },
+                                            onClick = { onOpenChapter(chapter, null) },
                                             modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
                                         )
                                     }

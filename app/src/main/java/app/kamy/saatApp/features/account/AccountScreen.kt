@@ -241,10 +241,7 @@ fun AccountScreen(
     if (state.showLanguageSheet) {
         LanguageSheet(
             selected = state.appLanguage,
-            onSelect = { language ->
-                vm.setAppLanguage(language)
-                app.kamy.saatApp.core.analytics.AppAnalytics.trackLanguageChanged(language.tag)
-            },
+            onSelect = vm::setAppLanguage,
             onDismiss = vm::closeLanguageSheet
         )
     }

@@ -89,10 +89,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                val localizedContext = androidx.compose.runtime.remember(currentLang) {
-                    AppLocale.wrap(this@MainActivity, currentLang)
-                }
-
                 var lastLang by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(currentLang) }
                 var isLanguageLoading by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
@@ -110,8 +106,7 @@ class MainActivity : ComponentActivity() {
                 var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
 
                 androidx.compose.runtime.CompositionLocalProvider(
-                    androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration,
-                    androidx.compose.ui.platform.LocalContext provides localizedContext
+                    androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration
                 ) {
                     SaatTheme(theme = currentTheme) {
                         Box(modifier = Modifier.fillMaxSize()) {
