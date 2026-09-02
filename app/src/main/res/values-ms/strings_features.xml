@@ -5,6 +5,11 @@
     <string name="bookmark_removed">Penanda dibuang</string>
     <string name="bookmarks_empty">Tiada ayat disimpan. Tandakan ayat semasa membaca.</string>
     <string name="bookmarks_title">Penanda</string>
+    <string name="bookmarks_card_desc">Koleksi ayat pilihan yang anda tandakan</string>
+    <string name="bookmarked_verses_hero_title">Ayat Ditandakan</string>
+    <string name="bookmarked_verses_count">%1$d ayat disimpan dalam senarai bacaan anda</string>
+    <string name="bookmarked_verses_empty_desc">Belum ada ayat yang ditandakan</string>
+    <string name="surah_ayah_format">%1$s · Ayat %2$d</string>
     <string name="channel_adhan_alert">Amaran azan</string>
     <string name="channel_adhan_alert_desc">Main azan apabila mainan penuh tidak boleh dimulakan</string>
     <string name="chapters_refresh_failed">Gagal memuat semula senarai surah</string>

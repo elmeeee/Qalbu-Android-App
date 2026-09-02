@@ -389,6 +389,11 @@
     <string name="bookmark_removed">Bookmark removed</string>
     <string name="bookmarks_title">Bookmarks</string>
     <string name="bookmarks_empty">No saved verses yet. Bookmark ayat while reading.</string>
+    <string name="bookmarks_card_desc">Collection of verses you have bookmarked</string>
+    <string name="bookmarked_verses_hero_title">Bookmarked Verses</string>
+    <string name="bookmarked_verses_count">%1$d verse(s) saved in your reading list</string>
+    <string name="bookmarked_verses_empty_desc">No bookmarked verses yet</string>
+    <string name="surah_ayah_format">%1$s · Ayah %2$d</string>
     <string name="quran_library_title">My Quran</string>
     <string name="quran_library_subtitle">Bookmarks, personal notes, and hifz progress — saved on this device.</string>
     <string name="quran_library_legend">What each mark means</string>

@@ -176,7 +176,7 @@ fun MyQuranLibraryCard(
                 }
                 Spacer(Modifier.height(3.dp))
                 Text(
-                    text = "Kumpulan ayat pilihan yang Anda tandai",
+                    text = stringResource(R.string.bookmarks_card_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = SaatColors.Slate500,
                     lineHeight = 18.sp

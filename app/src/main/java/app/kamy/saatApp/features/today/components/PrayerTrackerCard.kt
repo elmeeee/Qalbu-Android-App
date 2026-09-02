@@ -90,7 +90,6 @@ fun PrayerTrackerCard(
     onToggleDailyPrayer: () -> Unit = {},
     onToggleOptional: (OptionalWorshipHabit) -> Unit = {},
     onOpenCalendar: () -> Unit = {},
-    onShareVerse: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -231,8 +230,23 @@ fun PrayerTrackerCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    val currentLang by AppLanguageStore.from(context).currentFlow.collectAsStateWithLifecycle()
+                    val activeQuote = remember(currentLang, dailyQuote) {
+                        DailyQuoteRepository(context).getTodayQuote(currentLang)
+                    }
+
+                    val rawTranslation = verse?.translations?.firstOrNull()?.text?.toVerseTranslationPlainText()
+                    val translationText = activeQuote.quoteText.ifEmpty {
+                        if (!rawTranslation.isNullOrBlank()) "\"$rawTranslation\""
+                        else "\"And keep your prayer, and worship your Lord until there comes to you the certainty (i.e. death).\""
+                    }
+
+                    val mascotRes = remember(translationText, verse) {
+                        resolveDailyQuoteMascot(translationText, verse)
+                    }
+
                     Image(
-                        painter = painterResource(R.drawable.mascot_quran_qoute),
+                        painter = painterResource(mascotRes),
                         contentDescription = null,
                         modifier = Modifier.size(80.dp)
                     )
@@ -241,17 +255,6 @@ fun PrayerTrackerCard(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        val currentLang by AppLanguageStore.from(context).currentFlow.collectAsStateWithLifecycle()
-                        val activeQuote = remember(currentLang, dailyQuote) {
-                            DailyQuoteRepository(context).getTodayQuote(currentLang)
-                        }
-
-                        val rawTranslation = verse?.translations?.firstOrNull()?.text?.toVerseTranslationPlainText()
-                        val translationText = activeQuote.quoteText.ifEmpty {
-                            if (!rawTranslation.isNullOrBlank()) "\"$rawTranslation\""
-                            else "\"And keep your prayer, and worship your Lord until there comes to you the certainty (i.e. death).\""
-                        }
-
                         val refText = activeQuote.referenceLabel.ifEmpty {
                             referenceLabel ?: "Qur'an 15:99"
                         }
@@ -353,5 +356,59 @@ private fun JourneyBadge(
             fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.SemiBold,
             color = animatedLabelColor
         )
+    }
+}
+
+/**
+ * Dynamically resolves the mascot illustration for the daily quote based on:
+ * 1. Semantic keywords in the quote text (Prayer, Reading/Knowledge, Light/Night, Happiness/Gratitude, Patience/Trial, Leadership/Creation)
+ * 2. Deterministic daily hash from the verse/quote so it rotates across the 6 mascot illustrations every day.
+ */
+@androidx.annotation.DrawableRes
+private fun resolveDailyQuoteMascot(
+    quoteText: String,
+    verse: RandomAyahPayload?
+): Int {
+    val text = quoteText.lowercase()
+
+    return when {
+        text.contains("shalat") || text.contains("prayer") || text.contains("solat") ||
+            text.contains("sujud") || text.contains("doa") || text.contains("sembah") ||
+            text.contains("ruku") || text.contains("ibadah") -> R.drawable.mascot_prayer
+
+        text.contains("baca") || text.contains("read") || text.contains("kitab") ||
+            text.contains("qur'an") || text.contains("quran") || text.contains("ilmu") ||
+            text.contains("hikmah") || text.contains("pelajaran") -> R.drawable.mascot_reading
+
+        text.contains("cahaya") || text.contains("light") || text.contains("malam") ||
+            text.contains("night") || text.contains("petunjuk") || text.contains("hidayah") ||
+            text.contains("bintang") || text.contains("bulan") -> R.drawable.mascot_lentera
+
+        text.contains("gembira") || text.contains("senang") || text.contains("syukur") ||
+            text.contains("nikmat") || text.contains("surga") || text.contains("pahala") ||
+            text.contains("rahmat") || text.contains("bahagia") -> R.drawable.mascot_smile
+
+        text.contains("sabar") || text.contains("patience") || text.contains("sulit") ||
+            text.contains("sedih") || text.contains("duka") || text.contains("kesulitan") ||
+            text.contains("ujian") || text.contains("cobaan") -> R.drawable.mascot_happysad
+
+        text.contains("bumi") || text.contains("langit") || text.contains("kerajaan") ||
+            text.contains("pemimpin") || text.contains("amanah") || text.contains("adil") ||
+            text.contains("khalifah") || text.contains("alam") -> R.drawable.mascot_khilafah
+
+        else -> {
+            val seed = Math.abs(
+                (verse?.globalAyah ?: verse?.id ?: quoteText.hashCode())
+            )
+            val mascots = intArrayOf(
+                R.drawable.mascot_prayer,
+                R.drawable.mascot_reading,
+                R.drawable.mascot_lentera,
+                R.drawable.mascot_smile,
+                R.drawable.mascot_happysad,
+                R.drawable.mascot_khilafah
+            )
+            mascots[seed % mascots.size]
+        }
     }
 }

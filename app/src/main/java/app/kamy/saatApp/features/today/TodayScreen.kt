@@ -1,7 +1,6 @@
 package app.kamy.saatApp.features.today
 
 import android.Manifest
-import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
 import app.kamy.saatApp.domain.model.ReadingSession
-import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.design.theme.SaatColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -72,7 +70,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -88,21 +85,17 @@ import app.kamy.saatApp.ui.permissions.openAppNotificationSettings
 import app.kamy.saatApp.ui.permissions.openBackgroundReliabilitySettings
 import app.kamy.saatApp.ui.permissions.openExactAlarmSettings
 import app.kamy.saatApp.R
-import app.kamy.saatApp.features.today.components.TafsirSheet
 import app.kamy.saatApp.features.today.components.TodayImportantDayBanner
 import app.kamy.saatApp.features.today.components.TodayHeader
 import app.kamy.saatApp.features.today.components.PrayerDashboardCard
 import app.kamy.saatApp.features.today.components.PrayerLocationSheet
 import app.kamy.saatApp.features.today.components.PrayerTrackerCard
-import app.kamy.saatApp.features.today.components.TodayReciterSheet
-import app.kamy.saatApp.features.today.components.TodayVerseOfDaySection
 import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.ui.components.CoachMarkOverlay
 import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
-import app.kamy.saatApp.features.share.AiShareSheet
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.ui.layout.floatingNavAndAudioBottomPadding
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
@@ -162,9 +155,7 @@ fun TodayScreen(
     val locationEnable = stringResource(R.string.location_enable)
     val locating = stringResource(R.string.locating)
     val locationUnavailable = stringResource(R.string.location_unavailable)
-    val shareReflectionLabel = stringResource(R.string.share_reflection)
     val profileStillLoading = stringResource(R.string.profile_still_loading)
-    val verseOfDayTitle = stringResource(R.string.verse_of_day)
     val onboardingStore = remember { OnboardingStore.from(context) }
     val onboardingComplete = remember { onboardingStore.isComplete() }
     val permissionsHandledInOnboarding = remember { onboardingStore.permissionsHandledInOnboarding() }
@@ -494,7 +485,6 @@ fun TodayScreen(
                         onToggleDailyPrayer = trackerVm::toggleDailyPrayer,
                         onToggleOptional = trackerVm::toggleOptionalHabit,
                         onOpenCalendar = onOpenTrackerCalendar,
-                        onShareVerse = { todayVm.openAiShare() },
                         modifier = Modifier
                             .padding(horizontal = 20.dp)
                             .coachMarkTarget(
@@ -600,42 +590,6 @@ fun TodayScreen(
         onDismiss = prayerVm::dismissLocationSheet
     )
 
-    TodayReciterSheet(
-        visible = todayState.showReciterSheet,
-        recitations = todayState.recitations,
-        selectedRecitationId = todayState.selectedRecitationId,
-        onDismiss = todayVm::dismissReciterSheet,
-        onSelectRecitation = todayVm::selectRecitation
-    )
-
-    TafsirSheet(
-        isVisible = todayState.showTafsir,
-        isLoading = todayState.tafsirLoading,
-        tafsir = todayState.tafsir,
-        verseReference = todayState.verseReferenceLabel.orEmpty(),
-        selectedSource = todayState.selectedTafsirSource,
-        error = todayState.tafsirError,
-        onDismiss = { todayVm.dismissTafsir() },
-        onReload = { todayVm.reloadTafsir() },
-        onSelectSource = todayVm::selectTafsirSource
-    )
-
-    AiShareSheet(
-        visible = todayState.aiShareVisible,
-        loading = todayState.aiShareLoading,
-        draft = todayState.aiShareDraft,
-        error = todayState.aiShareError,
-        onDismiss = { todayVm.dismissAiShare() },
-        onDraftChange = todayVm::updateAiShareDraft,
-        onRegenerate = todayVm::regenerateAiShare,
-        onShare = { draft ->
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, draft)
-            }
-            context.startActivity(Intent.createChooser(intent, shareReflectionLabel))
-        }
-    )
     CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 

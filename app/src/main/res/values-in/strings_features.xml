@@ -5,6 +5,11 @@
     <string name="bookmark_removed">Bookmark dihapus</string>
     <string name="bookmarks_empty">Belum ada ayat tersimpan. Tandai ayat saat membaca.</string>
     <string name="bookmarks_title">Bookmark</string>
+    <string name="bookmarks_card_desc">Kumpulan ayat pilihan yang Anda tandai</string>
+    <string name="bookmarked_verses_hero_title">Ayat Ditandai</string>
+    <string name="bookmarked_verses_count">%1$d ayat tersimpan dalam daftar bacaan Anda</string>
+    <string name="bookmarked_verses_empty_desc">Belum ada ayat yang ditandai</string>
+    <string name="surah_ayah_format">%1$s · Ayat %2$d</string>
     <string name="channel_adhan_alert">Peringatan adzan</string>
     <string name="channel_adhan_alert_desc">Memutar adzan saat pemutaran penuh tidak bisa dimulai</string>
     <string name="chapters_refresh_failed">Gagal memuat ulang daftar surat</string>

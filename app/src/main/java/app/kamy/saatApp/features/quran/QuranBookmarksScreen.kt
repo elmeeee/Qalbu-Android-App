@@ -197,14 +197,18 @@ private fun BookmarksHeroCard(count: Int) {
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Ayat Ditandai",
+                        text = stringResource(R.string.bookmarked_verses_hero_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.Slate900
                     )
                     Spacer(Modifier.height(3.dp))
                     Text(
-                        text = if (count > 0) "$count ayat tersimpan dalam daftar bacaan Anda" else "Belum ada ayat yang ditandai",
+                        text = if (count > 0) {
+                            stringResource(R.string.bookmarked_verses_count, count)
+                        } else {
+                            stringResource(R.string.bookmarked_verses_empty_desc)
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = SaatColors.Slate500,
                         lineHeight = 18.sp
@@ -261,8 +265,8 @@ private fun BookmarkItemCard(
             Spacer(Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                val title = bookmark.surahLabel?.let { "$it · Ayat ${bookmark.verseNumber}" }
-                    ?: "Surah ${bookmark.chapterNumber} · Ayat ${bookmark.verseNumber}"
+                val surahName = bookmark.surahLabel ?: stringResource(R.string.surah_number, bookmark.chapterNumber)
+                val title = stringResource(R.string.surah_ayah_format, surahName, bookmark.verseNumber)
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
