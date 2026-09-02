@@ -2,18 +2,24 @@ package app.kamy.saatApp.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,6 +33,9 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
@@ -35,10 +44,17 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
+
+enum class CoachMarkGesture {
+    TAP,
+    SWIPE_HORIZONTAL
+}
 
 class CoachMarkState {
     var isVisible by mutableStateOf(false)
@@ -82,7 +98,8 @@ class CoachMarkState {
 data class CoachMarkTarget(
     val bounds: Rect,
     @StringRes val titleRes: Int,
-    @StringRes val descriptionRes: Int
+    @StringRes val descriptionRes: Int,
+    val gesture: CoachMarkGesture = CoachMarkGesture.TAP
 )
 
 @Composable
@@ -94,21 +111,18 @@ fun Modifier.coachMarkTarget(
     state: CoachMarkState,
     step: Int,
     @StringRes titleRes: Int,
-    @StringRes descriptionRes: Int
+    @StringRes descriptionRes: Int,
+    gesture: CoachMarkGesture = CoachMarkGesture.TAP
 ): Modifier = this.onGloballyPositioned { coordinates ->
     if (coordinates.isAttached) {
         val bounds = coordinates.boundsInRoot()
         if (!bounds.isEmpty && bounds.width > 0 && bounds.height > 0) {
-            state.targets[step] = CoachMarkTarget(bounds, titleRes, descriptionRes)
+            state.targets[step] = CoachMarkTarget(bounds, titleRes, descriptionRes, gesture)
         }
     }
 }
 
-private val TOOLTIP_HORIZONTAL_PADDING = 20.dp
-private val TOOLTIP_VERTICAL_GAP = 12.dp
-private val ARROW_HEIGHT = 10.dp
-private val ARROW_HALF_WIDTH = 10.dp
-private val HIGHLIGHT_PADDING = 6.dp
+private val HIGHLIGHT_PADDING = 8.dp
 private val HIGHLIGHT_CORNER = 16.dp
 
 @Composable
@@ -120,16 +134,26 @@ fun CoachMarkOverlay(
 
     val target = state.targets[state.currentStep]
     if (target == null) {
-        // No bounds registered for this step — auto-advance
         LaunchedEffect(state.currentStep) { state.next() }
         return
     }
 
+    val infiniteTransition = rememberInfiniteTransition(label = "coachMarkOverlay")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.40f,
+        targetValue = 0.95f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulseAlpha"
+    )
+
     AnimatedContent(
         targetState = state.currentStep,
         transitionSpec = {
-            (slideInVertically { it / 6 } + fadeIn()) togetherWith
-                    (slideOutVertically { -it / 6 } + fadeOut())
+            (fadeIn(tween(260)) + scaleIn(initialScale = 0.94f, animationSpec = tween(260)))
+                .togetherWith(fadeOut(tween(180)) + scaleOut(targetScale = 0.96f, animationSpec = tween(180)))
         },
         label = "coachMarkStep"
     ) { step ->
@@ -138,205 +162,503 @@ fun CoachMarkOverlay(
         val density = LocalDensity.current
         val config = LocalConfiguration.current
         val screenHeightPx = with(density) { config.screenHeightDp.dp.toPx() }
+        val screenWidthPx = with(density) { config.screenWidthDp.dp.toPx() }
 
         val targetCenterY = (stepTarget.bounds.top + stepTarget.bounds.bottom) / 2f
-        val showAbove = targetCenterY > screenHeightPx / 2f
-
         val targetCenterXPx = (stepTarget.bounds.left + stepTarget.bounds.right) / 2f
-        val arrowXDp: Dp = with(density) {
-            targetCenterXPx.toDp()
-                .coerceIn(40.dp, config.screenWidthDp.dp - 40.dp)
-        }
+        val showAbove = targetCenterY > screenHeightPx / 2f
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(step) {
-                    detectTapGestures { tapOffset ->
-                        // Tap on highlighted element → advance to next
-                        val padPx = HIGHLIGHT_PADDING.toPx()
-                        val expanded = Rect(
-                            stepTarget.bounds.left - padPx,
-                            stepTarget.bounds.top - padPx,
-                            stepTarget.bounds.right + padPx,
-                            stepTarget.bounds.bottom + padPx
-                        )
-                        if (expanded.contains(tapOffset)) {
-                            if (state.isLastStep()) { state.skip(); onDismiss() }
-                            else state.next()
+                    detectTapGestures {
+                        // Tapping anywhere advances to next step or dismisses
+                        if (state.isLastStep()) {
+                            state.skip()
+                            onDismiss()
+                        } else {
+                            state.next()
                         }
-                        // Taps elsewhere are blocked (no-op)
                     }
                 }
         ) {
-            // Dark scrim with punched-out highlight
+            // Dark scrim with punched-out highlight & pulsating glowing ring
             Canvas(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer(alpha = 0.99f)
             ) {
-                drawRect(Color.Black.copy(alpha = 0.75f))
-                val padPx    = HIGHLIGHT_PADDING.toPx()
+                // Dimmed immersive backdrop
+                drawRect(Color.Black.copy(alpha = 0.80f))
+
+                val padPx = HIGHLIGHT_PADDING.toPx()
                 val cornerPx = HIGHLIGHT_CORNER.toPx()
+                val targetRect = Rect(
+                    stepTarget.bounds.left - padPx,
+                    stepTarget.bounds.top - padPx,
+                    stepTarget.bounds.right + padPx,
+                    stepTarget.bounds.bottom + padPx
+                )
+
+                // Punch out clear hole
                 drawRoundRect(
                     color = Color.Transparent,
-                    topLeft = Offset(
-                        stepTarget.bounds.left - padPx,
-                        stepTarget.bounds.top - padPx
-                    ),
-                    size = Size(
-                        stepTarget.bounds.width + padPx * 2,
-                        stepTarget.bounds.height + padPx * 2
-                    ),
+                    topLeft = targetRect.topLeft,
+                    size = targetRect.size,
                     cornerRadius = CornerRadius(cornerPx, cornerPx),
                     blendMode = BlendMode.Clear
                 )
+
+                // Themed animated glowing stroke ring around target
+                drawRoundRect(
+                    color = Color.White.copy(alpha = pulseAlpha * 0.75f),
+                    topLeft = targetRect.topLeft,
+                    size = targetRect.size,
+                    cornerRadius = CornerRadius(cornerPx, cornerPx),
+                    style = Stroke(width = 2.dp.toPx())
+                )
             }
 
-            // Tooltip + arrow
-            val highlightTopDp    = with(density) { stepTarget.bounds.top.toDp() }
-            val highlightBottomDp = with(density) { stepTarget.bounds.bottom.toDp() }
-            val screenHeightDp    = config.screenHeightDp.dp
-            val estimatedTooltipHeight = 200.dp
-            val gapTotal = TOOLTIP_VERTICAL_GAP + ARROW_HEIGHT + HIGHLIGHT_PADDING
+            // Top Header Bar: Step Pill & Skip Button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Step Indicator Badge
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = Color.White.copy(alpha = 0.15f),
+                            shape = CircleShape
+                        )
+                        .padding(horizontal = 12.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = "${state.stepIndex()} / ${state.totalSteps()}",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        ),
+                        color = Color.White
+                    )
+                }
 
-            val arrowOffsetX: Dp = (arrowXDp - ARROW_HALF_WIDTH - TOOLTIP_HORIZONTAL_PADDING)
-                .coerceIn(0.dp, config.screenWidthDp.dp - TOOLTIP_HORIZONTAL_PADDING * 2 - ARROW_HALF_WIDTH * 2)
+                // Skip Button
+                TextButton(
+                    onClick = { state.skip(); onDismiss() },
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.coach_mark_skip).uppercase(),
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        letterSpacing = 0.8.sp
+                    )
+                }
+            }
 
-            if (showAbove) {
-                val tooltipBottom = (highlightTopDp - gapTotal)
-                    .coerceAtLeast(estimatedTooltipHeight + 24.dp)
-                val tooltipTop = (tooltipBottom - estimatedTooltipHeight).coerceAtLeast(24.dp)
+            // Gesture Visual & Text Container
+            val padPx = with(density) { HIGHLIGHT_PADDING.toPx() }
+            val highlightTopPx = stepTarget.bounds.top - padPx
+            val highlightBottomPx = stepTarget.bounds.bottom + padPx
 
+            if (stepTarget.gesture == CoachMarkGesture.SWIPE_HORIZONTAL) {
+                // Swipe Left/Right gesture overlay (as in the 2nd screenshot)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            top = tooltipTop,
-                            start = TOOLTIP_HORIZONTAL_PADDING,
-                            end = TOOLTIP_HORIZONTAL_PADDING
+                        .align(
+                            if (showAbove) Alignment.TopCenter else Alignment.BottomCenter
                         )
+                        .padding(
+                            top = if (showAbove) 100.dp else 24.dp,
+                            bottom = if (showAbove) 24.dp else 80.dp,
+                            start = 28.dp,
+                            end = 28.dp
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    TooltipCard(state = state, step = step, onDismiss = onDismiss)
-                    // Arrow pointing DOWN
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Canvas(
-                            modifier = Modifier
-                                .width(ARROW_HALF_WIDTH * 2)
-                                .height(ARROW_HEIGHT)
-                                .align(Alignment.TopStart)
-                                .offset(x = arrowOffsetX)
-                        ) {
-                            val path = Path().apply {
-                                moveTo(0f, 0f)
-                                lineTo(size.width, 0f)
-                                lineTo(size.width / 2f, size.height)
-                                close()
-                            }
-                            drawPath(path, Color.White)
-                        }
-                    }
+                    SwipeGestureVisual()
+
+                    Text(
+                        text = stringResource(stepTarget.titleRes).uppercase(),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.9.sp
+                        ),
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Text(
+                        text = stringResource(stepTarget.descriptionRes),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontSize = 13.5.sp,
+                            lineHeight = 20.sp
+                        ),
+                        color = Color.White.copy(alpha = 0.85f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                 }
             } else {
-                val tooltipTop = (highlightBottomDp + gapTotal)
-                    .coerceAtMost(screenHeightDp - estimatedTooltipHeight - 24.dp)
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = tooltipTop,
-                            start = TOOLTIP_HORIZONTAL_PADDING,
-                            end = TOOLTIP_HORIZONTAL_PADDING
+                // Tap gesture with pointer arrow (as in the 1st screenshot)
+                if (showAbove) {
+                    // Target is in bottom area -> Text & Hand placed ABOVE target
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                top = with(density) { (highlightTopPx * 0.40f).toDp().coerceAtLeast(80.dp) },
+                                start = 28.dp,
+                                end = 28.dp
+                            ),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(stepTarget.titleRes).uppercase(),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.9.sp
+                            ),
+                            color = Color.White,
+                            textAlign = TextAlign.Center
                         )
-                ) {
-                    // Arrow pointing UP
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Canvas(
-                            modifier = Modifier
-                                .width(ARROW_HALF_WIDTH * 2)
-                                .height(ARROW_HEIGHT)
-                                .align(Alignment.TopStart)
-                                .offset(x = arrowOffsetX)
-                        ) {
-                            val path = Path().apply {
-                                moveTo(0f, size.height)
-                                lineTo(size.width, size.height)
-                                lineTo(size.width / 2f, 0f)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(stepTarget.descriptionRes),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 13.5.sp,
+                                lineHeight = 20.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.85f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        TapGestureVisual()
+                    }
+
+                    // Connecting pointer line from hand down to target top edge
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val handBottomY = highlightTopPx * 0.76f
+                        val arrowEndY = highlightTopPx - 6.dp.toPx()
+
+                        if (arrowEndY > handBottomY) {
+                            // Vertical guide line
+                            drawLine(
+                                color = Color.White.copy(alpha = 0.75f),
+                                start = Offset(targetCenterXPx, handBottomY),
+                                end = Offset(targetCenterXPx, arrowEndY),
+                                strokeWidth = 1.8.dp.toPx()
+                            )
+
+                            // Arrowhead pointing DOWN
+                            val arrowSize = 7.dp.toPx()
+                            val arrowPath = Path().apply {
+                                moveTo(targetCenterXPx, arrowEndY)
+                                lineTo(targetCenterXPx - arrowSize, arrowEndY - arrowSize * 1.3f)
+                                lineTo(targetCenterXPx + arrowSize, arrowEndY - arrowSize * 1.3f)
                                 close()
                             }
-                            drawPath(path, Color.White)
+                            drawPath(arrowPath, Color.White)
                         }
                     }
-                    TooltipCard(state = state, step = step, onDismiss = onDismiss)
+                } else {
+                    // Target is in top area -> Text & Hand placed BELOW target
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                top = with(density) { (highlightBottomPx + 90.dp.toPx()).toDp() },
+                                start = 28.dp,
+                                end = 28.dp
+                            ),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TapGestureVisual()
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Text(
+                            text = stringResource(stepTarget.titleRes).uppercase(),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.9.sp
+                            ),
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(stepTarget.descriptionRes),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 13.5.sp,
+                                lineHeight = 20.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.85f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+
+                    // Connecting pointer line from hand up to target bottom edge
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val handTopY = highlightBottomPx + 78.dp.toPx()
+                        val arrowEndY = highlightBottomPx + 6.dp.toPx()
+
+                        if (handTopY > arrowEndY) {
+                            // Vertical guide line
+                            drawLine(
+                                color = Color.White.copy(alpha = 0.75f),
+                                start = Offset(targetCenterXPx, handTopY),
+                                end = Offset(targetCenterXPx, arrowEndY),
+                                strokeWidth = 1.8.dp.toPx()
+                            )
+
+                            // Arrowhead pointing UP
+                            val arrowSize = 7.dp.toPx()
+                            val arrowPath = Path().apply {
+                                moveTo(targetCenterXPx, arrowEndY)
+                                lineTo(targetCenterXPx - arrowSize, arrowEndY + arrowSize * 1.3f)
+                                lineTo(targetCenterXPx + arrowSize, arrowEndY + arrowSize * 1.3f)
+                                close()
+                            }
+                            drawPath(arrowPath, Color.White)
+                        }
+                    }
                 }
+            }
+
+            // Bottom Tap Anywhere to Continue Hint
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(bottom = 20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (state.isLastStep()) stringResource(R.string.coach_mark_finish) else "KETUK DI MANA SAJA UNTUK LANJUT",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.sp
+                    ),
+                    color = Color.White.copy(alpha = pulseAlpha * 0.85f)
+                )
             }
         }
     }
 }
 
+/**
+ * Animated Tap gesture visual: Hand icon with expanding touch ripple wave.
+ */
 @Composable
-private fun TooltipCard(
-    state: CoachMarkState,
-    step: Int,
-    onDismiss: () -> Unit
+private fun TapGestureVisual(
+    modifier: Modifier = Modifier
 ) {
-    val stepTarget = state.targets[step] ?: return
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(16.dp))
-            .padding(20.dp)
+    val transition = rememberInfiniteTransition(label = "tapAnimation")
+
+    val rippleRadius by transition.animateFloat(
+        initialValue = 4f,
+        targetValue = 38f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rippleRadius"
+    )
+
+    val rippleAlpha by transition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 0.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rippleAlpha"
+    )
+
+    val handScale by transition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 0.88f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(600, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "handScale"
+    )
+
+    Box(
+        modifier = modifier.size(68.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(stepTarget.titleRes),
-                style = MaterialTheme.typography.titleMedium,
-                color = SaatColors.Slate900,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = "${state.stepIndex()}/${state.totalSteps()}",
-                style = MaterialTheme.typography.labelSmall,
-                color = SaatColors.Slate500,
-                fontWeight = FontWeight.SemiBold
+        // Concentric Ripple Ring
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val centerOffset = Offset(size.width * 0.48f, size.height * 0.28f)
+            drawCircle(
+                color = Color.White.copy(alpha = rippleAlpha),
+                radius = rippleRadius.dp.toPx(),
+                center = centerOffset,
+                style = Stroke(width = 2.dp.toPx())
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = stringResource(stepTarget.descriptionRes),
-            style = MaterialTheme.typography.bodyMedium,
-            color = SaatColors.Slate700
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextButton(
-                onClick = { state.skip(); onDismiss() }
-            ) {
-                Text(stringResource(R.string.coach_mark_skip), color = SaatColors.Slate500)
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(
-                onClick = {
-                    if (state.isLastStep()) { state.skip(); onDismiss() }
-                    else state.next()
+
+        // Animated Hand Pointer Icon
+        HandTouchIcon(
+            modifier = Modifier
+                .size(44.dp)
+                .graphicsLayer {
+                    scaleX = handScale
+                    scaleY = handScale
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
-            ) {
-                Text(
-                    if (state.isLastStep()) stringResource(R.string.coach_mark_finish)
-                    else stringResource(R.string.coach_mark_next)
-                )
+            tint = Color.White
+        )
+    }
+}
+
+/**
+ * Animated Horizontal Swipe gesture visual: <── 👆 ──>
+ */
+@Composable
+private fun SwipeGestureVisual(
+    modifier: Modifier = Modifier
+) {
+    val transition = rememberInfiniteTransition(label = "swipeAnimation")
+
+    val swipeOffset by transition.animateFloat(
+        initialValue = -30f,
+        targetValue = 30f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "swipeOffset"
+    )
+
+    Column(
+        modifier = modifier.width(180.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Track line with Left & Right Arrowheads
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(18.dp)
+        ) {
+            val arrowSize = 6.dp.toPx()
+            val strokeW = 1.8.dp.toPx()
+            val y = size.height / 2f
+
+            // Left Arrow
+            val leftPath = Path().apply {
+                moveTo(arrowSize * 1.4f, y - arrowSize)
+                lineTo(0f, y)
+                lineTo(arrowSize * 1.4f, y + arrowSize)
             }
+            drawPath(leftPath, Color.White, style = Stroke(strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
+
+            // Main horizontal line
+            drawLine(
+                color = Color.White.copy(alpha = 0.8f),
+                start = Offset(0f, y),
+                end = Offset(size.width, y),
+                strokeWidth = strokeW
+            )
+
+            // Right Arrow
+            val rightPath = Path().apply {
+                moveTo(size.width - arrowSize * 1.4f, y - arrowSize)
+                lineTo(size.width, y)
+                lineTo(size.width - arrowSize * 1.4f, y + arrowSize)
+            }
+            drawPath(rightPath, Color.White, style = Stroke(strokeW, cap = StrokeCap.Round, join = StrokeJoin.Round))
         }
+
+        // Sliding Hand Pointer
+        HandTouchIcon(
+            modifier = Modifier
+                .size(40.dp)
+                .graphicsLayer {
+                    translationX = swipeOffset.dp.toPx()
+                },
+            tint = Color.White
+        )
+    }
+}
+
+/**
+ * Clean vector hand pointer touch icon.
+ */
+@Composable
+private fun HandTouchIcon(
+    modifier: Modifier = Modifier,
+    tint: Color = Color.White
+) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val strokeWidth = 2.2.dp.toPx()
+
+        val path = Path().apply {
+            // Index finger pointing up
+            moveTo(w * 0.44f, h * 0.42f)
+            lineTo(w * 0.44f, h * 0.12f)
+            cubicTo(w * 0.44f, h * 0.04f, w * 0.56f, h * 0.04f, w * 0.56f, h * 0.12f)
+            lineTo(w * 0.56f, h * 0.44f)
+
+            // Middle finger
+            cubicTo(w * 0.56f, h * 0.36f, w * 0.67f, h * 0.36f, w * 0.67f, h * 0.44f)
+            lineTo(w * 0.67f, h * 0.52f)
+
+            // Ring finger
+            cubicTo(w * 0.67f, h * 0.46f, w * 0.77f, h * 0.46f, w * 0.77f, h * 0.52f)
+            lineTo(w * 0.77f, h * 0.60f)
+
+            // Pinky finger
+            cubicTo(w * 0.77f, h * 0.54f, w * 0.86f, h * 0.54f, w * 0.86f, h * 0.60f)
+            lineTo(w * 0.86f, h * 0.74f)
+
+            // Palm base
+            cubicTo(w * 0.86f, h * 0.92f, w * 0.38f, h * 0.94f, w * 0.28f, h * 0.82f)
+
+            // Thumb
+            lineTo(w * 0.18f, h * 0.68f)
+            cubicTo(w * 0.12f, h * 0.60f, w * 0.22f, h * 0.52f, w * 0.28f, h * 0.58f)
+            lineTo(w * 0.38f, h * 0.68f)
+            lineTo(w * 0.38f, h * 0.42f)
+            close()
+        }
+
+        drawPath(
+            path = path,
+            color = tint,
+            style = Stroke(
+                width = strokeWidth,
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
+            )
+        )
     }
 }

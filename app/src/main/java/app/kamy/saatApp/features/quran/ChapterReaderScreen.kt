@@ -1915,67 +1915,88 @@ private fun ReaderScrollHint(
     Surface(
         onClick = onDismiss,
         modifier = modifier
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(28.dp),
-        color = SaatColors.HomeDarkGreen.copy(alpha = 0.96f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
-        shadowElevation = 12.dp
+        color = Color.Transparent,
+        shadowElevation = 14.dp
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.horizontalGradient(
+                        listOf(
+                            Color(0xFF085E43),
+                            Color(0xFF15AA7C)
+                        )
+                    ),
+                    shape = RoundedCornerShape(28.dp)
+                )
+                .border(
+                    BorderStroke(1.2.dp, Color(0xFFE8D39A).copy(alpha = 0.6f)),
+                    shape = RoundedCornerShape(28.dp)
+                )
+                .padding(horizontal = 16.dp, vertical = 11.dp)
         ) {
-            // Animated Horizontal Swipe Visual
-            Box(
-                modifier = Modifier
-                    .width(44.dp)
-                    .height(28.dp)
-                    .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp)),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier.size(11.dp)
-                    )
-                    Icon(
-                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier
-                            .size(11.dp)
-                            .graphicsLayer { rotationZ = 180f }
-                    )
-                }
-                // Animated glowing touch dot
+                // Animated Horizontal Swipe Visual Track
                 Box(
                     modifier = Modifier
-                        .size(14.dp)
-                        .graphicsLayer {
-                            translationX = swipeOffset
-                            alpha = handAlpha
-                        }
-                        .background(SaatColors.ArcGold, CircleShape)
-                        .border(1.5.dp, Color.White, CircleShape)
+                        .width(46.dp)
+                        .height(28.dp)
+                        .background(Color.Black.copy(alpha = 0.20f), RoundedCornerShape(14.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .size(11.dp)
+                                .graphicsLayer { rotationZ = 180f }
+                        )
+                    }
+                    // Animated glowing touch dot
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .graphicsLayer {
+                                translationX = swipeOffset
+                                alpha = handAlpha
+                            }
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Color(0xFFFFDF7A), Color(0xFFC9972E))
+                                ),
+                                CircleShape
+                            )
+                            .border(1.5.dp, Color.White, CircleShape)
+                    )
+                }
+
+                Text(
+                    text = stringResource(R.string.reader_scroll_hint),
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp),
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    textAlign = TextAlign.Start
                 )
             }
-
-            Text(
-                text = stringResource(R.string.reader_scroll_hint),
-                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-                textAlign = TextAlign.Start
-            )
         }
     }
 }
