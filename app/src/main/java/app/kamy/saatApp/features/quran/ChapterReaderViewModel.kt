@@ -905,6 +905,9 @@ class ChapterReaderViewModel @Inject constructor(
         val ayah = verse.resolvedVerseNumber ?: return
         val surah = _state.value.chapterDisplayName
         val isNowBookmarked = QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
+        if (isNowBookmarked) {
+            app.kamy.saatApp.core.analytics.AppAnalytics.trackAyahBookmarked(chapter, ayah)
+        }
         refreshPersonalVerseState(index)
         val msg = if (isNowBookmarked) {
             appContext.getString(R.string.bookmark_added)

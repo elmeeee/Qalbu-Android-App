@@ -63,8 +63,11 @@ class SaatApplication : Application(), androidx.work.Configuration.Provider {
                         apiKey = BuildConfig.POSTHOG_API_KEY,
                         host = BuildConfig.POSTHOG_HOST
                     ).apply {
+                        debug = BuildConfig.DEBUG
                         captureApplicationLifecycleEvents = true
                         captureScreenViews = true
+                        captureDeepLinks = true
+                        preloadFeatureFlags = true
                     }
                     com.posthog.android.PostHogAndroid.setup(this@SaatApplication, postHogConfig)
                 }
