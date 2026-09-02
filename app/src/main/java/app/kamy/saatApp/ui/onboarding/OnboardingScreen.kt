@@ -88,6 +88,7 @@ fun OnboardingScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showLocationRationale by remember { mutableStateOf(false) }
+    var isFinalizing by remember { mutableStateOf(false) }
 
     // Dynamically resolve strings for current language store selection
     val strings = remember(state.selectedLanguage) {
@@ -232,8 +233,14 @@ fun OnboardingScreen(
                                 }
                             }
                             OnboardingStep.PRAYER_NOTIFICATIONS -> {
-                                vm.completeOnboarding()
-                                onFinished()
+                                if (!isFinalizing) {
+                                    isFinalizing = true
+                                    scope.launch {
+                                        vm.completeOnboarding()
+                                        delay(1200)
+                                        onFinished()
+                                    }
+                                }
                             }
                         }
                     },
@@ -326,6 +333,57 @@ fun OnboardingScreen(
                                 )
                         )
                     }
+                }
+            }
+        }
+
+        // Fullscreen Loading Overlay when completing onboarding
+        androidx.compose.animation.AnimatedVisibility(
+            visible = isFinalizing,
+            enter = androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(200)),
+            exit = androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(200))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(app.kamy.saatApp.design.theme.SaatColors.HomeBg),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(app.kamy.saatApp.design.theme.SaatColors.PureWhite, CircleShape)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.fillMaxSize(),
+                            color = app.kamy.saatApp.design.theme.SaatColors.HomeDarkGreen,
+                            strokeWidth = 3.dp,
+                            trackColor = app.kamy.saatApp.design.theme.SaatColors.ArcGold.copy(alpha = 0.25f)
+                        )
+                        Image(
+                            painter = painterResource(R.drawable.ic_tasbih_3d),
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+
+                    Text(
+                        text = when (state.selectedLanguage) {
+                            AppLanguage.INDONESIAN -> "Menyiapkan aplikasi Anda..."
+                            AppLanguage.MALAY -> "Menyediakan aplikasi anda..."
+                            AppLanguage.ENGLISH -> "Preparing your experience..."
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = app.kamy.saatApp.design.theme.SaatColors.HomeDarkGreen,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

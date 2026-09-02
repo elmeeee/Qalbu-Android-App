@@ -958,8 +958,14 @@
     <string name="coach_mark_today_continue_desc">Resume your Quran reading session right where you left off.</string>
     <string name="coach_mark_today_verse_title">Verse of the Day</string>
     <string name="coach_mark_today_verse_desc">Listen to recitation, read tafsir, and share daily Qur\'anic inspiration with AI.</string>
-    <string name="coach_mark_quran_menu_title">Verse Actions Menu</string>
-    <string name="coach_mark_quran_menu_desc">Tap to access Bookmark, Notes, Hifz memorization tracker, Tafsir, and audio sharing.</string>
+    <string name="coach_mark_quran_menu_title">Tafsir &amp; Verse Actions</string>
+    <string name="coach_mark_quran_menu_desc">Tap to access Tafsir, Bookmark, Notes, Hifz tracker, and audio sharing.</string>
+    <string name="coach_mark_quran_settings_title">Reading Settings (Aa)</string>
+    <string name="coach_mark_quran_settings_desc">Customize Arabic font scale, text style, Tajweed coloring, and translations.</string>
+    <string name="coach_mark_quran_bookmark_title">Bookmark Verse</string>
+    <string name="coach_mark_quran_bookmark_desc">Save this verse to your bookmarks so you can easily resume reading anytime.</string>
+    <string name="coach_mark_quran_swipe_title">Swipe to Change Verses</string>
+    <string name="coach_mark_quran_swipe_desc">Swipe left or right across the screen to navigate seamlessly to the next or previous verse.</string>
     <string name="coach_mark_dhikr_title">Dhikr Counter</string>
     <string name="coach_mark_dhikr_desc">Tap the screen or button to count dhikr, and set your target count as needed.</string>
     <string name="coach_mark_asmaul_title">99 Names of Allah</string>

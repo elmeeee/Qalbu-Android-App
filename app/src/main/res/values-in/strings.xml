@@ -519,8 +519,14 @@
     <string name="coach_mark_today_continue_desc">Lanjutkan sesi tilawah Al-Quran tepat di ayat terakhir yang kamu baca.</string>
     <string name="coach_mark_today_verse_title">Ayat Hari Ini</string>
     <string name="coach_mark_today_verse_desc">Dengarkan murottal, baca tafsir, dan bagikan inspirasi Al-Quran harian dengan bantuan AI.</string>
-    <string name="coach_mark_quran_menu_title">Menu Aksi Ayat</string>
-    <string name="coach_mark_quran_menu_desc">Ketuk untuk mengakses Bookmark, Catatan, Hifz hafalan, Tafsir, dan membagikan audio.</string>
+    <string name="coach_mark_quran_menu_title">Menu Tafsir &amp; Aksi Ayat</string>
+    <string name="coach_mark_quran_menu_desc">Ketuk untuk membuka Tafsir Kemenag, Bookmark, Catatan, Hifz hafalan, dan audio ayat.</string>
+    <string name="coach_mark_quran_settings_title">Pengaturan Bacaan (Aa)</string>
+    <string name="coach_mark_quran_settings_desc">Sesuaikan ukuran font Arab, jenis teks, warna tajwid, dan terjemahan.</string>
+    <string name="coach_mark_quran_bookmark_title">Penanda Bacaan (Bookmark)</string>
+    <string name="coach_mark_quran_bookmark_desc">Tandai ayat terakhir yang kamu baca agar mudah dilanjutkan kapan saja.</string>
+    <string name="coach_mark_quran_swipe_title">Geser untuk Ganti Ayat</string>
+    <string name="coach_mark_quran_swipe_desc">Geser layar ke kiri atau kanan untuk berpindah ke ayat selanjutnya atau sebelumnya dengan mudah.</string>
     <string name="coach_mark_dhikr_title">Hitung Zikir</string>
     <string name="coach_mark_dhikr_desc">Ketuk tombol atau layar untuk menghitung zikir, dan atur target hitungan sesuai kebutuhanmu.</string>
     <string name="coach_mark_asmaul_title">99 Nama Allah</string>

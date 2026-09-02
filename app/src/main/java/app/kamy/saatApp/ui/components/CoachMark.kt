@@ -149,56 +149,60 @@ fun CoachMarkOverlay(
         label = "pulseAlpha"
     )
 
-    AnimatedContent(
-        targetState = state.currentStep,
-        transitionSpec = {
-            (fadeIn(tween(260)) + scaleIn(initialScale = 0.94f, animationSpec = tween(260)))
-                .togetherWith(fadeOut(tween(180)) + scaleOut(targetScale = 0.96f, animationSpec = tween(180)))
-        },
-        label = "coachMarkStep"
-    ) { step ->
-        val stepTarget = state.targets[step] ?: return@AnimatedContent
+    val currentTarget = state.targets[state.currentStep]
+    val targetBounds = currentTarget?.bounds ?: Rect.Zero
 
-        val density = LocalDensity.current
-        val config = LocalConfiguration.current
-        val screenHeightPx = with(density) { config.screenHeightDp.dp.toPx() }
-        val screenWidthPx = with(density) { config.screenWidthDp.dp.toPx() }
+    val animLeft by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = targetBounds.left,
+        animationSpec = tween(280, easing = FastOutSlowInEasing),
+        label = "animLeft"
+    )
+    val animTop by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = targetBounds.top,
+        animationSpec = tween(280, easing = FastOutSlowInEasing),
+        label = "animTop"
+    )
+    val animRight by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = targetBounds.right,
+        animationSpec = tween(280, easing = FastOutSlowInEasing),
+        label = "animRight"
+    )
+    val animBottom by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = targetBounds.bottom,
+        animationSpec = tween(280, easing = FastOutSlowInEasing),
+        label = "animBottom"
+    )
 
-        val targetCenterY = (stepTarget.bounds.top + stepTarget.bounds.bottom) / 2f
-        val targetCenterXPx = (stepTarget.bounds.left + stepTarget.bounds.right) / 2f
-        val showAbove = targetCenterY > screenHeightPx / 2f
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .pointerInput(step) {
-                    detectTapGestures {
-                        // Tapping anywhere advances to next step or dismisses
-                        if (state.isLastStep()) {
-                            state.skip()
-                            onDismiss()
-                        } else {
-                            state.next()
-                        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(state.currentStep) {
+                detectTapGestures {
+                    if (state.isLastStep()) {
+                        state.skip()
+                        onDismiss()
+                    } else {
+                        state.next()
                     }
                 }
+            }
+    ) {
+        // Static dark scrim with smoothly animated punched-out highlight & pulsating ring (No blinking!)
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(alpha = 0.99f)
         ) {
-            // Dark scrim with punched-out highlight & pulsating glowing ring
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer(alpha = 0.99f)
-            ) {
-                // Dimmed immersive backdrop
-                drawRect(Color.Black.copy(alpha = 0.80f))
+            drawRect(Color.Black.copy(alpha = 0.82f))
 
+            if (animRight > animLeft && animBottom > animTop) {
                 val padPx = HIGHLIGHT_PADDING.toPx()
                 val cornerPx = HIGHLIGHT_CORNER.toPx()
                 val targetRect = Rect(
-                    stepTarget.bounds.left - padPx,
-                    stepTarget.bounds.top - padPx,
-                    stepTarget.bounds.right + padPx,
-                    stepTarget.bounds.bottom + padPx
+                    animLeft - padPx,
+                    animTop - padPx,
+                    animRight + padPx,
+                    animBottom + padPx
                 )
 
                 // Punch out clear hole
@@ -219,114 +223,135 @@ fun CoachMarkOverlay(
                     style = Stroke(width = 2.dp.toPx())
                 )
             }
+        }
 
-            // Top Header Bar: Step Pill & Skip Button
-            Row(
+        // Top Header Bar: Step Pill & Skip Button (Always visible & smooth)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Step Indicator Badge
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .background(
+                        color = Color.White.copy(alpha = 0.15f),
+                        shape = CircleShape
+                    )
+                    .padding(horizontal = 12.dp, vertical = 5.dp)
             ) {
-                // Step Indicator Badge
-                Box(
-                    modifier = Modifier
-                        .background(
-                            color = Color.White.copy(alpha = 0.15f),
-                            shape = CircleShape
-                        )
-                        .padding(horizontal = 12.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = "${state.stepIndex()} / ${state.totalSteps()}",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
-                        ),
-                        color = Color.White
-                    )
-                }
-
-                // Skip Button
-                TextButton(
-                    onClick = { state.skip(); onDismiss() },
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.coach_mark_skip).uppercase(),
-                        color = Color.White.copy(alpha = 0.85f),
+                Text(
+                    text = "${state.stepIndex()} / ${state.totalSteps()}",
+                    style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        letterSpacing = 0.8.sp
-                    )
-                }
+                        fontSize = 12.sp
+                    ),
+                    color = Color.White
+                )
             }
 
-            // Gesture Visual & Text Container
+            // Skip Button
+            TextButton(
+                onClick = { state.skip(); onDismiss() },
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.coach_mark_skip).uppercase(),
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    letterSpacing = 0.8.sp
+                )
+            }
+        }
+
+        // Animated Gesture Visual & Text Container
+        AnimatedContent(
+            targetState = state.currentStep,
+            transitionSpec = {
+                (fadeIn(tween(220)) + scaleIn(initialScale = 0.96f, animationSpec = tween(220)))
+                    .togetherWith(fadeOut(tween(140)) + scaleOut(targetScale = 0.98f, animationSpec = tween(140)))
+            },
+            label = "coachMarkContent",
+            modifier = Modifier.fillMaxSize()
+        ) { step ->
+            val stepTarget = state.targets[step] ?: return@AnimatedContent
+
+            val density = LocalDensity.current
+            val config = LocalConfiguration.current
+            val screenHeightPx = with(density) { config.screenHeightDp.dp.toPx() }
+
+            val targetCenterY = (stepTarget.bounds.top + stepTarget.bounds.bottom) / 2f
+            val targetCenterXPx = (stepTarget.bounds.left + stepTarget.bounds.right) / 2f
+            val showAbove = targetCenterY > screenHeightPx / 2f
+
             val padPx = with(density) { HIGHLIGHT_PADDING.toPx() }
             val highlightTopPx = stepTarget.bounds.top - padPx
             val highlightBottomPx = stepTarget.bounds.bottom + padPx
 
-            if (stepTarget.gesture == CoachMarkGesture.SWIPE_HORIZONTAL) {
-                // Swipe Left/Right gesture overlay (as in the 2nd screenshot)
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(
-                            if (showAbove) Alignment.TopCenter else Alignment.BottomCenter
-                        )
-                        .padding(
-                            top = if (showAbove) 100.dp else 24.dp,
-                            bottom = if (showAbove) 24.dp else 80.dp,
-                            start = 28.dp,
-                            end = 28.dp
-                        ),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    SwipeGestureVisual()
-
-                    Text(
-                        text = stringResource(stepTarget.titleRes).uppercase(),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.9.sp
-                        ),
-                        color = Color.White,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Text(
-                        text = stringResource(stepTarget.descriptionRes),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = 13.5.sp,
-                            lineHeight = 20.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.85f),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-            } else {
-                // Tap gesture with pointer arrow (as in the 1st screenshot)
-                if (showAbove) {
-                    // Target is in bottom area -> Text & Hand placed ABOVE target
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (stepTarget.gesture == CoachMarkGesture.SWIPE_HORIZONTAL) {
+                    // Swipe Left/Right gesture overlay (<── 👆 ──>)
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .align(
+                                if (showAbove) Alignment.TopCenter else Alignment.BottomCenter
+                            )
                             .padding(
-                                top = with(density) { (highlightTopPx * 0.40f).toDp().coerceAtLeast(80.dp) },
+                                top = if (showAbove) 90.dp else 24.dp,
+                                bottom = if (showAbove) 24.dp else 80.dp,
                                 start = 28.dp,
                                 end = 28.dp
                             ),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        SwipeGestureVisual()
+
                         Text(
                             text = stringResource(stepTarget.titleRes).uppercase(),
                             style = MaterialTheme.typography.titleMedium.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.9.sp
+                            ),
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Text(
+                            text = stringResource(stepTarget.descriptionRes),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 13.5.sp,
+                                lineHeight = 20.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.85f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+                } else {
+                    // Tap gesture with pointer arrow
+                    if (showAbove) {
+                        // Target is in bottom area -> Text & Hand placed ABOVE target
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    top = with(density) { (highlightTopPx * 0.38f).toDp().coerceAtLeast(80.dp) },
+                                    start = 28.dp,
+                                    end = 28.dp
+                                ),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = stringResource(stepTarget.titleRes).uppercase(),
+                                style = MaterialTheme.typography.titleMedium.copy(
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.9.sp
@@ -348,18 +373,17 @@ fun CoachMarkOverlay(
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
 
                         TapGestureVisual()
                     }
 
                     // Connecting pointer line from hand down to target top edge
                     Canvas(modifier = Modifier.fillMaxSize()) {
-                        val handBottomY = highlightTopPx * 0.76f
+                        val handBottomY = highlightTopPx * 0.74f
                         val arrowEndY = highlightTopPx - 6.dp.toPx()
 
                         if (arrowEndY > handBottomY) {
-                            // Vertical guide line
                             drawLine(
                                 color = Color.White.copy(alpha = 0.75f),
                                 start = Offset(targetCenterXPx, handBottomY),
@@ -367,7 +391,6 @@ fun CoachMarkOverlay(
                                 strokeWidth = 1.8.dp.toPx()
                             )
 
-                            // Arrowhead pointing DOWN
                             val arrowSize = 7.dp.toPx()
                             val arrowPath = Path().apply {
                                 moveTo(targetCenterXPx, arrowEndY)
@@ -384,7 +407,7 @@ fun CoachMarkOverlay(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(
-                                top = with(density) { (highlightBottomPx + 90.dp.toPx()).toDp() },
+                                top = with(density) { (highlightBottomPx + 85.dp.toPx()).toDp() },
                                 start = 28.dp,
                                 end = 28.dp
                             ),
@@ -392,7 +415,7 @@ fun CoachMarkOverlay(
                     ) {
                         TapGestureVisual()
 
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(18.dp))
 
                         Text(
                             text = stringResource(stepTarget.titleRes).uppercase(),
@@ -421,11 +444,10 @@ fun CoachMarkOverlay(
 
                     // Connecting pointer line from hand up to target bottom edge
                     Canvas(modifier = Modifier.fillMaxSize()) {
-                        val handTopY = highlightBottomPx + 78.dp.toPx()
+                        val handTopY = highlightBottomPx + 74.dp.toPx()
                         val arrowEndY = highlightBottomPx + 6.dp.toPx()
 
                         if (handTopY > arrowEndY) {
-                            // Vertical guide line
                             drawLine(
                                 color = Color.White.copy(alpha = 0.75f),
                                 start = Offset(targetCenterXPx, handTopY),
@@ -433,7 +455,6 @@ fun CoachMarkOverlay(
                                 strokeWidth = 1.8.dp.toPx()
                             )
 
-                            // Arrowhead pointing UP
                             val arrowSize = 7.dp.toPx()
                             val arrowPath = Path().apply {
                                 moveTo(targetCenterXPx, arrowEndY)
@@ -446,28 +467,29 @@ fun CoachMarkOverlay(
                     }
                 }
             }
-
-            // Bottom Tap Anywhere to Continue Hint
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(bottom = 20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = if (state.isLastStep()) stringResource(R.string.coach_mark_finish) else "KETUK DI MANA SAJA UNTUK LANJUT",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 11.5.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 1.sp
-                    ),
-                    color = Color.White.copy(alpha = pulseAlpha * 0.85f)
-                )
-            }
         }
     }
+
+    // Bottom Tap Anywhere to Continue Hint
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .align(Alignment.BottomCenter)
+            .navigationBarsPadding()
+            .padding(bottom = 20.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (state.isLastStep()) stringResource(R.string.coach_mark_finish) else "KETUK DI MANA SAJA UNTUK LANJUT",
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 11.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.sp
+            ),
+            color = Color.White.copy(alpha = pulseAlpha * 0.85f)
+        )
+    }
+}
 }
 
 /**

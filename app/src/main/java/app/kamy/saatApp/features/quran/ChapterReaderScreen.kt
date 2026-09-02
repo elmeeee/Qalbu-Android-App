@@ -149,6 +149,7 @@ import app.kamy.saatApp.ui.common.TajweedTextAlign
 import app.kamy.saatApp.ui.common.TransliterationView
 import app.kamy.saatApp.ui.common.toVerseTranslationPlainText
 import app.kamy.saatApp.infrastructure.preferences.ReaderOnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkGesture
 import app.kamy.saatApp.ui.components.CoachMarkOverlay
 import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
@@ -469,7 +470,16 @@ fun ChapterReaderScreen(
                             audioPlaybackState = audioPlaybackState,
                             onPlay = { vm.onTapAyah(verseIdx) },
                             onContentScroll = if (verseIdx == 0) ::dismissScrollHint else null,
-                            onTajweedClick = { activeTajweedType.value = it }
+                            onTajweedClick = { activeTajweedType.value = it },
+                            modifier = if (verseIdx == 0) {
+                                Modifier.coachMarkTarget(
+                                    state = coachMarkState,
+                                    step = 3,
+                                    titleRes = R.string.coach_mark_quran_swipe_title,
+                                    descriptionRes = R.string.coach_mark_quran_swipe_desc,
+                                    gesture = CoachMarkGesture.SWIPE_HORIZONTAL
+                                )
+                            } else Modifier
                         )
                     }
                 }
@@ -549,7 +559,14 @@ fun ChapterReaderScreen(
                 IconButton(
                     onClick = {
                         vm.toggleBookmark(currentVerseIndex)
-                    }
+                    },
+                    modifier = Modifier.coachMarkTarget(
+                        state = coachMarkState,
+                        step = 2,
+                        titleRes = R.string.coach_mark_quran_bookmark_title,
+                        descriptionRes = R.string.coach_mark_quran_bookmark_desc,
+                        gesture = CoachMarkGesture.TAP
+                    )
                 ) {
                     Icon(
                         painter = androidx.compose.ui.res.painterResource(R.drawable.ic_bookmark_custom),
@@ -601,12 +618,6 @@ fun ChapterReaderScreen(
                             hasNote = state.currentVerseHasNote,
                             hifzStatus = state.currentVerseHifzStatus,
                             showTafsir = LocalQuranConfig.supportsTafsir(state.selectedTranslationId),
-                            modifier = Modifier.coachMarkTarget(
-                                coachMarkState,
-                                0,
-                                R.string.coach_mark_quran_menu_title,
-                                R.string.coach_mark_quran_menu_desc
-                            ),
                             onBookmark = {
                                 verseMenuExpanded.value = false
                                 vm.toggleBookmark(currentVerseIndex)
@@ -643,6 +654,13 @@ fun ChapterReaderScreen(
                         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
                         modifier = Modifier
                             .size(48.dp)
+                            .coachMarkTarget(
+                                state = coachMarkState,
+                                step = 0,
+                                titleRes = R.string.coach_mark_quran_menu_title,
+                                descriptionRes = R.string.coach_mark_quran_menu_desc,
+                                gesture = CoachMarkGesture.TAP
+                            )
                             .shadow(
                                 elevation = 6.dp,
                                 shape = CircleShape,
@@ -755,7 +773,7 @@ fun ChapterReaderScreen(
                                         .width(60.dp)
                                         .height(2.dp)
                                         .clip(CircleShape)
-                                )
+                                    )
                             }
 
                             // Close / Stop Button
@@ -784,6 +802,13 @@ fun ChapterReaderScreen(
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
                     modifier = Modifier
                         .size(48.dp)
+                        .coachMarkTarget(
+                            state = coachMarkState,
+                            step = 1,
+                            titleRes = R.string.coach_mark_quran_settings_title,
+                            descriptionRes = R.string.coach_mark_quran_settings_desc,
+                            gesture = CoachMarkGesture.TAP
+                        )
                         .shadow(
                             elevation = 6.dp,
                             shape = CircleShape,
@@ -986,7 +1011,8 @@ private fun SaatAyahPage(
     audioPlaybackState: AudioPlaybackState? = null,
     onPlay: () -> Unit,
     onContentScroll: (() -> Unit)? = null,
-    onTajweedClick: (TajweedType) -> Unit
+    onTajweedClick: (TajweedType) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val contentTopPadding = statusBarTop + 68.dp
@@ -1028,6 +1054,7 @@ private fun SaatAyahPage(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(modifier)
                 .verticalScroll(state = scrollState)
                 .padding(
                     start = 20.dp,
