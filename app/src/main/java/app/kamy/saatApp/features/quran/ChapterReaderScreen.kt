@@ -1634,35 +1634,84 @@ private fun ReciterRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
+    val avatarRes = app.kamy.saatApp.core.config.LocalQuranConfig.reciterAvatar(recitation.identifiableId)
+    val subtitleRes = app.kamy.saatApp.core.config.LocalQuranConfig.reciterSubtitleRes(recitation.identifiableId)
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) SaatColors.DeepEmerald.copy(alpha = 0.08f) else SaatColors.ScreenBackground,
+        shape = RoundedCornerShape(14.dp),
+        color = if (selected) SaatColors.DeepEmerald.copy(alpha = 0.07f) else Color(0xFFFAFAFA),
         border = BorderStroke(
-            1.dp,
-            if (selected) SaatColors.DeepEmerald.copy(alpha = 0.4f) else Color.Transparent
+            1.2.dp,
+            if (selected) SaatColors.DeepEmerald else Color(0xFFE2E8F0)
         )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
-            Text(
-                text = recitation.displayName,
-                modifier = Modifier.weight(1f),
-                color = if (selected) SaatColors.DeepEmerald else SaatColors.Slate800,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            if (selected) {
-                Icon(
-                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_check_custom),
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFF8F4F7)),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.foundation.Image(
+                    painter = painterResource(avatarRes),
                     contentDescription = null,
-                    tint = SaatColors.DeepEmerald,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(CircleShape)
+                )
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = recitation.displayName,
+                    color = if (selected) SaatColors.DeepEmerald else SaatColors.Slate900,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (subtitleRes != null) {
+                    Text(
+                        text = stringResource(subtitleRes),
+                        color = if (selected) SaatColors.DeepEmerald.copy(alpha = 0.8f) else SaatColors.Slate500,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 1.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            if (selected) {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(SaatColors.DeepEmerald),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check_custom),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, Color(0xFFCBD5E1), CircleShape)
                 )
             }
         }

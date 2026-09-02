@@ -70,6 +70,24 @@ object LocalQuranConfig {
     fun reciterSlug(recitationId: Int): String =
         recitations.firstOrNull { it.identifiableId == recitationId }?.reciterName ?: "alafasy"
 
+    @androidx.annotation.DrawableRes
+    fun reciterAvatar(recitationId: Int): Int = when (recitationId) {
+        RECITATION_ALAFASY -> app.kamy.saatApp.R.drawable.reciter_alafasy
+        RECITATION_SHAATREE -> app.kamy.saatApp.R.drawable.reciter_shaatree
+        RECITATION_MUAIQLY -> app.kamy.saatApp.R.drawable.reciter_muaiqly
+        RECITATION_HUSARY -> app.kamy.saatApp.R.drawable.reciter_husary
+        else -> app.kamy.saatApp.R.drawable.reciter_alafasy
+    }
+
+    @androidx.annotation.StringRes
+    fun reciterSubtitleRes(recitationId: Int): Int? = when (recitationId) {
+        RECITATION_ALAFASY -> app.kamy.saatApp.R.string.reciter_subtitle_alafasy
+        RECITATION_SHAATREE -> app.kamy.saatApp.R.string.reciter_subtitle_shaatree
+        RECITATION_MUAIQLY -> app.kamy.saatApp.R.string.reciter_subtitle_muaiqly
+        RECITATION_HUSARY -> app.kamy.saatApp.R.string.reciter_subtitle_husary
+        else -> null
+    }
+
     /** Map legacy QF translation IDs saved in prefs to local IDs. */
     fun normalizeTranslationId(savedId: Int): Int = when (savedId) {
         TRANSLATION_INDONESIAN, TRANSLATION_ENGLISH, TRANSLATION_MALAY -> savedId

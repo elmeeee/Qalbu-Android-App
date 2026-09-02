@@ -277,6 +277,10 @@
     <string name="text_size">Ukuran teks</string>
     <string name="continuous_play">Putar berkelanjutan</string>
     <string name="reciter">Qari</string>
+    <string name="reciter_subtitle_alafasy">Imam Masjid Agung Kuwait</string>
+    <string name="reciter_subtitle_shaatree">Imam Masjid Al-Furqan Jeddah</string>
+    <string name="reciter_subtitle_muaiqly">Imam Masjidil Haram Makkah</string>
+    <string name="reciter_subtitle_husary">Qari &amp; Syekh Al-Azhar Mesir</string>
     <string name="study_tools">Alat kajian</string>
     <string name="close_verse_actions">Tutup aksi ayat</string>
     <string name="share_reflection">Bagikan refleksi</string>

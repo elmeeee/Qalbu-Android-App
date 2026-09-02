@@ -1063,12 +1063,22 @@ private fun LanguageSheet(
                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                painter = painterResource(flagRes),
-                                contentDescription = null,
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(width = 28.dp, height = 20.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFF8F4F7)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.foundation.Image(
+                                    painter = painterResource(flagRes),
+                                    contentDescription = null,
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                )
+                            }
                             Spacer(Modifier.width(14.dp))
                             Text(
                                 text = stringResource(lang.labelRes),
@@ -1078,11 +1088,20 @@ private fun LanguageSheet(
                                 modifier = Modifier.weight(1f)
                             )
                             if (isSelected) {
-                                Text(
-                                    text = "✓",
-                                    color = SaatColors.DeepEmerald,
-                                    fontWeight = FontWeight.Bold
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(SaatColors.DeepEmerald),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_check_custom),
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
                             }
                         }
                     }
