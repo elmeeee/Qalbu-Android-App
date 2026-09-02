@@ -22,21 +22,6 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
 
-/**
- * Realistic 3D Quran book page-turn pager (Commit 466cf68 visual fidelity).
- *
- * Implements:
- * 1. 3D perspective and spine-hinged rotation (RTL Quran reading flow: 0 deg -> -180 deg).
- * 2. Stationary revealed page underneath (cancelling default slider motion).
- * 3. Dynamic multi-layer lighting:
- *    - Cast gutter shadow on the revealed page underneath
- *    - Crease shadow along the spine hinge
- *    - Traveling cylinder curl highlight & valley shadow across the bending paper
- *    - Ambient tilt darkening
- *    - Paper edge bevel and tactile thickness
- *    - Authentic back-face paper rendering when rotated past 90 degrees
- * 4. System gesture exclusion across the entire surface so edge gestures swipe ayahs smoothly.
- */
 @Composable
 fun PageCurlPager(
     state: PagerState,
@@ -49,7 +34,7 @@ fun PageCurlPager(
         modifier = modifier
             .fillMaxSize()
             .systemGestureExclusion()
-            .background(SaatColors.ScreenBackground),
+            .background(Color.Transparent),
         userScrollEnabled = userScrollEnabled,
         beyondViewportPageCount = 1,
         key = { it }
@@ -62,7 +47,7 @@ fun PageCurlPager(
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(zIndexVal)
-                .background(SaatColors.ScreenBackground)
+                .background(Color.Transparent)
                 .graphicsLayer {
                     val offset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
 
@@ -194,15 +179,7 @@ fun PageCurlPager(
                                 }
                             } else {
                                 // Back face of the physical page (p in 0.5f..1.0f)
-                                // Do NOT draw front content to avoid inverted mirror text.
-                                // Draw pristine paper background with spine crease on the right.
                                 val backProgress = (p - 0.5f) * 2f // 0 to 1
-
-                                // Solid warm paper background
-                                drawRect(
-                                    color = SaatColors.ScreenBackground,
-                                    size = size
-                                )
 
                                 // Spine crease shadow on the right side of the back-face
                                 val spineWidth = w * 0.18f
