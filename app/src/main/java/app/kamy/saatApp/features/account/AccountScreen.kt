@@ -89,6 +89,8 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.locale.AppLanguage
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Brush
 import app.kamy.saatApp.design.components.SaatInlineError
 import app.kamy.saatApp.design.theme.SaatColors
@@ -194,9 +196,7 @@ fun AccountScreen(
             error = state.translationsError,
             onQueryChange = vm::setTranslatorQuery,
             onPick = { translation ->
-                if (vm.selectTranslation(translation)) {
-                    (context as? ComponentActivity)?.recreate()
-                }
+                vm.selectTranslation(translation)
             },
             onDismiss = vm::closeTranslator,
             onRetry = vm::loadTranslations
@@ -243,7 +243,7 @@ fun AccountScreen(
             selected = state.appLanguage,
             onSelect = { language ->
                 vm.setAppLanguage(language)
-                (context as? ComponentActivity)?.recreate()
+                app.kamy.saatApp.core.analytics.AppAnalytics.trackLanguageChanged(language.tag)
             },
             onDismiss = vm::closeLanguageSheet
         )
@@ -1018,6 +1018,9 @@ private fun LanguageSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var applyingLang by remember { mutableStateOf<AppLanguage?>(null) }
+
     SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
@@ -1036,14 +1039,31 @@ private fun LanguageSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AppLanguage.entries.forEach { lang ->
-                    val isSelected = lang == selected
+                    val isSelected = lang == (applyingLang ?: selected)
+                    val isApplying = lang == applyingLang
                     val flagRes = when (lang) {
                         AppLanguage.INDONESIAN -> R.drawable.ic_flag_id
                         AppLanguage.ENGLISH -> R.drawable.ic_flag_en
                         AppLanguage.MALAY -> R.drawable.ic_flag_ms
                     }
                     Surface(
-                        onClick = { onSelect(lang) },
+                        onClick = {
+                            if (lang != selected && applyingLang == null) {
+                                applyingLang = lang
+                                scope.launch {
+                                    kotlinx.coroutines.delay(200)
+                                    onSelect(lang)
+                                    kotlinx.coroutines.delay(100)
+                                    sheetState.hide()
+                                    onDismiss()
+                                }
+                            } else if (lang == selected && applyingLang == null) {
+                                scope.launch {
+                                    sheetState.hide()
+                                    onDismiss()
+                                }
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
                         color = if (isSelected) {
@@ -1087,7 +1107,13 @@ private fun LanguageSheet(
                                 color = if (isSelected) SaatColors.DeepEmerald else MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.weight(1f)
                             )
-                            if (isSelected) {
+                            if (isApplying) {
+                                androidx.compose.material3.CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = SaatColors.DeepEmerald,
+                                    strokeWidth = 2.dp
+                                )
+                            } else if (isSelected) {
                                 Box(
                                     modifier = Modifier
                                         .size(22.dp)

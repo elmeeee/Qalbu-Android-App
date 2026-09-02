@@ -256,6 +256,15 @@ object AppAnalytics {
         )
     }
 
+    fun trackLanguageChanged(languageCode: String) {
+        capture(
+            event = "app_language_changed",
+            properties = mapOf(
+                "language" to languageCode
+            )
+        )
+    }
+
     // ==========================================
     // 🎛️ REMOTE CONFIGURATION & FEATURE FLAGS
     // ==========================================
