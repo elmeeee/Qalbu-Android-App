@@ -426,7 +426,15 @@ fun TodayScreen(
                 }
 
                 item(key = "top_header_spacer") {
-                    Spacer(modifier = Modifier.height(100.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+                item(key = "masjidku_collab") {
+                    app.kamy.saatApp.features.today.components.MasjidkuCollaborationBanner(
+                        isDarkBackground = cardDrawable != R.drawable.day,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 4.dp)
+                    )
                 }
                 item(key = "prayer_card") {
                     PrayerDashboardCard(

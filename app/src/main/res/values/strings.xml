@@ -439,6 +439,13 @@
     <!-- Worship / Spiritual Screen Revamp -->
     <string name="worship_header_title">Worship</string>
     <string name="worship_header_subtitle">Your path to Allah</string>
+    <string name="collab_with">In collaboration with</string>
+    <string name="collab_masjidku_sub">Digital Mosque Management</string>
+    <string name="tool_category_all">All</string>
+    <string name="tool_category_prayer">Prayer &amp; Time</string>
+    <string name="tool_category_dhikr">Dhikr &amp; Du\'a</string>
+    <string name="tool_category_fiqh">Fiqh &amp; Guides</string>
+    <string name="tool_search_hint">Search Islamic tools...</string>
 
     <string name="tool_qibla_title">Qibla</string>
     <string name="tool_qibla_desc">Find the direction of the Kaaba</string>

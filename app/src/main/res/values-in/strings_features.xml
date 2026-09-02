@@ -107,6 +107,13 @@
     <!-- Worship / Spiritual Screen Revamp -->
     <string name="worship_header_title">Ibadah</string>
     <string name="worship_header_subtitle">Jalanmu menuju Allah</string>
+    <string name="collab_with">Berkolaborasi dengan</string>
+    <string name="collab_masjidku_sub">Manajemen Masjid Digital</string>
+    <string name="tool_category_all">Semua</string>
+    <string name="tool_category_prayer">Shalat &amp; Waktu</string>
+    <string name="tool_category_dhikr">Zikir &amp; Doa</string>
+    <string name="tool_category_fiqh">Fikih &amp; Panduan</string>
+    <string name="tool_search_hint">Cari fitur ibadah...</string>
 
     <string name="tool_qibla_title">Kiblat</string>
     <string name="tool_qibla_desc">Cari arah Kiblat Ka\'bah</string>

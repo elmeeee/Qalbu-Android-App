@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -236,3 +237,82 @@ fun TodayHeader(
         }
     }
 }
+
+@Composable
+fun MasjidkuCollaborationBanner(
+    isDarkBackground: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val haptic = app.kamy.saatApp.ui.feedback.rememberTapHaptic()
+    val textColor = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
+    Row(
+        modifier = modifier
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+            .clickable {
+                haptic()
+                val intent = android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse("https://masjidku.app")
+                )
+                runCatching { context.startActivity(intent) }
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Vertical accent line
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .height(38.dp)
+                .background(
+                    color = textColor.copy(alpha = 0.5f),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(1.dp)
+                )
+        )
+
+        Spacer(Modifier.width(8.dp))
+
+        Column {
+            Text(
+                text = stringResource(R.string.collab_with),
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                color = textColor.copy(alpha = 0.85f),
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(Modifier.height(3.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                androidx.compose.foundation.Image(
+                    painter = painterResource(R.drawable.ic_masjidku_logo),
+                    contentDescription = "Masjidku",
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(6.dp))
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Column {
+                    Text(
+                        text = "Masjidku",
+                        style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                        lineHeight = 15.sp
+                    )
+                    Text(
+                        text = stringResource(R.string.collab_masjidku_sub),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        fontWeight = FontWeight.Normal,
+                        color = textColor.copy(alpha = 0.75f),
+                        lineHeight = 12.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
