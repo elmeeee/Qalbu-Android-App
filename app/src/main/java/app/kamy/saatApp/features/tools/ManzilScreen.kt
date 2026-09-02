@@ -91,45 +91,14 @@ fun ManzilScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        SaatColors.ScreenBackground,
-                        SaatColors.SageMist,
-                        SaatColors.PrayerMint
-                    )
-                )
-            )
-            .tabContentStatusBarInset()
+            .background(SaatColors.HomeBg)
     ) {
         // ─── Top bar ───────────────────────────────────────────────────
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = SaatColors.DeepEmerald
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.manzil_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.DeepEmerald
-                )
-                Text(
-                    text = stringResource(R.string.manzil_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SaatColors.Slate500
-                )
-            }
-        }
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+            title = stringResource(R.string.manzil_title),
+            subtitle = stringResource(R.string.manzil_subtitle),
+            onBack = onBack
+        )
 
         // ─── Premium Protection Header ──────────────────────────────────
         ManzilProtectionHeader(

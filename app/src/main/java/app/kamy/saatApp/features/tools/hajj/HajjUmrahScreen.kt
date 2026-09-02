@@ -84,59 +84,27 @@ fun HajjUmrahScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SaatColors.ScreenBackground)
+            .background(SaatColors.HomeBg)
     ) {
-        // Sticky Header / Top Bar
-        Surface(
-            color = Color.White,
-            shadowElevation = 2.dp,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 12.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = SaatColors.Slate700
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.hajj_top_bar_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald
-                        )
-                        Text(
-                            text = stringResource(R.string.hajj_top_bar_subtitle),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = SaatColors.Slate500
-                        )
-                    }
-                }
-
-                // Scrollable Tabs with Vector Icons
+        // Unified Sticky Header / Top Bar
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+            title = stringResource(R.string.hajj_top_bar_title),
+            subtitle = stringResource(R.string.hajj_top_bar_subtitle),
+            onBack = onBack,
+            bottomContent = {
                 ScrollableTabRow(
                     selectedTabIndex = activeTab,
-                    containerColor = Color.Transparent,
-                    contentColor = SaatColors.DeepEmerald,
+                    containerColor = SaatColors.HomeBg,
+                    contentColor = SaatColors.HomeDarkGreen,
                     edgePadding = 16.dp,
                     indicator = { tabPositions ->
                         TabRowDefaults.SecondaryIndicator(
                             modifier = Modifier.tabIndicatorOffset(tabPositions[activeTab]),
-                            color = SaatColors.DeepEmerald,
+                            color = SaatColors.HomeDarkGreen,
                             height = 3.dp
                         )
                     },
-                    divider = { HorizontalDivider(color = SaatColors.SoftGrey, thickness = 1.dp) }
+                    divider = { HorizontalDivider(color = Color(0xFFE8E2D2), thickness = 1.dp) }
                 ) {
                     tabs.forEachIndexed { index, item ->
                         Tab(
@@ -146,7 +114,7 @@ fun HajjUmrahScreen(
                                 Icon(
                                     painter = painterResource(id = item.iconRes),
                                     contentDescription = null,
-                                    tint = if (activeTab == index) SaatColors.DeepEmerald else SaatColors.Slate500,
+                                    tint = if (activeTab == index) SaatColors.HomeDarkGreen else SaatColors.Slate500,
                                     modifier = Modifier.size(20.dp)
                                 )
                             },
@@ -155,14 +123,14 @@ fun HajjUmrahScreen(
                                     text = item.title,
                                     fontWeight = if (activeTab == index) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 13.sp,
-                                    color = if (activeTab == index) SaatColors.DeepEmerald else SaatColors.Slate700
+                                    color = if (activeTab == index) SaatColors.HomeDarkGreen else SaatColors.Slate700
                                 )
                             }
                         )
                     }
                 }
             }
-        }
+        )
 
         // Tab Content
         LazyColumn(

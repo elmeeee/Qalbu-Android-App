@@ -125,59 +125,18 @@ fun FidyahCalculatorScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            SaatColors.ScreenBackground,
-                            SaatColors.SageMist.copy(alpha = 0.4f),
-                            SaatColors.ScreenBackground
-                        )
-                    )
-                )
+                .background(SaatColors.HomeBg)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = { focusManager.clearFocus() })
                 }
-                .tabContentStatusBarInset()
                 .imePadding()
         ) {
-        // Sticky Premium Header Bar (Without redundant Dua icon)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(SaatColors.ScreenBackground.copy(alpha = 0.95f))
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onNavigateBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = SaatColors.DeepEmerald
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "✦ ",
-                        fontSize = 14.sp,
-                        color = SaatColors.GoldDeep,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = screenTitle,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
-                    )
-                }
-                Text(
-                    text = subtitle,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+            // Unified Sticky Premium Header Bar
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = screenTitle,
+                subtitle = subtitle,
+                onBack = onNavigateBack
+            )
 
         HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
 

@@ -419,49 +419,12 @@ private fun FaraidhHeader(
     onScenarios: () -> Unit,
     onReset: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = SaatColors.PureWhite,
-        shadowElevation = 1.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                onClick = onBack,
-                shape = CircleShape,
-                color = SaatColors.LightGrey,
-                modifier = Modifier.size(38.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = SaatColors.Slate800,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.faraidh_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.Slate900
-                )
-                Text(
-                    text = stringResource(R.string.faraidh_subtitle_short),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = SaatColors.Teal,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+        title = stringResource(R.string.faraidh_title),
+        subtitle = stringResource(R.string.faraidh_subtitle_short),
+        onBack = onBack,
+        actions = {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 HeaderIconButton(
                     iconRes = R.drawable.ic_faraidh_doc,
                     contentDescription = stringResource(R.string.faraidh_saved_scenarios),
@@ -484,7 +447,7 @@ private fun FaraidhHeader(
                 )
             }
         }
-    }
+    )
 }
 
 @Composable

@@ -127,48 +127,15 @@ fun ZakatCalculatorScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        SaatColors.ScreenBackground,
-                        SaatColors.SageMist.copy(alpha = 0.4f),
-                        SaatColors.ScreenBackground
-                    )
-                )
-            )
-            .tabContentStatusBarInset()
+            .background(SaatColors.HomeBg)
             .imePadding()
     ) {
-        // Sticky Premium Header Row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(SaatColors.ScreenBackground.copy(alpha = 0.95f))
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(SaatColors.PureWhite)
-                    .border(1.dp, SaatColors.SoftGrey, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = SaatColors.Slate800
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = stringResource(R.string.zakat_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold,
-                color = SaatColors.Slate900
-            )
-        }
+        // Unified Sticky Premium Header Row
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+            title = stringResource(R.string.zakat_title),
+            subtitle = stringResource(R.string.tool_zakah_desc),
+            onBack = onBack
+        )
 
         // Scrollable Body Form with Bottom Padding guaranteed above Android Navbar
         Column(

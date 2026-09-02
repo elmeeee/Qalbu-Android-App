@@ -113,48 +113,51 @@ fun JamakPrayerScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(SaatColors.ScreenBackground)
+            .background(SaatColors.HomeBg)
     ) {
-        // Header Bar (Full screen behind status bar)
-        HeaderBar(
+        // Unified Header Bar with Scrollable Tabs
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
             title = stringResource(R.string.jamak_prayer_title),
             subtitle = stringResource(R.string.jamak_prayer_subtitle),
-            onBack = onBack
-        )
-
-        // Scrollable Tab Switcher (4 Tabs)
-        ScrollableTabRow(
-            selectedTabIndex = selectedTab,
-            containerColor = Color.White,
-            contentColor = SaatColors.DeepEmerald,
-            edgePadding = 16.dp,
-            indicator = { tabPositions ->
-                if (selectedTab in tabPositions.indices) {
-                    Box(
-                        Modifier
-                            .tabIndicatorOffset(tabPositions[selectedTab])
-                            .height(3.dp)
-                            .padding(horizontal = 16.dp)
-                            .background(SaatColors.GoldDeep, RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-                    )
-                }
-            }
-        ) {
-            JamakTab.entries.forEachIndexed { index, tab ->
-                Tab(
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index },
-                    text = {
-                        Text(
-                            text = tab.label(currentLang),
-                            style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp),
-                            fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium,
-                            color = if (selectedTab == index) SaatColors.DeepEmerald else SaatColors.Slate500
+            onBack = onBack,
+            bottomContent = {
+                ScrollableTabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = SaatColors.HomeBg,
+                    contentColor = SaatColors.HomeDarkGreen,
+                    edgePadding = 16.dp,
+                    indicator = { tabPositions ->
+                        if (selectedTab in tabPositions.indices) {
+                            Box(
+                                Modifier
+                                    .tabIndicatorOffset(tabPositions[selectedTab])
+                                    .height(3.dp)
+                                    .padding(horizontal = 16.dp)
+                                    .background(SaatColors.GoldDeep, RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                            )
+                        }
+                    },
+                    divider = {
+                        HorizontalDivider(color = Color(0xFFE8E2D2))
+                    }
+                ) {
+                    JamakTab.entries.forEachIndexed { index, tab ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Text(
+                                    text = tab.label(currentLang),
+                                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 13.sp),
+                                    fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium,
+                                    color = if (selectedTab == index) SaatColors.HomeDarkGreen else SaatColors.Slate500
+                                )
+                            }
                         )
                     }
-                )
+                }
             }
-        }
+        )
 
         // Tab Content
         Box(modifier = Modifier.fillMaxSize()) {
@@ -174,67 +177,7 @@ fun JamakPrayerScreen(
     }
 }
 
-@Composable
-private fun HeaderBar(
-    title: String,
-    subtitle: String,
-    onBack: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = Color.White,
-        shadowElevation = 2.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = SaatColors.DeepEmerald
-                )
-            }
 
-            Spacer(Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Surface(
-                        shape = CircleShape,
-                        color = SaatColors.GoldDeep.copy(alpha = 0.15f)
-                    ) {
-                        Text(
-                            text = "Musafir",
-                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.GoldDeep,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
-                    color = SaatColors.Slate500,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun DalilTabContent(

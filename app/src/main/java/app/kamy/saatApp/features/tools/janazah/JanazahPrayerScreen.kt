@@ -91,54 +91,22 @@ fun JanazahPrayerScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SaatColors.ScreenBackground)
+            .background(SaatColors.HomeBg)
     ) {
-        // Sticky Top Header
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = SaatColors.PureWhite,
-            shadowElevation = 2.dp
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = SaatColors.DeepEmerald
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.jenazah_prayer_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald
-                        )
-                        Text(
-                            text = when (appLanguage) {
-                                AppLanguage.ENGLISH -> "Fard Kifayah · 4 Takbirs without Ruku & Sujud"
-                                AppLanguage.MALAY -> "Fardu Kifayah · 4 Takbir Tanpa Rukuk & Sujud"
-                                else -> "Fardhu Kifayah · 4 Takbir Tanpa Ruku' & Sujud"
-                            },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = SaatColors.GoldDeep,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-
-                // Scrollable Sub-tabs
+        // Unified Sticky Top Header
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+            title = stringResource(R.string.jenazah_prayer_title),
+            subtitle = when (appLanguage) {
+                AppLanguage.ENGLISH -> "Fard Kifayah · 4 Takbirs without Ruku & Sujud"
+                AppLanguage.MALAY -> "Fardu Kifayah · 4 Takbir Tanpa Rukuk & Sujud"
+                else -> "Fardhu Kifayah · 4 Takbir Tanpa Ruku' & Sujud"
+            },
+            onBack = onBack,
+            bottomContent = {
                 ScrollableTabRow(
                     selectedTabIndex = activeTab,
-                    containerColor = SaatColors.PureWhite,
-                    contentColor = SaatColors.DeepEmerald,
+                    containerColor = SaatColors.HomeBg,
+                    contentColor = SaatColors.HomeDarkGreen,
                     edgePadding = 16.dp,
                     indicator = { tabPositions ->
                         if (activeTab < tabPositions.size) {
@@ -146,13 +114,13 @@ fun JanazahPrayerScreen(
                                 modifier = Modifier
                                     .tabIndicatorOffset(tabPositions[activeTab])
                                     .height(3.dp),
-                                color = SaatColors.DeepEmerald,
+                                color = SaatColors.HomeDarkGreen,
                                 shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
                             ) {}
                         }
                     },
                     divider = {
-                        HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
+                        HorizontalDivider(color = Color(0xFFE8E2D2))
                     }
                 ) {
                     tabTitles.forEachIndexed { index, title ->
@@ -164,14 +132,14 @@ fun JanazahPrayerScreen(
                                     text = title,
                                     fontWeight = if (activeTab == index) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 13.5.sp,
-                                    color = if (activeTab == index) SaatColors.DeepEmerald else SaatColors.Slate500
+                                    color = if (activeTab == index) SaatColors.HomeDarkGreen else SaatColors.Slate500
                                 )
                             }
                         )
                     }
                 }
             }
-        }
+        )
 
         // Tab Content
         when (activeTab) {

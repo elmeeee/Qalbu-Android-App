@@ -158,42 +158,22 @@ fun AsmaulHusnaScreen(
     }
 
     Scaffold(
+        containerColor = SaatColors.HomeBg,
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.asmaul_husna_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(R.string.asmaul_husna_subtitle_count),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        focusManager.clearFocus()
-                        onBack()
-                    }) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = stringResource(R.string.asmaul_husna_title),
+                subtitle = stringResource(R.string.asmaul_husna_subtitle_count),
+                onBack = {
+                    focusManager.clearFocus()
+                    onBack()
+                }
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(SaatColors.HomeBg)
                 .padding(paddingValues)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = { focusManager.clearFocus() })

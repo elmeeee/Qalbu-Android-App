@@ -48,29 +48,13 @@ fun EncyclopediaDetailScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = title,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = SaatColors.DeepEmerald,
-                            maxLines = 1
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = SaatColors.DeepEmerald
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                    title = title,
+                    subtitle = subtitle.takeIf { it.isNotBlank() },
+                    onBack = onBack
                 )
             },
-            containerColor = Color(0xFFF8FAF9)
+            containerColor = SaatColors.HomeBg
         ) { innerPadding ->
         if (state.isLoading) {
             Box(

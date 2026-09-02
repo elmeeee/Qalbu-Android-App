@@ -116,47 +116,17 @@ fun QuranRadioScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(SaatColors.ScreenBackground)
-                .tabContentStatusBarInset()
+                .background(SaatColors.HomeBg)
         ) {
-        // Sticky Header bar
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = SaatColors.ScreenBackground,
-            shadowElevation = 0.5.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+            // Unified Sticky Header bar
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = stringResource(R.string.radio_quran_title),
+                subtitle = stringResource(R.string.tool_radio_desc),
+                onBack = onBack,
+                actions = {
+                    LiveStatusBadge(isLive = playbackState.isPlaying && playbackState.reciterName == "Radio Quran")
                 }
-                Text(
-                    text = "✦",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = stringResource(R.string.radio_quran_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(Modifier.weight(1f))
-
-                // Live Indicator Badge in Header
-                LiveStatusBadge(isLive = playbackState.isPlaying && playbackState.reciterName == "Radio Quran")
-            }
-        }
+            )
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
