@@ -224,8 +224,12 @@ object AyahImageShare {
         }
 
         val totalContentHeight = totalFixedOverhead + arabicLayout.height + transLayout.height
-        var currentY = archTopY + (availableHeight - totalContentHeight) / 2f
-        if (currentY < archTopY) currentY = archTopY
+        // Center the entire content block around 48% height (open arch window above the mosque)
+        val targetCenterY = height * 0.48f
+        var currentY = targetCenterY - (totalContentHeight / 2f)
+        val minTopY = height * 0.19f
+        val maxTopY = height * 0.36f
+        currentY = currentY.coerceIn(minTopY, maxTopY)
 
         // 1. Top Decorative Flourish Ornament (Golden Diamond & Flanking Lines)
         val ornamentPaint = Paint().apply {
