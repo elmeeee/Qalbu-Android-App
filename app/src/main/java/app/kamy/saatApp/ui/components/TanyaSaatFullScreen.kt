@@ -42,6 +42,8 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -190,27 +192,25 @@ fun TanyaSaatFullScreen(
                     ) {
                         items(SaatMood.defaultList, key = { it.id }) { mood ->
                             val isSelected = state.activeMood?.id == mood.id
-                            Surface(
+                            FilterChip(
+                                selected = isSelected,
                                 onClick = { onMoodSelected(mood) },
-                                shape = RoundedCornerShape(20.dp),
-                                color = if (isSelected) SaatColors.DeepEmerald else Color(0xFFF1F5F3),
-                                border = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE2E8F0)),
-                                shadowElevation = if (isSelected) 2.dp else 0.dp
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
+                                leadingIcon = {
                                     Text(text = mood.iconEmoji, fontSize = 13.sp)
-                                    Spacer(modifier = Modifier.width(5.dp))
+                                },
+                                label = {
                                     Text(
                                         text = stringResource(mood.labelRes),
-                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                        color = if (isSelected) Color.White else Color(0xFF1E293B)
+                                        maxLines = 1,
+                                        softWrap = false,
+                                        style = MaterialTheme.typography.labelMedium
                                     )
-                                }
-                            }
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = SaatColors.DeepEmerald,
+                                    selectedLabelColor = SaatColors.PureWhite
+                                )
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.height(2.dp))

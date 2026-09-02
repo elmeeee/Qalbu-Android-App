@@ -136,7 +136,6 @@ fun AccountScreen(
             vm = vm,
             scrollState = mainScrollState,
             onBack = onBack,
-            onOpenReadingNotification = { currentDetailScreen.value = "READING_NOTIFICATION" },
             onOpenNotificationAdhan = { currentDetailScreen.value = "NOTIFICATION_ADHAN" },
             onOpenAbout = { currentDetailScreen.value = "ABOUT_SAAT" },
             onOpenPrivacyPolicy = { currentDetailScreen.value = "PRIVACY_POLICY" },
@@ -145,13 +144,6 @@ fun AccountScreen(
         )
 
         when (currentDetailScreen.value) {
-            "READING_NOTIFICATION" -> {
-                ReadingNotificationScreen(
-                    state = state,
-                    vm = vm,
-                    onBack = { currentDetailScreen.value = null }
-                )
-            }
             "NOTIFICATION_ADHAN" -> {
                 NotificationAdhanScreen(
                     state = state,
@@ -284,7 +276,6 @@ private fun AccountSettingsContent(
     vm: AccountViewModel,
     scrollState: ScrollState,
     onBack: (() -> Unit)?,
-    onOpenReadingNotification: () -> Unit,
     onOpenNotificationAdhan: () -> Unit,
     onOpenAbout: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
@@ -388,10 +379,10 @@ private fun AccountSettingsContent(
                     showDivider = true
                 )
                 SettingsCustomRow(
-                    iconRes = R.drawable.ic_setting_quran_custom,
-                    title = stringResource(R.string.settings_item_quran),
-                    subtitle = stringResource(R.string.settings_item_advance_options),
-                    onClick = onOpenReadingNotification,
+                    iconRes = R.drawable.ic_translator_custom,
+                    title = stringResource(R.string.reading_translator),
+                    subtitle = state.selectedTranslationName.ifBlank { LocalQuranConfig.translationForAppLanguage(state.appLanguage).authorName },
+                    onClick = { vm.openTranslator() },
                     showChevron = true,
                     showDivider = true
                 )
@@ -593,6 +584,14 @@ fun NotificationAdhanScreen(
             // Section 2: Notification Reading
             SettingsSectionHeader(stringResource(R.string.notif_section_reading))
             SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_daily_verse_custom,
+                    title = stringResource(R.string.reading_daily_verse),
+                    subtitle = if (state.dailyVerseEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.dailyVerseEnabled,
+                    onCheckedChange = vm::setDailyVerseEnabled,
+                    showDivider = true
+                )
                 val activeCount = state.surahReminders.count { it.enabled }
                 val surahSubtitle = if (state.yasinReminderEnabled) {
                     stringResource(R.string.surah_count_on_format, if (activeCount > 0) activeCount else 3)
@@ -728,104 +727,6 @@ fun NotificationAdhanScreen(
             },
             onDismiss = { showTahajudTimePicker = false }
         )
-    }
-}
-
-// ─── Reading Notification Screen (Mockup 3) ──────────────────────────────────
-
-@Composable
-fun ReadingNotificationScreen(
-    state: AccountUiState,
-    vm: AccountViewModel,
-    onBack: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(SaatColors.HomeBg)
-    ) {
-        // Sticky Header bar
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = SaatColors.HomeBg,
-            shadowElevation = 0.5.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .tabContentStatusBarInset()
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = Color(0xFF1C1C1E)
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.reading_notif_title),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = Color(0xFF1C1C1E)
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            // Section 1: Reading Notification
-            SettingsSectionHeader(stringResource(R.string.reading_section_reading_notif))
-            SettingsCard {
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_daily_verse_custom,
-                    title = stringResource(R.string.reading_daily_verse),
-                    subtitle = if (state.dailyVerseEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
-                    checked = state.dailyVerseEnabled,
-                    onCheckedChange = vm::setDailyVerseEnabled,
-                    showDivider = false
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Section 2: Writing
-            SettingsSectionHeader(stringResource(R.string.reading_section_writing))
-            SettingsCard {
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_latin_custom,
-                    title = stringResource(R.string.reading_show_latin),
-                    subtitle = if (state.showTransliteration) stringResource(R.string.state_on) else stringResource(R.string.state_off),
-                    checked = state.showTransliteration,
-                    onCheckedChange = vm::setShowTransliteration,
-                    showDivider = true
-                )
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_translator_custom,
-                    title = stringResource(R.string.reading_show_translation),
-                    subtitle = if (state.showTranslation) stringResource(R.string.state_shown) else stringResource(R.string.state_hidden),
-                    checked = state.showTranslation,
-                    onCheckedChange = vm::setShowTranslation,
-                    showDivider = true
-                )
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_translator_custom,
-                    title = stringResource(R.string.reading_translator),
-                    subtitle = state.selectedTranslationName.ifBlank { LocalQuranConfig.translationForAppLanguage(state.appLanguage).authorName },
-                    onClick = { vm.openTranslator() },
-                    showChevron = true,
-                    showDivider = false
-                )
-            }
-            Spacer(Modifier.height(floatingNavBottomPadding()))
-        }
     }
 }
 

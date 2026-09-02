@@ -39,6 +39,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -387,47 +389,31 @@ fun SpiritualToolsScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Category Filter Pills
+                    // Category Filter Pills (Tasbih style FilterChip)
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(ToolCategory.values()) { category ->
+                        items(ToolCategory.entries.toTypedArray()) { category ->
                             val isSelected = selectedCategory == category
-                            val pillBg by animateColorAsState(
-                                targetValue = if (isSelected) SaatColors.HomeDarkGreen else SaatColors.PureWhite,
-                                animationSpec = tween(150),
-                                label = "pillBg"
-                            )
-                            val pillTextColor by animateColorAsState(
-                                targetValue = if (isSelected) Color.White else SaatColors.Slate700,
-                                animationSpec = tween(150),
-                                label = "pillTextColor"
-                            )
-                            val pillBorder = if (isSelected) null else BorderStroke(1.dp, Color(0xFFE8E2D2))
-
-                            Surface(
-                                shape = CircleShape,
-                                color = pillBg,
-                                border = pillBorder,
-                                shadowElevation = if (isSelected) 2.dp else 0.dp,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable {
-                                        haptic()
-                                        selectedCategory = category
-                                    }
-                            ) {
-                                Text(
-                                    text = stringResource(category.labelRes),
-                                    style = TextStyle(
-                                        fontSize = 12.sp,
-                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                        color = pillTextColor
-                                    ),
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = {
+                                    haptic()
+                                    selectedCategory = category
+                                },
+                                label = {
+                                    Text(
+                                        text = stringResource(category.labelRes),
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = SaatColors.DeepEmerald,
+                                    selectedLabelColor = SaatColors.PureWhite
                                 )
-                            }
+                            )
                         }
                     }
                 }
@@ -443,7 +429,7 @@ fun SpiritualToolsScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Tidak ada fitur yang cocok",
+                            text = stringResource(R.string.tool_search_empty),
                             style = TextStyle(
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,

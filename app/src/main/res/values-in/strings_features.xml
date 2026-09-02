@@ -114,6 +114,7 @@
     <string name="tool_category_dhikr">Zikir &amp; Doa</string>
     <string name="tool_category_fiqh">Fikih &amp; Panduan</string>
     <string name="tool_search_hint">Cari fitur ibadah...</string>
+    <string name="tool_search_empty">Tidak ada fitur yang cocok</string>
 
     <string name="tool_qibla_title">Kiblat</string>
     <string name="tool_qibla_desc">Cari arah Kiblat Ka\'bah</string>

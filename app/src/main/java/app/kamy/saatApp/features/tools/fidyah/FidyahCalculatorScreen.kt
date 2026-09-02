@@ -46,6 +46,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -366,26 +368,21 @@ private fun MadhhabSelectorSection(
                     AppLanguage.ENGLISH -> m.titleEn
                     else -> m.titleId
                 }
-                Surface(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .clickable { onSelectMadhhab(m) },
-                    color = if (isSelected) SaatColors.DeepEmerald else SaatColors.PureWhite,
-                    shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = if (isSelected) SaatColors.GoldDeep else SaatColors.SoftGrey
-                    ),
-                    shadowElevation = if (isSelected) 2.dp else 0.dp
-                ) {
-                    Text(
-                        text = title,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        fontSize = 13.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { onSelectMadhhab(m) },
+                    label = {
+                        Text(
+                            text = title,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = SaatColors.DeepEmerald,
+                        selectedLabelColor = SaatColors.PureWhite
                     )
-                }
+                )
             }
         }
     }

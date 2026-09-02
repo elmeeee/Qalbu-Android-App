@@ -303,7 +303,7 @@ private fun DalilCardItem(
                             fontSize = 11.sp,
                             fontStyle = FontStyle.Italic
                         ),
-                        color = Slate600
+                        color = SaatColors.DeepEmerald
                     )
 
                     Spacer(Modifier.height(4.dp))
@@ -661,7 +661,7 @@ private fun StepCardItem(
                                     fontSize = 11.sp,
                                     fontStyle = FontStyle.Italic
                                 ),
-                                color = Slate600
+                                color = SaatColors.DeepEmerald
                             )
                         }
 
@@ -822,7 +822,7 @@ private fun NiatCardItem(
                             fontSize = 11.sp,
                             fontStyle = FontStyle.Italic
                         ),
-                        color = Slate600
+                        color = SaatColors.DeepEmerald
                     )
 
                     Spacer(Modifier.height(4.dp))

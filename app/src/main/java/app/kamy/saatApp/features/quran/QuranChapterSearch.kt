@@ -29,6 +29,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -541,24 +543,22 @@ fun QuranSearchSuggestionChips(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(suggestions) { label ->
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = SaatColors.DeepEmerald.copy(alpha = 0.08f),
-                border = androidx.compose.foundation.BorderStroke(
-                    width = 1.dp,
-                    color = SaatColors.DeepEmerald.copy(alpha = 0.2f)
-                ),
-                modifier = Modifier.clickable { onSuggestionClick(label) }
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = SaatColors.DeepEmerald,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+            FilterChip(
+                selected = false,
+                onClick = { onSuggestionClick(label) },
+                label = {
+                    Text(
+                        text = label,
+                        maxLines = 1,
+                        softWrap = false,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = SaatColors.DeepEmerald.copy(alpha = 0.08f),
+                    labelColor = SaatColors.DeepEmerald
                 )
-            }
+            )
         }
     }
 }

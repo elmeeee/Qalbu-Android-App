@@ -446,6 +446,7 @@
     <string name="tool_category_dhikr">Dhikr &amp; Du\'a</string>
     <string name="tool_category_fiqh">Fiqh &amp; Guides</string>
     <string name="tool_search_hint">Search Islamic tools...</string>
+    <string name="tool_search_empty">No matching tools found</string>
 
     <string name="tool_qibla_title">Qibla</string>
     <string name="tool_qibla_desc">Find the direction of the Kaaba</string>

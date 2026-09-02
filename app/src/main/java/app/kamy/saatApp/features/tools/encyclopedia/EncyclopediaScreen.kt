@@ -250,26 +250,21 @@ private fun CategoryChipsRow(
     ) {
         items(EncyclopediaCategory.entries) { category ->
             val isSelected = selectedCategory == category
-            val bgContainer = if (isSelected) {
-                Brush.horizontalGradient(listOf(SaatColors.DeepEmerald, SaatColors.Teal))
-            } else {
-                Brush.linearGradient(listOf(Color.White, Color.White))
-            }
-
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(bgContainer)
-                    .clickable { onSelectCategory(category) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = stringResource(category.labelRes),
-                    fontSize = 13.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isSelected) Color.White else SaatColors.Slate900
+            FilterChip(
+                selected = isSelected,
+                onClick = { onSelectCategory(category) },
+                label = {
+                    Text(
+                        text = stringResource(category.labelRes),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = SaatColors.DeepEmerald,
+                    selectedLabelColor = SaatColors.PureWhite
                 )
-            }
+            )
         }
     }
 }

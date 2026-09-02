@@ -17,7 +17,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -560,13 +561,11 @@ private fun ZakatBodiesSection(
         }
 
         // Country Selector Chips
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            ZakatCountry.entries.forEach { country ->
+            items(ZakatCountry.entries.toTypedArray()) { country ->
                 val isSelected = country == selectedCountry
                 FilterChip(
                     selected = isSelected,
@@ -575,20 +574,14 @@ private fun ZakatBodiesSection(
                         Text(
                             text = "${country.emoji} ${stringResource(country.labelRes)}",
                             style = MaterialTheme.typography.labelMedium,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = SaatColors.DeepEmerald,
-                        selectedLabelColor = Color.White,
-                        containerColor = SaatColors.SoftGrey,
-                        labelColor = SaatColors.Slate700
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        enabled = true,
-                        selected = isSelected,
-                        borderColor = Color.Transparent,
-                        selectedBorderColor = Color.Transparent
+                        selectedLabelColor = Color.White
                     )
                 )
             }

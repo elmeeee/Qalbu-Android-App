@@ -1175,7 +1175,7 @@ private fun SaatAyahPage(
                             lineHeight = (22 * fontScale).sp,
                             fontSize = (15 * fontScale).sp
                         ),
-                        color = SaatColors.Slate700,
+                        color = SaatColors.DeepEmerald,
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .fillMaxWidth()
