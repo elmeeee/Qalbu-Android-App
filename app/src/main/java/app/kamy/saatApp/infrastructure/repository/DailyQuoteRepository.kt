@@ -93,31 +93,46 @@ class DailyQuoteRepository @Inject constructor(
         }
     }
 
-    fun getTodayQuote(language: AppLanguage, eventTitle: String? = null): DailyQuoteItem {
+    fun getTodayQuote(
+        language: AppLanguage,
+        eventTitle: String? = null,
+        hijriLabel: String? = null
+    ): DailyQuoteItem {
         val date = Calendar.getInstance()
         val dayOfYear = date.get(Calendar.DAY_OF_YEAR)
-        return getQuoteForDay(dayOfYear, language, eventTitle, isFriday = date.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY)
+        return getQuoteForDay(
+            dayOfYear = dayOfYear,
+            language = language,
+            eventTitle = eventTitle,
+            hijriLabel = hijriLabel,
+            isFriday = date.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY
+        )
     }
 
     fun getQuoteForDay(
         dayOfYear: Int,
         language: AppLanguage,
         eventTitle: String? = null,
+        hijriLabel: String? = null,
         isFriday: Boolean = false
     ): DailyQuoteItem {
         if (quotesList.isEmpty()) {
             loadQuotesFromAssets()
         }
 
-        // Match KHGT Event or Friday theme if available
+        val event = eventTitle.orEmpty().lowercase()
+        val hijri = hijriLabel.orEmpty().lowercase()
+
+        // Match KHGT (Kalender Hijriah Global Tunggal) events or Friday
         val matchedTheme = when {
-            !eventTitle.isNullOrBlank() && (eventTitle.contains("Ramadan", ignoreCase = true) || eventTitle.contains("Ramadhan", ignoreCase = true)) -> "RAMADAN"
-            !eventTitle.isNullOrBlank() && (eventTitle.contains("Fitri", ignoreCase = true) || eventTitle.contains("Eid", ignoreCase = true)) -> "EID_FITR"
-            !eventTitle.isNullOrBlank() && (eventTitle.contains("Adha", ignoreCase = true) || eventTitle.contains("Kurban", ignoreCase = true) || eventTitle.contains("Korban", ignoreCase = true)) -> "EID_ADHA"
-            !eventTitle.isNullOrBlank() && eventTitle.contains("Arafah", ignoreCase = true) -> "ARAFAH"
-            !eventTitle.isNullOrBlank() && (eventTitle.contains("Isra", ignoreCase = true) || eventTitle.contains("Mi'raj", ignoreCase = true)) -> "ISRA_MIRAJ"
-            !eventTitle.isNullOrBlank() && (eventTitle.contains("Maulid", ignoreCase = true) || eventTitle.contains("Nabi", ignoreCase = true)) -> "MAWLID"
-            isFriday -> "JUMAH"
+            event.contains("ramadan") || event.contains("ramadhan") || event.contains("nuzulul") || hijri.contains("ramadan") || hijri.contains("ramadhan") -> "RAMADAN"
+            event.contains("fitri") || event.contains("eid al-fitr") || (hijri.contains("syawal") && (hijri.startsWith("1 ") || hijri.startsWith("2 "))) -> "EID_FITR"
+            event.contains("adha") || event.contains("kurban") || event.contains("korban") || event.contains("tasyrik") || (hijri.contains("zulhijjah") && (hijri.contains("10") || hijri.contains("11") || hijri.contains("12") || hijri.contains("13"))) -> "EID_ADHA"
+            event.contains("arafah") || event.contains("haji") || event.contains("hajj") || (hijri.contains("zulhijjah") && (hijri.contains("8") || hijri.contains("9"))) -> "HAJJ"
+            event.contains("isra") || event.contains("mi'raj") || (hijri.contains("rajab") && hijri.contains("27")) -> "LIGHT"
+            event.contains("maulid") || event.contains("nabi") || (hijri.contains("rabi") && hijri.contains("12")) -> "KNOWLEDGE"
+            event.contains("asyura") || event.contains("muharram") || (hijri.contains("muharram") && (hijri.contains("9") || hijri.contains("10"))) -> "PATIENCE"
+            isFriday -> "PRAYER"
             else -> null
         }
 

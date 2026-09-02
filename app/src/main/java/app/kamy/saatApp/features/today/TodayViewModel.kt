@@ -60,11 +60,19 @@ class TodayViewModel @Inject constructor(
         viewModelScope.launch {
             val khgtInfo = runCatching { khgtCalendarRepository.todayInfo() }.getOrNull()
             val currentLang = AppLanguageStore.from(appContext).current()
-            val initialQuote = dailyQuoteRepository.getTodayQuote(currentLang, khgtInfo?.eventTitle)
+            val initialQuote = dailyQuoteRepository.getTodayQuote(
+                language = currentLang,
+                eventTitle = khgtInfo?.eventTitle,
+                hijriLabel = khgtInfo?.hijriLabel
+            )
             _state.update { it.copy(dailyQuote = initialQuote) }
 
             AppLanguageStore.from(appContext).currentFlow.collect { lang ->
-                val updatedQuote = dailyQuoteRepository.getTodayQuote(lang, khgtInfo?.eventTitle)
+                val updatedQuote = dailyQuoteRepository.getTodayQuote(
+                    language = lang,
+                    eventTitle = khgtInfo?.eventTitle,
+                    hijriLabel = khgtInfo?.hijriLabel
+                )
                 _state.update { it.copy(dailyQuote = updatedQuote) }
             }
         }

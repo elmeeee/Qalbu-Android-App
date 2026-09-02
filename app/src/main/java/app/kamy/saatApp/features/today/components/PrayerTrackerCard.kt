@@ -231,7 +231,7 @@ fun PrayerTrackerCard(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     val currentLang by AppLanguageStore.from(context).currentFlow.collectAsStateWithLifecycle()
-                    val activeQuote = remember(currentLang, dailyQuote) {
+                    val activeQuote = dailyQuote ?: remember(currentLang) {
                         DailyQuoteRepository(context).getTodayQuote(currentLang)
                     }
 
@@ -265,9 +265,7 @@ fun PrayerTrackerCard(
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            lineHeight = 18.sp,
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis
+                            lineHeight = 18.5.sp
                         )
 
                         Text(
