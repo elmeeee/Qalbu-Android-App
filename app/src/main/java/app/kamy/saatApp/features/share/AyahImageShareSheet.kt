@@ -1,5 +1,6 @@
 package app.kamy.saatApp.features.share
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,9 +45,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,11 +68,12 @@ fun AyahImageShareSheet(
     onShare: (ShareTemplate) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var selectedTemplate by remember { mutableStateOf(ShareTemplate.IVORY_CREAM) }
+    var selectedTemplate by remember { mutableStateOf(ShareTemplate.TEMPLATE_1) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState
+        sheetState = sheetState,
+        containerColor = SaatColors.ScreenBackground
     ) {
         Column(
             modifier = Modifier
@@ -106,143 +109,127 @@ fun AyahImageShareSheet(
                 }
             }
 
-            // Real-time Preview Card
-            val tBgColorStart = Color(android.graphics.Color.parseColor(selectedTemplate.bgColorStart))
-            val tBgColorEnd = Color(android.graphics.Color.parseColor(selectedTemplate.bgColorEnd))
-            val tBorderColor = Color(android.graphics.Color.parseColor(selectedTemplate.borderColor))
-            val tInnerBorderColor = Color(android.graphics.Color.parseColor(selectedTemplate.innerBorderColor))
-            val tAppNameColor = Color(android.graphics.Color.parseColor(selectedTemplate.appNameColor))
-            val tArabicTextColor = Color(android.graphics.Color.parseColor(selectedTemplate.arabicTextColor))
-            val tTranslationColor = Color(android.graphics.Color.parseColor(selectedTemplate.translationColor))
-            val tDividerColor = Color(android.graphics.Color.parseColor(selectedTemplate.dividerColor))
-            val tReferenceColor = Color(android.graphics.Color.parseColor(selectedTemplate.referenceColor))
-            val tFooterColor = Color(android.graphics.Color.parseColor(selectedTemplate.footerColor))
+            val arabicColor = Color(android.graphics.Color.parseColor(selectedTemplate.arabicTextColor))
+            val translationColor = Color(android.graphics.Color.parseColor(selectedTemplate.translationColor))
+            val ornamentColor = Color(android.graphics.Color.parseColor(selectedTemplate.ornamentColor))
+            val refColor = Color(android.graphics.Color.parseColor(selectedTemplate.referenceColor))
+            val hashtagColor = Color(android.graphics.Color.parseColor(selectedTemplate.hashtagColor))
 
-            val tBgBrush = if (selectedTemplate.hasGradient) {
-                androidx.compose.ui.graphics.Brush.verticalGradient(
-                    colors = listOf(tBgColorStart, tBgColorEnd)
-                )
-            } else {
-                androidx.compose.ui.graphics.Brush.linearGradient(
-                    colors = listOf(tBgColorStart, tBgColorStart)
-                )
-            }
-
+            // Real-time Preview Card (941 x 1672 Aspect Ratio)
             Box(
                 modifier = Modifier
-                    .width(224.dp)
-                    .aspectRatio(4f / 5f)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(tBgBrush)
-                    .border(4.dp, tBorderColor, RoundedCornerShape(8.dp))
-                    .padding(8.dp)
+                    .width(230.dp)
+                    .aspectRatio(941f / 1672f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .border(1.dp, Color(0xFFC5A880).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
             ) {
-                // Inner border
-                Box(
+                // Background Ornate Image
+                Image(
+                    painter = painterResource(selectedTemplate.bgDrawableRes),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+
+                // Content inside the arch frame
+                val chapterNum = verse.chapterId ?: verse.verseKey?.substringBefore(':')?.toIntOrNull()
+                val verseNum = verse.resolvedVerseNumber ?: ""
+                val referenceText = if (chapterNum != null) {
+                    "QS. $surahName ($chapterNum) : $verseNum"
+                } else {
+                    "QS. $surahName : $verseNum"
+                }
+
+                val rawTranslation = verse.translations?.firstOrNull()?.text?.trim().orEmpty()
+                    .replace(Regex("<[^>]*>"), "")
+                val translationQuote = if (rawTranslation.isNotBlank()) "“$rawTranslation”" else ""
+                val hashtagText = stringResource(R.string.share_image_hashtag).trim()
+
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .border(0.5.dp, tInnerBorderColor, RoundedCornerShape(4.dp))
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(top = 62.dp, bottom = 112.dp, start = 20.dp, end = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceBetween
+                    // 1. Top Diamond Ornament
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        // Top Header (Logo + App Name)
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White)
-                                    .border(0.5.dp, tBorderColor, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.saat_app_icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = Color.Unspecified
-                                )
-                            }
-                            Text(
-                                text = "Sāat",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 7.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = tAppNameColor
-                                )
-                            )
-                        }
-
-                        // Middle Content (Arabic, Divider, Translation)
-                        Column(
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 4.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = verse.fullArabicForShare().trim(),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = 11.sp,
-                                    textAlign = TextAlign.Center,
-                                    color = tArabicTextColor
-                                ),
-                                maxLines = 4,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                                .width(28.dp)
+                                .height(1.dp)
+                                .background(ornamentColor)
+                        )
+                        Text(
+                            text = "❖",
+                            fontSize = 8.sp,
+                            color = ornamentColor
+                        )
+                        Box(
+                            modifier = Modifier
+                                .width(28.dp)
+                                .height(1.dp)
+                                .background(ornamentColor)
+                        )
+                    }
 
-                            // Subtle Divider
-                            Box(
-                                modifier = Modifier
-                                    .width(60.dp)
-                                    .height(1.dp)
-                                    .background(tDividerColor)
-                            )
+                    // 2. Arabic Text
+                    Text(
+                        text = verse.fullArabicForShare().trim(),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Serif,
+                        textAlign = TextAlign.Center,
+                        color = arabicColor,
+                        lineHeight = 16.sp,
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-                            val translationText = verse.translations?.firstOrNull()?.text?.trim().orEmpty()
-                                .replace(Regex("<[^>]*>"), "")
-                            Text(
-                                text = translationText,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 7.sp,
-                                    fontStyle = FontStyle.Italic,
-                                    textAlign = TextAlign.Center,
-                                    color = tTranslationColor
-                                ),
-                                maxLines = 5,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
+                    // 3. Translation Quote
+                    if (translationQuote.isNotBlank()) {
+                        Text(
+                            text = translationQuote,
+                            fontSize = 8.sp,
+                            fontFamily = FontFamily.Serif,
+                            textAlign = TextAlign.Center,
+                            color = translationColor,
+                            lineHeight = 11.sp,
+                            maxLines = 5,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
 
-                        // Bottom Footer (Reference + App Promo)
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(1.dp)
-                        ) {
+                    // 4. Middle Ornament
+                    Text(
+                        text = "― ❖ ―",
+                        fontSize = 7.sp,
+                        color = ornamentColor
+                    )
+
+                    // 5. Reference Text & Hashtag
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = referenceText,
+                            fontSize = 8.sp,
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
+                            color = refColor
+                        )
+                        if (hashtagText.isNotBlank()) {
                             Text(
-                                text = "$surahName ${verse.resolvedVerseNumber ?: ""}",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 7.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = tReferenceColor
-                                )
-                            )
-                            Text(
-                                text = stringResource(R.string.share_brand_tagline).replace("_", "").trim(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 5.sp,
-                                    color = tFooterColor
-                                ),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                text = hashtagText,
+                                fontSize = 6.sp,
+                                fontFamily = FontFamily.Serif,
+                                textAlign = TextAlign.Center,
+                                color = hashtagColor
                             )
                         }
                     }
@@ -251,59 +238,70 @@ fun AyahImageShareSheet(
 
             // Template Selector Title
             Text(
-                text = "Choose Template",
+                text = "Pilih Template Desain",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            // Horizontal Template List
+            // Horizontal Template List (Card Previews)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
                     .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterHorizontally)
             ) {
                 ShareTemplate.values().forEach { template ->
                     val isSelected = selectedTemplate == template
-                    val itemBgColor = Color(android.graphics.Color.parseColor(template.bgColorStart))
-                    val itemBorderColor = Color(android.graphics.Color.parseColor(template.borderColor))
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier
                             .clickable { selectedTemplate = template }
                             .padding(4.dp)
                     ) {
-                        // Colored Circle
+                        // Thumbnail Preview
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(itemBgColor)
+                                .width(56.dp)
+                                .aspectRatio(941f / 1672f)
+                                .clip(RoundedCornerShape(8.dp))
                                 .border(
-                                    width = if (isSelected) 3.dp else 1.5.dp,
-                                    color = if (isSelected) SaatColors.DeepEmerald else itemBorderColor,
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
+                                    width = if (isSelected) 2.5.dp else 1.dp,
+                                    color = if (isSelected) SaatColors.DeepEmerald else Color(0xFFD5BE9C),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
                         ) {
+                            Image(
+                                painter = painterResource(template.bgDrawableRes),
+                                contentDescription = null,
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+
                             if (isSelected) {
                                 Box(
                                     modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(CircleShape)
-                                        .background(SaatColors.DeepEmerald),
+                                        .fillMaxSize()
+                                        .background(Color.Black.copy(alpha = 0.2f)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                        tint = Color.White
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(20.dp)
+                                            .clip(CircleShape)
+                                            .background(SaatColors.DeepEmerald),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp),
+                                            tint = Color.White
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -312,6 +310,7 @@ fun AyahImageShareSheet(
                         Text(
                             text = template.displayName,
                             style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 11.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 color = if (isSelected) SaatColors.DeepEmerald else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -334,12 +333,12 @@ fun AyahImageShareSheet(
             ) {
                 Icon(Icons.Filled.Share, contentDescription = null)
                 Text(
-                    text = "Share Design",
+                    text = stringResource(R.string.share_as_image),
                     modifier = Modifier.padding(start = 8.dp),
                     fontWeight = FontWeight.SemiBold
                 )
             }
-            
+
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.padding(bottom = 8.dp)

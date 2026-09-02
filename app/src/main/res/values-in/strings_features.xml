@@ -474,6 +474,7 @@
     <string name="prayer_calendar_hint">Ketuk tanggal untuk melihat seluruh waktu shalat pada tanggal tersebut.</string>
     <string name="share_as_image">Bagikan sebagai Gambar</string>
     <string name="share_verse_image_chooser">Bagikan gambar ayat melalui…</string>
+    <string name="share_image_hashtag">#SaatNyaDekatDenganQuran</string>
     <string name="zakat_family_members">Jumlah anggota keluarga</string>
     <string name="zakat_fitrah_note">Zakat Fitrah berdasarkan 2,5 kg per jiwa; gunakan harga beras makanan pokok setempat per kg.</string>
     <string name="zakat_fitrah_total_weight">Total bobot zakat</string>

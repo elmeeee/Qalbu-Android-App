@@ -357,6 +357,7 @@
     <string name="force_update_button">Update Now</string>
     <string name="share_as_image">Share as Image</string>
     <string name="share_verse_image_chooser">Share verse image via…</string>
+    <string name="share_image_hashtag">#TimeForQuran</string>
     <string name="juz_number">Juz %1$d</string>
     <string name="ai_label">AI</string>
     <string name="clear_search_a11y">Clear search</string>
