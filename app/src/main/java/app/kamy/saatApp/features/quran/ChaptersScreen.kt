@@ -169,7 +169,7 @@ fun ChaptersScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(SaatColors.ScreenBackground)
             .pointerInput(state.isSearchActive, state.searchQuery) {
                 if (state.isSearchActive || state.searchQuery.isNotEmpty()) {
                     detectTapGestures(onTap = {
@@ -182,9 +182,7 @@ fun ChaptersScreen(
         when {
             state.isLoading && state.chapters.isEmpty() && !isPullRefreshing ->
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .tabContentStatusBarInset()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     QuranListHeader(
                         searchQuery = "",
@@ -202,7 +200,7 @@ fun ChaptersScreen(
                         onSearchFocusChange = {},
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(SaatColors.ScreenBackground)
                     )
                     repeat(10) { index ->
                         ChapterRowSkeleton(
