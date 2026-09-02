@@ -325,10 +325,14 @@ fun TodayScreen(
         }
     }
 
-    val showMasjidkuBanner = remember {
-        runCatching {
-            com.posthog.PostHog.isFeatureEnabled("show_masjidku_banner", defaultValue = true)
-        }.getOrDefault(true)
+    var showMasjidkuBanner by remember {
+        mutableStateOf(app.kamy.saatApp.core.analytics.AppAnalytics.isFeatureEnabled("show_masjidku_banner", defaultValue = true))
+    }
+
+    LaunchedEffect(Unit) {
+        app.kamy.saatApp.core.analytics.AppAnalytics.reloadFeatureFlags {
+            showMasjidkuBanner = app.kamy.saatApp.core.analytics.AppAnalytics.isFeatureEnabled("show_masjidku_banner", defaultValue = true)
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(SaatColors.HomeBg)) {

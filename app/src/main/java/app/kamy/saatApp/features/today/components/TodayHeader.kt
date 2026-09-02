@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -246,6 +247,32 @@ fun MasjidkuCollaborationBanner(
     val context = LocalContext.current
     val haptic = app.kamy.saatApp.ui.feedback.rememberTapHaptic()
     val textColor = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
+    val langTag = remember(context) {
+        app.kamy.saatApp.infrastructure.preferences.AppLanguageStore.from(context).current().tag
+    }
+    val defaultTitle = stringResource(R.string.collab_with)
+    val defaultSubtitle = stringResource(R.string.collab_masjidku_sub)
+
+    var remoteConfigState by remember(langTag) {
+        val payload = app.kamy.saatApp.core.analytics.AppAnalytics.getFeatureFlagPayload("show_masjidku_banner") as? Map<*, *>
+        val url = payload?.get("url")?.toString()?.takeIf { it.isNotBlank() } ?: "https://masjidku.app"
+        val title = resolveLocalizedPayload(payload?.get("title"), langTag, defaultTitle)
+        val subtitle = resolveLocalizedPayload(payload?.get("subtitle"), langTag, defaultSubtitle)
+        mutableStateOf(Triple(url, title, subtitle))
+    }
+
+    LaunchedEffect(langTag) {
+        app.kamy.saatApp.core.analytics.AppAnalytics.reloadFeatureFlags {
+            val payload = app.kamy.saatApp.core.analytics.AppAnalytics.getFeatureFlagPayload("show_masjidku_banner") as? Map<*, *>
+            val url = payload?.get("url")?.toString()?.takeIf { it.isNotBlank() } ?: "https://masjidku.app"
+            val title = resolveLocalizedPayload(payload?.get("title"), langTag, defaultTitle)
+            val subtitle = resolveLocalizedPayload(payload?.get("subtitle"), langTag, defaultSubtitle)
+            remoteConfigState = Triple(url, title, subtitle)
+        }
+    }
+
+    val (targetUrl, bannerTitle, bannerSubtitle) = remoteConfigState
+
     Row(
         modifier = modifier
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
@@ -254,7 +281,7 @@ fun MasjidkuCollaborationBanner(
                 app.kamy.saatApp.core.analytics.AppAnalytics.trackMasjidkuBannerClicked()
                 val intent = android.content.Intent(
                     android.content.Intent.ACTION_VIEW,
-                    android.net.Uri.parse("https://masjidku.app")
+                    android.net.Uri.parse(targetUrl)
                 )
                 runCatching { context.startActivity(intent) }
             },
@@ -275,7 +302,7 @@ fun MasjidkuCollaborationBanner(
 
         Column {
             Text(
-                text = stringResource(R.string.collab_with),
+                text = bannerTitle,
                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
                 color = textColor.copy(alpha = 0.85f),
                 fontWeight = FontWeight.Medium
@@ -305,7 +332,7 @@ fun MasjidkuCollaborationBanner(
                         lineHeight = 15.sp
                     )
                     Text(
-                        text = stringResource(R.string.collab_masjidku_sub),
+                        text = bannerSubtitle,
                         style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                         fontWeight = FontWeight.Normal,
                         color = textColor.copy(alpha = 0.75f),
@@ -315,5 +342,22 @@ fun MasjidkuCollaborationBanner(
             }
         }
     }
+}
+
+private fun resolveLocalizedPayload(payloadValue: Any?, langTag: String, fallback: String): String {
+    if (payloadValue == null) return fallback
+    if (payloadValue is String && payloadValue.isNotBlank()) return payloadValue
+    if (payloadValue is Map<*, *>) {
+        val direct = payloadValue[langTag]?.toString()?.takeIf { it.isNotBlank() }
+        if (direct != null) return direct
+        if (langTag == "id" || langTag == "in") {
+            val alt = (payloadValue["id"] ?: payloadValue["in"])?.toString()?.takeIf { it.isNotBlank() }
+            if (alt != null) return alt
+        }
+        return payloadValue["en"]?.toString()?.takeIf { it.isNotBlank() }
+            ?: payloadValue.values.firstOrNull()?.toString()?.takeIf { it.isNotBlank() }
+            ?: fallback
+    }
+    return fallback
 }
 

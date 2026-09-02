@@ -256,12 +256,25 @@ object AppAnalytics {
         )
     }
 
-    fun trackLanguageChanged(languageCode: String) {
-        capture(
-            event = "app_language_changed",
-            properties = mapOf(
-                "language" to languageCode
-            )
-        )
+    // ==========================================
+    // 🎛️ REMOTE CONFIGURATION & FEATURE FLAGS
+    // ==========================================
+
+    fun isFeatureEnabled(key: String, defaultValue: Boolean = true): Boolean {
+        return runCatching {
+            PostHog.isFeatureEnabled(key, defaultValue = defaultValue)
+        }.getOrDefault(defaultValue)
+    }
+
+    fun getFeatureFlagPayload(key: String): Any? {
+        return runCatching {
+            PostHog.getFeatureFlagPayload(key)
+        }.getOrNull()
+    }
+
+    fun reloadFeatureFlags(onFeatureFlags: (() -> Unit)? = null) {
+        runCatching {
+            PostHog.reloadFeatureFlags(onFeatureFlags = onFeatureFlags)
+        }
     }
 }
