@@ -14,8 +14,27 @@ data class DailyQuoteItem(
     val category: String,
     val theme: String,
     val quoteText: String,
-    val referenceLabel: String
-)
+    val referenceLabel: String,
+    val mascot: String = "mascot_prayer"
+) {
+    @androidx.annotation.DrawableRes
+    fun getMascotDrawable(): Int = when (mascot) {
+        "mascot_prayer" -> app.kamy.saatApp.R.drawable.mascot_prayer
+        "mascot_reading" -> app.kamy.saatApp.R.drawable.mascot_reading
+        "mascot_lentera" -> app.kamy.saatApp.R.drawable.mascot_lentera
+        "mascot_bawa_lentera" -> app.kamy.saatApp.R.drawable.mascot_bawa_lentera
+        "mascot_ramadan" -> app.kamy.saatApp.R.drawable.mascot_ramadan
+        "mascot_eidfitri" -> app.kamy.saatApp.R.drawable.mascot_eidfitri
+        "mascot_eidadha" -> app.kamy.saatApp.R.drawable.mascot_eidadha
+        "mascot_umrah" -> app.kamy.saatApp.R.drawable.mascot_umrah
+        "mascot_ilmu" -> app.kamy.saatApp.R.drawable.mascot_ilmu
+        "mascot_smile" -> app.kamy.saatApp.R.drawable.mascot_smile
+        "mascot_happysad" -> app.kamy.saatApp.R.drawable.mascot_happysad
+        "mascot_khilafah" -> app.kamy.saatApp.R.drawable.mascot_khilafah
+        "mascot_toa" -> app.kamy.saatApp.R.drawable.mascot_toa
+        else -> app.kamy.saatApp.R.drawable.mascot_prayer
+    }
+}
 
 @Singleton
 class DailyQuoteRepository @Inject constructor(
@@ -30,7 +49,8 @@ class DailyQuoteRepository @Inject constructor(
         val category: String,
         val theme: String,
         val referenceMap: Map<String, String>,
-        val quoteMap: Map<String, String>
+        val quoteMap: Map<String, String>,
+        val mascot: String
     )
 
     init {
@@ -49,6 +69,7 @@ class DailyQuoteRepository @Inject constructor(
                 val dayOfYear = obj.optInt("day_of_year", i + 1)
                 val category = obj.optString("category", "QURAN")
                 val theme = obj.optString("theme", "GENERAL")
+                val mascot = obj.optString("mascot", "mascot_prayer")
 
                 val refObj = obj.optJSONObject("reference")
                 val refMap = mapOf(
@@ -64,7 +85,7 @@ class DailyQuoteRepository @Inject constructor(
                     "en" to (qtObj?.optString("en") ?: "")
                 )
 
-                list.add(DailyQuoteItemRaw(id, dayOfYear, category, theme, refMap, qtMap))
+                list.add(DailyQuoteItemRaw(id, dayOfYear, category, theme, refMap, qtMap, mascot))
             }
             quotesList = list
         }.onFailure {
@@ -113,7 +134,8 @@ class DailyQuoteRepository @Inject constructor(
                     "id" to "Dan sembahlah Tuhanmu sampai datang kepadamu keyakinan (ajal).",
                     "ms" to "Dan sembahlah Tuhanmu sehingga datang kepadamu keyakinan (ajal).",
                     "en" to "And worship your Lord until there comes to you the certainty (i.e. death)."
-                )
+                ),
+                mascot = "mascot_prayer"
             )
 
         val langKey = when (language) {
@@ -131,7 +153,8 @@ class DailyQuoteRepository @Inject constructor(
             category = raw.category,
             theme = raw.theme,
             quoteText = "\"$quoteText\"",
-            referenceLabel = refLabel
+            referenceLabel = refLabel,
+            mascot = raw.mascot
         )
     }
 }
