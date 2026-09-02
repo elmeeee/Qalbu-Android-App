@@ -14,13 +14,9 @@ object LocalQuranConfig {
     const val DEFAULT_TRANSLATION_ID = TRANSLATION_INDONESIAN
 
     const val RECITATION_ALAFASY = 1
-    const val RECITATION_HUSARY = 2
-    const val RECITATION_MINSHAWI = 3
-    const val RECITATION_JIBREEL = 4
-    const val RECITATION_AJAMY = 5
-    const val RECITATION_AYYOUB = 6
-    const val RECITATION_MUAIQLY = 7
-    const val RECITATION_SHAATREE = 8
+    const val RECITATION_SHAATREE = 2
+    const val RECITATION_MUAIQLY = 3
+    const val RECITATION_HUSARY = 4
 
     const val DEFAULT_RECITATION_ID = RECITATION_ALAFASY
 
@@ -59,14 +55,10 @@ object LocalQuranConfig {
     )
 
     val recitations: List<RecitationPayload> = listOf(
-        recitation(RECITATION_ALAFASY,  "Mishary Rashid Alafasy",         "alafasy"),
-        recitation(RECITATION_HUSARY,   "Mahmoud Khalil Al-Husary",       "husarymujawwad"),
-        recitation(RECITATION_MINSHAWI, "Muhammad Siddiq Al-Minshawi",    "minshawi"),
-        recitation(RECITATION_JIBREEL,  "Muhammad Jibreel",               "muhammadjibreel"),
-        recitation(RECITATION_AJAMY,    "Ahmed Al-Ajamy",                 "ahmedajamy"),
-        recitation(RECITATION_AYYOUB,   "Muhammad Ayyoub",                "muhammadayyoub"),
-        recitation(RECITATION_MUAIQLY,  "Maher Al-Muaiqly",              "mahermuaiqly"),
-        recitation(RECITATION_SHAATREE, "Abu Bakr Ash-Shaatree",          "shaatree"),
+        recitation(RECITATION_ALAFASY,  "Mishary Rashid Alafasy",    "alafasy"),
+        recitation(RECITATION_SHAATREE, "Abu Bakr Ash-Shaatree",     "shaatree"),
+        recitation(RECITATION_MUAIQLY,  "Maher Al-Muaiqly",         "mahermuaiqly"),
+        recitation(RECITATION_HUSARY,   "Mahmoud Khalil Al-Husary",  "husarymujawwad"),
     )
 
     private fun recitation(id: Int, name: String, slug: String) = RecitationPayload(
