@@ -21,8 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLocale
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.SaatTheme
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
@@ -84,26 +89,50 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                val localizedContext = androidx.compose.runtime.remember(currentLang) {
+                    AppLocale.wrap(this@MainActivity, currentLang)
+                }
+
+                var lastLang by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(currentLang) }
+                var isLanguageLoading by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
                 androidx.compose.runtime.LaunchedEffect(currentLang) {
                     @Suppress("DEPRECATION")
                     resources.updateConfiguration(localizedConfiguration, resources.displayMetrics)
+                    if (lastLang != currentLang) {
+                        lastLang = currentLang
+                        isLanguageLoading = true
+                        kotlinx.coroutines.delay(750)
+                        isLanguageLoading = false
+                    }
                 }
 
                 var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
 
                 androidx.compose.runtime.CompositionLocalProvider(
-                    androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration
+                    androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration,
+                    androidx.compose.ui.platform.LocalContext provides localizedContext
                 ) {
                     SaatTheme(theme = currentTheme) {
-                        when {
-                            showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })
-                            else -> {
-                                ExactAlarmPermissionGate()
-                                app.kamy.saatApp.ui.permissions.FullScreenIntentPermissionGate()
-                                RootScreen(
-                                    pendingDeepLinkRoute = pendingRoute,
-                                    onDeepLinkHandled = { deepLinkRoute.value = null }
-                                )
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            when {
+                                showOnboarding -> OnboardingScreen(onFinished = { showOnboarding = false })
+                                else -> {
+                                    ExactAlarmPermissionGate()
+                                    app.kamy.saatApp.ui.permissions.FullScreenIntentPermissionGate()
+                                    RootScreen(
+                                        pendingDeepLinkRoute = pendingRoute,
+                                        onDeepLinkHandled = { deepLinkRoute.value = null }
+                                    )
+                                }
+                            }
+
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = isLanguageLoading,
+                                enter = androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(150)),
+                                exit = androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
+                            ) {
+                                LanguageChangingLoadingOverlay(language = currentLang)
                             }
                         }
                     }
@@ -151,5 +180,57 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         deepLinkRoute.value = DeepLinkRoutes.fromIntent(intent)
+    }
+}
+
+@Composable
+private fun LanguageChangingLoadingOverlay(
+    language: app.kamy.saatApp.core.locale.AppLanguage,
+    modifier: Modifier = Modifier
+) {
+    val loadingText = when (language) {
+        app.kamy.saatApp.core.locale.AppLanguage.INDONESIAN -> "Menerapkan bahasa & memuat konten..."
+        app.kamy.saatApp.core.locale.AppLanguage.ENGLISH -> "Applying language & loading content..."
+        app.kamy.saatApp.core.locale.AppLanguage.MALAY -> "Menetapkan bahasa & memuatkan kandungan..."
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(SaatColors.HomeBg),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(20.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .background(SaatColors.PureWhite, androidx.compose.foundation.shape.CircleShape)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.CircularProgressIndicator(
+                    modifier = Modifier.fillMaxSize(),
+                    color = SaatColors.HomeDarkGreen,
+                    strokeWidth = 3.dp,
+                    trackColor = SaatColors.ArcGold.copy(alpha = 0.25f)
+                )
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_tasbih_3d),
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            Text(
+                text = loadingText,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                color = SaatColors.HomeDarkGreen,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }

@@ -76,7 +76,7 @@
     <string name="adhan_voice">Suara adzan</string>
     <string name="show_translation">Tampilkan terjemahan</string>
     <string name="show_transliteration">Tampilkan latin</string>
-    <string name="reader_scroll_hint">Gulir untuk latin &amp; terjemahan</string>
+    <string name="reader_scroll_hint">Geser (swipe) ke kiri / kanan untuk ganti ayat</string>
 
     <string name="notif_summary_daily_verse">Ayat harian</string>
     <string name="notif_summary_prayer">Sholat</string>

@@ -311,6 +311,9 @@ fun ChapterReaderScreen(
         }
             .distinctUntilChanged()
             .collect { snap ->
+                if (snap.isScrolling && showScrollHint) {
+                    dismissScrollHint()
+                }
                 val vIdx = snap.page - snap.pageOffset
                 if (vIdx in 0 until snap.verseCount) {
                     vm.onPageChanged(vIdx)
@@ -320,6 +323,13 @@ fun ChapterReaderScreen(
                     }
                 }
             }
+    }
+
+    LaunchedEffect(showScrollHint) {
+        if (showScrollHint) {
+            kotlinx.coroutines.delay(6500)
+            dismissScrollHint()
+        }
     }
 
     LaunchedEffect(verseCount, pageOffset) {
@@ -1897,32 +1907,91 @@ private fun ReaderScrollHint(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val transition = rememberInfiniteTransition(label = "scrollHint")
-    val bounce by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 8f,
+    val transition = rememberInfiniteTransition(label = "swipeHint")
+    val swipeOffset by transition.animateFloat(
+        initialValue = 16f,
+        targetValue = -16f,
         animationSpec = infiniteRepeatable(
-            animation = tween(900),
+            animation = tween(1100, easing = androidx.compose.animation.core.FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "bounce"
+        label = "swipeOffset"
     )
+    val handAlpha by transition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "handAlpha"
+    )
+
     Surface(
         onClick = onDismiss,
         modifier = modifier
-            .graphicsLayer { translationY = bounce },
-        shape = RoundedCornerShape(20.dp),
-        color = SaatColors.DeepEmerald.copy(alpha = 0.94f),
-        shadowElevation = 8.dp
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = SaatColors.HomeDarkGreen.copy(alpha = 0.96f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
+        shadowElevation = 12.dp
     ) {
-        Text(
-            text = stringResource(R.string.reader_scroll_hint),
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Animated Horizontal Swipe Visual
+            Box(
+                modifier = Modifier
+                    .width(44.dp)
+                    .height(28.dp)
+                    .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.6f),
+                        modifier = Modifier.size(11.dp)
+                    )
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.6f),
+                        modifier = Modifier
+                            .size(11.dp)
+                            .graphicsLayer { rotationZ = 180f }
+                    )
+                }
+                // Animated glowing touch dot
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .graphicsLayer {
+                            translationX = swipeOffset
+                            alpha = handAlpha
+                        }
+                        .background(SaatColors.ArcGold, CircleShape)
+                        .border(1.5.dp, Color.White, CircleShape)
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.reader_scroll_hint),
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+                textAlign = TextAlign.Start
+            )
+        }
     }
 }
 

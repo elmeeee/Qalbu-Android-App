@@ -62,7 +62,7 @@
     <string name="adhan_voice">Suara azan</string>
     <string name="show_translation">Tunjuk terjemahan</string>
     <string name="show_transliteration">Tunjuk latin</string>
-    <string name="reader_scroll_hint">Tatal untuk latin &amp; terjemahan</string>
+    <string name="reader_scroll_hint">Leret (swipe) ke kiri / kanan untuk tukar ayat</string>
     <string name="notif_summary_daily_verse">Ayat harian</string>
     <string name="notif_summary_prayer">Solat</string>
     <string name="notif_summary_imsak">Imsak</string>

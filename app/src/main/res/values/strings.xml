@@ -569,7 +569,7 @@
     <string name="khgt_important_day">Important day</string>
     <string name="prayer_last_sync">Prayer times from last sync · %1$s</string>
     <string name="spiritual_tools_tab_subtitle">Qibla, doa, zikir, and more</string>
-    <string name="reader_scroll_hint">Scroll for transliteration &amp; translation</string>
+    <string name="reader_scroll_hint">Swipe left or right to navigate verses</string>
     <string name="chapters_refresh_failed">Couldn\'t refresh chapters</string>
     <string name="daily_verse_widget_title">Verse of the day</string>
     <string name="daily_verse_widget_desc">Today\'s ayah on your home screen</string>
