@@ -50,6 +50,9 @@ prowl = "1.0.1"
 # Prayer times
 adhan = "1.2.1"
 
+# Analytics
+posthog = "3.19.1"
+
 # Test
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -119,6 +122,9 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
+
+# Analytics
+posthog-android = { group = "com.posthog", name = "posthog-android", version.ref = "posthog" }
 
 # Debugging
 prowl = { group = "io.github.prowllabs", name = "prowl", version.ref = "prowl" }

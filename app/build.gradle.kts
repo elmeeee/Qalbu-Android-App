@@ -69,6 +69,8 @@ android {
         debug {
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
             buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "openai/gpt-oss-20b")}\"")
+            buildConfigField("String", "POSTHOG_API_KEY", "\"${secret("POSTHOG_API_KEY")}\"")
+            buildConfigField("String", "POSTHOG_HOST", "\"${secret("POSTHOG_HOST", "https://us.i.posthog.com")}\"")
         }
         release {
             isMinifyEnabled = true
@@ -85,6 +87,8 @@ android {
 
             buildConfigField("String", "API_KEY_GROQ", "\"${secret("API_KEY_GROQ")}\"")
             buildConfigField("String", "AI_MODEL", "\"${secret("AI_MODEL", "openai/gpt-oss-20b")}\"")
+            buildConfigField("String", "POSTHOG_API_KEY", "\"${secret("POSTHOG_API_KEY")}\"")
+            buildConfigField("String", "POSTHOG_HOST", "\"${secret("POSTHOG_HOST", "https://us.i.posthog.com")}\"")
         }
     }
 
@@ -138,6 +142,9 @@ dependencies {
     implementation(libs.play.review.ktx)
     implementation(libs.play.update.ktx)
     implementation(libs.adhan)
+
+    // Analytics
+    implementation(libs.posthog.android)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

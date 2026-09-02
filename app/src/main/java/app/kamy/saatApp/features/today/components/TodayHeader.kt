@@ -251,6 +251,7 @@ fun MasjidkuCollaborationBanner(
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
             .clickable {
                 haptic()
+                app.kamy.saatApp.core.analytics.AppAnalytics.trackMasjidkuBannerClicked()
                 val intent = android.content.Intent(
                     android.content.Intent.ACTION_VIEW,
                     android.net.Uri.parse("https://masjidku.app")

@@ -325,6 +325,12 @@ fun TodayScreen(
         }
     }
 
+    val showMasjidkuBanner = remember {
+        runCatching {
+            com.posthog.PostHog.isFeatureEnabled("show_masjidku_banner", defaultValue = true)
+        }.getOrDefault(true)
+    }
+
     Box(modifier = Modifier.fillMaxSize().background(SaatColors.HomeBg)) {
         Box(
             modifier = Modifier
@@ -428,13 +434,15 @@ fun TodayScreen(
                 item(key = "top_header_spacer") {
                     Spacer(modifier = Modifier.height(24.dp))
                 }
-                item(key = "masjidku_collab") {
-                    app.kamy.saatApp.features.today.components.MasjidkuCollaborationBanner(
-                        isDarkBackground = cardDrawable != R.drawable.day,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 4.dp)
-                    )
+                if (showMasjidkuBanner) {
+                    item(key = "masjidku_collab") {
+                        app.kamy.saatApp.features.today.components.MasjidkuCollaborationBanner(
+                            isDarkBackground = cardDrawable != R.drawable.day,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp, vertical = 4.dp)
+                        )
+                    }
                 }
                 item(key = "prayer_card") {
                     PrayerDashboardCard(
