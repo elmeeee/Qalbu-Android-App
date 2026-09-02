@@ -322,8 +322,8 @@ private fun JanazahStepCard(step: JanazahTakbirStep, appLanguage: AppLanguage) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    color = SaatColors.ScreenBackground.copy(alpha = 0.6f),
-                    border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.4f))
+                    color = SaatColors.HomeBg.copy(alpha = 0.6f),
+                    border = BorderStroke(1.dp, Color(0xFFE8E2D2))
                 ) {
                     Column(
                         modifier = Modifier.padding(14.dp),

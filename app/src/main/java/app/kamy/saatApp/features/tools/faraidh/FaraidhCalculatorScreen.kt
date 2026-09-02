@@ -239,61 +239,35 @@ fun FaraidhCalculatorScreen(
 
     if (state.showInputSheet) {
         androidx.activity.compose.BackHandler(onBack = { vm.toggleInputSheet(false) })
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = SaatColors.ScreenBackground
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(SaatColors.HomeBg)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = SaatColors.PureWhite,
-                    shadowElevation = 1.dp
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding()
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = { vm.toggleInputSheet(false) }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Text(
-                            text = stringResource(R.string.faraidh_input_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = stringResource(R.string.faraidh_input_title),
+                onBack = { vm.toggleInputSheet(false) }
+            )
 
-                FaraidhInputSheetContent(
-                    state = state,
-                    currency = currency,
-                    onDeceasedNameChange = vm::setDeceasedName,
-                    onGenderChange = vm::setGender,
-                    onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
-                    onMadhhabChange = vm::setMadhhab,
-                    onEstateFieldChange = vm::setEstateField,
-                    onHeirChange = vm::setHeirCount,
-                    onHeirNameChange = vm::setHeirName,
-                    onDone = { vm.toggleInputSheet(false) }
-                )
-            }
+            FaraidhInputSheetContent(
+                state = state,
+                currency = currency,
+                onDeceasedNameChange = vm::setDeceasedName,
+                onGenderChange = vm::setGender,
+                onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
+                onMadhhabChange = vm::setMadhhab,
+                onEstateFieldChange = vm::setEstateField,
+                onHeirChange = vm::setHeirCount,
+                onHeirNameChange = vm::setHeirName,
+                onDone = { vm.toggleInputSheet(false) }
+            )
         }
     }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        containerColor = SaatColors.ScreenBackground,
+        containerColor = SaatColors.HomeBg,
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {

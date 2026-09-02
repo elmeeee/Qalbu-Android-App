@@ -515,7 +515,7 @@ fun HajjDoaCard(
             // Arabic Box with Golden frame
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = SaatColors.ScreenBackground,
+                color = SaatColors.HomeBg,
                 border = BorderStroke(1.dp, SaatColors.Gold.copy(alpha = 0.4f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -660,7 +660,7 @@ fun HajjDalilCard(
             // Arabic text
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = SaatColors.ScreenBackground,
+                color = SaatColors.HomeBg,
                 border = BorderStroke(1.dp, SaatColors.Gold.copy(alpha = 0.35f)),
                 modifier = Modifier.fillMaxWidth()
             ) {

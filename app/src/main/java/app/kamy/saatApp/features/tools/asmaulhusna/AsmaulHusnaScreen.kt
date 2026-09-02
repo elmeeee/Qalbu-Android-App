@@ -515,7 +515,7 @@ private fun AsmaulHusnaDetailSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = SaatColors.HomeBg,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
@@ -532,7 +532,7 @@ private fun AsmaulHusnaDetailSheet(
             ) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = SaatColors.DeepEmerald,
+                    color = SaatColors.HomeDarkGreen,
                     modifier = Modifier.padding(vertical = 4.dp)
                 ) {
                     Text(
@@ -548,7 +548,7 @@ private fun AsmaulHusnaDetailSheet(
                     Icon(
                         Icons.Default.Refresh,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = SaatColors.Slate700
                     )
                 }
             }
@@ -563,7 +563,7 @@ private fun AsmaulHusnaDetailSheet(
                     text = item.arabic,
                     style = MaterialTheme.typography.displayMedium,
                     fontWeight = FontWeight.Bold,
-                    color = SaatColors.DeepEmerald,
+                    color = SaatColors.HomeDarkGreen,
                     fontSize = 42.sp,
                     textAlign = TextAlign.Center
                 )
@@ -571,12 +571,12 @@ private fun AsmaulHusnaDetailSheet(
                     text = item.latin,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = SaatColors.HomeDarkGreen
                 )
                 Text(
                     text = item.meaning(appLanguage),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = SaatColors.Slate700,
                     textAlign = TextAlign.Center
                 )
             }
@@ -586,8 +586,9 @@ private fun AsmaulHusnaDetailSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                )
+                    containerColor = SaatColors.PureWhite
+                ),
+                border = BorderStroke(1.dp, Color(0xFFE8E2D2))
             ) {
                 Column(
                     modifier = Modifier.padding(14.dp),
@@ -600,20 +601,20 @@ private fun AsmaulHusnaDetailSheet(
                         Icon(
                             Icons.Default.Book,
                             contentDescription = null,
-                            tint = SaatColors.DeepEmerald,
+                            tint = SaatColors.HomeDarkGreen,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
                             text = "${stringResource(R.string.asmaul_husna_dalil_title)} (${item.dalilReference})",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald
+                            color = SaatColors.HomeDarkGreen
                         )
                     }
                     Text(
                         text = item.dalil(appLanguage),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = SaatColors.Slate700,
                         lineHeight = 18.sp
                     )
                 }
@@ -624,9 +625,9 @@ private fun AsmaulHusnaDetailSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = SaatColors.Gold.copy(alpha = 0.12f)
+                    containerColor = SaatColors.PureWhite
                 ),
-                border = BorderStroke(1.dp, SaatColors.Gold.copy(alpha = 0.4f))
+                border = BorderStroke(1.dp, Color(0xFFE8E2D2))
             ) {
                 Column(
                     modifier = Modifier.padding(14.dp),
@@ -639,20 +640,20 @@ private fun AsmaulHusnaDetailSheet(
                         Icon(
                             Icons.Outlined.AutoAwesome,
                             contentDescription = null,
-                            tint = SaatColors.DeepEmerald,
+                            tint = SaatColors.GoldDeep,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
                             text = stringResource(R.string.asmaul_husna_fadhilah_title),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = SaatColors.DeepEmerald
+                            color = SaatColors.GoldDeep
                         )
                     }
                     Text(
                         text = item.fadhilah(appLanguage),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = SaatColors.Slate700,
                         lineHeight = 18.sp
                     )
                 }
@@ -663,9 +664,9 @@ private fun AsmaulHusnaDetailSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = SaatColors.DeepEmerald
+                    containerColor = SaatColors.HomeDarkGreen
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
                     modifier = Modifier

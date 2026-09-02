@@ -613,48 +613,16 @@ private fun SunnahNeedDetailFullScreen(
     appLanguage: AppLanguage,
     onDismiss: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = SaatColors.ScreenBackground
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SaatColors.HomeBg)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = SaatColors.PureWhite,
-                shadowElevation = 2.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = item.title(appLanguage),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = item.hadithReference,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = SaatColors.GoldDeep,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+            title = item.title(appLanguage),
+            subtitle = item.hadithReference,
+            onBack = onDismiss
+        )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -739,7 +707,6 @@ private fun SunnahNeedDetailFullScreen(
                     SunnahActionStepCard(step = step, appLanguage = appLanguage)
                 }
             }
-        }
     }
 }
 
@@ -854,45 +821,16 @@ private fun SunnahPrayerDetailFullScreen(
     onOpenDoaZikir: () -> Unit,
     onOpenQiyam: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = SaatColors.ScreenBackground
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SaatColors.HomeBg)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = SaatColors.PureWhite,
-                shadowElevation = 2.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = item.title(appLanguage),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = item.waktu(appLanguage),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = SaatColors.Slate500
-                        )
-                    }
-                }
-            }
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+            title = item.title(appLanguage),
+            subtitle = item.waktu(appLanguage),
+            onBack = onDismiss
+        )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -1117,7 +1055,6 @@ private fun SunnahPrayerDetailFullScreen(
                     }
                 }
             }
-        }
     }
 }
 
