@@ -12,50 +12,30 @@
     <string name="journey_toast_quran_success">Habit Al-Qur\'an berhasil ditandai! ✨</string>
     <string name="journey_toast_dhikr_success">Habit Dzikir berhasil ditandai! ✨</string>
     <string name="journey_toast_sunnah_success">Habit Sunnah berhasil ditandai! ✨</string>
-
-
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="language_malay">Bahasa Melayu</string>
     <string name="language_settings_title">Bahasa aplikasi</string>
-
-    <!-- Theme Settings -->
-    <string name="theme_emerald">Hijau Zamrud</string>
-    <string name="theme_gold">Emas Kerajaan</string>
-    <string name="theme_ocean">Biru Samudra</string>
-    <string name="theme_rose">Mawar Merah Muda</string>
-    <string name="theme_purple">Ungu Lavender</string>
-    <string name="theme_orange">Jingga Senja</string>
-    <string name="theme_red">Merah Hati</string>
-
-    <!-- Notification & Sound Settings -->
-
     <string name="sunnah_mon_fast_title">Puasa Sunnah Senin</string>
-    <string name="sunnah_mon_fast_body">Besok adalah hari Senin. Jangan lupa persiapkan puasa sunnah Anda.</string>
+    <string name="sunnah_mon_fast_body">Kīmi mengingatkan: Besok adalah hari Senin. Jangan lupa persiapkan puasa sunnah Anda.</string>
     <string name="sunnah_thu_fast_title">Puasa Sunnah Kamis</string>
-    <string name="sunnah_thu_fast_body">Besok adalah hari Kamis. Jangan lupa persiapkan puasa sunnah Anda.</string>
+    <string name="sunnah_thu_fast_body">Kīmi mengingatkan: Besok adalah hari Kamis. Jangan lupa persiapkan puasa sunnah Anda.</string>
     <string name="sunnah_dhuha_title">Shalat Duha</string>
-    <string name="sunnah_dhuha_body">SaatNya shalat Duha. Sempatkan melaksanakan shalat sunnah Duha.</string>
-    <string name="surah_reminder_notif_title">SaatNya membaca Surah %s</string>
-    <string name="surah_reminder_notif_body">Sempatkan membaca Surah %s hari ini. Semoga membawa ketenangan dan keberkahan.</string>
-
-    <!-- Madhab Settings -->
+    <string name="sunnah_dhuha_body">Kīmi mengingatkan: Sudah waktunya shalat Duha. Sempatkan melaksanakan shalat sunnah Duha.</string>
+    <string name="surah_reminder_notif_title">Kīmi mengajak Anda membaca Surah %s</string>
+    <string name="surah_reminder_notif_body">Sempatkan membaca Surah %s hari ini bersama Kīmi. Semoga membawa ketenangan dan keberkahan.</string>
     <string name="madhab_shafi">Syafi\'i</string>
     <string name="madhab_maliki">Maliki</string>
     <string name="madhab_hanbali">Hambali</string>
     <string name="madhab_hanafi">Hanafi</string>
     <string name="madhab_settings_title">Mazhab Perhitungan</string>
-
     <string name="nav_home">Beranda</string>
     <string name="nav_spiritual">Ibadah</string>
     <string name="nav_quran">Al-Quran</string>
     <string name="nav_setting">Lainnya</string>
-
     <string name="back">Kembali</string>
     <string name="loading">Memuat…</string>
     <string name="locating">Mencari lokasi…</string>
-
-
     <string name="prayer_fajr">Subuh</string>
     <string name="prayer_sunrise">Terbit</string>
     <string name="prayer_dhuhr">Dzuhur</string>
@@ -63,7 +43,6 @@
     <string name="prayer_maghrib">Maghrib</string>
     <string name="prayer_isha">Isya</string>
     <string name="prayer_imsak">Imsak</string>
-
     <string name="prayer_allow_location">Izinkan lokasi untuk melihat waktu sholat</string>
     <string name="prayer_schedule">Jadwal sholat</string>
     <string name="prayer_grace_passed">Sholat %1$s sudah lewat</string>
@@ -112,16 +91,16 @@
     <string name="prayer_quote_maghrib">Tutup harimu dengan syukur dan mengingat Allah.</string>
     <string name="prayer_quote_isha">Tenangkan hati sebelum malam beristirahat.</string>
     <string name="prayer_quote_tahajud">Di sunyi malam, dekatkan hati kepada-Nya.</string>
-    <string name="night_midnight_title">🌙 Tengah Malam</string>
-    <string name="night_midnight_body">Malam sudah setengah. Sholat Witir sebelum tidur — jangan sampai terlewat.</string>
-    <string name="night_first_third_title">🌃 Malam Dimulai</string>
-    <string name="night_first_third_body">Istirahatlah. Sepertiga akhir malam milik Anda — bangun untuk kebaikan yang siang tidak bisa beri.</string>
-    <string name="night_last_third_title">✨ Sepertiga Akhir Telah Tiba</string>
-    <string name="night_last_third_body">Allah turun ke langit dunia. Jam paling berkah hari ini dimulai.</string>
+    <string name="night_midnight_title">Kīmi Mengingatkan</string>
+    <string name="night_midnight_body">Sudah tengah malam. Jika belum tidur, jangan lupa menunaikan Witir sebelum beristirahat.</string>
+    <string name="night_first_third_title">Kīmi Mengingatkan</string>
+    <string name="night_first_third_body">Malam telah tiba. Istirahatlah dengan cukup, Kīmi akan mengingatkanmu saat sepertiga akhir malam tiba.</string>
+    <string name="night_last_third_title">Sepertiga Akhir Telah Tiba</string>
+    <string name="night_last_third_body">Sepertiga akhir malam telah tiba. Kīmi mengajakmu bangun dan mendekat kepada Allah.</string>
     <string name="tahajud_alarm_title">Saatnya Shalat Tahajud</string>
     <string name="tahajud_alarm_body">Di sunyi malam, dekatkan hati kepada-Nya.</string>
-    <string name="daily_verse_notif_title">Ayat Anda hari ini</string>
-    <string name="daily_verse_notif_fallback">Buka Saat untuk ayat hari ini.</string>
+    <string name="daily_verse_notif_title">Kīmi Punya Ayat untukmu</string>
+    <string name="daily_verse_notif_fallback">Luangkan beberapa menit untuk membaca dan merenungkan ayat hari ini.</string>
     <string name="adhan_playback_title">Adzan</string>
     <string name="adhan_playback_body">Memutar panggilan sholat</string>
     <string name="adhan_stop">Hentikan Adzan</string>
@@ -181,12 +160,7 @@
     <string name="fidyah_title">Tracker Fidyah</string>
     <string name="fidyah_subtitle">Perhitungan 4 Mazhab &amp; Catatan Qadha</string>
     <string name="prayer_tracker_open_calendar">Kalender</string>
-    <string name="prayer_check_notif_title">Sudah sholat %1$s?</string>
-    <string name="prayer_check_notif_body">Ketuk untuk centang sholat hari ini dan jaga streak.</string>
-    <string name="prayer_wrapup_notif_title">Lengkapi sholat hari ini</string>
-    <string name="prayer_wrapup_notif_body">Masih %1$d sholat belum dicentang. Selesaikan sebelum hari berakhir.</string>
-    <string name="channel_prayer_tracker">Checklist sholat</string>
-    <string name="channel_prayer_tracker_desc">Pengingat untuk menandai sholat</string>
+
     <string name="juz_load_failed">Gagal memuat daftar juz</string>
     <string name="juz_starts_at">Mulai dari %1$s</string>
     <string name="one_surah_found">1 surah ditemukan</string>

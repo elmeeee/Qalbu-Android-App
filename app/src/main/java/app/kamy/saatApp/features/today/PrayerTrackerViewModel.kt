@@ -9,7 +9,6 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.prayer.HijriDayHelper
 import app.kamy.saatApp.domain.prayer.PrayerTrackerAvailability
 import app.kamy.saatApp.infrastructure.notifications.AppNotificationCopy
-import app.kamy.saatApp.infrastructure.notifications.PrayerCheckReminderScheduler
 import app.kamy.saatApp.infrastructure.preferences.PrayerDayProgress
 import app.kamy.saatApp.infrastructure.preferences.PrayerTrackerPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerTrackerStore
@@ -42,8 +41,7 @@ data class PrayerTrackerUiState(
     val challengeTarget: Int = 7,
     val completedPrayers: Set<PrayerType> = emptySet(),
     val optionalHabits: List<OptionalHabitUiItem> = emptyList(),
-    val availablePrayers: Set<PrayerType> = emptySet(),
-    val checkRemindersEnabled: Boolean = true
+    val availablePrayers: Set<PrayerType> = emptySet()
 )
 
 @HiltViewModel
@@ -85,8 +83,7 @@ class PrayerTrackerViewModel @Inject constructor(
                 challengeTarget = PrayerTrackerStore.challengeTargetDays(streak),
                 completedPrayers = completed,
                 optionalHabits = buildOptionalHabits(today),
-                availablePrayers = available,
-                checkRemindersEnabled = prefs.checkRemindersEnabled()
+                availablePrayers = available
             )
         }
     }
@@ -97,15 +94,12 @@ class PrayerTrackerViewModel @Inject constructor(
         PrayerTrackerStore.toggle(appContext, prayer)
         val nowCompleted = PrayerTrackerStore.isCompleted(appContext, prayer)
         if (nowCompleted) {
-            PrayerCheckReminderScheduler.onPrayerMarked(appContext, prayer)
             val label = AppNotificationCopy.prayerDisplayName(appContext, prayer.aladhanKey)
             viewModelScope.launch {
                 _toastMessage.emit(
                     appContext.getString(R.string.prayer_marked_success, label)
                 )
             }
-        } else {
-            PrayerCheckReminderScheduler.reschedule(appContext)
         }
         refresh()
     }
@@ -119,16 +113,6 @@ class PrayerTrackerViewModel @Inject constructor(
 
     fun toggleOptionalHabit(habit: OptionalWorshipHabit) {
         PrayerTrackerStore.toggleOptional(appContext, habit)
-        refresh()
-    }
-
-    fun setCheckRemindersEnabled(enabled: Boolean) {
-        prefs.setCheckRemindersEnabled(enabled)
-        if (enabled) {
-            PrayerCheckReminderScheduler.reschedule(appContext)
-        } else {
-            PrayerCheckReminderScheduler.cancelAll(appContext)
-        }
         refresh()
     }
 
