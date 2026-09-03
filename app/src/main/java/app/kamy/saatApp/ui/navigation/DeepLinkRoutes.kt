@@ -13,13 +13,17 @@ object DeepLinkRoutes {
 
     private fun notificationRoute(intent: Intent): String? {
         val chapter = intent.getIntExtra(DailyVerseNotificationScheduler.EXTRA_CHAPTER, -1)
-        if (chapter > 0) {
+            .takeIf { it > 0 }
+            ?: intent.getIntExtra("chapter", -1).takeIf { it > 0 }
+            ?: intent.getIntExtra("chapter_number", -1).takeIf { it > 0 }
+            ?: intent.getIntExtra("surah_number", -1).takeIf { it > 0 }
+        if (chapter != null && chapter > 0) {
             val ayah = intent.getIntExtra(DailyVerseNotificationScheduler.EXTRA_AYAH, -1)
-            return if (ayah > 0) "quran/reader/$chapter?ayah=$ayah" else "quran/reader/$chapter?ayah=-1"
-        }
-        val surahNumber = intent.getIntExtra("surah_number", -1)
-        if (surahNumber > 0) {
-            return "quran/reader/$surahNumber?ayah=-1"
+                .takeIf { it > 0 }
+                ?: intent.getIntExtra("ayah", -1).takeIf { it > 0 }
+                ?: intent.getIntExtra("ayah_number", -1).takeIf { it > 0 }
+                ?: intent.getIntExtra("verse", -1).takeIf { it > 0 }
+            return if (ayah != null && ayah > 0) "quran/reader/$chapter?ayah=$ayah" else "quran/reader/$chapter?ayah=-1"
         }
         return null
     }
@@ -32,7 +36,8 @@ object DeepLinkRoutes {
                 val chapter = uri.pathSegments.firstOrNull()?.toIntOrNull()
                     ?: uri.getQueryParameter("chapter")?.toIntOrNull()
                     ?: return RootTab.Quran.route
-                val ayah = uri.getQueryParameter("ayah")?.toIntOrNull()
+                val ayah = uri.pathSegments.getOrNull(1)?.toIntOrNull()
+                    ?: uri.getQueryParameter("ayah")?.toIntOrNull()
                     ?: uri.getQueryParameter("verse")?.toIntOrNull()
                 if (ayah != null && ayah > 0) "quran/reader/$chapter?ayah=$ayah"
                 else "quran/reader/$chapter?ayah=-1"

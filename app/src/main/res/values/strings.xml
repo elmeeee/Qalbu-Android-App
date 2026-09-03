@@ -68,6 +68,15 @@
     <string name="notif_summary_count">%1$d reminders on</string>
     <string name="channel_daily_verse">Daily verse</string>
     <string name="channel_daily_verse_desc">Morning Quran verse reminder</string>
+    <string name="channel_quran_reminder">Qur\'an Reminders</string>
+    <string name="channel_quran_reminder_desc">Reminders to continue reading the Qur\'an</string>
+    <string name="last_read_reminder_3d_title">Kīmi’s Reminder 📖</string>
+    <string name="last_read_reminder_3d_body">It’s been a few days. Continue your Qur’an reading from %s.</string>
+    <string name="last_read_reminder_7d_title">Kīmi Invites You Back 📖</string>
+    <string name="last_read_reminder_7d_body">It’s been a few days since you last read the Qur’an. Take a few moments to continue from %s.</string>
+    <string name="notif_summary_quran_reminder">Qur\'an reading</string>
+    <string name="quran_reminder_setting_title">Qur\'an Reading Reminder</string>
+    <string name="quran_reminder_setting_desc">Gentle reminder when you haven\'t read for several days</string>
     <string name="channel_prayer">Prayer times</string>
     <string name="channel_prayer_desc">Adhan and night prayer reminders</string>
     <string name="channel_sunnah">Sunnah reading</string>

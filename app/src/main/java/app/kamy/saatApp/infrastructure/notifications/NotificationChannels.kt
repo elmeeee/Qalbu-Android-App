@@ -12,6 +12,7 @@ import app.kamy.saatApp.R
 
 object NotificationChannels {
     const val DAILY_VERSE = "daily_verse_v6"
+    const val QURAN_REMINDER = "quran_reminders_v1"
     const val PRAYER = "prayer_times_v8"
     const val PRAYER_ALERT = "prayer_alert_v8"
     const val SUNNAH = "sunnah_reminders_v5"
@@ -61,6 +62,18 @@ object NotificationChannels {
                 enableVibration(true)
                 setVibrationPattern(vibrationPattern)
                 setBypassDnd(true)
+            }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(
+                QURAN_REMINDER,
+                context.getString(R.string.channel_quran_reminder),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = context.getString(R.string.channel_quran_reminder_desc)
+                setSound(soundUri, notificationAudioAttributes)
+                enableVibration(true)
+                setVibrationPattern(vibrationPattern)
             }
         )
         manager.createNotificationChannel(

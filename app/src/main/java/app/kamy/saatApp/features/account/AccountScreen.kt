@@ -609,6 +609,14 @@ fun NotificationAdhanScreen(
                 )
                 SettingsCustomRow(
                     iconRes = R.drawable.ic_remainders_custom,
+                    title = stringResource(R.string.quran_reminder_setting_title),
+                    subtitle = if (state.quranReminderEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.quranReminderEnabled,
+                    onCheckedChange = vm::setQuranReminderEnabled,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_remainders_custom,
                     title = stringResource(R.string.notif_fasting_important_days),
                     subtitle = if (state.importantDaysReminderEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
                     checked = state.importantDaysReminderEnabled,

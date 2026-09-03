@@ -75,6 +75,9 @@ class MainActivity : ComponentActivity() {
                     android.graphics.Color.TRANSPARENT
                 )
             )
+            if (savedInstanceState == null && deepLinkRoute.value == null) {
+                deepLinkRoute.value = DeepLinkRoutes.fromIntent(intent)
+            }
             val needsOnboarding = !onboardingStore.isComplete()
             setContent {
                 val pendingRoute by deepLinkRoute

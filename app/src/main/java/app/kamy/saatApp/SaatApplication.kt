@@ -58,6 +58,7 @@ class SaatApplication : Application(), androidx.work.Configuration.Provider {
             }
             runCatching { SmartDefaultsInitializer.applyIfNeeded(this) }
             runCatching { DailyVerseNotificationScheduler.reschedule(this) }
+            runCatching { app.kamy.saatApp.infrastructure.notifications.QuranLastReadReminderScheduler.enqueue(this) }
             runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
             runCatching {
                 app.kamy.saatApp.infrastructure.preferences.SurahReminderStore.from(this).let { store ->

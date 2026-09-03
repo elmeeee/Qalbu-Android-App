@@ -71,6 +71,15 @@
 
     <string name="channel_daily_verse">Ayat harian</string>
     <string name="channel_daily_verse_desc">Pengingat ayat Al-Quran pagi</string>
+    <string name="channel_quran_reminder">Pengingat Al-Qur\'an</string>
+    <string name="channel_quran_reminder_desc">Pengingat untuk melanjutkan membaca Al-Qur\'an</string>
+    <string name="last_read_reminder_3d_title">Kīmi Mengingatkan 📖</string>
+    <string name="last_read_reminder_3d_body">Sudah beberapa hari. Yuk lanjutkan bacaanmu dari %s.</string>
+    <string name="last_read_reminder_7d_title">Kīmi Mengajakmu Kembali 📖</string>
+    <string name="last_read_reminder_7d_body">Sudah beberapa hari sejak terakhir membaca Al-Qur\'an. Yuk luangkan beberapa menit untuk melanjutkan dari %s.</string>
+    <string name="notif_summary_quran_reminder">Bacaan Al-Qur\'an</string>
+    <string name="quran_reminder_setting_title">Pengingat Membaca Al-Qur\'an</string>
+    <string name="quran_reminder_setting_desc">Pengingat ramah saat sudah beberapa hari tidak membaca</string>
     <string name="channel_prayer">Waktu sholat</string>
     <string name="channel_prayer_desc">Adzan dan pengingat sholat malam</string>
     <string name="channel_sunnah">Bacaan sunnah</string>

@@ -68,6 +68,15 @@
     <string name="notif_summary_count">%1$d peringatan aktif</string>
     <string name="channel_daily_verse">Ayat harian</string>
     <string name="channel_daily_verse_desc">Peringatan ayat Al-Quran pagi</string>
+    <string name="channel_quran_reminder">Peringatan Al-Quran</string>
+    <string name="channel_quran_reminder_desc">Peringatan untuk menyambung bacaan Al-Quran</string>
+    <string name="last_read_reminder_3d_title">Kīmi Mengingatkan 📖</string>
+    <string name="last_read_reminder_3d_body">Sudah beberapa hari. Jom sambung bacaanmu dari %s.</string>
+    <string name="last_read_reminder_7d_title">Kīmi Mengajakmu Kembali 📖</string>
+    <string name="last_read_reminder_7d_body">Sudah beberapa hari sejak kali terakhir membaca Al-Quran. Jom luangkan beberapa minit untuk menyambung bacaanmu dari %s.</string>
+    <string name="notif_summary_quran_reminder">Bacaan Al-Quran</string>
+    <string name="quran_reminder_setting_title">Peringatan Membaca Al-Quran</string>
+    <string name="quran_reminder_setting_desc">Peringatan mesra apabila beberapa hari tidak membaca</string>
     <string name="channel_prayer">Waktu solat</string>
     <string name="channel_prayer_desc">Azan dan peringatan solat malam</string>
     <string name="channel_sunnah">Bacaan sunnah</string>

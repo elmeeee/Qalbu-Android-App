@@ -60,6 +60,9 @@ open class PrayerNotificationPreferencesStoreBase(
     fun isMonThuFastEnabled(): Boolean = bool(KEY_MON_THU_FAST, default = true)
     fun setMonThuFastEnabled(enabled: Boolean) = setBool(KEY_MON_THU_FAST, enabled)
 
+    fun isQuranReminderEnabled(): Boolean = bool(KEY_QURAN_REMINDER, default = true)
+    fun setQuranReminderEnabled(enabled: Boolean) = setBool(KEY_QURAN_REMINDER, enabled)
+
     fun isDhuhaEnabled(): Boolean = bool(KEY_DHUHA, default = true)
     fun setDhuhaEnabled(enabled: Boolean) = setBool(KEY_DHUHA, enabled)
 
@@ -160,6 +163,7 @@ open class PrayerNotificationPreferencesStoreBase(
         private const val KEY_IMPORTANT_DAYS = "importantDaysReminderEnabled"
         private const val KEY_ADZAN_SOUND = "adhanSoundEnabled"
         private const val KEY_MON_THU_FAST = "monThuFastReminderEnabled"
+        private const val KEY_QURAN_REMINDER = "quranReminderEnabled"
         private const val KEY_DHUHA = "dhuhaReminderEnabled"
         private const val KEY_DHUHA_HOUR = "dhuhaReminderHour"
         private const val KEY_DHUHA_MINUTE = "dhuhaReminderMinute"
