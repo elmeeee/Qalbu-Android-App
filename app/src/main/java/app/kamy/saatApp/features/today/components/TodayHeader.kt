@@ -8,47 +8,47 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.util.Calendar
-
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.unit.lerp
 
 @Composable
 fun TodayHeader(
@@ -56,7 +56,8 @@ fun TodayHeader(
     locationStatus: String? = null,
     hijriLabel: String?,
     gregorianLabel: String?,
-    scrollProgress: Float = 0f,
+    isScrolled: Boolean = false,
+    isDarkBackground: Boolean = false,
     onLocationClick: () -> Unit = {},
     onCalendarClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -104,125 +105,217 @@ fun TodayHeader(
            .replace("Taman", "Tmn", ignoreCase = true)
     }
 
-    val progress = scrollProgress.coerceIn(0f, 1f)
+    val initialTextColor = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
+    val greetingColor = if (isScrolled) SaatColors.HomeDarkGreen else initialTextColor
+    val dateTextColor = if (isScrolled) SaatColors.HomeDarkGreen else initialTextColor
 
-    val headerBgColor = lerp(Color.Transparent, SaatColors.PureWhite, progress)
-    val greetingColor = lerp(Color.White.copy(alpha = 0.95f), SaatColors.Slate500, progress)
-    val defaultDateColor = lerp(Color.White, SaatColors.Slate900, progress)
-    val badgeBgColor = lerp(Color.White.copy(alpha = 0.2f), SaatColors.MintWash, progress)
-    val badgeBorderColor = lerp(Color.White.copy(alpha = 0.4f), SaatColors.Teal.copy(alpha = 0.25f), progress)
-    val badgeContentColor = lerp(Color.White, SaatColors.DeepEmerald, progress)
-    val elevationDp = lerp(0.dp, 2.dp, progress)
-    val dividerColor = lerp(Color.Transparent, SaatColors.SoftGrey.copy(alpha = 0.4f), progress)
+    val initialBadgeBg = if (isDarkBackground) Color.White.copy(alpha = 0.22f) else SaatColors.HomeDarkGreen.copy(alpha = 0.10f)
+    val badgeBgColor = if (isScrolled) SaatColors.HomeDarkGreen.copy(alpha = 0.12f) else initialBadgeBg
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = headerBgColor,
-        shadowElevation = elevationDp
+    val initialBadgeBorder = if (isDarkBackground) Color.White.copy(alpha = 0.45f) else SaatColors.HomeDarkGreen.copy(alpha = 0.25f)
+    val badgeBorderColor = if (isScrolled) SaatColors.HomeDarkGreen.copy(alpha = 0.25f) else initialBadgeBorder
+
+    val initialBadgeContent = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
+    val badgeContentColor = if (isScrolled) SaatColors.HomeDarkGreen else initialBadgeContent
+
+    Box(
+        modifier = modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .tabContentStatusBarInset()
+        // Frosted Glass Backdrop Layer
+        if (isScrolled) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(SaatColors.HomeBg.copy(alpha = 0.96f))
+            )
+        }
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = Color.Transparent,
+            shadowElevation = 0.dp
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .tabContentStatusBarInset()
             ) {
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = "Assalamu'alaikum",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = greetingColor,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                    var showHijri by remember { mutableStateOf(false) }
-                    LaunchedEffect(formattedHijri) {
-                        if (!formattedHijri.isNullOrBlank()) {
-                            while (true) {
-                                kotlinx.coroutines.delay(5000)
-                                showHijri = !showHijri
-                            }
-                        }
-                    }
-
-                    AnimatedContent(
-                        targetState = showHijri,
-                        transitionSpec = {
-                            (slideInVertically { height -> height } + fadeIn()) togetherWith
-                                    (slideOutVertically { height -> -height } + fadeOut())
-                        },
-                        label = "dateTransition"
-                    ) { targetShowHijri ->
-                        val dateText = remember(targetShowHijri, localDayName, gregorianLabel, formattedHijri) {
-                            val prefix = if (localDayName.isNotEmpty()) "$localDayName, " else ""
-                            if (targetShowHijri && !formattedHijri.isNullOrBlank()) {
-                                "$prefix$formattedHijri"
-                            } else {
-                                "$prefix${gregorianLabel.orEmpty()}"
-                            }
-                        }
-                        val targetDateColor = if (targetShowHijri) SaatColors.DeepEmerald else SaatColors.Slate900
-                        val textColor = lerp(Color.White, targetDateColor, progress)
-
-                        Text(
-                            text = dateText,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = textColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.clickable(
-                                onClick = onCalendarClick
-                            )
-                        )
-                    }
-                }
-
-                Spacer(Modifier.width(16.dp))
-
-                // Location Badge on the right
-                Surface(
-                    onClick = onLocationClick,
-                    shape = androidx.compose.foundation.shape.CircleShape,
-                    color = badgeBgColor,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, badgeBorderColor),
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
-                        Icon(
-                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_location_custom),
-                            contentDescription = stringResource(R.string.location_enable),
-                            tint = badgeContentColor,
-                            modifier = Modifier.size(16.dp)
-                        )
                         Text(
-                            text = displayLocation,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = badgeContentColor,
+                            text = "Assalamu'alaikum",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = greetingColor,
+                            fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.widthIn(max = 140.dp)
+                            overflow = TextOverflow.Ellipsis
                         )
+
+                        var showHijri by remember { mutableStateOf(false) }
+                        LaunchedEffect(formattedHijri) {
+                            if (!formattedHijri.isNullOrBlank()) {
+                                while (true) {
+                                    kotlinx.coroutines.delay(5000)
+                                    showHijri = !showHijri
+                                }
+                            }
+                        }
+
+                        AnimatedContent(
+                            targetState = showHijri,
+                            transitionSpec = {
+                                (slideInVertically { height -> height } + fadeIn()) togetherWith
+                                        (slideOutVertically { height -> -height } + fadeOut())
+                            },
+                            label = "dateTransition"
+                        ) { targetShowHijri ->
+                            val dateText = remember(targetShowHijri, localDayName, gregorianLabel, formattedHijri) {
+                                val prefix = if (localDayName.isNotEmpty()) "$localDayName, " else ""
+                                if (targetShowHijri && !formattedHijri.isNullOrBlank()) {
+                                    "$prefix$formattedHijri"
+                                } else {
+                                    "$prefix${gregorianLabel.orEmpty()}"
+                                }
+                            }
+
+                            Text(
+                                text = dateText,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = dateTextColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.clickable(
+                                    onClick = onCalendarClick
+                                )
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.width(16.dp))
+
+                    // Location Badge on the right
+                    Surface(
+                        onClick = onLocationClick,
+                        shape = androidx.compose.foundation.shape.CircleShape,
+                        color = badgeBgColor,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, badgeBorderColor),
+                        modifier = Modifier.align(Alignment.CenterVertically)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_location_custom),
+                                contentDescription = stringResource(R.string.location_enable),
+                                tint = badgeContentColor,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = displayLocation,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = badgeContentColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.widthIn(max = 140.dp)
+                            )
+                        }
                     }
                 }
             }
-            HorizontalDivider(color = dividerColor, thickness = 0.5.dp)
         }
     }
 }
 
+@Composable
+fun MasjidkuCollaborationBanner(
+    isDarkBackground: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val haptic = app.kamy.saatApp.ui.feedback.rememberTapHaptic()
+    val textColor = if (isDarkBackground) Color.White else SaatColors.HomeDarkGreen
+    val bannerTitle = stringResource(R.string.collab_with)
+    val bannerSubtitle = stringResource(R.string.collab_masjidku_sub)
+    val targetUrl = "https://masjidku.app?ref=saat_android"
+
+    Row(
+        modifier = modifier
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+            .clickable {
+                haptic()
+                val intent = android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse(targetUrl)
+                )
+                runCatching { context.startActivity(intent) }
+            },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Vertical accent line
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .height(38.dp)
+                .background(
+                    color = textColor.copy(alpha = 0.5f),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(1.dp)
+                )
+        )
+
+        Spacer(Modifier.width(10.dp))
+
+        Column(modifier = Modifier.padding(vertical = 2.dp)) {
+            Text(
+                text = bannerTitle,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                fontWeight = FontWeight.Medium,
+                color = textColor.copy(alpha = 0.85f),
+                lineHeight = 12.sp
+            )
+
+            Spacer(Modifier.height(2.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_masjidku_logo),
+                    contentDescription = "Masjidku",
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(6.dp))
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Column {
+                    Text(
+                        text = "Masjidku",
+                        style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                        lineHeight = 15.sp
+                    )
+                    Text(
+                        text = bannerSubtitle,
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                        fontWeight = FontWeight.Normal,
+                        color = textColor.copy(alpha = 0.75f),
+                        lineHeight = 12.sp
+                    )
+                }
+            }
+        }
+    }
+}

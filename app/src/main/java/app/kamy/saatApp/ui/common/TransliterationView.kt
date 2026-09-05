@@ -75,7 +75,7 @@ fun TransliterationView(
             fontStyle = FontStyle.Italic,
             lineHeight = 24.sp
         ),
-        color = SaatColors.Slate500,
+        color = SaatColors.DeepEmerald,
         textAlign = textAlign,
         softWrap = true,
         modifier = contentModifier.padding(vertical = 2.dp)
@@ -88,7 +88,7 @@ fun wrapTransliterationHtml(body: String): String {
             margin: 0;
             padding: 0;
             background: transparent;
-            color: #64748B;
+            color: #085E43;
             overflow: visible !important;
             height: auto !important;
             min-height: 0 !important;

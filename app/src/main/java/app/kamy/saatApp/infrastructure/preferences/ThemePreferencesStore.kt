@@ -12,14 +12,14 @@ import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
-enum class AppThemeColor(val key: String, val displayNameRes: Int) {
-    EMERALD("emerald", app.kamy.saatApp.R.string.theme_emerald),
-    OCEAN("ocean", app.kamy.saatApp.R.string.theme_ocean),
-    GOLD("gold", app.kamy.saatApp.R.string.theme_gold),
-    ROSE("rose", app.kamy.saatApp.R.string.theme_rose),
-    PURPLE("purple", app.kamy.saatApp.R.string.theme_purple),
-    ORANGE("orange", app.kamy.saatApp.R.string.theme_orange),
-    RED("red", app.kamy.saatApp.R.string.theme_red);
+enum class AppThemeColor(val key: String) {
+    EMERALD("emerald"),
+    OCEAN("ocean"),
+    GOLD("gold"),
+    ROSE("rose"),
+    PURPLE("purple"),
+    ORANGE("orange"),
+    RED("red");
 
     companion object {
         fun fromKey(key: String?): AppThemeColor {

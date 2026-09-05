@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -92,16 +93,19 @@ fun MyQuranLibraryCard(
 
     Surface(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = Color.Black.copy(alpha = 0.05f),
+                spotColor = Color.Black.copy(alpha = 0.04f)
+            ),
         shape = RoundedCornerShape(20.dp),
-        color = SaatColors.PureWhite,
-        shadowElevation = 3.dp,
-        border = BorderStroke(
-            1.dp,
-            Brush.linearGradient(
-                listOf(SaatColors.DeepEmerald.copy(0.22f), SaatColors.Gold.copy(0.25f))
-            )
-        )
+        color = Color.White.copy(alpha = 0.45f),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f))
     ) {
         Row(
             modifier = Modifier
@@ -119,19 +123,19 @@ fun MyQuranLibraryCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(50.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                SaatColors.DeepEmerald.copy(alpha = 0.15f),
-                                SaatColors.GoldDeep.copy(alpha = 0.18f)
+                                SaatColors.DeepEmerald.copy(alpha = 0.12f),
+                                SaatColors.GoldDeep.copy(alpha = 0.15f)
                             )
                         )
                     )
                     .border(
                         1.dp,
-                        SaatColors.GoldDeep.copy(alpha = 0.3f),
+                        Color.White.copy(alpha = 0.9f),
                         RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -139,29 +143,29 @@ fun MyQuranLibraryCard(
                 Icon(
                     painter = painterResource(R.drawable.ic_bookmark_custom),
                     contentDescription = null,
-                    tint = SaatColors.GoldDeep,
-                    modifier = Modifier.size(26.dp)
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.size(24.dp)
                 )
             }
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = stringResource(R.string.quran_library_title),
+                        text = stringResource(R.string.bookmarks_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.Slate900
                     )
-                    if (counts.total > 0) {
+                    if (counts.bookmarks > 0) {
                         Spacer(Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(SaatColors.GoldDeep)
+                                .background(SaatColors.DeepEmerald)
                                 .padding(horizontal = 7.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = "${counts.total}",
+                                text = "${counts.bookmarks}",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = SaatColors.PureWhite,
@@ -170,39 +174,19 @@ fun MyQuranLibraryCard(
                         }
                     }
                 }
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(3.dp))
                 Text(
-                    text = stringResource(R.string.quran_library_subtitle),
+                    text = stringResource(R.string.bookmarks_card_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = SaatColors.Slate500,
                     lineHeight = 18.sp
                 )
-                if (counts.total > 0) {
-                    Spacer(Modifier.height(10.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LibraryCountChip(
-                            drawableResId = R.drawable.ic_bookmark_custom,
-                            count = counts.bookmarks,
-                            tint = SaatColors.GoldDeep
-                        )
-                        LibraryCountChip(
-                            drawableResId = R.drawable.ic_personalnote_custom,
-                            count = counts.notes,
-                            tint = SaatColors.DeepEmerald
-                        )
-                        LibraryCountChip(
-                            drawableResId = R.drawable.ic_memorization_custom,
-                            count = counts.hifz,
-                            tint = SaatColors.IndigoDeep
-                        )
-                    }
-                }
             }
             Icon(
                 Icons.Filled.ChevronRight,
                 contentDescription = null,
                 tint = SaatColors.Slate500,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(22.dp)
             )
         }
     }

@@ -51,7 +51,7 @@ class PrayerTrackerCalendarViewModel @Inject constructor(
         loadMonth(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1)
     }
 
-    private fun refresh() {
+    fun refresh() {
         val cal = Calendar.getInstance()
         loadMonth(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1)
     }

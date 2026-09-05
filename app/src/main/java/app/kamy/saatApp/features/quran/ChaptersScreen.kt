@@ -13,6 +13,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
@@ -66,6 +67,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -143,6 +145,11 @@ fun ChaptersScreen(
             coachMarkState.show()
         }
     }
+
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        vm.onScreenVisible()
+        onPauseOrDispose {}
+    }
     val focusManager = LocalFocusManager.current
 
     BackHandler(enabled = state.isSearchActive || state.searchQuery.isNotEmpty()) {
@@ -162,7 +169,7 @@ fun ChaptersScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(SaatColors.ScreenBackground)
             .pointerInput(state.isSearchActive, state.searchQuery) {
                 if (state.isSearchActive || state.searchQuery.isNotEmpty()) {
                     detectTapGestures(onTap = {
@@ -175,9 +182,7 @@ fun ChaptersScreen(
         when {
             state.isLoading && state.chapters.isEmpty() && !isPullRefreshing ->
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .tabContentStatusBarInset()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     QuranListHeader(
                         searchQuery = "",
@@ -195,7 +200,7 @@ fun ChaptersScreen(
                         onSearchFocusChange = {},
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(SaatColors.ScreenBackground)
                     )
                     repeat(10) { index ->
                         ChapterRowSkeleton(
@@ -263,7 +268,7 @@ fun ChaptersScreen(
                         onSearchFocusChange = vm::onSearchActiveChange,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(SaatColors.ScreenBackground)
                             .coachMarkTarget(
                                 coachMarkState,
                                 0,
@@ -554,6 +559,8 @@ fun ChaptersScreen(
     }
 }
 
+private val QuranHeaderTextColor = Color(0xFF124C31)
+
 @Composable
 private fun QuranListHeader(
     searchQuery: String,
@@ -571,103 +578,134 @@ private fun QuranListHeader(
     modifier: Modifier = Modifier,
     onSearchFocusChange: (Boolean) -> Unit = {}
 ) {
-    Column(
-        modifier = modifier
-            .tabContentStatusBarInset()
-            .padding(
-                horizontal = SaatSpacing.screenHorizontal,
-                vertical = SaatSpacing.md
-            )
+    Box(
+        modifier = modifier.fillMaxWidth()
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "✦",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.tertiary,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.width(SaatSpacing.sm))
-            Text(
-                text = stringResource(R.string.quran_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        val defaultSubtitle = when (browseMode) {
-            QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
-            QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
-        }
-        val noMatchesSubtitle = stringResource(R.string.no_matches)
-        val oneSurahSubtitle = stringResource(R.string.one_surah_found)
-        val subtitle = when (resultCount) {
-            null -> defaultSubtitle
-            0 -> noMatchesSubtitle
-            1 -> oneSurahSubtitle
-            else -> stringResource(R.string.search_results_found, resultCount)
-        }
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 18.dp, top = 4.dp)
+        // Full width header background image matching original proportions (synchronously loaded)
+        Image(
+            painter = painterResource(R.drawable.bg_quran_header),
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            alignment = Alignment.TopCenter,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(125.dp)
         )
-        Spacer(Modifier.height(SaatSpacing.sm))
+
+        // Gradient overlay for smooth transition into ScreenBackground
         Box(
             modifier = Modifier
-                .height(2.dp)
-                .width(48.dp)
+                .fillMaxWidth()
+                .height(125.dp)
                 .background(
-                    Brush.horizontalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.tertiary,
-                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Transparent,
+                            SaatColors.ScreenBackground.copy(alpha = 0.5f),
+                            SaatColors.ScreenBackground
                         )
                     )
                 )
         )
-        Spacer(Modifier.height(SaatSpacing.md))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .tabContentStatusBarInset()
+                .padding(
+                    start = SaatSpacing.screenHorizontal,
+                    end = SaatSpacing.screenHorizontal,
+                    top = 8.dp,
+                    bottom = SaatSpacing.sm
+                )
         ) {
-            QuranChapterSearchBar(
-                query = searchQuery,
-                onQueryChange = onSearchQueryChange,
-                onClear = onClearSearch,
-                onFocusChange = onSearchFocusChange,
-                onDismiss = onClearSearch,
-                enabled = searchEnabled,
-                focusRequester = searchFocusRequester,
-                placeholder = stringResource(R.string.search_quran_placeholder),
-                modifier = Modifier.weight(1f)
-            )
-            if (isSearching && searchEnabled) {
-                Spacer(Modifier.width(8.dp))
-                TextButton(
-                    onClick = onClearSearch,
-                    contentPadding = PaddingValues(horizontal = 12.dp)
+            // Header Title & Subtitle (Centered, matching SpiritualToolsScreen font)
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.cancel),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = SaatColors.DeepEmerald,
-                        fontWeight = FontWeight.SemiBold
+                        text = stringResource(R.string.quran_title),
+                        style = androidx.compose.ui.text.TextStyle(
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = QuranHeaderTextColor
+                        ),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
+                val defaultSubtitle = when (browseMode) {
+                    QuranBrowseMode.SURAH -> stringResource(R.string.quran_subtitle)
+                    QuranBrowseMode.JUZ -> stringResource(R.string.quran_subtitle_juz)
+                }
+                val noMatchesSubtitle = stringResource(R.string.no_matches)
+                val oneSurahSubtitle = stringResource(R.string.one_surah_found)
+                val subtitle = when (resultCount) {
+                    null -> defaultSubtitle
+                    0 -> noMatchesSubtitle
+                    1 -> oneSurahSubtitle
+                    else -> stringResource(R.string.search_results_found, resultCount)
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Light,
+                        color = QuranHeaderTextColor
+                    ),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
             }
-        }
-        if (showSuggestions && searchEnabled) {
-            Spacer(Modifier.height(SaatSpacing.sm))
-            QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
-        }
-        if (showBrowseTabs) {
-            Spacer(Modifier.height(SaatSpacing.md))
-            QuranBrowseTabs(
-                browseMode = browseMode,
-                onBrowseModeChange = onBrowseModeChange,
-                modifier = Modifier.fillMaxWidth()
-            )
+
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                QuranChapterSearchBar(
+                    query = searchQuery,
+                    onQueryChange = onSearchQueryChange,
+                    onClear = onClearSearch,
+                    onFocusChange = onSearchFocusChange,
+                    onDismiss = onClearSearch,
+                    enabled = searchEnabled,
+                    focusRequester = searchFocusRequester,
+                    placeholder = stringResource(R.string.search_quran_placeholder),
+                    modifier = Modifier.weight(1f)
+                )
+                if (isSearching && searchEnabled) {
+                    Spacer(Modifier.width(8.dp))
+                    TextButton(
+                        onClick = onClearSearch,
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = SaatColors.DeepEmerald,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+            if (showSuggestions && searchEnabled) {
+                Spacer(Modifier.height(SaatSpacing.sm))
+                QuranSearchSuggestionChips(onSuggestionClick = onSuggestionClick)
+            }
+            if (showBrowseTabs) {
+                Spacer(Modifier.height(12.dp))
+                QuranBrowseTabs(
+                    browseMode = browseMode,
+                    onBrowseModeChange = onBrowseModeChange,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -680,24 +718,25 @@ private fun QuranBrowseTabs(
 ) {
     val surahLabel = stringResource(R.string.quran_tab_surah)
     val juzLabel = stringResource(R.string.quran_tab_juz)
-    val tabShape = RoundedCornerShape(22.dp)
 
-    Box(
+    Surface(
         modifier = modifier
-            .clip(RoundedCornerShape(26.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        SaatColors.DeepEmerald.copy(alpha = 0.08f),
-                        SaatColors.GoldDeep.copy(alpha = 0.05f)
-                    )
-                )
-            )
-            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(26.dp))
-            .padding(4.dp)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(24.dp),
+                ambientColor = Color.Black.copy(alpha = 0.06f),
+                spotColor = Color.Black.copy(alpha = 0.04f)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        color = Color.White.copy(alpha = 0.75f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.9f)),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             QuranBrowseTab(
@@ -705,16 +744,14 @@ private fun QuranBrowseTabs(
                 selected = browseMode == QuranBrowseMode.SURAH,
                 drawableResId = R.drawable.ic_quran_on,
                 onClick = { onBrowseModeChange(QuranBrowseMode.SURAH) },
-                modifier = Modifier.weight(1f),
-                shape = tabShape
+                modifier = Modifier.weight(1f)
             )
             QuranBrowseTab(
                 label = juzLabel,
                 selected = browseMode == QuranBrowseMode.JUZ,
                 drawableResId = R.drawable.ic_tafsir,
                 onClick = { onBrowseModeChange(QuranBrowseMode.JUZ) },
-                modifier = Modifier.weight(1f),
-                shape = tabShape
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -727,7 +764,7 @@ private fun QuranBrowseTab(
     drawableResId: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: RoundedCornerShape = RoundedCornerShape(22.dp)
+    shape: RoundedCornerShape = RoundedCornerShape(20.dp)
 ) {
     val bgColor by animateColorAsState(
         targetValue = if (selected) SaatColors.DeepEmerald else Color.Transparent,
@@ -758,10 +795,10 @@ private fun QuranBrowseTab(
                 tint = if (selected) Color.White else SaatColors.DeepEmerald,
                 modifier = Modifier.size(16.dp)
             )
-            Spacer(Modifier.width(6.dp))
+            Spacer(Modifier.width(8.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelLarge,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                 color = textColor
             )
@@ -776,73 +813,105 @@ private fun ContinueReadingCard(
     onTap: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
+    val totalVerses = chapter?.versesCount
+    val percentInt = remember(session.verseNumber, totalVerses) {
+        if (totalVerses != null && totalVerses > 0) {
+            ((session.verseNumber.toFloat() / totalVerses.toFloat()) * 100).toInt().coerceIn(1, 100)
+        } else 50
+    }
+    val fillFraction = (percentInt / 100f).coerceIn(0.05f, 1f)
+
+    Surface(
+        onClick = onTap,
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(22.dp),
+                ambientColor = Color.Black.copy(alpha = 0.05f),
+                spotColor = Color.Black.copy(alpha = 0.04f)
+            ),
+        shape = RoundedCornerShape(22.dp),
+        color = Color.White.copy(alpha = 0.85f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.95f)),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp
     ) {
-        Surface(
-            onClick = onTap,
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp),
-            shape = RoundedCornerShape(20.dp),
-            color = Color.Transparent,
-            shadowElevation = 4.dp
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(20.dp))
-            ) {
-                // Background image
-                Image(
-                    painter = painterResource(R.drawable.last_read_bg),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            SaatColors.LastReadBg.copy(alpha = 0.95f),
+                            SaatColors.LastReadBg.copy(alpha = 0.70f)
+                        )
+                    )
                 )
-
-                // Text overlay
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .fillMaxWidth(0.6f)
-                        .padding(start = 20.dp),
-                    verticalArrangement = Arrangement.Center
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.today_continue_reading_title),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SaatColors.HomeDarkGreen.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(3.dp))
+                val surahTitle = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber)
+                val verseTitle = stringResource(R.string.today_continue_reading_verse, session.verseNumber)
+                Text(
+                    text = "$surahTitle • $verseTitle",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = SaatColors.HomeDarkGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.today_continue_reading_title),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = Color.White.copy(alpha = 0.85f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = "$percentInt%",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.HomeDarkGreen
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = chapter?.displayComplexName ?: stringResource(R.string.surah_number, session.chapterNumber),
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        ),
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.today_continue_reading_verse, session.verseNumber),
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Normal
-                        ),
-                        color = Color.White.copy(alpha = 0.75f),
-                        maxLines = 1
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(4.dp)
+                            .clip(CircleShape)
+                            .background(SaatColors.TimelineGreen.copy(alpha = 0.5f))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fillFraction)
+                                .height(4.dp)
+                                .clip(CircleShape)
+                                .background(SaatColors.HomeDarkGreen)
+                        )
+                    }
                 }
             }
+
+            AsyncImage(
+                model = R.drawable.last_read,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(80.dp, 56.dp)
+                    .padding(start = 8.dp)
+            )
         }
     }
 }
@@ -859,93 +928,94 @@ private fun ChapterRow(
         meanings.getOrNull(chapter.id - 1) ?: chapter.displayTranslatedName
     }
 
-    Box(
+    Surface(
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        contentAlignment = Alignment.Center
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, Color(0xFFECE7DE))
     ) {
-        Surface(
-            onClick = onClick,
+        Row(
             modifier = Modifier
-                .width(345.dp)
-                .height(104.dp),
-            shape = RoundedCornerShape(16.dp),
-            color = SaatColors.PureWhite,
-            shadowElevation = 1.dp,
-            border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
+            ChapterNumberBadge(number = chapter.id)
+            Spacer(Modifier.width(14.dp))
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .weight(1f)
+                    .padding(vertical = 4.dp),
+                verticalArrangement = Arrangement.Center
             ) {
-                ChapterNumberBadge(number = chapter.id)
-                Spacer(Modifier.width(16.dp))
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(vertical = 10.dp),
-                    verticalArrangement = Arrangement.Center
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = chapter.displayComplexName,
-                            style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.Slate900,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                    Text(
+                        text = chapter.displayComplexName,
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 15.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (isRead) {
+                        Spacer(Modifier.width(6.dp))
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.Check,
+                            contentDescription = stringResource(R.string.khatam_completed),
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(16.dp)
                         )
-                        if (isRead) {
-                            Spacer(Modifier.width(6.dp))
-                            Icon(
-                                imageVector = androidx.compose.material.icons.Icons.Default.Check,
-                                contentDescription = stringResource(R.string.khatam_completed),
-                                tint = SaatColors.DeepEmerald,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                    if (meaning.isNotEmpty()) {
-                        Text(
-                            text = meaning,
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = SaatColors.Slate500,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 2.dp)
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        if (chapter.revelationLabel.isNotEmpty()) {
-                            SaatRevelationChip(
-                                label = chapter.revelationLabel,
-                                isMeccan = chapter.isMeccan
-                            )
-                        }
-                        chapter.versesCount?.let { count ->
-                            Text(
-                                text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = SaatColors.Slate500
-                            )
-                        }
                     }
                 }
-                Spacer(Modifier.width(8.dp))
-                Image(
-                    painter = painterResource(if (chapter.isMeccan) R.drawable.mecca else R.drawable.medina),
+                if (meaning.isNotEmpty()) {
+                    Text(
+                        text = meaning,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                        color = SaatColors.Slate500,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (chapter.revelationLabel.isNotEmpty()) {
+                        SaatRevelationChip(
+                            label = chapter.revelationLabel,
+                            isMeccan = chapter.isMeccan
+                        )
+                    }
+                    chapter.versesCount?.let { count ->
+                        Text(
+                            text = pluralStringResource(R.plurals.chapter_verse_count, count, count),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = SaatColors.Slate500
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color.White.copy(alpha = 0.6f))
+                    .border(1.dp, Color.White.copy(alpha = 0.8f), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = if (chapter.isMeccan) R.drawable.mecca else R.drawable.medina,
                     contentDescription = null,
-                    modifier = Modifier
-                        .size(52.dp),
+                    modifier = Modifier.size(42.dp),
                     contentScale = ContentScale.Fit
                 )
             }
@@ -974,18 +1044,18 @@ private fun JuzRow(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(16.dp),
-        color = SaatColors.PureWhite,
+        color = Color.White,
         shadowElevation = 1.dp,
-        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, Color(0xFFECE7DE))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             ChapterNumberBadge(number = juz.juzNumber)
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -1025,12 +1095,20 @@ private fun JuzRow(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = SaatColors.Teal.copy(alpha = 0.6f),
-                modifier = Modifier.size(20.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(SaatColors.Teal.copy(alpha = 0.10f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = SaatColors.Teal,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }

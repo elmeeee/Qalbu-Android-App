@@ -2,34 +2,39 @@
 <resources xmlns:ns0="http://schemas.android.com/tools" ns0:ignore="Typos,MissingTranslation">
     <string name="app_name">Saat</string>
     <string name="app_name_launcher">Saat</string>
+    <string name="prayer_countdown_until_label">until prayer</string>
+    <string name="todays_journey_title">Today\'s Journey</string>
+    <string name="todays_journey_subtitle">Complete your daily worship</string>
+    <string name="journey_badge_prayer">Prayer</string>
+    <string name="journey_badge_quran">Quran</string>
+    <string name="journey_badge_dhikr">Dhikr</string>
+    <string name="journey_badge_sunnah">Sunnah</string>
+    <string name="prayer_badge_not_after_isha">Prayer can be checked after Isha or 5 prayers completed</string>
+    <string name="journey_toast_prayer_success">Prayer habit marked as complete! ✨</string>
+    <string name="journey_toast_quran_success">Al-Quran reading habit marked as complete! ✨</string>
+    <string name="journey_toast_dhikr_success">Dhikr habit marked as complete! ✨</string>
+    <string name="journey_toast_sunnah_success">Sunnah worship habit marked as complete! ✨</string>
     <string name="language_english">English</string>
     <string name="language_indonesian">Bahasa Indonesia</string>
     <string name="language_malay">Bahasa Melayu</string>
     <string name="language_settings_title">App language</string>
-    <string name="theme_emerald">Emerald Green</string>
-    <string name="theme_ocean">Ocean Indigo</string>
-    <string name="theme_gold">Royal Gold</string>
-    <string name="theme_rose">Rose Petal</string>
-    <string name="theme_purple">Lavender Purple</string>
-    <string name="theme_orange">Sunset Orange</string>
-    <string name="theme_red">Crimson Red</string>
     <string name="sunnah_mon_fast_title">Monday Sunnah Fasting</string>
-    <string name="sunnah_mon_fast_body">Tomorrow is Monday. Prepare for your sunnah fast.</string>
+    <string name="sunnah_mon_fast_body">Kīmi’s reminder: Tomorrow is Monday. Don’t forget to prepare for your Sunnah fast.</string>
     <string name="sunnah_thu_fast_title">Thursday Sunnah Fasting</string>
-    <string name="sunnah_thu_fast_body">Tomorrow is Thursday. Prepare for your sunnah fast.</string>
+    <string name="sunnah_thu_fast_body">Kīmi’s reminder: Tomorrow is Thursday. Prepare for your Sunnah fast.</string>
     <string name="sunnah_dhuha_title">Dhuha Prayer</string>
-    <string name="sunnah_dhuha_body">It is time for Dhuha prayer. Take a moment to pray.</string>
-    <string name="surah_reminder_notif_title">Time to read Surah %s</string>
-    <string name="surah_reminder_notif_body">Take a moment to read Surah %s today. May it bring you peace and blessings.</string>
+    <string name="sunnah_dhuha_body">Kīmi’s reminder: It’s time for Duha prayer. Take a moment to perform this Sunnah prayer.</string>
+    <string name="surah_reminder_notif_title">Kīmi Invites You to Read Surah %s</string>
+    <string name="surah_reminder_notif_body">Take a moment to read Surah %s today with Kīmi. May it bring you peace and blessings.</string>
     <string name="madhab_shafi">Shafi\'i</string>
     <string name="madhab_maliki">Maliki</string>
     <string name="madhab_hanbali">Hanbali</string>
     <string name="madhab_hanafi">Hanafi</string>
     <string name="madhab_settings_title">Calculation School (Madhab)</string>
     <string name="nav_home">Home</string>
-    <string name="nav_spiritual">Spiritual</string>
+    <string name="nav_spiritual">Worship</string>
     <string name="nav_quran">Quran</string>
-    <string name="nav_setting">Setting</string>
+    <string name="nav_setting">More</string>
     <string name="back">Back</string>
     <string name="loading">Loading…</string>
     <string name="locating">Locating…</string>
@@ -42,10 +47,7 @@
     <string name="prayer_imsak">Imsak</string>
     <string name="prayer_allow_location">Allow location to see prayer times</string>
     <string name="prayer_schedule">Prayer schedule</string>
-    <string name="prayer_grace_passed">%1$s prayer has passed</string>
     <string name="prayer_time_remaining">Time remaining before %1$s</string>
-    <string name="prayer_countdown_until">%1$s until prayer %2$s</string>
-    <string name="prayer_countdown_passed">%1$s since %2$s adhan</string>
     <string name="font_size_subtitle">Adjust Arabic &amp; translation</string>
     <string name="prayer_calculation_method">Prayer calculation method</string>
     <string name="adhan_voice">Adhan voice</string>
@@ -63,6 +65,14 @@
     <string name="notif_summary_count">%1$d reminders on</string>
     <string name="channel_daily_verse">Daily verse</string>
     <string name="channel_daily_verse_desc">Morning Quran verse reminder</string>
+    <string name="channel_quran_reminder">Qur\'an Reminders</string>
+    <string name="channel_quran_reminder_desc">Reminders to continue reading the Qur\'an</string>
+    <string name="last_read_reminder_3d_title">Kīmi’s Reminder 📖</string>
+    <string name="last_read_reminder_3d_body">It’s been a few days. Continue your Qur’an reading from %s.</string>
+    <string name="last_read_reminder_7d_title">Kīmi Invites You Back 📖</string>
+    <string name="last_read_reminder_7d_body">It’s been a few days since you last read the Qur’an. Take a few moments to continue from %s.</string>
+    <string name="notif_summary_quran_reminder">Qur\'an reading</string>
+    <string name="quran_reminder_setting_title">Qur\'an Reading Reminder</string>
     <string name="channel_prayer">Prayer times</string>
     <string name="channel_prayer_desc">Adhan and night prayer reminders</string>
     <string name="channel_sunnah">Sunnah reading</string>
@@ -70,27 +80,34 @@
     <string name="channel_adhan_alert">Adhan alert</string>
     <string name="channel_adhan_alert_desc">Plays adhan when full playback cannot start</string>
     <string name="prayer_notif_title">%1$s • %2$s</string>
-    <string name="prayer_body_fajr">It\'s Saat for Fajr prayer</string>
-    <string name="prayer_body_dhuhr">It\'s Saat for Dhuhr prayer</string>
-    <string name="prayer_body_asr">It\'s Saat for Asr prayer</string>
-    <string name="prayer_body_maghrib">It\'s Saat for Maghrib prayer</string>
-    <string name="prayer_body_isha">It\'s Saat for Isha prayer</string>
-    <string name="prayer_body_imsak">It\'s Saat for Imsak</string>
-    <string name="prayer_body_default">It\'s Saat for %1$s prayer</string>
-    <string name="night_midnight_title">🌙 Midnight</string>
-    <string name="night_midnight_body">The night is halfway through. Pray Witr before you sleep — don\'t let it slip away.</string>
-    <string name="night_first_third_title">🌃 The Night Begins</string>
-    <string name="night_first_third_body">Rest well. The last third of the night is yours — rise for what the day can\'t give you.</string>
-    <string name="night_last_third_title">✨ The Last Third Has Begun</string>
-    <string name="night_last_third_body">Allah descends to the lowest heaven. The most powerful hour of the day starts now.</string>
-    <string name="tahajud_alarm_title">✨ Time for Tahajud Prayer</string>
-    <string name="tahajud_alarm_body">Wake up for Tahajud. Allah descends to the lowest heaven and answers the prayers of those who call upon Him.</string>
-    <string name="daily_verse_notif_title">Your verse for today</string>
-    <string name="daily_verse_notif_fallback">Open Saat for today\'s verse.</string>
+    <string name="prayer_body_fajr">Time for Fajr Prayer</string>
+    <string name="prayer_body_dhuhr">Time for Dhuhr Prayer</string>
+    <string name="prayer_body_asr">Time for Asr Prayer</string>
+    <string name="prayer_body_maghrib">Time for Maghrib Prayer</string>
+    <string name="prayer_body_isha">Time for Isha Prayer</string>
+    <string name="prayer_body_tahajud">Time for Tahajjud Prayer</string>
+    <string name="prayer_body_imsak">Time for Imsak</string>
+    <string name="prayer_body_default">Time for %1$s Prayer</string>
+    <string name="prayer_quote_fajr">Begin your day with a heart close to Allah.</string>
+    <string name="prayer_quote_dhuhr">Amidst the busyness, take a moment to remember Him.</string>
+    <string name="prayer_quote_asr">Pause for a moment, calm your heart, and return to Him.</string>
+    <string name="prayer_quote_maghrib">End your day with gratitude and remembrance of Allah.</string>
+    <string name="prayer_quote_isha">Find peace in your heart before resting for the night.</string>
+    <string name="prayer_quote_tahajud">In the stillness of the night, draw your heart closer to Him.</string>
+    <string name="night_midnight_title"> Kīmi’s Reminder</string>
+    <string name="night_midnight_body">It’s midnight. If you’re still awake, don’t forget to pray Witr before resting.</string>
+    <string name="night_first_third_title">Kīmi’s Reminder</string>
+    <string name="night_first_third_body">Night has begun. Get some rest, and Kīmi will remind you when the last third of the night arrives.</string>
+    <string name="night_last_third_title">The Last Third Has Begun</string>
+    <string name="night_last_third_body">The last third of the night has begun. Kīmi invites you to wake up and draw closer to Allah.</string>
+    <string name="tahajud_alarm_title">Time for Tahajjud Prayer</string>
+    <string name="tahajud_alarm_body">In the stillness of the night, draw your heart closer to Him.</string>
+    <string name="daily_verse_notif_title">Kīmi Has a Verse for You</string>
+    <string name="daily_verse_notif_fallback">Take a few moments to read and reflect on today’s verse.</string>
     <string name="adhan_playback_title">Adhan</string>
     <string name="adhan_playback_body">Playing the call to prayer</string>
-    <string name="adhan_stop">Stop adhan</string>
-    <string name="alarm_stop">Stop alarm</string>
+    <string name="adhan_stop">Stop Adhan</string>
+    <string name="alarm_stop">Stop Alarm</string>
     <string name="exact_alarm_rationale">Allow exact alarms so adhan and prayer reminders arrive on time.</string>
     <string name="exact_alarm_rationale_title">Prayer reminders on time</string>
     <string name="fullscreen_intent_rationale">"Saat" Would Like to Display Full-Screen Adhan Alarms When Screen Is Locked.</string>
@@ -129,7 +146,7 @@
     <string name="regenerate">Regenerate</string>
     <string name="retry">Retry</string>
     <string name="load_more">Load more</string>
-    <string name="quran_title">Quran</string>
+    <string name="quran_title">Al-Quran</string>
     <string name="quran_subtitle">114 Surahs · The Noble Quran</string>
     <string name="quran_subtitle_juz">30 Juz · The Noble Quran</string>
     <string name="quran_tab_surah">Surah</string>
@@ -146,13 +163,7 @@
     <string name="optional_rawatib">Rawatib Sunnah</string>
     <string name="fidyah_title">Fidyah Tracker</string>
     <string name="fidyah_subtitle">4 Madhhab Rules &amp; Qadha Tracker</string>
-    <string name="prayer_tracker_open_calendar">Calendar</string>
-    <string name="prayer_check_notif_title">Did you pray %1$s?</string>
-    <string name="prayer_check_notif_body">Tap to mark today\'s prayers and keep your streak.</string>
-    <string name="prayer_wrapup_notif_title">Complete today\'s prayers</string>
-    <string name="prayer_wrapup_notif_body">%1$d prayers still unchecked. Finish strong before the day ends.</string>
-    <string name="channel_prayer_tracker">Prayer check-in</string>
-    <string name="channel_prayer_tracker_desc">Reminders to mark completed prayers</string>
+
     <string name="juz_load_failed">Couldn\'t load juz list</string>
     <string name="juz_starts_at">Starts at %1$s</string>
     <string name="one_surah_found">1 surah found</string>
@@ -199,8 +210,10 @@
     <string name="text_size">Text size</string>
     <string name="continuous_play">Continuous play</string>
     <string name="reciter">Reciter</string>
-    <string name="study_tools">Study tools</string>
-    <string name="close_verse_actions">Close verse actions</string>
+    <string name="reciter_subtitle_alafasy">Imam of Grand Mosque, Kuwait</string>
+    <string name="reciter_subtitle_shaatree">Imam of Al-Furqan Mosque, Jeddah</string>
+    <string name="reciter_subtitle_muaiqly">Imam of Masjid al-Haram, Makkah</string>
+    <string name="reciter_subtitle_husary">Master Qari of Al-Azhar, Egypt</string>
     <string name="share_reflection">Share reflection</string>
     <string name="verse_of_day">Quran of the Day</string>
     <string name="daily_verse_occasion_daily">Daily reflection</string>
@@ -230,11 +243,9 @@
     <string name="tafsir_tahlili">Tafsir Tahlili</string>
     <string name="tafsir_jalalayn">Tafsir Jalalayn</string>
     <string name="hadith">Hadith</string>
-    <string name="no_verse_retry">No verse available. Pull to retry.</string>
     <string name="tafsir_load_error">Couldn\'t load tafsir</string>
     <string name="tafsir_empty">No commentary here</string>
     <string name="encyclopedia_title">Islamic Encyclopedia</string>
-    <string name="hajj_umrah_title">Hajj &amp; Umrah</string>
     <string name="encyclopedia_search_hint">Search prophets, companions, fiqh, terms…</string>
     <string name="encyclopedia_cat_all">All</string>
     <string name="encyclopedia_cat_prophets">Prophets</string>
@@ -245,7 +256,6 @@
     <string name="encyclopedia_section_glossary">Islamic Terms Glossary (A-Z)</string>
     <string name="encyclopedia_empty_title">No topics found</string>
     <string name="encyclopedia_empty_desc">Try searching for another prophet, companion, or keyword.</string>
-    <string name="encyclopedia_ask_ai">Ask AI Assistant</string>
     <string name="encyclopedia_quran_references">Qur\'an Proofs &amp; References</string>
     <string name="encyclopedia_surah_label">Surah %1$s (%2$d) : %3$s</string>
     <string name="hadith_load_error">Couldn\'t load hadith</string>
@@ -259,7 +269,6 @@
     <string name="choose_translator">Choose translator</string>
     <string name="search_translator_placeholder">Search by name, author, or language</string>
     <string name="no_translators">No translators found.</string>
-    <string name="reading_settings_a11y">Reading settings</string>
     <string name="location_enable">Enable location</string>
     <string name="location_unavailable">Location unavailable</string>
     <string name="location_settings_title">Prayer location</string>
@@ -277,25 +286,34 @@
     <string name="prayer_calendar_hint">Tap a day to see all prayer times for that date.</string>
     <string name="prayer_calendar_loading_day">Loading prayer times…</string>
     <string name="offline_banner_message">Offline — showing saved data</string>
-    <string name="onboarding_welcome_title">Welcome to Saat</string>
-    <string name="onboarding_welcome_body">Your daily Quran companion — prayer times, reflection, and community in one place.</string>
-    <string name="onboarding_language_title">Choose your language</string>
-    <string name="onboarding_language_body">Select the language you want to use in the app. You can change this later in Settings.</string>
-    <string name="onboarding_location_title">Where do you pray?</string>
-    <string name="onboarding_location_body">We need your location to calculate accurate prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha). Your location is stored only on this device and never sent to our servers.</string>
+    <string name="onboarding_brand_title">Sāat</string>
+    <string name="onboarding_brand_subtitle">A little companion to accompany your spiritual journey.</string>
+    <string name="onboarding_lang_card_title">Choose language</string>
+    <string name="onboarding_lang_card_subtitle">So Sāat can accompany you better.</string>
+    <string name="onboarding_start_button">Start</string>
+    <string name="onboarding_step1_footer">One step closer to Him.</string>
+    <string name="onboarding_kimi_title">Meet Kīmi</string>
+    <string name="onboarding_kimi_body">Hi, I\'m Kīmi.\nI will accompany your spiritual journey, from prayer times and reading the Quran, to reminding good deeds while keeping it light and easy.</string>
+    <string name="onboarding_continue_btn">Continue</string>
+    <string name="onboarding_perms_title">So Kīmi can accompany you accurately.</string>
+    <string name="onboarding_perms_subtitle">Allow the following permissions so Sāat can provide the best experience for you.</string>
+    <string name="onboarding_perm_loc_title">Use your location</string>
+    <string name="onboarding_perm_loc_desc">To calculate accurate prayer times, Qibla direction, and content relevant to your location.</string>
+    <string name="onboarding_perm_loc_btn">Allow Location</string>
+    <string name="onboarding_perm_loc_granted">Location Allowed</string>
+    <string name="onboarding_perm_notif_title">Allow notifications</string>
+    <string name="onboarding_perm_notif_desc">So Kīmi can remind you about prayer times, adhan, daily verses, and other good deeds.</string>
+    <string name="onboarding_perm_notif_btn">Allow Notifications</string>
+    <string name="onboarding_perm_notif_granted">Notifications Allowed</string>
+    <string name="onboarding_perm_later_btn">Not now</string>
+    <string name="onboarding_privacy_text">Your location data is safe with us. We will never share your personal information with third parties.</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_adhan_new_title">Set Your Adhan</string>
+    <string name="onboarding_adhan_new_subtitle">Choose which prayer times should play the adhan. You can enable or disable them as needed.</string>
+    <string name="onboarding_adhan_sound_note">Adhan sound can be adjusted or changed later in the app settings.</string>
+    <string name="onboarding_save_and_enter">Save &amp; Enter Sāat</string>
     <string name="onboarding_location_denied">Location denied. You can type a city name below to set your prayer location manually.</string>
-    <string name="onboarding_location_rationale_title">Why location?</string>
-    <string name="onboarding_location_rationale_body">Prayer times differ by location. GPS gives you the most accurate times without manual setup.</string>
-    <string name="onboarding_notifications_title">Stay on time</string>
-    <string name="onboarding_notifications_body">Enable notifications for adhan reminders and your daily verse. You can customize each prayer notification in Settings.</string>
-    <string name="onboarding_widget_title">Add a home widget</string>
-    <string name="onboarding_widget_body">Long-press your home screen → Widgets → Saat to pin prayer times at a glance.</string>
-    <string name="onboarding_continue">Continue</string>
-    <string name="onboarding_get_started">Get started</string>
-    <string name="onboarding_enable_notifications">Enable notifications</string>
     <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_skip_location">I\'ll type my city instead</string>
-    <string name="onboarding_skip_notifications">Not now</string>
     <string name="notifications_disabled_snackbar">Notifications are off. Enable them in Settings for prayer reminders.</string>
     <string name="action_settings">Settings</string>
     <string name="action_allow">Allow</string>
@@ -315,12 +333,10 @@
     <string name="force_update_button">Update Now</string>
     <string name="share_as_image">Share as Image</string>
     <string name="share_verse_image_chooser">Share verse image via…</string>
+    <string name="share_image_hashtag">#TimeForQuran</string>
     <string name="juz_number">Juz %1$d</string>
     <string name="ai_label">AI</string>
     <string name="clear_search_a11y">Clear search</string>
-    <string name="session_expired">Session expired. Sign in again from Account.</string>
-    <string name="request_failed">Request failed</string>
-    <string name="verse_of_day_load_failed">Could not load verse of the day. Pull to retry.</string>
     <string name="share_generate_failed">Could not generate share text</string>
     <string name="verses_load_failed">Failed to load verses</string>
     <string name="chapters_load_failed">Failed to load chapters</string>
@@ -346,6 +362,11 @@
     <string name="bookmark_removed">Bookmark removed</string>
     <string name="bookmarks_title">Bookmarks</string>
     <string name="bookmarks_empty">No saved verses yet. Bookmark ayat while reading.</string>
+    <string name="bookmarks_card_desc">Collection of verses you have bookmarked</string>
+    <string name="bookmarked_verses_hero_title">Bookmarked Verses</string>
+    <string name="bookmarked_verses_count">%1$d verse(s) saved in your reading list</string>
+    <string name="bookmarked_verses_empty_desc">No bookmarked verses yet</string>
+    <string name="surah_ayah_format">%1$s · Ayah %2$d</string>
     <string name="quran_library_title">My Quran</string>
     <string name="quran_library_subtitle">Bookmarks, personal notes, and hifz progress — saved on this device.</string>
     <string name="quran_library_legend">What each mark means</string>
@@ -385,10 +406,65 @@
     <string name="hifz_marked_learning">Marked as learning</string>
     <string name="hifz_marked_memorized">Marked as memorized</string>
     <string name="hifz_marked_review">Marked for review</string>
+    <!-- Worship / Spiritual Screen Revamp -->
+    <string name="worship_header_title">Worship</string>
+    <string name="worship_header_subtitle">Your path to Allah</string>
+    <string name="collab_with">In collaboration with</string>
+    <string name="collab_masjidku_sub">Digital Mosque Management</string>
+    <string name="tool_category_all">All</string>
+    <string name="tool_category_prayer">Prayer &amp; Time</string>
+    <string name="tool_category_dhikr">Dhikr &amp; Du\'a</string>
+    <string name="tool_category_fiqh">Fiqh &amp; Guides</string>
+    <string name="tool_search_hint">Search Islamic tools...</string>
+    <string name="tool_search_empty">No matching tools found</string>
+
+    <string name="tool_qibla_title">Qibla</string>
+    <string name="tool_qibla_desc">Find the direction of the Kaaba</string>
+
+    <string name="tool_radio_title">Radio</string>
+    <string name="tool_radio_desc">Listen to islamic radio stations</string>
+
+    <string name="tool_dua_dhikr_title">Du’a &amp; Dhikr</string>
+    <string name="tool_dua_dhikr_desc">Collection of duas and dhikr</string>
+
+    <string name="tool_asmaul_husna_title">Asmaul Husna</string>
+    <string name="tool_asmaul_husna_desc">Discover the 99 Names of Allah</string>
+
+    <string name="tool_faraidh_title">Faraidh</string>
+    <string name="tool_faraidh_desc">Learn islamic inheritance</string>
+
+    <string name="tool_zakah_title">Zakah</string>
+    <string name="tool_zakah_desc">Calculate and pay your zakah</string>
+
+    <string name="tool_tasbih_title">Tasbih</string>
+    <string name="tool_tasbih_desc">Count your dhikr with ease</string>
+
+    <string name="tool_manzil_title">Manzil</string>
+    <string name="tool_manzil_desc">Daily prayers for protection</string>
+
+    <string name="tool_hajj_umrah_title">Hajj &amp; Umrah</string>
+    <string name="tool_hajj_umrah_desc">Guides for hajj and umrah</string>
+
+    <string name="tool_jamak_guide_title">Jamak Prayer Guide</string>
+    <string name="tool_jamak_guide_desc">Learn how to combine prayers</string>
+
+    <string name="tool_sunnah_practices_title">Sunnah Practices</string>
+    <string name="tool_sunnah_practices_desc">Discover daily Sunnah practices</string>
+
+    <string name="tool_janazah_guide_title">Janazah Prayer Guide</string>
+    <string name="tool_janazah_guide_desc">Learn the Janazah prayer</string>
+
+    <string name="tool_encyclopedia_title">Encyclopedia</string>
+    <string name="tool_encyclopedia_desc">Explore Islamic knowledge</string>
+
+    <string name="tool_fidyah_tracker_title">Fidyah Tracker</string>
+    <string name="tool_fidyah_tracker_desc">Track your Fidyah payments</string>
+
     <string name="spiritual_tools_title">Spiritual tools</string>
     <string name="qibla_title">Qibla</string>
     <string name="dhikr_title">Tasbih</string>
     <string name="tasbih_target_left">Target: %1$d  |  Left: %2$d</string>
+    <string name="tasbih_tap_instruction">Tap or swipe to count</string>
     <string name="tasbih_reset_button">Reset</string>
     <string name="tasbih_end_button">End</string>
     <string name="tasbih_reset_dialog_title">Are you sure to Reset?</string>
@@ -464,7 +540,7 @@
     <string name="khgt_important_day">Important day</string>
     <string name="prayer_last_sync">Prayer times from last sync · %1$s</string>
     <string name="spiritual_tools_tab_subtitle">Qibla, doa, zikir, and more</string>
-    <string name="reader_scroll_hint">Scroll for transliteration &amp; translation</string>
+    <string name="reader_scroll_hint">Swipe left or right to navigate verses</string>
     <string name="chapters_refresh_failed">Couldn\'t refresh chapters</string>
     <string name="daily_verse_widget_title">Verse of the day</string>
     <string name="daily_verse_widget_desc">Today\'s ayah on your home screen</string>
@@ -622,7 +698,6 @@
     <string name="faraidh_scenario_name_hint">Scenario name</string>
     <string name="faraidh_scenario_empty">No saved scenarios yet</string>
     <string name="faraidh_reset">Reset calculation</string>
-    <string name="onboarding_step_progress">Step %1$d of %2$d</string>
     <string name="faraidh_block_homicide">Excluded: Homicide (killer)</string>
     <string name="faraidh_block_difference_of_religion">Excluded: Difference of religion</string>
     <string name="faraidh_block_simultaneous_death">Excluded: Simultaneous death</string>
@@ -833,27 +908,26 @@
     </string-array>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_and_conditions">Terms &amp; Conditions</string>
-    <string name="onboarding_prayer_config_title">Prayer Alerts</string>
-    <string name="onboarding_prayer_config_body">Choose which prayers play the Adzan sound. Those turned off will use the default notification sound.</string>
 
     <!-- Coach Mark -->
     <string name="coach_mark_skip">Skip</string>
-    <string name="coach_mark_next">Next</string>
     <string name="coach_mark_finish">Finish</string>
     <string name="coach_mark_today_location_title">Location &amp; Date</string>
     <string name="coach_mark_today_location_desc">Your current location. Tap the date to view prayer schedule &amp; Hijri calendar.</string>
-    <string name="coach_mark_today_khgt_title">Important Islamic Days</string>
-    <string name="coach_mark_today_khgt_desc">Stay informed about upcoming significant Islamic dates and events.</string>
     <string name="coach_mark_today_prayer_title">Prayer Schedule</string>
     <string name="coach_mark_today_prayer_desc">Daily prayer schedule information and countdown to the next prayer.</string>
     <string name="coach_mark_today_tracker_title">Daily Worship Tracker</string>
     <string name="coach_mark_today_tracker_desc">Easily log and track your daily mandatory prayers.</string>
     <string name="coach_mark_today_continue_title">Continue Reading</string>
     <string name="coach_mark_today_continue_desc">Resume your Quran reading session right where you left off.</string>
-    <string name="coach_mark_today_verse_title">Verse of the Day</string>
-    <string name="coach_mark_today_verse_desc">Listen to recitation, read tafsir, and share daily Qur\'anic inspiration with AI.</string>
-    <string name="coach_mark_quran_menu_title">Verse Actions Menu</string>
-    <string name="coach_mark_quran_menu_desc">Tap to access Bookmark, Notes, Hifz memorization tracker, Tafsir, and audio sharing.</string>
+    <string name="coach_mark_quran_menu_title">Tafsir &amp; Verse Actions</string>
+    <string name="coach_mark_quran_menu_desc">Tap to access Tafsir, Bookmark, Notes, Hifz tracker, and audio sharing.</string>
+    <string name="coach_mark_quran_settings_title">Reading Settings (Aa)</string>
+    <string name="coach_mark_quran_settings_desc">Customize Arabic font scale, text style, Tajweed coloring, and translations.</string>
+    <string name="coach_mark_quran_bookmark_title">Bookmark Verse</string>
+    <string name="coach_mark_quran_bookmark_desc">Save this verse to your bookmarks so you can easily resume reading anytime.</string>
+    <string name="coach_mark_quran_swipe_title">Swipe to Change Verses</string>
+    <string name="coach_mark_quran_swipe_desc">Swipe left or right across the screen to navigate seamlessly to the next or previous verse.</string>
     <string name="coach_mark_dhikr_title">Dhikr Counter</string>
     <string name="coach_mark_dhikr_desc">Tap the screen or button to count dhikr, and set your target count as needed.</string>
     <string name="coach_mark_asmaul_title">99 Names of Allah</string>
@@ -878,7 +952,6 @@
     <string name="settings_section_prayer_calc">Prayer Calculation</string>
     <string name="settings_section_about_saat">About Saat</string>
     <string name="settings_item_language">Language</string>
-    <string name="settings_item_quran">Quran</string>
     <string name="settings_item_notification">Notification</string>
     <string name="settings_item_advance_options">Advance Options</string>
     <string name="settings_item_madhab">Madhab</string>
@@ -904,15 +977,8 @@
     <string name="state_off">Off</string>
     <string name="surah_count_on_format">%1$d Surah - On</string>
 
-    <string name="reading_notif_title">Reading Notification</string>
-    <string name="reading_section_reading_notif">Reading Notification</string>
-    <string name="reading_section_writing">Writing</string>
     <string name="reading_daily_verse">Daily Verse</string>
-    <string name="reading_show_latin">Show Latin</string>
-    <string name="reading_show_translation">Show Translation</string>
     <string name="reading_translator">Translator</string>
-    <string name="state_shown">Shown</string>
-    <string name="state_hidden">Hidden</string>
     <string name="up_to_date_sheet_title">You\'re Up to Date!</string>
     <string name="up_to_date_sheet_desc">Saat v%1$s is currently the latest version. Enjoy your spiritual journey!</string>
     <string name="got_it">Got It</string>
@@ -920,7 +986,6 @@
     <!-- Spiritual Tools -->
     <string name="sunnah_prayer_title">Sunnah Practices &amp; Guides</string>
     <string name="jenazah_prayer_title">Janazah Prayer Guide</string>
-    <string name="jenazah_prayer_subtitle">Complete funeral prayer guide, rulings, intentions &amp; step-by-step 4 takbirs</string>
     <string name="jamak_prayer_title">Jamak &amp; Qashar</string>
     <string name="jamak_prayer_subtitle">Traveler prayer guide</string>
     <string name="sunnah_prayers_tab">Sunnah Prayers</string>
@@ -1040,12 +1105,8 @@
     <string name="hajj_view_related_doa">View Related Du\'a &amp; Dzikir</string>
     <string name="hajj_prohibitions_header">Prohibitions to Watch Out:</string>
     <string name="hajj_practical_tips_header">Practical Pilgrim Tips:</string>
-    <string name="hajj_mistakes_header">Common Mistakes to Avoid:</string>
     <string name="hajj_alternative_options_header">Alternative Options (If unable):</string>
 
-    <string name="hajj_copy_doa">Copy Du\'a</string>
-    <string name="hajj_share_doa">Share Du\'a</string>
-    <string name="hajj_copied_toast">Du\'a copied to clipboard!</string>
 
     <string name="hajj_mandatory_badge">Obligatory</string>
     <string name="hajj_rukun_badge">Pillar</string>

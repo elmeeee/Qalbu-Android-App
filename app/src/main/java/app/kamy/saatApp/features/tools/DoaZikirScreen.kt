@@ -107,11 +107,9 @@ fun DoaZikirScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(SaatColors.ScreenBackground)
-            .tabContentStatusBarInset()
+            .background(SaatColors.HomeBg)
     ) {
-        DoaZikirTopBar(
-            inDetail = inDetail,
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
             title = if (inDetail) {
                 state.selectedTitle.orEmpty()
             } else {
@@ -266,34 +264,7 @@ fun DoaZikirScreen(
     }
 }
 
-@Composable
-private fun DoaZikirTopBar(
-    inDetail: Boolean,
-    title: String,
-    onBack: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = null,
-                tint = SaatColors.DeepEmerald
-            )
-        }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = SaatColors.DeepEmerald,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
+
 
 @Composable
 private fun CatalogRow(

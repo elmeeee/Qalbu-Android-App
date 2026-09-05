@@ -133,38 +133,17 @@ fun DhikrScreen(onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFFBF8F3), SaatColors.ScreenBackground, Color(0xFFF7F3EB))
-                    )
-                )
-                .tabContentStatusBarInset()
+                .background(SaatColors.HomeBg)
                 .navigationBarsPadding()
         ) {
-            // Top Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                }
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.dhikr_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.Slate900
-                    )
-                    Text(
-                        text = stringResource(R.string.dhikr_premium_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = SaatColors.Slate500
-                    )
-                }
-            }
+            // Unified Top Bar
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = stringResource(R.string.dhikr_title),
+                subtitle = stringResource(R.string.dhikr_premium_subtitle),
+                onBack = onBack
+            )
+
+            Spacer(Modifier.height(8.dp))
 
             // Top Category Chips for Presets
             LazyRow(
@@ -301,7 +280,7 @@ fun DhikrScreen(onBack: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(326.dp)
+                            .height(360.dp)
                             .coachMarkTarget(
                                 coachMarkState,
                                 0,
@@ -313,8 +292,8 @@ fun DhikrScreen(onBack: () -> Unit) {
                         TasbeehCounterWidget(
                             count = pageCount,
                             pulseKey = if (pageIndex == selectedIndex) pulseKey else 0,
-                            counterWidth = 270.dp,
-                            counterHeight = 326.dp,
+                            counterWidth = 340.dp,
+                            counterHeight = 360.dp,
                             onTap = {
                                 if (pageCount >= activePreset.target) {
                                     confirmHaptic()

@@ -3,6 +3,7 @@
 package app.kamy.saatApp.features.quran
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -12,6 +13,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,8 +40,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.pager.VerticalPager
+import app.kamy.saatApp.features.quran.components.PageCurlPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.key
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -57,7 +60,13 @@ import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.SnackbarHost
@@ -98,7 +107,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -140,6 +149,7 @@ import app.kamy.saatApp.ui.common.TajweedTextAlign
 import app.kamy.saatApp.ui.common.TransliterationView
 import app.kamy.saatApp.ui.common.toVerseTranslationPlainText
 import app.kamy.saatApp.infrastructure.preferences.ReaderOnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkGesture
 import app.kamy.saatApp.ui.components.CoachMarkOverlay
 import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
@@ -172,11 +182,23 @@ fun ChapterReaderScreen(
     val audioPlaybackState by vm.audioPlaybackState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
-    DisposableEffect(Unit) {
+    val view = androidx.compose.ui.platform.LocalView.current
+    DisposableEffect(view) {
         val activity = context as? android.app.Activity
         activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            val root = activity?.window?.decorView ?: view
+            root.post {
+                val rect = android.graphics.Rect(0, 0, root.width, root.height)
+                root.systemGestureExclusionRects = listOf(rect)
+            }
+        }
         onDispose {
             activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val root = activity?.window?.decorView ?: view
+                root.systemGestureExclusionRects = emptyList()
+            }
         }
     }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -202,12 +224,24 @@ fun ChapterReaderScreen(
     val verseMenuExpanded = remember { mutableStateOf(false) }
     val activeTajweedType = remember { mutableStateOf<TajweedType?>(null) }
     val showImageShareSheet = remember { mutableStateOf(false) }
-    var hasScrolledToInitial by remember { mutableStateOf(false) }
-    var hasAlignedInitialPage by remember { mutableStateOf(false) }
+
+    // Intercept system gesture navigation swipe-back so Quran ayah swiping is never interrupted.
+    // Closes any open dialogs/sheets first, and requires user to use the top app bar back button to exit.
+    BackHandler(enabled = true) {
+        when {
+            showImageShareSheet.value -> showImageShareSheet.value = false
+            activeTajweedType.value != null -> activeTajweedType.value = null
+            verseMenuExpanded.value -> verseMenuExpanded.value = false
+            settingsVisible.value -> settingsVisible.value = false
+            else -> {
+                // Consume gesture so swiping pages does not trigger Android OS back navigation
+            }
+        }
+    }
 
     val s = state
     val verseCount = s.verses.size
-    val showPreviousTransition = verseCount > 0 && (
+    val showPreviousTransition = (
         (s.juzNumber != null && s.juzNumber > 1) ||
         (s.juzNumber == null && s.chapterNumber > 1)
     )
@@ -217,7 +251,30 @@ fun ChapterReaderScreen(
     )
     val pageOffset = if (showPreviousTransition) 1 else 0
     val totalPageCount = verseCount + pageOffset + (if (showNextTransition) 1 else 0)
-    val pagerState = rememberPagerState(initialPage = pageOffset) { totalPageCount.coerceAtLeast(1) }
+
+    val currentChapterKey = "${s.chapterNumber}_${s.juzNumber}"
+    val originChapterNumber = remember { s.chapterNumber }
+    val originJuzNumber = remember { s.juzNumber }
+    val isOriginChapter = s.chapterNumber == originChapterNumber && s.juzNumber == originJuzNumber
+
+    val defaultInitialVerseIdx = remember(currentChapterKey) {
+        if (!isOriginChapter) {
+            0
+        } else {
+            when {
+                !initialVerseKey.isNullOrBlank() -> {
+                    val verseNum = initialVerseKey.substringAfterLast(':').toIntOrNull()
+                    if (verseNum != null && verseNum > 0) verseNum - 1 else 0
+                }
+                initialVerseNumber != null && initialVerseNumber > 0 -> initialVerseNumber - 1
+                else -> 0
+            }
+        }
+    }
+    val calculatedInitialPage = pageOffset + defaultInitialVerseIdx
+
+    val pagerState = rememberPagerState(initialPage = calculatedInitialPage) { totalPageCount.coerceAtLeast(1) }
+
     val currentVerseIndex = (pagerState.currentPage - pageOffset).coerceIn(0, (verseCount - 1).coerceAtLeast(0))
     val currentVerse = s.verses.getOrNull(currentVerseIndex)
     val surahTitle = when {
@@ -230,19 +287,11 @@ fun ChapterReaderScreen(
         else -> state.chapterDisplayName ?: stringResource(R.string.surah_number, state.chapterNumber)
     }
     val loadErrorDisplay = state.error.rememberErrorDisplay(R.string.verses_load_failed)
-
-    // These long-lived effects below outlive many recompositions, so they must not capture
-    // verseCount/pageOffset/totalPageCount directly: those are 0/0/1 on the first composition
-    // (before verses load) and the captured values would stay stale forever, silently
-    // discarding every page-change and auto-scroll event.
     val latestVerseCount by rememberUpdatedState(verseCount)
     val latestPageOffset by rememberUpdatedState(pageOffset)
     val latestTotalPageCount by rememberUpdatedState(totalPageCount)
 
     LaunchedEffect(pagerState) {
-        // verseCount/pageOffset are part of the snapshot so the flow also re-emits once the
-        // verses finish loading. Without that, staying on the very first page produces no
-        // further emission and the opening ayah is never recorded as last read.
         snapshotFlow {
             ReaderPageSnapshot(
                 page = pagerState.currentPage,
@@ -253,6 +302,9 @@ fun ChapterReaderScreen(
         }
             .distinctUntilChanged()
             .collect { snap ->
+                if (snap.isScrolling && showScrollHint) {
+                    dismissScrollHint()
+                }
                 val vIdx = snap.page - snap.pageOffset
                 if (vIdx in 0 until snap.verseCount) {
                     vm.onPageChanged(vIdx)
@@ -264,48 +316,18 @@ fun ChapterReaderScreen(
             }
     }
 
-    LaunchedEffect(verseCount) {
+    LaunchedEffect(showScrollHint) {
+        if (showScrollHint) {
+            kotlinx.coroutines.delay(6500)
+            dismissScrollHint()
+        }
+    }
+
+    LaunchedEffect(verseCount, pageOffset) {
         if (verseCount == 0) return@LaunchedEffect
         val lastIndex = verseCount - 1 + pageOffset
         if (pagerState.currentPage > lastIndex) {
             pagerState.scrollToPage(lastIndex)
-        }
-    }
-
-    // rememberPagerState captured initialPage while verseCount was still 0, i.e. before
-    // pageOffset could become 1. Once the leading transition page appears, page 0 is that
-    // transition page, so align onto the first real ayah instead of opening on it.
-    LaunchedEffect(verseCount, pageOffset) {
-        if (verseCount == 0 || pageOffset == 0 || hasAlignedInitialPage) return@LaunchedEffect
-        hasAlignedInitialPage = true
-        val isDeepLink = !initialVerseKey.isNullOrBlank() || initialVerseNumber != null
-        if (isDeepLink) return@LaunchedEffect
-        if (pagerState.currentPage == 0) {
-            pagerState.scrollToPage(pageOffset)
-        }
-    }
-
-    LaunchedEffect(verseCount, initialVerseNumber, initialVerseKey, state.hasMore, state.isLoadingMore) {
-        if (verseCount == 0 || hasScrolledToInitial) return@LaunchedEffect
-        val idx = when {
-            !initialVerseKey.isNullOrBlank() ->
-                state.verses.indexOfFirst { it.verseKey == initialVerseKey }
-            initialVerseNumber != null ->
-                state.verses.indexOfFirst { it.resolvedVerseNumber == initialVerseNumber }
-            else -> -1
-        }
-        if (idx >= 0) {
-            val targetPage = idx + pageOffset
-            if (pagerState.currentPage != targetPage) {
-                pagerState.scrollToPage(targetPage)
-            }
-            hasScrolledToInitial = true
-        } else if (initialVerseKey.isNullOrBlank() && initialVerseNumber == null) {
-            hasScrolledToInitial = true
-        } else if (state.hasMore && !state.isLoadingMore) {
-            vm.loadMoreIfNeeded(state.verses.size - 1)
-        } else if (!state.hasMore) {
-            hasScrolledToInitial = true
         }
     }
 
@@ -321,7 +343,7 @@ fun ChapterReaderScreen(
                     val target = event.index + latestPageOffset
                     if (event.index in verses.indices && target in 0 until latestTotalPageCount) {
                         scope.launch {
-                            runCatching { pagerState.animateScrollToPage(target) }
+                            runCatching { pagerState.scrollToPage(target) }
                         }
                     }
                 }
@@ -339,14 +361,19 @@ fun ChapterReaderScreen(
                         }
                     }
                 }
+                is ReaderEvent.ShowToast -> {
+                    scope.launch {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = androidx.compose.material3.SnackbarDuration.Short
+                        )
+                    }
+                }
             }
         }
     }
 
-    // Safety net for audio-follow scrolling. The events above go through a droppable
-    // tryEmit(buffer = 1, no replay), so a missed emission would leave the pager stuck on an
-    // earlier ayah with no way back in sync. Reconciling against the playing verse key here
-    // means playback position always wins eventually, even if an event was lost.
     val playingVerseKey = state.currentlyPlayingVerseKey
     LaunchedEffect(playingVerseKey, verseCount) {
         if (playingVerseKey.isNullOrBlank() || verseCount == 0) return@LaunchedEffect
@@ -387,7 +414,7 @@ fun ChapterReaderScreen(
                 )
             }
         } else if (state.verses.isNotEmpty()) {
-            VerticalPager(
+            PageCurlPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
                 userScrollEnabled = true
@@ -427,7 +454,7 @@ fun ChapterReaderScreen(
                     }
                     else -> {
                         val verseIdx = pageIndex - pageOffset
-                        val verse = state.verses.getOrNull(verseIdx) ?: return@VerticalPager
+                        val verse = state.verses.getOrNull(verseIdx) ?: return@PageCurlPager
                         SaatAyahPage(
                             verse = verse,
                             fontScale = state.fontScale,
@@ -443,14 +470,22 @@ fun ChapterReaderScreen(
                             audioPlaybackState = audioPlaybackState,
                             onPlay = { vm.onTapAyah(verseIdx) },
                             onContentScroll = if (verseIdx == 0) ::dismissScrollHint else null,
-                            onTajweedClick = { activeTajweedType.value = it }
+                            onTajweedClick = { activeTajweedType.value = it },
+                            modifier = if (verseIdx == 0) {
+                                Modifier.coachMarkTarget(
+                                    state = coachMarkState,
+                                    step = 3,
+                                    titleRes = R.string.coach_mark_quran_swipe_title,
+                                    descriptionRes = R.string.coach_mark_quran_swipe_desc,
+                                    gesture = CoachMarkGesture.SWIPE_HORIZONTAL
+                                )
+                            } else Modifier
                         )
                     }
                 }
             }
         }
 
-        // Top chrome — back + settings (TikTok-style overlay)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -459,8 +494,9 @@ fun ChapterReaderScreen(
                     Brush.verticalGradient(
                         colors = listOf(
                             SaatColors.ScreenBackground,
-                            SaatColors.ScreenBackground.copy(alpha = 0.92f),
-                            SaatColors.ScreenBackground.copy(alpha = 0.6f),
+                            SaatColors.ScreenBackground.copy(alpha = 0.96f),
+                            SaatColors.ScreenBackground.copy(alpha = 0.85f),
+                            SaatColors.ScreenBackground.copy(alpha = 0.35f),
                             Color.Transparent
                         )
                     )
@@ -471,7 +507,7 @@ fun ChapterReaderScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .padding(horizontal = 4.dp, vertical = 4.dp)
+                    .padding(horizontal = 8.dp, vertical = 6.dp)
             ) {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -480,92 +516,100 @@ fun ChapterReaderScreen(
                         tint = SaatColors.Slate900
                     )
                 }
-                Spacer(Modifier.weight(1f))
-                IconButton(onClick = { settingsVisible.value = true }) {
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = surahTitle,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    val ayahLabel = if (state.juzNumber != null) {
+                        val verseLabel = currentVerse?.displayVerseReference?.let { ref ->
+                            stringResource(R.string.verse_key_label, ref)
+                        } ?: currentVerse?.resolvedVerseNumber?.let { num ->
+                            stringResource(R.string.verse_number, num)
+                        } ?: stringResource(R.string.verse_label, "—")
+                        listOfNotNull(
+                            verseLabel,
+                            state.juzNumber?.let { stringResource(R.string.juz_number, it) }
+                        ).joinToString(" · ")
+                    } else {
+                        currentVerse?.resolvedVerseNumber?.let { num ->
+                            stringResource(R.string.verse_number, num)
+                        } ?: currentVerse?.displayVerseReference?.let { ref ->
+                            stringResource(R.string.verse_key_label, ref)
+                        } ?: stringResource(R.string.verse_label, "—")
+                    }
+                    Text(
+                        text = ayahLabel,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SaatColors.Slate500,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                IconButton(
+                    onClick = {
+                        vm.toggleBookmark(currentVerseIndex)
+                    },
+                    modifier = Modifier.coachMarkTarget(
+                        state = coachMarkState,
+                        step = 2,
+                        titleRes = R.string.coach_mark_quran_bookmark_title,
+                        descriptionRes = R.string.coach_mark_quran_bookmark_desc,
+                        gesture = CoachMarkGesture.TAP
+                    )
+                ) {
                     Icon(
-                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_setting_on),
-                        contentDescription = stringResource(R.string.reading_settings_a11y),
-                        tint = SaatColors.Slate900
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_bookmark_custom),
+                        contentDescription = stringResource(if (state.currentVerseBookmarked) R.string.remove_bookmark else R.string.bookmark),
+                        tint = if (state.currentVerseBookmarked) SaatColors.DeepEmerald else SaatColors.Slate900,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
         }
 
-        currentVerse?.let { verse ->
-            val surahCaptionBottom = if (audioBarVisible) {
-                FloatingAudioBarMetrics.barHeight + FloatingAudioBarMetrics.bottomGap + 12.dp
-            } else {
-                18.dp
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                SaatColors.ScreenBackground.copy(alpha = 0.55f),
-                                SaatColors.ScreenBackground.copy(alpha = 0.92f),
-                                SaatColors.ScreenBackground,
-                                SaatColors.ScreenBackground
-                            )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            SaatColors.ScreenBackground.copy(alpha = 0.35f),
+                            SaatColors.ScreenBackground.copy(alpha = 0.85f),
+                            SaatColors.ScreenBackground.copy(alpha = 0.96f),
+                            SaatColors.ScreenBackground
                         )
                     )
-                    .navigationBarsPadding()
-                    .padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        bottom = surahCaptionBottom,
-                        top = 44.dp
-                    )
+                )
+                .navigationBarsPadding()
+                .padding(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = 28.dp,
+                    bottom = 24.dp
+                )
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                // Left Action: Menu Book / Actions popup
+                Column(
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 12.dp)
-                    ) {
-                        Text(
-                            text = surahTitle,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.Slate900,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        val subtitle = if (state.juzNumber != null) {
-                            val verseLabel = verse.displayVerseReference?.let { ref ->
-                                stringResource(R.string.verse_key_label, ref)
-                            } ?: verse.resolvedVerseNumber?.let { num ->
-                                stringResource(R.string.verse_number, num)
-                            } ?: stringResource(R.string.verse_label, "—")
-                            listOfNotNull(
-                                verseLabel,
-                                state.juzNumber?.let { stringResource(R.string.juz_number, it) }
-                            ).joinToString(" · ")
-                        } else {
-                            verse.resolvedVerseNumber?.let { num ->
-                                stringResource(R.string.verse_number, num)
-                            } ?: verse.displayVerseReference?.let { ref ->
-                                stringResource(R.string.verse_key_label, ref)
-                            } ?: stringResource(R.string.verse_label, "—")
-                        }
-                        Text(
-                            text = subtitle,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = SaatColors.Slate500,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-
                     if (state.verses.isNotEmpty()) {
                         ReaderVerseActionsMenu(
                             expanded = verseMenuExpanded.value,
@@ -574,12 +618,6 @@ fun ChapterReaderScreen(
                             hasNote = state.currentVerseHasNote,
                             hifzStatus = state.currentVerseHifzStatus,
                             showTafsir = LocalQuranConfig.supportsTafsir(state.selectedTranslationId),
-                            modifier = Modifier.coachMarkTarget(
-                                coachMarkState,
-                                0,
-                                R.string.coach_mark_quran_menu_title,
-                                R.string.coach_mark_quran_menu_desc
-                            ),
                             onBookmark = {
                                 verseMenuExpanded.value = false
                                 vm.toggleBookmark(currentVerseIndex)
@@ -606,6 +644,186 @@ fun ChapterReaderScreen(
                             }
                         )
                     }
+
+                    Surface(
+                        onClick = { verseMenuExpanded.value = !verseMenuExpanded.value },
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.40f),
+                        tonalElevation = 0.dp,
+                        shadowElevation = 0.dp,
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
+                        modifier = Modifier
+                            .size(48.dp)
+                            .coachMarkTarget(
+                                state = coachMarkState,
+                                step = 0,
+                                titleRes = R.string.coach_mark_quran_menu_title,
+                                descriptionRes = R.string.coach_mark_quran_menu_desc,
+                                gesture = CoachMarkGesture.TAP
+                            )
+                            .shadow(
+                                elevation = 6.dp,
+                                shape = CircleShape,
+                                ambientColor = Color.Black.copy(alpha = 0.08f),
+                                spotColor = Color.Black.copy(alpha = 0.06f)
+                            )
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_tafsir),
+                                contentDescription = stringResource(R.string.coach_mark_quran_menu_title),
+                                tint = if (verseMenuExpanded.value) SaatColors.DeepEmerald else SaatColors.Slate800,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Center Action: Audio Playback Capsule (Liquid Glass between Tafsir and Aa)
+                AnimatedVisibility(
+                    visible = audioPlaybackState.currentUrl != null,
+                    enter = fadeIn() + expandHorizontally() + scaleIn(),
+                    exit = fadeOut() + shrinkHorizontally() + scaleOut(),
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .padding(horizontal = 6.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = Color.White.copy(alpha = 0.45f),
+                        tonalElevation = 0.dp,
+                        shadowElevation = 0.dp,
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
+                        modifier = Modifier
+                            .height(48.dp)
+                            .shadow(
+                                elevation = 6.dp,
+                                shape = RoundedCornerShape(50),
+                                ambientColor = Color.Black.copy(alpha = 0.08f),
+                                spotColor = Color.Black.copy(alpha = 0.06f)
+                            )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(start = 5.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(7.dp)
+                        ) {
+                            // Custom Play / Pause Circle
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(SaatColors.DeepEmerald)
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                        onClick = { vm.toggleAudioPlay(currentVerseIndex) }
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = androidx.compose.ui.res.painterResource(
+                                        if (audioPlaybackState.isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+                                    ),
+                                    contentDescription = if (audioPlaybackState.isPlaying) "Pause" else "Play",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+
+                            // Audio Info (Surah, Ayah, Reciter) & Progress
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f, fill = false)
+                                    .padding(end = 2.dp),
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                val surahTitle = audioPlaybackState.trackTitle.ifBlank {
+                                    state.chapterDisplayName ?: "Surah ${state.chapterNumber}"
+                                }
+                                val ayahNum = audioPlaybackState.ayahNumber ?: currentVerse?.resolvedVerseNumber
+                                val ayahLabel = if (ayahNum != null && ayahNum > 0) "Ayat $ayahNum" else audioPlaybackState.trackSubtitle
+                                val reciterName = audioPlaybackState.reciterName.ifBlank {
+                                    state.recitations.firstOrNull { it.identifiableId == state.selectedRecitationId }?.displayName ?: ""
+                                }
+
+                                Text(
+                                    text = "$surahTitle · $ayahLabel",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SaatColors.Slate900,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                                if (reciterName.isNotBlank()) {
+                                    Text(
+                                        text = reciterName,
+                                        fontSize = 10.sp,
+                                        color = SaatColors.Slate500,
+                                        maxLines = 1,
+                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    )
+                                }
+                                Spacer(Modifier.height(2.dp))
+                                LinearProgressIndicator(
+                                    progress = { audioPlaybackState.progress.coerceIn(0f, 1f) },
+                                    color = SaatColors.DeepEmerald,
+                                    trackColor = SaatColors.SoftGrey.copy(alpha = 0.5f),
+                                    modifier = Modifier
+                                        .width(60.dp)
+                                        .height(2.dp)
+                                        .clip(CircleShape)
+                                    )
+                            }
+
+                            // Close / Stop Button
+                            IconButton(
+                                onClick = { vm.stopAudio() },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = "Stop",
+                                    tint = SaatColors.Slate500,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Right Action: "Aa" (Reading Settings Liquid Glass)
+                Surface(
+                    onClick = { settingsVisible.value = true },
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.40f),
+                    tonalElevation = 0.dp,
+                    shadowElevation = 0.dp,
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
+                    modifier = Modifier
+                        .size(48.dp)
+                        .coachMarkTarget(
+                            state = coachMarkState,
+                            step = 1,
+                            titleRes = R.string.coach_mark_quran_settings_title,
+                            descriptionRes = R.string.coach_mark_quran_settings_desc,
+                            gesture = CoachMarkGesture.TAP
+                        )
+                        .shadow(
+                            elevation = 6.dp,
+                            shape = CircleShape,
+                            ambientColor = Color.Black.copy(alpha = 0.08f),
+                            spotColor = Color.Black.copy(alpha = 0.06f)
+                        )
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Aa",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = SaatColors.Slate800
+                        )
+                    }
                 }
             }
         }
@@ -614,8 +832,60 @@ fun ChapterReaderScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = if (audioBarVisible) 100.dp else 24.dp)
-        )
+                .navigationBarsPadding()
+                .padding(bottom = if (audioBarVisible) 110.dp else 68.dp, start = 20.dp, end = 20.dp)
+        ) { snackbarData ->
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = Color.White.copy(alpha = 0.92f),
+                shadowElevation = 0.dp,
+                tonalElevation = 0.dp,
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.95f)),
+                modifier = Modifier
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(50),
+                        ambientColor = Color.Black.copy(alpha = 0.08f),
+                        spotColor = Color.Black.copy(alpha = 0.06f)
+                    )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    SaatColors.DeepEmerald.copy(alpha = 0.08f),
+                                    Color.White.copy(alpha = 0.92f)
+                                )
+                            )
+                        )
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(SaatColors.DeepEmerald.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_bookmark_custom),
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(13.dp)
+                        )
+                    }
+                    Text(
+                        text = snackbarData.visuals.message,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = SaatColors.Slate900
+                    )
+                }
+            }
+        }
 
         if (showScrollHint && state.verses.isNotEmpty()) {
             ReaderScrollHint(
@@ -741,11 +1011,12 @@ private fun SaatAyahPage(
     audioPlaybackState: AudioPlaybackState? = null,
     onPlay: () -> Unit,
     onContentScroll: (() -> Unit)? = null,
-    onTajweedClick: (TajweedType) -> Unit
+    onTajweedClick: (TajweedType) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val contentTopPadding = statusBarTop + 68.dp
-    val contentBottomPadding = if (audioBarVisible) 200.dp else 160.dp
+    val contentBottomPadding = if (audioBarVisible) 160.dp else 110.dp
     val scrollState = rememberScrollState()
     var hifzRevealStage by remember(verse.listIdentity) {
         mutableIntStateOf(0)
@@ -764,6 +1035,7 @@ private fun SaatAyahPage(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(SaatColors.ScreenBackground)
             .pointerInput(hifzModeEnabled, showTranslation) {
                 detectTapGestures(onTap = {
                     if (hifzModeEnabled) {
@@ -782,9 +1054,7 @@ private fun SaatAyahPage(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                // Do NOT gate on scrollState.maxValue > 0: on first composition maxValue is 0
-                // (layout not yet measured) which would disable scroll entirely and cause the
-                // VerticalPager to steal the gesture on ayah 1 before content is measurable.
+                .then(modifier)
                 .verticalScroll(state = scrollState)
                 .padding(
                     start = 20.dp,
@@ -926,20 +1196,18 @@ private fun SaatAyahPage(
             val showMeaning = showTranslation && (!hifzModeEnabled || hifzRevealStage >= 2)
             if (showLatin) {
                 verse.displayTransliteration(translationId)?.let { transliteration ->
-                    Box(
+                    Text(
+                        text = transliteration,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            lineHeight = (22 * fontScale).sp,
+                            fontSize = (15 * fontScale).sp
+                        ),
+                        color = SaatColors.DeepEmerald,
+                        textAlign = TextAlign.Start,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(SaatColors.LightGrey.copy(alpha = 0.45f))
-                            .padding(horizontal = 12.dp, vertical = 10.dp)
-                    ) {
-                        TransliterationView(
-                            text = transliteration,
-                            useHtml = verse.transliterationUsesHtml(translationId),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                            .padding(top = 10.dp)
+                    )
                 }
             }
             if (showMeaning) {
@@ -948,12 +1216,15 @@ private fun SaatAyahPage(
                     if (clean.isNotEmpty()) {
                         Text(
                             text = clean,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.35f
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                lineHeight = (24 * fontScale).sp,
+                                fontSize = (15 * fontScale).sp
                             ),
-                            color = SaatColors.Slate800,
-                            textAlign = TextAlign.Justify,
-                            modifier = Modifier.fillMaxWidth()
+                            color = SaatColors.Slate900,
+                            textAlign = TextAlign.Start,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp)
                         )
                     }
                 }
@@ -979,138 +1250,58 @@ private fun ReaderVerseActionsMenu(
     onShareImage: () -> Unit,
     onTafsir: () -> Unit
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+    AnimatedVisibility(
+        visible = expanded,
+        enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+        exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
+        modifier = modifier
     ) {
-        AnimatedVisibility(
-            visible = expanded,
-            enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
-            exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom)
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 12.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 4.dp)
-            ) {
+            if (showTafsir) {
                 ReaderActionPill(
                     icon = {
                         Icon(
-                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_bookmark_custom),
-                            contentDescription = null,
-                            tint = SaatColors.GoldDeep,
-                            modifier = Modifier.size(17.dp)
-                        )
-                    },
-                    label = stringResource(
-                        if (bookmarked) R.string.remove_bookmark else R.string.bookmark
-                    ),
-                    accent = SaatColors.GoldDeep,
-                    onClick = onBookmark
-                )
-                ReaderActionPill(
-                    icon = {
-                        Icon(
-                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_personalnote_custom),
-                            contentDescription = null,
-                            tint = if (hasNote) SaatColors.DeepEmerald else SaatColors.Slate500,
-                            modifier = Modifier.size(17.dp)
-                        )
-                    },
-                    label = stringResource(
-                        if (hasNote) R.string.verse_note_edit else R.string.verse_note
-                    ),
-                    accent = SaatColors.DeepEmerald,
-                    onClick = onNote
-                )
-                ReaderActionPill(
-                    icon = {
-                        Icon(
-                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_memorization_custom),
-                            contentDescription = null,
-                            tint = hifzStatusColor(hifzStatus),
-                            modifier = Modifier.size(17.dp)
-                        )
-                    },
-                    label = hifzStatusLabel(hifzStatus),
-                    accent = hifzStatusColor(hifzStatus),
-                    onClick = onHifz
-                )
-                ReaderActionPill(
-                    icon = {
-                        Icon(
-                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_ai),
-                            contentDescription = null,
-                            tint = SaatColors.Gold,
-                            modifier = Modifier.size(17.dp)
-                        )
-                    },
-                    label = stringResource(R.string.ai_label),
-                    accent = SaatColors.Gold,
-                    onClick = onAiShare
-                )
-                ReaderActionPill(
-                    icon = {
-                        Icon(
-                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_share_custom),
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_tafsir),
                             contentDescription = null,
                             tint = SaatColors.DeepEmerald,
                             modifier = Modifier.size(17.dp)
                         )
                     },
-                    label = stringResource(R.string.share_as_image),
+                    label = stringResource(R.string.tafsir),
                     accent = SaatColors.DeepEmerald,
-                    onClick = onShareImage
+                    onClick = onTafsir
                 )
-                if (showTafsir) {
-                    ReaderActionPill(
-                        icon = {
-                            Icon(
-                                painter = androidx.compose.ui.res.painterResource(R.drawable.ic_tafsir),
-                                contentDescription = null,
-                                tint = SaatColors.IndigoAccent,
-                                modifier = Modifier.size(17.dp)
-                            )
-                        },
-                        label = stringResource(R.string.tafsir),
-                        accent = SaatColors.IndigoAccent,
-                        onClick = onTafsir
-                    )
-                }
             }
-        }
-
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.linearGradient(
-                        listOf(SaatColors.DeepEmerald, SaatColors.Teal)
-                    )
-                )
-                .clickable(onClick = onToggle)
-                .padding(2.dp)
-        ) {
-            Surface(
-                onClick = onToggle,
-                shape = CircleShape,
-                color = SaatColors.PureWhite,
-                shadowElevation = if (expanded) 2.dp else 8.dp,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    val closeActionsLabel = stringResource(R.string.close_verse_actions)
-                    val studyToolsLabel = stringResource(R.string.study_tools)
+            ReaderActionPill(
+                icon = {
                     Icon(
-                        imageVector = if (expanded) Icons.Filled.Close else Icons.Filled.AutoStories,
-                        contentDescription = if (expanded) closeActionsLabel else studyToolsLabel,
-                        tint = if (expanded) SaatColors.Slate800 else SaatColors.DeepEmerald,
-                        modifier = Modifier.size(22.dp)
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_ai),
+                        contentDescription = null,
+                        tint = SaatColors.GoldDeep,
+                        modifier = Modifier.size(17.dp)
                     )
-                }
-            }
+                },
+                label = stringResource(R.string.ai_label),
+                accent = SaatColors.GoldDeep,
+                onClick = onAiShare
+            )
+            ReaderActionPill(
+                icon = {
+                    Icon(
+                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_share_custom),
+                        contentDescription = null,
+                        tint = SaatColors.Slate700,
+                        modifier = Modifier.size(17.dp)
+                    )
+                },
+                label = "Bagikan",
+                accent = SaatColors.Slate700,
+                onClick = onShareImage
+            )
         }
     }
 }
@@ -1126,24 +1317,26 @@ private fun ReaderActionPill(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = SaatColors.PureWhite,
-        shadowElevation = 6.dp,
+        color = Color.White,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
         modifier = Modifier
-            .widthIn(min = 156.dp)
-            .border(
-                width = 1.dp,
-                color = accent.copy(alpha = 0.22f),
-                shape = RoundedCornerShape(50)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(50),
+                ambientColor = Color.Black.copy(alpha = 0.08f),
+                spotColor = Color.Black.copy(alpha = 0.06f)
             )
     ) {
         Row(
-            modifier = Modifier.padding(start = 6.dp, end = 14.dp, top = 7.dp, bottom = 7.dp),
+            modifier = Modifier.padding(start = 5.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(7.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(30.dp)
+                    .size(28.dp)
                     .clip(CircleShape)
                     .background(accent.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
@@ -1152,10 +1345,10 @@ private fun ReaderActionPill(
             }
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = SaatColors.Slate800,
-                maxLines = 2
+                maxLines = 1
             )
         }
     }
@@ -1179,198 +1372,296 @@ private fun ReaderSettingsSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = SaatColors.PureWhite,
-        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.32f)
+        containerColor = SaatColors.ScreenBackground,
+        scrimColor = Color.Black.copy(alpha = 0.35f),
+        dragHandle = {
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp, bottom = 6.dp)
+                    .size(width = 38.dp, height = 4.dp)
+                    .clip(CircleShape)
+                    .background(SaatColors.Slate500.copy(alpha = 0.3f))
+            )
+        }
     ) {
-        val maxSheetHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp * 0.78f
+        val maxSheetHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp * 0.82f
         Column(
             Modifier
                 .fillMaxWidth()
                 .heightIn(max = maxSheetHeight)
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 4.dp)
+                .padding(horizontal = 20.dp)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header card
+            // Header Row
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(
-                                SaatColors.DeepEmerald.copy(alpha = 0.12f),
-                                SaatColors.Teal.copy(alpha = 0.06f)
-                            )
-                        )
-                    )
-                    .padding(horizontal = 18.dp, vertical = 14.dp),
+                    .padding(top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(SaatColors.DeepEmerald.copy(alpha = 0.15f)),
+                        .background(SaatColors.DeepEmerald.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_setting_on),
-                        contentDescription = null,
-                        tint = SaatColors.DeepEmerald,
-                        modifier = Modifier.size(22.dp)
+                    Text(
+                        text = "Aa",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.DeepEmerald
                     )
                 }
-                Spacer(Modifier.width(14.dp))
+                Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.reading_settings),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
+                        color = SaatColors.Slate900
                     )
                     Text(
                         text = stringResource(R.string.font_size_subtitle),
                         style = MaterialTheme.typography.bodySmall,
-                        color = SaatColors.Slate500,
-                        modifier = Modifier.padding(top = 2.dp)
+                        color = SaatColors.Slate500
+                    )
+                }
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(SaatColors.PureWhite)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.close),
+                        tint = SaatColors.Slate700,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
-            // Slider card
-            ReaderSettingToggleRow(
-                title = stringResource(R.string.text_size),
-                content = {
-                    Slider(
-                        value = state.fontScale,
-                        onValueChange = onFontScaleChange,
-                        valueRange = 0.85f..2.0f,
-                        steps = 11,
-                        colors = androidx.compose.material3.SliderDefaults.colors(
-                            thumbColor = SaatColors.Teal,
-                            activeTrackColor = SaatColors.DeepEmerald
+            // Section 1: Font Size & Live Arabic Preview
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = SaatColors.PureWhite,
+                border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+                shadowElevation = 0.5.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.text_size),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
+                    )
+
+                    // Live Preview Box
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(SaatColors.ScreenBackground)
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+                            fontSize = (24 * state.fontScale).sp,
+                            fontWeight = FontWeight.Normal,
+                            color = SaatColors.Slate900,
+                            textAlign = TextAlign.Center
                         )
-                    )
-                }
-            )
+                    }
 
-            // Toggles using custom icons
-            ReaderSettingToggleRow(
-                title = stringResource(R.string.show_translation),
-                checked = state.showTranslation,
-                onCheckedChange = onToggleTranslation
-            )
-            ReaderSettingToggleRow(
-                title = stringResource(R.string.show_transliteration),
-                checked = state.showTransliteration,
-                onCheckedChange = onToggleTransliteration
-            )
-            ReaderSettingToggleRow(
-                title = "Show Tajweed",
-                checked = state.isTajweedEnabled,
-                onCheckedChange = onToggleTajweed
-            )
-            ReaderSettingToggleRow(
-                title = stringResource(R.string.hifz_mode),
-                checked = state.hifzModeEnabled,
-                onCheckedChange = onToggleHifzMode
-            )
-            ReaderSettingToggleRow(
-                title = stringResource(R.string.continuous_play),
-                checked = state.playbackMode == AyahPlaybackMode.CONTINUOUS,
-                onCheckedChange = { enabled ->
-                    onSetPlaybackMode(
-                        if (enabled) AyahPlaybackMode.CONTINUOUS else AyahPlaybackMode.SINGLE
-                    )
-                }
-            )
-
-            Text(
-                text = stringResource(R.string.reciter),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = SaatColors.Slate800,
-                modifier = Modifier.padding(start = 4.dp, top = 4.dp)
-            )
-
-            if (state.recitations.isEmpty()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    color = SaatColors.DeepEmerald
-                )
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    state.recitations.forEach { recitation ->
-                        ReciterRow(
-                            recitation = recitation,
-                            selected = recitation.identifiableId == state.selectedRecitationId,
-                            onClick = { onSelectRecitation(recitation.identifiableId) }
+                    // Slider with Small/Large A labels
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "A",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = SaatColors.Slate500
+                        )
+                        Slider(
+                            value = state.fontScale,
+                            onValueChange = onFontScaleChange,
+                            valueRange = 0.85f..2.0f,
+                            steps = 11,
+                            colors = androidx.compose.material3.SliderDefaults.colors(
+                                thumbColor = SaatColors.DeepEmerald,
+                                activeTrackColor = SaatColors.DeepEmerald,
+                                inactiveTrackColor = SaatColors.SoftGrey
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "A",
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.Slate900
                         )
                     }
                 }
             }
-            Spacer(Modifier.height(16.dp))
+
+            // Section 2: Display & Content Toggles
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = SaatColors.PureWhite,
+                border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+                shadowElevation = 0.5.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                ) {
+                    ReaderSettingToggleItem(
+                        title = stringResource(R.string.show_translation),
+                        subtitle = "Tampilkan arti ayat dalam Bahasa Indonesia",
+                        checked = state.showTranslation,
+                        onCheckedChange = onToggleTranslation
+                    )
+                    Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF2EFE9)))
+                    ReaderSettingToggleItem(
+                        title = stringResource(R.string.show_transliteration),
+                        subtitle = "Tampilkan teks latin / transliterasi",
+                        checked = state.showTransliteration,
+                        onCheckedChange = onToggleTransliteration
+                    )
+                    Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF2EFE9)))
+                    ReaderSettingToggleItem(
+                        title = "Warna Tajwid",
+                        subtitle = "Panduan hukum bacaan dengan warna tajwid",
+                        checked = state.isTajweedEnabled,
+                        onCheckedChange = onToggleTajweed
+                    )
+                }
+            }
+
+            // Section 3: Audio Playback & Reciter
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = SaatColors.PureWhite,
+                border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+                shadowElevation = 0.5.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Text(
+                        text = "Audio & Tilawah",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
+                    )
+
+                    ReaderSettingToggleItem(
+                        title = stringResource(R.string.continuous_play),
+                        subtitle = "Lanjut putar ayat berikutnya secara otomatis",
+                        checked = state.playbackMode == AyahPlaybackMode.CONTINUOUS,
+                        onCheckedChange = { enabled ->
+                            onSetPlaybackMode(
+                                if (enabled) AyahPlaybackMode.CONTINUOUS else AyahPlaybackMode.SINGLE
+                            )
+                        }
+                    )
+
+                    Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF2EFE9)))
+
+                    Text(
+                        text = stringResource(R.string.reciter),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = SaatColors.Slate800
+                    )
+
+                    if (state.recitations.isEmpty()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.CenterHorizontally)
+                                .padding(vertical = 8.dp),
+                            color = SaatColors.DeepEmerald
+                        )
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            state.recitations.forEach { recitation ->
+                                ReciterRow(
+                                    recitation = recitation,
+                                    selected = recitation.identifiableId == state.selectedRecitationId,
+                                    onClick = { onSelectRecitation(recitation.identifiableId) }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-private fun ReaderSettingToggleRow(
+private fun ReaderSettingToggleItem(
     title: String,
-    checked: Boolean? = null,
-    onCheckedChange: ((Boolean) -> Unit)? = null,
-    content: (@Composable () -> Unit)? = null
+    subtitle: String? = null,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = SaatColors.PureWhite,
-        border = BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.8f))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = { onCheckedChange(!checked) }
+            )
+            .padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            if (content != null) {
+        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = SaatColors.Slate900,
+                fontWeight = FontWeight.SemiBold
+            )
+            if (subtitle != null) {
                 Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = SaatColors.Slate900,
-                    fontWeight = FontWeight.SemiBold
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SaatColors.Slate500,
+                    modifier = Modifier.padding(top = 2.dp)
                 )
-                content()
-            } else if (checked != null && onCheckedChange != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = SaatColors.Slate900,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f)
-                    )
-                    androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(
-                            if (checked) R.drawable.ic_toggle_on_custom else R.drawable.ic_toggle_off_custom
-                        ),
-                        contentDescription = if (checked) "On" else "Off",
-                        modifier = Modifier
-                            .size(width = 52.dp, height = 28.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = { onCheckedChange(!checked) }
-                            )
-                    )
-                }
             }
         }
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource(
+                if (checked) R.drawable.ic_toggle_on_custom else R.drawable.ic_toggle_off_custom
+            ),
+            contentDescription = if (checked) "On" else "Off",
+            modifier = Modifier.size(width = 48.dp, height = 26.dp)
+        )
     }
 }
 
@@ -1380,35 +1671,87 @@ private fun ReciterRow(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    Column(Modifier.fillMaxWidth()) {
+    val avatarRes = app.kamy.saatApp.core.config.LocalQuranConfig.reciterAvatar(recitation.identifiableId)
+    val subtitleRes = app.kamy.saatApp.core.config.LocalQuranConfig.reciterSubtitleRes(recitation.identifiableId)
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        color = if (selected) SaatColors.DeepEmerald.copy(alpha = 0.07f) else Color(0xFFFAFAFA),
+        border = BorderStroke(
+            1.2.dp,
+            if (selected) SaatColors.DeepEmerald else Color(0xFFE2E8F0)
+        )
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .clickable(onClick = onClick)
-                .background(
-                    if (selected) SaatColors.DeepEmerald.copy(alpha = 0.1f)
-                    else Color.Transparent
-                )
-                .padding(horizontal = 12.dp, vertical = 14.dp)
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
-            Text(
-                text = recitation.displayName,
-                modifier = Modifier.weight(1f),
-                color = SaatColors.Slate900,
-                style = MaterialTheme.typography.bodyLarge
-            )
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFF8F4F7)),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.foundation.Image(
+                    painter = painterResource(avatarRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(CircleShape)
+                )
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = recitation.displayName,
+                    color = if (selected) SaatColors.DeepEmerald else SaatColors.Slate900,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                if (subtitleRes != null) {
+                    Text(
+                        text = stringResource(subtitleRes),
+                        color = if (selected) SaatColors.DeepEmerald.copy(alpha = 0.8f) else SaatColors.Slate500,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 1.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.width(8.dp))
+
             if (selected) {
-                Text("✓", color = SaatColors.DeepEmerald, fontWeight = FontWeight.Bold)
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(SaatColors.DeepEmerald),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check_custom),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, Color(0xFFCBD5E1), CircleShape)
+                )
             }
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(SaatColors.SoftGrey)
-        )
     }
 }
 
@@ -1576,32 +1919,112 @@ private fun ReaderScrollHint(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val transition = rememberInfiniteTransition(label = "scrollHint")
-    val bounce by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 8f,
+    val transition = rememberInfiniteTransition(label = "swipeHint")
+    val swipeOffset by transition.animateFloat(
+        initialValue = 16f,
+        targetValue = -16f,
         animationSpec = infiniteRepeatable(
-            animation = tween(900),
+            animation = tween(1100, easing = androidx.compose.animation.core.FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "bounce"
+        label = "swipeOffset"
     )
+    val handAlpha by transition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "handAlpha"
+    )
+
     Surface(
         onClick = onDismiss,
         modifier = modifier
-            .graphicsLayer { translationY = bounce },
-        shape = RoundedCornerShape(20.dp),
-        color = SaatColors.DeepEmerald.copy(alpha = 0.94f),
-        shadowElevation = 8.dp
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = Color.Transparent,
+        shadowElevation = 14.dp
     ) {
-        Text(
-            text = stringResource(R.string.reader_scroll_hint),
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.horizontalGradient(
+                        listOf(
+                            Color(0xFF085E43),
+                            Color(0xFF15AA7C)
+                        )
+                    ),
+                    shape = RoundedCornerShape(28.dp)
+                )
+                .border(
+                    BorderStroke(1.2.dp, Color(0xFFE8D39A).copy(alpha = 0.6f)),
+                    shape = RoundedCornerShape(28.dp)
+                )
+                .padding(horizontal = 16.dp, vertical = 11.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Animated Horizontal Swipe Visual Track
+                Box(
+                    modifier = Modifier
+                        .width(46.dp)
+                        .height(28.dp)
+                        .background(Color.Black.copy(alpha = 0.20f), RoundedCornerShape(14.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 5.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier
+                                .size(11.dp)
+                                .graphicsLayer { rotationZ = 180f }
+                        )
+                    }
+                    // Animated glowing touch dot
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .graphicsLayer {
+                                translationX = swipeOffset
+                                alpha = handAlpha
+                            }
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Color(0xFFFFDF7A), Color(0xFFC9972E))
+                                ),
+                                CircleShape
+                            )
+                            .border(1.5.dp, Color.White, CircleShape)
+                    )
+                }
+
+                Text(
+                    text = stringResource(R.string.reader_scroll_hint),
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.5.sp),
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    textAlign = TextAlign.Start
+                )
+            }
+        }
     }
 }
 

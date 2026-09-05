@@ -12,21 +12,20 @@ import app.kamy.saatApp.R
 
 object NotificationChannels {
     const val DAILY_VERSE = "daily_verse_v6"
+    const val QURAN_REMINDER = "quran_reminders_v1"
     const val PRAYER = "prayer_times_v8"
     const val PRAYER_ALERT = "prayer_alert_v8"
     const val SUNNAH = "sunnah_reminders_v5"
     const val ADHAN_PLAYBACK = "adhan_playback"
     const val ADHAN_ALERT = "adhan_alert_v5"
     const val MEDIA_PLAYBACK = "media_playback"
-    const val PRAYER_TRACKER = "prayer_tracker_v5"
-
     /** Old channel IDs that must be deleted so the new configuration takes effect. */
     private val DEPRECATED_CHANNELS = listOf(
         "daily_verse_v1", "daily_verse_v2", "daily_verse_v3", "daily_verse_v4", "daily_verse_v5",
         "prayer_times_v1", "prayer_times_v2", "prayer_times_v3", "prayer_times_v4", "prayer_times_v5", "prayer_times_v6", "prayer_times_v7",
         "prayer_alert_v1", "prayer_alert_v2", "prayer_alert_v3", "prayer_alert_v4", "prayer_alert_v5", "prayer_alert_v6", "prayer_alert_v7",
         "sunnah_reminders_v1", "sunnah_reminders_v2", "sunnah_reminders_v3", "sunnah_reminders_v4",
-        "prayer_tracker_v1", "prayer_tracker_v2", "prayer_tracker_v3", "prayer_tracker_v4",
+        "prayer_tracker_v1", "prayer_tracker_v2", "prayer_tracker_v3", "prayer_tracker_v4", "prayer_tracker_v5",
         "adhan_alert_v1", "adhan_alert_v2", "adhan_alert_v3", "adhan_alert_v4"
     )
 
@@ -67,6 +66,18 @@ object NotificationChannels {
         )
         manager.createNotificationChannel(
             NotificationChannel(
+                QURAN_REMINDER,
+                context.getString(R.string.channel_quran_reminder),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = context.getString(R.string.channel_quran_reminder_desc)
+                setSound(soundUri, notificationAudioAttributes)
+                enableVibration(true)
+                setVibrationPattern(vibrationPattern)
+            }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(
                 PRAYER,
                 context.getString(R.string.channel_prayer),
                 NotificationManager.IMPORTANCE_HIGH
@@ -98,19 +109,6 @@ object NotificationChannels {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = context.getString(R.string.channel_sunnah_desc)
-                setSound(soundUri, notificationAudioAttributes)
-                enableVibration(true)
-                setVibrationPattern(vibrationPattern)
-                setBypassDnd(true)
-            }
-        )
-        manager.createNotificationChannel(
-            NotificationChannel(
-                PRAYER_TRACKER,
-                context.getString(R.string.channel_prayer_tracker),
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = context.getString(R.string.channel_prayer_tracker_desc)
                 setSound(soundUri, notificationAudioAttributes)
                 enableVibration(true)
                 setVibrationPattern(vibrationPattern)

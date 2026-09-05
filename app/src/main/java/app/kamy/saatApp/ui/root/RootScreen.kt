@@ -127,7 +127,7 @@ fun RootScreen(
     var isAccountDetailScreen by rememberSaveable { mutableStateOf(false) }
     var isTanyaSaatOpen by remember { mutableStateOf(false) }
     val showBottomBar = shouldShowBottomBar(currentRoute, isAccountDetailScreen) && !isTanyaSaatOpen
-    val showAudioBar = audioState.currentUrl != null && !isTanyaSaatOpen
+    val showAudioBar = audioState.currentUrl != null && !isTanyaSaatOpen && !isReaderRoute
     val audioBarBottomPadding = if (showBottomBar) {
         floatingNavBottomPadding() + FloatingAudioBarMetrics.bottomGap
     } else {
@@ -367,6 +367,7 @@ fun RootScreen(
                 onToggle = { audioPlayer.toggle() },
                 onDismiss = { audioPlayer.stop() },
                 onOpenPlayback = {
+                    if (isReaderRoute) return@FloatingAudioBar
                     val chapter = audioState.chapterNumber ?: return@FloatingAudioBar
                     val ayah = audioState.ayahNumber ?: -1
                     val readerRoute = "quran/reader/$chapter?ayah=$ayah"
@@ -375,7 +376,7 @@ fun RootScreen(
                             launchSingleTop = true
                         }
                     }
-                }.takeIf { audioState.hasReaderNavigation },
+                }.takeIf { audioState.hasReaderNavigation && !isReaderRoute },
                 reserveTrailingSpace = if (isReaderRoute) 52.dp else 0.dp,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)

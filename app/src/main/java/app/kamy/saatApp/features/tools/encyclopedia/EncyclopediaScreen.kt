@@ -69,33 +69,16 @@ fun EncyclopediaScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.encyclopedia_title),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = SaatColors.DeepEmerald
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        focusManager.clearFocus()
-                        onBack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
-                            tint = SaatColors.DeepEmerald
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = stringResource(R.string.encyclopedia_title),
+                subtitle = stringResource(R.string.tool_encyclopedia_desc),
+                onBack = {
+                    focusManager.clearFocus()
+                    onBack()
+                }
             )
         },
-        containerColor = Color(0xFFF8FAF9)
+        containerColor = SaatColors.HomeBg
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -267,26 +250,21 @@ private fun CategoryChipsRow(
     ) {
         items(EncyclopediaCategory.entries) { category ->
             val isSelected = selectedCategory == category
-            val bgContainer = if (isSelected) {
-                Brush.horizontalGradient(listOf(SaatColors.DeepEmerald, SaatColors.Teal))
-            } else {
-                Brush.linearGradient(listOf(Color.White, Color.White))
-            }
-
-            Box(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .background(bgContainer)
-                    .clickable { onSelectCategory(category) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = stringResource(category.labelRes),
-                    fontSize = 13.sp,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isSelected) Color.White else SaatColors.Slate900
+            FilterChip(
+                selected = isSelected,
+                onClick = { onSelectCategory(category) },
+                label = {
+                    Text(
+                        text = stringResource(category.labelRes),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = SaatColors.DeepEmerald,
+                    selectedLabelColor = SaatColors.PureWhite
                 )
-            }
+            )
         }
     }
 }

@@ -76,7 +76,8 @@ class LocationProvider @Inject constructor(
                         .getFromLocation(latitude, longitude, 1)
                         ?.firstOrNull()
                     ReverseGeocodeResult(
-                        cityName = address?.locality?.takeIf { it.isNotBlank() }
+                        cityName = address?.subLocality?.takeIf { it.isNotBlank() }
+                            ?: address?.locality?.takeIf { it.isNotBlank() }
                             ?: address?.subAdminArea?.takeIf { it.isNotBlank() }
                             ?: address?.adminArea?.takeIf { it.isNotBlank() },
                         countryCode = address?.countryCode?.takeIf { it.isNotBlank() }

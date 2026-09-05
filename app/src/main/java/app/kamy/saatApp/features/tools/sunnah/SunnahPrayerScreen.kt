@@ -165,67 +165,35 @@ fun SunnahPrayerScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(SaatColors.ScreenBackground)
+                .background(SaatColors.HomeBg)
         ) {
-            // Header Bar - Full White behind status bar
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = SaatColors.PureWhite,
-                shadowElevation = 1.dp
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding()
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = SaatColors.DeepEmerald
-                            )
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.sunnah_prayer_title),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = SaatColors.DeepEmerald
-                            )
-                            Text(
-                                text = when (appLanguage) {
-                                    AppLanguage.ENGLISH -> "Complete sunnah prayers & life-intention deeds with Hadiths"
-                                    AppLanguage.MALAY -> "Solat sunat & amalan kehidupan dengan dalil sahih"
-                                    else -> "Shalat sunnah & amalan kehidupan dengan dalil shahih"
-                                },
-                                style = MaterialTheme.typography.labelSmall,
-                                color = SaatColors.GoldDeep,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
-
-                    // 2-Segment Top Tabs
+            // Unified Header Bar with Tabs
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = stringResource(R.string.sunnah_prayer_title),
+                subtitle = when (appLanguage) {
+                    AppLanguage.ENGLISH -> "Complete sunnah prayers & life-intention deeds"
+                    AppLanguage.MALAY -> "Solat sunat & amalan kehidupan dengan dalil"
+                    else -> "Shalat sunnah & amalan kehidupan dengan dalil"
+                },
+                onBack = onBack,
+                bottomContent = {
                     TabRow(
                         selectedTabIndex = activeTab,
-                        containerColor = SaatColors.PureWhite,
-                        contentColor = SaatColors.DeepEmerald,
+                        containerColor = SaatColors.HomeBg,
+                        contentColor = SaatColors.HomeDarkGreen,
                         indicator = { tabPositions ->
                             if (activeTab < tabPositions.size) {
                                 Surface(
                                     modifier = Modifier
                                         .tabIndicatorOffset(tabPositions[activeTab])
                                         .height(3.dp),
-                                    color = SaatColors.DeepEmerald,
+                                    color = SaatColors.HomeDarkGreen,
                                     shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
                                 ) {}
                             }
                         },
                         divider = {
-                            HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
+                            HorizontalDivider(color = Color(0xFFE8E2D2))
                         }
                     ) {
                         Tab(
@@ -235,7 +203,7 @@ fun SunnahPrayerScreen(
                                 Text(
                                     text = stringResource(R.string.sunnah_prayers_tab),
                                     fontWeight = if (activeTab == 0) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (activeTab == 0) SaatColors.DeepEmerald else SaatColors.Slate500
+                                    color = if (activeTab == 0) SaatColors.HomeDarkGreen else SaatColors.Slate500
                                 )
                             }
                         )
@@ -246,13 +214,13 @@ fun SunnahPrayerScreen(
                                 Text(
                                     text = stringResource(R.string.sunnah_deeds_tab),
                                     fontWeight = if (activeTab == 1) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (activeTab == 1) SaatColors.DeepEmerald else SaatColors.Slate500
+                                    color = if (activeTab == 1) SaatColors.HomeDarkGreen else SaatColors.Slate500
                                 )
                             }
                         )
                     }
                 }
-            }
+            )
 
             if (activeTab == 0) {
                 // Category Filter Pills for Sunnah Prayers
@@ -645,48 +613,16 @@ private fun SunnahNeedDetailFullScreen(
     appLanguage: AppLanguage,
     onDismiss: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = SaatColors.ScreenBackground
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SaatColors.HomeBg)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = SaatColors.PureWhite,
-                shadowElevation = 2.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = item.title(appLanguage),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = item.hadithReference,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = SaatColors.GoldDeep,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+            title = item.title(appLanguage),
+            subtitle = item.hadithReference,
+            onBack = onDismiss
+        )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -771,7 +707,6 @@ private fun SunnahNeedDetailFullScreen(
                     SunnahActionStepCard(step = step, appLanguage = appLanguage)
                 }
             }
-        }
     }
 }
 
@@ -886,45 +821,16 @@ private fun SunnahPrayerDetailFullScreen(
     onOpenDoaZikir: () -> Unit,
     onOpenQiyam: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = SaatColors.ScreenBackground
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SaatColors.HomeBg)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = SaatColors.PureWhite,
-                shadowElevation = 2.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = item.title(appLanguage),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = item.waktu(appLanguage),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = SaatColors.Slate500
-                        )
-                    }
-                }
-            }
+        app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+            title = item.title(appLanguage),
+            subtitle = item.waktu(appLanguage),
+            onBack = onDismiss
+        )
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -1149,7 +1055,6 @@ private fun SunnahPrayerDetailFullScreen(
                     }
                 }
             }
-        }
     }
 }
 

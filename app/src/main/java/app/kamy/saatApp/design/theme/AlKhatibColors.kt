@@ -35,8 +35,8 @@ object SaatColors {
     )
 
     // Layout variables
-    var OffWhite by mutableStateOf(Color(0xFFF9F9F8))
-    var ScreenBackground by mutableStateOf(Color(0xFFF8FAFC))
+    var OffWhite by mutableStateOf(Color(0xFFF9F4EC))
+    var ScreenBackground by mutableStateOf(Color(0xFFF9F4EC))
     var PureWhite by mutableStateOf(Color(0xFFFFFFFF))
     var SoftGrey by mutableStateOf(Color(0xFFE5E7EB))
     var LightGrey by mutableStateOf(Color(0xFFF3F4F6))
@@ -53,7 +53,15 @@ object SaatColors {
     var IndigoAccent by mutableStateOf(Color(0xFF085E43))
     var BlueLink by mutableStateOf(Color(0xFF15AA7C))
 
-    // Constants
+    // Constants & Revamp Theme Colors
+    val HomeBg = Color(0xFFF9F4EC)
+    val LastReadBg = Color(0xFFFFFFFF)
+    val JourneyCardBg = Color(0xFFFAF6F0)
+    val HomeDarkGreen = Color(0xFF176345)
+    val TimelineGreen = Color(0xFFB9CBBE)
+    val ArcGold = Color(0xFFE7B75C)
+    val ArcInactive = Color(0xFFF4EFE2)
+
     val Gold = Color(0xFFB45309)
     val GoldBright = Color(0xFFD4A017)
     val GoldDeep = Color(0xFFD97706)
@@ -64,8 +72,8 @@ object SaatColors {
     fun applyTheme(theme: AppThemeColor = AppThemeColor.EMERALD) {
         // Unified app theme using linear gradient #085E43 to #15AA7C across all screens
         PureWhite = Color(0xFFFFFFFF)
-        OffWhite = Color(0xFFF9F9F8)
-        ScreenBackground = Color(0xFFF8FAFC)
+        OffWhite = Color(0xFFF9F4EC)
+        ScreenBackground = Color(0xFFF9F4EC)
         LightGrey = Color(0xFFF3F4F6)
         PanelGrey = Color(0xFFE8EBEF)
         PanelGreyAlt = Color(0xFFEEF2EE)

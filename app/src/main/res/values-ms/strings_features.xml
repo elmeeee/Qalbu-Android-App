@@ -5,6 +5,11 @@
     <string name="bookmark_removed">Penanda dibuang</string>
     <string name="bookmarks_empty">Tiada ayat disimpan. Tandakan ayat semasa membaca.</string>
     <string name="bookmarks_title">Penanda</string>
+    <string name="bookmarks_card_desc">Koleksi ayat pilihan yang anda tandakan</string>
+    <string name="bookmarked_verses_hero_title">Ayat Ditandakan</string>
+    <string name="bookmarked_verses_count">%1$d ayat disimpan dalam senarai bacaan anda</string>
+    <string name="bookmarked_verses_empty_desc">Belum ada ayat yang ditandakan</string>
+    <string name="surah_ayah_format">%1$s · Ayat %2$d</string>
     <string name="channel_adhan_alert">Amaran azan</string>
     <string name="channel_adhan_alert_desc">Main azan apabila mainan penuh tidak boleh dimulakan</string>
     <string name="chapters_refresh_failed">Gagal memuat semula senarai surah</string>
@@ -21,6 +26,7 @@
     <string name="dhikr_subhanallah">SubhanAllah</string>
     <string name="dhikr_title">Tasbih</string>
     <string name="tasbih_target_left">Sasaran: %1$d  |  Baki: %2$d</string>
+    <string name="tasbih_tap_instruction">Ketik atau leret untuk mengira</string>
     <string name="tasbih_reset_button">Set Semula</string>
     <string name="tasbih_end_button">Tamatkan</string>
     <string name="tasbih_reset_dialog_title">Adakah anda pasti untuk Mengeset Semula?</string>
@@ -98,6 +104,60 @@
     <string name="remove_bookmark">Buang penanda</string>
     <string name="shortcut_continue_quran">Teruskan Quran</string>
     <string name="shortcut_prayer_today">Waktu solat</string>
+    <!-- Worship / Spiritual Screen Revamp -->
+    <string name="worship_header_title">Ibadah</string>
+    <string name="worship_header_subtitle">Jalan anda menuju Allah</string>
+    <string name="collab_with">Berkolaborasi dengan</string>
+    <string name="collab_masjidku_sub">Pengurusan Masjid Digital</string>
+    <string name="tool_category_all">Semua</string>
+    <string name="tool_category_prayer">Solat &amp; Waktu</string>
+    <string name="tool_category_dhikr">Zikir &amp; Doa</string>
+    <string name="tool_category_fiqh">Fiqh &amp; Panduan</string>
+    <string name="tool_search_hint">Cari ciri ibadah...</string>
+    <string name="tool_search_empty">Tiada ciri yang sepadan dijumpai</string>
+
+    <string name="tool_qibla_title">Kiblat</string>
+    <string name="tool_qibla_desc">Cari arah Kiblat Kaabah</string>
+
+    <string name="tool_radio_title">Radio</string>
+    <string name="tool_radio_desc">Dengar stesen radio Islam</string>
+
+    <string name="tool_dua_dhikr_title">Doa &amp; Zikir</string>
+    <string name="tool_dua_dhikr_desc">Koleksi doa dan zikir</string>
+
+    <string name="tool_asmaul_husna_title">Asmaul Husna</string>
+    <string name="tool_asmaul_husna_desc">Ketahui 99 Nama Allah</string>
+
+    <string name="tool_faraidh_title">Faraidh</string>
+    <string name="tool_faraidh_desc">Pelajari warisan Islam</string>
+
+    <string name="tool_zakah_title">Zakat</string>
+    <string name="tool_zakah_desc">Kira dan bayar zakat anda</string>
+
+    <string name="tool_tasbih_title">Tasbih</string>
+    <string name="tool_tasbih_desc">Kira zikir anda dengan mudah</string>
+
+    <string name="tool_manzil_title">Manzil</string>
+    <string name="tool_manzil_desc">Doa harian untuk perlindungan</string>
+
+    <string name="tool_hajj_umrah_title">Haji &amp; Umrah</string>
+    <string name="tool_hajj_umrah_desc">Panduan haji dan umrah</string>
+
+    <string name="tool_jamak_guide_title">Panduan Solat Jamak</string>
+    <string name="tool_jamak_guide_desc">Pelajari cara menggabungkan solat</string>
+
+    <string name="tool_sunnah_practices_title">Amalan Sunnah</string>
+    <string name="tool_sunnah_practices_desc">Ketahui amalan sunnah harian</string>
+
+    <string name="tool_janazah_guide_title">Panduan Solat Jenazah</string>
+    <string name="tool_janazah_guide_desc">Pelajari cara solat jenazah</string>
+
+    <string name="tool_encyclopedia_title">Ensiklopedia</string>
+    <string name="tool_encyclopedia_desc">Terokai pengetahuan Islam</string>
+
+    <string name="tool_fidyah_tracker_title">Penjejak Fidyah</string>
+    <string name="tool_fidyah_tracker_desc">Jejak pembayaran Fidyah anda</string>
+
     <string name="spiritual_tools_tab_subtitle">Kiblat, doa, zikir, dan lagi</string>
     <string name="spiritual_tools_title">Alat spiritual</string>
     <string name="verse_key_label">Ayat %1$s</string>
@@ -420,12 +480,10 @@
     <string name="faraidh_scenario_loaded">Senario dimuatkan</string>
     <string name="faraidh_scenario_name_hint">Nama senario</string>
     <string name="faraidh_scenario_saved">Senario berjaya disimpan</string>
-    <string name="onboarding_location_rationale_body">Waktu solat berbeza mengikut lokasi. GPS memberikan waktu paling tepat tanpa tetapan manual.</string>
-    <string name="onboarding_location_rationale_title">Mengapa perlu lokasi?</string>
-    <string name="onboarding_step_progress">Langkah %1$d daripada %2$d</string>
     <string name="prayer_calendar_hint">Ketik tarikh untuk melihat seluruh waktu solat pada tarikh tersebut.</string>
     <string name="share_as_image">Kongsi sebagai Gambar</string>
     <string name="share_verse_image_chooser">Kongsi gambar ayat melalui…</string>
+    <string name="share_image_hashtag">#SaatNyaDekatDenganQuran</string>
     <string name="zakat_family_members">Bilangan ahli keluarga</string>
     <string name="zakat_fitrah_note">Zakat Fitrah berdasarkan 2.5 kg seorang; gunakan harga beras makanan ruji tempatan per kg.</string>
     <string name="zakat_fitrah_total_weight">Jumlah berat zakat</string>

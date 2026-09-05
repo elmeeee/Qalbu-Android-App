@@ -1,12 +1,13 @@
 package app.kamy.saatApp.features.share
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,12 +17,11 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Share
@@ -33,29 +33,29 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.lerp
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.share.VerseShareTextComposer.Companion.fullArabicForShare
 import app.kamy.saatApp.design.theme.SaatColors
+import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,24 +66,28 @@ fun AyahImageShareSheet(
     onShare: (ShareTemplate) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var selectedTemplate by remember { mutableStateOf(ShareTemplate.IVORY_CREAM) }
+    val templates = ShareTemplate.values()
+    val pagerState = rememberPagerState(initialPage = 0) { templates.size }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState
+        sheetState = sheetState,
+        containerColor = SaatColors.ScreenBackground,
+        dragHandle = null
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(top = 12.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header
+            // Header (Compact)
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -91,260 +95,224 @@ fun AyahImageShareSheet(
                     Icon(
                         Icons.Filled.Image,
                         contentDescription = null,
-                        tint = SaatColors.DeepEmerald
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.size(20.dp)
                     )
                     Text(
                         text = stringResource(R.string.share_as_image),
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.DeepEmerald,
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.Filled.Close, contentDescription = "Close")
+                IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.Close, contentDescription = "Close", modifier = Modifier.size(18.dp))
                 }
             }
 
-            // Real-time Preview Card
-            val tBgColorStart = Color(android.graphics.Color.parseColor(selectedTemplate.bgColorStart))
-            val tBgColorEnd = Color(android.graphics.Color.parseColor(selectedTemplate.bgColorEnd))
-            val tBorderColor = Color(android.graphics.Color.parseColor(selectedTemplate.borderColor))
-            val tInnerBorderColor = Color(android.graphics.Color.parseColor(selectedTemplate.innerBorderColor))
-            val tAppNameColor = Color(android.graphics.Color.parseColor(selectedTemplate.appNameColor))
-            val tArabicTextColor = Color(android.graphics.Color.parseColor(selectedTemplate.arabicTextColor))
-            val tTranslationColor = Color(android.graphics.Color.parseColor(selectedTemplate.translationColor))
-            val tDividerColor = Color(android.graphics.Color.parseColor(selectedTemplate.dividerColor))
-            val tReferenceColor = Color(android.graphics.Color.parseColor(selectedTemplate.referenceColor))
-            val tFooterColor = Color(android.graphics.Color.parseColor(selectedTemplate.footerColor))
+            // Swipeable Carousel of Templates
+            HorizontalPager(
+                state = pagerState,
+                contentPadding = PaddingValues(horizontal = 85.dp),
+                pageSpacing = 16.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) { pageIndex ->
+                val template = templates[pageIndex]
+                val pageOffset = ((pagerState.currentPage - pageIndex) + pagerState.currentPageOffsetFraction).absoluteValue
+                val scale = lerp(0.88f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
+                val alpha = lerp(0.65f, 1f, 1f - pageOffset.coerceIn(0f, 1f))
 
-            val tBgBrush = if (selectedTemplate.hasGradient) {
-                androidx.compose.ui.graphics.Brush.verticalGradient(
-                    colors = listOf(tBgColorStart, tBgColorEnd)
-                )
-            } else {
-                androidx.compose.ui.graphics.Brush.linearGradient(
-                    colors = listOf(tBgColorStart, tBgColorStart)
-                )
-            }
+                val arabicColor = Color(android.graphics.Color.parseColor(template.arabicTextColor))
+                val translationColor = Color(android.graphics.Color.parseColor(template.translationColor))
+                val ornamentColor = Color(android.graphics.Color.parseColor(template.ornamentColor))
+                val refColor = Color(android.graphics.Color.parseColor(template.referenceColor))
+                val hashtagColor = Color(android.graphics.Color.parseColor(template.hashtagColor))
 
-            Box(
-                modifier = Modifier
-                    .width(224.dp)
-                    .aspectRatio(4f / 5f)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(tBgBrush)
-                    .border(4.dp, tBorderColor, RoundedCornerShape(8.dp))
-                    .padding(8.dp)
-            ) {
-                // Inner border
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .border(0.5.dp, tInnerBorderColor, RoundedCornerShape(4.dp))
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                            this.alpha = alpha
+                        }
+                        .width(190.dp)
+                        .aspectRatio(941f / 1672f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFFC5A880).copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                 ) {
-                    Column(
+                    // Background Image
+                    Image(
+                        painter = painterResource(template.bgDrawableRes),
+                        contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.SpaceBetween
+                        contentScale = ContentScale.Crop
+                    )
+
+                    val chapterNum = verse.chapterId ?: verse.verseKey?.substringBefore(':')?.toIntOrNull()
+                    val verseNum = verse.resolvedVerseNumber ?: ""
+                    val referenceText = if (chapterNum != null) {
+                        "QS. $surahName ($chapterNum) : $verseNum"
+                    } else {
+                        "QS. $surahName : $verseNum"
+                    }
+
+                    val rawTranslation = verse.translations?.firstOrNull()?.text?.trim().orEmpty()
+                        .replace(Regex("<[^>]*>"), "")
+                    val translationQuote = if (rawTranslation.isNotBlank()) "“$rawTranslation”" else ""
+                    val hashtagText = stringResource(R.string.share_image_hashtag).trim()
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 70.dp, bottom = 90.dp, start = 14.dp, end = 14.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Top Header (Logo + App Name)
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                            verticalArrangement = Arrangement.spacedBy(7.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White)
-                                    .border(0.5.dp, tBorderColor, CircleShape),
-                                contentAlignment = Alignment.Center
+                            // 1. Top Diamond Ornament
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.saat_app_icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp),
-                                    tint = Color.Unspecified
+                                Box(
+                                    modifier = Modifier
+                                        .width(22.dp)
+                                        .height(1.dp)
+                                        .background(ornamentColor)
+                                )
+                                Text(
+                                    text = "❖",
+                                    fontSize = 7.sp,
+                                    color = ornamentColor
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .width(22.dp)
+                                        .height(1.dp)
+                                        .background(ornamentColor)
                                 )
                             }
-                            Text(
-                                text = "Sāat",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 7.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = tAppNameColor
-                                )
-                            )
-                        }
 
-                        // Middle Content (Arabic, Divider, Translation)
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 4.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
+                            // 2. Arabic Text
                             Text(
                                 text = verse.fullArabicForShare().trim(),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontSize = 11.sp,
-                                    textAlign = TextAlign.Center,
-                                    color = tArabicTextColor
-                                ),
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Serif,
+                                textAlign = TextAlign.Center,
+                                color = arabicColor,
+                                lineHeight = 14.sp,
                                 maxLines = 4,
                                 overflow = TextOverflow.Ellipsis
                             )
 
-                            // Subtle Divider
-                            Box(
-                                modifier = Modifier
-                                    .width(60.dp)
-                                    .height(1.dp)
-                                    .background(tDividerColor)
-                            )
-
-                            val translationText = verse.translations?.firstOrNull()?.text?.trim().orEmpty()
-                                .replace(Regex("<[^>]*>"), "")
-                            Text(
-                                text = translationText,
-                                style = MaterialTheme.typography.bodySmall.copy(
+                            // 3. Translation Quote
+                            if (translationQuote.isNotBlank()) {
+                                Text(
+                                    text = translationQuote,
                                     fontSize = 7.sp,
-                                    fontStyle = FontStyle.Italic,
+                                    fontFamily = FontFamily.Serif,
                                     textAlign = TextAlign.Center,
-                                    color = tTranslationColor
-                                ),
-                                maxLines = 5,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-
-                        // Bottom Footer (Reference + App Promo)
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(1.dp)
-                        ) {
-                            Text(
-                                text = "$surahName ${verse.resolvedVerseNumber ?: ""}",
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 7.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = tReferenceColor
+                                    color = translationColor,
+                                    lineHeight = 9.5.sp,
+                                    maxLines = 4,
+                                    overflow = TextOverflow.Ellipsis
                                 )
-                            )
+                            }
+
+                            // 4. Middle Ornament
                             Text(
-                                text = stringResource(R.string.share_brand_tagline).replace("_", "").trim(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 5.sp,
-                                    color = tFooterColor
-                                ),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                text = "― ❖ ―",
+                                fontSize = 6.sp,
+                                color = ornamentColor
                             )
+
+                            // 5. Reference Text & Hashtag
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(1.dp)
+                            ) {
+                                Text(
+                                    text = referenceText,
+                                    fontSize = 7.sp,
+                                    fontFamily = FontFamily.Serif,
+                                    fontWeight = FontWeight.SemiBold,
+                                    textAlign = TextAlign.Center,
+                                    color = refColor
+                                )
+                                if (hashtagText.isNotBlank()) {
+                                    Text(
+                                        text = hashtagText,
+                                        fontSize = 5.5.sp,
+                                        fontFamily = FontFamily.Serif,
+                                        textAlign = TextAlign.Center,
+                                        color = hashtagColor
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            // Template Selector Title
-            Text(
-                text = "Choose Template",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            // Horizontal Template List
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+            // Page Indicator Dots & Template Name
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(top = 2.dp)
             ) {
-                ShareTemplate.values().forEach { template ->
-                    val isSelected = selectedTemplate == template
-                    val itemBgColor = Color(android.graphics.Color.parseColor(template.bgColorStart))
-                    val itemBorderColor = Color(android.graphics.Color.parseColor(template.borderColor))
+                Text(
+                    text = templates[pagerState.currentPage].displayName,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = SaatColors.DeepEmerald
+                    )
+                )
 
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .clickable { selectedTemplate = template }
-                            .padding(4.dp)
-                    ) {
-                        // Colored Circle
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    templates.indices.forEach { index ->
+                        val isSelected = pagerState.currentPage == index
+                        val dotWidth by animateFloatAsState(targetValue = if (isSelected) 18f else 6f, label = "dotWidth")
+                        val dotAlpha by animateFloatAsState(targetValue = if (isSelected) 1f else 0.35f, label = "dotAlpha")
+
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
+                                .height(6.dp)
+                                .width(dotWidth.dp)
                                 .clip(CircleShape)
-                                .background(itemBgColor)
-                                .border(
-                                    width = if (isSelected) 3.dp else 1.5.dp,
-                                    color = if (isSelected) SaatColors.DeepEmerald else itemBorderColor,
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isSelected) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(CircleShape)
-                                        .background(SaatColors.DeepEmerald),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                        tint = Color.White
-                                    )
-                                }
-                            }
-                        }
-
-                        // Display Name
-                        Text(
-                            text = template.displayName,
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) SaatColors.DeepEmerald else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                                .background(SaatColors.DeepEmerald.copy(alpha = dotAlpha))
                         )
                     }
                 }
             }
 
-            // Share Button
+            // Share Button (Compact & Clean)
             Button(
-                onClick = { onShare(selectedTemplate) },
+                onClick = { onShare(templates[pagerState.currentPage]) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 4.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = SaatColors.DeepEmerald,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Filled.Share, contentDescription = null)
+                Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
                 Text(
-                    text = "Share Design",
+                    text = stringResource(R.string.share_as_image),
                     modifier = Modifier.padding(start = 8.dp),
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
                 )
-            }
-            
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                Text(stringResource(R.string.close), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

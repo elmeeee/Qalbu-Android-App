@@ -202,18 +202,36 @@ class ChapterReaderViewModel @Inject constructor(
             }
         }
 
-        // Sync ViewModel with player state to update currently playing verse key UI.
+        // Sync ViewModel with player state to update currently playing verse key UI and auto-advance page.
         viewModelScope.launch {
             audioPlayer.state.collect { audio ->
-                val nextPlayingVerseKey =
-                    if (audio.currentUrl != null) audio.trackSubtitle.ifBlank { null } else null
-                _state.update { it.copy(currentlyPlayingVerseKey = nextPlayingVerseKey) }
+                if (audio.currentUrl == null) {
+                    _state.update { it.copy(currentlyPlayingVerseKey = null) }
+                    return@collect
+                }
+                val activeIdx = audio.activeIndex
+                val nextPlayingVerseKey = if (activeIdx != null && activeIdx in audio.queue.indices) {
+                    audio.queue[activeIdx].verseKey
+                } else {
+                    val ch = audio.chapterNumber
+                    val ay = audio.ayahNumber
+                    if (ch != null && ay != null && ay > 0) "$ch:$ay" else null
+                }
+                val currentIndex = _state.value.currentVerseIndex
+                val nextIndex = if (nextPlayingVerseKey != null) {
+                    _state.value.verses.indexOfFirst { it.verseKey == nextPlayingVerseKey }
+                } else -1
+
+                if (nextIndex >= 0 && nextIndex != currentIndex) {
+                    _state.update { it.copy(currentlyPlayingVerseKey = nextPlayingVerseKey, currentVerseIndex = nextIndex) }
+                    _events.tryEmit(ReaderEvent.AutoAdvanceToPage(currentIndex, nextIndex))
+                } else {
+                    _state.update { it.copy(currentlyPlayingVerseKey = nextPlayingVerseKey) }
+                }
             }
         }
 
         // Subscribe to track-ended callback for reliable auto-advance (no race condition).
-        // Must dispatch to viewModelScope because the callback fires on the Media3 listener
-        // thread, while player manipulation and state updates require the Main dispatcher.
         audioPlayer.onTrackEnded = {
             viewModelScope.launch { maybeAutoAdvanceAfterCompletion() }
         }
@@ -221,11 +239,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        // Clear the callback to avoid leaking this ViewModel reference.
-        if (audioPlayer.onTrackEnded != null) {
-            audioPlayer.onTrackEnded = null
-            audioPlayer.stop()
-        }
+        // Keep background audio and queue playing smoothly across navigation
     }
 
     private fun maybeAutoAdvanceAfterCompletion() {
@@ -291,6 +305,14 @@ class ChapterReaderViewModel @Inject constructor(
         targetVerseIndex: Int = 0,
         autoPlayAfterLoad: Boolean = false
     ) {
+        val targetKey = targetVerseKey ?: pendingScrollVerseKey
+        val targetAyahNum = targetKey?.substringAfterLast(':')?.toIntOrNull() ?: (targetVerseIndex + 1)
+        val initialPerPage = if (targetAyahNum > 50) {
+            (((targetAyahNum - 1) / 50) + 1) * 50
+        } else {
+            50
+        }
+
         _state.update {
             it.copy(
                 isLoading = true,
@@ -303,7 +325,7 @@ class ChapterReaderViewModel @Inject constructor(
         }
         viewModelScope.launch {
             runCatching {
-                fetchVersePage(page = 1)
+                fetchVersePage(page = 1, perPage = initialPerPage)
             }.onSuccess { resp ->
                 val trans = translationStore.showTranslation.value
                 val translit = translationStore.showTransliteration.value
@@ -312,18 +334,20 @@ class ChapterReaderViewModel @Inject constructor(
                 val rec = translationStore.currentRecitationId()
                 val tid = LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
 
-                val restoredIndex = if (targetVerseKey != null) {
-                    resp.verses.indexOfFirst { it.verseKey == targetVerseKey }.takeIf { it >= 0 } ?: targetVerseIndex
+                val restoredIndex = if (targetKey != null) {
+                    resp.verses.indexOfFirst { it.verseKey == targetKey }.takeIf { it >= 0 } ?: targetVerseIndex
                 } else {
                     targetVerseIndex
                 }.coerceIn(0, (resp.verses.size - 1).coerceAtLeast(0))
+
+                val equivalentPage = (initialPerPage / 50)
 
                 _state.update { 
                     it.copy(
                         isLoading = false,
                         verses = resp.verses,
                         currentVerseIndex = restoredIndex,
-                        loadedApiPage = resp.pagination?.currentPage ?: 1,
+                        loadedApiPage = maxOf(resp.pagination?.currentPage ?: 1, equivalentPage),
                         hasMore = resp.pagination?.hasNextPage ?: false,
                         selectedTranslationId = tid,
                         showTranslation = trans,
@@ -406,17 +430,19 @@ class ChapterReaderViewModel @Inject constructor(
         logCurrentVerseReading(force = true)
     }
 
-    private suspend fun fetchVersePage(page: Int) =
+    private suspend fun fetchVersePage(page: Int, perPage: Int = 50) =
         if (_state.value.juzNumber != null) {
             quranRepository.getVersesByJuz(
                 juzNumber = _state.value.juzNumber!!,
                 page = page,
+                perPage = perPage,
                 audioRecitationId = _state.value.selectedRecitationId
             )
         } else {
             quranRepository.getVersesByChapter(
                 chapterNumber = _state.value.chapterNumber,
                 page = page,
+                perPage = perPage,
                 audioRecitationId = _state.value.selectedRecitationId
             )
         }
@@ -557,9 +583,23 @@ class ChapterReaderViewModel @Inject constructor(
     fun onPageSettled(index: Int) {
         val s = _state.value
         if (index !in s.verses.indices) return
+        val previousIndex = s.currentVerseIndex
         _state.update { it.copy(currentVerseIndex = index) }
         logCurrentVerseReading()
         refreshPersonalVerseState(index)
+
+        // If audio is currently playing and user manually swiped to a different ayah,
+        // immediately switch audio playback to the newly displayed ayah.
+        val isAudioActive = s.currentlyPlayingVerseKey != null && audioPlayer.state.value.currentUrl != null
+        if (isAudioActive && previousIndex != index) {
+            val newVerse = s.verses.getOrNull(index)
+            if (newVerse?.verseKey != null && newVerse.verseKey != s.currentlyPlayingVerseKey) {
+                val audioUrl = newVerse.audio?.url
+                if (!audioUrl.isNullOrBlank()) {
+                    playAyahAtIndex(index, newVerse)
+                }
+            }
+        }
     }
 
     private fun logCurrentVerseReading(force: Boolean = false) {
@@ -601,6 +641,15 @@ class ChapterReaderViewModel @Inject constructor(
         }
     }
 
+    fun toggleAudioPlay(index: Int = _state.value.currentVerseIndex) {
+        onTapAyah(index)
+    }
+
+    fun stopAudio() {
+        audioPlayer.stop()
+        _state.update { it.copy(currentlyPlayingVerseKey = null) }
+    }
+
     private fun playAyahAtIndex(index: Int, page: RandomAyahPayload) {
         val s = _state.value
         val chapterNum = page.chapterNumber ?: s.chapterNumber
@@ -613,6 +662,30 @@ class ChapterReaderViewModel @Inject constructor(
         val url = page.audio?.url ?: return
         lastStartedVerseKey = page.verseKey
         _state.update { it.copy(currentVerseIndex = index, currentlyPlayingVerseKey = page.verseKey) }
+
+        if (s.playbackMode == AyahPlaybackMode.CONTINUOUS && s.verses.isNotEmpty()) {
+            val queueItems = s.verses.mapNotNull { v ->
+                val audioUrl = v.audio?.url?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                AudioQueueItem(
+                    verseKey = v.verseKey.orEmpty(),
+                    ayahNumber = v.resolvedVerseNumber ?: 0,
+                    url = audioUrl,
+                    label = v.verseKey.orEmpty()
+                )
+            }
+            val queueStartIndex = queueItems.indexOfFirst { it.verseKey == page.verseKey }.coerceAtLeast(0)
+            if (queueItems.isNotEmpty()) {
+                audioPlayer.playSequence(
+                    items = queueItems,
+                    surahTitle = surahTitle,
+                    reciterName = reciterName,
+                    startIndex = queueStartIndex,
+                    chapterNumber = chapterNum
+                )
+                return
+            }
+        }
+
         audioPlayer.playVerse(
             url = url,
             surahTitle = surahTitle,
@@ -831,15 +904,14 @@ class ChapterReaderViewModel @Inject constructor(
         val chapter = verse.chapterNumber ?: _state.value.chapterNumber
         val ayah = verse.resolvedVerseNumber ?: return
         val surah = _state.value.chapterDisplayName
-        val added = QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
+        val isNowBookmarked = QuranPersonalStore.toggleBookmark(appContext, key, chapter, ayah, surah)
         refreshPersonalVerseState(index)
-        _state.update {
-            it.copy(
-                publishMessage = appContext.getString(
-                    if (added) R.string.bookmark_added else R.string.bookmark_removed
-                )
-            )
+        val msg = if (isNowBookmarked) {
+            appContext.getString(R.string.bookmark_added)
+        } else {
+            appContext.getString(R.string.bookmark_removed)
         }
+        _events.tryEmit(ReaderEvent.ShowToast(msg, isNowBookmarked))
     }
 
     fun openHifzPicker(index: Int = _state.value.currentVerseIndex) {
@@ -1084,4 +1156,5 @@ class ChapterReaderViewModel @Inject constructor(
 sealed interface ReaderEvent {
     data class AnimateToPage(val index: Int) : ReaderEvent
     data class AutoAdvanceToPage(val previousIndex: Int, val nextIndex: Int) : ReaderEvent
+    data class ShowToast(val message: String, val isBookmarked: Boolean) : ReaderEvent
 }

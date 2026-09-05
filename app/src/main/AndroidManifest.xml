@@ -106,9 +106,7 @@
             android:name=".infrastructure.notifications.PrayerMidnightRefreshReceiver"
             android:exported="false" />
 
-        <receiver
-            android:name=".infrastructure.notifications.PrayerCheckReminderReceiver"
-            android:exported="false" />
+
 
         <receiver
             android:name=".infrastructure.notifications.FidyahReminderReceiver"

@@ -88,9 +88,12 @@ object FidyahReminderScheduler {
         }
 
         val content = when (lang) {
-            AppLanguage.MALAY -> "Anda masih mempunyai $totalUnpaidDays hari rekod fidyah yang belum dijelaskan. Ketik untuk menyemak."
-            AppLanguage.ENGLISH -> "You have $totalUnpaidDays missed fast days with pending fidyah. Tap to review."
-            else -> "Kamu masih memiliki $totalUnpaidDays hari fidyah & qadha yang belum lunas. Ketik untuk memeriksa."
+            AppLanguage.MALAY ->
+                "Kīmi mengingatkan, anda masih mempunyai $totalUnpaidDays hari fidyah & qada yang belum diselesaikan. Ketik untuk menyemak."
+            AppLanguage.ENGLISH ->
+                "Kīmi’s reminder: You still have $totalUnpaidDays days of fidyah & missed fasts to complete. Tap to review."
+            else ->
+                "Kīmi mengingatkan, kamu masih memiliki $totalUnpaidDays hari fidyah & qadha yang belum diselesaikan. Ketuk untuk memeriksa."
         }
 
         NotificationChannels.ensureAll(context)
@@ -109,8 +112,8 @@ object FidyahReminderScheduler {
 
         val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
 
-        val builder = NotificationCompat.Builder(context, NotificationChannels.PRAYER_TRACKER)
-            .setSmallIcon(R.drawable.ic_stat_notification)
+        val builder = NotificationCompat.Builder(context, NotificationChannels.SUNNAH)
+            .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(content)
             .setStyle(NotificationCompat.BigTextStyle().bigText(content))

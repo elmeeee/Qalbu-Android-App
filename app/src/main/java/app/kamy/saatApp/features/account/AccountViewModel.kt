@@ -85,6 +85,7 @@ data class AccountUiState(
     val importantDaysReminderEnabled: Boolean = true,
     val adhanSoundEnabled: Boolean = true,
     val monThuFastReminderEnabled: Boolean = true,
+    val quranReminderEnabled: Boolean = true,
     val dhuhaReminderEnabled: Boolean = false,
     val dhuhaHour: Int = 8,
     val dhuhaMinute: Int = 30,
@@ -242,6 +243,7 @@ class AccountViewModel @Inject constructor(
                 importantDaysReminderEnabled = prayerNotificationPrefs.isImportantDaysReminderEnabled(),
                 adhanSoundEnabled = prayerNotificationPrefs.isAdhanSoundEnabled(),
                 monThuFastReminderEnabled = prayerNotificationPrefs.isMonThuFastEnabled(),
+                quranReminderEnabled = prayerNotificationPrefs.isQuranReminderEnabled(),
                 dhuhaReminderEnabled = prayerNotificationPrefs.isDhuhaEnabled(),
                 dhuhaHour = prayerNotificationPrefs.dhuhaHour(),
                 dhuhaMinute = prayerNotificationPrefs.dhuhaMinute(),
@@ -589,6 +591,11 @@ class AccountViewModel @Inject constructor(
     }
 
 
+    fun setQuranReminderEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setQuranReminderEnabled(enabled)
+        syncPrayerNotificationState()
+    }
+
     fun openAdhanSheet() = _state.update { it.copy(showAdhanSheet = true) }
 
     fun closeAdhanSheet() {
@@ -617,6 +624,7 @@ class AccountViewModel @Inject constructor(
     fun notificationSummary(state: AccountUiState = _state.value): String {
         val labels = buildList {
             if (state.dailyVerseEnabled) add(appContext.getString(R.string.notif_summary_daily_verse))
+            if (state.quranReminderEnabled) add(appContext.getString(R.string.notif_summary_quran_reminder))
             val enabledPrayers = PrayerType.ADZAN_NOTIFICATION_PRAYERS
                 .filter { state.isPrayerNotificationEnabled(it) }
                 .map { appContext.getString(prayerNameRes(it)) }

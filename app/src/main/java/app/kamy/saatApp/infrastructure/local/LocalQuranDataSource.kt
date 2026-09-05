@@ -48,27 +48,40 @@ class LocalQuranDataSource @Inject constructor(
     @Volatile
     private var tafsirEntriesCache: List<LocalTafsirEntry>? = null
 
+    @Volatile
+    private var chaptersCache: Map<AppLanguage, List<QuranChapter>>? = null
+
+    @Volatile
+    private var juzsCache: List<QuranJuz>? = null
+
     suspend fun getChapters(language: AppLanguage = AppLanguage.INDONESIAN): List<QuranChapter> =
         withContext(Dispatchers.IO) {
-        val db = database.openReadable()
-        db.rawQuery(
-            """
-            SELECT "index", tname, ename, ename_english, ayas, type, first_page, last_page, name
-            FROM suras
-            ORDER BY "index"
-            """.trimIndent(),
-            null
-        ).use { cursor ->
-            buildList {
-                while (cursor.moveToNext()) {
-                    add(cursor.toChapter(language))
+            chaptersCache?.get(language)?.let { return@withContext it }
+            val db = database.openReadable()
+            val list = db.rawQuery(
+                """
+                SELECT "index", tname, ename, ename_english, ayas, type, first_page, last_page, name
+                FROM suras
+                ORDER BY "index"
+                """.trimIndent(),
+                null
+            ).use { cursor ->
+                buildList {
+                    while (cursor.moveToNext()) {
+                        add(cursor.toChapter(language))
+                    }
                 }
             }
+            val currentMap = chaptersCache ?: emptyMap()
+            chaptersCache = currentMap + (language to list)
+            list
         }
-    }
 
     suspend fun getJuzs(): List<QuranJuz> = withContext(Dispatchers.IO) {
-        (1..30).mapNotNull { juzNumber -> loadJuz(db = database.openReadable(), juzNumber) }
+        juzsCache?.let { return@withContext it }
+        val list = (1..30).mapNotNull { juzNumber -> loadJuz(db = database.openReadable(), juzNumber) }
+        juzsCache = list
+        list
     }
 
     suspend fun getJuz(juzNumber: Int): QuranJuz? = withContext(Dispatchers.IO) {

@@ -1,6 +1,10 @@
 package app.kamy.saatApp.ui.onboarding
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.R
@@ -14,7 +18,6 @@ import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.infrastructure.preferences.PrayerNotificationPreferencesStore
-import app.kamy.saatApp.infrastructure.preferences.SavedManualLocation
 import app.kamy.saatApp.ui.permissions.canUseFullScreenIntent
 import app.kamy.saatApp.ui.permissions.openFullScreenIntentSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,16 +33,15 @@ import javax.inject.Inject
 enum class OnboardingStep {
     LANGUAGE,
     WELCOME,
-    LOCATION,
-    NOTIFICATIONS,
+    PERMISSIONS,
     PRAYER_NOTIFICATIONS
 }
 
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.LANGUAGE,
-    val selectedLanguage: AppLanguage = AppLanguage.ENGLISH,
-    val locationQuery: String = "",
-    val savingLocation: Boolean = false,
+    val selectedLanguage: AppLanguage = AppLanguage.INDONESIAN,
+    val locationGranted: Boolean = false,
+    val notificationGranted: Boolean = false,
     val locationError: String? = null,
     val prayerAdzanToggles: Map<PrayerType, Boolean> = emptyMap()
 )
@@ -55,7 +57,13 @@ class OnboardingViewModel @Inject constructor(
     private val appLanguageStore: AppLanguageStore
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(OnboardingUiState(selectedLanguage = appLanguageStore.current()))
+    private val _state = MutableStateFlow(
+        OnboardingUiState(
+            selectedLanguage = appLanguageStore.current(),
+            locationGranted = checkLocationPermission(),
+            notificationGranted = checkNotificationPermission()
+        )
+    )
     val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
     val strings: AppStrings = appStrings
 
@@ -69,16 +77,54 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
+    private fun checkLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            appContext, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+            appContext, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun checkNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                appContext, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    }
+
+    fun refreshPermissions() {
+        _state.update {
+            it.copy(
+                locationGranted = checkLocationPermission(),
+                notificationGranted = checkNotificationPermission()
+            )
+        }
+    }
+
     fun nextStep() {
         _state.update {
             val next = when (it.step) {
                 OnboardingStep.LANGUAGE -> OnboardingStep.WELCOME
-                OnboardingStep.WELCOME -> OnboardingStep.LOCATION
-                OnboardingStep.LOCATION -> OnboardingStep.NOTIFICATIONS
-                OnboardingStep.NOTIFICATIONS -> OnboardingStep.PRAYER_NOTIFICATIONS
+                OnboardingStep.WELCOME -> OnboardingStep.PERMISSIONS
+                OnboardingStep.PERMISSIONS -> OnboardingStep.PRAYER_NOTIFICATIONS
                 OnboardingStep.PRAYER_NOTIFICATIONS -> OnboardingStep.PRAYER_NOTIFICATIONS
             }
             it.copy(step = next, locationError = null)
+        }
+    }
+
+    fun previousStep() {
+        _state.update {
+            val prev = when (it.step) {
+                OnboardingStep.LANGUAGE -> OnboardingStep.LANGUAGE
+                OnboardingStep.WELCOME -> OnboardingStep.LANGUAGE
+                OnboardingStep.PERMISSIONS -> OnboardingStep.WELCOME
+                OnboardingStep.PRAYER_NOTIFICATIONS -> OnboardingStep.PERMISSIONS
+            }
+            it.copy(step = prev, locationError = null)
         }
     }
 
@@ -87,43 +133,10 @@ class OnboardingViewModel @Inject constructor(
         _state.update { it.copy(selectedLanguage = language) }
     }
 
-    fun updateLocationQuery(query: String) {
-        _state.update { it.copy(locationQuery = query, locationError = null) }
-    }
-
-    fun saveManualLocation() {
-        val query = _state.value.locationQuery.trim()
-        if (query.isEmpty()) return
-        viewModelScope.launch {
-            _state.update { it.copy(savingLocation = true, locationError = null) }
-            val geocoded = locationProvider.forwardGeocode(query)
-            if (geocoded?.latitude == null || geocoded.longitude == null) {
-                _state.update {
-                    it.copy(
-                        savingLocation = false,
-                        locationError = appStrings.getString(R.string.location_search_not_found)
-                    )
-                }
-                return@launch
-            }
-            locationPrefs.saveManual(
-                SavedManualLocation(
-                    latitude = geocoded.latitude,
-                    longitude = geocoded.longitude,
-                    label = geocoded.cityName ?: query,
-                    countryCode = geocoded.countryCode
-                )
-            )
-            locationPrefs.saveActiveLabel(geocoded.cityName ?: query)
-            _state.update { it.copy(savingLocation = false) }
-            nextStep()
-        }
-    }
-
     fun onLocationPermissionResult(granted: Boolean) {
         if (granted) {
             locationPrefs.setMode(LocationMode.GPS)
-            nextStep()
+            _state.update { it.copy(locationGranted = true, locationError = null) }
             viewModelScope.launch {
                 try {
                     val loc = locationProvider.currentLocation()
@@ -139,29 +152,28 @@ class OnboardingViewModel @Inject constructor(
             }
         } else {
             _state.update {
-                it.copy(locationError = appStrings.getString(R.string.onboarding_location_denied))
+                it.copy(
+                    locationGranted = false,
+                    locationError = appStrings.getString(R.string.onboarding_location_denied)
+                )
             }
         }
     }
 
-    fun skipLocation() {
-        nextStep()
-    }
-
-    fun onNotificationPermissionResult() {
+    fun onNotificationPermissionResult(granted: Boolean) {
+        _state.update { it.copy(notificationGranted = granted) }
         onboardingStore.markNotificationsHandled()
         DailyVerseNotificationScheduler.reschedule(appContext)
         if (!appContext.canUseFullScreenIntent()) {
             runCatching { appContext.openFullScreenIntentSettings() }
         }
-        nextStep()
     }
 
-    fun skipNotifications() {
+    fun skipPermissions() {
         onboardingStore.markNotificationsHandled()
         nextStep()
     }
-    
+
     fun togglePrayerAdzan(type: PrayerType, enabled: Boolean) {
         prayerPrefs.setPrayerEnabled(type, enabled)
         _state.update {

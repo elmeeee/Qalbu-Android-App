@@ -89,6 +89,8 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.locale.AppLanguage
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Brush
 import app.kamy.saatApp.design.components.SaatInlineError
 import app.kamy.saatApp.design.theme.SaatColors
@@ -134,7 +136,6 @@ fun AccountScreen(
             vm = vm,
             scrollState = mainScrollState,
             onBack = onBack,
-            onOpenReadingNotification = { currentDetailScreen.value = "READING_NOTIFICATION" },
             onOpenNotificationAdhan = { currentDetailScreen.value = "NOTIFICATION_ADHAN" },
             onOpenAbout = { currentDetailScreen.value = "ABOUT_SAAT" },
             onOpenPrivacyPolicy = { currentDetailScreen.value = "PRIVACY_POLICY" },
@@ -143,13 +144,6 @@ fun AccountScreen(
         )
 
         when (currentDetailScreen.value) {
-            "READING_NOTIFICATION" -> {
-                ReadingNotificationScreen(
-                    state = state,
-                    vm = vm,
-                    onBack = { currentDetailScreen.value = null }
-                )
-            }
             "NOTIFICATION_ADHAN" -> {
                 NotificationAdhanScreen(
                     state = state,
@@ -194,9 +188,7 @@ fun AccountScreen(
             error = state.translationsError,
             onQueryChange = vm::setTranslatorQuery,
             onPick = { translation ->
-                if (vm.selectTranslation(translation)) {
-                    (context as? ComponentActivity)?.recreate()
-                }
+                vm.selectTranslation(translation)
             },
             onDismiss = vm::closeTranslator,
             onRetry = vm::loadTranslations
@@ -241,10 +233,7 @@ fun AccountScreen(
     if (state.showLanguageSheet) {
         LanguageSheet(
             selected = state.appLanguage,
-            onSelect = { language ->
-                vm.setAppLanguage(language)
-                (context as? ComponentActivity)?.recreate()
-            },
+            onSelect = vm::setAppLanguage,
             onDismiss = vm::closeLanguageSheet
         )
     }
@@ -287,7 +276,6 @@ private fun AccountSettingsContent(
     vm: AccountViewModel,
     scrollState: ScrollState,
     onBack: (() -> Unit)?,
-    onOpenReadingNotification: () -> Unit,
     onOpenNotificationAdhan: () -> Unit,
     onOpenAbout: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
@@ -309,7 +297,7 @@ private fun AccountSettingsContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
+            .background(SaatColors.HomeBg)
     ) {
         // Clean Header bar
         Column(
@@ -331,13 +319,6 @@ private fun AccountSettingsContent(
                     }
                     Spacer(Modifier.width(4.dp))
                 }
-                Text(
-                    text = "✦",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.width(SaatSpacing.sm))
                 Text(
                     text = stringResource(R.string.settings_main_title),
                     style = MaterialTheme.typography.titleLarge,
@@ -391,10 +372,10 @@ private fun AccountSettingsContent(
                     showDivider = true
                 )
                 SettingsCustomRow(
-                    iconRes = R.drawable.ic_setting_quran_custom,
-                    title = stringResource(R.string.settings_item_quran),
-                    subtitle = stringResource(R.string.settings_item_advance_options),
-                    onClick = onOpenReadingNotification,
+                    iconRes = R.drawable.ic_translator_custom,
+                    title = stringResource(R.string.reading_translator),
+                    subtitle = state.selectedTranslationName.ifBlank { LocalQuranConfig.translationForAppLanguage(state.appLanguage).authorName },
+                    onClick = { vm.openTranslator() },
                     showChevron = true,
                     showDivider = true
                 )
@@ -495,12 +476,12 @@ fun NotificationAdhanScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
+            .background(SaatColors.HomeBg)
     ) {
         // Sticky Header bar
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFFF7F7F7),
+            color = SaatColors.HomeBg,
             shadowElevation = 0.5.dp
         ) {
             Row(
@@ -596,6 +577,14 @@ fun NotificationAdhanScreen(
             // Section 2: Notification Reading
             SettingsSectionHeader(stringResource(R.string.notif_section_reading))
             SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_daily_verse_custom,
+                    title = stringResource(R.string.reading_daily_verse),
+                    subtitle = if (state.dailyVerseEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.dailyVerseEnabled,
+                    onCheckedChange = vm::setDailyVerseEnabled,
+                    showDivider = true
+                )
                 val activeCount = state.surahReminders.count { it.enabled }
                 val surahSubtitle = if (state.yasinReminderEnabled) {
                     stringResource(R.string.surah_count_on_format, if (activeCount > 0) activeCount else 3)
@@ -609,6 +598,14 @@ fun NotificationAdhanScreen(
                     onClick = { vm.openSurahRemindersSheet() },
                     checked = state.yasinReminderEnabled,
                     onCheckedChange = { vm.setYasinReminderEnabled(it) },
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_remainders_custom,
+                    title = stringResource(R.string.quran_reminder_setting_title),
+                    subtitle = if (state.quranReminderEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.quranReminderEnabled,
+                    onCheckedChange = vm::setQuranReminderEnabled,
                     showDivider = true
                 )
                 SettingsCustomRow(
@@ -731,104 +728,6 @@ fun NotificationAdhanScreen(
             },
             onDismiss = { showTahajudTimePicker = false }
         )
-    }
-}
-
-// ─── Reading Notification Screen (Mockup 3) ──────────────────────────────────
-
-@Composable
-fun ReadingNotificationScreen(
-    state: AccountUiState,
-    vm: AccountViewModel,
-    onBack: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
-    ) {
-        // Sticky Header bar
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = Color(0xFFF7F7F7),
-            shadowElevation = 0.5.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .tabContentStatusBarInset()
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = Color(0xFF1C1C1E)
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.reading_notif_title),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = Color(0xFF1C1C1E)
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-        ) {
-            // Section 1: Reading Notification
-            SettingsSectionHeader(stringResource(R.string.reading_section_reading_notif))
-            SettingsCard {
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_daily_verse_custom,
-                    title = stringResource(R.string.reading_daily_verse),
-                    subtitle = if (state.dailyVerseEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
-                    checked = state.dailyVerseEnabled,
-                    onCheckedChange = vm::setDailyVerseEnabled,
-                    showDivider = false
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // Section 2: Writing
-            SettingsSectionHeader(stringResource(R.string.reading_section_writing))
-            SettingsCard {
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_latin_custom,
-                    title = stringResource(R.string.reading_show_latin),
-                    subtitle = if (state.showTransliteration) stringResource(R.string.state_on) else stringResource(R.string.state_off),
-                    checked = state.showTransliteration,
-                    onCheckedChange = vm::setShowTransliteration,
-                    showDivider = true
-                )
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_translator_custom,
-                    title = stringResource(R.string.reading_show_translation),
-                    subtitle = if (state.showTranslation) stringResource(R.string.state_shown) else stringResource(R.string.state_hidden),
-                    checked = state.showTranslation,
-                    onCheckedChange = vm::setShowTranslation,
-                    showDivider = true
-                )
-                SettingsCustomRow(
-                    iconRes = R.drawable.ic_translator_custom,
-                    title = stringResource(R.string.reading_translator),
-                    subtitle = state.selectedTranslationName.ifBlank { LocalQuranConfig.translationForAppLanguage(state.appLanguage).authorName },
-                    onClick = { vm.openTranslator() },
-                    showChevron = true,
-                    showDivider = false
-                )
-            }
-            Spacer(Modifier.height(floatingNavBottomPadding()))
-        }
     }
 }
 
@@ -1018,6 +917,9 @@ private fun LanguageSheet(
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var applyingLang by remember { mutableStateOf<AppLanguage?>(null) }
+
     SaatModalBottomSheet(onDismiss, sheetState) {
         Column(
             Modifier
@@ -1036,14 +938,31 @@ private fun LanguageSheet(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AppLanguage.entries.forEach { lang ->
-                    val isSelected = lang == selected
+                    val isSelected = lang == (applyingLang ?: selected)
+                    val isApplying = lang == applyingLang
                     val flagRes = when (lang) {
                         AppLanguage.INDONESIAN -> R.drawable.ic_flag_id
                         AppLanguage.ENGLISH -> R.drawable.ic_flag_en
                         AppLanguage.MALAY -> R.drawable.ic_flag_ms
                     }
                     Surface(
-                        onClick = { onSelect(lang) },
+                        onClick = {
+                            if (lang != selected && applyingLang == null) {
+                                applyingLang = lang
+                                scope.launch {
+                                    kotlinx.coroutines.delay(200)
+                                    onSelect(lang)
+                                    kotlinx.coroutines.delay(100)
+                                    sheetState.hide()
+                                    onDismiss()
+                                }
+                            } else if (lang == selected && applyingLang == null) {
+                                scope.launch {
+                                    sheetState.hide()
+                                    onDismiss()
+                                }
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
                         color = if (isSelected) {
@@ -1063,12 +982,22 @@ private fun LanguageSheet(
                                 .padding(horizontal = 16.dp, vertical = 14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                painter = painterResource(flagRes),
-                                contentDescription = null,
-                                tint = Color.Unspecified,
-                                modifier = Modifier.size(width = 28.dp, height = 20.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFF8F4F7)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                androidx.compose.foundation.Image(
+                                    painter = painterResource(flagRes),
+                                    contentDescription = null,
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                )
+                            }
                             Spacer(Modifier.width(14.dp))
                             Text(
                                 text = stringResource(lang.labelRes),
@@ -1077,12 +1006,27 @@ private fun LanguageSheet(
                                 color = if (isSelected) SaatColors.DeepEmerald else MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier.weight(1f)
                             )
-                            if (isSelected) {
-                                Text(
-                                    text = "✓",
+                            if (isApplying) {
+                                androidx.compose.material3.CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
                                     color = SaatColors.DeepEmerald,
-                                    fontWeight = FontWeight.Bold
+                                    strokeWidth = 2.dp
                                 )
+                            } else if (isSelected) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(SaatColors.DeepEmerald),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_check_custom),
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
                             }
                         }
                     }

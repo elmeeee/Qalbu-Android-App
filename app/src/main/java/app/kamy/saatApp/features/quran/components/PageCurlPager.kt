@@ -1,0 +1,282 @@
+package app.kamy.saatApp.features.quran.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.systemGestureExclusion
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import app.kamy.saatApp.design.theme.SaatColors
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.sin
+
+@Composable
+fun PageCurlPager(
+    state: PagerState,
+    modifier: Modifier = Modifier,
+    userScrollEnabled: Boolean = true,
+    content: @Composable (pageIndex: Int) -> Unit
+) {
+    HorizontalPager(
+        state = state,
+        modifier = modifier
+            .fillMaxSize()
+            .systemGestureExclusion()
+            .background(Color.Transparent),
+        userScrollEnabled = userScrollEnabled,
+        beyondViewportPageCount = 1,
+        key = { it }
+    ) { pageIndex ->
+        val pageOffset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
+        val isTurningPage = pageOffset > 0f && pageOffset < 1f
+        val zIndexVal = if (isTurningPage) 2f else 1f
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(zIndexVal)
+                .background(Color.Transparent)
+                .graphicsLayer {
+                    val offset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
+
+                    if (abs(offset) >= 1.05f) {
+                        alpha = 0f
+                        return@graphicsLayer
+                    }
+
+                    cameraDistance = 32f * density
+
+                    when {
+                        // Turning page (folding forward around the spine hinge at the left)
+                        offset > 0f && offset < 1f -> {
+                            translationX = offset * size.width
+                            transformOrigin = TransformOrigin(0f, 0.5f)
+                            // 3D rotation around the left spine hinge: 0 deg -> -180 deg
+                            rotationY = -180f * offset
+                            alpha = 1f
+                        }
+                        // Stationary page underneath being revealed
+                        offset < 0f && offset > -1f -> {
+                            // Cancel horizontal slide to keep stationary under the turning page
+                            translationX = offset * size.width
+                            transformOrigin = TransformOrigin(0f, 0.5f)
+                            rotationY = 0f
+                            alpha = 1f
+                        }
+                        // Resting page
+                        else -> {
+                            translationX = 0f
+                            rotationY = 0f
+                            alpha = 1f
+                            transformOrigin = TransformOrigin(0f, 0.5f)
+                        }
+                    }
+                }
+                .drawWithContent {
+                    val offset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
+                    val w = size.width
+                    val h = size.height
+
+                    if (abs(offset) >= 1.05f) {
+                        return@drawWithContent
+                    }
+
+                    when {
+                        // Page turning over (p in 0f..1f)
+                        offset > 0f && offset < 1f -> {
+                            val p = offset
+                            if (p <= 0.5f) {
+                                // Front face visible
+                                drawContent()
+
+                                val sinP = sin(p * PI).toFloat()
+
+                                // 1. Spine Crease Shadow (near left hinge x = 0)
+                                val spineShadowWidth = w * 0.14f
+                                val spineAlpha = (0.24f * sinP).coerceIn(0f, 1f)
+                                if (spineAlpha > 0.005f) {
+                                    drawRect(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                Color.Black.copy(alpha = spineAlpha),
+                                                Color.Transparent
+                                            ),
+                                            startX = 0f,
+                                            endX = spineShadowWidth
+                                        ),
+                                        size = Size(spineShadowWidth, h)
+                                    )
+                                }
+
+                                // 2. Dynamic Traveling Paper Curl Highlight
+                                val curlCenter = w * (1f - p * 0.72f)
+                                val curlHalfWidth = w * 0.12f
+                                val curlHighlightAlpha = (0.22f * sinP).coerceIn(0f, 1f)
+                                if (curlHighlightAlpha > 0.005f) {
+                                    drawRect(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                Color.White.copy(alpha = curlHighlightAlpha),
+                                                Color.Transparent
+                                            ),
+                                            startX = (curlCenter - curlHalfWidth).coerceAtLeast(0f),
+                                            endX = (curlCenter + curlHalfWidth).coerceAtMost(w)
+                                        ),
+                                        topLeft = Offset((curlCenter - curlHalfWidth).coerceAtLeast(0f), 0f),
+                                        size = Size(curlHalfWidth * 2f, h)
+                                    )
+                                }
+
+                                // 3. Curl Valley Shadow (immediately behind curl highlight)
+                                val valleyCenter = curlCenter - curlHalfWidth * 0.8f
+                                val valleyAlpha = (0.16f * sinP).coerceIn(0f, 1f)
+                                if (valleyAlpha > 0.005f && valleyCenter > 0f) {
+                                    drawRect(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                Color.Black.copy(alpha = valleyAlpha),
+                                                Color.Transparent
+                                            ),
+                                            startX = (valleyCenter - curlHalfWidth).coerceAtLeast(0f),
+                                            endX = (valleyCenter + curlHalfWidth).coerceAtMost(w)
+                                        ),
+                                        topLeft = Offset((valleyCenter - curlHalfWidth).coerceAtLeast(0f), 0f),
+                                        size = Size(curlHalfWidth * 2f, h)
+                                    )
+                                }
+
+                                // 4. Ambient Tilt Darkening (as the page turns away from the light)
+                                val tiltDarkening = (0.20f * sinP).coerceIn(0f, 1f)
+                                if (tiltDarkening > 0.005f) {
+                                    drawRect(
+                                        color = Color.Black.copy(alpha = tiltDarkening),
+                                        size = size
+                                    )
+                                }
+
+                                // 5. Right Paper Edge Bevel (tactile paper thickness)
+                                val edgeAlpha = (0.18f * (1f - p)).coerceIn(0f, 1f)
+                                if (edgeAlpha > 0.01f) {
+                                    drawRect(
+                                        color = Color.Black.copy(alpha = edgeAlpha),
+                                        topLeft = Offset(w - 2.dp.toPx(), 0f),
+                                        size = Size(2.dp.toPx(), h)
+                                    )
+                                }
+                            } else {
+                                // Back face of the physical page (p in 0.5f..1.0f)
+                                val backProgress = (p - 0.5f) * 2f // 0 to 1
+
+                                // Spine crease shadow on the right side of the back-face
+                                val spineWidth = w * 0.18f
+                                val backSpineAlpha = (0.26f * (1f - backProgress)).coerceIn(0f, 1f)
+                                if (backSpineAlpha > 0.005f) {
+                                    drawRect(
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                Color.Black.copy(alpha = backSpineAlpha)
+                                            ),
+                                            startX = w - spineWidth,
+                                            endX = w
+                                        ),
+                                        topLeft = Offset(w - spineWidth, 0f),
+                                        size = Size(spineWidth, h)
+                                    )
+                                }
+
+                                // Back face ambient shadow (light settling on back paper)
+                                val backAmbientAlpha = (0.16f * (1f - backProgress)).coerceIn(0f, 1f)
+                                if (backAmbientAlpha > 0.005f) {
+                                    drawRect(
+                                        color = Color.Black.copy(alpha = backAmbientAlpha),
+                                        size = size
+                                    )
+                                }
+
+                                // Left edge subtle paper thickness stroke
+                                val leftEdgeAlpha = (0.14f * backProgress).coerceIn(0f, 1f)
+                                if (leftEdgeAlpha > 0.01f) {
+                                    drawRect(
+                                        color = Color.Black.copy(alpha = leftEdgeAlpha),
+                                        topLeft = Offset.Zero,
+                                        size = Size(2.dp.toPx(), h)
+                                    )
+                                }
+                            }
+                        }
+
+                        // Stationary under-page (offset in -1f..0f)
+                        offset < 0f && offset > -1f -> {
+                            drawContent()
+
+                            val revealProgress = 1f + offset // 0 = fully covered, 1 = fully open
+                            val unrevealAmount = 1f - revealProgress // 1 = covered, 0 = open
+
+                            // 1. Spine Gutter Cast Shadow (cast by the lifting page onto the under-page)
+                            val castShadowWidth = w * (0.22f + 0.28f * unrevealAmount)
+                            val castShadowAlpha = (0.38f * unrevealAmount).coerceIn(0f, 1f)
+                            if (castShadowAlpha > 0.005f) {
+                                drawRect(
+                                    brush = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            Color.Black.copy(alpha = castShadowAlpha),
+                                            Color.Black.copy(alpha = castShadowAlpha * 0.35f),
+                                            Color.Transparent
+                                        ),
+                                        startX = 0f,
+                                        endX = castShadowWidth
+                                    ),
+                                    size = Size(castShadowWidth, h)
+                                )
+                            }
+
+                            // 2. Ambient occlusion across under-page while covered
+                            val ambientCoverAlpha = (0.12f * unrevealAmount).coerceIn(0f, 1f)
+                            if (ambientCoverAlpha > 0.005f) {
+                                drawRect(
+                                    color = Color.Black.copy(alpha = ambientCoverAlpha),
+                                    size = size
+                                )
+                            }
+                        }
+
+                        // Resting page
+                        else -> {
+                            drawContent()
+
+                            // Subtle permanent spine depth on the left edge (gives feeling of a bound book)
+                            val permanentSpineWidth = 8.dp.toPx()
+                            drawRect(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color.Black.copy(alpha = 0.05f),
+                                        Color.Transparent
+                                    ),
+                                    startX = 0f,
+                                    endX = permanentSpineWidth
+                                ),
+                                size = Size(permanentSpineWidth, h)
+                            )
+                        }
+                    }
+                }
+        ) {
+            content(pageIndex)
+        }
+    }
+}

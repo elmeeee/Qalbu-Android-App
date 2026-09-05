@@ -2,14 +2,20 @@ package app.kamy.saatApp.features.share
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Typeface
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.content.FileProvider
+import androidx.core.content.res.ResourcesCompat
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.RandomAyahPayload
-import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.domain.share.VerseShareTextComposer.Companion.fullArabicForShare
 import java.io.File
 import java.io.FileOutputStream
@@ -17,99 +23,43 @@ import java.io.FileOutputStream
 enum class ShareTemplate(
     val id: String,
     val displayName: String,
-    val bgColorStart: String,
-    val bgColorEnd: String,
-    val hasGradient: Boolean,
-    val borderColor: String,
-    val innerBorderColor: String,
-    val logoBackdropColor: String,
-    val appNameColor: String,
+    val bgDrawableRes: Int,
     val arabicTextColor: String,
     val translationColor: String,
-    val dividerColor: String,
+    val ornamentColor: String,
     val referenceColor: String,
-    val footerColor: String
+    val hashtagColor: String
 ) {
-    IVORY_CREAM(
-        id = "ivory_cream",
-        displayName = "Ivory Cream",
-        bgColorStart = "#FCFBF7",
-        bgColorEnd = "#FAF9F6",
-        hasGradient = false,
-        borderColor = "#C5A880",
-        innerBorderColor = "#D5BE9C",
-        logoBackdropColor = "#F3EFE0",
-        appNameColor = "#8C6239",
-        arabicTextColor = "#1F2937",
-        translationColor = "#4B5563",
-        dividerColor = "#D5BE9C",
-        referenceColor = "#8C6239",
-        footerColor = "#9CA3AF"
+    TEMPLATE_1(
+        id = "bg_share_1",
+        displayName = "Template 1",
+        bgDrawableRes = R.drawable.bg_share_1,
+        arabicTextColor = "#1B4332",
+        translationColor = "#2C3E50",
+        ornamentColor = "#B89758",
+        referenceColor = "#1B4332",
+        hashtagColor = "#7A6239"
     ),
-    DEEP_EMERALD(
-        id = "deep_emerald",
-        displayName = "Deep Emerald",
-        bgColorStart = "#0C231B",
-        bgColorEnd = "#1B4332",
-        hasGradient = true,
-        borderColor = "#D4AF37",
-        innerBorderColor = "#A38A33",
-        logoBackdropColor = "#2D5A46",
-        appNameColor = "#D4AF37",
+    TEMPLATE_2(
+        id = "bg_share_2",
+        displayName = "Template 2",
+        bgDrawableRes = R.drawable.bg_share_2,
         arabicTextColor = "#FFFFFF",
-        translationColor = "#E8F5E9",
-        dividerColor = "#A38A33",
-        referenceColor = "#D4AF37",
-        footerColor = "#95D5B2"
+        translationColor = "#FFFFFF",
+        ornamentColor = "#F5D77F",
+        referenceColor = "#FFFFFF",
+        hashtagColor = "#E2E8F0"
     ),
-    MIDNIGHT_DUSK(
-        id = "midnight",
-        displayName = "Midnight Dusk",
-        bgColorStart = "#0B0C10",
-        bgColorEnd = "#1F2833",
-        hasGradient = true,
-        borderColor = "#45A29E",
-        innerBorderColor = "#233342",
-        logoBackdropColor = "#15222E",
-        appNameColor = "#66FCF1",
+    TEMPLATE_3(
+        id = "bg_share_3",
+        displayName = "Template 3",
+        bgDrawableRes = R.drawable.bg_share_3,
         arabicTextColor = "#FFFFFF",
-        translationColor = "#E0F7FA",
-        dividerColor = "#45A29E",
-        referenceColor = "#66FCF1",
-        footerColor = "#A0AEC0"
-    ),
-    ROYAL_GOLD(
-        id = "royal_gold",
-        displayName = "Royal Gold",
-        bgColorStart = "#121212",
-        bgColorEnd = "#2C2318",
-        hasGradient = true,
-        borderColor = "#E5A93B",
-        innerBorderColor = "#A0782D",
-        logoBackdropColor = "#3E3628",
-        appNameColor = "#E5A93B",
-        arabicTextColor = "#F9D976",
-        translationColor = "#E6DFD3",
-        dividerColor = "#A0782D",
-        referenceColor = "#E5A93B",
-        footerColor = "#8C8C8C"
-    ),
-    WARM_ROSE(
-        id = "warm_rose",
-        displayName = "Warm Rose",
-        bgColorStart = "#FDF3F2",
-        bgColorEnd = "#F5DFDC",
-        hasGradient = true,
-        borderColor = "#C38380",
-        innerBorderColor = "#E5C1C0",
-        logoBackdropColor = "#FCE8E6",
-        appNameColor = "#7A3B3E",
-        arabicTextColor = "#3D0C11",
-        translationColor = "#4A5568",
-        dividerColor = "#E5C1C0",
-        referenceColor = "#7A3B3E",
-        footerColor = "#B08A82"
-    );
+        translationColor = "#FFFFFF",
+        ornamentColor = "#F5D77F",
+        referenceColor = "#FFFFFF",
+        hashtagColor = "#E2E8F0"
+    )
 }
 
 object AyahImageShare {
@@ -118,7 +68,7 @@ object AyahImageShare {
         context: Context,
         verse: RandomAyahPayload,
         surahName: String,
-        template: ShareTemplate = ShareTemplate.IVORY_CREAM
+        template: ShareTemplate = ShareTemplate.TEMPLATE_1
     ) {
         val bitmap = renderToBitmap(context, verse, surahName, template)
         val file = saveToCache(context, bitmap)
@@ -127,214 +77,245 @@ object AyahImageShare {
         }
     }
 
-    private fun renderToBitmap(
+    fun renderToBitmap(
         context: Context,
         verse: RandomAyahPayload,
         surahName: String,
         template: ShareTemplate
     ): Bitmap {
-        val width = 1080
-        val height = 1350
+        // Load background image
+        val options = BitmapFactory.Options().apply {
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        val rawBg = BitmapFactory.decodeResource(context.resources, template.bgDrawableRes, options)
+        val width = rawBg?.width ?: 941
+        val height = rawBg?.height ?: 1672
+
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        // Draw background (solid or linear gradient)
-        if (template.hasGradient) {
-            val gradPaint = Paint().apply {
-                shader = LinearGradient(
-                    0f, 0f, 0f, height.toFloat(),
-                    Color.parseColor(template.bgColorStart),
-                    Color.parseColor(template.bgColorEnd),
-                    Shader.TileMode.CLAMP
-                )
-            }
-            canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), gradPaint)
-        } else {
+        if (rawBg != null) {
             val bgPaint = Paint().apply {
-                color = Color.parseColor(template.bgColorStart)
-                style = Paint.Style.FILL
+                isFilterBitmap = true
+                isAntiAlias = true
             }
-            canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
+            canvas.drawBitmap(rawBg, 0f, 0f, bgPaint)
+        } else {
+            canvas.drawColor(Color.parseColor("#FAF6EC"))
         }
 
-        // Draw elegant thin borders
-        val borderPaint = Paint().apply {
-            color = Color.parseColor(template.borderColor)
-            style = Paint.Style.STROKE
-            strokeWidth = 16f
-        }
-        canvas.drawRect(24f, 24f, width - 24f, height - 24f, borderPaint)
+        val centerX = width / 2f
 
-        val innerBorderPaint = Paint().apply {
-            color = Color.parseColor(template.innerBorderColor)
-            style = Paint.Style.STROKE
-            strokeWidth = 2f
-        }
-        canvas.drawRect(36f, 36f, width - 36f, height - 36f, innerBorderPaint)
+        // Fonts
+        val lpmqTypeface = runCatching {
+            ResourcesCompat.getFont(context, R.font.lpmq)
+        }.getOrNull() ?: Typeface.create("serif", Typeface.BOLD)
 
-        // Draw elegant corner ornaments (small filled dots inside corners)
-        val ornamentPaint = Paint().apply {
-            color = Color.parseColor(template.borderColor)
-            style = Paint.Style.FILL
-            isAntiAlias = true
-        }
-        canvas.drawCircle(48f, 48f, 10f, ornamentPaint)
-        canvas.drawCircle(width - 48f, 48f, 10f, ornamentPaint)
-        canvas.drawCircle(48f, height - 48f, 10f, ornamentPaint)
-        canvas.drawCircle(width - 48f, height - 48f, 10f, ornamentPaint)
+        val serifRegular = Typeface.create(Typeface.SERIF, Typeface.NORMAL)
+        val serifMedium = Typeface.create(Typeface.SERIF, Typeface.NORMAL)
 
-        // Draw circular shield under App Icon to make it pop
-        val logoBackdropPaint = Paint().apply {
-            color = Color.WHITE
-            style = Paint.Style.FILL
-            isAntiAlias = true
-        }
-        val iconSize = 40
-        val iconX = (width - iconSize) / 2
-        val iconY = 100
-        val circleCenterX = (width / 2).toFloat()
-        val circleCenterY = (iconY + iconSize / 2).toFloat()
-        val circleRadius = (iconSize / 2 + 8).toFloat()
-        canvas.drawCircle(circleCenterX, circleCenterY, circleRadius, logoBackdropPaint)
-
-        // Draw elegant thin ring around the shield
-        val ringPaint = Paint().apply {
-            color = Color.parseColor(template.borderColor)
-            style = Paint.Style.STROKE
-            strokeWidth = 2f
-            isAntiAlias = true
-        }
-        canvas.drawCircle(circleCenterX, circleCenterY, circleRadius, ringPaint)
-
-        // Draw App Icon
-        val iconDrawable = context.resources.getDrawable(R.drawable.saat_app_icon, context.theme).mutate()
-        iconDrawable.setBounds(iconX, iconY, iconX + iconSize, iconY + iconSize)
-        iconDrawable.draw(canvas)
-
-        // Draw App Name "SĀAT"
-        val textPaint = TextPaint().apply {
-            color = Color.parseColor(template.appNameColor)
-            textSize = 28f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            textAlign = Paint.Align.CENTER
-            isAntiAlias = true
-        }
-        canvas.drawText("S Ā A T", (width / 2).toFloat(), (iconY + iconSize + 48).toFloat(), textPaint)
-
-        // Arabic text & translation setup
+        // Texts
         val arabicText = verse.fullArabicForShare().trim()
-        val translationText = verse.translations?.firstOrNull()?.text?.trim().orEmpty()
-            .replace(Regex("<[^>]*>"), "") // strip tags
+        val rawTranslation = verse.translations?.firstOrNull()?.text?.trim().orEmpty()
+            .replace(Regex("<[^>]*>"), "")
+        val translationText = if (rawTranslation.isNotBlank()) "“$rawTranslation”" else ""
 
-        // Auto-fit font size calculation loop
-        var currentArabicSize = 52f
-        var currentTranslationSize = 32f
-        val contentWidth = width - 200
-        val dividerHeight = 60
-        val topReserved = 320
-        val bottomReserved = 220
-        val availableHeight = height - topReserved - bottomReserved
+        val chapterNum = verse.chapterId ?: verse.verseKey?.substringBefore(':')?.toIntOrNull()
+        val verseNum = verse.resolvedVerseNumber ?: ""
+        val referenceText = if (chapterNum != null) {
+            "QS. $surahName ($chapterNum) : $verseNum"
+        } else {
+            "QS. $surahName : $verseNum"
+        }
+        val hashtagText = context.getString(R.string.share_image_hashtag).trim()
+
+        val isVeryLongAyah = arabicText.length > 200 || translationText.length > 280
+        val isMediumAyah = arabicText.length > 90 || translationText.length > 140
+
+        // Content horizontal width (expands slightly for longer verses to make optimal use of arch)
+        val contentWidthFactor = when {
+            isVeryLongAyah -> 0.78f
+            isMediumAyah -> 0.75f
+            else -> 0.72f
+        }
+        val contentWidth = (width * contentWidthFactor).toInt()
+        val contentLeft = (width - contentWidth) / 2f
+
+        // Vertical space inside arch
+        val archTopY = if (isVeryLongAyah) height * 0.155f else height * 0.175f
+        val archBottomY = if (isVeryLongAyah) height * 0.680f else height * 0.655f
+        val availableHeight = archBottomY - archTopY
+
+        // Auto-sizing calculation
+        var currentArabicSize = when {
+            isVeryLongAyah -> 34f
+            isMediumAyah -> 40f
+            else -> 46f
+        }
+        var currentTranslationSize = when {
+            isVeryLongAyah -> 22f
+            isMediumAyah -> 25f
+            else -> 28f
+        }
+        var arabicLineSpacing = if (isVeryLongAyah) 1.35f else 1.55f
+        var transLineSpacing = if (isVeryLongAyah) 1.25f else 1.35f
+        var sectionSpacing = if (isVeryLongAyah) 14f else if (isMediumAyah) 20f else 26f
+
+        val topOrnamentHeight = if (isVeryLongAyah) 24f else 34f
+        val midOrnamentHeight = if (isVeryLongAyah) 20f else 28f
+        val refHeight = 32f
+        val hashtagHeight = 24f
 
         var arabicPaint = TextPaint().apply {
             color = Color.parseColor(template.arabicTextColor)
             textSize = currentArabicSize
-            typeface = Typeface.create("serif", Typeface.BOLD)
+            typeface = lpmqTypeface
             isAntiAlias = true
         }
+
         var transPaint = TextPaint().apply {
             color = Color.parseColor(template.translationColor)
             textSize = currentTranslationSize
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
+            typeface = serifRegular
             isAntiAlias = true
         }
 
         var arabicLayout = StaticLayout.Builder.obtain(arabicText, 0, arabicText.length, arabicPaint, contentWidth)
             .setAlignment(Layout.Alignment.ALIGN_CENTER)
-            .setLineSpacing(0f, 1.6f)
-            .build()
-        var transLayout = StaticLayout.Builder.obtain(translationText, 0, translationText.length, transPaint, contentWidth)
-            .setAlignment(Layout.Alignment.ALIGN_CENTER)
-            .setLineSpacing(0f, 1.35f)
+            .setLineSpacing(0f, arabicLineSpacing)
             .build()
 
-        // Loop to fit content inside the available vertical height
+        var transLayout = StaticLayout.Builder.obtain(translationText, 0, translationText.length, transPaint, contentWidth)
+            .setAlignment(Layout.Alignment.ALIGN_CENTER)
+            .setLineSpacing(0f, transLineSpacing)
+            .build()
+
         var loopCount = 0
-        while (arabicLayout.height + dividerHeight + transLayout.height > availableHeight && currentArabicSize > 26f && loopCount < 10) {
-            currentArabicSize -= 3f
-            currentTranslationSize -= 1.5f
+        val totalFixedOverhead = topOrnamentHeight + midOrnamentHeight + refHeight + hashtagHeight + (sectionSpacing * 4)
+        while (arabicLayout.height + transLayout.height + totalFixedOverhead > availableHeight && currentArabicSize > 18f && loopCount < 16) {
+            currentArabicSize -= 1.5f
+            currentTranslationSize -= 1.0f
+            sectionSpacing = (sectionSpacing - 1.0f).coerceAtLeast(8f)
 
             arabicPaint = TextPaint().apply {
                 color = Color.parseColor(template.arabicTextColor)
                 textSize = currentArabicSize
-                typeface = Typeface.create("serif", Typeface.BOLD)
+                typeface = lpmqTypeface
                 isAntiAlias = true
             }
             transPaint = TextPaint().apply {
                 color = Color.parseColor(template.translationColor)
                 textSize = currentTranslationSize
-                typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
+                typeface = serifRegular
                 isAntiAlias = true
             }
 
             arabicLayout = StaticLayout.Builder.obtain(arabicText, 0, arabicText.length, arabicPaint, contentWidth)
                 .setAlignment(Layout.Alignment.ALIGN_CENTER)
-                .setLineSpacing(0f, 1.6f)
+                .setLineSpacing(0f, arabicLineSpacing)
                 .build()
+
             transLayout = StaticLayout.Builder.obtain(translationText, 0, translationText.length, transPaint, contentWidth)
                 .setAlignment(Layout.Alignment.ALIGN_CENTER)
-                .setLineSpacing(0f, 1.35f)
+                .setLineSpacing(0f, transLineSpacing)
                 .build()
 
             loopCount++
         }
 
-        // Center content vertically based on final auto-fitted heights
-        val totalTextHeight = arabicLayout.height + dividerHeight + transLayout.height
-        var startY = topReserved + (availableHeight - totalTextHeight) / 2
-        if (startY < topReserved) startY = topReserved
+        val totalContentHeight = totalFixedOverhead + arabicLayout.height + transLayout.height
+        // Center the entire content block around 48% height (open arch window above the mosque)
+        val targetCenterY = height * 0.48f
+        var currentY = targetCenterY - (totalContentHeight / 2f)
+        val minTopY = height * 0.19f
+        val maxTopY = height * 0.36f
+        currentY = currentY.coerceIn(minTopY, maxTopY)
 
-        // Draw Arabic
+        // 1. Top Decorative Flourish Ornament (Golden Diamond & Flanking Lines)
+        val ornamentPaint = Paint().apply {
+            color = Color.parseColor(template.ornamentColor)
+            isAntiAlias = true
+            strokeWidth = 2f
+        }
+        val topOrnamentCenterY = currentY + (topOrnamentHeight / 2f)
+        val lineWidth = if (isVeryLongAyah) 60f else 85f
+        val diamondRadius = if (isVeryLongAyah) 7f else 9f
+        // Left line
+        canvas.drawLine(centerX - lineWidth - diamondRadius, topOrnamentCenterY, centerX - diamondRadius - 5f, topOrnamentCenterY, ornamentPaint)
+        // Right line
+        canvas.drawLine(centerX + diamondRadius + 5f, topOrnamentCenterY, centerX + lineWidth + diamondRadius, topOrnamentCenterY, ornamentPaint)
+        // Center diamond
+        val diamondPath = Path().apply {
+            moveTo(centerX, topOrnamentCenterY - diamondRadius)
+            lineTo(centerX + diamondRadius, topOrnamentCenterY)
+            lineTo(centerX, topOrnamentCenterY + diamondRadius)
+            lineTo(centerX - diamondRadius, topOrnamentCenterY)
+            close()
+        }
+        canvas.drawPath(diamondPath, ornamentPaint)
+
+        currentY += topOrnamentHeight + sectionSpacing
+
+        // 2. Arabic Text
         canvas.save()
-        canvas.translate(100f, startY.toFloat())
+        canvas.translate(contentLeft, currentY)
         arabicLayout.draw(canvas)
         canvas.restore()
 
-        // Draw subtle divider line
-        val dividerY = startY + arabicLayout.height + (dividerHeight / 2)
-        val divPaint = Paint().apply {
-            color = Color.parseColor(template.dividerColor)
-            strokeWidth = 2.5f
+        currentY += arabicLayout.height + sectionSpacing
+
+        // 3. Translation Text (in double quotes)
+        if (translationText.isNotBlank()) {
+            canvas.save()
+            canvas.translate(contentLeft, currentY)
+            transLayout.draw(canvas)
+            canvas.restore()
+
+            currentY += transLayout.height + sectionSpacing
         }
-        canvas.drawLine(380f, dividerY.toFloat(), (width - 380).toFloat(), dividerY.toFloat(), divPaint)
 
-        // Draw Translation
-        canvas.save()
-        canvas.translate(100f, (dividerY + (dividerHeight / 2)).toFloat())
-        transLayout.draw(canvas)
-        canvas.restore()
+        // 4. Middle Ornament (Rosette / Diamond symbol)
+        val midOrnamentCenterY = currentY + (midOrnamentHeight / 2f)
+        val midLineWidth = if (isVeryLongAyah) 35f else 50f
+        val midDiamondRadius = if (isVeryLongAyah) 5f else 6f
+        canvas.drawLine(centerX - midLineWidth - midDiamondRadius, midOrnamentCenterY, centerX - midDiamondRadius - 4f, midOrnamentCenterY, ornamentPaint)
+        canvas.drawLine(centerX + midDiamondRadius + 4f, midOrnamentCenterY, centerX + midLineWidth + midDiamondRadius, midOrnamentCenterY, ornamentPaint)
+        val midDiamondPath = Path().apply {
+            moveTo(centerX, midOrnamentCenterY - midDiamondRadius)
+            lineTo(centerX + midDiamondRadius, midOrnamentCenterY)
+            lineTo(centerX, midOrnamentCenterY + midDiamondRadius)
+            lineTo(centerX - midDiamondRadius, midOrnamentCenterY)
+            close()
+        }
+        canvas.drawPath(midDiamondPath, ornamentPaint)
 
-        // Draw Reference (Surah Name + Verse)
-        val refText = "$surahName ${verse.resolvedVerseNumber ?: ""}"
+        currentY += midOrnamentHeight + (sectionSpacing * 0.7f)
+
+        // 5. Surah & Verse Reference Text (e.g. QS. Al-Insyirah (94) : 6)
+        val refSize = if (isVeryLongAyah) 24f else 28f
         val refPaint = TextPaint().apply {
             color = Color.parseColor(template.referenceColor)
-            textSize = 30f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            textSize = refSize
+            typeface = serifMedium
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
         }
-        canvas.drawText(refText, (width / 2).toFloat(), (height - 130).toFloat(), refPaint)
+        canvas.drawText(referenceText, centerX, currentY + 22f, refPaint)
 
-        // Footer note (uses share_brand_tagline resource without markdown formatting)
-        val taglineRaw = context.getString(R.string.share_brand_tagline)
-        val tagline = taglineRaw.replace("_", "").trim()
-        val footerPaint = TextPaint().apply {
-            color = Color.parseColor(template.footerColor)
-            textSize = 22f
-            typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-            textAlign = Paint.Align.CENTER
-            isAntiAlias = true
+        currentY += refHeight + 6f
+
+        // 6. Footer Hashtag (e.g. #SaatNyaDekatDenganQuran / #SaatDekatDenganQuran / #TimeForQuran)
+        if (hashtagText.isNotBlank()) {
+            val hashtagPaint = TextPaint().apply {
+                color = Color.parseColor(template.hashtagColor)
+                textSize = if (isVeryLongAyah) 18f else 20f
+                typeface = serifRegular
+                textAlign = Paint.Align.CENTER
+                letterSpacing = 0.05f
+                isAntiAlias = true
+            }
+            canvas.drawText(hashtagText, centerX, currentY + 16f, hashtagPaint)
         }
-        canvas.drawText(tagline, (width / 2).toFloat(), (height - 80).toFloat(), footerPaint)
 
         return bitmap
     }
@@ -343,9 +324,9 @@ object AyahImageShare {
         return runCatching {
             val cachePath = File(context.cacheDir, "images")
             cachePath.mkdirs()
-            val file = File(cachePath, "ayah_share_${System.currentTimeMillis()}.png")
+            val file = File(cachePath, "ayah_share_${System.currentTimeMillis()}.webp")
             FileOutputStream(file).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 95, out)
             }
             file
         }.getOrNull()
@@ -358,7 +339,7 @@ object AyahImageShare {
             file
         )
         val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "image/png"
+            type = "image/webp"
             putExtra(Intent.EXTRA_STREAM, uri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }

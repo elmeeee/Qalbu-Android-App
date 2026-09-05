@@ -155,6 +155,7 @@ object QuranPersonalStore {
                     lastReadUpdatedAtMillis = updatedAtMillis
                 )
             )
+            QuranLastReadReminderStore.from(context).reset()
         }
     }
 

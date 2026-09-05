@@ -6,10 +6,8 @@ import app.kamy.saatApp.core.locale.AppLocale
 import app.kamy.saatApp.di.LocalQuranEntryPoint
 import app.kamy.saatApp.infrastructure.airplane.AirplaneModeReceiver
 import app.kamy.saatApp.infrastructure.defaults.SmartDefaultsInitializer
-import app.kamy.saatApp.infrastructure.network.NetworkDebugger
 import app.kamy.saatApp.infrastructure.notifications.DailyVerseNotificationScheduler
 import app.kamy.saatApp.infrastructure.notifications.NotificationChannels
-import app.kamy.saatApp.infrastructure.notifications.PrayerCheckReminderScheduler
 import app.kamy.saatApp.infrastructure.notifications.PrayerNotificationCoordinator
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.widget.WidgetCoordinator
@@ -35,11 +33,7 @@ class SaatApplication : Application(), androidx.work.Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        // WorkManager auto-init is disabled in the manifest. Initialize here so
-        // a library/database failure is contained instead of crashing startup.
-        runCatching {
-            androidx.work.WorkManager.initialize(this, workManagerConfiguration)
-        }
+        // Fast path for immediate first frame / splash screen exit
         runCatching {
             val language = AppLanguageStore.from(this).current()
             val locale = java.util.Locale.forLanguageTag(language.tag)
@@ -51,24 +45,32 @@ class SaatApplication : Application(), androidx.work.Configuration.Provider {
         }
         runCatching { NotificationChannels.ensureAll(this) }
         runCatching { AirplaneModeReceiver.register(this) }
-        runCatching { SmartDefaultsInitializer.applyIfNeeded(this) }
-        runCatching { NetworkDebugger.install(this) }
-        runCatching { DailyVerseNotificationScheduler.reschedule(this) }
-        runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
-        runCatching { PrayerCheckReminderScheduler.reschedule(this) }
-        runCatching { app.kamy.saatApp.infrastructure.preferences.SurahReminderStore.from(this).let { store -> store.rescheduleAlarms(store.getReminders()) } }
-        runCatching {
-            WidgetCoordinator.refreshAll(this)
-            if (WidgetCoordinator.hasAnyWidgets(this)) {
-                WidgetRefreshScheduler.schedule(this)
-            }
-        }
-        // Warm up Quran database in background (non-blocking for first paint).
+
+        // Defer all disk I/O, database initialization, alarms, and schedulers to background thread
+        // to ensure cold startup and splash screen dismiss in < 10ms.
         warmUpBackgroundTasks()
     }
 
     private fun warmUpBackgroundTasks() {
         Executors.newSingleThreadExecutor().execute {
+            runCatching {
+                androidx.work.WorkManager.initialize(this, workManagerConfiguration)
+            }
+            runCatching { SmartDefaultsInitializer.applyIfNeeded(this) }
+            runCatching { DailyVerseNotificationScheduler.reschedule(this) }
+            runCatching { app.kamy.saatApp.infrastructure.notifications.QuranLastReadReminderScheduler.enqueue(this) }
+            runCatching { PrayerNotificationCoordinator.rescheduleFromCache(this) }
+            runCatching {
+                app.kamy.saatApp.infrastructure.preferences.SurahReminderStore.from(this).let { store ->
+                    store.rescheduleAlarms(store.getReminders())
+                }
+            }
+            runCatching {
+                WidgetCoordinator.refreshAll(this)
+                if (WidgetCoordinator.hasAnyWidgets(this)) {
+                    WidgetRefreshScheduler.schedule(this)
+                }
+            }
             runCatching {
                 EntryPointAccessors.fromApplication(this, LocalQuranEntryPoint::class.java)
                     .localQuranDatabase()

@@ -36,30 +36,43 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.offset
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.components.SaatErrorStateDark
+import app.kamy.saatApp.design.components.SaatSkeletonBlock
 import app.kamy.saatApp.design.components.SaatSkeletonOnDark
+import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.features.today.PrayerUiState
 import app.kamy.saatApp.infrastructure.repository.PrayerEntry
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 @DrawableRes
 fun getPrayerCardDrawable(type: PrayerType?): Int {
     return when (type) {
-        PrayerType.FAJR -> R.drawable.bg_fajr_card
-        PrayerType.DHUHR -> R.drawable.bg_dhur_card
-        PrayerType.ASR -> R.drawable.bg_asr_card
-        PrayerType.MAGHRIB -> R.drawable.bg_maghrib_card
-        PrayerType.ISHA -> R.drawable.bg_isha_card
-        else -> R.drawable.bg_fajr_card
+        PrayerType.FAJR, PrayerType.SUNRISE, PrayerType.DHUHR -> R.drawable.day
+        PrayerType.ASR, PrayerType.MAGHRIB -> R.drawable.sunset
+        PrayerType.ISHA -> R.drawable.night
+        null -> {
+            val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+            when (hour) {
+                in 5..14 -> R.drawable.day
+                in 15..18 -> R.drawable.sunset
+                else -> R.drawable.night
+            }
+        }
     }
 }
 
@@ -122,104 +135,314 @@ fun PrayerDashboardCard(
         }
     }
     val headline = rememberHeadline(state)
-    val targetPrayer = state.nextPrayer ?: state.activePrayer ?: PrayerType.MAGHRIB
+    val targetPrayer = state.nextPrayer ?: state.activePrayer ?: PrayerType.DHUHR
 
-    val activeSlotType = remember(state.timings, state.activePrayer, state.nextPrayer) {
-        if (state.timings.isEmpty()) null
-        else {
-            val now = java.util.Date()
-            val lastPassed = state.timings.lastOrNull { it.date.before(now) }
-            lastPassed?.type ?: state.activePrayer ?: PrayerType.FAJR
-        }
+    val singleActiveType = remember(state.activePrayer, state.nextPrayer, state.timings) {
+        state.activePrayer ?: state.nextPrayer ?: PrayerType.DHUHR
     }
 
-    Column(
+    val activeIndex = remember(singleActiveType) {
+        DISPLAY_PRAYER_SLOTS.indexOf(singleActiveType).coerceAtLeast(0)
+    }
+
+    val progressRatio = remember(state.timings, state.nextPrayer, state.activePrayer, state.countdown) {
+        calculatePrayerProgress(state)
+    }
+
+    Surface(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        shape = RoundedCornerShape(24.dp),
+        color = SaatColors.PureWhite,
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.6f))
     ) {
-        // Middle Section: Next Prayer & Countdown
-        when {
-            state.isLoading && state.timings.isEmpty() -> {
-                PrayerCardLoading()
-            }
-            fetchErrorDisplay != null && state.timings.isEmpty() -> {
-                SaatErrorStateDark(
-                    display = fetchErrorDisplay,
-                    onRetry = onRetry,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.prayer_widget_next_label),
-                        color = Color.White.copy(alpha = 0.92f),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            when {
+                state.isLoading || state.timings.isEmpty() -> {
+                    PrayerCardLoading()
+                }
+                fetchErrorDisplay != null && state.timings.isEmpty() -> {
+                    SaatErrorStateDark(
+                        display = fetchErrorDisplay,
+                        onRetry = onRetry,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(Modifier.height(1.dp))
-                    Text(
-                        text = headline.title,
-                        color = Color.White,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(2.dp))
-                    if (state.countdown.isNotBlank() && state.countdown != "--:--:--") {
-                        val countdownText = if (state.isGracePeriod) {
-                            stringResource(R.string.prayer_countdown_passed, state.countdown, headline.title)
-                        } else {
-                            stringResource(R.string.prayer_countdown_until, state.countdown, headline.title)
+                }
+                else -> {
+                    // Top Row: Next Prayer Name & Circular Arc Countdown
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.prayer_widget_next_label),
+                                color = Color(0xFF64748B),
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = headline.title,
+                                color = Color(0xFF0F172A),
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
-                        Text(
-                            text = countdownText,
-                            color = Color.White.copy(alpha = 0.95f),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+
+                        // Right: Circular Arc Countdown Widget
+                        PrayerArcCountdown(
+                            countdown = if (state.countdown.isNotBlank() && state.countdown != "--:--:--") state.countdown else "00:00:00",
+                            prayerType = targetPrayer,
+                            progress = progressRatio
                         )
+                    }
+
+                    // Timeline & Prayer Slots Row
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Horizontal Timeline Progress Track
+                        PrayerTimelineProgressTrack(
+                            activeIndex = activeIndex,
+                            totalSlots = DISPLAY_PRAYER_SLOTS.size,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        // 6 Prayer Slots
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (state.isLoading && state.timings.isEmpty()) {
+                                repeat(6) {
+                                    SchedulePrayerSlotSkeleton(modifier = Modifier.weight(1f))
+                                }
+                            } else {
+                                DISPLAY_PRAYER_SLOTS.forEachIndexed { index, type ->
+                                    val entry = slotEntries[index]
+                                    val isActive = !state.isLoading && state.timings.isNotEmpty() && entry != null && (type == singleActiveType)
+                                    SchedulePrayerSlot(
+                                        type = type,
+                                        entry = entry,
+                                        isActive = isActive,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+}
 
-        // Bottom Section: 6 Prayer Schedule Slots Row (Inside White Rounded Card)
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            color = Color.White,
-            shadowElevation = 0.dp
+private fun calculatePrayerProgress(state: PrayerUiState): Float {
+    val timings = state.timings.ifEmpty { return 0.5f }
+    val now = System.currentTimeMillis()
+    val nextType = state.nextPrayer ?: return 0.5f
+
+    val sorted = timings.sortedBy { it.date.time }
+    val ishaEntry = timings.find { it.type == PrayerType.ISHA }
+    val fajrEntry = timings.find { it.type == PrayerType.FAJR }
+
+    val isNightInterval = nextType == PrayerType.FAJR && (state.activePrayer == PrayerType.ISHA || (ishaEntry != null && now >= ishaEntry.date.time))
+
+    val prevTime: Long
+    val nextTime: Long
+
+    if (isNightInterval) {
+        prevTime = ishaEntry?.date?.time ?: (now - 3600 * 1000L)
+        val todayFajrTime = fajrEntry?.date?.time ?: (prevTime + 9 * 3600 * 1000L)
+        nextTime = if (todayFajrTime <= now) todayFajrTime + 24 * 3600 * 1000L else todayFajrTime
+    } else {
+        val nextEntry = timings.find { it.type == nextType } ?: return 0.5f
+        val nextIndex = sorted.indexOfFirst { it.type == nextType }
+        val prevEntry = if (nextIndex > 0) sorted[nextIndex - 1] else null
+
+        nextTime = nextEntry.date.time
+        prevTime = prevEntry?.date?.time ?: (nextTime - 3 * 3600 * 1000L)
+    }
+
+    val totalMs = (nextTime - prevTime).coerceAtLeast(1L)
+    val elapsedMs = (now - prevTime).coerceAtLeast(0L)
+
+    return (elapsedMs.toFloat() / totalMs.toFloat()).coerceIn(0.08f, 1f)
+}
+
+@Composable
+private fun PrayerArcCountdown(
+    countdown: String,
+    prayerType: PrayerType? = null,
+    progress: Float = 0.5f,
+    modifier: Modifier = Modifier
+) {
+    val untilPrayerText = stringResource(R.string.prayer_countdown_until_label)
+    val iconRes = getPrayerIconRes(prayerType ?: PrayerType.DHUHR)
+    val sweepAngle = (180f * progress).coerceIn(12f, 180f)
+
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val iconOffsetX = remember { androidx.compose.runtime.mutableStateOf(0.dp) }
+    val iconOffsetY = remember { androidx.compose.runtime.mutableStateOf(0.dp) }
+
+    Box(
+        modifier = modifier
+            .width(135.dp)
+            .height(80.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+            val strokePx = 3.5.dp.toPx()
+            val w = size.width
+            val diameter = w - strokePx
+            val arcSize = androidx.compose.ui.geometry.Size(diameter, diameter)
+            val topLeft = androidx.compose.ui.geometry.Offset(strokePx / 2, strokePx / 2)
+
+            // Inactive top arch (180deg)
+            drawArc(
+                color = SaatColors.ArcInactive,
+                startAngle = 180f,
+                sweepAngle = 180f,
+                useCenter = false,
+                topLeft = topLeft,
+                size = arcSize,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = strokePx,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            )
+
+            // Active golden top arch (progress-driven sweep angle)
+            drawArc(
+                color = SaatColors.ArcGold,
+                startAngle = 180f,
+                sweepAngle = sweepAngle,
+                useCenter = false,
+                topLeft = topLeft,
+                size = arcSize,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = strokePx,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            )
+
+            // Calculate precise icon position at endpoint of active arc
+            val rad = Math.toRadians((180f + sweepAngle).toDouble())
+            val radius = diameter / 2f
+            val cx = w / 2f
+            val cy = strokePx / 2f + radius
+            val endX = cx + radius * Math.cos(rad).toFloat()
+            val endY = cy + radius * Math.sin(rad).toFloat()
+
+            with(density) {
+                iconOffsetX.value = (endX - 9.dp.toPx()).toDp()
+                iconOffsetY.value = (endY - 9.dp.toPx()).toDp()
+            }
+        }
+
+        // Dynamic icon placement centered on active arc endpoint
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .offset(x = iconOffsetX.value, y = iconOffsetY.value)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (state.isLoading && state.timings.isEmpty()) {
-                    repeat(6) {
-                        SchedulePrayerSlotSkeleton(modifier = Modifier.weight(1f))
-                    }
-                } else {
-                    DISPLAY_PRAYER_SLOTS.forEachIndexed { index, type ->
-                        val entry = slotEntries[index]
-                        val isActive = !state.isLoading && state.timings.isNotEmpty() && entry != null && activeSlotType == type
-                        SchedulePrayerSlot(
-                            type = type,
-                            entry = entry,
-                            isActive = isActive,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                tint = SaatColors.ArcGold,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(top = 22.dp)
+        ) {
+            Text(
+                text = countdown,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0F172A)
+            )
+            Text(
+                text = untilPrayerText,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF64748B)
+            )
+        }
+    }
+}
+
+@Composable
+private fun PrayerTimelineProgressTrack(
+    activeIndex: Int,
+    totalSlots: Int = 6,
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.foundation.Canvas(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(14.dp)
+    ) {
+        val width = size.width
+        val height = size.height
+        val centerY = height / 2f
+        val slotWidth = width / totalSlots.toFloat()
+
+        val startX = slotWidth / 2f
+        val endX = width - (slotWidth / 2f)
+        val activeX = (startX + activeIndex * slotWidth).coerceIn(startX, endX)
+
+        // 1. Unfilled track line (from startX to endX)
+        drawLine(
+            color = Color(0xFFD1D5DB),
+            start = Offset(startX, centerY),
+            end = Offset(endX, centerY),
+            strokeWidth = 3.dp.toPx(),
+            cap = StrokeCap.Round
+        )
+
+        // 2. Active dark green track line (from startX to activeX)
+        if (activeIndex > 0) {
+            drawLine(
+                color = Color(0xFF176345),
+                start = Offset(startX, centerY),
+                end = Offset(activeX, centerY),
+                strokeWidth = 3.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+        }
+
+        // 3. Dots at slot centers
+        for (i in 0 until totalSlots) {
+            val dotX = startX + i * slotWidth
+            val isPassedOrActive = i <= activeIndex
+            val dotColor = if (isPassedOrActive) Color(0xFF176345) else Color(0xFFCBD5E1)
+            val dotRadius = if (i == activeIndex) 5.dp.toPx() else 3.5.dp.toPx()
+
+            drawCircle(
+                color = dotColor,
+                radius = dotRadius,
+                center = Offset(dotX, centerY)
+            )
+            if (i == activeIndex) {
+                drawCircle(
+                    color = Color.White,
+                    radius = 2.dp.toPx(),
+                    center = Offset(dotX, centerY)
+                )
             }
         }
     }
@@ -305,29 +528,27 @@ private fun SchedulePrayerSlot(
     val context = LocalContext.current
     val is24Hour = context.is24HourClock()
     val timeText = entry?.date?.let {
-        val pattern = if (is24Hour) "HH.mm" else "hh.mm a"
+        val pattern = if (is24Hour) "HH:mm" else "hh:mm a"
         SimpleDateFormat(pattern, Locale.getDefault()).format(it)
-    } ?: "--.--"
-
-    val iconRes = getPrayerIconRes(type)
-
-    val activeGradient = remember {
-        Brush.linearGradient(
-            colors = listOf(
-                Color(0xFF0D9488), // Modern Teal Emerald
-                Color(0xFF059669)  // Deep Emerald
-            )
-        )
-    }
+    } ?: "--:--"
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(12.dp))
             .then(
                 if (isActive) {
                     Modifier
-                        .background(activeGradient)
-                        .border(1.dp, Color(0xFF34D399).copy(alpha = 0.5f), RoundedCornerShape(14.dp))
+                        .background(Color(0xFFFCFBF9), RoundedCornerShape(12.dp))
+                        .border(
+                            width = 1.5.dp,
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color(0xFF145A43),
+                                    Color(0xFFF4EFE2)
+                                )
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
                 } else {
                     Modifier
                 }
@@ -341,22 +562,16 @@ private fun SchedulePrayerSlot(
         ) {
             Text(
                 text = prayerDisplayShort(type),
-                color = if (isActive) Color.White else Color(0xFF1E293B),
+                color = Color(0xFF1E293B),
                 fontSize = 11.5.sp,
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                tint = if (isActive) Color.White else Color(0xFF334155),
-                modifier = Modifier.size(22.dp)
-            )
             Text(
                 text = timeText,
-                color = if (isActive) Color.White else Color(0xFF0F172A),
+                color = Color(0xFF0F172A),
                 fontSize = 11.5.sp,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -368,25 +583,91 @@ private fun SchedulePrayerSlot(
 
 @Composable
 private fun PrayerCardLoading() {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        SaatSkeletonOnDark(
-            modifier = Modifier
-                .fillMaxWidth(0.4f)
-                .height(14.dp)
-        )
-        Spacer(Modifier.height(8.dp))
-        SaatSkeletonOnDark(
-            modifier = Modifier
-                .fillMaxWidth(0.65f)
-                .height(28.dp)
-        )
-        Spacer(Modifier.height(16.dp))
-        SaatSkeletonOnDark(
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Top Row Skeleton: Left text lines + Right circular arc countdown skeleton
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                SaatSkeletonBlock(
+                    modifier = Modifier
+                        .fillMaxWidth(0.35f)
+                        .height(14.dp),
+                    shape = RoundedCornerShape(4.dp),
+                    color = Color(0xFFCBD5E1)
+                )
+                Spacer(Modifier.height(8.dp))
+                SaatSkeletonBlock(
+                    modifier = Modifier
+                        .fillMaxWidth(0.60f)
+                        .height(26.dp),
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color(0xFFE2E8F0)
+                )
+            }
+
+            // Circular arc countdown skeleton
+            SaatSkeletonBlock(
+                modifier = Modifier.size(72.dp),
+                shape = CircleShape,
+                color = Color(0xFFE2E8F0)
+            )
+        }
+
+        // Horizontal Timeline Track Skeleton
+        SaatSkeletonBlock(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp)
+                .height(6.dp),
+            shape = RoundedCornerShape(3.dp),
+            color = Color(0xFFE2E8F0)
         )
+
+        // 6 Prayer Slots Skeleton
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            repeat(6) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        SaatSkeletonBlock(
+                            modifier = Modifier
+                                .width(28.dp)
+                                .height(10.dp),
+                            shape = RoundedCornerShape(3.dp),
+                            color = Color(0xFFCBD5E1)
+                        )
+                        SaatSkeletonBlock(
+                            modifier = Modifier.size(22.dp),
+                            shape = CircleShape,
+                            color = Color(0xFFE2E8F0)
+                        )
+                        SaatSkeletonBlock(
+                            modifier = Modifier
+                                .width(30.dp)
+                                .height(11.dp),
+                            shape = RoundedCornerShape(3.dp),
+                            color = Color(0xFFCBD5E1)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -404,20 +685,24 @@ private fun SchedulePrayerSlotSkeleton(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            SaatSkeletonOnDark(
+            SaatSkeletonBlock(
                 modifier = Modifier
                     .width(26.dp)
-                    .height(10.dp)
+                    .height(10.dp),
+                shape = RoundedCornerShape(3.dp),
+                color = Color(0xFFCBD5E1)
             )
-            SaatSkeletonOnDark(
-                modifier = Modifier
-                    .size(20.dp)
-                    .clip(CircleShape)
+            SaatSkeletonBlock(
+                modifier = Modifier.size(20.dp),
+                shape = CircleShape,
+                color = Color(0xFFE2E8F0)
             )
-            SaatSkeletonOnDark(
+            SaatSkeletonBlock(
                 modifier = Modifier
                     .width(28.dp)
-                    .height(11.dp)
+                    .height(11.dp),
+                shape = RoundedCornerShape(3.dp),
+                color = Color(0xFFCBD5E1)
             )
         }
     }

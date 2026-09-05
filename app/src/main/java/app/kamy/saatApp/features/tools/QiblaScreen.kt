@@ -174,7 +174,7 @@ fun QiblaScreen(onBack: () -> Unit) {
                 }
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
             }
-            sensorManager.registerListener(listener, rotation, SensorManager.SENSOR_DELAY_GAME)
+            sensorManager.registerListener(listener, rotation, SensorManager.SENSOR_DELAY_UI)
             onDispose { sensorManager.unregisterListener(listener) }
         }
     }

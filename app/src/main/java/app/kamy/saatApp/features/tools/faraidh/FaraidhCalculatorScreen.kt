@@ -61,6 +61,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -239,61 +241,35 @@ fun FaraidhCalculatorScreen(
 
     if (state.showInputSheet) {
         androidx.activity.compose.BackHandler(onBack = { vm.toggleInputSheet(false) })
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = SaatColors.ScreenBackground
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(SaatColors.HomeBg)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = SaatColors.PureWhite,
-                    shadowElevation = 1.dp
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .statusBarsPadding()
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = { vm.toggleInputSheet(false) }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.back),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Text(
-                            text = stringResource(R.string.faraidh_input_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = stringResource(R.string.faraidh_input_title),
+                onBack = { vm.toggleInputSheet(false) }
+            )
 
-                FaraidhInputSheetContent(
-                    state = state,
-                    currency = currency,
-                    onDeceasedNameChange = vm::setDeceasedName,
-                    onGenderChange = vm::setGender,
-                    onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
-                    onMadhhabChange = vm::setMadhhab,
-                    onEstateFieldChange = vm::setEstateField,
-                    onHeirChange = vm::setHeirCount,
-                    onHeirNameChange = vm::setHeirName,
-                    onDone = { vm.toggleInputSheet(false) }
-                )
-            }
+            FaraidhInputSheetContent(
+                state = state,
+                currency = currency,
+                onDeceasedNameChange = vm::setDeceasedName,
+                onGenderChange = vm::setGender,
+                onBornOutOfWedlockChange = vm::setDeceasedBornOutOfWedlock,
+                onMadhhabChange = vm::setMadhhab,
+                onEstateFieldChange = vm::setEstateField,
+                onHeirChange = vm::setHeirCount,
+                onHeirNameChange = vm::setHeirName,
+                onDone = { vm.toggleInputSheet(false) }
+            )
         }
     }
 
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        containerColor = SaatColors.ScreenBackground,
+        containerColor = SaatColors.HomeBg,
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
@@ -419,49 +395,12 @@ private fun FaraidhHeader(
     onScenarios: () -> Unit,
     onReset: () -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = SaatColors.PureWhite,
-        shadowElevation = 1.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                onClick = onBack,
-                shape = CircleShape,
-                color = SaatColors.LightGrey,
-                modifier = Modifier.size(38.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = SaatColors.Slate800,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.faraidh_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.Slate900
-                )
-                Text(
-                    text = stringResource(R.string.faraidh_subtitle_short),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = SaatColors.Teal,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+        title = stringResource(R.string.faraidh_title),
+        subtitle = stringResource(R.string.faraidh_subtitle_short),
+        onBack = onBack,
+        actions = {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 HeaderIconButton(
                     iconRes = R.drawable.ic_faraidh_doc,
                     contentDescription = stringResource(R.string.faraidh_saved_scenarios),
@@ -484,7 +423,7 @@ private fun FaraidhHeader(
                 )
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -612,49 +551,40 @@ private fun FaraidhPillTabs(selectedTab: Int, onTabSelected: (Int) -> Unit) {
         Triple(2, R.string.faraidh_tab_dalil, R.drawable.ic_faraidh_dalil),
         Triple(3, R.string.faraidh_tab_glossary, R.drawable.ic_faraidh_terms)
     )
-    val scroll = rememberScrollState()
-    Row(
+    androidx.compose.foundation.lazy.LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(scroll)
-            .padding(horizontal = SaatSpacing.screenHorizontal)
-            .padding(bottom = 8.dp),
+            .padding(bottom = 6.dp),
+        contentPadding = PaddingValues(horizontal = SaatSpacing.screenHorizontal),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        tabs.forEach { (index, labelRes, iconRes) ->
+        items(tabs.size) { i ->
+            val (index, labelRes, iconRes) = tabs[i]
             val selected = selectedTab == index
-            val bg by animateColorAsState(
-                if (selected) SaatColors.DeepEmerald else SaatColors.LightGrey,
-                label = "tabBg"
-            )
-            val fg by animateColorAsState(
-                if (selected) Color.White else SaatColors.Slate500,
-                label = "tabFg"
-            )
-            Surface(
+            FilterChip(
+                selected = selected,
                 onClick = { onTabSelected(index) },
-                shape = RoundedCornerShape(14.dp),
-                color = bg
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                leadingIcon = {
                     Icon(
                         painter = androidx.compose.ui.res.painterResource(iconRes),
                         contentDescription = null,
-                        tint = fg,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
-                    Spacer(Modifier.width(8.dp))
+                },
+                label = {
                     Text(
                         text = stringResource(labelRes),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = fg,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                        maxLines = 1,
+                        softWrap = false,
+                        style = MaterialTheme.typography.labelMedium
                     )
-                }
-            }
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = SaatColors.DeepEmerald,
+                    selectedLabelColor = SaatColors.PureWhite,
+                    selectedLeadingIconColor = SaatColors.PureWhite
+                )
+            )
         }
     }
 }

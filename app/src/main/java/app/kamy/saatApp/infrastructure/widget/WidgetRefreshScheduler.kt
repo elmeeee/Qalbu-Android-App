@@ -17,7 +17,11 @@ object WidgetRefreshScheduler {
         val alarmManager = appContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val pendingIntent = pendingIntent(appContext)
         val triggerAt = System.currentTimeMillis() + INTERVAL_MS
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC, triggerAt, pendingIntent)
+        } else {
+            alarmManager.set(AlarmManager.RTC, triggerAt, pendingIntent)
+        }
     }
 
     fun cancel(context: Context) {

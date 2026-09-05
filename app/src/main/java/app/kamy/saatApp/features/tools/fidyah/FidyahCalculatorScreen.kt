@@ -46,6 +46,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -125,59 +127,18 @@ fun FidyahCalculatorScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            SaatColors.ScreenBackground,
-                            SaatColors.SageMist.copy(alpha = 0.4f),
-                            SaatColors.ScreenBackground
-                        )
-                    )
-                )
+                .background(SaatColors.HomeBg)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = { focusManager.clearFocus() })
                 }
-                .tabContentStatusBarInset()
                 .imePadding()
         ) {
-        // Sticky Premium Header Bar (Without redundant Dua icon)
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(SaatColors.ScreenBackground.copy(alpha = 0.95f))
-                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onNavigateBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = SaatColors.DeepEmerald
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
-            Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "✦ ",
-                        fontSize = 14.sp,
-                        color = SaatColors.GoldDeep,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = screenTitle,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
-                    )
-                }
-                Text(
-                    text = subtitle,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+            // Unified Sticky Premium Header Bar
+            app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
+                title = screenTitle,
+                subtitle = subtitle,
+                onBack = onNavigateBack
+            )
 
         HorizontalDivider(color = SaatColors.SoftGrey.copy(alpha = 0.5f))
 
@@ -407,26 +368,21 @@ private fun MadhhabSelectorSection(
                     AppLanguage.ENGLISH -> m.titleEn
                     else -> m.titleId
                 }
-                Surface(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .clickable { onSelectMadhhab(m) },
-                    color = if (isSelected) SaatColors.DeepEmerald else SaatColors.PureWhite,
-                    shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = if (isSelected) SaatColors.GoldDeep else SaatColors.SoftGrey
-                    ),
-                    shadowElevation = if (isSelected) 2.dp else 0.dp
-                ) {
-                    Text(
-                        text = title,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        fontSize = 13.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+                FilterChip(
+                    selected = isSelected,
+                    onClick = { onSelectMadhhab(m) },
+                    label = {
+                        Text(
+                            text = title,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = SaatColors.DeepEmerald,
+                        selectedLabelColor = SaatColors.PureWhite
                     )
-                }
+                )
             }
         }
     }
