@@ -84,9 +84,21 @@ class MainActivity : ComponentActivity() {
                 val currentTheme by themePreferencesStore.themeFlow.collectAsStateWithLifecycle(initialValue = app.kamy.saatApp.infrastructure.preferences.AppThemeColor.EMERALD)
                 val currentLang by appLanguageStore.currentFlow.collectAsStateWithLifecycle()
 
-                val localizedConfiguration = androidx.compose.runtime.remember(currentLang) {
+                val localizedContext = androidx.compose.runtime.remember(currentLang) {
                     val locale = java.util.Locale.forLanguageTag(currentLang.tag)
                     java.util.Locale.setDefault(locale)
+                    val config = android.content.res.Configuration(resources.configuration).apply {
+                        setLocale(locale)
+                    }
+                    @Suppress("DEPRECATION")
+                    resources.updateConfiguration(config, resources.displayMetrics)
+                    @Suppress("DEPRECATION")
+                    applicationContext.resources.updateConfiguration(config, applicationContext.resources.displayMetrics)
+                    AppLocale.wrap(this@MainActivity, currentLang)
+                }
+
+                val localizedConfiguration = androidx.compose.runtime.remember(currentLang) {
+                    val locale = java.util.Locale.forLanguageTag(currentLang.tag)
                     android.content.res.Configuration(resources.configuration).apply {
                         setLocale(locale)
                     }
@@ -96,8 +108,6 @@ class MainActivity : ComponentActivity() {
                 var isLanguageLoading by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
                 androidx.compose.runtime.LaunchedEffect(currentLang) {
-                    @Suppress("DEPRECATION")
-                    resources.updateConfiguration(localizedConfiguration, resources.displayMetrics)
                     if (lastLang != currentLang) {
                         lastLang = currentLang
                         isLanguageLoading = true
@@ -109,7 +119,8 @@ class MainActivity : ComponentActivity() {
                 var showOnboarding by rememberSaveable { mutableStateOf(needsOnboarding) }
 
                 androidx.compose.runtime.CompositionLocalProvider(
-                    androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration
+                    androidx.compose.ui.platform.LocalConfiguration provides localizedConfiguration,
+                    androidx.compose.ui.platform.LocalContext provides localizedContext
                 ) {
                     SaatTheme(theme = currentTheme) {
                         Box(modifier = Modifier.fillMaxSize()) {

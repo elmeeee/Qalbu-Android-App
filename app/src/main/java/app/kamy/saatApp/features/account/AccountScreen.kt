@@ -320,13 +320,6 @@ private fun AccountSettingsContent(
                     Spacer(Modifier.width(4.dp))
                 }
                 Text(
-                    text = "✦",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.width(SaatSpacing.sm))
-                Text(
                     text = stringResource(R.string.settings_main_title),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,

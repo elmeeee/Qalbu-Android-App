@@ -630,10 +630,6 @@ private fun QuranListHeader(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = "🍃",
-                        fontSize = 16.sp
-                    )
-                    Text(
                         text = stringResource(R.string.quran_title),
                         style = androidx.compose.ui.text.TextStyle(
                             fontSize = 20.sp,

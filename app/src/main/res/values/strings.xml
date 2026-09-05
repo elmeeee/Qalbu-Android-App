@@ -47,10 +47,7 @@
     <string name="prayer_imsak">Imsak</string>
     <string name="prayer_allow_location">Allow location to see prayer times</string>
     <string name="prayer_schedule">Prayer schedule</string>
-    <string name="prayer_grace_passed">%1$s prayer has passed</string>
     <string name="prayer_time_remaining">Time remaining before %1$s</string>
-    <string name="prayer_countdown_until">%1$s until prayer %2$s</string>
-    <string name="prayer_countdown_passed">%1$s since %2$s adhan</string>
     <string name="font_size_subtitle">Adjust Arabic &amp; translation</string>
     <string name="prayer_calculation_method">Prayer calculation method</string>
     <string name="adhan_voice">Adhan voice</string>
@@ -76,7 +73,6 @@
     <string name="last_read_reminder_7d_body">It’s been a few days since you last read the Qur’an. Take a few moments to continue from %s.</string>
     <string name="notif_summary_quran_reminder">Qur\'an reading</string>
     <string name="quran_reminder_setting_title">Qur\'an Reading Reminder</string>
-    <string name="quran_reminder_setting_desc">Gentle reminder when you haven\'t read for several days</string>
     <string name="channel_prayer">Prayer times</string>
     <string name="channel_prayer_desc">Adhan and night prayer reminders</string>
     <string name="channel_sunnah">Sunnah reading</string>
@@ -150,7 +146,7 @@
     <string name="regenerate">Regenerate</string>
     <string name="retry">Retry</string>
     <string name="load_more">Load more</string>
-    <string name="quran_title">Quran</string>
+    <string name="quran_title">Al-Quran</string>
     <string name="quran_subtitle">114 Surahs · The Noble Quran</string>
     <string name="quran_subtitle_juz">30 Juz · The Noble Quran</string>
     <string name="quran_tab_surah">Surah</string>
@@ -167,7 +163,6 @@
     <string name="optional_rawatib">Rawatib Sunnah</string>
     <string name="fidyah_title">Fidyah Tracker</string>
     <string name="fidyah_subtitle">4 Madhhab Rules &amp; Qadha Tracker</string>
-    <string name="prayer_tracker_open_calendar">Calendar</string>
 
     <string name="juz_load_failed">Couldn\'t load juz list</string>
     <string name="juz_starts_at">Starts at %1$s</string>
@@ -219,7 +214,6 @@
     <string name="reciter_subtitle_shaatree">Imam of Al-Furqan Mosque, Jeddah</string>
     <string name="reciter_subtitle_muaiqly">Imam of Masjid al-Haram, Makkah</string>
     <string name="reciter_subtitle_husary">Master Qari of Al-Azhar, Egypt</string>
-    <string name="close_verse_actions">Close verse actions</string>
     <string name="share_reflection">Share reflection</string>
     <string name="verse_of_day">Quran of the Day</string>
     <string name="daily_verse_occasion_daily">Daily reflection</string>
@@ -249,11 +243,9 @@
     <string name="tafsir_tahlili">Tafsir Tahlili</string>
     <string name="tafsir_jalalayn">Tafsir Jalalayn</string>
     <string name="hadith">Hadith</string>
-    <string name="no_verse_retry">No verse available. Pull to retry.</string>
     <string name="tafsir_load_error">Couldn\'t load tafsir</string>
     <string name="tafsir_empty">No commentary here</string>
     <string name="encyclopedia_title">Islamic Encyclopedia</string>
-    <string name="hajj_umrah_title">Hajj &amp; Umrah</string>
     <string name="encyclopedia_search_hint">Search prophets, companions, fiqh, terms…</string>
     <string name="encyclopedia_cat_all">All</string>
     <string name="encyclopedia_cat_prophets">Prophets</string>
@@ -264,7 +256,6 @@
     <string name="encyclopedia_section_glossary">Islamic Terms Glossary (A-Z)</string>
     <string name="encyclopedia_empty_title">No topics found</string>
     <string name="encyclopedia_empty_desc">Try searching for another prophet, companion, or keyword.</string>
-    <string name="encyclopedia_ask_ai">Ask AI Assistant</string>
     <string name="encyclopedia_quran_references">Qur\'an Proofs &amp; References</string>
     <string name="encyclopedia_surah_label">Surah %1$s (%2$d) : %3$s</string>
     <string name="hadith_load_error">Couldn\'t load hadith</string>
@@ -278,7 +269,6 @@
     <string name="choose_translator">Choose translator</string>
     <string name="search_translator_placeholder">Search by name, author, or language</string>
     <string name="no_translators">No translators found.</string>
-    <string name="reading_settings_a11y">Reading settings</string>
     <string name="location_enable">Enable location</string>
     <string name="location_unavailable">Location unavailable</string>
     <string name="location_settings_title">Prayer location</string>
@@ -347,9 +337,6 @@
     <string name="juz_number">Juz %1$d</string>
     <string name="ai_label">AI</string>
     <string name="clear_search_a11y">Clear search</string>
-    <string name="session_expired">Session expired. Sign in again from Account.</string>
-    <string name="request_failed">Request failed</string>
-    <string name="verse_of_day_load_failed">Could not load verse of the day. Pull to retry.</string>
     <string name="share_generate_failed">Could not generate share text</string>
     <string name="verses_load_failed">Failed to load verses</string>
     <string name="chapters_load_failed">Failed to load chapters</string>
@@ -711,7 +698,6 @@
     <string name="faraidh_scenario_name_hint">Scenario name</string>
     <string name="faraidh_scenario_empty">No saved scenarios yet</string>
     <string name="faraidh_reset">Reset calculation</string>
-    <string name="onboarding_step_progress">Step %1$d of %2$d</string>
     <string name="faraidh_block_homicide">Excluded: Homicide (killer)</string>
     <string name="faraidh_block_difference_of_religion">Excluded: Difference of religion</string>
     <string name="faraidh_block_simultaneous_death">Excluded: Simultaneous death</string>
@@ -922,25 +908,18 @@
     </string-array>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="terms_and_conditions">Terms &amp; Conditions</string>
-    <string name="onboarding_prayer_config_title">Prayer Alerts</string>
-    <string name="onboarding_prayer_config_body">Choose which prayers play the Adzan sound. Those turned off will use the default notification sound.</string>
 
     <!-- Coach Mark -->
     <string name="coach_mark_skip">Skip</string>
-    <string name="coach_mark_next">Next</string>
     <string name="coach_mark_finish">Finish</string>
     <string name="coach_mark_today_location_title">Location &amp; Date</string>
     <string name="coach_mark_today_location_desc">Your current location. Tap the date to view prayer schedule &amp; Hijri calendar.</string>
-    <string name="coach_mark_today_khgt_title">Important Islamic Days</string>
-    <string name="coach_mark_today_khgt_desc">Stay informed about upcoming significant Islamic dates and events.</string>
     <string name="coach_mark_today_prayer_title">Prayer Schedule</string>
     <string name="coach_mark_today_prayer_desc">Daily prayer schedule information and countdown to the next prayer.</string>
     <string name="coach_mark_today_tracker_title">Daily Worship Tracker</string>
     <string name="coach_mark_today_tracker_desc">Easily log and track your daily mandatory prayers.</string>
     <string name="coach_mark_today_continue_title">Continue Reading</string>
     <string name="coach_mark_today_continue_desc">Resume your Quran reading session right where you left off.</string>
-    <string name="coach_mark_today_verse_title">Verse of the Day</string>
-    <string name="coach_mark_today_verse_desc">Listen to recitation, read tafsir, and share daily Qur\'anic inspiration with AI.</string>
     <string name="coach_mark_quran_menu_title">Tafsir &amp; Verse Actions</string>
     <string name="coach_mark_quran_menu_desc">Tap to access Tafsir, Bookmark, Notes, Hifz tracker, and audio sharing.</string>
     <string name="coach_mark_quran_settings_title">Reading Settings (Aa)</string>
@@ -973,7 +952,6 @@
     <string name="settings_section_prayer_calc">Prayer Calculation</string>
     <string name="settings_section_about_saat">About Saat</string>
     <string name="settings_item_language">Language</string>
-    <string name="settings_item_quran">Quran</string>
     <string name="settings_item_notification">Notification</string>
     <string name="settings_item_advance_options">Advance Options</string>
     <string name="settings_item_madhab">Madhab</string>
@@ -999,15 +977,8 @@
     <string name="state_off">Off</string>
     <string name="surah_count_on_format">%1$d Surah - On</string>
 
-    <string name="reading_notif_title">Reading Notification</string>
-    <string name="reading_section_reading_notif">Reading Notification</string>
-    <string name="reading_section_writing">Writing</string>
     <string name="reading_daily_verse">Daily Verse</string>
-    <string name="reading_show_latin">Show Latin</string>
-    <string name="reading_show_translation">Show Translation</string>
     <string name="reading_translator">Translator</string>
-    <string name="state_shown">Shown</string>
-    <string name="state_hidden">Hidden</string>
     <string name="up_to_date_sheet_title">You\'re Up to Date!</string>
     <string name="up_to_date_sheet_desc">Saat v%1$s is currently the latest version. Enjoy your spiritual journey!</string>
     <string name="got_it">Got It</string>
@@ -1015,7 +986,6 @@
     <!-- Spiritual Tools -->
     <string name="sunnah_prayer_title">Sunnah Practices &amp; Guides</string>
     <string name="jenazah_prayer_title">Janazah Prayer Guide</string>
-    <string name="jenazah_prayer_subtitle">Complete funeral prayer guide, rulings, intentions &amp; step-by-step 4 takbirs</string>
     <string name="jamak_prayer_title">Jamak &amp; Qashar</string>
     <string name="jamak_prayer_subtitle">Traveler prayer guide</string>
     <string name="sunnah_prayers_tab">Sunnah Prayers</string>
@@ -1135,12 +1105,8 @@
     <string name="hajj_view_related_doa">View Related Du\'a &amp; Dzikir</string>
     <string name="hajj_prohibitions_header">Prohibitions to Watch Out:</string>
     <string name="hajj_practical_tips_header">Practical Pilgrim Tips:</string>
-    <string name="hajj_mistakes_header">Common Mistakes to Avoid:</string>
     <string name="hajj_alternative_options_header">Alternative Options (If unable):</string>
 
-    <string name="hajj_copy_doa">Copy Du\'a</string>
-    <string name="hajj_share_doa">Share Du\'a</string>
-    <string name="hajj_copied_toast">Du\'a copied to clipboard!</string>
 
     <string name="hajj_mandatory_badge">Obligatory</string>
     <string name="hajj_rukun_badge">Pillar</string>

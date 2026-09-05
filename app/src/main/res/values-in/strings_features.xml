@@ -479,11 +479,6 @@
     <string name="faraidh_scenario_loaded">Skenario dimuat</string>
     <string name="faraidh_scenario_name_hint">Nama skenario</string>
     <string name="faraidh_scenario_saved">Skenario berhasil disimpan</string>
-    <string name="onboarding_location_rationale_body">Waktu shalat berbeda sesuai lokasi. GPS memberikan waktu paling akurat tanpa pengaturan manual.</string>
-    <string name="onboarding_location_rationale_title">Mengapa perlu lokasi?</string>
-    <string name="onboarding_prayer_config_body">Pilih waktu shalat yang mengumandangkan suara Azan. Waktu yang dimatikan akan menggunakan suara notifikasi standar.</string>
-    <string name="onboarding_prayer_config_title">Peringatan Shalat</string>
-    <string name="onboarding_step_progress">Langkah %1$d dari %2$d</string>
     <string name="prayer_calendar_hint">Ketuk tanggal untuk melihat seluruh waktu shalat pada tanggal tersebut.</string>
     <string name="share_as_image">Bagikan sebagai Gambar</string>
     <string name="share_verse_image_chooser">Bagikan gambar ayat melalui…</string>

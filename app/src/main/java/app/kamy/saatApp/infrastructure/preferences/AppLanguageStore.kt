@@ -9,9 +9,10 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class AppLanguageStore(context: Context) {
 
+    private val appContext = context.applicationContext ?: context
+
     // applicationContext is null during Application.attachBaseContext; fall back to base context.
-    private val prefs = (context.applicationContext ?: context)
-        .getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     private val prefChangeListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == KEY_LANGUAGE) {
@@ -33,6 +34,15 @@ class AppLanguageStore(context: Context) {
 
     fun set(language: AppLanguage) {
         prefs.edit().putString(KEY_LANGUAGE, language.tag).commit()
+        val locale = java.util.Locale.forLanguageTag(language.tag)
+        java.util.Locale.setDefault(locale)
+        try {
+            val config = android.content.res.Configuration(appContext.resources.configuration).apply {
+                setLocale(locale)
+            }
+            @Suppress("DEPRECATION")
+            appContext.resources.updateConfiguration(config, appContext.resources.displayMetrics)
+        } catch (_: Throwable) {}
         _sharedFlow.value = language
     }
 

@@ -45,10 +45,7 @@
     <string name="prayer_imsak">Imsak</string>
     <string name="prayer_allow_location">Izinkan lokasi untuk melihat waktu sholat</string>
     <string name="prayer_schedule">Jadwal sholat</string>
-    <string name="prayer_grace_passed">Sholat %1$s sudah lewat</string>
     <string name="prayer_time_remaining">Sisa waktu sebelum %1$s</string>
-    <string name="prayer_countdown_until">%1$s menuju waktu shalat %2$s</string>
-    <string name="prayer_countdown_passed">%1$s adzan %2$s telah berlalu</string>
 
     <string name="font_size_subtitle">Atur Arab &amp; terjemahan</string>
     <string name="prayer_calculation_method">Metode perhitungan sholat</string>
@@ -79,7 +76,6 @@
     <string name="last_read_reminder_7d_body">Sudah beberapa hari sejak terakhir membaca Al-Qur\'an. Yuk luangkan beberapa menit untuk melanjutkan dari %s.</string>
     <string name="notif_summary_quran_reminder">Bacaan Al-Qur\'an</string>
     <string name="quran_reminder_setting_title">Pengingat Membaca Al-Qur\'an</string>
-    <string name="quran_reminder_setting_desc">Pengingat ramah saat sudah beberapa hari tidak membaca</string>
     <string name="channel_prayer">Waktu sholat</string>
     <string name="channel_prayer_desc">Adzan dan pengingat sholat malam</string>
     <string name="channel_sunnah">Bacaan sunnah</string>
@@ -168,8 +164,6 @@
     <string name="optional_rawatib">Sunnah Rawatib</string>
     <string name="fidyah_title">Tracker Fidyah</string>
     <string name="fidyah_subtitle">Perhitungan 4 Mazhab &amp; Catatan Qadha</string>
-    <string name="prayer_tracker_open_calendar">Kalender</string>
-
     <string name="juz_load_failed">Gagal memuat daftar juz</string>
     <string name="juz_starts_at">Mulai dari %1$s</string>
     <string name="one_surah_found">1 surah ditemukan</string>
@@ -257,8 +251,6 @@
     <string name="reciter_subtitle_shaatree">Imam Masjid Al-Furqan Jeddah</string>
     <string name="reciter_subtitle_muaiqly">Imam Masjidil Haram Makkah</string>
     <string name="reciter_subtitle_husary">Qari &amp; Syekh Al-Azhar Mesir</string>
-    <string name="study_tools">Alat kajian</string>
-    <string name="close_verse_actions">Tutup aksi ayat</string>
     <string name="share_reflection">Bagikan refleksi</string>
     <string name="verse_of_day">Al-Quran Hari Ini</string>
     <string name="daily_verse_occasion_daily">Renungan harian</string>
@@ -288,11 +280,9 @@
     <string name="tafsir_tahlili">Tafsir Tahlili</string>
     <string name="tafsir_jalalayn">Tafsir Jalalayn</string>
     <string name="hadith">Hadits</string>
-    <string name="no_verse_retry">Ayat tidak tersedia. Tarik untuk coba lagi.</string>
     <string name="tafsir_load_error">Gagal memuat tafsir</string>
     <string name="tafsir_empty">Belum ada tafsir di sini</string>
     <string name="encyclopedia_title">Ensiklopedi Islam</string>
-    <string name="hajj_umrah_title">Haji &amp; Umrah</string>
     <string name="encyclopedia_search_hint">Cari kisah nabi, sahabat, fikih, istilah…</string>
     <string name="encyclopedia_cat_all">Semua</string>
     <string name="encyclopedia_cat_prophets">Nabi &amp; Rasul</string>
@@ -303,7 +293,6 @@
     <string name="encyclopedia_section_glossary">Glosarium Istilah Islam (A-Z)</string>
     <string name="encyclopedia_empty_title">Topik tidak ditemukan</string>
     <string name="encyclopedia_empty_desc">Coba cari dengan kata kunci nabi, sahabat, atau istilah lain.</string>
-    <string name="encyclopedia_ask_ai">Tanyakan ke AI Assistant</string>
     <string name="encyclopedia_quran_references">Dalil &amp; Referensi Al-Qur\'an</string>
     <string name="encyclopedia_surah_label">Surah %1$s (%2$d) : %3$s</string>
     <string name="hadith_load_error">Gagal memuat hadits</string>
@@ -317,7 +306,6 @@
     <string name="choose_translator">Pilih penerjemah</string>
     <string name="search_translator_placeholder">Cari nama, penulis, atau bahasa</string>
     <string name="no_translators">Penerjemah tidak ditemukan.</string>
-    <string name="reading_settings_a11y">Pengaturan baca</string>
     <string name="location_enable">Aktifkan lokasi</string>
     <string name="location_unavailable">Lokasi tidak tersedia</string>
     <string name="notifications_disabled_snackbar">Notifikasi dimatikan. Aktifkan di Pengaturan untuk pengingat shalat.</string>
@@ -340,9 +328,6 @@
     <string name="force_update_button">Update Sekarang</string>
     <string name="ai_label">AI</string>
     <string name="clear_search_a11y">Hapus pencarian</string>
-    <string name="session_expired">Sesi berakhir. Masuk lagi dari Akun.</string>
-    <string name="request_failed">Permintaan gagal</string>
-    <string name="verse_of_day_load_failed">Tidak dapat memuat ayat hari ini. Tarik untuk coba lagi.</string>
     <string name="share_generate_failed">Tidak dapat membuat teks bagikan</string>
     <string name="verses_load_failed">Gagal memuat ayat</string>
     <string name="chapters_load_failed">Gagal memuat surah</string>
@@ -481,20 +466,15 @@
     <string name="privacy_policy">Kebijakan Privasi</string>
     <string name="terms_and_conditions">Syarat &amp; Ketentuan</string>
     <string name="coach_mark_skip">Lewati</string>
-    <string name="coach_mark_next">Lanjut</string>
     <string name="coach_mark_finish">Selesai</string>
     <string name="coach_mark_today_location_title">Lokasi &amp; Tanggal</string>
     <string name="coach_mark_today_location_desc">Lokasi kamu saat ini. Ketuk tanggal untuk melihat jadwal shalat &amp; kalender Hijriyah.</string>
-    <string name="coach_mark_today_khgt_title">Hari-Hari Penting Islam</string>
-    <string name="coach_mark_today_khgt_desc">Dapatkan informasi mengenai tanggal dan peristiwa penting dalam kalender Islam.</string>
     <string name="coach_mark_today_prayer_title">Jadwal Shalat</string>
     <string name="coach_mark_today_prayer_desc">Informasi jadwal shalat harian serta hitung mundur menuju waktu shalat berikutnya.</string>
     <string name="coach_mark_today_tracker_title">Tracker Ibadah Harian</string>
     <string name="coach_mark_today_tracker_desc">Catat dan pantau pelaksanaan shalat wajib harianmu dengan mudah.</string>
     <string name="coach_mark_today_continue_title">Lanjutkan Membaca</string>
     <string name="coach_mark_today_continue_desc">Lanjutkan sesi tilawah Al-Quran tepat di ayat terakhir yang kamu baca.</string>
-    <string name="coach_mark_today_verse_title">Ayat Hari Ini</string>
-    <string name="coach_mark_today_verse_desc">Dengarkan murottal, baca tafsir, dan bagikan inspirasi Al-Quran harian dengan bantuan AI.</string>
     <string name="coach_mark_quran_menu_title">Menu Tafsir &amp; Aksi Ayat</string>
     <string name="coach_mark_quran_menu_desc">Ketuk untuk membuka Tafsir Kemenag, Bookmark, Catatan, Hifz hafalan, dan audio ayat.</string>
     <string name="coach_mark_quran_settings_title">Pengaturan Bacaan (Aa)</string>
@@ -521,7 +501,6 @@
     <string name="settings_section_prayer_calc">Perhitungan Waktu Solat</string>
     <string name="settings_section_about_saat">Tentang Saat</string>
     <string name="settings_item_language">Bahasa</string>
-    <string name="settings_item_quran">Al-Qur\'an</string>
     <string name="settings_item_notification">Notifikasi</string>
     <string name="settings_item_advance_options">Opsi Lanjutan</string>
     <string name="settings_item_madhab">Mazhab</string>
@@ -543,21 +522,13 @@
     <string name="state_on">Aktif</string>
     <string name="state_off">Nonaktif</string>
     <string name="surah_count_on_format">%1$d Surah - Aktif</string>
-    <string name="reading_notif_title">Notifikasi Membaca</string>
-    <string name="reading_section_reading_notif">Notifikasi Membaca</string>
-    <string name="reading_section_writing">Penulisan</string>
     <string name="reading_daily_verse">Ayat Harian</string>
-    <string name="reading_show_latin">Tampilkan Latin</string>
-    <string name="reading_show_translation">Tampilkan Terjemahan</string>
     <string name="reading_translator">Penterjemah</string>
-    <string name="state_shown">Tampil</string>
-    <string name="state_hidden">Sembunyi</string>
     <string name="up_to_date_sheet_title">Aplikasi Sudah Terbaru!</string>
     <string name="up_to_date_sheet_desc">Saat versi %1$s adalah versi terbaru saat ini. Selamat beribadah!</string>
     <string name="got_it">Mengerti</string>
     <string name="sunnah_prayer_title">Panduan &amp; Amalan Sunnah</string>
     <string name="jenazah_prayer_title">Panduan Shalat Jenazah</string>
-    <string name="jenazah_prayer_subtitle">Panduan lengkap fardhu kifayah, niat, posisi imam &amp; tata cara 4 takbir</string>
     <string name="jamak_prayer_title">Jamak &amp; Qashar</string>
     <string name="jamak_prayer_subtitle">Panduan shalat musafir</string>
     <string name="sunnah_prayers_tab">Shalat Sunnah</string>
@@ -614,11 +585,7 @@
     <string name="hajj_view_related_doa">Buka Doa &amp; Dzikir Terkait</string>
     <string name="hajj_prohibitions_header">Larangan yang Harus Dihindari:</string>
     <string name="hajj_practical_tips_header">Tips Praktis di Lapangan:</string>
-    <string name="hajj_mistakes_header">Kesalahan Umum yang Sering Terjadi:</string>
     <string name="hajj_alternative_options_header">Pilihan Alternatif / Gantian:</string>
-    <string name="hajj_copy_doa">Salin Doa</string>
-    <string name="hajj_share_doa">Bagikan Doa</string>
-    <string name="hajj_copied_toast">Teks doa berhasil disalin!</string>
     <string name="hajj_mandatory_badge">Wajib</string>
     <string name="hajj_rukun_badge">Rukun</string>
     <string name="hajj_wajib_badge">Wajib</string>
