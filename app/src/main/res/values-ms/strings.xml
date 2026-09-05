@@ -215,41 +215,34 @@
     <string name="prayer_widget_in_progress">Sekarang</string>
     <string name="prayer_widget_at_time">Azan pada %1$s</string>
     <string name="prayer_calendar_title">Kalendar solat</string>
-    <string name="onboarding_welcome_subhead">Selamat datang ke</string>
-    <string name="onboarding_welcome_title">Sāat</string>
-    <string name="onboarding_welcome_body">Teman harian anda\nuntuk diri yang lebih baik.</string>
-    <string name="onboarding_welcome_feat1_title">Solat tepat waktu</string>
-    <string name="onboarding_welcome_feat1_sub">Waktu solat tepat\ndan peringatan azan</string>
-    <string name="onboarding_welcome_feat2_title">Al-Quran &amp; Tadabbur</string>
-    <string name="onboarding_welcome_feat2_sub">Baca, renungkan dan berkembang bersama\nAl-Quran</string>
-    <string name="onboarding_welcome_feat3_title">Ciri-ciri spiritual</string>
-    <string name="onboarding_welcome_feat3_sub">Zikir, Kiblat, Zakat, dan\nbanyak lagi untuk anda</string>
-    <string name="onboarding_welcome_btn">Mari Bermula</string>
-    <string name="onboarding_language_title">Pilih\nbahasa anda</string>
-    <string name="onboarding_language_body">Pilih bahasa pilihan anda\nuntuk bermula</string>
-    <string name="onboarding_location_title">Kebenaran Akses\nLokasi</string>
-    <string name="onboarding_location_body">Kami menggunakan lokasi anda untuk menunjukkan\nwaktu solat &amp; arah Kiblat yang tepat.</string>
+    <string name="onboarding_brand_title">Sāat</string>
+    <string name="onboarding_brand_subtitle">Teman kecil untuk menemani perjalanan ibadah anda.</string>
+    <string name="onboarding_lang_card_title">Pilih bahasa</string>
+    <string name="onboarding_lang_card_subtitle">Supaya Sāat dapat menemani anda dengan lebih baik.</string>
+    <string name="onboarding_start_button">Mula</string>
+    <string name="onboarding_step1_footer">Satu langkah lebih dekat kepada-Nya.</string>
+    <string name="onboarding_kimi_title">Kenali Kīmi</string>
+    <string name="onboarding_kimi_body">Hai, saya Kīmi.\nSaya akan menemani perjalanan ibadah anda, bermula daripada waktu solat, membaca Al-Quran, mengingatkan amalan, dan memastikannya tetap ringan.</string>
+    <string name="onboarding_continue_btn">Seterusnya</string>
+    <string name="onboarding_perms_title">Supaya Kīmi dapat menemani anda dengan tepat.</string>
+    <string name="onboarding_perms_subtitle">Benarkan beberapa akses berikut agar Sāat dapat memberikan pengalaman terbaik untuk anda.</string>
+    <string name="onboarding_perm_loc_title">Gunakan lokasi anda</string>
+    <string name="onboarding_perm_loc_desc">Untuk mengira waktu solat yang tepat, arah kiblat, dan kandungan yang sesuai dengan lokasi anda.</string>
+    <string name="onboarding_perm_loc_btn">Benarkan Lokasi</string>
+    <string name="onboarding_perm_loc_granted">Lokasi Dibenarkan</string>
+    <string name="onboarding_perm_notif_title">Benarkan notifikasi</string>
+    <string name="onboarding_perm_notif_desc">Supaya Kīmi boleh mengingatkan anda tentang waktu solat, azan, ayat harian, dan amalan lain.</string>
+    <string name="onboarding_perm_notif_btn">Benarkan Notifikasi</string>
+    <string name="onboarding_perm_notif_granted">Notifikasi Dibenarkan</string>
+    <string name="onboarding_perm_later_btn">Nanti saja</string>
+    <string name="onboarding_privacy_text">Data lokasi anda selamat bersama kami. Kami tidak akan berkongsi maklumat peribadi anda dengan pihak lain.</string>
+    <string name="onboarding_back">Kembali</string>
+    <string name="onboarding_adhan_new_title">Tetapkan Azan Anda</string>
+    <string name="onboarding_adhan_new_subtitle">Pilih waktu solat yang ingin menggunakan azan. Anda boleh mengaktifkan atau menyahaktifkan mengikut keperluan.</string>
+    <string name="onboarding_adhan_sound_note">Bunyi azan boleh dilaraskan atau ditukar kemudian di tetapan aplikasi.</string>
+    <string name="onboarding_save_and_enter">Simpan &amp; Masuk ke Sāat</string>
     <string name="onboarding_location_denied">Kebenaran lokasi ditolak. Anda boleh menaip nama bandar secara manual.</string>
-    <string name="onboarding_location_item1">Waktu solat tepat untuk kawasan anda</string>
-    <string name="onboarding_location_item2">Arah Kiblat yang tepat</string>
-    <string name="onboarding_location_item3">Boleh digunakan luar talian selepas disediakan</string>
-    <string name="onboarding_btn_allow_location">Benarkan Lokasi</string>
-    <string name="onboarding_btn_not_now">Nanti Sahaja</string>
-    <string name="onboarding_notif_title">Sentiasa\nTerhubung</string>
-    <string name="onboarding_notif_body">Benarkan pemberitahuan agar tidak terlepas\nwaktu solat dan peringatan penting.</string>
-    <string name="onboarding_notif_item1">Peringatan waktu solat</string>
-    <string name="onboarding_notif_item2">Zikir harian &amp; motivasi</string>
-    <string name="onboarding_notif_item3">Pemberitahuan &amp; maklumat penting</string>
-    <string name="onboarding_btn_allow_notif">Benarkan Pemberitahuan</string>
-    <string name="onboarding_adhan_title">Peringatan\nAzan</string>
-    <string name="onboarding_adhan_body">Pilih waktu solat yang ingin\nanda ingatkan dengan azan.</string>
-    <string name="onboarding_adhan_footer">Anda boleh mengubahnya kemudian dalam tetapan</string>
-    <string name="onboarding_continue">Teruskan</string>
-    <string name="onboarding_get_started">Mula</string>
-    <string name="onboarding_enable_notifications">Hidupkan pemberitahuan</string>
     <string name="onboarding_skip">Langkau</string>
-    <string name="onboarding_skip_location">Langkau dulu</string>
-    <string name="onboarding_skip_notifications">Bukan sekarang</string>
     <string name="search_empty_message">Tiada hasil untuk “%1$s”. Cuba nama surah (Yasin), nombor (36), ayat (2:255), atau juz (Juz 30).</string>
     <string name="reading_settings">Tetapan bacaan</string>
     <string name="text_size">Saiz teks</string>
@@ -484,8 +477,6 @@
     <string name="terms_and_conditions">Terma &amp; Syarat</string>
     <string name="onboarding_prayer_config_title">Notifikasi Solat</string>
     <string name="onboarding_prayer_config_body">Pilih solat mana yang menggunakan suara Azan. Jika dimatikan, akan menggunakan suara notifikasi standard.</string>
-
-    <!-- Coach Mark -->
     <string name="coach_mark_skip">Langkau</string>
     <string name="coach_mark_next">Seterusnya</string>
     <string name="coach_mark_finish">Selesai</string>
@@ -517,16 +508,10 @@
     <string name="coach_mark_radio_desc">Dengar siaran langsung radio dakwah &amp; murottal 24 jam daripada pelbagai negara.</string>
     <string name="coach_mark_chapters_title">Senarai Surah &amp; Juz</string>
     <string name="coach_mark_chapters_desc">Cari surah dengan cepat dan pilih mod paparan mengikut Surah, Juz, atau Halaman.</string>
-
-    <!-- Force Update -->
     <string name="force_update_later_button">Mungkin Nanti</string>
     <string name="force_update_version_info">Versi Baharu: %1$s</string>
-
-    <!-- Settings & App Info -->
     <string name="app_tagline">Saat • Teman Ibadah Harian</string>
     <string name="app_version_format">Versi %1$s</string>
-
-    <!-- Revamped Settings Strings -->
     <string name="settings_main_title">Tetapan</string>
     <string name="settings_main_subtitle">Konfigurasi dan keutamaan aplikasi</string>
     <string name="settings_section_general">Tetapan Umum</string>
@@ -544,7 +529,6 @@
     <string name="settings_item_terms">Terma &amp; Syarat</string>
     <string name="settings_item_check_update">Semak Kemas Kini</string>
     <string name="settings_item_up_to_date">Versi terkini</string>
-
     <string name="notif_adhan_title">Pemberitahuan Azan</string>
     <string name="notif_section_adhan">Pemberitahuan Azan</string>
     <string name="notif_section_reading">Pemberitahuan Bacaan</string>
@@ -556,7 +540,6 @@
     <string name="state_on">Hidup</string>
     <string name="state_off">Mati</string>
     <string name="surah_count_on_format">%1$d Surah - Hidup</string>
-
     <string name="reading_notif_title">Pemberitahuan Bacaan</string>
     <string name="reading_section_reading_notif">Pemberitahuan Bacaan</string>
     <string name="reading_section_writing">Penulisan</string>
@@ -569,8 +552,6 @@
     <string name="up_to_date_sheet_title">Aplikasi Terkini!</string>
     <string name="up_to_date_sheet_desc">Saat versi %1$s ialah versi terkini. Selamat beribadah!</string>
     <string name="got_it">Faham</string>
-
-    <!-- Spiritual Tools -->
     <string name="sunnah_prayer_title">Panduan &amp; Amalan Sunnah</string>
     <string name="jenazah_prayer_title">Panduan Solat Jenazah</string>
     <string name="jenazah_prayer_subtitle">Panduan lengkap fardu kifayah, niat, kedudukan imam &amp; tatacara 4 takbir</string>
@@ -593,11 +574,8 @@
     <string name="doa_saved_toast">Berjaya disimpan ke Penanda!</string>
     <string name="adhan_tab_general">Azan Umum</string>
     <string name="adhan_tab_fajr">Azan Subuh</string>
-
-    <!-- Hajj & Umrah Screen Strings (Malay) -->
     <string name="hajj_top_bar_title">Panduan Lengkap Haji &amp; Umrah</string>
     <string name="hajj_top_bar_subtitle">Tatacara Sahih, Doa, Dalil &amp; Fikih 4 Mazhab</string>
-
     <string name="hajj_tab_umrah">Manasik Umrah</string>
     <string name="hajj_tab_hajj">Manasik Haji</string>
     <string name="hajj_tab_doa">Doa &amp; Zikir</string>
@@ -605,61 +583,47 @@
     <string name="hajj_tab_fiqh">Fikih 4 Mazhab</string>
     <string name="hajj_tab_miqat">Miqat &amp; Ziarah</string>
     <string name="hajj_tab_checklist">Senarai Semak Jemaah</string>
-
     <string name="hajj_umrah_intro_title">5 Rukun &amp; Peringkat Ibadah Umrah</string>
     <string name="hajj_umrah_intro_subtitle">Ikuti urutan manasik secara tertib bermula dari Miqat hingga Tahallul.</string>
-
     <string name="hajj_intro_title">Kronologi Hari-Hari Haji (8–13 Zulhijjah)</string>
     <string name="hajj_intro_subtitle">Panduan lengkap hari Tarwiyah, Arafah, Muzdalifah, Jamarat, dan Tasyrik.</string>
-
     <string name="hajj_dalil_intro_title">Dalil Al-Qur\'an &amp; Hadis Sahih</string>
     <string name="hajj_dalil_intro_subtitle">Dalil utama dari Surah Al-Baqarah, Ali \'Imran, Al-Hajj &amp; Sahih Muslim.</string>
-
     <string name="hajj_madhhab_intro_title">Fikih 4 Mazhab &amp; Panduan Dam (Denda)</string>
     <string name="hajj_madhhab_intro_subtitle">Perbandingan hukum antara Mazhab Syafi\'i, Hanafi, Maliki, dan Hanbali.</string>
     <string name="hajj_madhhab_matrix_header">Perbandingan Hukum 4 Mazhab</string>
     <string name="hajj_dam_rules_header">Panduan Dam &amp; Tebusan Fidyah</string>
-
     <string name="hajj_miqat_intro_title">Lokasi Sempadan Miqat &amp; Tempat Bersejarah</string>
     <string name="hajj_miqat_intro_subtitle">Sempadan Miqat yang ditetapkan Rasulullah SAW dan tempat ziarah utama.</string>
     <string name="hajj_miqat_boundaries_header">Sempadan Miqat</string>
     <string name="hajj_ziarah_sites_header">Tempat Ziarah Bersejarah Makkah &amp; Madinah</string>
-
     <string name="hajj_checklist_progress_title">Kemajuan Persediaan Jemaah</string>
-
     <string name="hajj_hero_umrah_badge">MANASIK UMRAH</string>
     <string name="hajj_hero_umrah_title">Panduan Manasik Umrah</string>
     <string name="hajj_hero_umrah_subtitle">Daripada Ihram di Miqat hingga Tahallul</string>
-
     <string name="hajj_hero_hajj_badge">RUKUN ISLAM KE-5</string>
     <string name="hajj_hero_hajj_title">Panduan Manasik Haji</string>
     <string name="hajj_hero_hajj_subtitle">Perjalanan Lengkap (8–13 Zulhijjah)</string>
-
     <string name="hajj_select_type_label">Pilih Jenis Ibadah Haji:</string>
     <string name="hajj_tamattu_desc">Tamattu\': Mengerjakan Umrah terlebih dahulu, bertahallul, kemudian memakai ihram Haji pada 8 Zulhijjah (Wajib Dam Hadyu). Pilihan utama jemaah Malaysia/Nusantara.</string>
     <string name="hajj_ifrad_desc">Ifrad: Mengerjakan Haji dahulu sehingga selesai, kemudian mengerjakan Umrah selepasnya (Tidak wajib Dam).</string>
     <string name="hajj_qiran_desc">Qiran: Menggabungkan niat Haji &amp; Umrah sekali gus dalam satu ihram berterusan (Wajib Dam).</string>
-
     <string name="hajj_view_related_doa">Lihat Doa &amp; Zikir Berkaitan</string>
     <string name="hajj_prohibitions_header">Larangan Semasa Tahap Ini:</string>
     <string name="hajj_practical_tips_header">Tips Praktikal Jemaah:</string>
     <string name="hajj_mistakes_header">Kesalahan Lazim Perlu Dielakkan:</string>
     <string name="hajj_alternative_options_header">Pilihan Gantian (Jika tidak mampu):</string>
-
     <string name="hajj_copy_doa">Salin Doa</string>
     <string name="hajj_share_doa">Kongsi Doa</string>
     <string name="hajj_copied_toast">Doa berjaya disalin!</string>
-
     <string name="hajj_mandatory_badge">Wajib</string>
     <string name="hajj_rukun_badge">Rukun</string>
     <string name="hajj_wajib_badge">Wajib</string>
     <string name="hajj_expand_details">Kembangkan butiran</string>
-
     <string name="hajj_detailed_steps_header">Panduan Langkah demi Langkah:</string>
     <string name="hajj_tafsir_explanation_header">Huraian Tafsir &amp; Konteks:</string>
     <string name="hajj_rajih_conclusion_header">Kesimpulan Tarjih &amp; Praktikal:</string>
     <string name="hajj_penalty_header">Kadar Dam / Denda:</string>
-
     <string name="hajj_copy_prayer">Salin doa</string>
     <string name="hajj_share_prayer">Kongsi doa</string>
 </resources>
