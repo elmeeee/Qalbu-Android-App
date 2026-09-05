@@ -45,23 +45,17 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
-import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 
 data class QuranLibraryCounts(
-    val bookmarks: Int,
-    val notes: Int,
-    val hifz: Int
+    val bookmarks: Int
 ) {
-    val total: Int get() = bookmarks + notes + hifz
+    val total: Int get() = bookmarks
 }
 
 fun readQuranLibraryCounts(context: android.content.Context): QuranLibraryCounts {
-    val hifzSummary = QuranPersonalStore.hifzSummary(context)
     return QuranLibraryCounts(
-        bookmarks = QuranPersonalStore.bookmarks(context).size,
-        notes = QuranPersonalStore.notes(context).size,
-        hifz = hifzSummary.total
+        bookmarks = QuranPersonalStore.bookmarks(context).size
     )
 }
 
@@ -224,198 +218,6 @@ private fun LibraryCountChip(
 }
 
 @Composable
-fun QuranLibraryHero(
-    counts: QuranLibraryCounts,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(22.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(
-                        SaatColors.DeepEmerald.copy(alpha = 0.12f),
-                        SaatColors.GoldDeep.copy(alpha = 0.08f)
-                    )
-                )
-            )
-            .border(
-                width = 1.dp,
-                color = SaatColors.DeepEmerald.copy(alpha = 0.18f),
-                shape = RoundedCornerShape(22.dp)
-            )
-            .padding(20.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(SaatColors.GoldDeep.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_bookmark_custom),
-                    contentDescription = null,
-                    tint = SaatColors.GoldDeep,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = stringResource(R.string.quran_library_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.Slate900
-                )
-                Text(
-                    text = stringResource(R.string.quran_library_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = SaatColors.Slate500
-                )
-            }
-        }
-
-        Spacer(Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            LibraryFeaturePill(
-                drawableResId = R.drawable.ic_bookmark_custom,
-                label = stringResource(R.string.bookmarks_title),
-                count = counts.bookmarks,
-                tint = SaatColors.GoldDeep,
-                modifier = Modifier.weight(1f)
-            )
-            LibraryFeaturePill(
-                drawableResId = R.drawable.ic_personalnote_custom,
-                label = stringResource(R.string.notes_title),
-                count = counts.notes,
-                tint = SaatColors.DeepEmerald,
-                modifier = Modifier.weight(1f)
-            )
-            LibraryFeaturePill(
-                drawableResId = R.drawable.ic_memorization_custom,
-                label = stringResource(R.string.hifz_title),
-                count = counts.hifz,
-                tint = SaatColors.IndigoDeep,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(Modifier.height(16.dp))
-        QuranLibraryLegend()
-    }
-}
-
-@Composable
-fun QuranLibraryLegend(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.quran_library_legend),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-            color = SaatColors.Slate800
-        )
-        LegendRow(
-            drawableResId = R.drawable.ic_bookmark_custom,
-            tint = SaatColors.GoldDeep,
-            text = stringResource(R.string.quran_library_intro_bookmarks)
-        )
-        LegendRow(
-            drawableResId = R.drawable.ic_personalnote_custom,
-            tint = SaatColors.DeepEmerald,
-            text = stringResource(R.string.quran_library_intro_notes)
-        )
-        LegendRow(
-            drawableResId = R.drawable.ic_memorization_custom,
-            tint = SaatColors.IndigoDeep,
-            text = stringResource(R.string.quran_library_intro_hifz)
-        )
-    }
-}
-
-@Composable
-private fun LegendRow(
-    drawableResId: Int,
-    tint: Color,
-    text: String
-) {
-    Row(
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(tint.copy(alpha = 0.12f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(drawableResId),
-                contentDescription = null,
-                tint = tint,
-                modifier = Modifier.size(15.dp)
-            )
-        }
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = SaatColors.Slate500,
-            lineHeight = 18.sp,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun LibraryFeaturePill(
-    drawableResId: Int,
-    label: String,
-    count: Int,
-    tint: Color,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.85f))
-            .border(1.dp, tint.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
-            .padding(horizontal = 10.dp, vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            painter = painterResource(drawableResId),
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = count.toString(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = SaatColors.Slate900
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = SaatColors.Slate500,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
 fun VersePersonalBadges(
     verseKey: String?,
     personalDataRevision: Int,
@@ -427,51 +229,19 @@ fun VersePersonalBadges(
     val bookmarked = remember(verseKey, personalDataRevision) {
         QuranPersonalStore.isBookmarked(context, verseKey)
     }
-    val hasNote = remember(verseKey, personalDataRevision) {
-        QuranPersonalStore.noteFor(context, verseKey) != null
-    }
-    val hifzStatus = remember(verseKey, personalDataRevision) {
-        QuranPersonalStore.hifzStatus(context, verseKey)
-    }
-    if (!bookmarked && !hasNote && hifzStatus == HifzStatus.NONE) return
+    if (!bookmarked) return
 
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (bookmarked) {
-            VerseBadge(
-                drawableResId = R.drawable.ic_bookmark_custom,
-                label = stringResource(R.string.verse_has_bookmark),
-                tint = SaatColors.GoldDeep,
-                compact = compact
-            )
-            Spacer(Modifier.width(6.dp))
-        }
-        if (hasNote) {
-            VerseBadge(
-                drawableResId = R.drawable.ic_personalnote_custom,
-                label = stringResource(R.string.verse_has_note),
-                tint = SaatColors.DeepEmerald,
-                compact = compact
-            )
-            Spacer(Modifier.width(6.dp))
-        }
-        if (hifzStatus != HifzStatus.NONE) {
-            val (label, tint) = when (hifzStatus) {
-                HifzStatus.LEARNING -> stringResource(R.string.hifz_learning) to SaatColors.Gold
-                HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized) to SaatColors.DeepEmerald
-                HifzStatus.NEEDS_REVIEW -> stringResource(R.string.hifz_review) to Color(0xFFC2410C)
-                HifzStatus.NONE -> "" to Color.Transparent
-            }
-            VerseBadge(
-                drawableResId = R.drawable.ic_memorization_custom,
-                label = label,
-                tint = tint,
-                compact = compact
-            )
-        }
+        VerseBadge(
+            drawableResId = R.drawable.ic_bookmark_custom,
+            label = stringResource(R.string.verse_has_bookmark),
+            tint = SaatColors.GoldDeep,
+            compact = compact
+        )
     }
 }
 

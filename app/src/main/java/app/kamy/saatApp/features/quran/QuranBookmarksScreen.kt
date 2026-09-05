@@ -340,7 +340,7 @@ private fun BookmarksEmptyState() {
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                text = stringResource(R.string.quran_library_empty_bookmarks_body),
+                text = stringResource(R.string.bookmarks_card_desc),
                 style = MaterialTheme.typography.bodySmall,
                 color = SaatColors.Slate500,
                 textAlign = TextAlign.Center,

@@ -56,7 +56,6 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Psychology
@@ -128,8 +127,6 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.design.components.SaatPartialBottomSheet
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.kamy.saatApp.features.share.AiShareSheet
-import androidx.compose.material.icons.filled.Forum
-import app.kamy.saatApp.domain.model.HifzStatus
 import app.kamy.saatApp.design.components.SaatErrorState
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.design.theme.SaatColors
@@ -458,12 +455,11 @@ fun ChapterReaderScreen(
                         SaatAyahPage(
                             verse = verse,
                             fontScale = state.fontScale,
-                            showTranslation = state.showTranslation && !state.hifzModeEnabled,
+                            showTranslation = state.showTranslation,
                             showTransliteration = state.showTransliteration,
                             translationId = state.selectedTranslationId,
                             isTajweedEnabled = state.isTajweedEnabled,
                             arabicTextType = state.arabicTextType,
-                            hifzModeEnabled = state.hifzModeEnabled,
                             audioBarVisible = audioBarVisible,
                             personalDataRevision = state.personalDataRevision,
                             showBismillahPre = verseIdx == 0 && state.bismillahPre,
@@ -615,20 +611,10 @@ fun ChapterReaderScreen(
                             expanded = verseMenuExpanded.value,
                             onToggle = { verseMenuExpanded.value = !verseMenuExpanded.value },
                             bookmarked = state.currentVerseBookmarked,
-                            hasNote = state.currentVerseHasNote,
-                            hifzStatus = state.currentVerseHifzStatus,
                             showTafsir = LocalQuranConfig.supportsTafsir(state.selectedTranslationId),
                             onBookmark = {
                                 verseMenuExpanded.value = false
                                 vm.toggleBookmark(currentVerseIndex)
-                            },
-                            onNote = {
-                                verseMenuExpanded.value = false
-                                vm.openNote(currentVerseIndex)
-                            },
-                            onHifz = {
-                                verseMenuExpanded.value = false
-                                vm.cycleHifzStatus(currentVerseIndex)
                             },
                             onAiShare = {
                                 verseMenuExpanded.value = false
@@ -908,19 +894,7 @@ fun ChapterReaderScreen(
             onToggleTajweed = vm::toggleTajweed,
             onSelectRecitation = vm::selectRecitation,
             onSetPlaybackMode = vm::setPlaybackMode,
-            onToggleHifzMode = vm::toggleHifzMode,
             onArabicTextTypeChange = vm::setArabicTextType
-        )
-    }
-
-    if (state.noteVisible) {
-        VerseNoteSheet(
-            draft = state.noteDraft,
-            hasExistingNote = state.currentVerseHasNote,
-            onDraftChange = vm::updateNoteDraft,
-            onDismiss = vm::dismissNote,
-            onSave = vm::saveNote,
-            onDelete = vm::deleteNote
         )
     }
 
@@ -928,14 +902,6 @@ fun ChapterReaderScreen(
         TajweedInfoSheet(
             type = type,
             onDismiss = { activeTajweedType.value = null }
-        )
-    }
-
-    if (state.hifzPickerVisible) {
-        HifzPickerSheet(
-            currentStatus = state.currentVerseHifzStatus,
-            onDismiss = vm::dismissHifzPicker,
-            onSelect = vm::setHifzStatus
         )
     }
 
@@ -965,7 +931,7 @@ fun ChapterReaderScreen(
         onDismiss = { vm.dismissAiShare() },
         onDraftChange = vm::updateAiShareDraft,
         onRegenerate = vm::regenerateAiShare,
-        onShare = { draft ->
+        onShare = { draft: String ->
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, draft)
@@ -1004,7 +970,6 @@ private fun SaatAyahPage(
     translationId: Int,
     isTajweedEnabled: Boolean,
     arabicTextType: ArabicTextType,
-    hifzModeEnabled: Boolean,
     audioBarVisible: Boolean,
     personalDataRevision: Int,
     showBismillahPre: Boolean,
@@ -1018,9 +983,6 @@ private fun SaatAyahPage(
     val contentTopPadding = statusBarTop + 68.dp
     val contentBottomPadding = if (audioBarVisible) 160.dp else 110.dp
     val scrollState = rememberScrollState()
-    var hifzRevealStage by remember(verse.listIdentity) {
-        mutableIntStateOf(0)
-    }
 
     LaunchedEffect(scrollState, onContentScroll) {
         if (onContentScroll == null) return@LaunchedEffect
@@ -1030,24 +992,12 @@ private fun SaatAyahPage(
             }
     }
 
-    val interactionSource = remember { MutableInteractionSource() }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(SaatColors.ScreenBackground)
-            .pointerInput(hifzModeEnabled, showTranslation) {
-                detectTapGestures(onTap = {
-                    if (hifzModeEnabled) {
-                        when (hifzRevealStage) {
-                            0 -> hifzRevealStage = 1
-                            1 -> if (showTranslation) hifzRevealStage = 2 else onPlay()
-                            else -> onPlay()
-                        }
-                    } else {
-                        onPlay()
-                    }
-                })
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = { onPlay() })
             },
         contentAlignment = Alignment.Center
     ) {
@@ -1078,35 +1028,7 @@ private fun SaatAyahPage(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
                 )
             }
-            when {
-                hifzModeEnabled && hifzRevealStage == 0 -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(180.dp)
-                            .background(SaatColors.SoftGrey.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = stringResource(R.string.hifz_recall_prompt),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = SaatColors.Slate800,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(Modifier.height(6.dp))
-                            Text(
-                                text = stringResource(R.string.hifz_tap_to_reveal),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = SaatColors.Slate500,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
-                else -> {
-                    val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) (verse.textIndopak ?: verse.textUthmani) else verse.textUthmani
+            val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) (verse.textIndopak ?: verse.textUthmani) else verse.textUthmani
                     val isPlayingThisVerse = audioPlaybackState != null && audioPlaybackState.trackSubtitle == verse.verseKey && audioPlaybackState.currentUrl != null
                     val (words, weights, totalWeight) = remember(textToRender) {
                         val parsedWords = textToRender?.split("\\s+".toRegex())
@@ -1190,11 +1112,7 @@ private fun SaatAyahPage(
                         onTajweedClick = onTajweedClick,
                         modifier = Modifier.fillMaxWidth()
                     )
-                }
-            }
-            val showLatin = showTransliteration && (!hifzModeEnabled || hifzRevealStage >= 1)
-            val showMeaning = showTranslation && (!hifzModeEnabled || hifzRevealStage >= 2)
-            if (showLatin) {
+            if (showTransliteration) {
                 verse.displayTransliteration(translationId)?.let { transliteration ->
                     Text(
                         text = transliteration,
@@ -1210,7 +1128,7 @@ private fun SaatAyahPage(
                     )
                 }
             }
-            if (showMeaning) {
+            if (showTranslation) {
                 verse.translations?.firstOrNull()?.text?.let { translation ->
                     val clean = translation.toVerseTranslationPlainText()
                     if (clean.isNotEmpty()) {
@@ -1239,13 +1157,9 @@ private fun ReaderVerseActionsMenu(
     expanded: Boolean,
     onToggle: () -> Unit,
     bookmarked: Boolean,
-    hasNote: Boolean,
-    hifzStatus: HifzStatus,
     modifier: Modifier = Modifier,
     showTafsir: Boolean = true,
     onBookmark: () -> Unit,
-    onNote: () -> Unit,
-    onHifz: () -> Unit,
     onAiShare: () -> Unit,
     onShareImage: () -> Unit,
     onTafsir: () -> Unit
@@ -1365,7 +1279,6 @@ private fun ReaderSettingsSheet(
     onToggleTajweed: (Boolean) -> Unit,
     onSelectRecitation: (Int) -> Unit,
     onSetPlaybackMode: (AyahPlaybackMode) -> Unit,
-    onToggleHifzMode: (Boolean) -> Unit,
     onArabicTextTypeChange: (ArabicTextType) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -1751,165 +1664,6 @@ private fun ReciterRow(
                         .border(1.5.dp, Color(0xFFCBD5E1), CircleShape)
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun hifzStatusLabel(status: HifzStatus): String = when (status) {
-    HifzStatus.NONE -> stringResource(R.string.hifz_mark)
-    HifzStatus.LEARNING -> stringResource(R.string.hifz_learning)
-    HifzStatus.MEMORIZED -> stringResource(R.string.hifz_memorized)
-    HifzStatus.NEEDS_REVIEW -> stringResource(R.string.hifz_review)
-}
-
-private fun hifzStatusColor(status: HifzStatus): Color = when (status) {
-    HifzStatus.NONE -> SaatColors.Slate500
-    HifzStatus.LEARNING -> SaatColors.IndigoAccent
-    HifzStatus.MEMORIZED -> SaatColors.DeepEmerald
-    HifzStatus.NEEDS_REVIEW -> SaatColors.GoldDeep
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HifzPickerSheet(
-    currentStatus: HifzStatus,
-    onDismiss: () -> Unit,
-    onSelect: (HifzStatus) -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.hifz_picker_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = SaatColors.DeepEmerald
-            )
-            Text(
-                text = stringResource(R.string.hifz_picker_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = SaatColors.Slate500
-            )
-            HifzPickerOption(
-                title = stringResource(R.string.hifz_learning),
-                subtitle = stringResource(R.string.hifz_learning_desc),
-                selected = currentStatus == HifzStatus.LEARNING,
-                color = SaatColors.IndigoAccent,
-                onClick = { onSelect(HifzStatus.LEARNING) }
-            )
-            HifzPickerOption(
-                title = stringResource(R.string.hifz_memorized),
-                subtitle = stringResource(R.string.hifz_memorized_desc),
-                selected = currentStatus == HifzStatus.MEMORIZED,
-                color = SaatColors.DeepEmerald,
-                onClick = { onSelect(HifzStatus.MEMORIZED) }
-            )
-            HifzPickerOption(
-                title = stringResource(R.string.hifz_review),
-                subtitle = stringResource(R.string.hifz_review_desc),
-                selected = currentStatus == HifzStatus.NEEDS_REVIEW,
-                color = SaatColors.GoldDeep,
-                onClick = { onSelect(HifzStatus.NEEDS_REVIEW) }
-            )
-            if (currentStatus != HifzStatus.NONE) {
-                TextButton(onClick = { onSelect(HifzStatus.NONE) }) {
-                    Text(stringResource(R.string.hifz_clear), color = SaatColors.Danger)
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-        }
-    }
-}
-
-@Composable
-private fun HifzPickerOption(
-    title: String,
-    subtitle: String,
-    selected: Boolean,
-    color: Color,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(if (selected) color.copy(alpha = 0.12f) else SaatColors.SoftGrey.copy(alpha = 0.25f))
-            .clickable(onClick = onClick)
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(title, fontWeight = FontWeight.SemiBold, color = SaatColors.Slate900)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = SaatColors.Slate500)
-        }
-        if (selected) {
-            Text("✓", color = color, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun VerseNoteSheet(
-    draft: String,
-    hasExistingNote: Boolean,
-    onDraftChange: (String) -> Unit,
-    onDismiss: () -> Unit,
-    onSave: () -> Unit,
-    onDelete: () -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.verse_note),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = SaatColors.DeepEmerald
-            )
-            androidx.compose.material3.OutlinedTextField(
-                value = draft,
-                onValueChange = onDraftChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp),
-                placeholder = { Text(stringResource(R.string.verse_note_hint)) }
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (hasExistingNote) {
-                    TextButton(onClick = onDelete) {
-                        Text(stringResource(R.string.delete_note), color = SaatColors.Danger)
-                    }
-                } else {
-                    Spacer(Modifier.width(1.dp))
-                }
-                Row {
-                    TextButton(onClick = onDismiss) {
-                        Text(stringResource(R.string.back))
-                    }
-                    TextButton(onClick = onSave) {
-                        Text(stringResource(R.string.done))
-                    }
-                }
-            }
-            Spacer(Modifier.height(8.dp))
         }
     }
 }

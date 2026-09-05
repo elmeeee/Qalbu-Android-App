@@ -114,9 +114,7 @@ class ChaptersViewModel @Inject constructor(
             val readJuzs = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.readJuzs(appContext)
             val lastReadJuz = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.lastReadJuz(appContext)
             val lastReadVerseKey = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.lastReadVerseKey(appContext)
-            val hasBookmarks = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.bookmarks(appContext).isNotEmpty() ||
-                app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.notes(appContext).isNotEmpty() ||
-                app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.hifzEntries(appContext).isNotEmpty()
+            val hasBookmarks = app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore.bookmarks(appContext).isNotEmpty()
             _state.update {
                 it.copy(
                     isLoading = false,
