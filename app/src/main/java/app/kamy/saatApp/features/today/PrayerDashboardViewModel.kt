@@ -423,8 +423,8 @@ class PrayerDashboardViewModel @Inject constructor(
             }
         }
 
-        val lastPassed = timings.lastOrNull { it.date.before(now) && it.type != PrayerType.SUNRISE }
-        val active = lastPassed?.type ?: timings.first { it.type != PrayerType.SUNRISE }.type
+        val lastPassed = timings.lastOrNull { it.date.before(now) }
+        val active = lastPassed?.type ?: timings.first().type
         val theme = if (active == PrayerType.MAGHRIB || active == PrayerType.ISHA) {
             PrayerTheme.NIGHT
         } else {

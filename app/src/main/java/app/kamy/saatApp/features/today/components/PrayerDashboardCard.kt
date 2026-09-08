@@ -21,11 +21,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -222,8 +227,17 @@ fun PrayerDashboardCard(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+                        val timelinePosition = remember(activeIndex, progressRatio) {
+                            if (activeIndex >= DISPLAY_PRAYER_SLOTS.size - 1) {
+                                activeIndex.toFloat()
+                            } else {
+                                (activeIndex.toFloat() + progressRatio).coerceIn(0f, (DISPLAY_PRAYER_SLOTS.size - 1).toFloat())
+                            }
+                        }
+
                         // Horizontal Timeline Progress Track
                         PrayerTimelineProgressTrack(
+                            timelinePosition = timelinePosition,
                             activeIndex = activeIndex,
                             totalSlots = DISPLAY_PRAYER_SLOTS.size,
                             modifier = Modifier.fillMaxWidth()
@@ -303,7 +317,22 @@ private fun PrayerArcCountdown(
     val untilPrayerText = stringResource(R.string.prayer_countdown_until_label)
     val iconRes = getPrayerIconRes(currentType)
     val prayerColor = getPrayerThemeColor(currentType)
-    val sweepAngle = (180f * progress).coerceIn(12f, 180f)
+
+    // Smooth progress animation (sweep angle & floating icon position)
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress.coerceIn(0.08f, 1f),
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "PrayerArcProgress"
+    )
+
+    // Smooth prayer color transition
+    val animatedPrayerColor by animateColorAsState(
+        targetValue = prayerColor,
+        animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+        label = "PrayerColor"
+    )
+
+    val sweepAngle = (180f * animatedProgress).coerceIn(12f, 180f)
 
     val density = androidx.compose.ui.platform.LocalDensity.current
     val iconOffsetX = remember { androidx.compose.runtime.mutableStateOf(0.dp) }
@@ -324,7 +353,7 @@ private fun PrayerArcCountdown(
 
             // Inactive top arch (180deg) with subtle prayer color tint
             drawArc(
-                color = prayerColor.copy(alpha = 0.14f),
+                color = animatedPrayerColor.copy(alpha = 0.14f),
                 startAngle = 180f,
                 sweepAngle = 180f,
                 useCenter = false,
@@ -338,7 +367,7 @@ private fun PrayerArcCountdown(
 
             // Active top arch matching the prayer's signature color
             drawArc(
-                color = prayerColor,
+                color = animatedPrayerColor,
                 startAngle = 180f,
                 sweepAngle = sweepAngle,
                 useCenter = false,
@@ -399,12 +428,17 @@ private fun PrayerArcCountdown(
 
 @Composable
 private fun PrayerTimelineProgressTrack(
+    timelinePosition: Float,
     activeIndex: Int,
     totalSlots: Int = 6,
     modifier: Modifier = Modifier
 ) {
-    val activeType = DISPLAY_PRAYER_SLOTS.getOrNull(activeIndex) ?: PrayerType.DHUHR
-    val activeColor = getPrayerThemeColor(activeType)
+    // Smooth timeline progression animation
+    val animatedPosition by animateFloatAsState(
+        targetValue = timelinePosition,
+        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
+        label = "TimelineProgressPosition"
+    )
 
     androidx.compose.foundation.Canvas(
         modifier = modifier
@@ -418,7 +452,7 @@ private fun PrayerTimelineProgressTrack(
 
         val startX = slotWidth / 2f
         val endX = width - (slotWidth / 2f)
-        val activeX = (startX + activeIndex * slotWidth).coerceIn(startX, endX)
+        val activeX = (startX + animatedPosition * slotWidth).coerceIn(startX, endX)
 
         // 1. Unfilled track line (from startX to endX)
         drawLine(
@@ -429,10 +463,10 @@ private fun PrayerTimelineProgressTrack(
             cap = StrokeCap.Round
         )
 
-        // 2. Active prayer track line (from startX to activeX)
-        if (activeIndex > 0) {
+        // 2. Active dark green track line (continuously moving towards next prayer)
+        if (animatedPosition > 0f) {
             drawLine(
-                color = activeColor,
+                color = Color(0xFF176345),
                 start = Offset(startX, centerY),
                 end = Offset(activeX, centerY),
                 strokeWidth = 3.dp.toPx(),
@@ -443,16 +477,17 @@ private fun PrayerTimelineProgressTrack(
         // 3. Dots at slot centers
         for (i in 0 until totalSlots) {
             val dotX = startX + i * slotWidth
-            val isPassedOrActive = i <= activeIndex
-            val dotColor = if (isPassedOrActive) activeColor else Color(0xFFCBD5E1)
-            val dotRadius = if (i == activeIndex) 5.dp.toPx() else 3.5.dp.toPx()
+            val isPassedOrActive = i.toFloat() <= animatedPosition + 0.05f
+            val dotColor = if (isPassedOrActive) Color(0xFF176345) else Color(0xFFCBD5E1)
+            val isCurrentSlot = i == activeIndex
+            val dotRadius = if (isCurrentSlot) 5.dp.toPx() else 3.5.dp.toPx()
 
             drawCircle(
                 color = dotColor,
                 radius = dotRadius,
                 center = Offset(dotX, centerY)
             )
-            if (i == activeIndex) {
+            if (isCurrentSlot) {
                 drawCircle(
                     color = Color.White,
                     radius = 2.dp.toPx(),
@@ -542,7 +577,6 @@ private fun SchedulePrayerSlot(
 ) {
     val context = LocalContext.current
     val is24Hour = context.is24HourClock()
-    val slotColor = getPrayerThemeColor(type)
     val timeText = entry?.date?.let {
         val pattern = if (is24Hour) "HH:mm" else "hh:mm a"
         SimpleDateFormat(pattern, Locale.getDefault()).format(it)
@@ -554,13 +588,13 @@ private fun SchedulePrayerSlot(
             .then(
                 if (isActive) {
                     Modifier
-                        .background(slotColor.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+                        .background(Color(0xFFFCFBF9), RoundedCornerShape(12.dp))
                         .border(
                             width = 1.5.dp,
                             brush = Brush.verticalGradient(
                                 colors = listOf(
-                                    slotColor,
-                                    slotColor.copy(alpha = 0.25f)
+                                    Color(0xFF145A43),
+                                    Color(0xFFF4EFE2)
                                 )
                             ),
                             shape = RoundedCornerShape(12.dp)
@@ -578,7 +612,7 @@ private fun SchedulePrayerSlot(
         ) {
             Text(
                 text = prayerDisplayShort(type),
-                color = if (isActive) slotColor else Color(0xFF1E293B),
+                color = Color(0xFF1E293B),
                 fontSize = 11.5.sp,
                 fontWeight = if (isActive) FontWeight.Bold else FontWeight.Medium,
                 maxLines = 1,
