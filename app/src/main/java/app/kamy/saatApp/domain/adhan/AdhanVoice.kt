@@ -1,52 +1,56 @@
 package app.kamy.saatApp.domain.adhan
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.RawRes
 import app.kamy.saatApp.R
 
 enum class AdhanVoice(
     val id: String,
     val displayName: String,
-    @RawRes val rawRes: Int
+    @RawRes val rawRes: Int,
+    @DrawableRes val avatarRes: Int
 ) {
     IslamSobhi(
         id = "islam_sobhi",
         displayName = "Islam Sobhi",
-        rawRes = R.raw.adhan_islam_sobhi
+        rawRes = R.raw.adhan_islam_sobhi,
+        avatarRes = R.drawable.adhan_islam_sobhi
     ),
     OmarHishamAlArabi(
         id = "omar_hisham",
         displayName = "Omar Hisham Al Arabi",
-        rawRes = R.raw.adhan_omar_hisham_al_arabi
+        rawRes = R.raw.adhan_omar_hisham_al_arabi,
+        avatarRes = R.drawable.adhan_omar_hisham
     ),
     HamzaAlMajali(
         id = "hamza_al_majali",
         displayName = "Hamza Al Majali",
-        rawRes = R.raw.adhan_hamza_al_majale
+        rawRes = R.raw.adhan_hamza_al_majale,
+        avatarRes = R.drawable.adhan_hamza_majali
     ),
     SheikhAbdulKarimMalaysia(
         id = "sheikh_abdul_karim",
         displayName = "Sheikh Abdul Karim Umar Al-Makki",
-        rawRes = R.raw.adhan_sheikh_abdul_karim_malaysia
+        rawRes = R.raw.adhan_sheikh_abdul_karim_malaysia,
+        avatarRes = R.drawable.adhan_sheikh_abdul_karim
     ),
     UstBilalAttaki(
         id = "ust_bilal_attaki",
         displayName = "Ust. Bilal Attaki",
-        rawRes = R.raw.adhan_normal_ust_bilal_attaki
+        rawRes = R.raw.adhan_normal_ust_bilal_attaki,
+        avatarRes = R.drawable.adhan_bilal_attaki
     ),
     UstDaengSyawal(
         id = "ust_daeng_syawal",
         displayName = "Ust. Daeng Syawal Mubarak",
-        rawRes = R.raw.adhan_ust_daeng_syawal_indonesia
+        rawRes = R.raw.adhan_ust_daeng_syawal_indonesia,
+        avatarRes = R.drawable.adhan_daeng_syawal
     ),
     HabibSyech(
         id = "habib_syech",
         displayName = "Habib Syech Bin Abdul Qadir Assegaf",
-        rawRes = R.raw.adhan_habib_syech
-    ),
-    MFikriIzzulKamil(
-        id = "m_fikri_izzul_kamil",
-        displayName = "M. Fikri Izzul Kamil",
-        rawRes = R.raw.adhan_m_fikri_izzul_kamil
+        rawRes = R.raw.adhan_habib_syech,
+        avatarRes = R.drawable.adhan_habib_syech
     );
 
     companion object {
@@ -62,22 +66,26 @@ enum class AdhanVoice(
 enum class FajrAdhanVoice(
     val id: String,
     val displayName: String,
-    @RawRes val rawRes: Int
+    @RawRes val rawRes: Int,
+    @DrawableRes val avatarRes: Int
 ) {
     MisharyAlafasy(
         id = "fajr_mishary",
         displayName = "Mishary Rashid Alafasy",
-        rawRes = R.raw.adhan_fajr_mishary_alafasy
+        rawRes = R.raw.adhan_fajr_mishary_alafasy,
+        avatarRes = R.drawable.reciter_alafasy
     ),
     UstBilalAttaki(
         id = "fajr_bilal_attaki",
         displayName = "Ust. Bilal Attaki",
-        rawRes = R.raw.adhan_fajr_ust_bilal_attaki
+        rawRes = R.raw.adhan_fajr_ust_bilal_attaki,
+        avatarRes = R.drawable.adhan_bilal_attaki
     ),
     MuhammadRohani(
         id = "fajr_muhammad_rohani",
         displayName = "Muhammad Rohani",
-        rawRes = R.raw.adhan_fajr_muhammad_rohani
+        rawRes = R.raw.adhan_fajr_muhammad_rohani,
+        avatarRes = R.drawable.adhan_muhammad_rohani
     );
 
     companion object {

@@ -596,4 +596,8 @@
     <string name="hajj_penalty_header">Bentuk Dam / Denda:</string>
     <string name="hajj_copy_prayer">Salin doa</string>
     <string name="hajj_share_prayer">Bagikan doa</string>
+
+    <!-- Institution Search -->
+    <string name="search_institution_hint">Cari institusi, negara, atau kata kunci</string>
+    <string name="search_no_results">Tidak ada institusi yang sesuai</string>
 </resources>

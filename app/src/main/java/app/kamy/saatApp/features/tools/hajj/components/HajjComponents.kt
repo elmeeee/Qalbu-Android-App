@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -780,10 +781,10 @@ fun MadhhabRulingCard(
 
             // 4-Mazhab Comparison Grid/Rows
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                MadhhabItemTile(name = "Mazhab Syafi'i", text = ruling.syafii.get(appLanguage), accentColor = SaatColors.DeepEmerald)
-                MadhhabItemTile(name = "Mazhab Hanafi", text = ruling.hanafi.get(appLanguage), accentColor = SaatColors.Teal)
-                MadhhabItemTile(name = "Mazhab Maliki", text = ruling.maliki.get(appLanguage), accentColor = SaatColors.GoldDeep)
-                MadhhabItemTile(name = "Mazhab Hanbali", text = ruling.hanbali.get(appLanguage), accentColor = Color(0xFF4F46E5))
+                MadhhabItemTile(name = "Mazhab Syafi'i", iconRes = R.drawable.imam_syafii, text = ruling.syafii.get(appLanguage), accentColor = SaatColors.DeepEmerald)
+                MadhhabItemTile(name = "Mazhab Hanafi", iconRes = R.drawable.imam_hanafi, text = ruling.hanafi.get(appLanguage), accentColor = SaatColors.Teal)
+                MadhhabItemTile(name = "Mazhab Maliki", iconRes = R.drawable.imam_maliki, text = ruling.maliki.get(appLanguage), accentColor = SaatColors.GoldDeep)
+                MadhhabItemTile(name = "Mazhab Hanbali", iconRes = R.drawable.imam_hambali, text = ruling.hanbali.get(appLanguage), accentColor = Color(0xFF4F46E5))
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -829,6 +830,7 @@ fun MadhhabRulingCard(
 @Composable
 private fun MadhhabItemTile(
     name: String,
+    iconRes: Int,
     text: String,
     accentColor: Color
 ) {
@@ -839,13 +841,23 @@ private fun MadhhabItemTile(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = accentColor
-            )
-            Spacer(modifier = Modifier.height(4.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(CircleShape)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = accentColor
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodySmall,

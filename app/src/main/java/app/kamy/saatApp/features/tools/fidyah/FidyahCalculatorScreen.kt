@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -371,6 +372,15 @@ private fun MadhhabSelectorSection(
                 FilterChip(
                     selected = isSelected,
                     onClick = { onSelectMadhhab(m) },
+                    leadingIcon = {
+                        Image(
+                            painter = painterResource(m.iconRes),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                        )
+                    },
                     label = {
                         Text(
                             text = title,
@@ -380,7 +390,8 @@ private fun MadhhabSelectorSection(
                     },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = SaatColors.DeepEmerald,
-                        selectedLabelColor = SaatColors.PureWhite
+                        selectedLabelColor = SaatColors.PureWhite,
+                        selectedLeadingIconColor = SaatColors.PureWhite
                     )
                 )
             }

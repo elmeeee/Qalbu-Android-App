@@ -232,6 +232,10 @@ object LocalPrayerCalculator {
                 base.fajrAngle = 20.0
                 base.ishaAngle = 18.0
             }
+            PrayerCalculationMethod.JORDAN -> {
+                base.fajrAngle = 18.0
+                base.ishaAngle = 18.0
+            }
             PrayerCalculationMethod.TEHRAN -> {
                 base.fajrAngle = 17.7
                 base.ishaAngle = 14.0
@@ -240,11 +244,37 @@ object LocalPrayerCalculator {
                 base.fajrAngle = 16.0
                 base.ishaAngle = 14.0
             }
+            PrayerCalculationMethod.FRANCE,
+            PrayerCalculationMethod.LISBON -> {
+                base.fajrAngle = 12.0
+                base.ishaAngle = 12.0
+            }
+            PrayerCalculationMethod.TURKEY -> {
+                base.fajrAngle = 18.0
+                base.ishaAngle = 17.0
+            }
+            PrayerCalculationMethod.RUSSIA -> {
+                base.fajrAngle = 16.0
+                base.ishaAngle = 15.0
+            }
+            PrayerCalculationMethod.TUNISIA -> {
+                base.fajrAngle = 18.0
+                base.ishaAngle = 18.0
+            }
+            PrayerCalculationMethod.ALGERIA -> {
+                base.fajrAngle = 18.0
+                base.ishaAngle = 17.0
+            }
+            PrayerCalculationMethod.MOROCCO -> {
+                base.fajrAngle = 19.0
+                base.ishaAngle = 17.0
+            }
             else -> Unit
         }
 
-        base.madhab = when (madhab) {
-            PrayerMadhab.HANAFI -> Madhab.HANAFI
+        base.madhab = when {
+            madhab == PrayerMadhab.HANAFI -> Madhab.HANAFI
+            method.aladhanSchool == 1 && madhab == PrayerMadhab.SHAFI -> Madhab.HANAFI
             else -> Madhab.SHAFI
         }
         base.adjustments = parseTune(method.aladhanTune)

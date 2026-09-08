@@ -88,6 +88,14 @@ object LocalQuranConfig {
         else -> null
     }
 
+    @androidx.annotation.DrawableRes
+    fun translationAvatar(translationId: Int): Int = when (normalizeTranslationId(translationId)) {
+        TRANSLATION_INDONESIAN -> app.kamy.saatApp.R.drawable.kemenag
+        TRANSLATION_ENGLISH -> app.kamy.saatApp.R.drawable.sahih_international
+        TRANSLATION_MALAY -> app.kamy.saatApp.R.drawable.dbp
+        else -> app.kamy.saatApp.R.drawable.kemenag
+    }
+
     /** Map legacy QF translation IDs saved in prefs to local IDs. */
     fun normalizeTranslationId(savedId: Int): Int = when (savedId) {
         TRANSLATION_INDONESIAN, TRANSLATION_ENGLISH, TRANSLATION_MALAY -> savedId

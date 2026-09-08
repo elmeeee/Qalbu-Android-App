@@ -30,59 +30,89 @@ enum class PrayerCalculationMethod(val rawValue: String) {
     val displayName: String
         get() = when (this) {
             MUHAMMADIYAH -> "Muhammadiyah"
-            KEMENAG -> "Ministry of Religious Affairs (Kemenag)"
+            KEMENAG -> "Kementerian Agama RI (Kemenag)"
             MUIS -> "Majlis Ugama Islam Singapura (MUIS)"
             JAKIM -> "Jabatan Kemajuan Islam Malaysia (JAKIM)"
             BRUNEI -> "Majlis Ugama Islam Brunei (MUIB)"
-            KARACHI -> "Karachi"
-            TEHRAN -> "Tehran"
-            JAFARI -> "Jafari"
-            ISNA -> "ISNA"
-            MWL -> "Muslim World League"
-            UMM_AL_QURA -> "Umm Al-Qura"
-            EGYPTIAN -> "Egyptian"
-            MCW -> "Moonsighting Committee"
-            GULF -> "Gulf Region"
-            KUWAIT -> "Kuwait"
-            QATAR -> "Qatar"
-            DUBAI -> "Dubai"
-            TUNISIA -> "Tunisia"
-            ALGERIA -> "Algeria"
-            MOROCCO -> "Morocco"
-            JORDAN -> "Jordan"
-            FRANCE -> "UOIF France"
-            TURKEY -> "Diyanet Turkey"
-            RUSSIA -> "Russia"
-            LISBON -> "Lisbon"
+            KARACHI -> "University of Islamic Sciences, Karachi"
+            TEHRAN -> "Institute of Geophysics, University of Tehran"
+            JAFARI -> "Shia Ithna-Ashari (Leva Institute, Qom)"
+            ISNA -> "Islamic Society of North America (ISNA)"
+            MWL -> "Muslim World League (MWL)"
+            UMM_AL_QURA -> "Umm Al-Qura University, Makkah"
+            EGYPTIAN -> "Egyptian General Authority of Survey"
+            MCW -> "Moonsighting Committee Worldwide"
+            GULF -> "Gulf Region (90 min Isha)"
+            KUWAIT -> "Ministry of Awqaf & Islamic Affairs, Kuwait"
+            QATAR -> "Ministry of Awqaf & Islamic Affairs, Qatar"
+            DUBAI -> "Islamic Affairs (IACAD), Dubai"
+            TUNISIA -> "Ministère des Affaires Religieuses, Tunisie"
+            ALGERIA -> "Ministère des Affaires Religieuses, Algérie"
+            MOROCCO -> "Ministère des Habous et des Affaires Islamiques, Maroc"
+            JORDAN -> "Ministry of Awqaf & Islamic Affairs, Jordan"
+            FRANCE -> "Union des Organisations Islamiques de France (UOIF)"
+            TURKEY -> "Diyanet İşleri Başkanlığı, Türkiye"
+            RUSSIA -> "Spiritual Administration of Muslims of Russia (DUM RF)"
+            LISBON -> "Comunidade Islâmica de Lisboa, Portugal"
         }
 
     val organization: String
         get() = when (this) {
             MUHAMMADIYAH -> "Persyarikatan Muhammadiyah"
-            KEMENAG -> "Ministry of Religious Affairs (Kemenag)"
+            KEMENAG -> "Kementerian Agama Republik Indonesia"
             MUIS -> "Majlis Ugama Islam Singapura"
             JAKIM -> "Jabatan Kemajuan Islam Malaysia"
-            BRUNEI -> "Majlis Ugama Islam Brunei"
-            KARACHI -> "University of Islamic Sciences, Karachi"
-            TEHRAN -> "Institute of Geophysics, University of Tehran"
-            JAFARI -> "Shia Ithna-Ashari (Leva Institute, Qom)"
+            BRUNEI -> "Kementerian Hal Ehwal Ugama, Brunei Darussalam"
+            KARACHI -> "Jamia Uloom-ul-Islamia, Karachi, Pakistan"
+            TEHRAN -> "Institute of Geophysics, University of Tehran, Iran"
+            JAFARI -> "Leva Research Institute, Qom, Iran"
             ISNA -> "Islamic Society of North America"
-            MWL -> "Muslim World League"
-            UMM_AL_QURA -> "Umm Al-Qura University, Makkah"
-            EGYPTIAN -> "Egyptian General Authority of Survey"
+            MWL -> "Muslim World League (Rabitah al-Alam al-Islami)"
+            UMM_AL_QURA -> "Umm Al-Qura University, Makkah al-Mukarramah"
+            EGYPTIAN -> "Egyptian General Authority of Survey (Al-Hai'ah Al-Misriyyah)"
             MCW -> "Moonsighting Committee Worldwide"
-            GULF -> "Gulf Region"
-            KUWAIT -> "Kuwait"
-            QATAR -> "Qatar"
-            DUBAI -> "Dubai (experimental)"
-            TUNISIA -> "Tunisia"
-            ALGERIA -> "Algeria"
-            MOROCCO -> "Morocco"
-            JORDAN -> "Ministry of Awqaf, Jordan"
-            FRANCE -> "Union Organization islamic de France"
-            TURKEY -> "Diyanet İşleri Başkanlığı"
-            RUSSIA -> "Spiritual Administration of Muslims of Russia"
-            LISBON -> "Comunidade Islamica de Lisboa"
+            GULF -> "Gulf Region Prayer Calculation (90 min interval)"
+            KUWAIT -> "Ministry of Awqaf and Islamic Affairs, Kuwait"
+            QATAR -> "Ministry of Awqaf and Islamic Affairs, Qatar"
+            DUBAI -> "Islamic Affairs & Charitable Activities Department, Dubai"
+            TUNISIA -> "Ministère des Affaires Religieuses, République Tunisienne"
+            ALGERIA -> "Ministère des Affaires Religieuses et des Wakfs, Algérie"
+            MOROCCO -> "Ministère des Habous et des Affaires Islamiques, Royaume du Maroco"
+            JORDAN -> "Ministry of Awqaf, Islamic Affairs and Holy Places, Jordan"
+            FRANCE -> "Musulmans de France (ex-UOIF)"
+            TURKEY -> "T.C. Diyanet İşleri Başkanlığı"
+            RUSSIA -> "Spiritual Administration of Muslims of the Russian Federation"
+            LISBON -> "Comunidade Islâmica de Lisboa, Portugal"
+        }
+
+    @get:androidx.annotation.DrawableRes
+    val iconRes: Int
+        get() = when (this) {
+            MUHAMMADIYAH -> app.kamy.saatApp.R.drawable.institution_muhammadiyah
+            KEMENAG -> app.kamy.saatApp.R.drawable.institution_kemenag
+            MUIS -> app.kamy.saatApp.R.drawable.institution_muis
+            JAKIM -> app.kamy.saatApp.R.drawable.institution_jakim
+            BRUNEI -> app.kamy.saatApp.R.drawable.institution_muib
+            KARACHI -> app.kamy.saatApp.R.drawable.institution_karachi
+            TEHRAN -> app.kamy.saatApp.R.drawable.institution_tehran
+            JAFARI -> app.kamy.saatApp.R.drawable.institution_jafari
+            ISNA -> app.kamy.saatApp.R.drawable.institution_isna
+            MWL -> app.kamy.saatApp.R.drawable.institution_mwl
+            UMM_AL_QURA -> app.kamy.saatApp.R.drawable.institution_umm_al_qura
+            EGYPTIAN -> app.kamy.saatApp.R.drawable.institution_egyptian
+            MCW -> app.kamy.saatApp.R.drawable.institution_mcw
+            GULF -> app.kamy.saatApp.R.drawable.institution_gulf
+            KUWAIT -> app.kamy.saatApp.R.drawable.institution_kuwait
+            QATAR -> app.kamy.saatApp.R.drawable.institution_qatar
+            DUBAI -> app.kamy.saatApp.R.drawable.institution_dubai
+            TUNISIA -> app.kamy.saatApp.R.drawable.institution_tunisia
+            ALGERIA -> app.kamy.saatApp.R.drawable.institution_algeria
+            MOROCCO -> app.kamy.saatApp.R.drawable.institution_morocco
+            JORDAN -> app.kamy.saatApp.R.drawable.institution_jordan
+            FRANCE -> app.kamy.saatApp.R.drawable.institution_france
+            TURKEY -> app.kamy.saatApp.R.drawable.institution_turkey
+            RUSSIA -> app.kamy.saatApp.R.drawable.institution_russia
+            LISBON -> app.kamy.saatApp.R.drawable.institution_lisbon
         }
 
     val aladhanMethodId: Int
@@ -116,10 +146,58 @@ enum class PrayerCalculationMethod(val rawValue: String) {
     val aladhanMethodSettings: String?
         get() = when (this) {
             MUHAMMADIYAH -> "18,null,18"
-            else -> null
+            KEMENAG, MUIS, JAKIM, BRUNEI, JORDAN -> "20,null,18"
+            KARACHI -> "18,null,18"
+            ISNA -> "15,null,15"
+            MWL -> "18,null,17"
+            MCW -> "18,null,18"
+            EGYPTIAN -> "19.5,null,17.5"
+            UMM_AL_QURA -> "18.5,null,90 min"
+            KUWAIT -> "18,null,17.5"
+            QATAR -> "18,null,90 min"
+            DUBAI -> "18.2,null,18.2"
+            TUNISIA -> "18,null,18"
+            ALGERIA -> "18,null,17"
+            MOROCCO -> "19,null,17"
+            FRANCE, LISBON -> "12,null,12"
+            TURKEY -> "18,null,17"
+            RUSSIA -> "16,null,15"
+            TEHRAN -> "17.7,4.5,14"
+            JAFARI -> "16,4,14"
+            GULF -> "19.5,null,90 min"
         }
 
-    val aladhanSchool: Int get() = 0
+    val countryName: String
+        get() = when (this) {
+            MUHAMMADIYAH, KEMENAG -> "Indonesia"
+            MUIS -> "Singapura (Singapore)"
+            JAKIM -> "Malaysia"
+            BRUNEI -> "Brunei Darussalam"
+            KARACHI -> "Pakistan / India / Bangladesh"
+            TEHRAN, JAFARI -> "Iran / Shia"
+            ISNA -> "Amerika Utara (USA / Canada)"
+            MWL, MCW -> "Internasional (Worldwide)"
+            UMM_AL_QURA -> "Arab Saudi (Saudi Arabia)"
+            EGYPTIAN -> "Mesir (Egypt)"
+            GULF -> "Kawasan Teluk (Gulf Region)"
+            KUWAIT -> "Kuwait"
+            QATAR -> "Qatar"
+            DUBAI -> "Uni Emirat Arab (UAE - Dubai)"
+            TUNISIA -> "Tunisia"
+            ALGERIA -> "Aljazair (Algeria)"
+            MOROCCO -> "Maroko (Morocco)"
+            JORDAN -> "Yordania (Jordan)"
+            FRANCE -> "Perancis (France)"
+            TURKEY -> "Turki (Turkey)"
+            RUSSIA -> "Rusia (Russia)"
+            LISBON -> "Portugal (Lisbon)"
+        }
+
+    val aladhanSchool: Int
+        get() = when (this) {
+            KARACHI, TURKEY, RUSSIA -> 1 // 1 = Hanafi (bayangan Ashar 2x)
+            else -> 0 // 0 = Standar (Syafi'i, Maliki, Hanbali / bayangan Ashar 1x)
+        }
 
     val aladhanTune: String
         get() = when (this) {

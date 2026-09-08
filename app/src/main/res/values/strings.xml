@@ -1082,4 +1082,8 @@
 
     <string name="hajj_copy_prayer">Copy prayer</string>
     <string name="hajj_share_prayer">Share prayer</string>
+
+    <!-- Institution Search -->
+    <string name="search_institution_hint">Search institution, country, or keyword</string>
+    <string name="search_no_results">No matching institutions found</string>
 </resources>

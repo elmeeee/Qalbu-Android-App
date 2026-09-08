@@ -592,4 +592,8 @@
     <string name="hajj_penalty_header">Kadar Dam / Denda:</string>
     <string name="hajj_copy_prayer">Salin doa</string>
     <string name="hajj_share_prayer">Kongsi doa</string>
+
+    <!-- Institution Search -->
+    <string name="search_institution_hint">Cari institusi, negara, atau kata kunci</string>
+    <string name="search_no_results">Tiada institusi yang sepadan dijumpai</string>
 </resources>

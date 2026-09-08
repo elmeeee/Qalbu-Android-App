@@ -1,15 +1,19 @@
 package app.kamy.saatApp.domain.model
 
+import androidx.annotation.DrawableRes
+import app.kamy.saatApp.R
+
 enum class FidyahMadhhab(
     val id: String,
     val titleId: String,
     val titleMs: String,
-    val titleEn: String
+    val titleEn: String,
+    @DrawableRes val iconRes: Int
 ) {
-    SYAFII("syafii", "Syafi'i", "Syafi'i", "Shafi'i"),
-    HANAFI("hanafi", "Hanafi", "Hanafi", "Hanafi"),
-    MALIKI("maliki", "Maliki", "Maliki", "Maliki"),
-    HANBALI("hanbali", "Hanbali", "Hanbali", "Hanbali");
+    SYAFII("syafii", "Syafi'i", "Syafi'i", "Shafi'i", R.drawable.imam_syafii),
+    HANAFI("hanafi", "Hanafi", "Hanafi", "Hanafi", R.drawable.imam_hanafi),
+    MALIKI("maliki", "Maliki", "Maliki", "Maliki", R.drawable.imam_maliki),
+    HANBALI("hanbali", "Hanbali", "Hanbali", "Hanbali", R.drawable.imam_hambali);
 
     companion object {
         fun fromId(id: String): FidyahMadhhab =

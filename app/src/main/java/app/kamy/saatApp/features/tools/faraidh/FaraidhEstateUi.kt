@@ -47,6 +47,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.res.painterResource
 import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.faraidh.EstateAssetInput
@@ -59,10 +62,10 @@ import java.math.BigDecimal
 @Composable
 fun FaraidhMadhhabPicker(selected: FaraidhMadhhab, onSelect: (FaraidhMadhhab) -> Unit) {
     val options = listOf(
-        FaraidhMadhhab.HANAFI to R.string.faraidh_madhhab_hanafi,
-        FaraidhMadhhab.MALIKI to R.string.faraidh_madhhab_maliki,
-        FaraidhMadhhab.SHAFII to R.string.faraidh_madhhab_shafii,
-        FaraidhMadhhab.HANBALI to R.string.faraidh_madhhab_hanbali
+        Triple(FaraidhMadhhab.HANAFI, R.string.faraidh_madhhab_hanafi, R.drawable.imam_hanafi),
+        Triple(FaraidhMadhhab.MALIKI, R.string.faraidh_madhhab_maliki, R.drawable.imam_maliki),
+        Triple(FaraidhMadhhab.SHAFII, R.string.faraidh_madhhab_shafii, R.drawable.imam_syafii),
+        Triple(FaraidhMadhhab.HANBALI, R.string.faraidh_madhhab_hanbali, R.drawable.imam_hambali)
     )
     Column {
         Text(
@@ -73,9 +76,10 @@ fun FaraidhMadhhabPicker(selected: FaraidhMadhhab, onSelect: (FaraidhMadhhab) ->
         )
         Spacer(Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            options.take(2).forEach { (madhhab, labelRes) ->
+            options.take(2).forEach { (madhhab, labelRes, iconRes) ->
                 MadhhabChip(
                     label = stringResource(labelRes),
+                    iconRes = iconRes,
                     selected = selected == madhhab,
                     onClick = { onSelect(madhhab) },
                     modifier = Modifier.weight(1f)
@@ -84,9 +88,10 @@ fun FaraidhMadhhabPicker(selected: FaraidhMadhhab, onSelect: (FaraidhMadhhab) ->
         }
         Spacer(Modifier.height(8.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            options.drop(2).forEach { (madhhab, labelRes) ->
+            options.drop(2).forEach { (madhhab, labelRes, iconRes) ->
                 MadhhabChip(
                     label = stringResource(labelRes),
+                    iconRes = iconRes,
                     selected = selected == madhhab,
                     onClick = { onSelect(madhhab) },
                     modifier = Modifier.weight(1f)
@@ -103,7 +108,13 @@ fun FaraidhMadhhabPicker(selected: FaraidhMadhhab, onSelect: (FaraidhMadhhab) ->
 }
 
 @Composable
-private fun MadhhabChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun MadhhabChip(
+    label: String,
+    iconRes: Int,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val bg = if (selected) SaatColors.DeepEmerald else SaatColors.PureWhite
     val fg = if (selected) Color.White else SaatColors.Slate800
     val border = if (selected) SaatColors.DeepEmerald else SaatColors.SoftGrey
@@ -115,13 +126,26 @@ private fun MadhhabChip(label: String, selected: Boolean, onClick: () -> Unit, m
         color = bg,
         shape = RoundedCornerShape(12.dp)
     ) {
-        Text(
-            label,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp),
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = fg
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = fg,
+                maxLines = 1
+            )
+        }
     }
 }
 

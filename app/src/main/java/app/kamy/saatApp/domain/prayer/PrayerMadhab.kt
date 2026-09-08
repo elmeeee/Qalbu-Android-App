@@ -1,10 +1,18 @@
 package app.kamy.saatApp.domain.prayer
 
-enum class PrayerMadhab(val rawValue: String, val displayNameRes: Int) {
-    SHAFI("shafi", app.kamy.saatApp.R.string.madhab_shafi),
-    MALIKI("maliki", app.kamy.saatApp.R.string.madhab_maliki),
-    HANBALI("hanbali", app.kamy.saatApp.R.string.madhab_hanbali),
-    HANAFI("hanafi", app.kamy.saatApp.R.string.madhab_hanafi);
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import app.kamy.saatApp.R
+
+enum class PrayerMadhab(
+    val rawValue: String,
+    @StringRes val displayNameRes: Int,
+    @DrawableRes val iconRes: Int
+) {
+    SHAFI("shafi", R.string.madhab_shafi, R.drawable.imam_syafii),
+    MALIKI("maliki", R.string.madhab_maliki, R.drawable.imam_maliki),
+    HANBALI("hanbali", R.string.madhab_hanbali, R.drawable.imam_hambali),
+    HANAFI("hanafi", R.string.madhab_hanafi, R.drawable.imam_hanafi);
 
     companion object {
         val defaultMadhab = SHAFI
