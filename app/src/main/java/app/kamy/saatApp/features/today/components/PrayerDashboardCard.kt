@@ -22,14 +22,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -37,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -318,12 +325,14 @@ private fun PrayerArcCountdown(
     val iconRes = getPrayerIconRes(currentType)
     val prayerColor = getPrayerThemeColor(currentType)
 
-    // Smooth progress animation (sweep angle & floating icon position)
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress.coerceIn(0.08f, 1f),
-        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
-        label = "PrayerArcProgress"
-    )
+    // Guaranteed visible sweep animation on enter and updates
+    val animatedProgress = remember { Animatable(0.08f) }
+    LaunchedEffect(currentType, progress) {
+        animatedProgress.animateTo(
+            targetValue = progress.coerceIn(0.08f, 1f),
+            animationSpec = tween(durationMillis = 1100, easing = FastOutSlowInEasing)
+        )
+    }
 
     // Smooth prayer color transition
     val animatedPrayerColor by animateColorAsState(
@@ -332,7 +341,19 @@ private fun PrayerArcCountdown(
         label = "PrayerColor"
     )
 
-    val sweepAngle = (180f * animatedProgress).coerceIn(12f, 180f)
+    // Breathing pulse for 3D prayer icon
+    val infiniteTransition = rememberInfiniteTransition(label = "ArcPulse")
+    val iconPulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "IconScale"
+    )
+
+    val sweepAngle = (180f * animatedProgress.value).coerceIn(12f, 180f)
 
     val density = androidx.compose.ui.platform.LocalDensity.current
     val iconOffsetX = remember { androidx.compose.runtime.mutableStateOf(0.dp) }
@@ -393,11 +414,15 @@ private fun PrayerArcCountdown(
             }
         }
 
-        // Dynamic 3D Onboarding prayer icon centered on active arc endpoint
+        // Dynamic 3D Onboarding prayer icon with subtle breathing scale centered on active arc endpoint
         Box(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .offset(x = iconOffsetX.value, y = iconOffsetY.value)
+                .graphicsLayer {
+                    scaleX = iconPulseScale
+                    scaleY = iconPulseScale
+                }
         ) {
             Image(
                 painter = painterResource(iconRes),
@@ -433,11 +458,34 @@ private fun PrayerTimelineProgressTrack(
     totalSlots: Int = 6,
     modifier: Modifier = Modifier
 ) {
-    // Smooth timeline progression animation
-    val animatedPosition by animateFloatAsState(
-        targetValue = timelinePosition,
-        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing),
-        label = "TimelineProgressPosition"
+    // Explicit Animatable for guaranteed visible sweeping animation upon enter & update
+    val animatedPosition = remember { Animatable(0f) }
+    LaunchedEffect(timelinePosition) {
+        animatedPosition.animateTo(
+            targetValue = timelinePosition,
+            animationSpec = tween(durationMillis = 1100, easing = FastOutSlowInEasing)
+        )
+    }
+
+    // Continuous pulse glow at active moving tip so progress is clearly visible and alive
+    val infiniteTransition = rememberInfiniteTransition(label = "TimelinePulse")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.25f,
+        targetValue = 0.85f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "PulseAlpha"
+    )
+    val pulseRadius by infiniteTransition.animateFloat(
+        initialValue = 3.5f,
+        targetValue = 6.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1300, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "PulseRadius"
     )
 
     androidx.compose.foundation.Canvas(
@@ -452,7 +500,8 @@ private fun PrayerTimelineProgressTrack(
 
         val startX = slotWidth / 2f
         val endX = width - (slotWidth / 2f)
-        val activeX = (startX + animatedPosition * slotWidth).coerceIn(startX, endX)
+        val pos = animatedPosition.value
+        val activeX = (startX + pos * slotWidth).coerceIn(startX, endX)
 
         // 1. Unfilled track line (from startX to endX)
         drawLine(
@@ -463,8 +512,8 @@ private fun PrayerTimelineProgressTrack(
             cap = StrokeCap.Round
         )
 
-        // 2. Active dark green track line (continuously moving towards next prayer)
-        if (animatedPosition > 0f) {
+        // 2. Active dark green track line (progressing continuously towards next prayer)
+        if (pos > 0.02f) {
             drawLine(
                 color = Color(0xFF176345),
                 start = Offset(startX, centerY),
@@ -472,12 +521,29 @@ private fun PrayerTimelineProgressTrack(
                 strokeWidth = 3.dp.toPx(),
                 cap = StrokeCap.Round
             )
+
+            // Dynamic moving head dot with pulsing halo ring at the moving tip
+            drawCircle(
+                color = Color(0xFF176345).copy(alpha = pulseAlpha * 0.45f),
+                radius = pulseRadius.dp.toPx(),
+                center = Offset(activeX, centerY)
+            )
+            drawCircle(
+                color = Color(0xFF176345),
+                radius = 3.5.dp.toPx(),
+                center = Offset(activeX, centerY)
+            )
+            drawCircle(
+                color = Color.White,
+                radius = 1.5.dp.toPx(),
+                center = Offset(activeX, centerY)
+            )
         }
 
         // 3. Dots at slot centers
         for (i in 0 until totalSlots) {
             val dotX = startX + i * slotWidth
-            val isPassedOrActive = i.toFloat() <= animatedPosition + 0.05f
+            val isPassedOrActive = i.toFloat() <= pos + 0.05f
             val dotColor = if (isPassedOrActive) Color(0xFF176345) else Color(0xFFCBD5E1)
             val isCurrentSlot = i == activeIndex
             val dotRadius = if (isCurrentSlot) 5.dp.toPx() else 3.5.dp.toPx()
