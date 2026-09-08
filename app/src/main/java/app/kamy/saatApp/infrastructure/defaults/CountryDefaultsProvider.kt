@@ -74,7 +74,7 @@ object CountryDefaultsProvider {
      * [TelephonyManager.getSimCountryIso] and [TelephonyManager.getNetworkCountryIso]
      * do NOT require READ_PHONE_STATE permission on API 30+.
      */
-    private fun detectCountryCode(context: Context): String? =
+    fun detectCountryCode(context: Context): String? =
         runCatching {
             val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
                 ?: return@runCatching null

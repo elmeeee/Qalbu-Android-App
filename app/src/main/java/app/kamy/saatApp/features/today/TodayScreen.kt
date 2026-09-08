@@ -325,8 +325,6 @@ fun TodayScreen(
         }
     }
 
-    val showMasjidkuBanner = true
-
     Box(modifier = Modifier.fillMaxSize().background(SaatColors.HomeBg)) {
         Box(
             modifier = Modifier
@@ -428,17 +426,7 @@ fun TodayScreen(
                 }
 
                 item(key = "top_header_spacer") {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-                if (showMasjidkuBanner) {
-                    item(key = "masjidku_collab") {
-                        app.kamy.saatApp.features.today.components.MasjidkuCollaborationBanner(
-                            isDarkBackground = cardDrawable != R.drawable.day,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp, vertical = 4.dp)
-                        )
-                    }
+                    Spacer(modifier = Modifier.height(90.dp))
                 }
                 item(key = "prayer_card") {
                     PrayerDashboardCard(

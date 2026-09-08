@@ -108,9 +108,12 @@ import app.kamy.saatApp.domain.model.QuranTranslation
 import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.saatApp.domain.prayer.PrayerMadhab
 import app.kamy.saatApp.domain.prayer.PrayerMethodOption
+import app.kamy.saatApp.infrastructure.defaults.CountryDefaultsProvider
+import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -2334,32 +2337,114 @@ private fun LegalWebView(
 
 @Composable
 private fun AppFooterCard(appVersion: String) {
+    val context = LocalContext.current
+    val haptic = app.kamy.saatApp.ui.feedback.rememberTapHaptic()
+    val targetUrl = "https://masjidku.app?ref=saat_android"
+
+    val isIndonesiaUser = remember(context) {
+        val locationStore = LocationPreferencesStore.from(context)
+        val activeCC = locationStore.activeCountryCode()
+        if (!activeCC.isNullOrBlank()) {
+            activeCC.equals("ID", ignoreCase = true) || activeCC.equals("IDN", ignoreCase = true)
+        } else {
+            val detected = CountryDefaultsProvider.detectCountryCode(context)
+                ?: Locale.getDefault().country
+            detected.equals("ID", ignoreCase = true) || detected.equals("IDN", ignoreCase = true)
+        }
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 12.dp),
-        shape = RoundedCornerShape(18.dp),
+            .padding(top = 8.dp, bottom = 16.dp),
+        shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 18.dp, horizontal = 20.dp),
+                .padding(vertical = 18.dp, horizontal = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Text(
-                text = stringResource(R.string.app_tagline),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = SaatColors.DeepEmerald
-            )
-            Text(
-                text = stringResource(R.string.app_version_format, appVersion),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            )
+            // Centered Collaboration with Masjidku (Only shown for Indonesian users)
+            if (isIndonesiaUser) {
+                Surface(
+                    onClick = {
+                        haptic()
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl))
+                        runCatching { context.startActivity(intent) }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp, horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.collab_with),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.ic_masjidku_logo),
+                            contentDescription = "Masjidku",
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(RoundedCornerShape(7.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Masjidku",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.DeepEmerald
+                        )
+                    }
+
+                    Text(
+                        text = stringResource(R.string.collab_masjidku_sub),
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+                }
+            }
+
+            // App Tagline & Version
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.app_tagline),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = SaatColors.DeepEmerald,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = stringResource(R.string.app_version_format, appVersion),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
