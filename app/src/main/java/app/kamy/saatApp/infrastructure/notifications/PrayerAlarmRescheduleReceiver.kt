@@ -54,6 +54,7 @@ class PrayerAlarmRescheduleReceiver : BroadcastReceiver() {
                     .from(appContext)
                     .let { store -> store.rescheduleAlarms(store.getReminders()) }
             }
+            runCatching { LivePrayerCountdownManager.update(appContext) }
         }
     }
 }

@@ -57,6 +57,9 @@ open class PrayerNotificationPreferencesStoreBase(
     fun isAdhanSoundEnabled(): Boolean = bool(KEY_ADZAN_SOUND, default = true)
     fun setAdhanSoundEnabled(enabled: Boolean) = setBool(KEY_ADZAN_SOUND, enabled)
 
+    fun isLiveCountdownEnabled(): Boolean = bool(KEY_LIVE_COUNTDOWN, default = true)
+    fun setLiveCountdownEnabled(enabled: Boolean) = setBool(KEY_LIVE_COUNTDOWN, enabled)
+
     fun isMonThuFastEnabled(): Boolean = bool(KEY_MON_THU_FAST, default = true)
     fun setMonThuFastEnabled(enabled: Boolean) = setBool(KEY_MON_THU_FAST, enabled)
 
@@ -168,5 +171,6 @@ open class PrayerNotificationPreferencesStoreBase(
         private const val KEY_DHUHA_HOUR = "dhuhaReminderHour"
         private const val KEY_DHUHA_MINUTE = "dhuhaReminderMinute"
         private const val KEY_DHUHA_DAYS = "dhuhaReminderDays"
+        private const val KEY_LIVE_COUNTDOWN = "liveCountdownNotificationEnabled"
     }
 }

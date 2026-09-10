@@ -78,6 +78,14 @@
     <string name="quran_reminder_setting_title">Pengingat Membaca Al-Qur\'an</string>
     <string name="channel_prayer">Waktu sholat</string>
     <string name="channel_prayer_desc">Adzan dan pengingat sholat malam</string>
+    <string name="channel_live_prayer_countdown">Hitung Mundur Waktu Sholat</string>
+    <string name="channel_live_prayer_countdown_desc">Hitung mundur langsung waktu sholat di layar kunci</string>
+    <string name="live_countdown_approaching_format">MENJELANG %1$s</string>
+    <string name="live_countdown_in_format">%1$s dalam</string>
+    <string name="live_countdown_next_prayer_title">Waktu Shalat Berikutnya</string>
+    <string name="notification_verse_format">Ayat %1$s</string>
+    <string name="setting_live_prayer_countdown">Hitung Mundur Waktu Shalat (Layar Kunci)</string>
+    <string name="setting_live_prayer_countdown_desc">Tampilkan kartu hitung mundur shalat langsung di layar kunci dan bilah notifikasi</string>
     <string name="channel_sunnah">Bacaan sunnah</string>
     <string name="channel_sunnah_desc">Pengingat bacaan surah mingguan</string>
 

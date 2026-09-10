@@ -69,6 +69,7 @@ object PrayerNotificationCoordinator {
         val bundle = PrayerScheduleCache.load(appContext)
         val options = PrayerNotificationPreferencesStore.from(appContext).scheduleOptions()
         PrayerNotificationScheduler.reschedule(appContext, bundle, options)
+        runCatching { LivePrayerCountdownManager.update(appContext) }
     }
 }
 

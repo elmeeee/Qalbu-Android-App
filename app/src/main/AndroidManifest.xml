@@ -78,6 +78,10 @@
             android:exported="false" />
 
         <receiver
+            android:name=".infrastructure.notifications.LivePrayerCountdownReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".infrastructure.notifications.BootCompletedReceiver"
             android:exported="true">
             <intent-filter>

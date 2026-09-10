@@ -91,6 +91,7 @@ data class AccountUiState(
     val dhuhaMinute: Int = 30,
     val dhuhaTimeLabel: String = "08:30",
     val dhuhaDays: Set<Int> = (1..7).toSet(),
+    val liveCountdownEnabled: Boolean = true,
     val showAdhanSheet: Boolean = false,
     val showLanguageSheet: Boolean = false,
     val appLanguage: AppLanguage = AppLanguage.ENGLISH,
@@ -250,8 +251,19 @@ class AccountViewModel @Inject constructor(
                 dhuhaHour = prayerNotificationPrefs.dhuhaHour(),
                 dhuhaMinute = prayerNotificationPrefs.dhuhaMinute(),
                 dhuhaTimeLabel = String.format("%02d:%02d", prayerNotificationPrefs.dhuhaHour(), prayerNotificationPrefs.dhuhaMinute()),
-                dhuhaDays = prayerNotificationPrefs.dhuhaDays()
+                dhuhaDays = prayerNotificationPrefs.dhuhaDays(),
+                liveCountdownEnabled = prayerNotificationPrefs.isLiveCountdownEnabled()
             )
+        }
+    }
+
+    fun setLiveCountdownEnabled(enabled: Boolean) {
+        prayerNotificationPrefs.setLiveCountdownEnabled(enabled)
+        _state.update { it.copy(liveCountdownEnabled = enabled) }
+        if (enabled) {
+            app.kamy.saatApp.infrastructure.notifications.LivePrayerCountdownManager.update(appContext)
+        } else {
+            app.kamy.saatApp.infrastructure.notifications.LivePrayerCountdownManager.cancel(appContext)
         }
     }
 

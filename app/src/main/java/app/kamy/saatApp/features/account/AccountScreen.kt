@@ -605,6 +605,28 @@ fun NotificationAdhanScreen(
 
             Spacer(Modifier.height(16.dp))
 
+            // Section: Live Prayer Countdown
+            SettingsSectionHeader(stringResource(R.string.channel_live_prayer_countdown))
+            SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_notification_custom,
+                    title = stringResource(R.string.setting_live_prayer_countdown),
+                    subtitle = if (state.liveCountdownEnabled) stringResource(R.string.state_on) else stringResource(R.string.state_off),
+                    checked = state.liveCountdownEnabled,
+                    onCheckedChange = vm::setLiveCountdownEnabled,
+                    showDivider = false
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = stringResource(R.string.setting_live_prayer_countdown_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+
+            Spacer(Modifier.height(16.dp))
+
             // Section 2: Notification Reading
             SettingsSectionHeader(stringResource(R.string.notif_section_reading))
             SettingsCard {

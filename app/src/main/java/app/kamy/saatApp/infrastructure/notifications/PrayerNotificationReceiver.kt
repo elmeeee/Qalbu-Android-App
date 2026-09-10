@@ -98,6 +98,7 @@ class PrayerNotificationReceiver : BroadcastReceiver() {
         CoroutineScope(SupervisorJob() + Dispatchers.Default).launch {
             try {
                 PrayerNotificationCoordinator.rescheduleFromCache(appContext)
+                LivePrayerCountdownManager.update(appContext)
             } catch (_: Throwable) {
                 // Reschedule failure is non-critical; next app launch will repair alarms.
             }

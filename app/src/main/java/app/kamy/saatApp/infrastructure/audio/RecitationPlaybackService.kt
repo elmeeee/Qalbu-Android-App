@@ -191,9 +191,6 @@ private class CustomMediaNotificationProvider(
             contentTitle = context.getString(R.string.notification_radio_title)
             contentText = metadata.title?.toString()?.ifBlank { "Radio Quran" } ?: "Radio Quran"
         } else {
-            // Format 2 — Saat Memutar Tilawah / Murottal Surah:
-            // Baris 1 (Judul Notifikasi): Sedang memutar surah {nama surahnya} (contoh: Sedang memutar surah Al-Fatihah)
-            // Baris 2 (Teks Notifikasi): {nama reciter} (contoh: Mishary Rashid Alafasy)
             val rawSurahName = metadata.title?.toString() ?: ""
             val cleanSurahName = rawSurahName
                 .removePrefix("Surah ")
@@ -203,8 +200,27 @@ private class CustomMediaNotificationProvider(
                 .trim()
                 .ifBlank { "Al-Qur'an" }
 
+            val rawAyah = metadata.albumTitle?.toString()?.trim()
+            val ayahNumber = if (!rawAyah.isNullOrBlank()) {
+                if (rawAyah.contains(":")) {
+                    rawAyah.substringAfter(":").trim()
+                } else {
+                    rawAyah.filter { it.isDigit() }.takeIf { it.isNotBlank() }
+                }
+            } else null
+
+            val verseLabel = if (!ayahNumber.isNullOrBlank()) {
+                context.getString(R.string.notification_verse_format, ayahNumber)
+            } else null
+
+            val reciter = metadata.artist?.toString()?.ifBlank { context.getString(R.string.app_name) } ?: context.getString(R.string.app_name)
+
             contentTitle = context.getString(R.string.notification_recitation_title_format, cleanSurahName)
-            contentText = metadata.artist?.toString()?.ifBlank { context.getString(R.string.app_name) } ?: context.getString(R.string.app_name)
+            contentText = if (verseLabel != null) {
+                "$verseLabel • $reciter"
+            } else {
+                reciter
+            }
         }
 
         val updatedNotification = NotificationCompat.Builder(context, defaultNotification.notification)

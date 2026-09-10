@@ -65,6 +65,7 @@ class MainActivity : ComponentActivity() {
 
         val startupError = try {
             AppReviewManager.recordAppLaunch(applicationContext)
+            runCatching { app.kamy.saatApp.infrastructure.notifications.LivePrayerCountdownManager.update(applicationContext) }
             enableEdgeToEdge(
                 statusBarStyle = androidx.activity.SystemBarStyle.light(
                     android.graphics.Color.TRANSPARENT,
