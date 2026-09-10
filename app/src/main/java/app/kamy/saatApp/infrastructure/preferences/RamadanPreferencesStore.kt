@@ -8,6 +8,9 @@ object RamadanPreferencesStore {
     private const val KEY_MODE_ENABLED = "mode_enabled"
     private const val KEY_TARAWIH_GOAL = "tarawih_goal"
     private const val KEY_TARAWIH_DONE_PREFIX = "tarawih_"
+    private const val KEY_FASTING_DONE_PREFIX = "fasting_"
+    private const val KEY_DOA_DONE_PREFIX = "doa_"
+    private const val KEY_SUNNAH_DONE_PREFIX = "sunnah_"
 
     fun isModeEnabled(context: Context): Boolean =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -53,6 +56,60 @@ object RamadanPreferencesStore {
         val day = PrayerTrackerStore.todayKey()
         val next = !isTarawihDone(context, day)
         setTarawihDone(context, next, day)
+        return next
+    }
+
+    fun isFastingDone(context: Context, dayKey: String = PrayerTrackerStore.todayKey()): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_FASTING_DONE_PREFIX + dayKey, true)
+
+    fun setFastingDone(context: Context, done: Boolean, dayKey: String = PrayerTrackerStore.todayKey()) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_FASTING_DONE_PREFIX + dayKey, done)
+            .apply()
+    }
+
+    fun toggleFastingDone(context: Context): Boolean {
+        val day = PrayerTrackerStore.todayKey()
+        val next = !isFastingDone(context, day)
+        setFastingDone(context, next, day)
+        return next
+    }
+
+    fun isDoaDone(context: Context, dayKey: String = PrayerTrackerStore.todayKey()): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_DOA_DONE_PREFIX + dayKey, false)
+
+    fun setDoaDone(context: Context, done: Boolean, dayKey: String = PrayerTrackerStore.todayKey()) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_DOA_DONE_PREFIX + dayKey, done)
+            .apply()
+    }
+
+    fun toggleDoaDone(context: Context): Boolean {
+        val day = PrayerTrackerStore.todayKey()
+        val next = !isDoaDone(context, day)
+        setDoaDone(context, next, day)
+        return next
+    }
+
+    fun isSunnahDone(context: Context, dayKey: String = PrayerTrackerStore.todayKey()): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_SUNNAH_DONE_PREFIX + dayKey, false)
+
+    fun setSunnahDone(context: Context, done: Boolean, dayKey: String = PrayerTrackerStore.todayKey()) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_SUNNAH_DONE_PREFIX + dayKey, done)
+            .apply()
+    }
+
+    fun toggleSunnahDone(context: Context): Boolean {
+        val day = PrayerTrackerStore.todayKey()
+        val next = !isSunnahDone(context, day)
+        setSunnahDone(context, next, day)
         return next
     }
 }

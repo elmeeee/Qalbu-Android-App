@@ -111,6 +111,7 @@ fun TodayScreen(
     onOpenPrayerCalendar: () -> Unit = {},
     onOpenTrackerCalendar: () -> Unit = {},
     onOpenChapterReader: (Int, Int) -> Unit = { _, _ -> },
+    onOpenRamadanDetail: () -> Unit = {},
     onTanyaSaatOpenChanged: (Boolean) -> Unit = {}
 ) {
     val todayVm: TodayViewModel = hiltViewModel()
@@ -472,7 +473,7 @@ fun TodayScreen(
                         TodayRamadanCard(
                             info = ramadanInfo,
                             backgroundRes = prayerState.ramadanCardBackground,
-                            onTap = onOpenPrayerCalendar,
+                            onTap = onOpenRamadanDetail,
                             modifier = Modifier.padding(horizontal = 20.dp)
                         )
                     }

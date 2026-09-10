@@ -609,4 +609,42 @@
     <string name="ramadan_imsak">Imsak</string>
     <string name="ramadan_iftar">Iftar</string>
     <string name="ramadan_days_unit">hari</string>
+
+    <!-- Ramadan Detail Screen Strings -->
+    <string name="ramadan_detail_title">Ramadan</string>
+    <string name="ramadan_greeting_caption">Semoga Ramadan ini membawamu lebih dekat kepada Allah 💚</string>
+    <string name="ramadan_quote_banner">Hari-hari yang lebih baik semakin dekat dengan setiap amal kebaikan 🤍</string>
+    <string name="fasting_today">Puasa Hari Ini</string>
+    <string name="you_are_fasting">Sedang berpuasa</string>
+    <string name="not_fasting">Tidak berpuasa</string>
+    <string name="time_until_iftar">Waktu menuju Iftar</string>
+    <string name="time_until_imsak">Waktu menuju Imsak</string>
+    <string name="ramadan_progress_percent_format">%1$d dari %2$d hari</string>
+    <string name="quran_goal_title">Target Qur\'an</string>
+    <string name="quran_goal_juz_format">%1$d / 30 Juz</string>
+    <string name="quran_goal_juz_completed">%1$d dari 30 Juz Selesai</string>
+    <string name="continue_reading_btn">Lanjut Membaca</string>
+    <string name="taraweeh_title">Tarawih</string>
+    <string name="taraweeh_desc">Pantau shalat tarawihmu di bulan Ramadan ini.</string>
+    <string name="mark_as_done_btn">Tandai Selesai</string>
+    <string name="completed_btn">Selesai</string>
+    <string name="ramadan_checklist_title">Checklist Ramadan Hari Ini</string>
+    <string name="see_all">Lihat Semua</string>
+    <string name="checklist_puasa">Puasa</string>
+    <string name="checklist_subuh">Subuh</string>
+    <string name="checklist_dzuhur">Dzuhur</string>
+    <string name="checklist_ashar">Ashar</string>
+    <string name="checklist_maghrib">Maghrib</string>
+    <string name="checklist_isya">Isya\'</string>
+    <string name="checklist_taraweeh">Tarawih</string>
+    <string name="checklist_quran">Al-Qur\'an</string>
+    <string name="checklist_dhikr">Dzikir</string>
+    <string name="checklist_doa">Doa</string>
+    <string name="checklist_sedekah">Sedekah</string>
+    <string name="ten_last_nights_title">10 Malam Terakhir</string>
+    <string name="ten_last_nights_desc">Tingkatkan ibadah di malam-malam yang penuh kemuliaan.</string>
+    <string name="toast_habit_completed">%1$s berhasil ditandai selesai</string>
+    <string name="toast_habit_uncompleted">%1$s dibatalkan</string>
+    <string name="toast_taraweeh_completed">Shalat Tarawih berhasil ditandai selesai</string>
+    <string name="toast_taraweeh_uncompleted">Tanda shalat Tarawih dibatalkan</string>
 </resources>

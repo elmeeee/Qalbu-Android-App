@@ -49,6 +49,7 @@ import app.kamy.saatApp.features.tools.faraidh.FaraidhCalculatorScreen
 import app.kamy.saatApp.features.quran.QuranBookmarksScreen
 import app.kamy.saatApp.features.today.PrayerCalendarScreen
 import app.kamy.saatApp.features.today.PrayerTrackerCalendarScreen
+import app.kamy.saatApp.features.today.RamadanDetailScreen
 import app.kamy.saatApp.features.today.TodayScreen
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.ui.components.FloatingAudioBar
@@ -79,8 +80,9 @@ internal fun shouldShowBottomBar(
         currentRoute == "prayer/tracker/calendar"
     val isToolRoute = currentRoute?.startsWith("tools/") == true
     val isBookmarksRoute = currentRoute == "quran/bookmarks"
+    val isRamadanDetailRoute = currentRoute == "ramadan/detail"
     return !isAccountDetailScreen && !isReaderRoute && !isPrayerCalendarRoute && !isToolRoute &&
-        !isBookmarksRoute
+        !isBookmarksRoute && !isRamadanDetailRoute
 }
 
 @Composable
@@ -164,7 +166,25 @@ fun RootScreen(
                     onOpenChapterReader = { chapter, ayah ->
                         navController.navigate("quran/reader/${chapter}?ayah=${ayah}") { launchSingleTop = true }
                     },
+                    onOpenRamadanDetail = {
+                        navController.navigate("ramadan/detail") { launchSingleTop = true }
+                    },
                     onTanyaSaatOpenChanged = { isTanyaSaatOpen = it }
+                )
+            }
+            composable(
+                route = "ramadan/detail",
+                enterTransition = { slideInHorizontally(tween(260)) { it } + fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(160)) },
+                popEnterTransition = { fadeIn(tween(160)) },
+                popExitTransition = { slideOutHorizontally(tween(240)) { it } + fadeOut(tween(160)) }
+            ) {
+                RamadanDetailScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenJuz = { juzNumber, verseKey ->
+                        val keyArg = verseKey?.let { java.net.URLEncoder.encode(it, Charsets.UTF_8.name()) }.orEmpty()
+                        navController.navigate("quran/juz/$juzNumber?verseKey=$keyArg") { launchSingleTop = true }
+                    }
                 )
             }
             composable("prayer/calendar") {
