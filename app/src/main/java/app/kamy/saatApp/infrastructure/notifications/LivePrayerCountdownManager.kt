@@ -35,7 +35,19 @@ object LivePrayerCountdownManager {
         }
 
         val bundle = PrayerScheduleCache.load(appContext)
-        if (bundle == null || bundle.adzanPrayers.isEmpty()) {
+        val cachedDay = PrayerDayCache.load(appContext)
+
+        val rawPrayers: List<PrayerNotificationItem> = when {
+            bundle != null && bundle.adzanPrayers.isNotEmpty() -> bundle.adzanPrayers
+            cachedDay != null && cachedDay.timings.isNotEmpty() -> {
+                cachedDay.timings.map { entry ->
+                    PrayerNotificationItem(entry.type.aladhanKey, entry.date.time)
+                }
+            }
+            else -> emptyList()
+        }
+
+        if (rawPrayers.isEmpty()) {
             return
         }
 
@@ -48,11 +60,8 @@ object LivePrayerCountdownManager {
             appContext.createConfigurationContext(config)
         }.getOrDefault(appContext)
 
-        val meta = PrayerScheduleCache.loadMeta(appContext)
-        val cachedDay = PrayerDayCache.load(appContext)
-
         val now = System.currentTimeMillis()
-        val prayers = bundle.adzanPrayers.sortedBy { it.fireAtMillis }
+        val prayers = rawPrayers.sortedBy { it.fireAtMillis }
 
         val nextPrayer = prayers.firstOrNull { it.fireAtMillis > now }
             ?: prayers.first().let { first ->
@@ -69,11 +78,13 @@ object LivePrayerCountdownManager {
             R.string.live_countdown_approaching_format,
             prayerName.uppercase(locale)
         )
-        val prefixText = localizedContext.getString(
-            R.string.live_countdown_in_format,
+
+        val towardsText = localizedContext.getString(
+            R.string.live_countdown_towards_format,
             prayerName
         )
 
+        val meta = PrayerScheduleCache.loadMeta(appContext)
         val cityLabel = meta?.cityLabel
             ?: cachedDay?.cityName
             ?: LocationPreferencesStore.from(appContext).displayLabel()
@@ -95,7 +106,7 @@ object LivePrayerCountdownManager {
         val expandedView = RemoteViews(appContext.packageName, R.layout.notification_prayer_live_countdown).apply {
             setTextViewText(R.id.tv_header_badge, headerBadgeText)
             setTextViewText(R.id.tv_prayer_time, timeString)
-            setTextViewText(R.id.tv_countdown_prefix, prefixText)
+            setTextViewText(R.id.tv_countdown_prefix, towardsText)
             setChronometer(R.id.chronometer_countdown, chronometerBase, null, true)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 setChronometerCountDown(R.id.chronometer_countdown, true)
@@ -104,8 +115,8 @@ object LivePrayerCountdownManager {
         }
 
         val collapsedView = RemoteViews(appContext.packageName, R.layout.notification_prayer_live_countdown_collapsed).apply {
-            setTextViewText(R.id.tv_collapsed_title, "$prayerName • $timeString")
-            setTextViewText(R.id.tv_collapsed_subtitle, footer)
+            setTextViewText(R.id.tv_collapsed_title, towardsText)
+            setTextViewText(R.id.tv_collapsed_prayer_time, "$prayerName $timeString")
             setChronometer(R.id.chronometer_countdown_collapsed, chronometerBase, null, true)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 setChronometerCountDown(R.id.chronometer_countdown_collapsed, true)
@@ -126,6 +137,8 @@ object LivePrayerCountdownManager {
 
         val notification = NotificationCompat.Builder(appContext, NotificationChannels.LIVE_PRAYER_COUNTDOWN)
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(towardsText)
+            .setContentText("$prayerName $timeString")
             .setCustomContentView(collapsedView)
             .setCustomBigContentView(expandedView)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())

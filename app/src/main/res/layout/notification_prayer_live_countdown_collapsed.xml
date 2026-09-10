@@ -5,9 +5,9 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingStart="4dp"
-    android:paddingTop="2dp"
+    android:paddingTop="4dp"
     android:paddingEnd="4dp"
-    android:paddingBottom="2dp"
+    android:paddingBottom="4dp"
     android:gravity="center_vertical">
 
     <LinearLayout
@@ -20,21 +20,23 @@
             android:id="@+id/tv_collapsed_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Subuh • 04:35"
-            android:textSize="14sp"
+            android:text="Menuju Subuh"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium"
             android:maxLines="1"
             android:ellipsize="end" />
 
         <TextView
-            android:id="@+id/tv_collapsed_subtitle"
+            android:id="@+id/tv_collapsed_prayer_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Jakarta"
-            android:textColor="#9CA3AF"
-            android:textSize="11sp"
-            android:layout_marginTop="2dp"
+            android:text="Subuh 04:35"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
             android:maxLines="1"
             android:ellipsize="end" />
     </LinearLayout>
@@ -43,8 +45,8 @@
         android:id="@+id/chronometer_countdown_collapsed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#10B981"
-        android:textSize="15sp"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
         android:textStyle="bold"
         android:fontFamily="monospace"
         android:countDown="true" />

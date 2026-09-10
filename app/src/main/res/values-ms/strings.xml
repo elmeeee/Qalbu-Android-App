@@ -78,10 +78,11 @@
     <string name="channel_live_prayer_countdown">Hitung Mundur Waktu Solat</string>
     <string name="channel_live_prayer_countdown_desc">Hitung mundur langsung waktu solat di skrin kunci</string>
     <string name="live_countdown_approaching_format">MENJELANG %1$s</string>
+    <string name="live_countdown_towards_format">Menuju %1$s</string>
     <string name="live_countdown_in_format">%1$s dalam</string>
     <string name="live_countdown_next_prayer_title">Waktu Solat Seterusnya</string>
     <string name="notification_verse_format">Ayat %1$s</string>
-    <string name="setting_live_prayer_countdown">Hitung Mundur Waktu Solat (Skrin Kunci)</string>
+    <string name="setting_live_prayer_countdown">Hitung Mundur Waktu Solat</string>
     <string name="setting_live_prayer_countdown_desc">Papar kad hitung mundur solat langsung di skrin kunci dan bar notifikasi</string>
     <string name="channel_sunnah">Bacaan sunnah</string>
     <string name="channel_sunnah_desc">Peringatan bacaan surah mingguan</string>

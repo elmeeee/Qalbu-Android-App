@@ -129,6 +129,7 @@ class PrayerDashboardViewModel @Inject constructor(
                 }
                 scheduleDayKey = dayKey()
                 recomputeActiveAndCountdown()
+                runCatching { app.kamy.saatApp.infrastructure.notifications.LivePrayerCountdownManager.update(appContext) }
             }
         }
 
@@ -246,6 +247,7 @@ class PrayerDashboardViewModel @Inject constructor(
             PrayerDayCache.save(appContext, result)
             scheduleDayKey = dayKey()
             recomputeActiveAndCountdown()
+            runCatching { app.kamy.saatApp.infrastructure.notifications.LivePrayerCountdownManager.update(appContext) }
             result.scheduleBundle?.let { bundle ->
                 PrayerNotificationCoordinator.onScheduleUpdated(
                     appContext,

@@ -19,7 +19,7 @@ object NotificationChannels {
     const val ADHAN_PLAYBACK = "adhan_playback"
     const val ADHAN_ALERT = "adhan_alert_v5"
     const val MEDIA_PLAYBACK = "media_playback"
-    const val LIVE_PRAYER_COUNTDOWN = "live_prayer_countdown_v1"
+    const val LIVE_PRAYER_COUNTDOWN = "live_prayer_countdown_v2"
     /** Old channel IDs that must be deleted so the new configuration takes effect. */
     private val DEPRECATED_CHANNELS = listOf(
         "daily_verse_v1", "daily_verse_v2", "daily_verse_v3", "daily_verse_v4", "daily_verse_v5",
@@ -27,7 +27,8 @@ object NotificationChannels {
         "prayer_alert_v1", "prayer_alert_v2", "prayer_alert_v3", "prayer_alert_v4", "prayer_alert_v5", "prayer_alert_v6", "prayer_alert_v7",
         "sunnah_reminders_v1", "sunnah_reminders_v2", "sunnah_reminders_v3", "sunnah_reminders_v4",
         "prayer_tracker_v1", "prayer_tracker_v2", "prayer_tracker_v3", "prayer_tracker_v4", "prayer_tracker_v5",
-        "adhan_alert_v1", "adhan_alert_v2", "adhan_alert_v3", "adhan_alert_v4"
+        "adhan_alert_v1", "adhan_alert_v2", "adhan_alert_v3", "adhan_alert_v4",
+        "live_prayer_countdown_v1"
     )
 
     fun ensureAll(context: Context) {
@@ -145,7 +146,7 @@ object NotificationChannels {
             NotificationChannel(
                 LIVE_PRAYER_COUNTDOWN,
                 context.getString(R.string.channel_live_prayer_countdown),
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = context.getString(R.string.channel_live_prayer_countdown_desc)
                 setSound(null, null)

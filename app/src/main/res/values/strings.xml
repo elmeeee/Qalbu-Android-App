@@ -78,10 +78,11 @@
     <string name="channel_live_prayer_countdown">Live Prayer Countdown</string>
     <string name="channel_live_prayer_countdown_desc">Live countdown to the next prayer on lockscreen</string>
     <string name="live_countdown_approaching_format">APPROACHING %1$s</string>
+    <string name="live_countdown_towards_format">Towards %1$s</string>
     <string name="live_countdown_in_format">%1$s in</string>
     <string name="live_countdown_next_prayer_title">Next Prayer</string>
     <string name="notification_verse_format">Verse %1$s</string>
-    <string name="setting_live_prayer_countdown">Lockscreen Live Prayer Countdown</string>
+    <string name="setting_live_prayer_countdown">Live Prayer Countdown</string>
     <string name="setting_live_prayer_countdown_desc">Show real-time prayer countdown card on lockscreen and notification bar</string>
     <string name="channel_sunnah">Sunnah reading</string>
     <string name="channel_sunnah_desc">Weekly surah reading reminders</string>
