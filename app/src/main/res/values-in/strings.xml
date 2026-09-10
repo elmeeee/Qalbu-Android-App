@@ -467,6 +467,7 @@
     <string name="terms_and_conditions">Syarat &amp; Ketentuan</string>
     <string name="coach_mark_skip">Lewati</string>
     <string name="coach_mark_finish">Selesai</string>
+    <string name="coach_mark_tap_to_continue">Ketuk di mana saja untuk lanjut</string>
     <string name="coach_mark_today_location_title">Lokasi &amp; Tanggal</string>
     <string name="coach_mark_today_location_desc">Lokasi kamu saat ini. Ketuk tanggal untuk melihat jadwal shalat &amp; kalender Hijriyah.</string>
     <string name="coach_mark_today_prayer_title">Jadwal Shalat</string>

@@ -463,6 +463,7 @@
     <string name="terms_and_conditions">Terma &amp; Syarat</string>
     <string name="coach_mark_skip">Langkau</string>
     <string name="coach_mark_finish">Selesai</string>
+    <string name="coach_mark_tap_to_continue">Ketik di mana-mana untuk teruskan</string>
     <string name="coach_mark_today_location_title">Lokasi &amp; Tarikh</string>
     <string name="coach_mark_today_location_desc">Lokasi anda semasa. Ketik tarikh untuk melihat jadual solat &amp; kalendar Hijriah.</string>
     <string name="coach_mark_today_prayer_title">Jadual Solat</string>

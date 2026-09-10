@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import coil.compose.AsyncImage
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -167,6 +168,7 @@ fun TodayScreen(
     
     val coachMarkState = rememberCoachMarkState()
     val ramadanCoachMarkState = rememberCoachMarkState()
+    val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         if (!onboardingStore.hasShownHomeCoachMark()) {
@@ -182,6 +184,23 @@ fun TodayScreen(
             kotlinx.coroutines.delay(1200)
             ramadanCoachMarkState.show()
             onboardingStore.markRamadanHomeCoachMarkShown()
+        }
+    }
+
+    LaunchedEffect(coachMarkState.currentStep, coachMarkState.isVisible) {
+        if (coachMarkState.isVisible) {
+            when (coachMarkState.currentStep) {
+                0 -> listState.animateScrollToItem(0)
+                2 -> listState.animateScrollToItem(1)
+                3 -> listState.animateScrollToItem(3)
+                4 -> listState.animateScrollToItem(5)
+            }
+        }
+    }
+
+    LaunchedEffect(ramadanCoachMarkState.currentStep, ramadanCoachMarkState.isVisible) {
+        if (ramadanCoachMarkState.isVisible) {
+            listState.animateScrollToItem(2)
         }
     }
 
@@ -307,7 +326,6 @@ fun TodayScreen(
 
 
 
-    val listState = rememberLazyListState()
     val isScrolled by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 40
@@ -439,7 +457,7 @@ fun TodayScreen(
                 }
 
                 item(key = "top_header_spacer") {
-                    Spacer(modifier = Modifier.height(90.dp))
+                    Spacer(modifier = Modifier.height(50.dp))
                 }
                 item(key = "prayer_card") {
                     PrayerDashboardCard(

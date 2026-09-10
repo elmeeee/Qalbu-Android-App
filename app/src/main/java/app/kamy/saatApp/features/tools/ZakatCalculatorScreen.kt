@@ -529,18 +529,15 @@ fun ZakatCalculatorScreen(
 
             // Directory of Official Zakat Bodies
             ZakatBodiesSection(
-                selectedCountry = state.selectedZakatCountry,
-                onSelectCountry = vm::updateZakatCountry
+                selectedCountry = state.selectedZakatCountry
             )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ZakatBodiesSection(
-    selectedCountry: ZakatCountry,
-    onSelectCountry: (ZakatCountry) -> Unit
+    selectedCountry: ZakatCountry
 ) {
     val context = LocalContext.current
     val bodies = remember(selectedCountry) { ZakatBodyRepository.byCountry(selectedCountry) }
@@ -558,33 +555,6 @@ private fun ZakatBodiesSection(
                 style = MaterialTheme.typography.bodySmall,
                 color = SaatColors.Slate500
             )
-        }
-
-        // Country Selector Chips
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(ZakatCountry.entries.toTypedArray()) { country ->
-                val isSelected = country == selectedCountry
-                FilterChip(
-                    selected = isSelected,
-                    onClick = { onSelectCountry(country) },
-                    label = {
-                        Text(
-                            text = "${country.emoji} ${stringResource(country.labelRes)}",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            maxLines = 1,
-                            softWrap = false
-                        )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = SaatColors.DeepEmerald,
-                        selectedLabelColor = Color.White
-                    )
-                )
-            }
         }
 
         if (selectedCountry == ZakatCountry.MALAYSIA) {
@@ -640,9 +610,26 @@ private fun ZakatBodyCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(SaatColors.MintWash)
+                    .border(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_institution_custom),
+                    contentDescription = body.name,
+                    tint = SaatColors.DeepEmerald,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(Modifier.width(14.dp))
+
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -683,7 +670,7 @@ private fun ZakatBodyCard(
             Spacer(Modifier.width(12.dp))
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
                     .background(SaatColors.DeepEmerald.copy(alpha = 0.08f)),
                 contentAlignment = Alignment.Center
@@ -692,7 +679,7 @@ private fun ZakatBodyCard(
                     imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                     contentDescription = stringResource(R.string.zakat_body_open_website),
                     tint = SaatColors.DeepEmerald,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }

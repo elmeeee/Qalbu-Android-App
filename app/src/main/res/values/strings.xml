@@ -874,6 +874,7 @@
     <!-- Coach Mark -->
     <string name="coach_mark_skip">Skip</string>
     <string name="coach_mark_finish">Finish</string>
+    <string name="coach_mark_tap_to_continue">Tap anywhere to continue</string>
     <string name="coach_mark_today_location_title">Location &amp; Date</string>
     <string name="coach_mark_today_location_desc">Your current location. Tap the date to view prayer schedule &amp; Hijri calendar.</string>
     <string name="coach_mark_today_prayer_title">Prayer Schedule</string>

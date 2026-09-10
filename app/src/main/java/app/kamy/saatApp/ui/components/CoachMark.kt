@@ -480,7 +480,7 @@ fun CoachMarkOverlay(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = if (state.isLastStep()) stringResource(R.string.coach_mark_finish) else "KETUK DI MANA SAJA UNTUK LANJUT",
+            text = if (state.isLastStep()) stringResource(R.string.coach_mark_finish).uppercase() else stringResource(R.string.coach_mark_tap_to_continue).uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontSize = 11.5.sp,
                 fontWeight = FontWeight.SemiBold,

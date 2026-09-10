@@ -117,6 +117,17 @@ fun RamadanDetailScreen(
         }
     }
 
+    LaunchedEffect(coachMarkState.currentStep, coachMarkState.isVisible) {
+        if (coachMarkState.isVisible) {
+            when (coachMarkState.currentStep) {
+                0 -> listState.animateScrollToItem(1)
+                1 -> listState.animateScrollToItem(3)
+                2 -> listState.animateScrollToItem(4)
+                3 -> listState.animateScrollToItem(5)
+            }
+        }
+    }
+
     fun showCustomToast(msg: String) {
         scope.launch {
             snackbarHostState.currentSnackbarData?.dismiss()

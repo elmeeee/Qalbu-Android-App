@@ -264,123 +264,123 @@ fun FaraidhCalculatorScreen(
                 onDone = { vm.toggleInputSheet(false) }
             )
         }
-    }
-
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
-        containerColor = SaatColors.HomeBg,
-        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            if (hasResult) {
-                Surface(
-                    shadowElevation = 12.dp,
-                    color = SaatColors.PureWhite,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                ) {
-                    Box(
+    } else {
+        Scaffold(
+            modifier = Modifier
+                .fillMaxSize(),
+            containerColor = SaatColors.HomeBg,
+            contentWindowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            bottomBar = {
+                if (hasResult) {
+                    Surface(
+                        shadowElevation = 12.dp,
+                        color = SaatColors.PureWhite,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp)
+                            .navigationBarsPadding()
                     ) {
-                        Button(
-                            onClick = {
-                                vm.exportPdf { uri ->
-                                    val share = Intent(Intent.ACTION_SEND).apply {
-                                        type = "application/pdf"
-                                        putExtra(Intent.EXTRA_STREAM, uri)
-                                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    }
-                                    context.startActivity(
-                                        Intent.createChooser(share, context.getString(R.string.faraidh_export_pdf))
-                                    )
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = SaatColors.DeepEmerald,
-                                contentColor = Color.White
-                            ),
-                            enabled = !state.pdfExporting
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = SaatSpacing.screenHorizontal, vertical = 12.dp)
                         ) {
-                            if (state.pdfExporting) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color = Color.White,
-                                    strokeWidth = 2.dp
-                                )
-                                Spacer(Modifier.width(10.dp))
-                            } else {
-                                Icon(
-                                    painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_pdf),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    vm.exportPdf { uri ->
+                                        val share = Intent(Intent.ACTION_SEND).apply {
+                                            type = "application/pdf"
+                                            putExtra(Intent.EXTRA_STREAM, uri)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(
+                                            Intent.createChooser(share, context.getString(R.string.faraidh_export_pdf))
+                                        )
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = SaatColors.DeepEmerald,
+                                    contentColor = Color.White
+                                ),
+                                enabled = !state.pdfExporting
+                            ) {
+                                if (state.pdfExporting) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(Modifier.width(10.dp))
+                                } else {
+                                    Icon(
+                                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_faraidh_pdf),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                }
+                                Text(stringResource(R.string.faraidh_export_pdf), fontWeight = FontWeight.SemiBold)
                             }
-                            Text(stringResource(R.string.faraidh_export_pdf), fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
             }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = padding.calculateBottomPadding())
-        ) {
-            FaraidhHeader(
-                onBack = onBack,
-                onInfo = { showTooltip = true },
-                onSave = { showSaveDialog = true },
-                onScenarios = { showScenarioList = true },
-                onReset = { vm.resetCalculation() }
-            )
-            Spacer(Modifier.height(8.dp))
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = padding.calculateBottomPadding())
+            ) {
+                FaraidhHeader(
+                    onBack = onBack,
+                    onInfo = { showTooltip = true },
+                    onSave = { showSaveDialog = true },
+                    onScenarios = { showScenarioList = true },
+                    onReset = { vm.resetCalculation() }
+                )
+                Spacer(Modifier.height(8.dp))
 
-            FaraidhStatusStrip(
-                netEstate = state.netEstate,
-                deceasedName = state.names.deceasedName,
-                heirCount = heirCount,
-                hasResult = hasResult,
-                currency = currency,
-                onEdit = { vm.toggleInputSheet(true) }
-            )
+                FaraidhStatusStrip(
+                    netEstate = state.netEstate,
+                    deceasedName = state.names.deceasedName,
+                    heirCount = heirCount,
+                    hasResult = hasResult,
+                    currency = currency,
+                    onEdit = { vm.toggleInputSheet(true) }
+                )
 
-            FaraidhPillTabs(
-                selectedTab = state.selectedTab,
-                onTabSelected = vm::selectTab
-            )
+                FaraidhPillTabs(
+                    selectedTab = state.selectedTab,
+                    onTabSelected = vm::selectTab
+                )
 
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                when (state.selectedTab) {
-                    0 -> FaraidhBreakdownTab(
-                        result = state.result,
-                        estateComputation = state.estateComputation,
-                        names = state.names,
-                        currency = currency,
-                        hasHeirs = heirCount > 0,
-                        onStart = { vm.toggleInputSheet(true) }
-                    )
-                    1 -> FaraidhSilsilahTab(
-                        nodes = state.result?.silsilah.orEmpty(),
-                        hasHeirs = heirCount > 0,
-                        currency = currency,
-                        onStart = { vm.toggleInputSheet(true) }
-                    )
-                    2 -> FaraidhDalilTab(
-                        proofs = state.proofs,
-                        hasResult = hasResult,
-                        onOpenVerse = onOpenVerse,
-                        onOpenUrl = { url -> context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) },
-                        onStart = { vm.toggleInputSheet(true) }
-                    )
-                    else -> FaraidhGlossaryTab(glossary = state.glossary)
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    when (state.selectedTab) {
+                        0 -> FaraidhBreakdownTab(
+                            result = state.result,
+                            estateComputation = state.estateComputation,
+                            names = state.names,
+                            currency = currency,
+                            hasHeirs = heirCount > 0,
+                            onStart = { vm.toggleInputSheet(true) }
+                        )
+                        1 -> FaraidhSilsilahTab(
+                            nodes = state.result?.silsilah.orEmpty(),
+                            hasHeirs = heirCount > 0,
+                            currency = currency,
+                            onStart = { vm.toggleInputSheet(true) }
+                        )
+                        2 -> FaraidhDalilTab(
+                            proofs = state.proofs,
+                            hasResult = hasResult,
+                            onOpenVerse = onOpenVerse,
+                            onOpenUrl = { url -> context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) },
+                            onStart = { vm.toggleInputSheet(true) }
+                        )
+                        else -> FaraidhGlossaryTab(glossary = state.glossary)
+                    }
                 }
             }
         }
