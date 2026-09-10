@@ -64,7 +64,8 @@ data class RamadanDetailUiState(
     val lastReadVerseKey: String? = null,
     val quranTotalJuz: Int = 30,
     val isTarawihDone: Boolean = false,
-    val checklistDoneMap: Map<RamadanChecklistItem, Boolean> = emptyMap()
+    val checklistDoneMap: Map<RamadanChecklistItem, Boolean> = emptyMap(),
+    val isTenLastNightsVisible: Boolean = false
 )
 
 @HiltViewModel
@@ -141,6 +142,9 @@ class RamadanDetailViewModel @Inject constructor(
             val isFasting = RamadanPreferencesStore.isFastingDone(appContext)
             val checklistMap = buildChecklistMap()
 
+            val isForceTenNights = RamadanPreferencesStore.isForceTenLastNightsEnabled(appContext)
+            val isTenLastNightsVisible = isForceTenNights || (currentDay in 21..totalDays)
+
             _state.update {
                 it.copy(
                     dayNumber = currentDay,
@@ -157,7 +161,8 @@ class RamadanDetailViewModel @Inject constructor(
                     completedJuzCount = completedJuzCount,
                     lastReadVerseKey = lastVerseKey,
                     isTarawihDone = isTarawih,
-                    checklistDoneMap = checklistMap
+                    checklistDoneMap = checklistMap,
+                    isTenLastNightsVisible = isTenLastNightsVisible
                 )
             }
             recomputeCountdown(cachedTimings)

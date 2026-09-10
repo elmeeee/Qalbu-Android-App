@@ -496,6 +496,11 @@
     <string name="settings_main_subtitle">Konfigurasi dan keutamaan aplikasi</string>
     <string name="settings_section_general">Tetapan Umum</string>
     <string name="settings_section_prayer_calc">Pengiraan Waktu Solat</string>
+    <string name="settings_section_ramadan_testing">Ramadan &amp; 10 Malam Terakhir (Pengujian)</string>
+    <string name="settings_force_ramadan_title">Simulasi Mod Ramadan</string>
+    <string name="settings_force_ramadan_desc">Pamerkan kad papan pemuka Ramadan untuk pengujian</string>
+    <string name="settings_force_ten_nights_title">Simulasi 10 Malam Terakhir</string>
+    <string name="settings_force_ten_nights_desc">Pamerkan kad 10 Malam Terakhir dalam butiran Ramadan</string>
     <string name="settings_section_about_saat">Mengenai Saat</string>
     <string name="settings_item_language">Bahasa</string>
     <string name="settings_item_notification">Pemberitahuan</string>

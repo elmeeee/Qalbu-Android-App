@@ -123,7 +123,7 @@ fun RamadanDetailScreen(
                 0 -> listState.animateScrollToItem(1)
                 1 -> listState.animateScrollToItem(3)
                 2 -> listState.animateScrollToItem(4)
-                3 -> listState.animateScrollToItem(5)
+                3 -> if (state.isTenLastNightsVisible) listState.animateScrollToItem(5)
             }
         }
     }
@@ -356,22 +356,24 @@ fun RamadanDetailScreen(
                 )
             }
 
-            // Card 5: 10 Malam Terakhir
-            item(key = "ten_last_nights_card") {
-                TenLastNightsCard(
-                    onClick = {
-                        performTapHaptic()
-                        onOpenTenLastNights()
-                    },
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .coachMarkTarget(
-                            coachMarkState,
-                            3,
-                            R.string.coach_mark_ramadan_ten_nights_title,
-                            R.string.coach_mark_ramadan_ten_nights_desc
-                        )
-                )
+            // Card 5: 10 Malam Terakhir (Only shown during the last 10 nights or when testing toggle is enabled)
+            if (state.isTenLastNightsVisible) {
+                item(key = "ten_last_nights_card") {
+                    TenLastNightsCard(
+                        onClick = {
+                            performTapHaptic()
+                            onOpenTenLastNights()
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .coachMarkTarget(
+                                coachMarkState,
+                                3,
+                                R.string.coach_mark_ramadan_ten_nights_title,
+                                R.string.coach_mark_ramadan_ten_nights_desc
+                            )
+                    )
+                }
             }
         }
 

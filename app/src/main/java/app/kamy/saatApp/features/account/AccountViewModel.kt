@@ -102,7 +102,9 @@ data class AccountUiState(
     val showMadhabSheet: Boolean = false,
     val selectedAdhanVoice: AdhanVoice = AdhanVoice.DEFAULT,
     val selectedFajrVoice: FajrAdhanVoice = FajrAdhanVoice.DEFAULT,
-    val previewingAdhanVoiceId: String? = null
+    val previewingAdhanVoiceId: String? = null,
+    val forceRamadanMode: Boolean = false,
+    val forceTenLastNights: Boolean = false
 ) {
     fun isPrayerNotificationEnabled(type: PrayerType): Boolean = when (type) {
         PrayerType.FAJR -> fajrNotificationEnabled
@@ -282,9 +284,21 @@ class AccountViewModel @Inject constructor(
                 appLanguage = appLanguageStore.current(),
                 appTheme = themeStore.currentTheme(),
                 prayerMadhab = prayerMethodStore.currentMadhab(),
-                surahReminders = surahReminderStore.getReminders()
+                surahReminders = surahReminderStore.getReminders(),
+                forceRamadanMode = app.kamy.saatApp.infrastructure.preferences.RamadanPreferencesStore.isForceRamadanEnabled(appContext),
+                forceTenLastNights = app.kamy.saatApp.infrastructure.preferences.RamadanPreferencesStore.isForceTenLastNightsEnabled(appContext)
             )
         }
+    }
+
+    fun setForceRamadanMode(enabled: Boolean) {
+        app.kamy.saatApp.infrastructure.preferences.RamadanPreferencesStore.setForceRamadanEnabled(appContext, enabled)
+        _state.update { it.copy(forceRamadanMode = enabled) }
+    }
+
+    fun setForceTenLastNights(enabled: Boolean) {
+        app.kamy.saatApp.infrastructure.preferences.RamadanPreferencesStore.setForceTenLastNightsEnabled(appContext, enabled)
+        _state.update { it.copy(forceTenLastNights = enabled) }
     }
 
     fun openLanguageSheet() {

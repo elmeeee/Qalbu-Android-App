@@ -913,6 +913,11 @@
     <string name="settings_main_subtitle">App preferences and configuration</string>
     <string name="settings_section_general">General settings</string>
     <string name="settings_section_prayer_calc">Prayer Calculation</string>
+    <string name="settings_section_ramadan_testing">Ramadan &amp; The Last 10 Nights (Testing)</string>
+    <string name="settings_force_ramadan_title">Ramadan Mode Simulation</string>
+    <string name="settings_force_ramadan_desc">Display Ramadan dashboard card for testing</string>
+    <string name="settings_force_ten_nights_title">The Last 10 Nights Simulation</string>
+    <string name="settings_force_ten_nights_desc">Display The Last 10 Nights card in Ramadan detail</string>
     <string name="settings_section_about_saat">About Saat</string>
     <string name="settings_item_language">Language</string>
     <string name="settings_item_notification">Notification</string>

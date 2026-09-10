@@ -430,7 +430,30 @@ private fun AccountSettingsContent(
 
             Spacer(Modifier.height(16.dp))
 
-            // 3. About Sāat
+            // 3. Ramadan & 10 Last Nights Simulation (Testing)
+            SettingsSectionHeader(stringResource(R.string.settings_section_ramadan_testing))
+            SettingsCard {
+                SettingsCustomRow(
+                    iconRes = R.drawable.taraweh_icon,
+                    title = stringResource(R.string.settings_force_ramadan_title),
+                    subtitle = stringResource(R.string.settings_force_ramadan_desc),
+                    checked = state.forceRamadanMode,
+                    onCheckedChange = vm::setForceRamadanMode,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ramadan_quran_goal,
+                    title = stringResource(R.string.settings_force_ten_nights_title),
+                    subtitle = stringResource(R.string.settings_force_ten_nights_desc),
+                    checked = state.forceTenLastNights,
+                    onCheckedChange = vm::setForceTenLastNights,
+                    showDivider = false
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // 4. About Sāat
             SettingsSectionHeader(stringResource(R.string.settings_section_about_saat))
             SettingsCard {
                 SettingsCustomRow(

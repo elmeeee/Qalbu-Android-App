@@ -462,8 +462,10 @@ class PrayerDashboardViewModel @Inject constructor(
             }
         }
 
-        // Fallback using current active Hijri month's dynamic calendar progression
-        if (ramadan == null) {
+        val isForceRamadan = app.kamy.saatApp.infrastructure.preferences.RamadanPreferencesStore.isForceRamadanEnabled(appContext)
+
+        // Fallback simulation only when Testing/Developer toggle is active
+        if (ramadan == null && isForceRamadan) {
             val khgtToday = runCatching { khgtCalendar.todayInfo() }.getOrNull()
             val localDate = nowCal.toInstant().atZone(nowCal.timeZone.toZoneId()).toLocalDate()
             val hijrah = java.time.chrono.HijrahDate.from(localDate)

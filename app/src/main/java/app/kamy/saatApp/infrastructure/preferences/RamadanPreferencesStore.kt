@@ -12,6 +12,31 @@ object RamadanPreferencesStore {
     private const val KEY_DOA_DONE_PREFIX = "doa_"
     private const val KEY_SUNNAH_DONE_PREFIX = "sunnah_"
 
+    private const val KEY_FORCE_RAMADAN_MODE = "force_ramadan_mode"
+    private const val KEY_FORCE_TEN_LAST_NIGHTS = "force_ten_last_nights"
+
+    fun isForceRamadanEnabled(context: Context): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_FORCE_RAMADAN_MODE, false)
+
+    fun setForceRamadanEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_FORCE_RAMADAN_MODE, enabled)
+            .apply()
+    }
+
+    fun isForceTenLastNightsEnabled(context: Context): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_FORCE_TEN_LAST_NIGHTS, false)
+
+    fun setForceTenLastNightsEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_FORCE_TEN_LAST_NIGHTS, enabled)
+            .apply()
+    }
+
     fun isModeEnabled(context: Context): Boolean =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getBoolean(KEY_MODE_ENABLED, isRamadanSeason(context))
