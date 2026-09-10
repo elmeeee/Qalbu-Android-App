@@ -13,9 +13,6 @@
     <string name="channel_adhan_alert">Peringatan adzan</string>
     <string name="channel_adhan_alert_desc">Memutar adzan saat pemutaran penuh tidak bisa dimulai</string>
     <string name="chapters_refresh_failed">Gagal memuat ulang daftar surat</string>
-    <string name="daily_verse_widget_desc">Ayat hari ini di layar utama</string>
-    <string name="daily_verse_widget_empty">Buka SĀAT untuk memuat ayat hari ini</string>
-    <string name="daily_verse_widget_title">Ayat hari ini</string>
     <string name="dhikr_alhamdulillah">Alhamdulillah</string>
     <string name="dhikr_allahuakbar">Allahu Akbar</string>
     <string name="dhikr_istighfar">Istighfar</string>

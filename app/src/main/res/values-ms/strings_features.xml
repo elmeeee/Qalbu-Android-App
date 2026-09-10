@@ -13,9 +13,6 @@
     <string name="channel_adhan_alert">Amaran azan</string>
     <string name="channel_adhan_alert_desc">Main azan apabila mainan penuh tidak boleh dimulakan</string>
     <string name="chapters_refresh_failed">Gagal memuat semula senarai surah</string>
-    <string name="daily_verse_widget_desc">Ayat hari ini di skrin utama</string>
-    <string name="daily_verse_widget_empty">Buka SĀAT untuk memuatkan ayat hari ini</string>
-    <string name="daily_verse_widget_title">Ayat hari ini</string>
     <string name="dhikr_alhamdulillah">Alhamdulillah</string>
     <string name="dhikr_allahuakbar">Allahu Akbar</string>
     <string name="dhikr_istighfar">Istighfar</string>

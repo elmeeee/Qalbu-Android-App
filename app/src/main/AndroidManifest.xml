@@ -136,27 +136,15 @@
             android:exported="false" />
 
         <receiver
-            android:name=".infrastructure.widget.DailyVerseWidgetProvider"
+            android:name=".infrastructure.widget.PrayerWidgetProvider"
             android:exported="true"
-            android:label="@string/daily_verse_widget_title">
+            android:label="@string/prayer_widget_title">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/daily_verse_widget_info" />
-        </receiver>
-
-        <receiver
-            android:name=".infrastructure.widget.PrayerNextWidgetProvider"
-            android:exported="true"
-            android:label="@string/prayer_widget_next_title">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/prayer_next_widget_info" />
+                android:resource="@xml/prayer_widget_large_info" />
         </receiver>
 
         <service

@@ -208,10 +208,13 @@
     <string name="location_save_city">Simpan lokasi</string>
     <string name="location_use_gps">Gunakan lokasi saat ini</string>
     <string name="location_search_not_found">Tempat tidak ditemukan. Coba kota terdekat.</string>
-    <string name="prayer_calendar_load_failed">Gagal memuat kalender sholat</string>
+    <string name="prayer_widget_title">Waktu Shalat</string>
+    <string name="prayer_widget_desc">Widget jadwal shalat lengkap dengan lokasi dan tanggal Hijriah</string>
+    <string name="prayer_widget_status_soon">Segera</string>
+    <string name="prayer_widget_status_now">Berlangsung</string>
     <string name="prayer_widget_empty">Buka Saat untuk memuat jadwal sholat</string>
     <string name="prayer_widget_next_label">Sholat berikutnya</string>
-    <string name="prayer_widget_in_progress">Sekarang</string>
+    <string name="prayer_widget_in_progress">Berlangsung</string>
     <string name="prayer_widget_at_time">Adzan pukul %1$s</string>
     <string name="prayer_calendar_title">Kalender sholat</string>
     <string name="onboarding_brand_title">Sāat</string>

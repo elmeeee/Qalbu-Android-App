@@ -8,8 +8,7 @@ object WidgetCoordinator {
 
     fun refreshAll(context: Context) {
         val appContext = context.applicationContext
-        PrayerNextWidgetUpdater.updateAll(appContext)
-        DailyVerseWidgetUpdater.updateAll(appContext)
+        PrayerWidgetUpdater.updateAll(appContext)
     }
 
     fun hasAnyWidgets(context: Context): Boolean {
@@ -31,7 +30,6 @@ object WidgetCoordinator {
     }
 
     private fun widgetProviders(): List<Class<*>> = listOf(
-        PrayerNextWidgetProvider::class.java,
-        DailyVerseWidgetProvider::class.java
+        PrayerWidgetProvider::class.java
     )
 }

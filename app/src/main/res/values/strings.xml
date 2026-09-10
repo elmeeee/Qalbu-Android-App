@@ -504,11 +504,12 @@
     <string name="spiritual_tools_tab_subtitle">Qibla, doa, zikir, and more</string>
     <string name="reader_scroll_hint">Swipe left or right to navigate verses</string>
     <string name="chapters_refresh_failed">Couldn\'t refresh chapters</string>
-    <string name="daily_verse_widget_title">Verse of the day</string>
-    <string name="daily_verse_widget_desc">Today\'s ayah on your home screen</string>
-    <string name="daily_verse_widget_empty">Open Saat to load today\'s verse</string>
-    <string name="prayer_widget_next_title">Next prayer</string>
-    <string name="prayer_widget_next_desc">Countdown to the next adhan</string>
+    <string name="prayer_widget_title">Prayer Times</string>
+    <string name="prayer_widget_desc">Large prayer schedule widget with location and Hijri date</string>
+    <string name="prayer_widget_status_soon">Soon</string>
+    <string name="prayer_widget_status_now">Now</string>
+    <string name="prayer_widget_next_title">Prayer Times</string>
+    <string name="prayer_widget_next_desc">Large prayer schedule widget with location and Hijri date</string>
     <string name="shortcut_continue_quran">Continue Quran</string>
     <string name="shortcut_prayer_today">Prayer times</string>
     <string name="faraidh_title">Faraidh</string>

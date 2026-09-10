@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/prayer_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_widget_container_clip"
+    android:clipToOutline="true">
+
+    <!-- Background Artwork Layer with centerCrop to PREVENT STRETCHING -->
+    <ImageView
+        android:id="@+id/widget_bg_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_widget_large" />
+
+    <!-- Content Overlay Container -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="12dp">
+
+        <!-- Top Header (Icon + Title + Subtitle) -->
+        <LinearLayout
+            android:id="@+id/widget_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Mosque Circle Icon -->
+            <FrameLayout
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_widget_icon_circle">
+
+                <ImageView
+                    android:id="@+id/widget_mosque_icon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_widget_mosque" />
+            </FrameLayout>
+
+            <!-- Title & Location + Hijri Subtitle -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="9dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/widget_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/prayer_widget_title"
+                    android:textColor="#103B2B"
+                    android:textSize="14.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="0.5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Jakarta, 12 Ramadan 1448 H"
+                    android:textColor="#234939"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Bottom Prayer Times Row (5 slots) -->
+        <LinearLayout
+            android:id="@+id/widget_schedule_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Slot 1: Subuh / Fajr -->
+            <LinearLayout
+                android:id="@+id/widget_slot_1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_widget_active_slot"
+                android:gravity="center"
+                android:minHeight="54dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:id="@+id/widget_slot_1_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Subuh"
+                    android:textColor="#E0EDE7"
+                    android:textSize="10.5sp" />
+
+                <TextView
+                    android:id="@+id/widget_slot_1_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="0.5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="04:35"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_slot_1_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Segera"
+                    android:textColor="#E0EDE7"
+                    android:textSize="9.5sp" />
+            </LinearLayout>
+
+            <!-- Slot 2: Dzuhur / Dhuhr -->
+            <LinearLayout
+                android:id="@+id/widget_slot_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_widget_slots_container"
+                android:gravity="center"
+                android:minHeight="54dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:id="@+id/widget_slot_2_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Dzuhur"
+                    android:textColor="#234939"
+                    android:textSize="10.5sp" />
+
+                <TextView
+                    android:id="@+id/widget_slot_2_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="0.5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="11:52"
+                    android:textColor="#103B2B"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_slot_2_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Segera"
+                    android:textColor="#E0EDE7"
+                    android:textSize="9.5sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Slot 3: Ashar / Asr -->
+            <LinearLayout
+                android:id="@+id/widget_slot_3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_widget_slots_container"
+                android:gravity="center"
+                android:minHeight="54dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:id="@+id/widget_slot_3_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Ashar"
+                    android:textColor="#234939"
+                    android:textSize="10.5sp" />
+
+                <TextView
+                    android:id="@+id/widget_slot_3_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="0.5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="15:14"
+                    android:textColor="#103B2B"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_slot_3_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Segera"
+                    android:textColor="#E0EDE7"
+                    android:textSize="9.5sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Slot 4: Maghrib -->
+            <LinearLayout
+                android:id="@+id/widget_slot_4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="2dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_widget_slots_container"
+                android:gravity="center"
+                android:minHeight="54dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:id="@+id/widget_slot_4_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Maghrib"
+                    android:textColor="#234939"
+                    android:textSize="10.5sp" />
+
+                <TextView
+                    android:id="@+id/widget_slot_4_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="0.5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="18:11"
+                    android:textColor="#103B2B"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_slot_4_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Segera"
+                    android:textColor="#E0EDE7"
+                    android:textSize="9.5sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Slot 5: Isya / Isha -->
+            <LinearLayout
+                android:id="@+id/widget_slot_5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_widget_slots_container"
+                android:gravity="center"
+                android:minHeight="54dp"
+                android:orientation="vertical"
+                android:paddingHorizontal="2dp"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:id="@+id/widget_slot_5_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Isya"
+                    android:textColor="#234939"
+                    android:textSize="10.5sp" />
+
+                <TextView
+                    android:id="@+id/widget_slot_5_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="0.5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="19:20"
+                    android:textColor="#103B2B"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_slot_5_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Segera"
+                    android:textColor="#E0EDE7"
+                    android:textSize="9.5sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+</FrameLayout>

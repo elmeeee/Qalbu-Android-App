@@ -4,29 +4,24 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 
-class PrayerNextWidgetProvider : AppWidgetProvider() {
+class PrayerWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        val snapshot = PrayerWidgetRenderer.snapshot(context)
-        appWidgetIds.forEach { id ->
-            runCatching {
-                appWidgetManager.updateAppWidget(
-                    id,
-                    PrayerNextWidgetUpdater.buildViews(context, snapshot)
-                )
-            }
-        }
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        PrayerWidgetUpdater.updateAll(context)
     }
 
     override fun onEnabled(context: Context) {
+        super.onEnabled(context)
         WidgetCoordinator.onWidgetsEnabled(context)
     }
 
     override fun onDisabled(context: Context) {
+        super.onDisabled(context)
         WidgetCoordinator.onWidgetsDisabled(context)
     }
 }
