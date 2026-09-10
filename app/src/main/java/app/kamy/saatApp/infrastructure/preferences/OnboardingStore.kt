@@ -54,6 +54,24 @@ class OnboardingStore @Inject constructor(
         prefs.edit().putBoolean(KEY_CHAPTERS_COACH_MARK, true).apply()
     }
 
+    fun hasShownRamadanHomeCoachMark(): Boolean = prefs.getBoolean(KEY_RAMADAN_HOME_COACH_MARK, false)
+
+    fun markRamadanHomeCoachMarkShown() {
+        prefs.edit().putBoolean(KEY_RAMADAN_HOME_COACH_MARK, true).apply()
+    }
+
+    fun hasShownRamadanDetailCoachMark(): Boolean = prefs.getBoolean(KEY_RAMADAN_DETAIL_COACH_MARK, false)
+
+    fun markRamadanDetailCoachMarkShown() {
+        prefs.edit().putBoolean(KEY_RAMADAN_DETAIL_COACH_MARK, true).apply()
+    }
+
+    fun hasShownTenLastNightsCoachMark(): Boolean = prefs.getBoolean(KEY_TEN_LAST_NIGHTS_COACH_MARK, false)
+
+    fun markTenLastNightsCoachMarkShown() {
+        prefs.edit().putBoolean(KEY_TEN_LAST_NIGHTS_COACH_MARK, true).apply()
+    }
+
     fun isFirstLaunchDefaultApplied(): Boolean =
         prefs.getBoolean(KEY_FIRST_LAUNCH_DEFAULTS, false)
 
@@ -72,6 +90,9 @@ class OnboardingStore @Inject constructor(
         private const val KEY_ASMAUL_COACH_MARK = "asmaul_coach_mark_shown"
         private const val KEY_RADIO_COACH_MARK = "radio_coach_mark_shown"
         private const val KEY_CHAPTERS_COACH_MARK = "chapters_coach_mark_shown"
+        private const val KEY_RAMADAN_HOME_COACH_MARK = "ramadan_home_coach_mark_shown"
+        private const val KEY_RAMADAN_DETAIL_COACH_MARK = "ramadan_detail_coach_mark_shown"
+        private const val KEY_TEN_LAST_NIGHTS_COACH_MARK = "ten_last_nights_coach_mark_shown"
         private const val KEY_FIRST_LAUNCH_DEFAULTS = "first_launch_defaults_applied"
     }
 }

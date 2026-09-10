@@ -1,0 +1,104 @@
+{
+  "title": {
+    "en": "About Lailatul Qadr",
+    "id": "Tentang Lailatul Qadr",
+    "ms": "Tentang Lailatul Qadr"
+  },
+  "subtitle": {
+    "en": "Virtues, Signs, and Recommended Deeds",
+    "id": "Keutamaan, Tanda-tanda, dan Amalan yang Dianjurkan",
+    "ms": "Keutamaan, Tanda-tanda, dan Amalan yang Disunnahkan"
+  },
+  "sections": [
+    {
+      "id": "meaning",
+      "heading": {
+        "en": "What is Lailatul Qadr?",
+        "id": "Apa itu Lailatul Qadr?",
+        "ms": "Apakah itu Lailatul Qadr?"
+      },
+      "content": {
+        "en": "Lailatul Qadr (The Night of Decree / Power) is the most glorious night of the whole year. On this night, Allah first revealed the Holy Qur'an to Prophet Muhammad (peace be upon him) through Angel Jibril.",
+        "id": "Lailatul Qadr (Malam Kemuliaan) adalah malam yang paling agung dan penuh berkah dalam sepanjang tahun. Pada malam inilah Al-Qur'an pertama kali diturunkan kepada Nabi Muhammad ﷺ melalui Malaikat Jibril.",
+        "ms": "Lailatul Qadr (Malam Kemuliaan) adalah malam yang paling agung dan diberkati sepanjang tahun. Pada malam inilah Al-Quran pertama kali diturunkan kepada Nabi Muhammad ﷺ melalui Malaikat Jibril."
+      },
+      "quran_reference": {
+        "verse": "إِنَّا أَنزَلْنَاهُ فِي لَيْلَةِ الْقَدْرِ",
+        "reference": "QS. Al-Qadr (97:1)",
+        "translation": {
+          "en": "\"Indeed, We sent the Qur'an down during the Night of Decree.\"",
+          "id": "\"Sesungguhnya Kami telah menurunkannya (Al-Qur'an) pada malam kemuliaan.\"",
+          "ms": "\"Sesungguhnya Kami telah menurunkannya (Al-Quran) pada malam kemuliaan.\""
+        }
+      }
+    },
+    {
+      "id": "virtues",
+      "heading": {
+        "en": "Great Virtues of Lailatul Qadr",
+        "id": "Keutamaan Agung Lailatul Qadr",
+        "ms": "Keutamaan Agung Lailatul Qadr"
+      },
+      "content": {
+        "en": "1. Better than a Thousand Months: Acts of worship performed on this night are better in reward than worshiping continuously for 1,000 months (over 83 years and 4 months).\n2. Descent of Angels: Countless angels, led by Jibril ('alaihis salam), descend upon the earth bringing peace, blessings, and mercy until dawn.\n3. Forgiveness of All Past Sins: Whoever stands in voluntary prayer during Lailatul Qadr with faith and seeking Allah's reward will have all previous sins forgiven.",
+        "id": "1. Lebih Baik dari 1.000 Bulan: Nilai ibadah dan amal saleh pada malam ini lebih utama daripada beribadah selama 1.000 bulan (lebih dari 83 tahun 4 bulan).\n2. Turunnya Para Malaikat: Malaikat-malaikat dan Jibril 'alaihissalam turun ke bumi membawa ketenangan, rahmat, dan keselamatan hingga terbit fajar.\n3. Pengampunan Seluruh Dosa: Siapa saja yang mendirikan shalat pada malam Lailatul Qadr karena iman dan mengharap pahala dari Allah, niscaya diampuni dosa-dosanya yang telah lalu.",
+        "ms": "1. Lebih Baik daripada 1,000 Bulan: Nilai ibadah dan amal soleh pada malam ini lebih utama daripada beribadah selama 1,000 bulan (lebih daripada 83 tahun 4 bulan).\n2. Turunnya Para Malaikat: Para malaikat bersama Jibril 'alaihissalam turun ke bumi membawa ketenangan, rahmat, dan keselamatan hingga terbit fajar.\n3. Keampunan Seluruh Dosa: Sesiapa yang mendirikan solat pada malam Lailatul Qadr kerana iman dan mengharapkan ganjaran Allah, nescaya diampunkan dosa-dosanya yang lalu."
+      },
+      "hadith_reference": {
+        "reference": "HR. Bukhari no. 1901 & Muslim no. 760",
+        "text": {
+          "en": "\"Whoever stands in prayer on Lailatul Qadr out of faith and expectation of reward, all their past sins will be forgiven.\"",
+          "id": "\"Barangsiapa shalat pada malam Lailatul Qadar karena iman dan mengharap pahala, maka diampuni dosa-dosanya yang telah lalu.\"",
+          "ms": "\"Sesiapa yang solat pada malam Lailatul Qadar kerana iman dan mengharapkan pahala, maka diampunkan dosa-dosanya yang telah lalu.\""
+        }
+      }
+    },
+    {
+      "id": "timing",
+      "heading": {
+        "en": "When Does It Occur?",
+        "id": "Kapan Waktu Lailatul Qadr?",
+        "ms": "Bilakah Waktu Lailatul Qadr?"
+      },
+      "content": {
+        "en": "Prophet Muhammad ﷺ instructed us to seek Lailatul Qadr among the odd nights during the last ten nights of Ramadan (the 21st, 23rd, 25th, 27th, and 29th nights). Allah keeps the exact night hidden so believers remain diligent and dedicated throughout all ten nights.",
+        "id": "Rasulullah ﷺ menganjurkan kita untuk mencari Lailatul Qadr pada malam-malam ganjil di sepuluh malam terakhir Ramadan (malam ke-21, 23, 25, 27, dan 29). Allah merahasiakan kepastian malamnya agar kaum mukminin senantiasa bersemangat menghidupkan seluruh malam-malam terakhir.",
+        "ms": "Rasulullah ﷺ menganjurkan kita untuk mencari Lailatul Qadr pada malam-malam ganjil dalam sepuluh malam terakhir Ramadan (malam ke-21, 23, 25, 27, dan 29). Allah merahsiakan malam tersebut supaya umat Islam sentiasa bersemangat menghidupkan seluruh malam terakhir."
+      },
+      "hadith_reference": {
+        "reference": "HR. Bukhari no. 2017 & Muslim no. 1169",
+        "text": {
+          "en": "\"Search for Lailatul Qadr in the odd nights of the last ten days of Ramadan.\"",
+          "id": "\"Carilah Lailatul Qadar pada malam-malam ganjil dari sepuluh malam terakhir bulan Ramadan.\"",
+          "ms": "\"Carilah Lailatul Qadar pada malam-malam ganjil daripada sepuluh malam terakhir bulan Ramadan.\""
+        }
+      }
+    },
+    {
+      "id": "signs",
+      "heading": {
+        "en": "Signs of Lailatul Qadr",
+        "id": "Tanda-Tanda Lailatul Qadr",
+        "ms": "Tanda-Tanda Lailatul Qadr"
+      },
+      "content": {
+        "en": "Authentic Hadiths mention several physical and spiritual signs:\n1. Calm and Serene Atmosphere: The night is peaceful, neither excessively hot nor cold.\n2. Tranquility in the Heart: Believers feel profound inner peace, deep devotion, and joy in worship.\n3. Gentle Morning Sun: The morning sun rises white and gentle, without blinding, harsh rays (HR. Muslim no. 762).",
+        "id": "Hadits-hadits shahih menyebutkan beberapa tanda fisik dan batiniah:\n1. Suasana Malam Tenang & Sejuk: Malam terasa hening, damai, tidak terlalu panas dan tidak terlalu dingin.\n2. Ketenangan Hati: Hati orang-orang beriman merasakan kelezatan dan ketenangan yang mendalam saat beribadah.\n3. Terbit Matahari Pagi yang Lembut: Matahari pada pagi harinya terbit berwarna putih bersih dengan sinar yang teduh, tidak menyengat (HR. Muslim no. 762).",
+        "ms": "Hadis-hadis sahih menyebutkan beberapa tanda fizikal dan rohani:\n1. Suasana Malam Tenang & Nyaman: Malam berasa hening, damai, tidak terlalu panas dan tidak terlalu sejuk.\n2. Ketenangan Hati: Hati orang-orang beriman merasakan kemanisan dan kedamaian mendalam semasa beribadah.\n3. Terbit Matahari Pagi yang Lembut: Matahari pada pagi harinya terbit berwarna putih bersih dengan sinar yang teduh, tidak menyilaukan (HR. Muslim no. 762)."
+      }
+    },
+    {
+      "id": "recommended_deeds",
+      "heading": {
+        "en": "Recommended Deeds in the Last 10 Nights",
+        "id": "Amalan Utama di 10 Malam Terakhir",
+        "ms": "Amalan Utama pada 10 Malam Terakhir"
+      },
+      "content": {
+        "en": "1. Qiyamul Lail (Tahajjud & Taraweeh prayers)\n2. I'tikaf (Seclusion in the mosque)\n3. Reciting and contemplating the Holy Qur'an\n4. Repeating the specific Dua taught by Rasulullah ﷺ (*Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'anni*)\n5. Abundant Istighfar, Dhikr, and sincere Sadaqah (Charity).",
+        "id": "1. Qiyamul Lail (Mendirikan Shalat Tahajud, Tarawih, dan Witir)\n2. I'tikaf di masjid\n3. Memperbanyak tilawah dan tadabbur Al-Qur'an\n4. Memperbanyak doa khusus Lailatul Qadr (*Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'anni*)\n5. Memperbanyak istighfar, dzikir malam, dan sedekah.",
+        "ms": "1. Qiyamullail (Mendirikan Solat Tahajud, Terawih, dan Witir)\n2. I'tikaf di masjid\n3. Memperbanyakkan tilawah dan tadabbur Al-Quran\n4. Membaca doa khusus Lailatul Qadr (*Allahumma innaka 'afuwwun tuhibbul 'afwa fa'fu 'anni*)\n5. Memperbanyakkan istighfar, zikir malam, dan sedekah."
+      }
+    }
+  ]
+}

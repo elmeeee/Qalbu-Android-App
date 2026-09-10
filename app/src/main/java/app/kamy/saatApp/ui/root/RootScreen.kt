@@ -1,10 +1,13 @@
 package app.kamy.saatApp.ui.root
 
-import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -80,9 +83,9 @@ internal fun shouldShowBottomBar(
         currentRoute == "prayer/tracker/calendar"
     val isToolRoute = currentRoute?.startsWith("tools/") == true
     val isBookmarksRoute = currentRoute == "quran/bookmarks"
-    val isRamadanDetailRoute = currentRoute == "ramadan/detail"
+    val isRamadanRoute = currentRoute?.startsWith("ramadan/") == true
     return !isAccountDetailScreen && !isReaderRoute && !isPrayerCalendarRoute && !isToolRoute &&
-        !isBookmarksRoute && !isRamadanDetailRoute
+        !isBookmarksRoute && !isRamadanRoute
 }
 
 @Composable
@@ -184,7 +187,21 @@ fun RootScreen(
                     onOpenJuz = { juzNumber, verseKey ->
                         val keyArg = verseKey?.let { java.net.URLEncoder.encode(it, Charsets.UTF_8.name()) }.orEmpty()
                         navController.navigate("quran/juz/$juzNumber?verseKey=$keyArg") { launchSingleTop = true }
+                    },
+                    onOpenTenLastNights = {
+                        navController.navigate("ramadan/ten-last-nights") { launchSingleTop = true }
                     }
+                )
+            }
+            composable(
+                route = "ramadan/ten-last-nights",
+                enterTransition = { slideInHorizontally(tween(260)) { it } + fadeIn(tween(200)) },
+                exitTransition = { fadeOut(tween(160)) },
+                popEnterTransition = { fadeIn(tween(160)) },
+                popExitTransition = { slideOutHorizontally(tween(240)) { it } + fadeOut(tween(160)) }
+            ) {
+                app.kamy.saatApp.features.today.TenLastNightsDetailScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
             composable("prayer/calendar") {
@@ -405,11 +422,15 @@ fun RootScreen(
             )
         }
 
-        if (showBottomBar) {
+        AnimatedVisibility(
+            visible = showBottomBar,
+            enter = slideInVertically(animationSpec = tween(240, easing = FastOutSlowInEasing)) { it } + fadeIn(tween(180)),
+            exit = slideOutVertically(animationSpec = tween(240, easing = FastOutSlowInEasing)) { it } + fadeOut(tween(180)),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(

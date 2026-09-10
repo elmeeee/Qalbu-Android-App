@@ -166,11 +166,22 @@ fun TodayScreen(
     }
     
     val coachMarkState = rememberCoachMarkState()
+    val ramadanCoachMarkState = rememberCoachMarkState()
+
     LaunchedEffect(Unit) {
         if (!onboardingStore.hasShownHomeCoachMark()) {
             kotlinx.coroutines.delay(1000)
             coachMarkState.show()
             onboardingStore.markHomeCoachMarkShown()
+        }
+    }
+
+    LaunchedEffect(prayerState.ramadanInfo?.isRamadan, coachMarkState.isVisible) {
+        val isRamadan = prayerState.ramadanInfo?.isRamadan == true
+        if (isRamadan && !coachMarkState.isVisible && !onboardingStore.hasShownRamadanHomeCoachMark()) {
+            kotlinx.coroutines.delay(1200)
+            ramadanCoachMarkState.show()
+            onboardingStore.markRamadanHomeCoachMarkShown()
         }
     }
 
@@ -474,7 +485,14 @@ fun TodayScreen(
                             info = ramadanInfo,
                             backgroundRes = prayerState.ramadanCardBackground,
                             onTap = onOpenRamadanDetail,
-                            modifier = Modifier.padding(horizontal = 20.dp)
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp)
+                                .coachMarkTarget(
+                                    ramadanCoachMarkState,
+                                    0,
+                                    R.string.coach_mark_today_ramadan_title,
+                                    R.string.coach_mark_today_ramadan_desc
+                                )
                         )
                     }
                 }
@@ -565,7 +583,7 @@ fun TodayScreen(
                                 text = action,
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = SaatColors.ArcGold
                             )
                         }
                     }
@@ -604,6 +622,7 @@ fun TodayScreen(
     )
 
     CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
+    CoachMarkOverlay(state = ramadanCoachMarkState, onDismiss = { ramadanCoachMarkState.skip() })
 }
 
 @Composable

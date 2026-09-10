@@ -80,10 +80,23 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.ui.feedback.rememberTapHaptic
 
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.layout.navigationBarsPadding
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.coachMarkTarget
+import app.kamy.saatApp.ui.components.rememberCoachMarkState
+
 @Composable
 fun RamadanDetailScreen(
     onNavigateBack: () -> Unit,
     onOpenJuz: (juzNumber: Int, verseKey: String?) -> Unit,
+    onOpenTenLastNights: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: RamadanDetailViewModel = hiltViewModel()
 ) {
@@ -91,6 +104,25 @@ fun RamadanDetailScreen(
     val listState = rememberLazyListState()
     val context = LocalContext.current
     val performTapHaptic = rememberTapHaptic()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val onboardingStore = remember { OnboardingStore.from(context) }
+    val coachMarkState = rememberCoachMarkState()
+
+    LaunchedEffect(Unit) {
+        if (!onboardingStore.hasShownRamadanDetailCoachMark()) {
+            delay(600)
+            coachMarkState.show()
+            onboardingStore.markRamadanDetailCoachMarkShown()
+        }
+    }
+
+    fun showCustomToast(msg: String) {
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
 
     val isScrolled by remember {
         derivedStateOf {
@@ -221,7 +253,14 @@ fun RamadanDetailScreen(
             item(key = "fasting_today_card") {
                 FastingTodayCard(
                     state = state,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .coachMarkTarget(
+                            coachMarkState,
+                            0,
+                            R.string.coach_mark_ramadan_header_title,
+                            R.string.coach_mark_ramadan_header_desc
+                        )
                 )
             }
 
@@ -266,11 +305,17 @@ fun RamadanDetailScreen(
                             } else {
                                 context.getString(R.string.toast_taraweeh_uncompleted)
                             }
-                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            showCustomToast(msg)
                         },
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
+                            .coachMarkTarget(
+                                coachMarkState,
+                                1,
+                                R.string.coach_mark_ramadan_tarawih_title,
+                                R.string.coach_mark_ramadan_tarawih_desc
+                            )
                     )
                 }
             }
@@ -287,17 +332,85 @@ fun RamadanDetailScreen(
                         } else {
                             context.getString(R.string.toast_habit_uncompleted, label)
                         }
-                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        showCustomToast(msg)
                     },
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .coachMarkTarget(
+                            coachMarkState,
+                            2,
+                            R.string.coach_mark_ramadan_checklist_title,
+                            R.string.coach_mark_ramadan_checklist_desc
+                        )
                 )
             }
 
             // Card 5: 10 Malam Terakhir
             item(key = "ten_last_nights_card") {
                 TenLastNightsCard(
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    onClick = {
+                        performTapHaptic()
+                        onOpenTenLastNights()
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .coachMarkTarget(
+                            coachMarkState,
+                            3,
+                            R.string.coach_mark_ramadan_ten_nights_title,
+                            R.string.coach_mark_ramadan_ten_nights_desc
+                        )
                 )
+            }
+        }
+
+        // Custom Today Journey style Snackbar / Toast
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 20.dp, start = 20.dp, end = 20.dp)
+        ) { snackbarData ->
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = SaatColors.HomeDarkGreen,
+                shadowElevation = 10.dp,
+                border = BorderStroke(1.dp, SaatColors.ArcGold.copy(alpha = 0.5f)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(SaatColors.HomeDarkGreen)
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFE6F4EA)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "Notification",
+                            tint = SaatColors.HomeDarkGreen,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Text(
+                        text = snackbarData.visuals.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
 
@@ -366,6 +479,8 @@ fun RamadanDetailScreen(
                 }
             }
         }
+
+        CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
     }
 }
 
@@ -1202,19 +1317,18 @@ private fun HabitBadgeItem(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 11.sp,
+                fontSize = 10.5.sp,
                 fontWeight = if (isDone) FontWeight.Bold else FontWeight.Medium
             ),
             color = if (isDone) SaatColors.HomeDarkGreen else Color(0xFF334155),
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            textAlign = TextAlign.Center
         )
     }
 }
 
 @Composable
 private fun TenLastNightsCard(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -1222,7 +1336,10 @@ private fun TenLastNightsCard(
         color = Color(0xFFF9F6F0),
         shadowElevation = 0.5.dp,
         border = BorderStroke(1.dp, Color(0xFFEAE3D5)),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
