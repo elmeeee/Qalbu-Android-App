@@ -17,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
+import app.kamy.saatApp.domain.model.RamadanDayInfo
+
 @Singleton
 class LocalKhgtCalendar @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -27,11 +29,50 @@ class LocalKhgtCalendar @Inject constructor(
 
     suspend fun todayInfo(): KhgtTodayInfo? = infoForDate(Calendar.getInstance())
 
+    suspend fun ramadanInfo(
+        date: Calendar = Calendar.getInstance(),
+        imsakTime: String? = null,
+        iftarTime: String? = null
+    ): RamadanDayInfo? = withContext(Dispatchers.IO) {
+        val gregorian = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH).format(date.time)
+        val hijriYears = listOf(
+            currentHijriYearGuess(date) - 1,
+            currentHijriYearGuess(date),
+            currentHijriYearGuess(date) + 1
+        )
+        for (year in hijriYears) {
+            val calendar = loadYear(year) ?: continue
+            val months = calendar.data.orEmpty()
+            for (month in months) {
+                if (month.name.equals("Ramadan", ignoreCase = true)) {
+                    val days = month.days.orEmpty()
+                    val dayIndex = days.indexOfFirst { it.masehi == gregorian }
+                    if (dayIndex != -1) {
+                        val day = days[dayIndex]
+                        val dayNumber = parseArabicHijriDay(day.hijri) ?: (dayIndex + 1)
+                        val totalDays = days.size.coerceAtLeast(29)
+                        val hijriYear = month.year ?: year
+                        return@withContext RamadanDayInfo(
+                            isRamadan = true,
+                            dayNumber = dayNumber,
+                            totalDays = totalDays,
+                            hijriYear = hijriYear,
+                            hijriLabel = "$dayNumber Ramadan $hijriYear H",
+                            imsakTime = imsakTime,
+                            iftarTime = iftarTime
+                        )
+                    }
+                }
+            }
+        }
+        null
+    }
+
     suspend fun infoForDate(date: Calendar): KhgtTodayInfo? = withContext(Dispatchers.IO) {
         val gregorian = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH).format(date.time)
         val gregorianShort = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(date.time)
 
-        for (year in listOf(currentHijriYearGuess(date), currentHijriYearGuess(date) + 1)) {
+        for (year in listOf(currentHijriYearGuess(date) - 1, currentHijriYearGuess(date), currentHijriYearGuess(date) + 1)) {
             val calendar = loadYear(year) ?: continue
             val day = findDayByGregorian(calendar.data.orEmpty(), gregorian) ?: continue
             val hijriLabel = buildString {
@@ -94,13 +135,33 @@ class LocalKhgtCalendar @Inject constructor(
     suspend fun monthForToday(): KhgtMonth? = withContext(Dispatchers.IO) {
         val today = Calendar.getInstance()
         val gregorian = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH).format(today.time)
-        for (year in listOf(currentHijriYearGuess(today), currentHijriYearGuess(today) + 1)) {
+        for (year in listOf(currentHijriYearGuess(today) - 1, currentHijriYearGuess(today), currentHijriYearGuess(today) + 1)) {
             val calendar = loadYear(year) ?: continue
             calendar.data.orEmpty().forEach { month ->
                 if (month.days?.any { it.masehi == gregorian } == true) return@withContext month
             }
         }
         null
+    }
+
+    private fun parseArabicHijriDay(arabic: String?): Int? {
+        if (arabic.isNullOrBlank()) return null
+        val western = arabic.map { ch ->
+            when (ch) {
+                '٠' -> '0'
+                '١' -> '1'
+                '٢' -> '2'
+                '٣' -> '3'
+                '٤' -> '4'
+                '٥' -> '5'
+                '٦' -> '6'
+                '٧' -> '7'
+                '٨' -> '8'
+                '٩' -> '9'
+                else -> ch
+            }
+        }.joinToString("")
+        return western.filter { it.isDigit() }.toIntOrNull()
     }
 
     private fun loadYear(hijriYear: Int): KhgtCalendarResponse? {
@@ -141,3 +202,4 @@ class LocalKhgtCalendar @Inject constructor(
             GZIPInputStream(input).bufferedReader().use { it.readText() }
         }
 }
+

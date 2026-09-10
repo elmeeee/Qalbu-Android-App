@@ -90,6 +90,7 @@ import app.kamy.saatApp.features.today.components.TodayHeader
 import app.kamy.saatApp.features.today.components.PrayerDashboardCard
 import app.kamy.saatApp.features.today.components.PrayerLocationSheet
 import app.kamy.saatApp.features.today.components.PrayerTrackerCard
+import app.kamy.saatApp.features.today.components.TodayRamadanCard
 import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
@@ -462,6 +463,17 @@ fun TodayScreen(
                                     R.string.coach_mark_today_continue_title,
                                     R.string.coach_mark_today_continue_desc
                                 )
+                        )
+                    }
+                }
+
+                prayerState.ramadanInfo?.takeIf { it.isRamadan }?.let { ramadanInfo ->
+                    item(key = "ramadan_card") {
+                        TodayRamadanCard(
+                            info = ramadanInfo,
+                            backgroundRes = prayerState.ramadanCardBackground,
+                            onTap = onOpenPrayerCalendar,
+                            modifier = Modifier.padding(horizontal = 20.dp)
                         )
                     }
                 }

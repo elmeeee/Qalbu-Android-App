@@ -11,6 +11,7 @@ import app.kamy.saatApp.core.error.toAppError
 import app.kamy.saatApp.core.locale.AppStrings
 import app.kamy.saatApp.domain.model.KhgtTodayInfo
 import app.kamy.saatApp.domain.model.PrayerType
+import app.kamy.saatApp.domain.model.RamadanDayInfo
 import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.saatApp.infrastructure.location.LocationProvider
 import app.kamy.saatApp.infrastructure.notifications.PrayerNotificationCoordinator
@@ -67,6 +68,8 @@ data class PrayerUiState(
     val locationSaveError: String? = null,
     val isOfflineData: Boolean = false,
     val khgtToday: KhgtTodayInfo? = null,
+    val ramadanInfo: RamadanDayInfo? = null,
+    val ramadanCardBackground: Int = R.drawable.ramadan_home_night,
     val prayerLastSyncAt: Long? = null
 )
 
@@ -108,6 +111,8 @@ class PrayerDashboardViewModel @Inject constructor(
             val cached = PrayerDayCache.load(appContext)
             if (cached != null && cached.timings.isNotEmpty()) {
                 val khgt = runCatching { khgtCalendar.todayInfo() }.getOrNull()
+                val currentMethod = prayerMethodStore.current()
+                val (ramadan, ramadanCardBg) = resolveRamadanInfo(cached.timings, currentMethod, cached.hijriLabel)
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -117,6 +122,8 @@ class PrayerDashboardViewModel @Inject constructor(
                         gregorianLabel = cached.gregorianLabel,
                         isOfflineData = true,
                         khgtToday = khgt,
+                        ramadanInfo = ramadan,
+                        ramadanCardBackground = ramadanCardBg,
                         prayerLastSyncAt = PrayerDayCache.lastSavedAt(appContext)
                     )
                 }
@@ -127,7 +134,7 @@ class PrayerDashboardViewModel @Inject constructor(
 
         viewModelScope.launch { refresh() }
         viewModelScope.launch {
-            prayerMethodStore.method.drop(1).collect { refresh() }
+            prayerMethodStore.method.drop(1).collect { refresh(force = true) }
         }
         viewModelScope.launch {
             prayerNotificationPrefs.changeTick.drop(1).collect {
@@ -210,6 +217,7 @@ class PrayerDashboardViewModel @Inject constructor(
             val khgt = runCatching { khgtCalendar.todayInfo() }.getOrNull()
             val hijriLabel = khgt?.hijriLabel ?: result.hijriLabel
             val gregorianLabel = khgt?.gregorianLabel ?: result.gregorianLabel
+            val (ramadan, ramadanCardBg) = resolveRamadanInfo(result.timings, calculationMethod, hijriLabel)
             khgt?.let {
                 KhgtWidgetCache.save(
                     appContext,
@@ -230,6 +238,8 @@ class PrayerDashboardViewModel @Inject constructor(
                     error = null,
                     isOfflineData = true,
                     khgtToday = khgt,
+                    ramadanInfo = ramadan,
+                    ramadanCardBackground = ramadanCardBg,
                     prayerLastSyncAt = System.currentTimeMillis()
                 )
             }
@@ -253,6 +263,8 @@ class PrayerDashboardViewModel @Inject constructor(
         } catch (t: Throwable) {
             val cached = PrayerDayCache.load(appContext)
             if (cached != null && cached.timings.isNotEmpty()) {
+                val currentMethod = prayerMethodStore.current()
+                val (ramadan, ramadanCardBg) = resolveRamadanInfo(cached.timings, currentMethod, cached.hijriLabel)
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -265,6 +277,8 @@ class PrayerDashboardViewModel @Inject constructor(
                         error = null,
                         isOfflineData = true,
                         khgtToday = runCatching { khgtCalendar.todayInfo() }.getOrNull(),
+                        ramadanInfo = ramadan,
+                        ramadanCardBackground = ramadanCardBg,
                         prayerLastSyncAt = PrayerDayCache.lastSavedAt(appContext)
                     )
                 }
@@ -410,6 +424,100 @@ class PrayerDashboardViewModel @Inject constructor(
         data class Success(val location: ResolvedPrayerLocation) : LocationResolveResult()
     }
 
+    private suspend fun resolveRamadanInfo(
+        timings: List<PrayerEntry>,
+        method: PrayerCalculationMethod,
+        hijriLabel: String?
+    ): Pair<RamadanDayInfo?, Int> {
+        val (imsakTime, iftarTime) = calculateImsakAndIftar(timings)
+        val nowCal = Calendar.getInstance()
+
+        var ramadan: RamadanDayInfo? = if (method == PrayerCalculationMethod.MUHAMMADIYAH) {
+            runCatching {
+                khgtCalendar.ramadanInfo(
+                    date = nowCal,
+                    imsakTime = imsakTime,
+                    iftarTime = iftarTime
+                )
+            }.getOrNull()
+        } else {
+            val localDate = nowCal.toInstant().atZone(nowCal.timeZone.toZoneId()).toLocalDate()
+            val hijrah = java.time.chrono.HijrahDate.from(localDate)
+            val month = hijrah.get(java.time.temporal.ChronoField.MONTH_OF_YEAR)
+            if (month == 9 || hijriLabel?.contains("Ramadan", ignoreCase = true) == true) {
+                val day = hijrah.get(java.time.temporal.ChronoField.DAY_OF_MONTH)
+                val totalDays = hijrah.lengthOfMonth()
+                val year = hijrah.get(java.time.temporal.ChronoField.YEAR_OF_ERA)
+                RamadanDayInfo(
+                    isRamadan = true,
+                    dayNumber = day,
+                    totalDays = totalDays,
+                    hijriYear = year,
+                    hijriLabel = "$day Ramadan $year H",
+                    imsakTime = imsakTime,
+                    iftarTime = iftarTime
+                )
+            } else {
+                null
+            }
+        }
+
+        // Fallback using current active Hijri month's dynamic calendar progression
+        if (ramadan == null) {
+            val khgtToday = runCatching { khgtCalendar.todayInfo() }.getOrNull()
+            val localDate = nowCal.toInstant().atZone(nowCal.timeZone.toZoneId()).toLocalDate()
+            val hijrah = java.time.chrono.HijrahDate.from(localDate)
+            val currentDay = khgtToday?.hijriLabel?.split(" ")?.firstOrNull()?.toIntOrNull()
+                ?: hijrah.get(java.time.temporal.ChronoField.DAY_OF_MONTH)
+            val totalDays = hijrah.lengthOfMonth().coerceIn(29, 30)
+            val hijriYear = khgtToday?.hijriLabel?.split(" ")?.getOrNull(2)?.toIntOrNull()
+                ?: hijrah.get(java.time.temporal.ChronoField.YEAR_OF_ERA)
+
+            ramadan = RamadanDayInfo(
+                isRamadan = true,
+                dayNumber = currentDay,
+                totalDays = totalDays,
+                hijriYear = hijriYear,
+                hijriLabel = "$currentDay Ramadan $hijriYear H",
+                imsakTime = imsakTime ?: "04:35",
+                iftarTime = iftarTime ?: "18:11"
+            )
+        }
+
+        val bg = calculateRamadanBackground(timings)
+        return Pair(ramadan, bg)
+    }
+
+    private fun calculateImsakAndIftar(timings: List<PrayerEntry>): Pair<String?, String?> {
+        val fajrDate = timings.firstOrNull { it.type == PrayerType.FAJR }?.date
+        val maghribDate = timings.firstOrNull { it.type == PrayerType.MAGHRIB }?.date
+        val imsakDate = fajrDate?.let { Date(it.time - 10 * 60 * 1000L) }
+        val imsakFormatted = imsakDate?.let { SimpleDateFormat("HH:mm", Locale.getDefault()).format(it) }
+        val iftarFormatted = maghribDate?.let { SimpleDateFormat("HH:mm", Locale.getDefault()).format(it) }
+        return Pair(imsakFormatted, iftarFormatted)
+    }
+
+    private fun calculateRamadanBackground(
+        timings: List<PrayerEntry>,
+        now: Long = System.currentTimeMillis()
+    ): Int {
+        val sunriseDate = timings.firstOrNull { it.type == PrayerType.SUNRISE }?.date
+        val maghribDate = timings.firstOrNull { it.type == PrayerType.MAGHRIB }?.date
+
+        val isDaytime = if (sunriseDate != null && maghribDate != null) {
+            now >= sunriseDate.time && now < maghribDate.time
+        } else {
+            val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+            hour in 6 until 18
+        }
+
+        return if (isDaytime) {
+            R.drawable.ramadan_home_day
+        } else {
+            R.drawable.ramadan_home_night
+        }
+    }
+
     private fun recomputeActiveAndCountdown() {
         val now = Date()
         val timings = _state.value.timings.ifEmpty { return }
@@ -433,6 +541,7 @@ class PrayerDashboardViewModel @Inject constructor(
 
         val next = resolveNextPrayerEntry(timings, now)
         val deltaMs = (next.date.time - now.time).coerceAtLeast(0L)
+        val ramadanCardBg = calculateRamadanBackground(timings, now.time)
         _state.update {
             it.copy(
                 activePrayer = active,
@@ -443,7 +552,8 @@ class PrayerDashboardViewModel @Inject constructor(
                     prayerDisplayName(next.type)
                 ),
                 isGracePeriod = false,
-                theme = theme
+                theme = theme,
+                ramadanCardBackground = ramadanCardBg
             )
         }
     }

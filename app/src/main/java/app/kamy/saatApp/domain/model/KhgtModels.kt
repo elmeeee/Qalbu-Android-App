@@ -43,3 +43,13 @@ data class KhgtTodayInfo(
     val eventTitle: String?,
     val isImportantDay: Boolean
 )
+
+data class RamadanDayInfo(
+    val isRamadan: Boolean,
+    val dayNumber: Int,
+    val totalDays: Int,
+    val hijriYear: Int,
+    val hijriLabel: String,
+    val imsakTime: String? = null,
+    val iftarTime: String? = null
+)

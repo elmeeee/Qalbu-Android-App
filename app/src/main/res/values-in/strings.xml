@@ -600,4 +600,13 @@
     <!-- Institution Search -->
     <string name="search_institution_hint">Cari institusi, negara, atau kata kunci</string>
     <string name="search_no_results">Tidak ada institusi yang sesuai</string>
+
+    <!-- Ramadan Card Strings -->
+    <string name="ramadan_mubarak">Ramadan Mubarak</string>
+    <string name="ramadan_progress_title">Progres Ramadan Anda</string>
+    <string name="ramadan_progress_days_format">%1$d / %2$d hari</string>
+    <string name="ramadan_date_format">%1$d Ramadan %2$d H</string>
+    <string name="ramadan_imsak">Imsak</string>
+    <string name="ramadan_iftar">Iftar</string>
+    <string name="ramadan_days_unit">hari</string>
 </resources>

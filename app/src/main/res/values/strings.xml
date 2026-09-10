@@ -1086,4 +1086,13 @@
     <!-- Institution Search -->
     <string name="search_institution_hint">Search institution, country, or keyword</string>
     <string name="search_no_results">No matching institutions found</string>
+
+    <!-- Ramadan Card Strings -->
+    <string name="ramadan_mubarak">Ramadan Mubarak</string>
+    <string name="ramadan_progress_title">Your Ramadan Progress</string>
+    <string name="ramadan_progress_days_format">%1$d / %2$d days</string>
+    <string name="ramadan_date_format">%1$d Ramadan %2$d H</string>
+    <string name="ramadan_imsak">Imsak</string>
+    <string name="ramadan_iftar">Iftar</string>
+    <string name="ramadan_days_unit">days</string>
 </resources>
