@@ -142,13 +142,49 @@
         <receiver
             android:name=".infrastructure.widget.PrayerWidgetProvider"
             android:exported="true"
-            android:label="@string/prayer_widget_title">
+            android:label="@string/widget_large_title">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_widget_large_info" />
+        </receiver>
+
+        <receiver
+            android:name=".infrastructure.widget.PrayerWidgetSmallProvider"
+            android:exported="true"
+            android:label="@string/widget_small_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_widget_small_info" />
+        </receiver>
+
+        <receiver
+            android:name=".infrastructure.widget.PrayerWidgetMediumProvider"
+            android:exported="true"
+            android:label="@string/widget_medium_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_widget_medium_info" />
+        </receiver>
+
+        <receiver
+            android:name=".infrastructure.widget.PrayerWidgetTimesProvider"
+            android:exported="true"
+            android:label="@string/widget_times_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_widget_times_info" />
         </receiver>
 
         <service

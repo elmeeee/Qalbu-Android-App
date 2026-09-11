@@ -4,90 +4,261 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingStart="4dp"
-    android:paddingTop="6dp"
-    android:paddingEnd="4dp"
-    android:paddingBottom="6dp">
+    android:background="@drawable/bg_live_activity_card"
+    android:paddingStart="14dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="14dp"
+    android:paddingBottom="12dp">
 
-    <!-- Top Header Row -->
+    <!-- Top Main Content Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="top">
 
-        <TextView
-            android:id="@+id/tv_header_badge"
+        <!-- Left Circle Icon Badge -->
+        <FrameLayout
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_live_circle_badge">
+
+            <ImageView
+                android:id="@+id/iv_live_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_live_mosque"
+                android:contentDescription="Prayer Icon" />
+        </FrameLayout>
+
+        <!-- Center Dynamic Text Container -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="MENJELANG SUBUH"
-            android:textColor="#FFFFFF"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.08"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:orientation="vertical"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="6dp">
 
-        <TextView
-            android:id="@+id/tv_prayer_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="04:35"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium" />
+            <!-- STATE 1 & STATE 4: COUNTDOWN MODE (Menuju Dzuhur / Menuju Iftar) -->
+            <LinearLayout
+                android:id="@+id/container_state_countdown"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <TextView
+                    android:id="@+id/tv_countdown_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Menuju Dzuhur"
+                    android:textColor="#D1D5DB"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <Chronometer
+                    android:id="@+id/chronometer_countdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:countDown="true" />
+
+                <TextView
+                    android:id="@+id/tv_countdown_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dzuhur • 11:54"
+                    android:textColor="#9CA3AF"
+                    android:textSize="12sp"
+                    android:fontFamily="sans-serif"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+            <!-- STATE 2: PRAYER TIME ARRIVED (Saatnya Shalat Dzuhur) -->
+            <LinearLayout
+                android:id="@+id/container_state_arrived"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_arrived_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Saatnya Shalat"
+                    android:textColor="#D1D5DB"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/tv_arrived_prayer_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:text="Dzuhur"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1" />
+
+                <TextView
+                    android:id="@+id/tv_arrived_prayer_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="11:54"
+                    android:textColor="#9CA3AF"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- STATE 3 & STATE 5: PRAYER FINISHED (Dzuhur selesai / Iftar selesai) -->
+            <LinearLayout
+                android:id="@+id/container_state_finished"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_finished_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dzuhur selesai"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/tv_finished_next_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Berikutnya"
+                    android:textColor="#9CA3AF"
+                    android:textSize="11sp"
+                    android:fontFamily="sans-serif" />
+
+                <TextView
+                    android:id="@+id/tv_finished_next_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:text="Ashar • 15:12"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Right Chevron Indicator -->
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="top"
+            android:src="@drawable/ic_live_chevron_down"
+            android:contentDescription="Expand" />
+
     </LinearLayout>
 
-    <!-- Main Countdown Section -->
+    <!-- Bottom Action & Progress Section -->
+
+    <!-- State 1 & 4: Full-width Progress Bar -->
     <LinearLayout
+        android:id="@+id/container_progress_full"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="56dp"
+        android:visibility="visible">
+
+        <ProgressBar
+            android:id="@+id/progress_bar_full"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:max="100"
+            android:progress="45"
+            android:progressDrawable="@drawable/bg_live_progress_track" />
+    </LinearLayout>
+
+    <!-- State 2: Action Button ("Buka Saat") -->
+    <LinearLayout
+        android:id="@+id/container_arrived_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="56dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/btn_open_app"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:background="@drawable/bg_live_button"
+            android:text="Buka Saat"
+            android:textColor="#04291D"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- State 3 & 5: Split Progress Bar + Small Countdown -->
+    <LinearLayout
+        android:id="@+id/container_progress_with_countdown"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="6dp">
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="56dp"
+        android:visibility="gone">
 
-        <TextView
-            android:id="@+id/tv_countdown_prefix"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text="Menuju Subuh"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium" />
+        <ProgressBar
+            android:id="@+id/progress_bar_split"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:layout_weight="1"
+            android:max="100"
+            android:progress="35"
+            android:progressDrawable="@drawable/bg_live_progress_track" />
 
         <Chronometer
-            android:id="@+id/chronometer_countdown"
+            android:id="@+id/chronometer_countdown_small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:textColor="#FFFFFF"
-            android:textSize="19sp"
-            android:textStyle="bold"
-            android:fontFamily="monospace"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
             android:countDown="true" />
-    </LinearLayout>
-
-    <!-- Footer Location & Hijri Date -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:id="@+id/tv_location_hijri"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Jakarta • 22 Ramadan 1447 H"
-            android:textColor="#FFFFFF"
-            android:textSize="11sp"
-            android:maxLines="1"
-            android:ellipsize="end" />
     </LinearLayout>
 
 </LinearLayout>

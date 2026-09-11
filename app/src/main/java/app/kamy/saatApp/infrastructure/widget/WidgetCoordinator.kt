@@ -30,6 +30,9 @@ object WidgetCoordinator {
     }
 
     private fun widgetProviders(): List<Class<*>> = listOf(
-        PrayerWidgetProvider::class.java
+        PrayerWidgetProvider::class.java,
+        PrayerWidgetSmallProvider::class.java,
+        PrayerWidgetMediumProvider::class.java,
+        PrayerWidgetTimesProvider::class.java
     )
 }

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/prayer_widget_times_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_widget_card"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="8dp">
+
+    <!-- Slot 1: Imsak -->
+    <LinearLayout
+        android:id="@+id/widget_times_slot_1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/widget_times_icon_1"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_widget_imsak"
+            android:contentDescription="Imsak" />
+
+        <TextView
+            android:id="@+id/widget_times_name_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Imsak"
+            android:textColor="#D1D5DB"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/widget_times_time_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="04:35"
+            android:textColor="#FFFFFF"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <!-- Slot 2: Subuh -->
+    <LinearLayout
+        android:id="@+id/widget_times_slot_2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/widget_times_icon_2"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_widget_subuh"
+            android:contentDescription="Subuh" />
+
+        <TextView
+            android:id="@+id/widget_times_name_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Subuh"
+            android:textColor="#D1D5DB"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/widget_times_time_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="04:45"
+            android:textColor="#FFFFFF"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <!-- Slot 3: Dzuhur -->
+    <LinearLayout
+        android:id="@+id/widget_times_slot_3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/widget_times_icon_3"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_widget_dzuhur"
+            android:contentDescription="Dzuhur" />
+
+        <TextView
+            android:id="@+id/widget_times_name_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Dzuhur"
+            android:textColor="#15AA7C"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="bold"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/widget_times_time_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="11:54"
+            android:textColor="#15AA7C"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <!-- Slot 4: Ashar -->
+    <LinearLayout
+        android:id="@+id/widget_times_slot_4"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/widget_times_icon_4"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_widget_ashar"
+            android:contentDescription="Ashar" />
+
+        <TextView
+            android:id="@+id/widget_times_name_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Ashar"
+            android:textColor="#D1D5DB"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/widget_times_time_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="15:12"
+            android:textColor="#FFFFFF"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <!-- Slot 5: Maghrib -->
+    <LinearLayout
+        android:id="@+id/widget_times_slot_5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/widget_times_icon_5"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_widget_maghrib"
+            android:contentDescription="Maghrib" />
+
+        <TextView
+            android:id="@+id/widget_times_name_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Maghrib"
+            android:textColor="#D1D5DB"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/widget_times_time_5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="18:11"
+            android:textColor="#FFFFFF"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <!-- Slot 6: Isya -->
+    <LinearLayout
+        android:id="@+id/widget_times_slot_6"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/widget_times_icon_6"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_widget_isya"
+            android:contentDescription="Isya" />
+
+        <TextView
+            android:id="@+id/widget_times_name_6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Isya"
+            android:textColor="#D1D5DB"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/widget_times_time_6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="19:23"
+            android:textColor="#FFFFFF"
+            android:textSize="12.5sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+    </LinearLayout>
+
+</LinearLayout>
