@@ -16,10 +16,12 @@ object RamadanPreferencesStore {
     private const val KEY_FORCE_TEN_LAST_NIGHTS = "force_ten_last_nights"
 
     fun isForceRamadanEnabled(context: Context): Boolean =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!app.kamy.saatApp.BuildConfig.DEBUG) false
+        else context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getBoolean(KEY_FORCE_RAMADAN_MODE, false)
 
     fun setForceRamadanEnabled(context: Context, enabled: Boolean) {
+        if (!app.kamy.saatApp.BuildConfig.DEBUG) return
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putBoolean(KEY_FORCE_RAMADAN_MODE, enabled)
@@ -27,10 +29,12 @@ object RamadanPreferencesStore {
     }
 
     fun isForceTenLastNightsEnabled(context: Context): Boolean =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!app.kamy.saatApp.BuildConfig.DEBUG) false
+        else context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getBoolean(KEY_FORCE_TEN_LAST_NIGHTS, false)
 
     fun setForceTenLastNightsEnabled(context: Context, enabled: Boolean) {
+        if (!app.kamy.saatApp.BuildConfig.DEBUG) return
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putBoolean(KEY_FORCE_TEN_LAST_NIGHTS, enabled)

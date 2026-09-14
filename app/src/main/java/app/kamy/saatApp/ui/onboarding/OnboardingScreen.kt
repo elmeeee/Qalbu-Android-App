@@ -286,30 +286,45 @@ private fun LanguageStepScreen(
 
                 Spacer(Modifier.height(4.dp))
 
-                // Title "Sāat" in White
-                Text(
-                    text = strings.getString(R.string.onboarding_brand_title),
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontSize = 42.sp,
-                        letterSpacing = 1.5.sp
-                    ),
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
+                // Translucent Glass Backdrop Card for Title & Subtitle
+                Surface(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(22.dp),
+                    color = Color.Black.copy(alpha = 0.28f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.25f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 18.dp, vertical = 14.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Title "Sāat" in White
+                        Text(
+                            text = strings.getString(R.string.onboarding_brand_title),
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontSize = 38.sp,
+                                letterSpacing = 1.5.sp
+                            ),
+                            fontFamily = FontFamily.Serif,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
 
-                Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(4.dp))
 
-                // Subtitle in White
-                Text(
-                    text = strings.getString(R.string.onboarding_brand_subtitle),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp),
-                    color = Color.White.copy(alpha = 0.92f),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 36.dp),
-                    lineHeight = 20.sp
-                )
+                        // Subtitle in White
+                        Text(
+                            text = strings.getString(R.string.onboarding_brand_subtitle),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.5.sp),
+                            color = Color.White.copy(alpha = 0.95f),
+                            textAlign = TextAlign.Center,
+                            lineHeight = 19.sp
+                        )
+                    }
+                }
             }
 
             // Flexible middle space so lantern character shines
@@ -350,11 +365,33 @@ private fun LanguageStepScreen(
 
                     Spacer(Modifier.height(14.dp))
 
-                    // 3 Language Selector Chips (Row) with CIRCULAR FLAGS
+                    // 3 Language Selector Chips (Row) with localized spelling
                     val languages = listOf(
-                        Triple(AppLanguage.INDONESIAN, "Indonesia", R.drawable.ic_flag_id),
-                        Triple(AppLanguage.MALAY, "Bahasa Melayu", R.drawable.ic_flag_ms),
-                        Triple(AppLanguage.ENGLISH, "English", R.drawable.ic_flag_en)
+                        Triple(
+                            AppLanguage.INDONESIAN,
+                            when (selected) {
+                                AppLanguage.ENGLISH -> "Indonesian"
+                                else -> "Indonesia"
+                            },
+                            R.drawable.ic_flag_id
+                        ),
+                        Triple(
+                            AppLanguage.MALAY,
+                            when (selected) {
+                                AppLanguage.ENGLISH -> "Malay"
+                                else -> "Melayu"
+                            },
+                            R.drawable.ic_flag_ms
+                        ),
+                        Triple(
+                            AppLanguage.ENGLISH,
+                            when (selected) {
+                                AppLanguage.INDONESIAN -> "Inggris"
+                                AppLanguage.MALAY -> "Inggeris"
+                                AppLanguage.ENGLISH -> "English"
+                            },
+                            R.drawable.ic_flag_en
+                        )
                     )
 
                     Row(
@@ -392,7 +429,7 @@ private fun LanguageStepScreen(
                                     Text(
                                         text = label,
                                         style = MaterialTheme.typography.bodySmall.copy(
-                                            fontSize = if (label.length > 10) 11.sp else 12.sp
+                                            fontSize = if (label.length > 9) 11.sp else 12.sp
                                         ),
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                         color = if (isSelected) Color.White else Color(0xFF334155),
@@ -483,7 +520,7 @@ private fun WelcomeStepScreen(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .navigationBarsPadding()
-                .padding(horizontal = 24.dp, vertical = 12.dp),
+                .padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -533,31 +570,45 @@ private fun WelcomeStepScreen(
 
                 Spacer(Modifier.height(8.dp))
 
-                // Title: Kenalan dengan Kīmi in White
-                Text(
-                    text = strings.getString(R.string.onboarding_kimi_title),
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    fontFamily = FontFamily.Serif,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
+                // Translucent Glass Backdrop Card for Title & Body
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(22.dp),
+                    color = Color.Black.copy(alpha = 0.28f),
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.25f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 18.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Title: Kenalan dengan Kīmi in White
+                        Text(
+                            text = strings.getString(R.string.onboarding_kimi_title),
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontSize = 26.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            fontFamily = FontFamily.Serif,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
 
-                Spacer(Modifier.height(10.dp))
+                        Spacer(Modifier.height(8.dp))
 
-                // Body text in White
-                Text(
-                    text = strings.getString(R.string.onboarding_kimi_body),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 14.sp,
-                        lineHeight = 21.sp
-                    ),
-                    color = Color.White.copy(alpha = 0.95f),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
+                        // Body text in White
+                        Text(
+                            text = strings.getString(R.string.onboarding_kimi_body),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 13.5.sp,
+                                lineHeight = 20.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.95f),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
             }
 
             // Bottom Action Controls
