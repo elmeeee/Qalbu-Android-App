@@ -210,22 +210,6 @@ fun ReaderLoadingSkeleton(lines: Int = 8) {
 }
 
 @Composable
-fun HadithCardSkeleton() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .readerKnowledgeCard()
-            .padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        SaatSkeletonLine(widthFraction = 0.45f, height = 12.dp)
-        SaatSkeletonLine(height = 12.dp)
-        SaatSkeletonLine(height = 12.dp)
-        SaatSkeletonLine(widthFraction = 0.7f, height = 12.dp)
-    }
-}
-
-@Composable
 fun ReaderEmptyState(
     title: String,
     description: String,
