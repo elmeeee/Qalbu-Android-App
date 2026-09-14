@@ -458,7 +458,7 @@ fun TodayScreen(
                 }
 
                 item(key = "top_header_spacer") {
-                    Spacer(modifier = Modifier.height(70.dp))
+                    Spacer(modifier = Modifier.height(77.dp))
                 }
                 item(key = "prayer_card") {
                     PrayerDashboardCard(

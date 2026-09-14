@@ -378,132 +378,274 @@ fun DhikrSessionView(
                     .fillMaxWidth()
             ) { pageIndex ->
                 val item = sessionItems[pageIndex]
+                Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(24.dp))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            incrementCount()
+                        },
+                    shape = RoundedCornerShape(24.dp),
+                    color = SaatColors.PureWhite,
+                    shadowElevation = 6.dp,
+                    border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.08f))
+                ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(SaatColors.PureWhite)
-                            .border(
-                                1.5.dp,
-                                Brush.linearGradient(
-                                    listOf(SaatColors.Teal.copy(0.3f), SaatColors.Gold.copy(0.3f))
-                                ),
-                                RoundedCornerShape(24.dp)
-                            )
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                incrementCount()
-                            }
-                            .verticalScroll(rememberScrollState())
-                            .padding(20.dp)
+                        modifier = Modifier.fillMaxSize()
                     ) {
-                        // Header info badge inside card - target count badge
-                        if (item.repeatCount >= 3) {
+                        // Top Brand Decorative Gradient Strip
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(
+                                            SaatColors.DeepEmerald,
+                                            SaatColors.Teal,
+                                            SaatColors.GoldDeep,
+                                            SaatColors.GoldBright
+                                        )
+                                    )
+                                )
+                        )
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 20.dp, vertical = 18.dp)
+                        ) {
+                            // Header Meta Info: Category/Title & Target Count
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Start,
+                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // Category / Title Badge
+                                val categoryTitle = item.bundleTitle?.takeIf { it.isNotBlank() } ?: "Dzikir"
                                 Surface(
-                                    shape = RoundedCornerShape(12.dp),
+                                    shape = RoundedCornerShape(20.dp),
                                     color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
                                 ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(6.dp)
+                                                .clip(CircleShape)
+                                                .background(SaatColors.GoldDeep)
+                                        )
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(
+                                            text = categoryTitle,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = SaatColors.DeepEmerald,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    // Target Repeat Badge (only if >= 3)
+                                    if (item.repeatCount >= 3) {
+                                        Surface(
+                                            shape = RoundedCornerShape(20.dp),
+                                            color = SaatColors.GoldDeep.copy(alpha = 0.12f)
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.dhikr_target_format, item.repeatCount),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = SaatColors.GoldDeep,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
+
+                                    // Item Index
                                     Text(
-                                        text = stringResource(R.string.dhikr_target_format, item.repeatCount),
+                                        text = "${pageIndex + 1}/${sessionItems.size}",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = SaatColors.DeepEmerald,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                        color = SaatColors.Slate500,
+                                        fontWeight = FontWeight.SemiBold
                                     )
                                 }
                             }
 
-                            Spacer(Modifier.height(12.dp))
-                        }
+                            Spacer(Modifier.height(16.dp))
 
-                        // Arabic Display Box
-                        if (item.arabic.isNotBlank()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(18.dp))
-                                    .background(SaatColors.DeepEmerald.copy(alpha = 0.05f))
-                                    .padding(18.dp)
-                            ) {
-                                Text(
-                                    text = item.arabic,
-                                    style = MaterialTheme.typography.headlineSmall.copy(
-                                        lineHeight = 46.sp,
-                                        fontSize = 26.sp,
-                                        fontFamily = TajweedFontFamily,
-                                        fontWeight = FontWeight.Normal
-                                    ),
-                                    textAlign = TextAlign.End,
-                                    color = SaatColors.Slate900,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                            // Arabic Display Sanctuary Box
+                            if (item.arabic.isNotBlank()) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(
+                                            Brush.verticalGradient(
+                                                listOf(
+                                                    SaatColors.DeepEmerald.copy(alpha = 0.04f),
+                                                    SaatColors.MintWash
+                                                )
+                                            )
+                                        )
+                                        .border(
+                                            1.dp,
+                                            SaatColors.DeepEmerald.copy(alpha = 0.10f),
+                                            RoundedCornerShape(20.dp)
+                                        )
+                                        .padding(horizontal = 20.dp, vertical = 22.dp)
+                                ) {
+                                    Text(
+                                        text = item.arabic,
+                                        style = MaterialTheme.typography.headlineSmall.copy(
+                                            lineHeight = 48.sp,
+                                            fontSize = 26.sp,
+                                            fontFamily = TajweedFontFamily,
+                                            fontWeight = FontWeight.Normal
+                                        ),
+                                        textAlign = TextAlign.End,
+                                        color = SaatColors.Slate900,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                                Spacer(Modifier.height(14.dp))
                             }
-                            Spacer(Modifier.height(16.dp))
-                        }
 
-                        // Latin Transliteration
-                        if (item.latin.isNotBlank()) {
-                            Text(
-                                text = item.latin.replace("\r\n", "\n"),
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontStyle = FontStyle.Italic
-                                ),
-                                color = SaatColors.TealDark,
-                                lineHeight = 24.sp
-                            )
-                            Spacer(Modifier.height(12.dp))
-                        }
-
-                        // Translation
-                        if (item.translation.isNotBlank()) {
-                            Text(
-                                text = item.translation.replace("\r\n", "\n"),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = SaatColors.Slate800,
-                                lineHeight = 26.sp
-                            )
-                            Spacer(Modifier.height(16.dp))
-                        }
-
-                        // Reference / Source Tag
-                        val referenceSource = item.source?.takeIf { it.isNotBlank() && it != "-" }
-                            ?: item.fawaid?.takeIf { it.isNotBlank() && it != "-" }
-
-                        if (!referenceSource.isNullOrBlank()) {
+                            // Ornamental Divider
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFFF1F5F9))
-                                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                                    .padding(vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(8.dp)
+                                        .weight(1f)
+                                        .height(1.dp)
+                                        .background(
+                                            Brush.horizontalGradient(
+                                                listOf(
+                                                    Color.Transparent,
+                                                    SaatColors.GoldDeep.copy(alpha = 0.35f)
+                                                )
+                                            )
+                                        )
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
                                         .clip(CircleShape)
                                         .background(SaatColors.GoldDeep)
                                 )
                                 Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = referenceSource,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = SaatColors.Slate700,
-                                    fontWeight = FontWeight.Medium
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(1.dp)
+                                        .background(
+                                            Brush.horizontalGradient(
+                                                listOf(
+                                                    SaatColors.GoldDeep.copy(alpha = 0.35f),
+                                                    Color.Transparent
+                                                )
+                                            )
+                                        )
                                 )
                             }
+
+                            Spacer(Modifier.height(12.dp))
+
+                            // Latin Transliteration Box
+                            if (item.latin.isNotBlank()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(SaatColors.SageMist.copy(alpha = 0.55f))
+                                        .padding(horizontal = 16.dp, vertical = 14.dp)
+                                ) {
+                                    Text(
+                                        text = item.latin.replace("\r\n", "\n"),
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontStyle = FontStyle.Italic
+                                        ),
+                                        color = SaatColors.TealDark,
+                                        lineHeight = 24.sp
+                                    )
+                                }
+                                Spacer(Modifier.height(14.dp))
+                            }
+
+                            // Translation
+                            if (item.translation.isNotBlank()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 4.dp)
+                                ) {
+                                    Text(
+                                        text = item.translation.replace("\r\n", "\n"),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = SaatColors.Slate800,
+                                        lineHeight = 26.sp,
+                                        fontSize = 15.sp
+                                    )
+                                }
+                                Spacer(Modifier.height(16.dp))
+                            }
+
+                            // Reference / Source Tag
+                            val referenceSource = item.source?.takeIf { it.isNotBlank() && it != "-" }
+                                ?: item.fawaid?.takeIf { it.isNotBlank() && it != "-" }
+
+                            if (!referenceSource.isNullOrBlank()) {
+                                Surface(
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = SaatColors.PrayerCreamWarm.copy(alpha = 0.40f),
+                                    border = BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.20f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .clip(CircleShape)
+                                                .background(SaatColors.GoldDeep)
+                                        )
+                                        Spacer(Modifier.width(10.dp))
+                                        Text(
+                                            text = referenceSource,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = SaatColors.Slate700,
+                                            fontWeight = FontWeight.Medium,
+                                            lineHeight = 18.sp
+                                        )
+                                    }
+                                }
+                                Spacer(Modifier.height(12.dp))
+                            }
+
+                            // Bottom Clearance for floating controls
+                            Spacer(Modifier.height(88.dp))
                         }
-                        Spacer(Modifier.height(84.dp))
                     }
                 }
             }
+        }
 
         // Bottom Controls Container: Next/Finish Button + Tasbih Counter FAB (Positioned above system navbar)
         Box(
