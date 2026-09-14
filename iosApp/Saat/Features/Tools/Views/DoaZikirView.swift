@@ -547,19 +547,21 @@ struct ZikirSessionContainer: View {
                     .background(SaatTokens.Colors.screenBackground)
                     
                     // Floating Interactive Tasbih Counter
-                    Button(action: {
-                        incrementCount(activeItem: activeItem)
-                    }) {
-                        PremiumTasbihCounter(
-                            count: currentCount,
-                            target: activeItem.repeatCount,
-                            pulseKey: pulseKey,
-                            subtitle: "\(activeItem.repeatCount)x",
-                            counterSize: 96
-                        )
+                    if activeItem.repeatCount >= 3 {
+                        Button(action: {
+                            incrementCount(activeItem: activeItem)
+                        }) {
+                            PremiumTasbihCounter(
+                                count: currentCount,
+                                target: activeItem.repeatCount,
+                                pulseKey: pulseKey,
+                                subtitle: "\(activeItem.repeatCount)x",
+                                counterSize: 96
+                            )
+                        }
+                        .padding(.bottom, 64)
+                        .padding(.trailing, 24)
                     }
-                    .padding(.bottom, 64)
-                    .padding(.trailing, 24)
                 }
                 
                 Divider()

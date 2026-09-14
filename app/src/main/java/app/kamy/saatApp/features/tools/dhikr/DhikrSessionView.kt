@@ -354,13 +354,15 @@ fun DhikrSessionView(
                                 overflow = TextOverflow.Ellipsis
                             )
 
-                            Text(
-                                text = " (${item.repeatCount}x)",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = if (isActive) SaatColors.GoldBright else SaatColors.Slate500,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.sp
-                            )
+                            if (item.repeatCount >= 3) {
+                                Text(
+                                    text = " (${item.repeatCount}x)",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (isActive) SaatColors.GoldBright else SaatColors.Slate500,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 11.sp
+                                )
+                            }
                         }
                     }
                 }
@@ -398,26 +400,28 @@ fun DhikrSessionView(
                             .padding(20.dp)
                     ) {
                         // Header info badge inside card - target count badge
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                        if (item.repeatCount >= 3) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = stringResource(R.string.dhikr_target_format, item.repeatCount),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = SaatColors.DeepEmerald,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                )
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.dhikr_target_format, item.repeatCount),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = SaatColors.DeepEmerald,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
                             }
-                        }
 
-                        Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(12.dp))
+                        }
 
                         // Arabic Display Box
                         if (item.arabic.isNotBlank()) {
@@ -508,69 +512,105 @@ fun DhikrSessionView(
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-            // Next / Finish Button
-            Button(
-                onClick = {
-                    if (currentItemIndex < sessionItems.size - 1) {
-                        scope.launch { pagerState.animateScrollToPage(currentItemIndex + 1) }
-                    } else {
-                        isCompleted = true
-                    }
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = SaatColors.DeepEmerald,
-                    contentColor = SaatColors.PureWhite
-                ),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-            ) {
-                Text(
-                    text = stringResource(
-                        if (currentItemIndex < sessionItems.size - 1) R.string.dhikr_session_next
-                        else R.string.dhikr_session_finish_title
-                    ),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.width(6.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            // Tasbih Counter Floating Button
-            Surface(
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
+            if (activeItem.repeatCount >= 3) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Next / Finish Button
+                    Button(
+                        onClick = {
+                            if (currentItemIndex < sessionItems.size - 1) {
+                                scope.launch { pagerState.animateScrollToPage(currentItemIndex + 1) }
+                            } else {
+                                isCompleted = true
+                            }
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = SaatColors.DeepEmerald,
+                            contentColor = SaatColors.PureWhite
+                        ),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                     ) {
-                        incrementCount()
+                        Text(
+                            text = stringResource(
+                                if (currentItemIndex < sessionItems.size - 1) R.string.dhikr_session_next
+                                else R.string.dhikr_session_finish_title
+                            ),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    // Tasbih Counter Floating Button
+                    Surface(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                incrementCount()
+                            },
+                        shape = CircleShape,
+                        color = Color.Transparent,
+                        shadowElevation = 8.dp
+                    ) {
+                        PremiumTasbihCounter(
+                            count = currentCount,
+                            target = activeItem.repeatCount,
+                            pulseKey = pulseKey,
+                            subtitle = "${activeItem.repeatCount}x",
+                            counterSize = 80.dp
+                        )
+                    }
+                }
+            } else {
+                // Full width Next / Finish Button when repeat count < 3 (no tasbih counter)
+                Button(
+                    onClick = {
+                        if (currentItemIndex < sessionItems.size - 1) {
+                            scope.launch { pagerState.animateScrollToPage(currentItemIndex + 1) }
+                        } else {
+                            isCompleted = true
+                        }
                     },
-                shape = CircleShape,
-                color = Color.Transparent,
-                shadowElevation = 8.dp
-            ) {
-                PremiumTasbihCounter(
-                    count = currentCount,
-                    target = activeItem.repeatCount,
-                    pulseKey = pulseKey,
-                    subtitle = "${activeItem.repeatCount}x",
-                    counterSize = 80.dp
-                )
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SaatColors.DeepEmerald,
+                        contentColor = SaatColors.PureWhite
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                ) {
+                    Text(
+                        text = stringResource(
+                            if (currentItemIndex < sessionItems.size - 1) R.string.dhikr_session_next
+                            else R.string.dhikr_session_finish_title
+                        ),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
-}
 }
 
 @Composable
