@@ -31,7 +31,7 @@ android {
         applicationId = "app.kamy.saatApp"
         minSdk = 30
         targetSdk = 36
-        versionCode = 15
+        versionCode = 16
         versionName = "1.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
