@@ -74,24 +74,26 @@ class TanyaSaatRepository @Inject constructor(
 
         // If AI call succeeded, resolve authentic verse and doa cards from local SQLite database (qurannew.db)
         if (envelope != null) {
-            val env = envelope!!
+            val env = envelope
             var verseData: SaatVerseCardData? = null
-            if (env.chapterNumber != null && env.verseNumber != null) {
-                val key = "${env.chapterNumber}:${env.verseNumber}"
+            val chNum = env.chapterNumber
+            val vNum = env.verseNumber
+            if (chNum != null && vNum != null) {
+                val key = "$chNum:$vNum"
                 runCatching {
                     val verse = quranRepository.getVerseByKey(key)
                     if (verse != null) {
                         val chapters = quranRepository.getChapters()
-                        val chapterMeta = chapters.firstOrNull { it.id == env.chapterNumber }
+                        val chapterMeta = chapters.firstOrNull { it.id == chNum }
                         val uthmani = verse.textUthmani.orEmpty()
                         val indopak = verse.textIndopak.orEmpty()
                         val arabic = uthmani.ifBlank { indopak }
                         val translation = verse.translations?.firstOrNull()?.text.orEmpty()
 
                         verseData = SaatVerseCardData(
-                            chapterNumber = env.chapterNumber!!,
-                            verseNumber = env.verseNumber!!,
-                            surahName = chapterMeta?.nameSimple ?: "Surah ${env.chapterNumber}",
+                            chapterNumber = chNum,
+                            verseNumber = vNum,
+                            surahName = chapterMeta?.nameSimple ?: "Surah $chNum",
                             arabicText = arabic,
                             translationText = translation,
                             verseKey = key
@@ -101,9 +103,9 @@ class TanyaSaatRepository @Inject constructor(
             }
 
             var doaData: DoaItem? = null
-            if (!env.doaSlug.isNullOrBlank()) {
+            val slug = env.doaSlug
+            if (!slug.isNullOrBlank()) {
                 runCatching {
-                    val slug = env.doaSlug!!
                     val dailyDoas = doaRepository.getDailyDoas()
                     doaData = dailyDoas.firstOrNull { it.id == slug || it.category == slug }
                         ?: doaRepository.getDoas(slug).firstOrNull()

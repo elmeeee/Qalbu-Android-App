@@ -608,14 +608,17 @@ private fun rememberHeadline(state: PrayerUiState): PrayerHeadline {
                 title = allowLocation,
                 subtitle = ""
             )
-            state.isGracePeriod && state.activePrayer != null -> PrayerHeadline(
-                label = inProgress,
-                title = name(state.activePrayer!!),
-                subtitle = state.countdownSubtitle
-            )
+            state.isGracePeriod && state.activePrayer != null -> {
+                PrayerHeadline(
+                    label = inProgress,
+                    title = name(state.activePrayer),
+                    subtitle = state.countdownSubtitle
+                )
+            }
             state.nextPrayer != null -> {
-                val prayerName = name(state.nextPrayer!!)
-                val time = state.timings.find { it.type == state.nextPrayer }?.date?.let {
+                val next = state.nextPrayer
+                val prayerName = name(next)
+                val time = state.timings.find { it.type == next }?.date?.let {
                     val pattern = if (is24Hour) "HH.mm" else "hh.mm a"
                     SimpleDateFormat(pattern, Locale.getDefault()).format(it)
                 } ?: "--.--"

@@ -23,7 +23,7 @@ private fun HadithReference.toDisplayItem(context: Context): HadithDisplayItem? 
     if (texts.isEmpty()) return null
 
     val body = texts
-        .joinToString(separator = "\n\n") { it.body!!.trim() }
+        .joinToString(separator = "\n\n") { it.body.orEmpty().trim() }
         .toReaderPlainText()
     if (body.isBlank()) return null
 

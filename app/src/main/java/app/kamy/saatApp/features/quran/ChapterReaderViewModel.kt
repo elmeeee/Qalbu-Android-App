@@ -423,21 +423,19 @@ class ChapterReaderViewModel @Inject constructor(
     }
 
     private suspend fun fetchVersePage(page: Int, perPage: Int = 50) =
-        if (_state.value.juzNumber != null) {
+        _state.value.juzNumber?.let { juzNum ->
             quranRepository.getVersesByJuz(
-                juzNumber = _state.value.juzNumber!!,
+                juzNumber = juzNum,
                 page = page,
                 perPage = perPage,
                 audioRecitationId = _state.value.selectedRecitationId
             )
-        } else {
-            quranRepository.getVersesByChapter(
-                chapterNumber = _state.value.chapterNumber,
-                page = page,
-                perPage = perPage,
-                audioRecitationId = _state.value.selectedRecitationId
-            )
-        }
+        } ?: quranRepository.getVersesByChapter(
+            chapterNumber = _state.value.chapterNumber,
+            page = page,
+            perPage = perPage,
+            audioRecitationId = _state.value.selectedRecitationId
+        )
 
     private fun tryScrollToPendingVerse() {
         val key = pendingScrollVerseKey ?: return
