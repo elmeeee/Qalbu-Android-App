@@ -1,15 +1,20 @@
 package app.kamy.saatApp.features.tools.radio
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +28,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,9 +38,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Card
@@ -42,11 +45,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,8 +57,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -74,14 +81,11 @@ import app.kamy.saatApp.design.theme.SaatSpacing
 import app.kamy.saatApp.infrastructure.audio.AudioPlaybackState
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
-import app.kamy.saatApp.ui.layout.floatingNavAndAudioBottomPadding
-import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
-
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.ui.components.CoachMarkOverlay
 import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
-import androidx.compose.runtime.LaunchedEffect
+import app.kamy.saatApp.ui.layout.floatingNavAndAudioBottomPadding
 
 @Composable
 fun QuranRadioScreen(
@@ -112,6 +116,10 @@ fun QuranRadioScreen(
         }
     }
 
+    val currentPlayingStation = remember(playbackState.currentUrl, allStations) {
+        allStations.firstOrNull { it.streamUrl == playbackState.currentUrl }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -128,83 +136,104 @@ fun QuranRadioScreen(
                 }
             )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = SaatSpacing.screenHorizontal,
-                end = SaatSpacing.screenHorizontal,
-                top = 12.dp,
-                bottom = floatingNavAndAudioBottomPadding(audioBarVisible = playbackState.currentUrl != null) + 16.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Hero / Now Playing Card
-            item {
-                Box(
-                    modifier = Modifier.coachMarkTarget(
-                        coachMarkState,
-                        0,
-                        R.string.coach_mark_radio_title,
-                        R.string.coach_mark_radio_desc
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = SaatSpacing.screenHorizontal,
+                    end = SaatSpacing.screenHorizontal,
+                    top = 12.dp,
+                    bottom = floatingNavAndAudioBottomPadding(audioBarVisible = playbackState.currentUrl != null) + 16.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Hero / Now Playing Card
+                item {
+                    Box(
+                        modifier = Modifier.coachMarkTarget(
+                            coachMarkState,
+                            0,
+                            R.string.coach_mark_radio_title,
+                            R.string.coach_mark_radio_desc
+                        )
+                    ) {
+                        RadioHeroPlayerCard(
+                            playbackState = playbackState,
+                            activeStation = currentPlayingStation,
+                            onToggle = { audioPlayer.toggle() },
+                            onStop = { audioPlayer.stop() }
+                        )
+                    }
+                }
+
+                // Category Filter Pills
+                item {
+                    CategoryFilterBar(
+                        appLanguage = appLanguage,
+                        selectedCategory = selectedCategory,
+                        onSelectCategory = { selectedCategory = it }
                     )
-                ) {
-                    RadioHeroPlayerCard(
-                        playbackState = playbackState,
-                        onToggle = { audioPlayer.toggle() },
-                        onStop = { audioPlayer.stop() }
+                }
+
+                // Radio Stations List Header
+                item {
+                    Text(
+                        text = stringResource(R.string.radio_quran_list_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+                    )
+                }
+
+                // Radio Station Cards
+                items(filteredStations, key = { it.id }) { station ->
+                    val isCurrentPlaying = playbackState.currentUrl == station.streamUrl && playbackState.isPlaying
+
+                    RadioStationCard(
+                        station = station,
+                        appLanguage = appLanguage,
+                        isPlaying = isCurrentPlaying,
+                        onPlayClick = {
+                            if (isCurrentPlaying) {
+                                audioPlayer.toggle()
+                            } else {
+                                audioPlayer.playRadioStation(
+                                    stationName = station.name,
+                                    countryName = station.country(appLanguage),
+                                    url = station.streamUrl
+                                )
+                            }
+                        }
                     )
                 }
             }
-
-            // Category Filter Pills
-            item {
-                CategoryFilterBar(
-                    appLanguage = appLanguage,
-                    selectedCategory = selectedCategory,
-                    onSelectCategory = { selectedCategory = it }
-                )
-            }
-
-            // Radio Stations List Header
-            item {
-                Text(
-                    text = stringResource(R.string.radio_quran_list_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
-                )
-            }
-
-            // Radio Station Cards
-            items(filteredStations, key = { it.id }) { station ->
-                val isCurrentPlaying = playbackState.currentUrl == station.streamUrl && playbackState.isPlaying
-
-                RadioStationCard(
-                    station = station,
-                    appLanguage = appLanguage,
-                    isPlaying = isCurrentPlaying,
-                    onPlayClick = {
-                        if (isCurrentPlaying) {
-                            audioPlayer.toggle()
-                        } else {
-                            audioPlayer.playRadioStation(
-                                stationName = station.name,
-                                countryName = "${station.countryFlag} ${station.country(appLanguage)}",
-                                url = station.streamUrl
-                            )
-                        }
-                    }
-                )
-            }
         }
+        CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
     }
-}
-CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
 }
 
 @Composable
 private fun LiveStatusBadge(isLive: Boolean) {
+    val pulseTransition = rememberInfiniteTransition(label = "livePulse")
+    val dotAlpha by pulseTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1.0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "dotAlpha"
+    )
+    val dotScale by pulseTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "dotScale"
+    )
+
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = if (isLive) Color(0xFFE57373).copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant,
@@ -218,8 +247,9 @@ private fun LiveStatusBadge(isLive: Boolean) {
             Box(
                 modifier = Modifier
                     .size(8.dp)
+                    .scale(if (isLive) dotScale else 1f)
                     .clip(CircleShape)
-                    .background(if (isLive) Color(0xFFE53935) else Color.Gray)
+                    .background(if (isLive) Color(0xFFE53935).copy(alpha = dotAlpha) else Color.Gray)
             )
             Text(
                 text = if (isLive) stringResource(R.string.radio_quran_live_badge) else stringResource(R.string.radio_quran_offline_badge),
@@ -234,10 +264,25 @@ private fun LiveStatusBadge(isLive: Boolean) {
 @Composable
 private fun RadioHeroPlayerCard(
     playbackState: AudioPlaybackState,
+    activeStation: QuranRadioStation?,
     onToggle: () -> Unit,
     onStop: () -> Unit
 ) {
     val isRadioActive = playbackState.reciterName == "Radio Quran" && playbackState.currentUrl != null
+
+    // Rotating vinyl animation
+    val discTransition = rememberInfiniteTransition(label = "vinylDisc")
+    val discRotation by discTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(12000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "discRotation"
+    )
+
+    val currentRotation = if (playbackState.isPlaying) discRotation else 0f
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -308,19 +353,60 @@ private fun RadioHeroPlayerCard(
                 }
 
                 if (isRadioActive) {
-                    // Active Radio Info
+                    // Active Radio Info with Vinyl / Disc Avatar Art
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        // Animated Vinyl Disc
+                        Box(
+                            modifier = Modifier
+                                .size(68.dp)
+                                .shadow(8.dp, CircleShape)
+                                .clip(CircleShape)
+                                .background(Color(0xFF1E1E1E))
+                                .border(2.dp, SaatColors.Gold, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (activeStation != null) {
+                                Image(
+                                    painter = painterResource(activeStation.iconRes),
+                                    contentDescription = activeStation.name,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .rotate(currentRotation)
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.Radio,
+                                    contentDescription = null,
+                                    tint = SaatColors.GoldBright,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .rotate(currentRotation)
+                                )
+                            }
+
+                            // Center Spindle Hole with Gold Ring
+                            Box(
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(SaatColors.DeepEmerald)
+                                    .border(1.5.dp, SaatColors.Gold, CircleShape)
+                            )
+                        }
+
+                        // Title & Subtitle + Equalizer
                         Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
                                 text = playbackState.trackTitle,
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 maxLines = 1,
@@ -328,14 +414,13 @@ private fun RadioHeroPlayerCard(
                             )
                             Text(
                                 text = playbackState.trackSubtitle,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = Color.White.copy(alpha = 0.85f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
 
-                        Spacer(Modifier.width(12.dp))
                         SoundEqualizerAnimation(isPlaying = playbackState.isPlaying)
                     }
 
@@ -349,12 +434,20 @@ private fun RadioHeroPlayerCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
+                            val playButtonScale by animateFloatAsState(
+                                targetValue = if (playbackState.isPlaying) 1.05f else 1.0f,
+                                animationSpec = spring(),
+                                label = "playBtnScale"
+                            )
+
                             Surface(
                                 onClick = onToggle,
                                 shape = CircleShape,
                                 color = SaatColors.Gold,
                                 shadowElevation = 6.dp,
-                                modifier = Modifier.size(52.dp)
+                                modifier = Modifier
+                                    .size(52.dp)
+                                    .scale(playButtonScale)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
@@ -424,60 +517,65 @@ private fun SoundEqualizerAnimation(isPlaying: Boolean) {
     val transition = rememberInfiniteTransition(label = "equalizer")
     
     val bar1 by transition.animateFloat(
-        initialValue = 0.3f,
+        initialValue = 0.25f,
         targetValue = 1.0f,
         animationSpec = infiniteRepeatable(
-            animation = tween(450, easing = FastOutSlowInEasing),
+            animation = tween(420, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "bar1"
     )
     val bar2 by transition.animateFloat(
-        initialValue = 0.8f,
+        initialValue = 0.85f,
         targetValue = 0.2f,
         animationSpec = infiniteRepeatable(
-            animation = tween(350, easing = FastOutSlowInEasing),
+            animation = tween(330, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "bar2"
     )
     val bar3 by transition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 0.9f,
+        initialValue = 0.35f,
+        targetValue = 0.95f,
         animationSpec = infiniteRepeatable(
-            animation = tween(550, easing = FastOutSlowInEasing),
+            animation = tween(520, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "bar3"
+    )
+    val bar4 by transition.animateFloat(
+        initialValue = 0.7f,
+        targetValue = 0.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(380, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "bar4"
     )
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(3.dp),
         verticalAlignment = Alignment.Bottom,
-        modifier = Modifier.height(18.dp)
+        modifier = Modifier.height(20.dp)
     ) {
         val active1 = if (isPlaying) bar1 else 0.2f
         val active2 = if (isPlaying) bar2 else 0.4f
         val active3 = if (isPlaying) bar3 else 0.2f
+        val active4 = if (isPlaying) bar4 else 0.3f
 
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .height((18 * active1).dp)
-                .background(SaatColors.Gold, RoundedCornerShape(2.dp))
-        )
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .height((18 * active2).dp)
-                .background(SaatColors.Gold, RoundedCornerShape(2.dp))
-        )
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .height((18 * active3).dp)
-                .background(SaatColors.Gold, RoundedCornerShape(2.dp))
-        )
+        listOf(active1, active2, active3, active4).forEach { factor ->
+            Box(
+                modifier = Modifier
+                    .width(3.5.dp)
+                    .height((20 * factor).dp)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(SaatColors.GoldBright, SaatColors.Gold)
+                        ),
+                        RoundedCornerShape(2.dp)
+                    )
+            )
+        }
     }
 }
 
@@ -528,13 +626,40 @@ private fun RadioStationCard(
     isPlaying: Boolean,
     onPlayClick: () -> Unit
 ) {
-    val cardBg = if (isPlaying) {
-        SaatColors.DeepEmerald
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
-    val titleColor = if (isPlaying) Color.White else MaterialTheme.colorScheme.onSurface
-    val descColor = if (isPlaying) Color.White.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val cardBg by animateColorAsState(
+        targetValue = if (isPlaying) SaatColors.DeepEmerald else MaterialTheme.colorScheme.surface,
+        animationSpec = tween(300),
+        label = "cardBg"
+    )
+    val titleColor by animateColorAsState(
+        targetValue = if (isPlaying) Color.White else MaterialTheme.colorScheme.onSurface,
+        label = "titleColor"
+    )
+    val descColor by animateColorAsState(
+        targetValue = if (isPlaying) Color.White.copy(alpha = 0.85f) else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "descColor"
+    )
+
+    // Pulsing halo animation when playing
+    val haloTransition = rememberInfiniteTransition(label = "halo")
+    val haloScale by haloTransition.animateFloat(
+        initialValue = 1.0f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "haloScale"
+    )
+    val haloAlpha by haloTransition.animateFloat(
+        initialValue = 0.5f,
+        targetValue = 0.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1100, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "haloAlpha"
+    )
 
     Card(
         modifier = Modifier
@@ -555,17 +680,36 @@ private fun RadioStationCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Surface(
-                shape = CircleShape,
-                color = if (isPlaying) Color.White.copy(alpha = 0.15f) else MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(48.dp)
+            // Station Avatar with Pulsing Halo + Country Badge
+            Box(
+                modifier = Modifier.size(54.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = station.countryFlag,
-                        fontSize = 22.sp
+                // Pulsing Halo ring when active
+                if (isPlaying) {
+                    Box(
+                        modifier = Modifier
+                            .size(54.dp)
+                            .scale(haloScale)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(SaatColors.Gold.copy(alpha = haloAlpha))
                     )
                 }
+
+                // Station WebP Avatar
+                Image(
+                    painter = painterResource(station.iconRes),
+                    contentDescription = station.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .border(
+                            1.5.dp,
+                            if (isPlaying) SaatColors.Gold else Color.White.copy(alpha = 0.2f),
+                            RoundedCornerShape(16.dp)
+                        )
+                )
             }
 
             Column(
@@ -612,11 +756,19 @@ private fun RadioStationCard(
                 )
             }
 
+            // Play / Pause Button with animated color & scale
+            val btnScale by animateFloatAsState(
+                targetValue = if (isPlaying) 1.08f else 1.0f,
+                animationSpec = spring(),
+                label = "btnScale"
+            )
+
             Surface(
                 shape = CircleShape,
                 color = if (isPlaying) SaatColors.Gold else MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
                     .size(42.dp)
+                    .scale(btnScale)
                     .clickable(onClick = onPlayClick)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -633,3 +785,4 @@ private fun RadioStationCard(
         }
     }
 }
+

@@ -4,6 +4,8 @@ import android.content.Context
 import app.kamy.saatApp.core.locale.AppLanguage
 import org.json.JSONArray
 
+import app.kamy.saatApp.R
+
 enum class RadioCategory(val labelEn: String, val labelId: String, val labelMs: String) {
     ALL("All", "Semua", "Semua"),
     MALAYSIA("Malaysia", "Malaysia", "Malaysia"),
@@ -36,6 +38,21 @@ data class QuranRadioStation(
     val category: RadioCategory,
     val streamUrl: String
 ) {
+    val iconRes: Int
+        get() = when (id) {
+            "suara_muslim_id" -> R.drawable.radio_suaramuslim
+            "ikim_my" -> R.drawable.radio_ikimfm
+            "saudi_quran" -> R.drawable.radio_makkahmadinahlive
+            "warna_sg" -> R.drawable.radio_warnafm
+            "nur_islam_bn" -> R.drawable.radio_rtb
+            "alafasy_radio" -> R.drawable.radio_alafasy
+            "minshawi_radio" -> R.drawable.radio_minshawi
+            "maher_radio" -> R.drawable.radio_maher
+            "abdulbasit_radio" -> R.drawable.radio_abdulbasit
+            "shuraim_radio" -> R.drawable.radio_shuraim
+            else -> R.drawable.ic_live_mosque
+        }
+
     fun country(language: AppLanguage): String = when (language) {
         AppLanguage.ENGLISH -> countryEn
         AppLanguage.MALAY -> countryMs

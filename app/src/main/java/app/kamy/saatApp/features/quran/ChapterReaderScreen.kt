@@ -676,17 +676,17 @@ fun ChapterReaderScreen(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(50),
-                        color = Color.White.copy(alpha = 0.45f),
-                        tonalElevation = 0.dp,
+                        color = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 4.dp,
                         shadowElevation = 0.dp,
-                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
                         modifier = Modifier
                             .height(48.dp)
                             .shadow(
-                                elevation = 6.dp,
+                                elevation = 8.dp,
                                 shape = RoundedCornerShape(50),
-                                ambientColor = Color.Black.copy(alpha = 0.08f),
-                                spotColor = Color.Black.copy(alpha = 0.06f)
+                                ambientColor = Color.Black.copy(alpha = 0.15f),
+                                spotColor = Color.Black.copy(alpha = 0.12f)
                             )
                     ) {
                         Row(
