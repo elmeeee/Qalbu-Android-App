@@ -6,9 +6,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -63,6 +67,8 @@ fun TasbeehCounterWidget(
     counterWidth: Dp = 320.dp,
     counterHeight: Dp = 370.dp,
     showCenterText: Boolean = true,
+    target: Int = 33,
+    subtitle: String = "",
     onTap: () -> Unit
 ) {
     val activeIndex = remember(count) {
@@ -82,7 +88,7 @@ fun TasbeehCounterWidget(
     var accumulatedDragDistance by remember { mutableFloatStateOf(0f) }
     val dragThresholdPx = 36f
     val densityVal = LocalDensity.current.density
-    val shouldDisplayCenterText = showCenterText && counterWidth >= 140.dp
+    val isCompact = counterWidth < 140.dp
 
     BoxWithConstraints(
         modifier = modifier
@@ -253,58 +259,112 @@ fun TasbeehCounterWidget(
             contentScale = ContentScale.Fit
         )
 
-        // 4. LAYER 4: Counter Number & Instruction Text WRAPPED INSIDE THE CENTER OF THE RING (Only shown when shouldDisplayCenterText is true)
-        if (shouldDisplayCenterText) {
-            val maxTextWidthDp = (radius * 1.45f / densityVal).dp
-            val centerBoxTopDp = ((centerY - (radius * 0.55f)) / densityVal).dp
+        // 4. LAYER 4: Counter Number & Instruction Text WRAPPED INSIDE THE CENTER OF THE RING
+        if (showCenterText) {
+            if (!isCompact) {
+                val maxTextWidthDp = (radius * 1.45f / densityVal).dp
+                val centerBoxTopDp = ((centerY - (radius * 0.55f)) / densityVal).dp
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(y = centerBoxTopDp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Round Badge for 100x / multi-round dhikr (shows if roundCount > 1)
-                if (roundCount > 1) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF124C31).copy(alpha = 0.12f))
-                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "Putaran $roundCount",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF124C31)
-                        )
-                    }
-                    Spacer(Modifier.height(2.dp))
-                }
-
-                // Big Counter Number
-                Text(
-                    text = count.toString(),
-                    fontSize = 44.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF124C31),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(Modifier.height(2.dp))
-
-                // Instruction Text Wrapped Inside Ring Center
-                Text(
-                    text = stringResource(R.string.tasbih_tap_instruction),
-                    fontSize = 11.5.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color(0xFF64748B),
-                    textAlign = TextAlign.Center,
-                    lineHeight = 15.sp,
+                Column(
                     modifier = Modifier
-                        .widthIn(max = maxTextWidthDp)
-                        .padding(horizontal = 4.dp)
-                )
+                        .fillMaxWidth()
+                        .offset(y = centerBoxTopDp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Round Badge for 100x / multi-round dhikr (shows if roundCount > 1)
+                    if (roundCount > 1) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFF124C31).copy(alpha = 0.12f))
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "Putaran $roundCount",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF124C31)
+                            )
+                        }
+                        Spacer(Modifier.height(2.dp))
+                    }
+
+                    // Big Counter Number
+                    Text(
+                        text = count.toString(),
+                        fontSize = 44.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF124C31),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(Modifier.height(2.dp))
+
+                    // Instruction Text Wrapped Inside Ring Center
+                    Text(
+                        text = stringResource(R.string.tasbih_tap_instruction),
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF64748B),
+                        textAlign = TextAlign.Center,
+                        lineHeight = 15.sp,
+                        modifier = Modifier
+                            .widthIn(max = maxTextWidthDp)
+                            .padding(horizontal = 4.dp)
+                    )
+                }
+            } else {
+                // Compact / Floating Counter inside center of beads ring
+                val innerCircleSizeDp = (radius * 1.52f / densityVal).dp
+                val innerLeftDp = ((centerX - (radius * 0.76f)) / densityVal).dp
+                val innerTopDp = ((centerY - (radius * 0.76f)) / densityVal).dp
+
+                Box(
+                    modifier = Modifier
+                        .offset(x = innerLeftDp, y = innerTopDp)
+                        .size(innerCircleSizeDp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.96f))
+                        .border(
+                            1.dp,
+                            Brush.linearGradient(
+                                listOf(
+                                    Color(0xFF0F766E).copy(alpha = 0.25f),
+                                    Color(0xFFD97706).copy(alpha = 0.25f)
+                                )
+                            ),
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        val countFontSize = (sizePx * 0.18f / densityVal).coerceIn(16f, 22f).sp
+                        val subtitleFontSize = (sizePx * 0.085f / densityVal).coerceIn(8.5f, 10.5f).sp
+
+                        Text(
+                            text = count.toString(),
+                            fontSize = countFontSize,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF124C31),
+                            textAlign = TextAlign.Center,
+                            lineHeight = countFontSize
+                        )
+
+                        val displaySubtitle = if (subtitle.isNotBlank()) subtitle else if (target > 0) "${target}x" else ""
+                        if (displaySubtitle.isNotBlank()) {
+                            Text(
+                                text = displaySubtitle,
+                                fontSize = subtitleFontSize,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF64748B),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -318,15 +378,17 @@ fun PremiumTasbihCounter(
     modifier: Modifier = Modifier,
     subtitle: String,
     counterSize: Dp = 88.dp,
-    showCenterText: Boolean = false
+    showCenterText: Boolean = true
 ) {
     TasbeehCounterWidget(
         count = count,
         pulseKey = pulseKey,
         modifier = modifier,
         counterWidth = counterSize,
-        counterHeight = counterSize * 1.2f,
+        counterHeight = counterSize * 1.25f,
         showCenterText = showCenterText,
+        target = target,
+        subtitle = subtitle,
         onTap = {}
     )
 }
