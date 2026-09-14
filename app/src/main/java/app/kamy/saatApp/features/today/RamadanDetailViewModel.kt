@@ -44,6 +44,21 @@ enum class RamadanChecklistItem {
     SEDEKAH
 }
 
+data class RamadanDayProgressItem(
+    val dayNumber: Int,
+    val state: RamadanPreferencesStore.FastingDayState,
+    val isToday: Boolean,
+    val isPassed: Boolean,
+    val isFuture: Boolean
+)
+
+data class RamadanFastingStats(
+    val totalFasted: Int = 0,
+    val totalMissed: Int = 0,
+    val totalRemaining: Int = 0,
+    val currentStreak: Int = 0
+)
+
 data class RamadanDetailUiState(
     val isLoading: Boolean = false,
     val dayNumber: Int = 12,
@@ -65,7 +80,10 @@ data class RamadanDetailUiState(
     val quranTotalJuz: Int = 30,
     val isTarawihDone: Boolean = false,
     val checklistDoneMap: Map<RamadanChecklistItem, Boolean> = emptyMap(),
-    val isTenLastNightsVisible: Boolean = false
+    val isTenLastNightsVisible: Boolean = false,
+    val calendarDays: List<RamadanDayProgressItem> = emptyList(),
+    val fastingStats: RamadanFastingStats = RamadanFastingStats(),
+    val selectedCalendarDay: RamadanDayProgressItem? = null
 )
 
 @HiltViewModel
@@ -106,18 +124,14 @@ class RamadanDetailViewModel @Inject constructor(
 
             val (imsakFormatted, subuhFormatted, maghribFormatted, isyaFormatted) = extractPrayerTimings(cachedTimings)
 
-            // Resolve dynamic day of Ramadan or active Hijri month
-            val ramadanInfo = if (method == PrayerCalculationMethod.MUHAMMADIYAH) {
-                runCatching {
-                    khgtCalendar.ramadanInfo(
-                        date = nowCal,
-                        imsakTime = imsakFormatted,
-                        iftarTime = maghribFormatted
-                    )
-                }.getOrNull()
-            } else {
-                null
-            }
+            // Resolve dynamic day of Ramadan from KHGT calendar
+            val ramadanInfo = runCatching {
+                khgtCalendar.ramadanInfo(
+                    date = nowCal,
+                    imsakTime = imsakFormatted,
+                    iftarTime = maghribFormatted
+                )
+            }.getOrNull()
 
             val localDate = nowCal.toInstant().atZone(nowCal.timeZone.toZoneId()).toLocalDate()
             val hijrah = java.time.chrono.HijrahDate.from(localDate)
@@ -145,6 +159,36 @@ class RamadanDetailViewModel @Inject constructor(
             val isForceTenNights = RamadanPreferencesStore.isForceTenLastNightsEnabled(appContext)
             val isTenLastNightsVisible = isForceTenNights || (currentDay in 21..totalDays)
 
+            // Build 30-Day Ramadan Calendar Grid & Stats
+            val calendarDays = (1..totalDays).map { day ->
+                val state = RamadanPreferencesStore.getRamadanDayFastingState(appContext, hijriYear, day, currentDay)
+                RamadanDayProgressItem(
+                    dayNumber = day,
+                    state = state,
+                    isToday = day == currentDay,
+                    isPassed = day < currentDay,
+                    isFuture = day > currentDay
+                )
+            }
+            val totalFasted = calendarDays.count { it.state == RamadanPreferencesStore.FastingDayState.FASTED }
+            val totalMissed = calendarDays.count { it.state == RamadanPreferencesStore.FastingDayState.NOT_FASTED }
+            val totalRemaining = calendarDays.count { it.isFuture }
+            var streak = 0
+            for (d in currentDay downTo 1) {
+                val dayItem = calendarDays.firstOrNull { it.dayNumber == d }
+                if (dayItem?.state == RamadanPreferencesStore.FastingDayState.FASTED) {
+                    streak++
+                } else if (dayItem?.state == RamadanPreferencesStore.FastingDayState.NOT_FASTED) {
+                    break
+                }
+            }
+            val stats = RamadanFastingStats(
+                totalFasted = totalFasted,
+                totalMissed = totalMissed,
+                totalRemaining = totalRemaining,
+                currentStreak = streak
+            )
+
             _state.update {
                 it.copy(
                     dayNumber = currentDay,
@@ -162,7 +206,9 @@ class RamadanDetailViewModel @Inject constructor(
                     lastReadVerseKey = lastVerseKey,
                     isTarawihDone = isTarawih,
                     checklistDoneMap = checklistMap,
-                    isTenLastNightsVisible = isTenLastNightsVisible
+                    isTenLastNightsVisible = isTenLastNightsVisible,
+                    calendarDays = calendarDays,
+                    fastingStats = stats
                 )
             }
             recomputeCountdown(cachedTimings)
@@ -266,17 +312,22 @@ class RamadanDetailViewModel @Inject constructor(
             RamadanChecklistItem.SEDEKAH -> PrayerTrackerStore.toggleOptional(appContext, OptionalWorshipHabit.DAILY_CHARITY)
         }
 
-        val updatedMap = buildChecklistMap()
-        val isTarawih = RamadanPreferencesStore.isTarawihDone(appContext)
-        val isFasting = RamadanPreferencesStore.isFastingDone(appContext)
-        _state.update {
-            it.copy(
-                checklistDoneMap = updatedMap,
-                isTarawihDone = isTarawih,
-                isFastingToday = isFasting
-            )
+        loadData()
+        return buildChecklistMap()[item] == true
+    }
+
+    fun toggleCalendarDayFasting(dayNumber: Int): RamadanPreferencesStore.FastingDayState {
+        val currentYear = _state.value.hijriYear
+        val currentDay = _state.value.dayNumber
+        val newState = RamadanPreferencesStore.toggleRamadanDayFasting(appContext, currentYear, dayNumber, currentDay)
+        loadData()
+        return newState
+    }
+
+    fun selectCalendarDay(dayNumber: Int?) {
+        _state.update { curr ->
+            curr.copy(selectedCalendarDay = curr.calendarDays.firstOrNull { it.dayNumber == dayNumber })
         }
-        return updatedMap[item] == true
     }
 
     fun toggleTarawihDone(): Boolean {

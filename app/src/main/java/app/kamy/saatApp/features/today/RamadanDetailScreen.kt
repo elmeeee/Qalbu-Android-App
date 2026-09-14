@@ -88,6 +88,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
+import app.kamy.saatApp.features.today.components.RamadanCalendarCard
 import app.kamy.saatApp.ui.components.CoachMarkOverlay
 import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
@@ -97,6 +98,7 @@ fun RamadanDetailScreen(
     onNavigateBack: () -> Unit,
     onOpenJuz: (juzNumber: Int, verseKey: String?) -> Unit,
     onOpenTenLastNights: () -> Unit = {},
+    onOpenFidyahTracker: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: RamadanDetailViewModel = hiltViewModel()
 ) {
@@ -275,11 +277,20 @@ fun RamadanDetailScreen(
                 )
             }
 
-            // Card 2: Ramadan Progress
-            item(key = "ramadan_progress_card") {
-                RamadanProgressCard(
-                    dayNumber = state.dayNumber,
+            // Card 2: Interactive 30-Day Ramadan Calendar Grid with Stats & Toggle
+            item(key = "ramadan_calendar_card") {
+                RamadanCalendarCard(
+                    calendarDays = state.calendarDays,
+                    stats = state.fastingStats,
+                    currentDayNumber = state.dayNumber,
                     totalDays = state.totalDays,
+                    onToggleDay = { dayNum ->
+                        viewModel.toggleCalendarDayFasting(dayNum)
+                    },
+                    onShowMessage = { msg ->
+                        showCustomToast(msg)
+                    },
+                    onOpenFidyahTracker = onOpenFidyahTracker,
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
             }

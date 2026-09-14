@@ -519,7 +519,7 @@
     <string name="force_update_version_info">Versi Baharu: %1$s</string>
     <string name="app_tagline">Saat • Teman Ibadah Harian</string>
     <string name="app_version_format">Versi %1$s</string>
-    <string name="settings_main_title">Tetapan</string>
+    <string name="settings_main_title">Lainnya</string>
     <string name="settings_main_subtitle">Konfigurasi dan keutamaan aplikasi</string>
     <string name="settings_section_general">Tetapan Umum</string>
     <string name="settings_section_prayer_calc">Pengiraan Waktu Solat</string>
@@ -638,6 +638,21 @@
     <string name="ramadan_imsak">Imsak</string>
     <string name="ramadan_iftar">Iftar</string>
     <string name="ramadan_days_unit">hari</string>
+    <!-- Ramadan Calendar & Fasting Tracker Strings -->
+    <string name="ramadan_calendar_title">Kalendar Puasa Ramadan</string>
+    <string name="ramadan_calendar_subtitle">Ketik hari untuk ubah status puasa</string>
+    <string name="ramadan_stat_fasted">Puasa</string>
+    <string name="ramadan_stat_missed">Tinggal</string>
+    <string name="ramadan_stat_remaining">Baki Hari</string>
+    <string name="ramadan_stat_streak">Streak</string>
+    <string name="ramadan_day_number_format">Hari ke-%1$d</string>
+    <string name="ramadan_mark_fasted">Berpuasa</string>
+    <string name="ramadan_mark_missed">Tidak Puasa (Qadha)</string>
+    <string name="ramadan_toast_status_updated">Hari ke-%1$d ditandakan %2$s</string>
+    <string name="ramadan_day_future_hint">Hari ke-%1$d Ramadan belum tiba</string>
+    <string name="ramadan_qadha_info">Anda mempunyai %1$d hari puasa yang perlu diqadha selepas Ramadan</string>
+    <string name="ramadan_open_fidyah_tracker">Buka Penjejak Fidyah &amp; Qadha</string>
+    <string name="ramadan_fidyah_cta">Kira Fidyah</string>
 
     <!-- Ramadan Detail Screen Strings -->
     <string name="ramadan_detail_title">Ramadan</string>

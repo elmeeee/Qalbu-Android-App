@@ -934,7 +934,7 @@
     <string name="app_version_format">Version %1$s</string>
 
     <!-- Revamped Settings Strings -->
-    <string name="settings_main_title">Settings</string>
+    <string name="settings_main_title">More</string>
     <string name="settings_main_subtitle">App preferences and configuration</string>
     <string name="settings_section_general">General settings</string>
     <string name="settings_section_prayer_calc">Prayer Calculation</string>
@@ -1125,6 +1125,21 @@
     <string name="ramadan_date_format">%1$d Ramadan %2$d H</string>
     <string name="ramadan_imsak">Imsak</string>
     <string name="ramadan_iftar">Iftar</string>
+    <!-- Ramadan Calendar & Fasting Tracker Strings -->
+    <string name="ramadan_calendar_title">Ramadan Fasting Calendar</string>
+    <string name="ramadan_calendar_subtitle">Tap day to toggle fasting status</string>
+    <string name="ramadan_stat_fasted">Fasted</string>
+    <string name="ramadan_stat_missed">Missed</string>
+    <string name="ramadan_stat_remaining">Remaining</string>
+    <string name="ramadan_stat_streak">Streak</string>
+    <string name="ramadan_day_number_format">Day %1$d</string>
+    <string name="ramadan_mark_fasted">Fasted</string>
+    <string name="ramadan_mark_missed">Missed (Qadha)</string>
+    <string name="ramadan_toast_status_updated">Day %1$d marked as %2$s</string>
+    <string name="ramadan_day_future_hint">Day %1$d of Ramadan is upcoming</string>
+    <string name="ramadan_qadha_info">You have %1$d missed days to make up after Ramadan</string>
+    <string name="ramadan_open_fidyah_tracker">Open Fidyah &amp; Qadha Tracker</string>
+    <string name="ramadan_fidyah_cta">Calculate Fidyah</string>
     <string name="ramadan_days_unit">days</string>
 
     <!-- Ramadan Detail Screen Strings -->

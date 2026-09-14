@@ -190,6 +190,9 @@ fun RootScreen(
                     },
                     onOpenTenLastNights = {
                         navController.navigate("ramadan/ten-last-nights") { launchSingleTop = true }
+                    },
+                    onOpenFidyahTracker = {
+                        navController.navigate("tools/fidyah") { launchSingleTop = true }
                     }
                 )
             }

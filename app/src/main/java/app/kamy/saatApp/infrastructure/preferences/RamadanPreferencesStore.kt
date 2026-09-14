@@ -137,4 +137,66 @@ object RamadanPreferencesStore {
         setSunnahDone(context, next, day)
         return next
     }
+
+    enum class FastingDayState {
+        FASTED,      // Puasa (Fasted)
+        NOT_FASTED,  // Tidak Puasa / Bolong (Missed / Excused - Qadha)
+        UNRECORDED   // Belum diisi / Future
+    }
+
+    private const val KEY_RAMADAN_FASTING_PREFIX = "ramadan_fasting_day_"
+
+    fun getRamadanDayFastingState(
+        context: Context,
+        hijriYear: Int,
+        dayNumber: Int,
+        currentDayNumber: Int
+    ): FastingDayState {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val key = "${KEY_RAMADAN_FASTING_PREFIX}${hijriYear}_${dayNumber}"
+        if (prefs.contains(key)) {
+            val saved = prefs.getString(key, null)
+            if (saved != null) {
+                return runCatching { FastingDayState.valueOf(saved) }.getOrDefault(FastingDayState.FASTED)
+            }
+        }
+        return when {
+            dayNumber < currentDayNumber -> FastingDayState.FASTED
+            dayNumber == currentDayNumber -> {
+                if (isFastingDone(context)) FastingDayState.FASTED else FastingDayState.NOT_FASTED
+            }
+            else -> FastingDayState.UNRECORDED
+        }
+    }
+
+    fun setRamadanDayFastingState(
+        context: Context,
+        hijriYear: Int,
+        dayNumber: Int,
+        state: FastingDayState
+    ) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putString("${KEY_RAMADAN_FASTING_PREFIX}${hijriYear}_${dayNumber}", state.name)
+            .apply()
+    }
+
+    fun toggleRamadanDayFasting(
+        context: Context,
+        hijriYear: Int,
+        dayNumber: Int,
+        currentDayNumber: Int
+    ): FastingDayState {
+        val current = getRamadanDayFastingState(context, hijriYear, dayNumber, currentDayNumber)
+        val next = when (current) {
+            FastingDayState.FASTED -> FastingDayState.NOT_FASTED
+            FastingDayState.NOT_FASTED -> FastingDayState.FASTED
+            FastingDayState.UNRECORDED -> FastingDayState.FASTED
+        }
+        setRamadanDayFastingState(context, hijriYear, dayNumber, next)
+        if (dayNumber == currentDayNumber) {
+            setFastingDone(context, next == FastingDayState.FASTED)
+        }
+        return next
+    }
 }
