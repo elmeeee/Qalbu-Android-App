@@ -73,6 +73,11 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
+            
             requireNotNull(signingConfigs.findByName("release")) {
                 "Release signing config is required for release builds. " +
                 "Configure RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD, " +
