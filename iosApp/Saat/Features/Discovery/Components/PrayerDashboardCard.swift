@@ -17,45 +17,22 @@ struct PrayerDashboardCard: View {
     }
     
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            if !viewModel.mappedPrayers.isEmpty && !viewModel.isLoading {
-                MascotPopOutView(theme: viewModel.activeTheme)
-                    .frame(width: 100, height: 100)
-                    .offset(x: -10, y: 0)
-                    .transition(.scale.combined(with: .opacity))
+        VStack(alignment: .leading, spacing: 0) {
+            if viewModel.mappedPrayers.isEmpty || viewModel.isLoading {
+                PrayerDashboardSkeleton()
+            } else {
+                activeCardLayout
             }
-            
-            VStack(alignment: .leading, spacing: 0) {
-                if viewModel.mappedPrayers.isEmpty || viewModel.isLoading {
-                    PrayerDashboardSkeleton()
-                } else {
-                    activeCardLayout
-                }
-            }
-            .background(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: viewModel.activeTheme.cardGradientColors,
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: viewModel.activeTheme.borderGradientColors,
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.5
-                    )
-            )
-            .shadow(color: viewModel.activeTheme == .daylight ? Color.Token.deepEmerald.opacity(0.08) : Color.black.opacity(0.3), radius: 15, x: 0, y: 8)
-            .padding(.top, 78)
         }
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(SaatTokens.Colors.primaryGradient)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+        )
+        .shadow(color: SaatTokens.Colors.deepEmerald.opacity(0.16), radius: 15, x: 0, y: 8)
         .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
         .animation(.spring(response: 0.5, dampingFraction: 0.8, blendDuration: 0), value: viewModel.activeTheme)
         .accessibilityElement(children: .ignore)
@@ -76,12 +53,17 @@ struct PrayerDashboardCard: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(languageManager.localize("next_prayer"))
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(.white.opacity(0.7))
+                    HStack(spacing: 5) {
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 11))
+                            .foregroundColor(.white.opacity(0.8))
+                        Text(languageManager.localize("next_prayer"))
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.white.opacity(0.8))
+                    }
                     
                     Text(viewModel.nextPrayerDisplayName)
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.system(size: 26, weight: .bold))
                         .foregroundColor(.white)
                         .lineLimit(1)
                     
@@ -92,24 +74,32 @@ struct PrayerDashboardCard: View {
                 
                 Spacer()
                 
-                Text(viewModel.countdownString)
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(Color.Token.goldBright)
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.75)
-                    .shadow(color: Color.Token.goldBright.opacity(0.3), radius: 6, x: 0, y: 0)
+                VStack(spacing: 2) {
+                    Text(viewModel.countdownString)
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(Color.black.opacity(0.22))
+                        .overlay(
+                            Capsule().stroke(Color.white.opacity(0.15), lineWidth: 0.5)
+                        )
+                )
             }
-            .padding(.horizontal, 24)
-            .padding(.top, 24)
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
             .padding(.bottom, 16)
             
             Rectangle()
                 .fill(Color.white.opacity(0.12))
                 .frame(height: 1)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 14)
             
             HStack(spacing: 0) {
                 ForEach(viewModel.mappedPrayers) { item in

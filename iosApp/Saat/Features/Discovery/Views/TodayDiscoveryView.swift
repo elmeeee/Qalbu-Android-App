@@ -66,30 +66,59 @@ struct TodayDiscoveryView: View {
         }
     }
 
+    private var prayerBackgroundName: String {
+        guard let target = coordinator?.dashboardViewModel?.nextPrayerDisplayName.lowercased() else {
+            return "prayer_bg_day"
+        }
+        if target.contains("fajr") || target.contains("subuh") || target.contains("sunrise") || target.contains("terbit") || target.contains("dhuhr") || target.contains("dzuhur") {
+            return "prayer_bg_day"
+        } else if target.contains("asr") || target.contains("ashar") || target.contains("maghrib") {
+            return "prayer_bg_sunset"
+        } else {
+            return "prayer_bg_night"
+        }
+    }
+
     @ViewBuilder
     private func discoveryShell(_ vm: TodayDiscoveryViewModel) -> some View {
         ZStack(alignment: .top) {
             SaatTokens.Colors.screenBackground
                 .ignoresSafeArea()
 
+            Image(prayerBackgroundName)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .frame(height: 250)
+                .clipped()
+                .overlay(
+                    LinearGradient(
+                        colors: [
+                            Color.clear,
+                            Color.clear,
+                            SaatTokens.Colors.screenBackground.opacity(0.4),
+                            SaatTokens.Colors.screenBackground
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .ignoresSafeArea(edges: .top)
 
             ScrollView {
-                VStack(spacing: 0) {
+                VStack(spacing: 14) {
                     if let khgt = coordinator?.dashboardViewModel?.khgtToday {
                         TodayImportantDayBanner(info: khgt)
                             .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                            .padding(.vertical, 4)
                     }
 
                     prayerCard
-                        .padding(.vertical, 4)
 
                     if let tracker {
                         PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
                             showingTrackerCalendar = true
                         })
                         .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                        .padding(.vertical, 8)
                     }
 
                     if let session = vm.continueReading {
@@ -101,13 +130,12 @@ struct TodayDiscoveryView: View {
                             }
                         )
                         .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                        .padding(.vertical, 6)
                     }
 
                     verseSection(vm: vm)
                 }
                 .padding(.top, 8)
-                .padding(.bottom, 24)
+                .padding(.bottom, 32)
             }
             .scrollIndicators(.hidden)
             .refreshable {
@@ -177,8 +205,9 @@ struct TodayDiscoveryView: View {
             isLoggingIn: verseState.isLoggingIn,
             onAccountTap: { verseState.requestAccount() }
         )
-        .background(Color.Token.panelGrey.ignoresSafeArea(edges: .top))
+        .background(Color.clear)
     }
+
 
     @ViewBuilder
     private func verseSection(vm: TodayDiscoveryViewModel) -> some View {

@@ -24,14 +24,14 @@ struct PrayerTimeColumn: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(name)
-                .font(.system(size: 11, weight: isActive ? .bold : .regular))
-                .foregroundColor(isActive ? Color.Token.goldBright : .white.opacity(0.6))
+                .font(.system(size: 11, weight: isActive ? .bold : .medium))
+                .foregroundColor(isActive ? SaatTokens.Colors.deepEmerald : .white.opacity(0.75))
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
             
             Text(time)
                 .font(.system(size: 13, weight: isActive ? .bold : .semibold))
-                .foregroundColor(isActive ? Color.Token.goldBright : .white)
+                .foregroundColor(isActive ? SaatTokens.Colors.deepEmerald : .white)
                 .lineLimit(1)
                 .fixedSize(horizontal: true, vertical: false)
         }
@@ -41,13 +41,9 @@ struct PrayerTimeColumn: View {
         .background(
             Group {
                 if isActive {
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.white.opacity(0.12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(Color.Token.goldBright.opacity(0.4), lineWidth: 1.5)
-                        )
-                        .shadow(color: Color.black.opacity(0.15), radius: 6, y: 3)
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.12), radius: 6, y: 3)
                 } else {
                     Color.clear
                 }
