@@ -125,6 +125,8 @@ androidComponents {
 
 
 dependencies {
+    implementation(project(":shared"))
+
     // AndroidX core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

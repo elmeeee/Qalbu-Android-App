@@ -2,22 +2,32 @@ import SwiftUI
 
 enum SaatTokens {
     struct Colors {
-        // Primary variables (default Emerald)
-        static let deepEmerald = Color(hex: 0xFF0F_4C3A)
-        static let teal = Color(hex: 0xFF14_806A)
-        static let tealDark = Color(hex: 0xFF10_6352)
-        static let emeraldRich = Color(hex: 0xFF16_5C4B)
-        static let emeraldNight = Color(hex: 0xFF09_291F)
-        static let forestDark = Color(hex: 0xFF0C_382A)
-        static let forestDeeper = Color(hex: 0xFF06_2118)
-        static let readerMoss = Color(hex: 0xFF0E_4030)
-        static let readerForest = Color(hex: 0xFF08_261C)
-        static let sageTint = Color(hex: 0xFFE8_F2ED)
-        static let mintWash = Color(hex: 0xFFF2_F9F6)
+        // Primary vertical gradient: #085E43 to #15AA7C
+        static let deepEmerald = Color(hex: 0xFF08_5E43)
+        static let teal = Color(hex: 0xFF15_AA7C)
+        static let tealDark = Color(hex: 0xFF08_5E43)
+        static let emeraldRich = Color(hex: 0xFF08_5E43)
+        static let emeraldNight = Color(hex: 0xFF04_291D)
+        static let forestDark = Color(hex: 0xFF08_5E43)
+        static let forestDeeper = Color(hex: 0xFF04_291D)
+        static let readerMoss = Color(hex: 0xFF08_5E43)
+        static let readerForest = Color(hex: 0xFF04_291D)
+        static let sageTint = Color(hex: 0xFFE6_F3EE)
+        static let mintWash = Color(hex: 0xFFF0_F8F5)
+
+        // Primary Vertical Gradient Brush equivalent
+        static let primaryGradient = LinearGradient(
+            colors: [Color(hex: 0xFF08_5E43), Color(hex: 0xFF15_AA7C)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
 
         // Layout variables
-        static let offWhite = Color(hex: 0xFFF9_F9F8)
-        static let screenBackground = Color(hex: 0xFFF8_FAFC)
+        static let offWhite = Color(hex: 0xFFF9_F4EC)
+        static let screenBackground = Color(hex: 0xFFF9_F4EC)
+        static let homeBg = Color(hex: 0xFFF9_F4EC)
+        static let lastReadBg = Color(hex: 0xFFFF_FFFF)
+        static let journeyCardBg = Color(hex: 0xFFFA_F6F0)
         static let pureWhite = Color(hex: 0xFFFF_FFFF)
         static let softGrey = Color(hex: 0xFFE5_E7EB)
         static let lightGrey = Color(hex: 0xFFF3_F4F6)
@@ -33,15 +43,15 @@ enum SaatTokens {
         static let sageMist = Color(hex: 0xFFF1_F5F2)
         static let panelGrey = Color(hex: 0xFFE8_EBEF)
         static let panelGreyAlt = Color(hex: 0xFFEE_F2EE)
-        static let indigoAccent = Color(hex: 0xFF4F_46E5)
-        static let blueLink = Color(hex: 0xFF25_63EB)
+        static let indigoAccent = Color(hex: 0xFF08_5E43)
+        static let blueLink = Color(hex: 0xFF15_AA7C)
 
-        // Constants
+        // Constants & Accents
         static let gold = Color(hex: 0xFFB4_5309)
         static let goldBright = Color(hex: 0xFFD4_A017)
         static let goldDeep = Color(hex: 0xFFD9_7706)
         static let amberWash = Color(hex: 0xFFFF_FBEB)
-        static let indigoDeep = Color(hex: 0xFF31_2E81)
+        static let homeDarkGreen = Color(hex: 0xFF17_6345)
         static let danger = Color(hex: 0xFFEF_4444)
     }
 
@@ -50,6 +60,7 @@ enum SaatTokens {
         static let floatingNavBarOuterVerticalPadding: CGFloat = 16
         static let floatingAudioBarHeight: CGFloat = 68
         static let floatingAudioBarBottomGap: CGFloat = 8
+        static let cardCornerRadius: CGFloat = 20
     }
 
     struct Spacing {
@@ -63,7 +74,10 @@ enum SaatTokens {
 
     struct Shapes {
         static let navigationBarShape = RoundedRectangle(cornerRadius: 32, style: .continuous)
+        static let cardShape = RoundedRectangle(cornerRadius: 20, style: .continuous)
+        static let chipShape = RoundedRectangle(cornerRadius: 12, style: .continuous)
     }
+
 }
 
 extension Color {

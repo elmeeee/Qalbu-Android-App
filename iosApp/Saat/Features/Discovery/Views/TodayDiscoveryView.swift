@@ -69,12 +69,9 @@ struct TodayDiscoveryView: View {
     @ViewBuilder
     private func discoveryShell(_ vm: TodayDiscoveryViewModel) -> some View {
         ZStack(alignment: .top) {
-            LinearGradient(
-                colors: [Color.Token.panelGrey, Color.Token.panelGreyAlt, Color.Token.screenBackground],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            SaatTokens.Colors.screenBackground
+                .ignoresSafeArea()
+
 
             ScrollView {
                 VStack(spacing: 0) {
