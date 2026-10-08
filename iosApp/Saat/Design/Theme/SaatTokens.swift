@@ -51,6 +51,7 @@ enum SaatTokens {
         static let goldBright = Color(hex: 0xFFD4_A017)
         static let goldDeep = Color(hex: 0xFFD9_7706)
         static let amberWash = Color(hex: 0xFFFF_FBEB)
+        static let indigoDeep = Color(hex: 0xFF31_2E81)
         static let homeDarkGreen = Color(hex: 0xFF17_6345)
         static let danger = Color(hex: 0xFFEF_4444)
     }

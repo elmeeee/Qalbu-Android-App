@@ -14,8 +14,6 @@ struct FloatingTabBar: View {
                 tab: .tools, icon: "square.grid.2x2", selectedIcon: "square.grid.2x2.fill",
                 title: "Tools")
             Spacer()
-            tabItem(tab: .reflect, icon: "pencil.line", selectedIcon: "pencil", title: "Reflect")
-            Spacer()
             accountTabItem()
         }
         .padding(.horizontal, 24)
