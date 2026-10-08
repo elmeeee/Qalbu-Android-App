@@ -215,7 +215,7 @@ final class TodayShareTextComposer {
         let now = Date()
 
         return """
-        *Saat | Quran Foundation*
+        *Saat (ساعات)*
         _1 Verse, 1 Day 📖 Read, Reflect, Share_
 
         \(dynamicAddressLine(now: now))
@@ -260,7 +260,7 @@ final class TodayShareTextComposer {
         }()
 
         return """
-        *Saat | Quran Foundation*
+        *Saat (ساعات)*
         _1 Verse, 1 Day 📖 Read, Reflect, Share_
 
         _My friend..._

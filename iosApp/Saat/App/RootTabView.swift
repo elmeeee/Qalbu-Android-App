@@ -10,7 +10,7 @@ import SwiftUI
 
 struct RootTabView: View {
     enum Tab: Hashable {
-        case today, journey, tools, reflect, account
+        case today, journey, tools, account
     }
 
     enum TodayNavigation: Hashable {
@@ -55,15 +55,6 @@ struct RootTabView: View {
             }
             .tag(Tab.tools)
 
-            ReflectionView(
-                verseState: verseState,
-                isTabSelected: selectedTab == .reflect
-            )
-            .tabItem {
-                Label("Reflect", systemImage: selectedTab == .reflect ? "pencil" : "pencil.line")
-            }
-            .tag(Tab.reflect)
-
             NavigationStack {
                 ProfileView(preferSystemNavigationTitle: true, verseState: verseState)
                     .environment(\.appContainer, container)
@@ -74,13 +65,7 @@ struct RootTabView: View {
             .tag(Tab.account)
         }
         .environmentObject(prayerController)
-        .onChangeWithFallback(of: verseState.shouldNavigateToReflect) { shouldNavigate in
-            if shouldNavigate {
-                if selectedTab != .reflect {
-                    withAnimation { selectedTab = .reflect }
-                }
-            }
-        }
+
         .onChangeWithFallback(of: verseState.shouldNavigateToAccount) { shouldNavigate in
             if shouldNavigate {
                 selectedTab = .account
