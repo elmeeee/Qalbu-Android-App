@@ -2,58 +2,84 @@
 //  TodayContinueReadingCard.swift
 //  Saat
 //
+//  Created by Elmee on 25/04/2026.
+//  Copyright © 2026 Elmee. All rights reserved.
+//
 
 import SwiftUI
 
 struct TodayContinueReadingCard: View {
     let session: ReadingSession
     let chapterName: String?
+    let totalVerses: Int? = 0
     let onTap: () -> Void
+
+    private var percentInt: Int {
+        if let total = totalVerses, total > 0 {
+            return max(1, min(100, Int((Double(session.verseNumber) / Double(total)) * 100)))
+        }
+        return 50
+    }
+
+    private var fillFraction: CGFloat {
+        max(0.05, min(1.0, CGFloat(percentInt) / 100.0))
+    }
 
     var body: some View {
         Button(action: onTap) {
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(SaatTokens.Colors.sageTint)
-                        .frame(width: 48, height: 48)
-                    
-                    Image(systemName: "bookmark.fill")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(SaatTokens.Colors.deepEmerald)
-                }
-                
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(String(localized: "continue_reading", defaultValue: "TERAKHIR DIBACA").uppercased())
-                        .font(.system(size: 11, weight: .bold))
-                        .tracking(0.5)
-                        .foregroundColor(SaatTokens.Colors.teal)
-                    
-                    Text(chapterName ?? "Surah \(session.chapterNumber)")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(SaatTokens.Colors.slate900)
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Terakhir Dibaca")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.homeDarkGreen)
                         .lineLimit(1)
-                    
-                    Text("Ayat \(session.verseNumber)")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(SaatTokens.Colors.slate500)
+
+                    let surahTitle = chapterName ?? "Surah \(session.chapterNumber)"
+                    let verseTitle = "Ayat \(session.verseNumber)"
+                    Text("\(surahTitle) • \(verseTitle)")
+                        .font(.system(size: 18, weight: .heavy))
+                        .foregroundColor(SaatTokens.Colors.homeDarkGreen)
+                        .lineLimit(1)
+
+                    Spacer().frame(height: 4)
+
+                    HStack(spacing: 8) {
+                        Text("\(percentInt)%")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(SaatTokens.Colors.homeDarkGreen)
+
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                Capsule()
+                                    .fill(Color(hex: 0xFFB9_CBBE))
+                                    .frame(height: 4)
+
+                                Capsule()
+                                    .fill(SaatTokens.Colors.homeDarkGreen)
+                                    .frame(width: max(8, geo.size.width * fillFraction), height: 4)
+                            }
+                        }
+                        .frame(height: 4)
+                        .frame(maxWidth: 160)
+                    }
                 }
-                
+
                 Spacer()
-                
-                Image(systemName: "arrow.right.circle.fill")
-                    .font(.system(size: 24))
-                    .foregroundColor(SaatTokens.Colors.deepEmerald)
+
+                Image("last_read")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 90, height: 60)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(SaatTokens.Colors.pureWhite)
-            .cornerRadius(20)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 18)
+            .background(SaatTokens.Colors.lastReadBg)
+            .cornerRadius(24)
             .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(SaatTokens.Colors.softGrey.opacity(0.8), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .stroke(Color(hex: 0xFFE2_E8F0).opacity(0.5), lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 3)
+            .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
         }
         .buttonStyle(.plain)
     }

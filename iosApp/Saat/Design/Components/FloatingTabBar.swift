@@ -4,126 +4,62 @@ struct FloatingTabBar: View {
     @Binding var selectedTab: RootTabView.Tab
     let avatarUrl: URL?
 
+    private let tabs: [(RootTabView.Tab, String, String, String)] = [
+        (.today, "sun.max", "sun.max.fill", "Utama"),
+        (.journey, "book", "book.fill", "Al-Qur'an"),
+        (.tools, "square.grid.2x2", "square.grid.2x2.fill", "Ibadah"),
+        (.account, "person.circle", "person.circle.fill", "Akun")
+    ]
+
     var body: some View {
         HStack(spacing: 0) {
-            tabItem(tab: .today, icon: "sun.max", selectedIcon: "sun.max.fill", title: "Today")
-            Spacer()
-            tabItem(tab: .journey, icon: "book", selectedIcon: "book.fill", title: "Quran")
-            Spacer()
-            tabItem(
-                tab: .tools, icon: "square.grid.2x2", selectedIcon: "square.grid.2x2.fill",
-                title: "Tools")
-            Spacer()
-            accountTabItem()
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 12)
-        .frame(height: SaatTokens.Metrics.floatingNavBarHeight)
-        .background {
-            SaatTokens.Shapes.navigationBarShape
-                .fill(SaatTokens.Colors.pureWhite.opacity(0.94))
-                .overlay(
-                    SaatTokens.Shapes.navigationBarShape
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.9),
-                                    SaatTokens.Colors.teal.opacity(0.12),
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 0.5
-                        )
-                )
-                .shadow(color: SaatTokens.Colors.deepEmerald.opacity(0.12), radius: 16, x: 0, y: 8)
-        }
-        .padding(.horizontal, 18)
-        .padding(.bottom, SaatTokens.Metrics.floatingNavBarOuterVerticalPadding)
-    }
-
-    @ViewBuilder
-    private func tabItem(tab: RootTabView.Tab, icon: String, selectedIcon: String, title: String)
-        -> some View
-    {
-        let isSelected = selectedTab == tab
-
-        Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                selectedTab = tab
-            }
-        }) {
-            VStack(spacing: 4) {
-                Image(systemName: isSelected ? selectedIcon : icon)
-                    .font(.system(size: 21))
-                    .foregroundColor(
-                        isSelected ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate500)
-
-                if isSelected {
-                    Text(title)
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(SaatTokens.Colors.deepEmerald)
-                }
-            }
-            .padding(.horizontal, isSelected ? 10 : 8)
-            .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill(isSelected ? SaatTokens.Colors.teal.opacity(0.12) : Color.clear)
-            )
-        }
-        .buttonStyle(.plain)
-    }
-
-    @ViewBuilder
-    private func accountTabItem() -> some View {
-        let isSelected = selectedTab == .account
-
-        Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                selectedTab = .account
-            }
-        }) {
-            VStack(spacing: 4) {
-                if let url = avatarUrl {
-                    AsyncImage(url: url) { phase in
-                        if let image = phase.image {
-                            image
-                                .resizable()
-                                .scaledToFill()
-                        } else {
-                            Image(systemName: "person.crop.circle")
-                                .resizable()
-                        }
+            ForEach(tabs, id: \.0) { tab, icon, selectedIcon, label in
+                let isSelected = selectedTab == tab
+                Button(action: {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.76)) {
+                        selectedTab = tab
                     }
-                    .frame(width: 21, height: 21)
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .strokeBorder(
-                                isSelected ? SaatTokens.Colors.deepEmerald : Color.clear,
-                                lineWidth: 1)
-                    )
-                } else {
-                    Image(systemName: isSelected ? "person.crop.circle.fill" : "person.crop.circle")
-                        .font(.system(size: 21))
-                        .foregroundColor(
-                            isSelected ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate500)
-                }
+                }) {
+                    VStack(spacing: 2) {
+                        Image(systemName: isSelected ? selectedIcon : icon)
+                            .font(.system(size: 21))
+                            .foregroundColor(isSelected ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate500)
 
-                if isSelected {
-                    Text("Profile")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundColor(SaatTokens.Colors.deepEmerald)
+                        Text(label)
+                            .font(.system(size: 11, weight: isSelected ? .bold : .medium))
+                            .foregroundColor(isSelected ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate500)
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(
+                        Group {
+                            if isSelected {
+                                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                                    .fill(SaatTokens.Colors.deepEmerald.opacity(0.10))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                                            .stroke(SaatTokens.Colors.deepEmerald.opacity(0.20), lineWidth: 1)
+                                    )
+                            }
+                        }
+                    )
                 }
+                .buttonStyle(.plain)
             }
-            .padding(.horizontal, isSelected ? 10 : 8)
-            .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill(isSelected ? SaatTokens.Colors.teal.opacity(0.12) : Color.clear)
-            )
         }
-        .buttonStyle(.plain)
+        .padding(6)
+        .background(
+            Capsule()
+                .fill(Color.white)
+        )
+        .overlay(
+            Capsule()
+                .stroke(Color(hex: 0xFFEC_E7DE), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 6)
+        .padding(.horizontal, 24)
+        .padding(.bottom, 10)
     }
 }

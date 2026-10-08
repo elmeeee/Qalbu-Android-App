@@ -7,255 +7,164 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct TodayDiscoveryHeaderView: View {
     let hijriDate: String?
     let gregorianDate: String?
     let cityName: String?
     let locationStatus: String?
-    let avatarURL: URL?
-    let isLoggingIn: Bool
-    let onAccountTap: () -> Void
+    let isScrolled: Bool
+    let isDarkBackground: Bool
+    let onLocationClick: () -> Void
+    let onCalendarClick: () -> Void
 
-    @State private var greetingPhase: CGFloat = 0
+    @State private var showHijri = false
+    @State private var timer: Timer?
 
-    private var greeting: String {
-        let hour = Calendar.current.component(.hour, from: .now)
-        switch hour {
-        case 3..<12: return "Good Morning"
-        case 12..<15: return "Good Afternoon"
-        case 15..<18: return "Good Afternoon"
-        case 18..<21: return "Good Evening"
-        default: return "Good Night"
+    private var displayLocation: String {
+        let text = cityName ?? locationStatus ?? "Menemukan lokasi…"
+        var raw = text
+        if text.contains(",") {
+            let parts = text.split(separator: ",")
+            if !(parts.count == 2 && Double(parts[0].trimmingCharacters(in: .whitespaces)) != nil) {
+                raw = String(parts[0].trimmingCharacters(in: .whitespaces))
+            }
+        }
+        return raw
+            .replacingOccurrences(of: "Kecamatan", with: "Kec", options: .caseInsensitive)
+            .replacingOccurrences(of: "Kelurahan", with: "Kel", options: .caseInsensitive)
+            .replacingOccurrences(of: "Subdistrict", with: "Subdist", options: .caseInsensitive)
+    }
+
+    private var localDayName: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "id_ID")
+        formatter.dateFormat = "EEEE"
+        return formatter.string(from: Date())
+    }
+
+    private var formattedHijri: String? {
+        guard let hijri = hijriDate, !hijri.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+        if hijri.hasSuffix(" H") || hijri.hasSuffix(" AH") {
+            return hijri
+        }
+        return "\(hijri) H"
+    }
+
+    private var dateDisplayText: String {
+        let prefix = localDayName.isEmpty ? "" : "\(localDayName), "
+        if showHijri, let formattedHijri {
+            return "\(prefix)\(formattedHijri)"
+        } else if let gregorian = gregorianDate, !gregorian.isEmpty {
+            return "\(prefix)\(gregorian)"
+        } else {
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "id_ID")
+            formatter.dateFormat = "d MMM"
+            return "\(prefix)\(formatter.string(from: Date()))"
         }
     }
 
-    private var greetingIcon: String {
-        let hour = Calendar.current.component(.hour, from: .now)
-        switch hour {
-        case 3..<12: return "sunrise.fill"
-        case 12..<18: return "sun.max.fill"
-        case 18..<21: return "sunset.fill"
-        default: return "moon.stars.fill"
+    private var initialTextColor: Color {
+        isDarkBackground ? .white : SaatTokens.Colors.homeDarkGreen
+    }
+
+    private var textColor: Color {
+        isScrolled ? SaatTokens.Colors.homeDarkGreen : initialTextColor
+    }
+
+    private var badgeBg: Color {
+        if isScrolled {
+            return SaatTokens.Colors.homeDarkGreen.opacity(0.12)
         }
+        return isDarkBackground ? Color.white.opacity(0.22) : SaatTokens.Colors.homeDarkGreen.opacity(0.10)
+    }
+
+    private var badgeBorder: Color {
+        if isScrolled {
+            return SaatTokens.Colors.homeDarkGreen.opacity(0.25)
+        }
+        return isDarkBackground ? Color.white.opacity(0.45) : SaatTokens.Colors.homeDarkGreen.opacity(0.25)
+    }
+
+    private var badgeContentColor: Color {
+        if isScrolled {
+            return SaatTokens.Colors.homeDarkGreen
+        }
+        return isDarkBackground ? .white : SaatTokens.Colors.homeDarkGreen
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .center, spacing: 14) {
+        ZStack {
+            if isScrolled {
+                SaatTokens.Colors.homeBg
+                    .opacity(0.96)
+                    .ignoresSafeArea(edges: .top)
+            }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    greetingRow
-                    dateRow
-                    locationRow
+            HStack(alignment: .center) {
+                // Left: Greeting & Rotating Date
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Assalamu'alaikum")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(textColor)
+                        .lineLimit(1)
+
+                    Button(action: onCalendarClick) {
+                        Text(dateDisplayText)
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(textColor)
+                            .lineLimit(1)
+                            .contentTransition(.numericText())
+                    }
+                    .buttonStyle(.plain)
                 }
 
-                Spacer(minLength: 0)
+                Spacer()
 
-                todayBadge
+                // Right: Location Badge Capsule
+                Button(action: onLocationClick) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "mappin.and.ellipse")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(badgeContentColor)
+
+                        Text(displayLocation)
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(badgeContentColor)
+                            .lineLimit(1)
+                            .frame(maxWidth: 140, alignment: .leading)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        Capsule()
+                            .fill(badgeBg)
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(badgeBorder, lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
             }
-            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-            .padding(.top, 14)
-            .padding(.bottom, 14)
-
-            dividerLine
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
-                greetingPhase = 1
-            }
-        }
-    }
-
-    private var greetingRow: some View {
-        HStack(spacing: 5) {
-            Image(systemName: greetingIcon)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [
-                            Color.Token.goldDeep,
-                            Color.Token.gold
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .symbolEffect(.pulse, options: .repeating.speed(0.3))
-
-            Text(greeting)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Color.Token.deepEmerald.opacity(0.7))
-        }
-    }
-
-    private var dateRow: some View {
-        RotatingPrayerDateLabelView(hijri: hijriDate, gregorian: gregorianDate)
-    }
-
-    private var locationRow: some View {
-        HStack(spacing: 5) {
-            Image(systemName: "mappin.circle.fill")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Color.Token.deepEmerald, Color.Token.teal],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-
-            Text(cityName ?? locationStatus ?? "Locating…")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(Color.Token.deepEmerald)
-                .lineLimit(1)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(SaatAccessibility.Today.location), \(cityName ?? locationStatus ?? "")")
-    }
-
-    private var todayBadge: some View {
-        HStack(spacing: 4) {
-            Text("✦")
-                .font(.system(size: 8))
-                .foregroundStyle(Color.Token.gold)
-            Text("Today")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(Color.Token.deepEmerald)
-                .tracking(0.3)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(
-            Capsule()
-                .fill(Color.Token.deepEmerald.opacity(0.06))
-        )
-        .overlay(
-            Capsule()
-                .stroke(Color.Token.deepEmerald.opacity(0.1), lineWidth: 0.5)
-        )
-    }
-
-    private var dividerLine: some View {
-        Rectangle()
-            .fill(
-                LinearGradient(
-                    colors: [
-                        Color.Token.deepEmerald.opacity(0.0),
-                        Color.Token.deepEmerald.opacity(0.08),
-                        Color.Token.gold.opacity(0.1),
-                        Color.Token.deepEmerald.opacity(0.08),
-                        Color.Token.deepEmerald.opacity(0.0)
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
-            .frame(height: 0.5)
-    }
-}
-
-struct TodayProfileAvatarButton: View {
-    let url: URL?
-    let isLoggingIn: Bool
-
-    var body: some View {
-        Group {
-            if isLoggingIn {
-                avatarFrame {
-                    ProgressView()
-                        .tint(Color.Token.deepEmerald)
-                        .scaleEffect(0.9)
-                }
-            } else if let url {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFill()
-                    case .failure:
-                        fallbackIcon
-                    case .empty:
-                        ProgressView()
-                            .tint(Color.Token.deepEmerald)
-                            .scaleEffect(0.9)
-                    @unknown default:
-                        fallbackIcon
+            timer?.invalidate()
+            timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
+                Task { @MainActor in
+                    withAnimation(.easeInOut(duration: 0.35)) {
+                        showHijri.toggle()
                     }
                 }
-                .id(url)
-                .frame(width: 44, height: 44)
-                .clipShape(Circle())
-                .overlay(
-                    Circle()
-                        .stroke(
-                            LinearGradient(
-                                colors: [
-                                    Color.Token.deepEmerald.opacity(0.5),
-                                    Color.Token.gold.opacity(0.3)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 2
-                        )
-                )
-                .shadow(color: Color.Token.deepEmerald.opacity(0.1), radius: 4, y: 2)
-            } else {
-                fallbackIcon
             }
         }
-    }
-
-    @ViewBuilder
-    private func avatarFrame<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        Circle()
-            .fill(Color.Token.pureWhite)
-            .frame(width: 44, height: 44)
-            .overlay(content())
-            .overlay(
-                Circle()
-                    .stroke(Color.Token.softGrey, lineWidth: 1)
-            )
-    }
-
-    private var fallbackIcon: some View {
-        ZStack {
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.Token.deepEmerald.opacity(0.08),
-                            Color.Token.deepEmerald.opacity(0.04)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(width: 44, height: 44)
-
-            Image(systemName: "person.fill")
-                .font(.system(size: 18, weight: .medium))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Color.Token.deepEmerald, Color.Token.teal],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+        .onDisappear {
+            timer?.invalidate()
+            timer = nil
         }
-        .overlay(
-            Circle()
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            Color.Token.deepEmerald.opacity(0.2),
-                            Color.Token.gold.opacity(0.15)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1.5
-                )
-        )
     }
 }

@@ -11,176 +11,169 @@ import SwiftUI
 struct PrayerTrackerCard: View {
     @ObservedObject var viewModel: PrayerTrackerViewModel
     let onOpenCalendar: () -> Void
-    @ObservedObject private var languageManager = AppLanguageManager.shared
+
+    @State private var isPrayerDone: Bool = false
+    @State private var isQuranDone: Bool = false
+    @State private var isDhikrDone: Bool = false
+    @State private var isSunnahDone: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Header row
-            HStack(alignment: .center, spacing: 0) {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header: Today's Journey & Calendar Streak Icon
+            HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(languageManager.localize("daily_prayer_tracker"))
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
-                    
-                    Text(String(format: languageManager.localize("prayer_completed_format"), viewModel.state.todayProgress.completedCount, viewModel.state.todayProgress.totalCount))
-                        .font(.system(size: 11, weight: .regular))
-                        .foregroundColor(Color.Token.slate500)
+                    Text("Perjalanan Hari Ini")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(Color(hex: 0xFF1E_293B))
+
+                    Text("Lacak ibadah harianmu")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(Color(hex: 0xFF64_748B))
                 }
-                
+
                 Spacer()
-                
-                // Streak badge
-                HStack(spacing: 4) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(Color.Token.goldDeep)
-                    
-                    Text("\(viewModel.state.streak)")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(Color.Token.goldDeep)
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.Token.amberWash)
-                .cornerRadius(20)
-                
+
                 Button(action: onOpenCalendar) {
                     Image(systemName: "calendar")
-                        .font(.system(size: 18))
-                        .foregroundColor(Color.Token.teal)
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(SaatTokens.Colors.homeDarkGreen)
                         .padding(8)
                 }
-                .accessibilityLabel("Open prayer calendar")
+                .accessibilityLabel("Prayer Calendar")
             }
-            .padding(.horizontal, 14)
-            .padding(.top, 14)
-            
-            // Progress Bar
-            ProgressView(value: Double(viewModel.state.todayProgress.completedCount), total: Double(viewModel.state.todayProgress.totalCount))
-                .tint(Color.Token.teal)
-                .progressViewStyle(.linear)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-            
-            // Check off chips
+
+            // 4 Circular Journey Badges Row
             HStack(spacing: 0) {
-                ForEach(PrayerTrackerStore.TRACKED_PRAYERS) { prayer in
-                    let done = viewModel.state.completedPrayers.contains(prayer)
-                    let enabled = done || viewModel.state.availablePrayers.contains(prayer)
-                    
-                    Spacer()
-                    PrayerCheckChip(
-                        label: languageManager.localize("prayer_" + prayer.rawValue.lowercased()),
-                        completed: done,
-                        enabled: enabled,
-                        onClick: {
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            viewModel.togglePrayer(prayer)
-                        }
-                    )
-                    Spacer()
-                }
-            }
-            .padding(.horizontal, 6)
-            .padding(.bottom, 12)
-
-            // Optional habits chips
-            if !viewModel.state.optionalHabits.isEmpty {
-                Divider()
-                    .background(Color.Token.softGrey)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(viewModel.state.optionalHabits) { item in
-                            OptionalHabitChip(item: item) {
-                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                viewModel.toggleOptionalHabit(item.habit)
-                            }
+                JourneyBadgeView(
+                    label: "Shalat",
+                    isCompleted: isPrayerDone,
+                    onClick: {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                            isPrayerDone.toggle()
                         }
                     }
-                    .padding(.horizontal, 14)
-                    .padding(.bottom, 14)
-                }
-            }
-        }
-        .background(Color.Token.pureWhite)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
-    }
-}
+                )
+                .frame(maxWidth: .infinity)
 
-struct PrayerCheckChip: View {
-    let label: String
-    let completed: Bool
-    let enabled: Bool
-    let onClick: () -> Void
-
-    var body: some View {
-        Button(action: onClick) {
-            VStack(alignment: .center, spacing: 4) {
-                ZStack {
-                    Circle()
-                        .strokeBorder(
-                            completed ? Color.Token.deepEmerald :
-                            (enabled ? Color.Token.softGrey : Color.Token.softGrey.opacity(0.45)),
-                            lineWidth: 2
-                        )
-                        .background(
-                            Circle().fill(
-                                completed ? Color.Token.deepEmerald :
-                                (enabled ? Color.clear : Color.Token.lightGrey.opacity(0.35))
-                            )
-                        )
-                        .frame(width: 40, height: 40)
-                    
-                    if completed {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                JourneyBadgeView(
+                    label: "Quran",
+                    isCompleted: isQuranDone,
+                    onClick: {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                            isQuranDone.toggle()
+                        }
                     }
-                }
-                
-                Text(label)
-                    .font(.system(size: 11, weight: completed ? .semibold : .regular))
-                    .foregroundColor(
-                        completed ? Color.Token.deepEmerald :
-                        (enabled ? Color.Token.slate500 : Color.Token.slate500.opacity(0.45))
-                    )
-                    .lineLimit(1)
-            }
-        }
-        .disabled(!enabled && !completed)
-        .opacity(enabled || completed ? 1.0 : 0.55)
-    }
-}
+                )
+                .frame(maxWidth: .infinity)
 
-struct OptionalHabitChip: View {
-    let item: OptionalHabitUiItem
-    let onClick: () -> Void
+                JourneyBadgeView(
+                    label: "Dzikir",
+                    isCompleted: isDhikrDone,
+                    onClick: {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                            isDhikrDone.toggle()
+                        }
+                    }
+                )
+                .frame(maxWidth: .infinity)
 
-    var body: some View {
-        Button(action: onClick) {
-            HStack(spacing: 4) {
-                if item.completed {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(Color.Token.deepEmerald)
-                }
-                
-                Text(item.label)
-                    .font(.system(size: 11, weight: item.completed ? .semibold : .regular))
-                    .foregroundColor(item.completed ? Color.Token.deepEmerald : Color.Token.slate800)
+                JourneyBadgeView(
+                    label: "Sunnah",
+                    isCompleted: isSunnahDone,
+                    onClick: {
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                            isSunnahDone.toggle()
+                        }
+                    }
+                )
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(item.completed ? Color.Token.deepEmerald.opacity(0.12) : Color.Token.lightGrey)
+
+            // Inner Quran Quote Card
+            HStack(alignment: .center, spacing: 12) {
+                Image("mascot_reading")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 80, height: 80)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("\"Dan sembahlah Tuhanmu sampai yakin (ajal) datang kepadamu.\"")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(hex: 0xFF1E_293B))
+                        .lineSpacing(3)
+
+                    Text("Qur'an 15:99")
+                        .font(.system(size: 11.5, weight: .medium))
+                        .foregroundColor(Color(hex: 0xFF64_748B))
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(hex: 0xFFFF_FDF7))
             .cornerRadius(20)
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(item.completed ? Color.Token.deepEmerald : Color.Token.softGrey, lineWidth: 1)
+                    .stroke(Color(hex: 0xFFF3_EDE2), lineWidth: 1)
             )
         }
+        .padding(18)
+        .background(SaatTokens.Colors.journeyCardBg)
+        .cornerRadius(24)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .stroke(Color(hex: 0xFFF0_EBE1).opacity(0.6), lineWidth: 1)
+        )
+        .onAppear {
+            isPrayerDone = viewModel.state.completedPrayers.count >= 5
+        }
+    }
+}
+
+// MARK: - Journey Badge
+private struct JourneyBadgeView: View {
+    let label: String
+    let isCompleted: Bool
+    let onClick: () -> Void
+
+    var body: some View {
+        Button(action: onClick) {
+            VStack(spacing: 6) {
+                ZStack {
+                    Circle()
+                        .fill(isCompleted ? Color(hex: 0xFFE6_F4EA) : Color(hex: 0xFFF7_F4E9))
+                        .frame(width: 56, height: 56)
+                        .overlay(
+                            Circle()
+                                .stroke(isCompleted ? Color(hex: 0xFFB8_E0C4) : Color(hex: 0xFFEC_E4D5), lineWidth: 1)
+                        )
+
+                    if isCompleted {
+                        ZStack {
+                            Circle()
+                                .fill(SaatTokens.Colors.homeDarkGreen)
+                                .frame(width: 24, height: 24)
+
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                    } else {
+                        Circle()
+                            .stroke(SaatTokens.Colors.homeDarkGreen.opacity(0.65), lineWidth: 2)
+                            .frame(width: 18, height: 18)
+                    }
+                }
+
+                Text(label)
+                    .font(.system(size: 12, weight: isCompleted ? .bold : .semibold))
+                    .foregroundColor(isCompleted ? SaatTokens.Colors.homeDarkGreen : Color(hex: 0xFF47_5569))
+            }
+            .padding(4)
+        }
+        .buttonStyle(.plain)
     }
 }

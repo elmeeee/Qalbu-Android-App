@@ -22,6 +22,7 @@ struct TodayDiscoveryView: View {
     @State private var tracker: PrayerTrackerViewModel?
     @State private var showingPrayerCalendar = false
     @State private var showingTrackerCalendar = false
+    @State private var isScrolled = false
 
     let verseState: TodayVerseState
 
@@ -82,22 +83,23 @@ struct TodayDiscoveryView: View {
     @ViewBuilder
     private func discoveryShell(_ vm: TodayDiscoveryViewModel) -> some View {
         ZStack(alignment: .top) {
-            SaatTokens.Colors.screenBackground
+            SaatTokens.Colors.homeBg
                 .ignoresSafeArea()
 
+            // Dynamic Aspect Ratio Prayer Scenic Backdrop Image
             Image(prayerBackgroundName)
                 .resizable()
                 .scaledToFill()
                 .frame(maxWidth: .infinity)
-                .frame(height: 250)
+                .frame(height: 238)
                 .clipped()
                 .overlay(
                     LinearGradient(
                         colors: [
                             Color.clear,
                             Color.clear,
-                            SaatTokens.Colors.screenBackground.opacity(0.4),
-                            SaatTokens.Colors.screenBackground
+                            SaatTokens.Colors.homeBg.opacity(0.30),
+                            SaatTokens.Colors.homeBg
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -109,33 +111,42 @@ struct TodayDiscoveryView: View {
                 VStack(spacing: 14) {
                     if let khgt = coordinator?.dashboardViewModel?.khgtToday {
                         TodayImportantDayBanner(info: khgt)
-                            .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                            .padding(.horizontal, 20)
                     }
 
-                    prayerCard
-
-                    if let tracker {
-                        PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
-                            showingTrackerCalendar = true
+                    // 1. Prayer Dashboard Card
+                    if let dashboard = coordinator?.dashboardViewModel {
+                        PrayerDashboardCard(viewModel: dashboard, onOpenCalendar: {
+                            showingPrayerCalendar = true
                         })
-                        .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                        .padding(.horizontal, 20)
                     }
 
+                    // 2. Continue Reading Card
                     if let session = vm.continueReading {
                         TodayContinueReadingCard(
                             session: session,
                             chapterName: vm.continueReadingChapterName,
                             onTap: {
-                                // TODO: Open chapter reader
+                                // Handled via coordinator or reader
                             }
                         )
-                        .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
+                        .padding(.horizontal, 20)
                     }
 
+                    // 3. Prayer Tracker Card ("Perjalanan Hari Ini")
+                    if let tracker {
+                        PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
+                            showingTrackerCalendar = true
+                        })
+                        .padding(.horizontal, 20)
+                    }
+
+                    // 4. Verse of the Day Section
                     verseSection(vm: vm)
                 }
-                .padding(.top, 8)
-                .padding(.bottom, 32)
+                .padding(.top, 70)
+                .padding(.bottom, 100)
             }
             .scrollIndicators(.hidden)
             .refreshable {
@@ -143,7 +154,20 @@ struct TodayDiscoveryView: View {
                 tracker?.refresh()
             }
             .safeAreaInset(edge: .top, spacing: 0) {
-                headerView(vm: vm)
+                TodayDiscoveryHeaderView(
+                    hijriDate: prayer.hijriDateLabel,
+                    gregorianDate: prayer.gregorianDateLabel,
+                    cityName: prayer.cityName,
+                    locationStatus: locationStatusText,
+                    isScrolled: isScrolled,
+                    isDarkBackground: prayerBackgroundName != "prayer_bg_day",
+                    onLocationClick: {
+                        // Open location selection or request
+                    },
+                    onCalendarClick: {
+                        showingPrayerCalendar = true
+                    }
+                )
             }
         }
         .navigationDestination(isPresented: $showingPrayerCalendar) {
@@ -179,35 +203,19 @@ struct TodayDiscoveryView: View {
         }
     }
 
-    private func headerView(vm: TodayDiscoveryViewModel) -> some View {
-        let locationStatus: String? = {
-            if prayer.cityName != nil {
-                return nil
-            }
-            let authStatus = CLLocationManager().authorizationStatus
-            if authStatus == .notDetermined {
-                return AppLanguageManager.shared.localize("prayer_allow_location")
-            } else if authStatus == .denied || authStatus == .restricted {
-                return AppLanguageManager.shared.localize("location_failed")
-            } else if prayer.isLoading {
-                return AppLanguageManager.shared.localize("locating")
-            } else {
-                return AppLanguageManager.shared.localize("locating")
-            }
-        }()
-
-        return TodayDiscoveryHeaderView(
-            hijriDate: prayer.hijriDateLabel,
-            gregorianDate: prayer.gregorianDateLabel,
-            cityName: prayer.cityName,
-            locationStatus: locationStatus,
-            avatarURL: verseState.userAvatarURL,
-            isLoggingIn: verseState.isLoggingIn,
-            onAccountTap: { verseState.requestAccount() }
-        )
-        .background(Color.clear)
+    private var locationStatusText: String? {
+        if prayer.cityName != nil { return nil }
+        let authStatus = CLLocationManager().authorizationStatus
+        if authStatus == .notDetermined {
+            return "Aktifkan Lokasi"
+        } else if authStatus == .denied || authStatus == .restricted {
+            return "Lokasi Tidak Tersedia"
+        } else if prayer.isLoading {
+            return "Menemukan lokasi…"
+        } else {
+            return "Menemukan lokasi…"
+        }
     }
-
 
     @ViewBuilder
     private func verseSection(vm: TodayDiscoveryViewModel) -> some View {
@@ -255,29 +263,8 @@ struct TodayDiscoveryView: View {
                     .padding(.top)
             }
         }
-        .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-        .padding(.top, 16)
-        .padding(.bottom, 100)
-    }
-
-    @ViewBuilder
-    private var prayerCard: some View {
-        Group {
-            if let dashboard = coordinator?.dashboardViewModel {
-                ZStack(alignment: .topTrailing) {
-                    PrayerDashboardCard(viewModel: dashboard)
-                        .onTapGesture {
-                            showingPrayerCalendar = true
-                        }
-                }
-            } else {
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(Color.Token.softGrey.opacity(0.4))
-                    .frame(height: 220)
-                    .padding(.horizontal, TodayDiscoveryLayout.horizontalInset)
-                    .padding(.top, 40)
-            }
-        }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
     }
 
     private var tafsirSheetBinding: Binding<Bool> {
