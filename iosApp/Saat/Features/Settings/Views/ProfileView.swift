@@ -462,3 +462,42 @@ private struct ToggleRow: View {
         }
     }
 }
+
+// MARK: - App Language Selection Sheet
+struct AppLanguageSelectionSheet: View {
+    @Binding var selectedLanguage: AppLanguage
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(AppLanguage.allCases) { lang in
+                    Button {
+                        selectedLanguage = lang
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Text(lang.displayName)
+                                .foregroundColor(.primary)
+                            Spacer()
+                            if selectedLanguage == lang {
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(SaatTokens.Colors.deepEmerald)
+                                    .fontWeight(.bold)
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Bahasa Aplikasi")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Tutup") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
