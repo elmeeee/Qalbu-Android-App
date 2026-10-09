@@ -67,6 +67,13 @@
 			);
 			target = 3600CD242F9C5791001EC262 /* Saat */;
 		};
+		36DC5CFE2FBC1881007DDF44 /* Exceptions for "AlKhatibLiveActivity" folder in "AlKhatibLiveActivity" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3600CD512F9C5793001EC262 /* AlKhatibLiveActivity */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -90,6 +97,9 @@
 		};
 		3600CD552F9C5793001EC262 /* AlKhatibLiveActivity */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				36DC5CFE2FBC1881007DDF44 /* Exceptions for "AlKhatibLiveActivity" folder in "AlKhatibLiveActivity" target */,
+			);
 			path = AlKhatibLiveActivity;
 			sourceTree = "<group>";
 		};
@@ -763,10 +773,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NF3JRRP69D;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AlKhatibLiveActivity/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Saat Live Activity";
-				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat.LiveActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -787,10 +797,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NF3JRRP69D;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AlKhatibLiveActivity/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Saat Live Activity";
-				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat.LiveActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
