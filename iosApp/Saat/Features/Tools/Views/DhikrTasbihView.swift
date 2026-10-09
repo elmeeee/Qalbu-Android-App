@@ -143,6 +143,8 @@ struct DhikrTasbihView: View {
             .ignoresSafeArea()
         )
         .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             count = DhikrStore.sessionCount(for: currentPreset.id)
         }

@@ -11,9 +11,10 @@ import SwiftUI
 struct PrayerDashboardCard: View {
     @ObservedObject var viewModel: PrayerDashboardViewModel
     let onOpenCalendar: () -> Void
+    @ObservedObject private var languageManager = AppLanguageManager.shared
 
     private var targetPrayerName: String {
-        viewModel.nextPrayerDisplayName.isEmpty ? "Dzuhur" : viewModel.nextPrayerDisplayName
+        viewModel.nextPrayerDisplayName.isEmpty ? languageManager.localize("prayer_dhuhr") : viewModel.nextPrayerDisplayName
     }
 
     private var targetPrayerIcon: String {
@@ -67,7 +68,7 @@ struct PrayerDashboardCard: View {
                 // Top Row: Next Prayer Name & Circular Arc Countdown
                 HStack(alignment: .center) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Selanjutnya")
+                        Text(languageManager.localize("live_countdown_next_prayer_title"))
                             .font(.system(size: 14, weight: .medium))
                             .foregroundColor(SaatTokens.Colors.slate500)
 
@@ -129,6 +130,7 @@ private struct PrayerArcCountdownView: View {
     let prayerColor: Color
     let iconName: String
     let progress: CGFloat
+    @ObservedObject private var languageManager = AppLanguageManager.shared
 
     var body: some View {
         ZStack(alignment: .center) {
@@ -194,7 +196,7 @@ private struct PrayerArcCountdownView: View {
                     .foregroundColor(SaatTokens.Colors.slate900)
                     .monospacedDigit()
 
-                Text("menuju \(targetPrayerName)")
+                Text(languageManager.localizeFormatted("live_countdown_towards_format", targetPrayerName))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(SaatTokens.Colors.slate500)
             }
@@ -329,12 +331,12 @@ private struct SchedulePrayerSlotView: View {
 
     private func shortPrayerName(_ raw: String) -> String {
         let low = raw.lowercased()
-        if low.contains("fajr") || low.contains("subuh") { return "Subuh" }
-        if low.contains("sunrise") || low.contains("syuruq") || low.contains("terbit") { return "Terbit" }
-        if low.contains("dhuhr") || low.contains("dzuhur") { return "Dzuhur" }
-        if low.contains("asr") || low.contains("ashar") { return "Ashar" }
-        if low.contains("maghrib") { return "Maghrib" }
-        if low.contains("isha") || low.contains("isya") { return "Isya" }
+        if low.contains("fajr") || low.contains("subuh") { return AppLanguageManager.shared.localize("prayer_fajr") }
+        if low.contains("sunrise") || low.contains("syuruq") || low.contains("terbit") { return AppLanguageManager.shared.localize("prayer_sunrise") }
+        if low.contains("dhuhr") || low.contains("dzuhur") { return AppLanguageManager.shared.localize("prayer_dhuhr") }
+        if low.contains("asr") || low.contains("ashar") { return AppLanguageManager.shared.localize("prayer_asr") }
+        if low.contains("maghrib") { return AppLanguageManager.shared.localize("prayer_maghrib") }
+        if low.contains("isha") || low.contains("isya") { return AppLanguageManager.shared.localize("prayer_isha") }
         return raw
     }
 }

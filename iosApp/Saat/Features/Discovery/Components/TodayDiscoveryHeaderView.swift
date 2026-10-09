@@ -21,9 +21,10 @@ struct TodayDiscoveryHeaderView: View {
 
     @State private var showHijri = false
     @State private var timer: Timer?
+    @ObservedObject private var languageManager = AppLanguageManager.shared
 
     private var displayLocation: String {
-        let text = cityName ?? locationStatus ?? "Menemukan lokasi…"
+        let text = cityName ?? locationStatus ?? languageManager.localize("discovering_location")
         var raw = text
         if text.contains(",") {
             let parts = text.split(separator: ",")
@@ -39,7 +40,7 @@ struct TodayDiscoveryHeaderView: View {
 
     private var localDayName: String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "id_ID")
+        formatter.locale = Locale(identifier: languageManager.currentLanguage.localeIdentifier)
         formatter.dateFormat = "EEEE"
         return formatter.string(from: Date())
     }
@@ -60,7 +61,7 @@ struct TodayDiscoveryHeaderView: View {
             return "\(prefix)\(gregorian)"
         } else {
             let formatter = DateFormatter()
-            formatter.locale = Locale(identifier: "id_ID")
+            formatter.locale = Locale(identifier: languageManager.currentLanguage.localeIdentifier)
             formatter.dateFormat = "d MMM"
             return "\(prefix)\(formatter.string(from: Date()))"
         }

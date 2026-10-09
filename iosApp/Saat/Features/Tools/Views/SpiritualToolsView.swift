@@ -51,7 +51,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_qibla_desc",
                 route: "qibla",
                 category: .prayer,
-                destinationBuilder: { AnyView(QiblaFinderView().navigationTitle(AppLanguageManager.shared.localize("tool_qibla_title"))) }
+                destinationBuilder: { AnyView(QiblaFinderView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_sunnah_3d",
@@ -59,7 +59,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_sunnah_practices_desc",
                 route: "sunnah-prayer",
                 category: .prayer,
-                destinationBuilder: { AnyView(QiyamTrackerView().navigationTitle(AppLanguageManager.shared.localize("tool_sunnah_practices_title"))) }
+                destinationBuilder: { AnyView(SunnahPrayerGuideView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_jamak_3d",
@@ -67,7 +67,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_jamak_guide_desc",
                 route: "jamak-qashar",
                 category: .prayer,
-                destinationBuilder: { AnyView(QiyamTrackerView().navigationTitle(AppLanguageManager.shared.localize("tool_jamak_guide_title"))) }
+                destinationBuilder: { AnyView(JamakQasharGuideView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_radio_3d",
@@ -75,7 +75,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_radio_desc",
                 route: "radio",
                 category: .prayer,
-                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_radio_title"))) }
+                destinationBuilder: { AnyView(QuranRadioView()) }
             ),
 
             // 2. Dzikir & Doa (DHIKR)
@@ -85,7 +85,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_dua_dhikr_desc",
                 route: "doa-zikir",
                 category: .dhikr,
-                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_dua_dhikr_title"))) }
+                destinationBuilder: { AnyView(DoaZikirView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_tasbih_3d",
@@ -93,7 +93,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_tasbih_desc",
                 route: "dhikr",
                 category: .dhikr,
-                destinationBuilder: { AnyView(DhikrTasbihView().navigationTitle(AppLanguageManager.shared.localize("tool_tasbih_title"))) }
+                destinationBuilder: { AnyView(DhikrTasbihView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_asmaulhusna_3d",
@@ -101,7 +101,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_asmaul_husna_desc",
                 route: "asmaul-husna",
                 category: .dhikr,
-                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_asmaul_husna_title"))) }
+                destinationBuilder: { AnyView(AsmaulHusnaView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_manzil_3d",
@@ -109,7 +109,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_manzil_desc",
                 route: "manzil",
                 category: .dhikr,
-                destinationBuilder: { AnyView(ManzilView().navigationTitle(AppLanguageManager.shared.localize("tool_manzil_title"))) }
+                destinationBuilder: { AnyView(ManzilView()) }
             ),
 
             // 3. Fiqih & Panduan (FIQH)
@@ -119,7 +119,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_zakah_desc",
                 route: "zakat",
                 category: .fiqh,
-                destinationBuilder: { AnyView(ZakatCalculatorView().navigationTitle(AppLanguageManager.shared.localize("tool_zakah_title"))) }
+                destinationBuilder: { AnyView(ZakatCalculatorView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_fidyah_3d",
@@ -127,7 +127,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_fidyah_tracker_desc",
                 route: "fidyah",
                 category: .fiqh,
-                destinationBuilder: { AnyView(ZakatCalculatorView().navigationTitle(AppLanguageManager.shared.localize("tool_fidyah_tracker_title"))) }
+                destinationBuilder: { AnyView(FidyahCalculatorView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_faraidh_3d",
@@ -135,7 +135,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_faraidh_desc",
                 route: "faraidh",
                 category: .fiqh,
-                destinationBuilder: { AnyView(FaraidhCalculatorView().navigationTitle(AppLanguageManager.shared.localize("tool_faraidh_title"))) }
+                destinationBuilder: { AnyView(FaraidhCalculatorView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_hajj_umrah_3d",
@@ -143,7 +143,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_hajj_umrah_desc",
                 route: "hajj-umrah",
                 category: .fiqh,
-                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_hajj_umrah_title"))) }
+                destinationBuilder: { AnyView(HajjUmrahGuideView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_jenazah_3d",
@@ -151,7 +151,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_janazah_guide_desc",
                 route: "jenazah",
                 category: .fiqh,
-                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_janazah_guide_title"))) }
+                destinationBuilder: { AnyView(JanazahGuideView()) }
             ),
             SpiritualToolItem(
                 iconName: "ic_encyclopedia_3d",
@@ -159,7 +159,7 @@ struct SpiritualToolsView: View {
                 descKey: "tool_encyclopedia_desc",
                 route: "encyclopedia",
                 category: .fiqh,
-                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_encyclopedia_title"))) }
+                destinationBuilder: { AnyView(EncyclopediaGuideView()) }
             )
         ]
     }
@@ -178,8 +178,8 @@ struct SpiritualToolsView: View {
     }
 
     private let columns = [
-        GridItem(.flexible(), spacing: 14),
-        GridItem(.flexible(), spacing: 14)
+        GridItem(.flexible(minimum: 140), spacing: 12),
+        GridItem(.flexible(minimum: 140), spacing: 12)
     ]
 
     var body: some View {
@@ -220,6 +220,7 @@ struct SpiritualToolsView: View {
                             .foregroundColor(Color(hex: "#64748B"))
                     }
                     .padding(.top, 16)
+                    .padding(.horizontal, 16)
 
                     // Modern Search Bar
                     HStack(spacing: 10) {
@@ -252,6 +253,7 @@ struct SpiritualToolsView: View {
                             .stroke(Color(hex: "#E8E2D2"), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 1)
+                    .padding(.horizontal, 16)
 
                     // Category Filter Pills
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -280,6 +282,7 @@ struct SpiritualToolsView: View {
                                 .buttonStyle(.plain)
                             }
                         }
+                        .padding(.horizontal, 16)
                         .padding(.vertical, 2)
                     }
 
@@ -293,15 +296,16 @@ struct SpiritualToolsView: View {
                             Spacer(minLength: 40)
                         }
                         .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 16)
                     } else {
-                        LazyVGrid(columns: columns, spacing: 14) {
+                        LazyVGrid(columns: columns, spacing: 12) {
                             ForEach(filteredTools) { tool in
                                 NavigationLink(destination: tool.destinationBuilder()) {
                                     VStack(alignment: .center, spacing: 4) {
                                         Image(tool.iconName)
                                             .resizable()
                                             .scaledToFit()
-                                            .frame(width: 76, height: 76)
+                                            .frame(width: 74, height: 74)
                                             .padding(.bottom, 4)
 
                                         Text(languageManager.localize(tool.titleKey))
@@ -332,11 +336,11 @@ struct SpiritualToolsView: View {
                                 .buttonStyle(.plain)
                             }
                         }
+                        .padding(.horizontal, 16)
                         .padding(.top, 4)
                         .padding(.bottom, 32)
                     }
                 }
-                .padding(.horizontal, 18)
             }
         }
         .navigationBarHidden(true)

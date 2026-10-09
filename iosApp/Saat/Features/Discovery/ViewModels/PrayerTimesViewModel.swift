@@ -120,6 +120,14 @@ final class PrayerTimesController: NSObject, ObservableObject, CLLocationManager
             name: PrayerNotificationPreferences.didChangeNotification,
             object: nil
         )
+
+        let initialLoc = CLLocation(latitude: manualLatitude, longitude: manualLongitude)
+        self.lastKnownLocation = initialLoc
+        self.cityName = manualCityName.isEmpty ? "Jakarta" : manualCityName
+        Task { [weak self] in
+            guard let self = self else { return }
+            await self.fetchPrayerTimes(for: initialLoc, bypassDedupe: false)
+        }
     }
 
     @objc private func handleNotificationPreferencesChange() {

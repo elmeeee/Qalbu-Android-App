@@ -144,6 +144,8 @@ struct FaraidhCalculatorView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarHidden(true)
     }
     
     private func tabButton(title: String, index: Int) -> some View {

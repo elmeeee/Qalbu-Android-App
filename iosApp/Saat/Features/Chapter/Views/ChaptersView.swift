@@ -426,7 +426,7 @@ private struct QuranChapterRow: View {
                 }
 
                 HStack(spacing: 8) {
-                    Text(chapter.isMeccan ? "Makkiyah" : "Madaniyah")
+                    Text(chapter.isMeccan ? languageManager.localize("revelation_place_makkah") : languageManager.localize("revelation_place_madinah"))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(chapter.isMeccan ? Color(hex: "#2E7D32") : Color(hex: "#1565C0"))
                         .padding(.horizontal, 7)
@@ -437,7 +437,7 @@ private struct QuranChapterRow: View {
                         .cornerRadius(6)
 
                     if let count = chapter.versesCount {
-                        Text("\(count) Ayat")
+                        Text(String(format: languageManager.localize("verse_count_format"), count))
                             .font(.system(size: 11.5, weight: .medium))
                             .foregroundColor(Color(hex: "#64748B"))
                     }
@@ -499,7 +499,7 @@ private struct JuzRow: View {
                 }
 
                 if let count = juz.versesCount {
-                    Text("\(count) Ayat")
+                    Text(String(format: languageManager.localize("verse_count_format"), count))
                         .font(.system(size: 11.5, weight: .semibold))
                         .foregroundColor(Color(hex: "#0E7490"))
                         .padding(.top, 4)

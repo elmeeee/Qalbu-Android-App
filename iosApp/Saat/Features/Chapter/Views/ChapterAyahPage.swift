@@ -72,6 +72,14 @@ struct ChapterAyahPage: View {
                     VStack(spacing: contentSpacing) {
                         memorizationEyeButton
 
+                        if verse.resolvedVerseNumber == 1 && verse.chapterNumber != 9 && verse.chapterNumber != 1 {
+                            Text("﷽")
+                                .font(.system(size: CGFloat(34 * effectiveFontScale)))
+                                .foregroundColor(Color.Token.deepEmerald)
+                                .multilineTextAlignment(.center)
+                                .padding(.vertical, 4)
+                        }
+
                         arabicBlockView
 
                         if showTransliteration, let latinText = verse.transliteration, !latinText.isEmpty {

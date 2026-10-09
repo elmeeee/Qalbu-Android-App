@@ -23,6 +23,14 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .malay: return "Bahasa Melayu"
         }
     }
+    
+    var localeIdentifier: String {
+        switch self {
+        case .english: return "en_US"
+        case .indonesian: return "id_ID"
+        case .malay: return "ms_MY"
+        }
+    }
 }
 
 extension Notification.Name {
@@ -65,6 +73,11 @@ class AppLanguageManager: ObservableObject {
             return idVal
         }
         return translations[key]?[.indonesian] ?? translations[key]?[.english] ?? key
+    }
+    
+    func localizeFormatted(_ key: String, _ args: CVarArg...) -> String {
+        let format = localize(key)
+        return String(format: format, arguments: args)
     }
     
     private let translations: [String: [AppLanguage: String]] = [

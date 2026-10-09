@@ -142,6 +142,8 @@ struct ZakatCalculatorView: View {
             Task { await fetchLivePrice() }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarHidden(true)
     }
     
     // MARK: - Maal Section

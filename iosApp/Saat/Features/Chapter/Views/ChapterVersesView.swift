@@ -34,27 +34,11 @@ struct ChapterVersesView: View {
 
     private var showsNowPlaying: Bool { audio.currentURL != nil }
 
-    private var readerChromeShowsNowPlaying: Bool {
-        showsNowPlaying || (readerCoordinator?.reservesReaderChromeForAudio == true)
-    }
-
-    private var floatingPlayerBottomPadding: CGFloat {
-        TabBarLayout.spacingAboveTabBar + TabBarLayout.nowPlayingBottomPadding
-    }
-
-    private var floatingActionsBottomPadding: CGFloat {
-        let base: CGFloat = 72
-        if readerChromeShowsNowPlaying {
-            return base + TabBarLayout.nowPlayingChromeHeight + 12
-        }
-        return base
-    }
-
     var body: some View {
         GeometryReader { rootGeo in
             let chromeInsets = ChapterReaderChromeInsets.resolved(
                 safeArea: rootGeo.safeAreaInsets,
-                showsNowPlaying: readerChromeShowsNowPlaying
+                showsNowPlaying: showsNowPlaying
             )
             mainContent(chromeInsets: chromeInsets)
         }
@@ -62,6 +46,7 @@ struct ChapterVersesView: View {
         .chapterReaderScreenBackground()
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             if readerCoordinator == nil {
                 readerCoordinator = ChapterReaderCoordinator(chapter: chapter, juzNumber: juzNumber, audio: audio)
@@ -78,14 +63,6 @@ struct ChapterVersesView: View {
         .onChange(of: chapterTranslationId) { _, newId in
             guard let readerCoordinator, readerCoordinator.lastAppliedTranslationId != newId else { return }
             readerCoordinator.lastAppliedTranslationId = newId
-            guard let vm else { return }
-            audio.stop()
-            Task { await vm.applyContentPreferencesChange() }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: ChapterReaderPreferences.translationDidChangeNotification)) { _ in
-            let selected = ChapterReaderPreferences.selectedTranslationId()
-            guard let readerCoordinator, readerCoordinator.lastAppliedTranslationId != selected else { return }
-            readerCoordinator.lastAppliedTranslationId = selected
             guard let vm else { return }
             audio.stop()
             Task { await vm.applyContentPreferencesChange() }
@@ -137,6 +114,30 @@ struct ChapterVersesView: View {
                 )
             }
         }
+        .confirmationDialog(
+            languageManager.localize("quran_ayah_options"),
+            isPresented: $isMenuExpanded,
+            titleVisibility: .visible
+        ) {
+            Button(languageManager.localize("tafsir")) {
+                guard let readerCoordinator, let vm else { return }
+                readerCoordinator.openTafsirForCurrentAyah(in: vm)
+            }
+            Button(languageManager.localize("hadith")) {
+                guard let readerCoordinator, let vm else { return }
+                readerCoordinator.openHadithForCurrentAyah(in: vm)
+            }
+            Button(languageManager.localize("ai_reflection")) {
+                showAISheet = true
+            }
+            Button(languageManager.currentLanguage == .english ? "Notes" : "Catatan") {
+                showNoteSheet = true
+            }
+            Button(isCurrentVerseBookmarked ? (languageManager.currentLanguage == .english ? "Remove Bookmark" : "Hapus Bookmark") : (languageManager.currentLanguage == .english ? "Add Bookmark" : "Simpan Bookmark")) {
+                toggleCurrentBookmark()
+            }
+            Button(languageManager.localize("cancel"), role: .cancel) {}
+        }
         .onChange(of: audio.activeSequenceIndex) { _, _ in
             guard let vm, let readerCoordinator else { return }
             readerCoordinator.onActiveSequenceIndexChanged(vm: vm)
@@ -163,49 +164,16 @@ struct ChapterVersesView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .environment(\.chapterReaderChromeInsets, chromeInsets)
 
+            // Top App Bar
             VStack(spacing: 0) {
                 topChrome
                 Spacer()
             }
 
+            // Bottom Floating Controls
             VStack(spacing: 0) {
                 Spacer()
-                bottomLeftChrome
-            }
-
-            VStack(spacing: 0) {
-                Spacer()
-                if showsNowPlaying {
-                    floatingNowPlayingBar
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
-            .safeAreaPadding(.horizontal)
-            .safeAreaPadding(.bottom, floatingPlayerBottomPadding)
-
-            if isMenuExpanded {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .transition(.opacity)
-                    .zIndex(20)
-                    .onTapGesture {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                            isMenuExpanded = false
-                        }
-                    }
-            }
-
-            if readerCoordinator?.isOnIntroPage == false {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        sideActionButtons
-                    }
-                }
-                .padding(.trailing, 12)
-                .safeAreaPadding(.bottom, floatingActionsBottomPadding)
-                .zIndex(30)
+                bottomFloatingControls
             }
 
             if let toast = toastMessage {
@@ -234,7 +202,7 @@ struct ChapterVersesView: View {
                 ProgressView()
                     .tint(.white)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                    .safeAreaPadding(.bottom, floatingActionsBottomPadding)
+                    .padding(.bottom, 80)
                     .allowsHitTesting(false)
             }
 
@@ -250,7 +218,7 @@ struct ChapterVersesView: View {
             .overlay {
                 VStack(spacing: 12) {
                     ProgressView().tint(.white)
-                    Text(AppLanguageManager.shared.localize("loading"))
+                    Text(languageManager.localize("loading"))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.white)
                 }
@@ -275,10 +243,10 @@ struct ChapterVersesView: View {
 
         if let currentVerse = readerCoordinator?.currentVerse(in: vm) {
             let verseNum = currentVerse.resolvedVerseNumber
-            let label = languageManager.currentLanguage == .english ? "Verse" : "Ayah"
+            let label = languageManager.currentLanguage == .english ? "Verse" : "Ayat"
             if let verseNum {
                 if let juz = currentVerse.juzNumber {
-                    return "\(label) (\(verseNum)) • \(languageManager.localize("juz")) \(juz)"
+                    return "\(label) \(verseNum) · \(languageManager.localize("juz")) \(juz)"
                 }
                 return "\(label) \(verseNum)"
             }
@@ -286,9 +254,9 @@ struct ChapterVersesView: View {
 
         if let firstVerse = vm.verses.first,
            let verseNum = firstVerse.resolvedVerseNumber {
-            let label = languageManager.currentLanguage == .english ? "Verse" : "Ayah"
+            let label = languageManager.currentLanguage == .english ? "Verse" : "Ayat"
             if let juz = firstVerse.juzNumber {
-                return "\(label) (\(verseNum)) • \(languageManager.localize("juz")) \(juz)"
+                return "\(label) \(verseNum) · \(languageManager.localize("juz")) \(juz)"
             }
             return "\(label) \(verseNum)"
         }
@@ -296,226 +264,192 @@ struct ChapterVersesView: View {
         return readerCoordinator?.positionLabel(in: vm) ?? ""
     }
 
+    private var isCurrentVerseBookmarked: Bool {
+        guard let vm, let verse = readerCoordinator?.currentVerse(in: vm), let key = verse.verseKey else {
+            return false
+        }
+        let bookmarked = UserDefaults.standard.stringArray(forKey: "bookmarked_verses") ?? []
+        return bookmarked.contains(key)
+    }
+
+    private func toggleCurrentBookmark() {
+        guard let vm, let verse = readerCoordinator?.currentVerse(in: vm), let key = verse.verseKey else { return }
+        var bookmarked = UserDefaults.standard.stringArray(forKey: "bookmarked_verses") ?? []
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        if bookmarked.contains(key) {
+            bookmarked.removeAll(where: { $0 == key })
+            showToast(languageManager.currentLanguage == .english ? "Removed bookmark" : "Bookmark dihapus")
+        } else {
+            bookmarked.append(key)
+            showToast(languageManager.currentLanguage == .english ? "Bookmarked successfully" : "Bookmark disimpan")
+        }
+        UserDefaults.standard.set(bookmarked, forKey: "bookmarked_verses")
+    }
+
     private var topChrome: some View {
         HStack(alignment: .center) {
-            headerIconButton(systemName: "arrow.left") {
+            Button(action: {
                 audio.stop()
                 dismiss()
+            }) {
+                Image(systemName: "arrow.left")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(Color.Token.slate900)
+                    .frame(width: 44, height: 44)
             }
+
             Spacer()
-            headerIconButton(systemName: "gearshape.fill") {
-                showReadingSettings = true
+
+            VStack(spacing: 2) {
+                Text(currentSurahName)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(Color.Token.slate900)
+                    .lineLimit(1)
+
+                if !currentPositionLabel.isEmpty {
+                    Text(currentPositionLabel)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color.Token.slate500)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            Button(action: toggleCurrentBookmark) {
+                Image(systemName: isCurrentVerseBookmarked ? "bookmark.fill" : "bookmark")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(isCurrentVerseBookmarked ? Color.Token.deepEmerald : Color.Token.slate900)
+                    .frame(width: 44, height: 44)
             }
         }
-        .padding(.horizontal, 4)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
         .safeAreaPadding(.top, 4)
         .background(
             LinearGradient(
-                colors: [Color.Token.screenBackground.opacity(0.95), Color.clear],
+                colors: [Color.Token.screenBackground.opacity(0.98), Color.Token.screenBackground.opacity(0.85), Color.clear],
                 startPoint: .top,
                 endPoint: .bottom
             )
         )
     }
 
-    private var bottomLeftChrome: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(currentSurahName)
-                .font(.system(size: 22, weight: .bold))
-                .foregroundColor(Color.Token.slate900)
-                .lineLimit(1)
-            
-            if currentPositionLabel.isEmpty == false {
-                Text(currentPositionLabel)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Color.Token.slate500)
-                    .lineLimit(1)
-            }
-        }
-        .padding(.leading, 20)
-        .padding(.trailing, 12)
-        .padding(.top, 48)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            LinearGradient(
-                colors: [Color.clear, Color.Token.screenBackground.opacity(0.92)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-        .padding(.bottom, audio.currentURL != nil ? TabBarLayout.spacingAboveTabBar + TabBarLayout.nowPlayingBottomPadding + 12 : 20)
-        .padding(.trailing, 100) // Keep clear of FAB
-    }
-
-    private func headerIconButton(systemName: String, action: @escaping () -> Void) -> some View {
-        let label = systemName == "arrow.left"
-            ? SaatAccessibility.Reader.back
-            : SaatAccessibility.Reader.settings
-        let hint = systemName == "gearshape.fill" ? SaatAccessibility.Reader.settingsHint : nil
-        return Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: 20, weight: .medium))
-                .foregroundColor(Color.Token.slate900)
-                .frame(width: 48, height: 48)
-        }
-        .saatAccessibility(label: label, hint: hint)
-    }
-
-    private var sideActionButtons: some View {
-        ZStack(alignment: .bottomTrailing) {
-            VStack(spacing: 16) {
-                if isMenuExpanded {
-                    // Menu Items (vertical list)
-                    fabMenuItem(icon: "bookmark.fill", color: Color.Token.goldBright, label: languageManager.currentLanguage == .english ? "Bookmark" : "Bookmark") {
-                        if let vm, let verse = readerCoordinator?.currentVerse(in: vm), let key = verse.verseKey {
-                            let bookmarked = UserDefaults.standard.stringArray(forKey: "bookmarked_verses") ?? []
-                            var newBookmarks = bookmarked
-                            if bookmarked.contains(key) {
-                                newBookmarks.removeAll(where: { $0 == key })
-                                showToast(languageManager.currentLanguage == .english ? "Removed bookmark" : "Bookmark dihapus")
-                            } else {
-                                newBookmarks.append(key)
-                                showToast(languageManager.currentLanguage == .english ? "Bookmarked successfully" : "Bookmark disimpan")
-                            }
-                            UserDefaults.standard.set(newBookmarks, forKey: "bookmarked_verses")
-                        }
-                    }
-                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity).combined(with: .move(edge: .bottom)), removal: .scale.combined(with: .opacity)))
-
-                    fabMenuItem(icon: "pencil.and.outline", color: Color.Token.teal, label: languageManager.currentLanguage == .english ? "Notes" : "Catatan") {
-                        showNoteSheet = true
-                    }
-                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity).combined(with: .move(edge: .bottom)), removal: .scale.combined(with: .opacity)))
-
-                    fabMenuItem(icon: "brain.headlight", color: .orange, label: languageManager.currentLanguage == .english ? "Memorize" : "Tandai Hafalan") {
-                        if let vm, let verse = readerCoordinator?.currentVerse(in: vm), let key = verse.verseKey {
-                            let memorized = UserDefaults.standard.stringArray(forKey: "memorized_verses") ?? []
-                            var newMemorized = memorized
-                            if memorized.contains(key) {
-                                newMemorized.removeAll(where: { $0 == key })
-                                showToast(languageManager.currentLanguage == .english ? "Removed from memorized" : "Hafalan dibatalkan")
-                            } else {
-                                newMemorized.append(key)
-                                showToast(languageManager.currentLanguage == .english ? "Marked as memorized" : "Telah dihafal")
-                            }
-                            UserDefaults.standard.set(newMemorized, forKey: "memorized_verses")
-                        }
-                    }
-                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity).combined(with: .move(edge: .bottom)), removal: .scale.combined(with: .opacity)))
-
-                    fabMenuItem(icon: "sparkles", color: .purple, label: languageManager.localize("ai_reflection")) {
-                        showAISheet = true
-                    }
-                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity).combined(with: .move(edge: .bottom)), removal: .scale.combined(with: .opacity)))
-
-                    fabMenuItem(icon: "book.closed.fill", color: Color.Token.deepEmerald, label: "Tafsir") {
-                        guard let readerCoordinator, let vm else { return }
-                        readerCoordinator.openTafsirForCurrentAyah(in: vm)
-                    }
-                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity).combined(with: .move(edge: .bottom)), removal: .scale.combined(with: .opacity)))
-
-                    fabMenuItem(icon: "text.book.closed.fill", color: Color.Token.indigoAccent, label: "Hadits") {
-                        guard let readerCoordinator, let vm else { return }
-                        readerCoordinator.openHadithForCurrentAyah(in: vm)
-                    }
-                    .transition(.asymmetric(insertion: .scale.combined(with: .opacity).combined(with: .move(edge: .bottom)), removal: .scale.combined(with: .opacity)))
-                }
-
-                // Play/Pause button shown above collapsed FAB button
-                if !isMenuExpanded, let vm, let readerCoordinator = readerCoordinator {
-                    Button(action: {
-                        if audio.isPlaying {
-                            audio.pause()
-                        } else {
-                            if audio.currentURL != nil {
-                                audio.toggle()
-                            } else {
-                                Task {
-                                    await readerCoordinator.playEntireSurah(vm: vm)
-                                }
-                            }
-                        }
-                    }) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.Token.deepEmerald)
-                                .frame(width: 48, height: 48)
-                                .shadow(color: Color.Token.deepEmerald.opacity(0.3), radius: 6, y: 3)
-                            
-                            Image(systemName: audio.isPlaying ? "pause.fill" : "play.fill")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
-                        }
-                    }
-                    .transition(.opacity)
-                }
-
-                // Main FAB Button
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        isMenuExpanded.toggle()
-                    }
-                } label: {
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.Token.deepEmerald, Color.Token.teal],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 52, height: 52)
-                        
-                        Circle()
-                            .fill(Color.Token.pureWhite)
-                            .frame(width: 48, height: 48)
-                            .shadow(color: .black.opacity(isMenuExpanded ? 0.05 : 0.15), radius: isMenuExpanded ? 2 : 8, y: isMenuExpanded ? 1 : 4)
-
-                        Image(systemName: isMenuExpanded ? "xmark" : "text.book.closed.fill")
-                            .font(.system(size: 20, weight: .semibold))
-                            .foregroundColor(isMenuExpanded ? Color.Token.slate800 : Color.Token.deepEmerald)
-                            .rotationEffect(.degrees(isMenuExpanded ? 90 : 0))
-                    }
-                }
-                .buttonStyle(.plain)
-            }
-        }
-    }
-
-    private func fabMenuItem(icon: String, color: Color, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                isMenuExpanded = false
-            }
-            action()
-        }) {
-            HStack(spacing: 12) {
-                Text(label)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color.Token.slate800)
-                
+    private var bottomFloatingControls: some View {
+        HStack(alignment: .center, spacing: 12) {
+            // Left: Action Menu (Tafsir & More)
+            Button(action: {
+                isMenuExpanded = true
+            }) {
                 ZStack {
                     Circle()
-                        .fill(color.opacity(0.15))
-                        .frame(width: 28, height: 28)
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(color)
+                        .fill(Color.white.opacity(0.85))
+                        .frame(width: 48, height: 48)
+                        .overlay(Circle().stroke(Color.white.opacity(0.9), lineWidth: 1))
+                        .shadow(color: .black.opacity(0.08), radius: 8, y: 3)
+
+                    Image("ic_tafsir")
+                        .resizable()
+                        .renderingMode(.template)
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                        .foregroundColor(Color.Token.slate800)
                 }
             }
-            .padding(.leading, 16)
-            .padding(.trailing, 12)
-            .padding(.vertical, 8)
-            .background(
-                Capsule()
-                    .fill(Color.Token.pureWhite)
-                    .shadow(color: .black.opacity(0.08), radius: 4, y: 2)
-            )
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            // Center: Audio Player Capsule (Liquid Glass)
+            if showsNowPlaying || audio.isPlaying {
+                audioCapsule
+            }
+
+            Spacer()
+
+            // Right: Reading Settings (Aa)
+            Button(action: {
+                showReadingSettings = true
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.85))
+                        .frame(width: 48, height: 48)
+                        .overlay(Circle().stroke(Color.white.opacity(0.9), lineWidth: 1))
+                        .shadow(color: .black.opacity(0.08), radius: 8, y: 3)
+
+                    Text("Aa")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(Color.Token.slate800)
+                }
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 20)
+        .padding(.bottom, 20)
+    }
+
+    private var audioTrackTitle: String {
+        guard let vm else { return "" }
+        if let currentVerse = readerCoordinator?.currentVerse(in: vm), let num = currentVerse.resolvedVerseNumber {
+            return "\(currentSurahName) · \(languageManager.currentLanguage == .english ? "Verse" : "Ayat") \(num)"
+        }
+        return currentSurahName
+    }
+
+    private var audioReciterName: String {
+        vm?.reciterDisplayName ?? ""
+    }
+
+    private var audioCapsule: some View {
+        HStack(spacing: 8) {
+            Button(action: {
+                if audio.isPlaying {
+                    audio.pause()
+                } else {
+                    audio.toggle()
+                }
+            }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.Token.deepEmerald)
+                        .frame(width: 36, height: 36)
+
+                    Image(systemName: audio.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(.white)
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(audioTrackTitle)
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(Color.Token.slate900)
+                    .lineLimit(1)
+
+                if !audioReciterName.isEmpty {
+                    Text(audioReciterName)
+                        .font(.system(size: 10, weight: .regular))
+                        .foregroundColor(Color.Token.slate500)
+                        .lineLimit(1)
+                }
+            }
+
+            Button(action: { audio.stop() }) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Color.Token.slate500)
+                    .frame(width: 24, height: 24)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(
+            Capsule()
+                .fill(Color.white.opacity(0.92))
+                .overlay(Capsule().stroke(Color.white, lineWidth: 1))
+                .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+        )
     }
 
     private func showToast(_ message: String) {
@@ -528,12 +462,6 @@ struct ChapterVersesView: View {
                 }
             }
         }
-    }
-
-    private var floatingNowPlayingBar: some View {
-        ChapterNowPlayingBar(audio: audio)
-            .padding(.horizontal, TabBarLayout.nowPlayingHorizontalInset)
-            .shadow(color: .black.opacity(0.25), radius: 12, y: 6)
     }
 
     private var tafsirSheetBinding: Binding<Bool> {
@@ -561,51 +489,37 @@ struct ChapterVersesView: View {
                 Task { await bindable.loadInitial() }
             }
         } else if bindable.verses.isEmpty {
-            Text("No verses found")
+            Text(languageManager.localize("search_no_results"))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let readerCoordinator {
             @Bindable var readerCoordinator = readerCoordinator
-            GeometryReader { pagerGeo in
-                let pageHeight = pagerGeo.size.height
 
-                ScrollView(.vertical) {
-                    LazyVStack(spacing: 0) {
-                        if let ch = chapter {
-                            ChapterIntroPage(
-                                chapter: ch,
-                                isPreparingPlayAll: bindable.isPreparingPlayAll,
-                                onPlayAll: { Task { await readerCoordinator.playEntireSurah(vm: bindable) } },
-                                onTapScreen: { Task { await readerCoordinator.playEntireSurah(vm: bindable) } }
-                            )
-                            .frame(width: pagerGeo.size.width, height: pageHeight)
-                            .clipped()
-                            .id(ChapterReaderCoordinator.ScrollID.intro)
-                        }
-
-                        ForEach(bindable.verses, id: \.listIdentity) { verse in
-                            ChapterAyahPage(
-                                verse: verse,
-                                showTranslation: showTranslation,
-                                showTransliteration: showTransliteration,
-                                isMemorizationMode: isMemorizationMode,
-                                fontScale: fontScale,
-                                isPlaying: audio.isPlayingURL(verse.audio?.url) && audio.isPlaying,
-                                onTapScreen: { readerCoordinator.handleTap(for: verse, vm: bindable) }
-                            )
-                            .frame(width: pagerGeo.size.width, height: pageHeight)
-                            .clipped()
-                            .id(verse.listIdentity)
-                        }
-                    }
-                    .scrollTargetLayout()
+            TabView(selection: $readerCoordinator.scrollPosition) {
+                if let ch = chapter {
+                    ChapterIntroPage(
+                        chapter: ch,
+                        isPreparingPlayAll: bindable.isPreparingPlayAll,
+                        onPlayAll: { Task { await readerCoordinator.playEntireSurah(vm: bindable) } },
+                        onTapScreen: { Task { await readerCoordinator.playEntireSurah(vm: bindable) } }
+                    )
+                    .tag(ChapterReaderCoordinator.ScrollID.intro as String?)
                 }
-                .scrollTargetBehavior(.paging)
-                .scrollBounceBehavior(.basedOnSize, axes: .vertical)
-                .scrollPosition(id: $readerCoordinator.scrollPosition, anchor: .top)
-                .scrollIndicators(.hidden)
-                .scrollContentBackground(.hidden)
+
+                ForEach(bindable.verses, id: \.listIdentity) { verse in
+                    ChapterAyahPage(
+                        verse: verse,
+                        showTranslation: showTranslation,
+                        showTransliteration: showTransliteration,
+                        isMemorizationMode: isMemorizationMode,
+                        fontScale: fontScale,
+                        isPlaying: audio.isPlayingURL(verse.audio?.url) && audio.isPlaying,
+                        onTapScreen: { readerCoordinator.handleTap(for: verse, vm: bindable) }
+                    )
+                    .tag(verse.listIdentity as String?)
+                }
             }
+            .tabViewStyle(.page(indexDisplayMode: .never))
             .ignoresSafeArea()
             .onChange(of: readerCoordinator.scrollPosition) { _, newID in
                 readerCoordinator.onScrollPositionChanged(newID, vm: bindable)
@@ -620,7 +534,7 @@ struct ChapterVersesView: View {
                 .foregroundColor(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-            Button("Try Again", action: retry)
+            Button(languageManager.localize("try_again"), action: retry)
                 .buttonStyle(.borderedProminent)
                 .tint(Color.Token.deepEmerald)
         }

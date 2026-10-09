@@ -13,6 +13,7 @@ struct TodayContinueReadingCard: View {
     let chapterName: String?
     let totalVerses: Int? = 0
     let onTap: () -> Void
+    @ObservedObject private var languageManager = AppLanguageManager.shared
 
     private var percentInt: Int {
         if let total = totalVerses, total > 0 {
@@ -29,13 +30,13 @@ struct TodayContinueReadingCard: View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Terakhir Dibaca")
+                    Text(languageManager.localize("today_continue_reading_title"))
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(SaatTokens.Colors.homeDarkGreen)
                         .lineLimit(1)
 
-                    let surahTitle = chapterName ?? "Surah \(session.chapterNumber)"
-                    let verseTitle = "Ayat \(session.verseNumber)"
+                    let surahTitle = chapterName ?? String(format: languageManager.localize("surah_number"), session.chapterNumber)
+                    let verseTitle = String(format: languageManager.localize("verse_number"), session.verseNumber)
                     Text("\(surahTitle) • \(verseTitle)")
                         .font(.system(size: 18, weight: .heavy))
                         .foregroundColor(SaatTokens.Colors.homeDarkGreen)

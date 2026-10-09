@@ -11,6 +11,7 @@ import SwiftUI
 struct PrayerTrackerCard: View {
     @ObservedObject var viewModel: PrayerTrackerViewModel
     let onOpenCalendar: () -> Void
+    @ObservedObject private var languageManager = AppLanguageManager.shared
 
     @State private var isPrayerDone: Bool = false
     @State private var isQuranDone: Bool = false
@@ -22,11 +23,11 @@ struct PrayerTrackerCard: View {
             // Header: Today's Journey & Calendar Streak Icon
             HStack(alignment: .center) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Perjalanan Hari Ini")
+                    Text(languageManager.localize("todays_journey_title"))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundColor(Color(hex: 0xFF1E_293B))
 
-                    Text("Lacak ibadah harianmu")
+                    Text(languageManager.localize("todays_journey_subtitle"))
                         .font(.system(size: 13, weight: .regular))
                         .foregroundColor(Color(hex: 0xFF64_748B))
                 }
@@ -39,13 +40,13 @@ struct PrayerTrackerCard: View {
                         .foregroundColor(SaatTokens.Colors.homeDarkGreen)
                         .padding(8)
                 }
-                .accessibilityLabel("Prayer Calendar")
+                .accessibilityLabel(languageManager.localize("prayer_calendar_title"))
             }
 
             // 4 Circular Journey Badges Row
             HStack(spacing: 0) {
                 JourneyBadgeView(
-                    label: "Shalat",
+                    label: languageManager.localize("journey_badge_prayer"),
                     isCompleted: isPrayerDone,
                     onClick: {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -57,7 +58,7 @@ struct PrayerTrackerCard: View {
                 .frame(maxWidth: .infinity)
 
                 JourneyBadgeView(
-                    label: "Quran",
+                    label: languageManager.localize("journey_badge_quran"),
                     isCompleted: isQuranDone,
                     onClick: {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -69,7 +70,7 @@ struct PrayerTrackerCard: View {
                 .frame(maxWidth: .infinity)
 
                 JourneyBadgeView(
-                    label: "Dzikir",
+                    label: languageManager.localize("journey_badge_dhikr"),
                     isCompleted: isDhikrDone,
                     onClick: {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -81,7 +82,7 @@ struct PrayerTrackerCard: View {
                 .frame(maxWidth: .infinity)
 
                 JourneyBadgeView(
-                    label: "Sunnah",
+                    label: languageManager.localize("journey_badge_sunnah"),
                     isCompleted: isSunnahDone,
                     onClick: {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
