@@ -2,13 +2,12 @@ import SwiftUI
 
 struct FloatingTabBar: View {
     @Binding var selectedTab: RootTabView.Tab
-    let avatarUrl: URL?
 
     private let tabs: [(RootTabView.Tab, String, String, String)] = [
-        (.today, "sun.max", "sun.max.fill", "Utama"),
+        (.today, "house", "house.fill", "Beranda"),
         (.journey, "book", "book.fill", "Al-Qur'an"),
         (.tools, "square.grid.2x2", "square.grid.2x2.fill", "Ibadah"),
-        (.account, "person.circle", "person.circle.fill", "Akun")
+        (.account, "slider.horizontal.3", "slider.horizontal.3", "Lainnya")
     ]
 
     var body: some View {
@@ -23,7 +22,7 @@ struct FloatingTabBar: View {
                 }) {
                     VStack(spacing: 2) {
                         Image(systemName: isSelected ? selectedIcon : icon)
-                            .font(.system(size: 21))
+                            .font(.system(size: 20, weight: isSelected ? .bold : .medium))
                             .foregroundColor(isSelected ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate500)
 
                         Text(label)

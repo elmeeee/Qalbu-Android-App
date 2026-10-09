@@ -31,41 +31,36 @@ struct RootTabView: View {
     }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            NavigationStack(path: $todayNavigationPath) {
-                TodayDiscoveryView(verseState: verseState)
-                    .toolbar(.hidden, for: .navigationBar)
-            }
-            .tabItem {
-                Label("Today", systemImage: selectedTab == .today ? "sun.max.fill" : "sun.max")
-            }
-            .tag(Tab.today)
-
-            ChaptersView()
-                .tabItem {
-                    Label("Quran", systemImage: selectedTab == .journey ? "book.fill" : "book")
+        ZStack(alignment: .bottom) {
+            Group {
+                switch selectedTab {
+                case .today:
+                    NavigationStack(path: $todayNavigationPath) {
+                        TodayDiscoveryView(verseState: verseState)
+                            .toolbar(.hidden, for: .navigationBar)
+                    }
+                case .journey:
+                    ChaptersView()
+                case .tools:
+                    NavigationStack {
+                        SpiritualToolsView()
+                            .toolbar(.hidden, for: .navigationBar)
+                    }
+                case .account:
+                    NavigationStack {
+                        ProfileView(preferSystemNavigationTitle: false, verseState: verseState)
+                            .environment(\.appContainer, container)
+                            .toolbar(.hidden, for: .navigationBar)
+                    }
                 }
-                .tag(Tab.journey)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            NavigationStack {
-                SpiritualToolsView()
-            }
-            .tabItem {
-                Label("Tools", systemImage: selectedTab == .tools ? "square.grid.2x2.fill" : "square.grid.2x2")
-            }
-            .tag(Tab.tools)
-
-            NavigationStack {
-                ProfileView(preferSystemNavigationTitle: true, verseState: verseState)
-                    .environment(\.appContainer, container)
-            }
-            .tabItem {
-                Label("Account", systemImage: selectedTab == .account ? "person.fill" : "person")
-            }
-            .tag(Tab.account)
+            // Floating Tab Bar
+            FloatingTabBar(selectedTab: $selectedTab)
         }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .environmentObject(prayerController)
-
         .onChangeWithFallback(of: verseState.shouldNavigateToAccount) { shouldNavigate in
             if shouldNavigate {
                 selectedTab = .account

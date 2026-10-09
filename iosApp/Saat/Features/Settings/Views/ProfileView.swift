@@ -27,73 +27,176 @@ struct ProfileView: View {
         DailyVerseNotificationPreferences.defaultHour
     @AppStorage(DailyVerseNotificationPreferences.minuteKey) private var dailyVerseMinute =
         DailyVerseNotificationPreferences.defaultMinute
-    @State private var showingDailyVerseTimeSheet = false
-    @State private var showNotificationDeniedAlert = false
-    @State private var notificationAlertMessage = ""
+
     @AppStorage(ChapterReaderPreferences.translationIdKey) private var selectedTranslationId =
         ChapterReaderPreferences.defaultTranslationId
     @AppStorage(ChapterReaderPreferences.translationNameKey) private var selectedTranslationName =
         ""
     @AppStorage(PrayerCalculationMethod.storageKey)
     private var prayerMethodRaw = PrayerCalculationMethod.defaultMethod.rawValue
+    @AppStorage("selected_adhan_sound") private var selectedAdhanSound = "default"
 
-    @State private var viewModel: ProfileViewModel?
-    @State private var isOAuthPresenting = false
     @State private var showingFontScaleSheet = false
     @State private var showingTranslatorSheet = false
-    @AppStorage("selected_adhan_sound") private var selectedAdhanSound = "default"
     @State private var showingAdhanVoiceSheet = false
+    @State private var showingDailyVerseTimeSheet = false
+    @State private var showingAppLanguageSheet = false
+    @State private var showingMadhabSheet = false
+    @State private var showingCheckUpdateAlert = false
+    @State private var selectedMadhab: String = "Syafi'i, Maliki, Hanbali"
 
     @ObservedObject var languageManager = AppLanguageManager.shared
-    @State private var showingAppLanguageSheet = false
+
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+    }
 
     var body: some View {
         ZStack {
-            Color(SaatTokens.Colors.screenBackground)
+            SaatTokens.Colors.homeBg
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: SaatTokens.Spacing.lg) {
-                    headerSection
-                    generalSection
-                    prayerSettingsSection
-                    notificationsSection
-                    aboutSection
+                VStack(alignment: .leading, spacing: 16) {
+                    // Header Title & Subtitle
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Pengaturan & Lainnya")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
 
-                    if showsSignedInActions {
-                        logOutButton
+                        Text("Kelola preferensi dan informasi aplikasi")
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(SaatTokens.Colors.slate500)
+
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(
+                                LinearGradient(
+                                    colors: [SaatTokens.Colors.gold, SaatTokens.Colors.gold.opacity(0.15)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: 48, height: 2.5)
+                            .padding(.top, 4)
                     }
+                    .padding(.top, 16)
+                    .padding(.horizontal, 4)
+
+                    // 1. Pengaturan Umum
+                    sectionHeader("PENGATURAN UMUM")
+                    SettingsCardView {
+                        SettingsRowItem(
+                            iconName: "globe",
+                            title: "Bahasa Aplikasi",
+                            subtitle: languageManager.currentLanguage.displayName,
+                            onClick: { showingAppLanguageSheet = true },
+                            showDivider: true
+                        )
+
+                        SettingsRowItem(
+                            iconName: "person.text.rectangle",
+                            title: "Penerjemah Al-Qur'an",
+                            subtitle: selectedTranslationName.isEmpty ? "Kemenag RI" : selectedTranslationName,
+                            onClick: { showingTranslatorSheet = true },
+                            showDivider: true
+                        )
+
+                        NavigationLink(destination: NotificationSettingsDetailView()) {
+                            SettingsRowContent(
+                                iconName: "bell.badge",
+                                title: "Notifikasi & Adzan",
+                                subtitle: "Pilihan jadwal & audio",
+                                showDivider: false
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    // 2. Metode & Perhitungan Shalat
+                    sectionHeader("METODE & PERHITUNGAN SHALAT")
+                    SettingsCardView {
+                        SettingsRowItem(
+                            iconName: "bookmark.circle",
+                            title: "Mazhab Shalat",
+                            subtitle: selectedMadhab,
+                            onClick: { showingMadhabSheet = true },
+                            showDivider: true
+                        )
+
+                        NavigationLink(destination: PrayerCalculationSettingsView()) {
+                            SettingsRowContent(
+                                iconName: "clock.badge.checkmark",
+                                title: "Metode Perhitungan",
+                                subtitle: selectedPrayerMethod.displayName,
+                                showDivider: true
+                            )
+                        }
+                        .buttonStyle(.plain)
+
+                        SettingsRowItem(
+                            iconName: "waveform",
+                            title: "Suara Adzan",
+                            subtitle: adhanVoiceDisplayName,
+                            onClick: { showingAdhanVoiceSheet = true },
+                            showDivider: false
+                        )
+                    }
+
+                    // 3. Tentang Saat
+                    sectionHeader("TENTANG SĀAT")
+                    SettingsCardView {
+                        SettingsRowItem(
+                            iconName: "info.circle",
+                            title: "Tentang Aplikasi",
+                            subtitle: "Sāat: Waktu Shalat & Al-Qur'an",
+                            onClick: {
+                                if let url = URL(string: "https://elmee.my/saat") {
+                                    UIApplication.shared.open(url)
+                                }
+                            },
+                            showDivider: true
+                        )
+
+                        SettingsRowItem(
+                            iconName: "shield.checkered",
+                            title: "Kebijakan Privasi",
+                            subtitle: "Perlindungan data pengguna",
+                            onClick: {
+                                if let url = URL(string: "https://elmee.my/saat/privacy") {
+                                    UIApplication.shared.open(url)
+                                }
+                            },
+                            showDivider: true
+                        )
+
+                        SettingsRowItem(
+                            iconName: "doc.text",
+                            title: "Syarat & Ketentuan",
+                            subtitle: "Ketentuan penggunaan aplikasi",
+                            onClick: {
+                                if let url = URL(string: "https://elmee.my/saat/terms") {
+                                    UIApplication.shared.open(url)
+                                }
+                            },
+                            showDivider: true
+                        )
+
+                        SettingsRowItem(
+                            iconName: "arrow.clockwise.circle",
+                            title: "Periksa Pembaruan",
+                            subtitle: "Versi \(appVersion) (Aplikasi sudah versi terbaru)",
+                            onClick: { showingCheckUpdateAlert = true },
+                            showDivider: false
+                        )
+                    }
+
+                    // App Footer Card
+                    AppFooterCardView(appVersion: appVersion)
+                        .padding(.top, 8)
                 }
-                .padding(.horizontal, SaatTokens.Spacing.screenHorizontal)
-                .padding(.vertical, SaatTokens.Spacing.md)
-                .padding(.bottom, 90)  // Space for floating tab bar
+                .padding(.horizontal, 18)
+                .padding(.bottom, 120)
             }
-        }
-        .navigationTitle(preferSystemNavigationTitle ? languageManager.localize("tab_profile") : "")
-        .navigationBarTitleDisplayMode(preferSystemNavigationTitle ? .large : .inline)
-        .onAppear {
-            guard let container, viewModel == nil else { return }
-            viewModel = ProfileViewModel(container: container)
-        }
-        .task {
-            guard let container else { return }
-            if viewModel == nil { viewModel = ProfileViewModel(container: container) }
-            await viewModel?.reloadIfNeeded()
-            viewModel?.sync(to: verseState)
-            if dailyVerseEnabled {
-                let result = await DailyVerseNotificationCoordinator.refreshIfNeeded(
-                    container: container)
-                handleDailyVerseScheduleResult(result)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .qfUserProfileDidUpdate)) { _ in
-            Task { @MainActor in
-                await viewModel?.hydrateFromCacheIfNeeded()
-                viewModel?.sync(to: verseState)
-            }
-        }
-        .sheet(isPresented: $showingFontScaleSheet) {
-            FontScaleSheetView(fontScale: $fontScale)
         }
         .sheet(isPresented: $showingAppLanguageSheet) {
             AppLanguageSelectionSheet(selectedLanguage: $languageManager.currentLanguage)
@@ -110,525 +213,252 @@ struct ProfileView: View {
         .sheet(isPresented: $showingAdhanVoiceSheet) {
             AdhanVoiceSelectionSheet()
         }
-        .sheet(isPresented: $showingDailyVerseTimeSheet) {
-            DailyVerseNotificationTimeSheetView(
-                hour: $dailyVerseHour,
-                minute: $dailyVerseMinute,
-                onSaved: {
-                    Task { await applyDailyVerseMorningTime() }
-                }
-            )
-        }
-        .alert(
-            languageManager.localize("notif_disabled_title"),
-            isPresented: $showNotificationDeniedAlert
-        ) {
-            Button(languageManager.localize("open_settings")) {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
+        .confirmationDialog("Pilih Mazhab", isPresented: $showingMadhabSheet, titleVisibility: .visible) {
+            Button("Syafi'i, Maliki, Hanbali (Standar)") {
+                selectedMadhab = "Syafi'i, Maliki, Hanbali"
             }
-            Button(languageManager.localize("close"), role: .cancel) {}
+            Button("Hanafi (Waktu Ashar lebih lambat)") {
+                selectedMadhab = "Hanafi"
+            }
+            Button("Batal", role: .cancel) {}
+        }
+        .alert("Aplikasi Sudah Versi Terbaru", isPresented: $showingCheckUpdateAlert) {
+            Button("Tutup", role: .cancel) {}
         } message: {
-            Text(notificationAlertMessage)
-        }
-        .onChange(of: selectedTranslationId) { _, _ in
-            ChapterReaderPreferences.notifyTranslationDidChange()
-        }
-        .onChange(of: adzanEnabled) { _, _ in PrayerNotificationPreferences.notifyDidChange() }
-        .onChange(of: imsakEnabled) { _, _ in PrayerNotificationPreferences.notifyDidChange() }
-        .onChange(of: midnightEnabled) { _, _ in PrayerNotificationPreferences.notifyDidChange() }
-        .onChange(of: firstThirdEnabled) { _, _ in PrayerNotificationPreferences.notifyDidChange() }
-        .onChange(of: tahajudEnabled) { _, _ in PrayerNotificationPreferences.notifyDidChange() }
-        .onChange(of: dailyVerseEnabled) { _, enabled in
-            Task {
-                let result = await DailyVerseNotificationCoordinator.setEnabled(
-                    enabled, container: container)
-                handleDailyVerseScheduleResult(result)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .qfOAuthWebAuthStateDidChange)) { _ in
-            isOAuthPresenting = container?.oauth.isWebAuthInProgress == true
-            guard isOAuthPresenting == false else { return }
-            Task { @MainActor in
-                await viewModel?.handleOAuthDidChange(isInProgress: false)
-                viewModel?.sync(to: verseState)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .qfUserSessionDidChange)) { _ in
-            Task { @MainActor in
-                await viewModel?.handleSessionDidChange()
-                viewModel?.sync(to: verseState)
-            }
+            Text("Kamu sudah menggunakan versi terbaru Sāat (\(appVersion)).")
         }
     }
 
-    @ViewBuilder
-    private var headerSection: some View {
-        if let viewModel {
-            @Bindable var viewModel = viewModel
-            ProfileHeaderView(
-                profile: viewModel.profile,
-                fallbackName: verseState?.isLoggedIn == true ? verseState?.userDisplayName : nil,
-                fallbackAvatarURL: verseState?.userAvatarURL,
-                isLoading: viewModel.isLoading,
-                isOAuthPresenting: isOAuthPresenting,
-                onSignIn: {
-                    Task {
-                        await viewModel.signIn()
-                        viewModel.sync(to: verseState)
-                    }
-                }
-            )
-        } else if verseState?.isLoggedIn == true {
-            ProfileHeaderView(
-                profile: nil,
-                fallbackName: verseState?.userDisplayName,
-                fallbackAvatarURL: verseState?.userAvatarURL,
-                isLoading: false,
-                isOAuthPresenting: isOAuthPresenting,
-                onSignIn: {}
-            )
-        } else {
-            ProfileHeaderView(
-                profile: nil,
-                fallbackName: nil,
-                fallbackAvatarURL: nil,
-                isLoading: false,
-                isOAuthPresenting: isOAuthPresenting,
-                onSignIn: {}
-            )
-        }
-    }
-
-    private var generalSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ProfileSectionHeaderView(title: languageManager.localize("general"))
-            VStack(spacing: 0) {
-                Button {
-                    showingFontScaleSheet = true
-                } label: {
-                    ProfileRowView(
-                        icon: "textformat.size",
-                        title: languageManager.localize("font_size"),
-                        subtitle: fontScaleLabel,
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-                .saatAccessibility(
-                    label: SaatAccessibility.Profile.fontSize,
-                    hint: "Current size \(fontScaleLabel). Opens font size picker"
-                )
-
-                Divider().padding(.leading, 66)
-
-                Button {
-                    showingAppLanguageSheet = true
-                } label: {
-                    ProfileRowView(
-                        icon: "globe",
-                        title: languageManager.localize("app_language"),
-                        subtitle: languageManager.currentLanguage.displayName,
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-            .profileCardStyle()
-        }
-    }
-
-    private var prayerSettingsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ProfileSectionHeaderView(title: languageManager.localize("prayer_setting"))
-            VStack(spacing: 0) {
-                NavigationLink {
-                    LocationSettingsView()
-                } label: {
-                    ProfileRowView(
-                        icon: "location.circle",
-                        title: languageManager.localize("location_source"),
-                        subtitle: "",
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Divider().padding(.leading, 66)
-
-                NavigationLink {
-                    PrayerCalculationSettingsView()
-                } label: {
-                    ProfileRowView(
-                        icon: "clock.badge.checkmark",
-                        title: languageManager.localize("prayer_calc"),
-                        subtitle: selectedPrayerMethod.displayName,
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-                .saatAccessibility(
-                    label: SaatAccessibility.Profile.prayerCalculation,
-                    hint:
-                        "Current method \(selectedPrayerMethod.displayName). Choose how prayer times are calculated"
-                )
-
-                Divider().padding(.leading, 66)
-
-                ProfileRowView(
-                    icon: "book.pages",
-                    title: languageManager.localize("show_translation"),
-                    subtitle: languageManager.localize("show_translation"),
-                    hasToggle: true,
-                    isOn: $showTranslation
-                )
-
-                Divider().padding(.leading, 66)
-
-                Button {
-                    showingTranslatorSheet = true
-                } label: {
-                    ProfileRowView(
-                        icon: "person.text.rectangle",
-                        title: languageManager.localize("translator"),
-                        subtitle: selectedTranslationName,
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-                .saatAccessibility(
-                    label: SaatAccessibility.Profile.translator,
-                    hint: selectedTranslationName.isEmpty
-                        ? "Choose translation language for Quran text"
-                        : "Current translator \(selectedTranslationName)"
-                )
-
-                Divider().padding(.leading, 66)
-
-                Button {
-                    showingAdhanVoiceSheet = true
-                } label: {
-                    ProfileRowView(
-                        icon: "waveform",
-                        title: languageManager.localize("adhan_voice"),
-                        subtitle: adhanVoiceDisplayName,
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(languageManager.localize("adhan_voice"))
-                .accessibilityHint(
-                    "Current voice: \(adhanVoiceDisplayName). Choose the voice for Adhan notifications"
-                )
-            }
-            .profileCardStyle()
-        }
-    }
-
-    private var adhanVoiceDisplayName: String {
-        switch selectedAdhanSound {
-        case "default": return languageManager.localize("system_default")
-        case "adhan_ust_daeng_syawal_indonesia": return "Ust. Daeng Syawal (ID)"
-        case "adhan_omar_hisham_al_arabi": return "Omar Hisham Al Arabi"
-        case "adhan_sheikh_abdul_karim_malaysia": return "Sheikh Abdul Karim (MY)"
-        case "adhan_fajr_mishary_alafasy": return "Mishary Alafasy (Fajr)"
-        default: return languageManager.localize("system_default")
-        }
-    }
-
-    private var dailyVerseNotificationSubtitle: String {
-        languageManager.localize("daily_verse_sub")
-    }
-
-    private var dailyVerseTimeRowSubtitle: String {
-        DailyVerseNotificationPreferences.formattedMorningTime(
-            hour: dailyVerseHour,
-            minute: dailyVerseMinute
-        )
-    }
-
-    private func applyDailyVerseMorningTime() async {
-        let result = await DailyVerseNotificationCoordinator.applyMorningTime(
-            hour: dailyVerseHour,
-            minute: dailyVerseMinute,
-            container: container
-        )
-        handleDailyVerseScheduleResult(result)
-    }
-
-    private func handleDailyVerseScheduleResult(
-        _ result: DailyVerseNotificationScheduler.ScheduleResult
-    ) {
-        switch result {
-        case .scheduled, .disabled:
-            break
-        case .authorizationDenied:
-            notificationAlertMessage = languageManager.localize("notif_disabled_msg")
-            showNotificationDeniedAlert = true
-        case .failed(let message):
-            notificationAlertMessage = message
-            showNotificationDeniedAlert = true
-        }
-    }
-
-    private var notificationsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ProfileSectionHeaderView(title: languageManager.localize("notifications"))
-            VStack(spacing: 0) {
-                ProfileRowView(
-                    icon: "book.closed.fill",
-                    title: languageManager.localize("verse_of_the_day"),
-                    subtitle: dailyVerseNotificationSubtitle,
-                    hasToggle: true,
-                    isOn: $dailyVerseEnabled
-                )
-                if dailyVerseEnabled {
-                    Divider().padding(.leading, 66)
-                    Button {
-                        showingDailyVerseTimeSheet = true
-                    } label: {
-                        ProfileRowView(
-                            icon: "clock.fill",
-                            title: languageManager.localize("morning_time"),
-                            subtitle: dailyVerseTimeRowSubtitle,
-                            hasToggle: false,
-                            isOn: .constant(false)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .saatAccessibility(
-                        label: "Morning reminder time",
-                        hint: "Currently \(dailyVerseTimeRowSubtitle). Double tap to change."
-                    )
-                }
-                Divider().padding(.leading, 66)
-                ProfileRowView(
-                    icon: "bell",
-                    title: languageManager.localize("prayer_times"),
-                    subtitle: languageManager.localize("prayer_times_sub"),
-                    hasToggle: true,
-                    isOn: $adzanEnabled
-                )
-                Divider().padding(.leading, 66)
-                ProfileRowView(
-                    icon: "bell.badge",
-                    title: languageManager.localize("imsak"),
-                    subtitle: languageManager.localize("imsak_sub"),
-                    hasToggle: true,
-                    isOn: $imsakEnabled
-                )
-                Divider().padding(.leading, 66)
-                ProfileRowView(
-                    icon: "moon",
-                    title: languageManager.localize("midnight"),
-                    subtitle: languageManager.localize("midnight_sub"),
-                    hasToggle: true,
-                    isOn: $midnightEnabled
-                )
-                Divider().padding(.leading, 66)
-                ProfileRowView(
-                    icon: "moon.stars",
-                    title: languageManager.localize("first_third_night"),
-                    subtitle: languageManager.localize("first_third_sub"),
-                    hasToggle: true,
-                    isOn: $firstThirdEnabled
-                )
-                Divider().padding(.leading, 66)
-                ProfileRowView(
-                    icon: "sparkles",
-                    title: languageManager.localize("tahajud"),
-                    subtitle: languageManager.localize("tahajud_sub"),
-                    hasToggle: true,
-                    isOn: $tahajudEnabled
-                )
-            }
-            .profileCardStyle()
-        }
-    }
-
-    private var aboutSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ProfileSectionHeaderView(title: languageManager.localize("about"))
-            VStack(spacing: 0) {
-                Button {
-                    if let url = URL(string: "https://elmee.my/saat") {
-                        UIApplication.shared.open(url)
-                    }
-                } label: {
-                    ProfileRowView(
-                        icon: "info.circle",
-                        title: languageManager.localize("about_developer"),
-                        subtitle:
-                            "Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")",
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Divider().padding(.leading, 66)
-
-                Button {
-                    if let url = URL(
-                        string:
-                            "https://elmee.my/saat/privacy?lang=\(languageManager.currentLanguage.rawValue)"
-                    ) {
-                        UIApplication.shared.open(url)
-                    }
-                } label: {
-                    ProfileRowView(
-                        icon: "shield",
-                        title: languageManager.localize("privacy_policy"),
-                        subtitle: languageManager.localize("privacy_policy_effective"),
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-
-                Divider().padding(.leading, 66)
-
-                Button {
-                    if let url = URL(
-                        string:
-                            "https://elmee.my/saat/terms?lang=\(languageManager.currentLanguage.rawValue)"
-                    ) {
-                        UIApplication.shared.open(url)
-                    }
-                } label: {
-                    ProfileRowView(
-                        icon: "doc.text",
-                        title: languageManager.localize("terms_and_conditions"),
-                        subtitle: languageManager.localize("terms_effective"),
-                        hasToggle: false,
-                        isOn: .constant(false)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-            .profileCardStyle()
-        }
-    }
-
-    @ViewBuilder
-    private var logOutButton: some View {
-        VStack(spacing: 12) {
-            Button {
-                Task {
-                    await viewModel?.signOut()
-                    hasCompletedOnboarding = true
-                }
-            } label: {
-                Text(languageManager.localize("sign_out"))
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.Token.danger)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            }
-            .buttonStyle(PillPressStyle())
-            .disabled(isOAuthPresenting)
-            .opacity(isOAuthPresenting ? 0.5 : 1)
-            .saatAccessibility(label: SaatAccessibility.Profile.signOut)
-
-            Button {
-                if let url = URL(
-                    string:
-                        "https://elmee.my/saat/delete-account?lang=\(languageManager.currentLanguage.rawValue)"
-                ) {
-                    UIApplication.shared.open(url)
-                }
-            } label: {
-                Text(languageManager.localize("delete_account"))
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color.Token.danger)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.clear)
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(Color.Token.danger, lineWidth: 1)
-                    )
-            }
-            .buttonStyle(PillPressStyle())
-            .disabled(isOAuthPresenting)
-            .opacity(isOAuthPresenting ? 0.5 : 1)
-        }
-    }
-
-    private var showsSignedInActions: Bool {
-        viewModel?.profile != nil || verseState?.isLoggedIn == true
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 12, weight: .bold))
+            .foregroundColor(SaatTokens.Colors.homeDarkGreen)
+            .tracking(0.5)
+            .padding(.leading, 4)
+            .padding(.top, 4)
     }
 
     private var selectedPrayerMethod: PrayerCalculationMethod {
         PrayerCalculationMethod(rawValue: prayerMethodRaw) ?? PrayerCalculationMethod.defaultMethod
     }
 
-    private var fontScaleLabel: String {
-        switch fontScale {
-        case ..<0.95: return languageManager.localize("font_small")
-        case 0.95..<1.1: return languageManager.localize("font_medium")
-        case 1.1..<1.22: return languageManager.localize("font_large")
-        default: return languageManager.localize("font_extra_large")
+    private var adhanVoiceDisplayName: String {
+        switch selectedAdhanSound {
+        case "default": return "Suara Default Sistem"
+        case "adhan_ust_daeng_syawal_indonesia": return "Ust. Daeng Syawal (ID)"
+        case "adhan_omar_hisham_al_arabi": return "Omar Hisham Al Arabi"
+        case "adhan_sheikh_abdul_karim_malaysia": return "Sheikh Abdul Karim (MY)"
+        case "adhan_fajr_mishary_alafasy": return "Mishary Alafasy (Subuh)"
+        default: return "Suara Default Sistem"
         }
     }
 }
 
-struct AppLanguageSelectionSheet: View {
-    @Binding var selectedLanguage: AppLanguage
-    @Environment(\.dismiss) private var dismiss
+// MARK: - Settings Card Container
+private struct SettingsCardView<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(AppLanguage.allCases) { lang in
-                    Button {
-                        selectedLanguage = lang
-                        dismiss()
-                    } label: {
-                        HStack {
-                            Text(lang.displayName)
-                                .foregroundColor(.primary)
-                            Spacer()
-                            if selectedLanguage == lang {
-                                Image(systemName: "checkmark")
-                                    .foregroundColor(Color.Token.deepEmerald)
-                                    .fontWeight(.bold)
-                            }
-                        }
+        VStack(spacing: 0) {
+            content
+        }
+        .background(SaatTokens.Colors.pureWhite)
+        .cornerRadius(18)
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color(hex: 0xFFEA_E4D6), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.02), radius: 6, x: 0, y: 2)
+    }
+}
+
+// MARK: - Settings Row Item
+private struct SettingsRowItem: View {
+    let iconName: String
+    let title: String
+    let subtitle: String?
+    let onClick: () -> Void
+    let showDivider: Bool
+
+    var body: some View {
+        Button(action: onClick) {
+            SettingsRowContent(
+                iconName: iconName,
+                title: title,
+                subtitle: subtitle,
+                showDivider: showDivider
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct SettingsRowContent: View {
+    let iconName: String
+    let title: String
+    let subtitle: String?
+    let showDivider: Bool
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(SaatTokens.Colors.sageTint)
+                        .frame(width: 38, height: 38)
+
+                    Image(systemName: iconName)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.homeDarkGreen)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.slate900)
+
+                    if let subtitle, !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.system(size: 12.5, weight: .regular))
+                            .foregroundColor(SaatTokens.Colors.slate500)
+                            .lineLimit(1)
                     }
                 }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(SaatTokens.Colors.slate400)
             }
-            .navigationTitle(AppLanguageManager.shared.localize("app_language"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(AppLanguageManager.shared.localize("close")) {
-                        dismiss()
-                    }
-                }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            if showDivider {
+                Divider()
+                    .padding(.leading, 68)
             }
         }
     }
 }
 
-extension View {
-    fileprivate func profileCardStyle() -> some View {
-        background(Color.Token.pureWhite)
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: Color.black.opacity(0.04), radius: 10, y: 4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(Color.Token.softGrey.opacity(0.5), lineWidth: 0.5)
-            )
+// MARK: - App Footer Card
+private struct AppFooterCardView: View {
+    let appVersion: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .fill(SaatTokens.Colors.sageTint)
+                    .frame(width: 50, height: 50)
+
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(SaatTokens.Colors.homeDarkGreen)
+            }
+
+            Text("Sāat: Waktu Shalat & Al-Qur'an")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(SaatTokens.Colors.homeDarkGreen)
+
+            Text("Versi \(appVersion)")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(SaatTokens.Colors.slate500)
+
+            Text("Dibuat dengan ikhlas untuk umat")
+                .font(.system(size: 11, weight: .regular))
+                .foregroundColor(SaatTokens.Colors.slate400)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+    }
+}
+
+// MARK: - Notification Settings Detail View
+struct NotificationSettingsDetailView: View {
+    @AppStorage(PrayerNotificationPreferences.adzanKey) private var adzanEnabled = true
+    @AppStorage(PrayerNotificationPreferences.imsakKey) private var imsakEnabled = true
+    @AppStorage(PrayerNotificationPreferences.midnightKey) private var midnightEnabled = true
+    @AppStorage(PrayerNotificationPreferences.firstThirdKey) private var firstThirdEnabled = true
+    @AppStorage(PrayerNotificationPreferences.tahajudKey) private var tahajudEnabled = true
+    @AppStorage(DailyVerseNotificationPreferences.enabledKey) private var dailyVerseEnabled = true
+
+    var body: some View {
+        ZStack {
+            SaatTokens.Colors.homeBg
+                .ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Pengaturan Notifikasi")
+                        .font(.system(size: 22, weight: .bold))
+                        .foregroundColor(SaatTokens.Colors.deepEmerald)
+                        .padding(.top, 16)
+
+                    SettingsCardView {
+                        ToggleRow(icon: "bell.fill", title: "Adzan & Waktu Shalat", subtitle: "Pengingat 5 waktu shalat", isOn: $adzanEnabled, showDivider: true)
+                        ToggleRow(icon: "bell.badge.fill", title: "Waktu Imsak", subtitle: "10 menit sebelum Subuh", isOn: $imsakEnabled, showDivider: true)
+                        ToggleRow(icon: "sparkles", title: "Tahajud & Qiyamul Lail", subtitle: "Sepertiga malam terakhir", isOn: $tahajudEnabled, showDivider: true)
+                        ToggleRow(icon: "book.closed.fill", title: "Ayat Harian", subtitle: "Kutipan inspirasi setiap pagi", isOn: $dailyVerseEnabled, showDivider: false)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .padding(.bottom, 120)
+            }
+        }
+        .navigationTitle("Notifikasi & Adzan")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct ToggleRow: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    @Binding var isOn: Bool
+    let showDivider: Bool
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(SaatTokens.Colors.sageTint)
+                        .frame(width: 38, height: 38)
+
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.homeDarkGreen)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(SaatTokens.Colors.slate900)
+
+                    Text(subtitle)
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(SaatTokens.Colors.slate500)
+                }
+
+                Spacer()
+
+                Toggle("", isOn: $isOn)
+                    .labelsHidden()
+                    .tint(SaatTokens.Colors.deepEmerald)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            if showDivider {
+                Divider()
+                    .padding(.leading, 68)
+            }
+        }
     }
 }
