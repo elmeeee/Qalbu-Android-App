@@ -86,7 +86,7 @@ struct ProfileView: View {
                     sectionHeader("PENGATURAN UMUM")
                     SettingsCardView {
                         SettingsRowItem(
-                            iconName: "globe",
+                            iconName: "ic_language_custom",
                             title: "Bahasa Aplikasi",
                             subtitle: languageManager.currentLanguage.displayName,
                             onClick: { showingAppLanguageSheet = true },
@@ -94,7 +94,7 @@ struct ProfileView: View {
                         )
 
                         SettingsRowItem(
-                            iconName: "person.text.rectangle",
+                            iconName: "ic_translator_custom",
                             title: "Penerjemah Al-Qur'an",
                             subtitle: selectedTranslationName.isEmpty ? "Kemenag RI" : selectedTranslationName,
                             onClick: { showingTranslatorSheet = true },
@@ -103,9 +103,9 @@ struct ProfileView: View {
 
                         NavigationLink(destination: NotificationSettingsDetailView()) {
                             SettingsRowContent(
-                                iconName: "bell.badge",
+                                iconName: "ic_notification_custom",
                                 title: "Notifikasi & Adzan",
-                                subtitle: "Pilihan jadwal & audio",
+                                subtitle: "Opsi lanjutan & pengingat",
                                 showDivider: false
                             )
                         }
@@ -116,7 +116,7 @@ struct ProfileView: View {
                     sectionHeader("METODE & PERHITUNGAN SHALAT")
                     SettingsCardView {
                         SettingsRowItem(
-                            iconName: "bookmark.circle",
+                            iconName: "ic_madhab_custom",
                             title: "Mazhab Shalat",
                             subtitle: selectedMadhab,
                             onClick: { showingMadhabSheet = true },
@@ -125,7 +125,7 @@ struct ProfileView: View {
 
                         NavigationLink(destination: PrayerCalculationSettingsView()) {
                             SettingsRowContent(
-                                iconName: "clock.badge.checkmark",
+                                iconName: "ic_institution_custom",
                                 title: "Metode Perhitungan",
                                 subtitle: selectedPrayerMethod.displayName,
                                 showDivider: true
@@ -134,7 +134,7 @@ struct ProfileView: View {
                         .buttonStyle(.plain)
 
                         SettingsRowItem(
-                            iconName: "waveform",
+                            iconName: "ic_adhan_voice_custom",
                             title: "Suara Adzan",
                             subtitle: adhanVoiceDisplayName,
                             onClick: { showingAdhanVoiceSheet = true },
@@ -146,7 +146,7 @@ struct ProfileView: View {
                     sectionHeader("TENTANG SĀAT")
                     SettingsCardView {
                         SettingsRowItem(
-                            iconName: "info.circle",
+                            iconName: "ic_about_custom",
                             title: "Tentang Aplikasi",
                             subtitle: "Sāat: Waktu Shalat & Al-Qur'an",
                             onClick: {
@@ -158,7 +158,7 @@ struct ProfileView: View {
                         )
 
                         SettingsRowItem(
-                            iconName: "shield.checkered",
+                            iconName: "ic_privacy_custom",
                             title: "Kebijakan Privasi",
                             subtitle: "Perlindungan data pengguna",
                             onClick: {
@@ -170,7 +170,7 @@ struct ProfileView: View {
                         )
 
                         SettingsRowItem(
-                            iconName: "doc.text",
+                            iconName: "ic_terms_custom",
                             title: "Syarat & Ketentuan",
                             subtitle: "Ketentuan penggunaan aplikasi",
                             onClick: {
@@ -182,9 +182,9 @@ struct ProfileView: View {
                         )
 
                         SettingsRowItem(
-                            iconName: "arrow.clockwise.circle",
+                            iconName: "ic_update_custom",
                             title: "Periksa Pembaruan",
-                            subtitle: "Versi \(appVersion) (Aplikasi sudah versi terbaru)",
+                            subtitle: "Aplikasi sudah versi terbaru",
                             onClick: { showingCheckUpdateAlert = true },
                             showDivider: false
                         )
@@ -194,7 +194,7 @@ struct ProfileView: View {
                     AppFooterCardView(appVersion: appVersion)
                         .padding(.top, 8)
                 }
-                .padding(.horizontal, 18)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 120)
             }
         }
@@ -231,11 +231,11 @@ struct ProfileView: View {
 
     private func sectionHeader(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 12, weight: .bold))
-            .foregroundColor(SaatTokens.Colors.homeDarkGreen)
-            .tracking(0.5)
+            .font(.system(size: 13, weight: .bold))
+            .foregroundColor(Color(hex: 0xFF8E_8E93))
             .padding(.leading, 4)
-            .padding(.top, 4)
+            .padding(.top, 8)
+            .padding(.bottom, 2)
     }
 
     private var selectedPrayerMethod: PrayerCalculationMethod {
@@ -266,13 +266,13 @@ private struct SettingsCardView<Content: View>: View {
         VStack(spacing: 0) {
             content
         }
-        .background(SaatTokens.Colors.pureWhite)
-        .cornerRadius(18)
+        .background(Color.white)
+        .cornerRadius(16)
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color(hex: 0xFFEA_E4D6), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color(hex: 0xFFEE_EEEE), lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.02), radius: 6, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 1)
     }
 }
 
@@ -306,25 +306,20 @@ private struct SettingsRowContent: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(SaatTokens.Colors.sageTint)
-                        .frame(width: 38, height: 38)
-
-                    Image(systemName: iconName)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(SaatTokens.Colors.homeDarkGreen)
-                }
+                Image(iconName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(SaatTokens.Colors.slate900)
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(Color(hex: 0xFF1C_1C1E))
 
                     if let subtitle, !subtitle.isEmpty {
                         Text(subtitle)
-                            .font(.system(size: 12.5, weight: .regular))
-                            .foregroundColor(SaatTokens.Colors.slate500)
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(Color(hex: 0xFF8E_8E93))
                             .lineLimit(1)
                     }
                 }
@@ -333,14 +328,14 @@ private struct SettingsRowContent: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(SaatTokens.Colors.slate400)
+                    .foregroundColor(Color(hex: 0xFFC7_C7CC))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
 
             if showDivider {
                 Divider()
-                    .padding(.leading, 68)
+                    .padding(.leading, 54)
             }
         }
     }
@@ -401,13 +396,13 @@ struct NotificationSettingsDetailView: View {
                         .padding(.top, 16)
 
                     SettingsCardView {
-                        ToggleRow(icon: "bell.fill", title: "Adzan & Waktu Shalat", subtitle: "Pengingat 5 waktu shalat", isOn: $adzanEnabled, showDivider: true)
-                        ToggleRow(icon: "bell.badge.fill", title: "Waktu Imsak", subtitle: "10 menit sebelum Subuh", isOn: $imsakEnabled, showDivider: true)
-                        ToggleRow(icon: "sparkles", title: "Tahajud & Qiyamul Lail", subtitle: "Sepertiga malam terakhir", isOn: $tahajudEnabled, showDivider: true)
-                        ToggleRow(icon: "book.closed.fill", title: "Ayat Harian", subtitle: "Kutipan inspirasi setiap pagi", isOn: $dailyVerseEnabled, showDivider: false)
+                        ToggleRow(iconName: "ic_adhan_on_custom", title: "Adzan & Waktu Shalat", subtitle: "Pengingat 5 waktu shalat", isOn: $adzanEnabled, showDivider: true)
+                        ToggleRow(iconName: "ic_remainders_custom", title: "Waktu Imsak", subtitle: "10 menit sebelum Subuh", isOn: $imsakEnabled, showDivider: true)
+                        ToggleRow(iconName: "ic_remainders_custom", title: "Tahajud & Qiyamul Lail", subtitle: "Sepertiga malam terakhir", isOn: $tahajudEnabled, showDivider: true)
+                        ToggleRow(iconName: "ic_daily_verse_custom", title: "Ayat Harian", subtitle: "Kutipan inspirasi setiap pagi", isOn: $dailyVerseEnabled, showDivider: false)
                     }
                 }
-                .padding(.horizontal, 18)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 120)
             }
         }
@@ -417,7 +412,7 @@ struct NotificationSettingsDetailView: View {
 }
 
 private struct ToggleRow: View {
-    let icon: String
+    let iconName: String
     let title: String
     let subtitle: String
     @Binding var isOn: Bool
@@ -426,24 +421,19 @@ private struct ToggleRow: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(SaatTokens.Colors.sageTint)
-                        .frame(width: 38, height: 38)
-
-                    Image(systemName: icon)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(SaatTokens.Colors.homeDarkGreen)
-                }
+                Image(iconName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(SaatTokens.Colors.slate900)
+                        .foregroundColor(Color(hex: 0xFF1C_1C1E))
 
                     Text(subtitle)
                         .font(.system(size: 12, weight: .regular))
-                        .foregroundColor(SaatTokens.Colors.slate500)
+                        .foregroundColor(Color(hex: 0xFF8E_8E93))
                 }
 
                 Spacer()
@@ -457,7 +447,7 @@ private struct ToggleRow: View {
 
             if showDivider {
                 Divider()
-                    .padding(.leading, 68)
+                    .padding(.leading, 54)
             }
         }
     }

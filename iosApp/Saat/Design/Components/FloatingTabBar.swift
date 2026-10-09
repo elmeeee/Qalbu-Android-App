@@ -4,15 +4,15 @@ struct FloatingTabBar: View {
     @Binding var selectedTab: RootTabView.Tab
 
     private let tabs: [(RootTabView.Tab, String, String, String)] = [
-        (.today, "house", "house.fill", "Beranda"),
-        (.journey, "book", "book.fill", "Al-Qur'an"),
-        (.tools, "square.grid.2x2", "square.grid.2x2.fill", "Ibadah"),
-        (.account, "slider.horizontal.3", "slider.horizontal.3", "Lainnya")
+        (.today, "ic_home_off", "ic_home_on", "Beranda"),
+        (.journey, "ic_quran_off", "ic_quran_on", "Al-Qur'an"),
+        (.tools, "ic_spritual_off", "ic_spritual_on", "Ibadah"),
+        (.account, "ic_setting_off", "ic_setting_on", "Lainnya")
     ]
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(tabs, id: \.0) { tab, icon, selectedIcon, label in
+            ForEach(tabs, id: \.0) { tab, unselectedIcon, selectedIcon, label in
                 let isSelected = selectedTab == tab
                 Button(action: {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -21,8 +21,11 @@ struct FloatingTabBar: View {
                     }
                 }) {
                     VStack(spacing: 2) {
-                        Image(systemName: isSelected ? selectedIcon : icon)
-                            .font(.system(size: 20, weight: isSelected ? .bold : .medium))
+                        Image(isSelected ? selectedIcon : unselectedIcon)
+                            .renderingMode(isSelected ? .template : .original)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
                             .foregroundColor(isSelected ? SaatTokens.Colors.deepEmerald : SaatTokens.Colors.slate500)
 
                         Text(label)

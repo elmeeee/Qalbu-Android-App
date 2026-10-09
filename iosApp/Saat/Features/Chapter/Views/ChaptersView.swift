@@ -146,8 +146,11 @@ struct ChaptersView: View {
                             }
                         }) {
                             HStack(spacing: 8) {
-                                Image(systemName: "book.pages.fill")
-                                    .font(.system(size: 14))
+                                Image("ic_quran_on")
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 16, height: 16)
                                 Text(languageManager.localize("surah"))
                                     .font(.system(size: 14, weight: selectedTab == 0 ? .bold : .medium))
                             }
@@ -171,8 +174,11 @@ struct ChaptersView: View {
                             }
                         }) {
                             HStack(spacing: 8) {
-                                Image(systemName: "text.book.closed.fill")
-                                    .font(.system(size: 14))
+                                Image("ic_tafsir")
+                                    .renderingMode(.template)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 16, height: 16)
                                 Text(languageManager.localize("juz"))
                                     .font(.system(size: 14, weight: selectedTab == 1 ? .bold : .medium))
                             }
@@ -254,7 +260,7 @@ struct ChaptersView: View {
     private func chaptersList(_ vm: QuranChaptersViewModel) -> some View {
         let displayed = vm.filteredChapters
         return ScrollView {
-            LazyVStack(spacing: 10) {
+            LazyVStack(spacing: 8) {
                 // Continue reading card if not searching
                 if vm.searchText.isEmpty, let route = vm.continueReadingRoute(), let ch = route.chapter {
                     NavigationLink(value: route) {
@@ -265,7 +271,7 @@ struct ChaptersView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .padding(.bottom, 6)
+                    .padding(.bottom, 4)
                 }
 
                 if displayed.isEmpty && vm.searchText.isEmpty == false {
@@ -280,7 +286,7 @@ struct ChaptersView: View {
                     }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 18)
             .padding(.top, 6)
             .padding(.bottom, 120)
         }
@@ -309,7 +315,52 @@ struct ChaptersView: View {
 
     private func juzsList(_ vm: QuranChaptersViewModel) -> some View {
         ScrollView {
-            LazyVStack(spacing: 10) {
+            LazyVStack(spacing: 8) {
+                // Target Khatam Header Card
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        HStack(spacing: 8) {
+                            Image(systemName: "bookmark.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(SaatTokens.Colors.deepEmerald)
+                            Text("Target Khatam")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(SaatTokens.Colors.slate900)
+                        }
+                        Spacer()
+                        Text("0%")
+                            .font(.system(size: 16, weight: .heavy))
+                            .foregroundColor(SaatTokens.Colors.deepEmerald)
+                    }
+
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(SaatTokens.Colors.deepEmerald.opacity(0.15))
+                                .frame(height: 8)
+                            Capsule()
+                                .fill(SaatTokens.Colors.deepEmerald)
+                                .frame(width: max(8, geo.size.width * 0.05), height: 8)
+                        }
+                    }
+                    .frame(height: 8)
+
+                    HStack {
+                        Text("0 dari 30 Juz selesai")
+                            .font(.system(size: 12))
+                            .foregroundColor(SaatTokens.Colors.slate500)
+                        Spacer()
+                    }
+                }
+                .padding(16)
+                .background(SaatTokens.Colors.deepEmerald.opacity(0.08))
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(SaatTokens.Colors.deepEmerald.opacity(0.2), lineWidth: 1.5)
+                )
+                .padding(.bottom, 4)
+
                 ForEach(vm.juzs, id: \.id) { juz in
                     let start = juz.startChapterAndAyah()
                     let chapter = start.flatMap { chAndAyah in vm.chapters.first(where: { $0.id == chAndAyah.0 }) }
@@ -320,12 +371,32 @@ struct ChaptersView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 18)
             .padding(.top, 6)
             .padding(.bottom, 120)
         }
         .refreshable {
             await vm.refreshAll(force: true)
+        }
+    }
+}
+
+// MARK: - Chapter Number Badge (Star Frame)
+private struct ChapterNumberBadge: View {
+    let number: Int
+
+    var body: some View {
+        ZStack {
+            Image("frame_number_icon")
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 38, height: 38)
+                .foregroundColor(SaatTokens.Colors.teal)
+
+            Text("\(number)")
+                .font(.system(size: number >= 100 ? 11 : 12, weight: .bold, design: .rounded))
+                .foregroundColor(SaatTokens.Colors.slate900)
         }
     }
 }
@@ -336,19 +407,11 @@ private struct QuranChapterRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
-            // Number Badge (Deep emerald gradient circle)
-            ZStack {
-                Circle()
-                    .fill(SaatTokens.Colors.primaryGradient)
-                    .frame(width: 38, height: 38)
-
-                Text("\(chapter.id)")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-            }
+            // Star Frame Number Badge
+            ChapterNumberBadge(number: chapter.id)
 
             // Info Column
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(chapter.displayComplexName)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(SaatTokens.Colors.slate900)
@@ -356,48 +419,57 @@ private struct QuranChapterRow: View {
 
                 if chapter.displayTranslatedName.isEmpty == false {
                     Text(chapter.displayTranslatedName)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.system(size: 12, weight: .regular))
                         .foregroundColor(SaatTokens.Colors.slate500)
                         .lineLimit(1)
                 }
 
-                HStack(spacing: 6) {
+                HStack(spacing: 8) {
                     Text(chapter.isMeccan ? "Makkiyah" : "Madaniyah")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(SaatTokens.Colors.homeDarkGreen)
-                        .padding(.horizontal, 6)
+                        .foregroundColor(chapter.isMeccan ? Color(hex: 0xFF2E_7D32) : Color(hex: 0xFF15_65C0))
+                        .padding(.horizontal, 7)
                         .padding(.vertical, 2)
-                        .background(SaatTokens.Colors.sageTint)
+                        .background(
+                            (chapter.isMeccan ? Color(hex: 0xFF2E_7D32) : Color(hex: 0xFF15_65C0)).opacity(0.12)
+                        )
                         .cornerRadius(6)
 
                     if let count = chapter.versesCount {
-                        Text("• \(count) Ayat")
+                        Text("\(count) Ayat")
                             .font(.system(size: 11.5, weight: .medium))
                             .foregroundColor(SaatTokens.Colors.slate500)
                     }
                 }
-                .padding(.top, 2)
+                .padding(.top, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Right: Arabic Calligraphy Title
-            if let arabic = chapter.nameArabic {
-                Text(arabic)
-                    .font(.system(size: 20, weight: .bold, design: .serif))
-                    .foregroundColor(SaatTokens.Colors.homeDarkGreen)
-                    .lineLimit(1)
-                    .padding(.trailing, 4)
+            // Right: Mecca / Medina 3D illustration badge in 48x48 rounded box
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.white.opacity(0.6))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(Color.white.opacity(0.8), lineWidth: 1)
+                    )
+                    .frame(width: 48, height: 48)
+
+                Image(chapter.isMeccan ? "mecca" : "medina")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 42, height: 42)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(Color.white)
-        .cornerRadius(18)
+        .cornerRadius(16)
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color(hex: 0xFFE2_E8F0).opacity(0.6), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color(hex: 0xFFEC_E7DE), lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 1)
+        .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
     }
 }
 
@@ -408,25 +480,17 @@ private struct JuzRow: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(SaatTokens.Colors.primaryGradient)
-                    .frame(width: 38, height: 38)
+            ChapterNumberBadge(number: juz.juzNumber)
 
-                Text("\(juz.juzNumber)")
-                    .font(.system(size: 14, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-            }
-
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text("Juz \(juz.juzNumber)")
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundColor(SaatTokens.Colors.slate900)
 
                 if let start = juz.startChapterAndAyah() {
                     let surahName = chapter?.displayComplexName ?? "Surah \(start.0)"
-                    Text("Mulai di \(surahName) • Ayat \(start.1)")
-                        .font(.system(size: 12.5, weight: .regular))
+                    Text("Mulai dari \(surahName) · Ayat \(start.1)")
+                        .font(.system(size: 12, weight: .regular))
                         .foregroundColor(SaatTokens.Colors.slate500)
                         .lineLimit(1)
                 }
@@ -435,23 +499,29 @@ private struct JuzRow: View {
                     Text("\(count) Ayat")
                         .font(.system(size: 11.5, weight: .semibold))
                         .foregroundColor(SaatTokens.Colors.teal)
-                        .padding(.top, 2)
+                        .padding(.top, 4)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(SaatTokens.Colors.teal.opacity(0.7))
+            ZStack {
+                Circle()
+                    .fill(SaatTokens.Colors.teal.opacity(0.10))
+                    .frame(width: 32, height: 32)
+
+                Image(systemName: "arrow.right")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(SaatTokens.Colors.teal)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .background(Color.white)
-        .cornerRadius(18)
+        .cornerRadius(16)
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color(hex: 0xFFE2_E8F0).opacity(0.6), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color(hex: 0xFFEC_E7DE), lineWidth: 1)
         )
-        .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 1)
+        .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
     }
 }
