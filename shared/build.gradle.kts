@@ -29,3 +29,9 @@ kotlin {
         }
     }
 }
+
+tasks.register<Exec>("syncSharedStrings") {
+    group = "localization"
+    description = "Synchronizes strings.xml into KMP SharedStrings and iOS Localizable.strings"
+    commandLine("python3", "${rootProject.rootDir}/scripts/generate_kmp_strings.py")
+}

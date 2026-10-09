@@ -1,5 +1,3 @@
-/* Localizable.strings (ms) - Generated from Android strings.xml */
-
 "about_lailatul_qadr_desc" = "Keutamaan, tanda-tanda, dan amalan yang disunnahkan.";
 "about_lailatul_qadr_title" = "Tentang Lailatul Qadr";
 "action_allow" = "Benarkan";
@@ -536,9 +534,9 @@
 "manzil_fami_label" = "Fami bi Shawqin (فَمِي بِشَوْقٍ)";
 "manzil_header_body" = "A collection of selected verses for protection from sihr, jinn, and harm, compiled by scholars in the Indian subcontinent.";
 "manzil_header_title" = "Protection from the Quran";
-"manzil_how_body" = "Each day, recite one Manzil in sequence from Monday to Sunday, completing the entire Quran in one week. You may recite it in one sitting or spread it across multiple sessions during the day (e.g. after Fajr, Zuhr, Asr, Maghrib, and Isya').\n\nTo begin, start with Manzil 1 (Juz 1–6) and proceed to the next Manzil each day. Consistency is key — even if you cannot complete a full Manzil in a day, try to at least read a portion and continue the next day.";
+"manzil_how_body" = "Each day, recite one Manzil in sequence from Monday to Sunday, completing the entire Quran in one week. You may recite it in one sitting or spread it across multiple sessions during the day (e.g. after Fajr, Zuhr, Asr, Maghrib, and Isya').\\n\\nTo begin, start with Manzil 1 (Juz 1–6) and proceed to the next Manzil each day. Consistency is key — even if you cannot complete a full Manzil in a day, try to at least read a portion and continue the next day.";
 "manzil_how_title" = "How to Practice";
-"manzil_info_definition" = "Manzil (Arabic: منزل) is a system for dividing the recitation of the Quran to facilitate completing (khatam) the Quran over seven days (one week). This tradition is widely practiced in South Asian Muslim communities and has been popularized by scholars such as Shah Waliullah al-Dehlawi.\n\nNote: \"Manzil\" here refers to the 7-part Quran division for khatam, and is different from the protection verses (Manzil ruqyah) compiled by Maulana Zakariyya Kandhlawi. This section in the app covers the protection verses.";
+"manzil_info_definition" = "Manzil (Arabic: منزل) is a system for dividing the recitation of the Quran to facilitate completing (khatam) the Quran over seven days (one week). This tradition is widely practiced in South Asian Muslim communities and has been popularized by scholars such as Shah Waliullah al-Dehlawi.\\n\\nNote: \"Manzil\" here refers to the 7-part Quran division for khatam, and is different from the protection verses (Manzil ruqyah) compiled by Maulana Zakariyya Kandhlawi. This section in the app covers the protection verses.";
 "manzil_info_subtitle" = "Definition, 7-day division & practice guide";
 "manzil_info_title" = "About Manzil Al-Quran";
 "manzil_item_al_araf" = "Al-A'raf 54–56";
@@ -649,7 +647,7 @@
 "onboarding_brand_subtitle" = "Teman kecil untuk menemani perjalanan ibadah anda.";
 "onboarding_brand_title" = "Sāat";
 "onboarding_continue_btn" = "Seterusnya";
-"onboarding_kimi_body" = "Hai, saya Kīmi.\nSaya akan menemani perjalanan ibadah anda, bermula daripada waktu solat, membaca Al-Quran, mengingatkan amalan, dan memastikannya tetap ringan.";
+"onboarding_kimi_body" = "Hai, saya Kīmi.\\nSaya akan menemani perjalanan ibadah anda, bermula daripada waktu solat, membaca Al-Quran, mengingatkan amalan, dan memastikannya tetap ringan.";
 "onboarding_kimi_title" = "Kenali Kīmi";
 "onboarding_lang_card_subtitle" = "Supaya Sāat dapat menemani anda dengan lebih baik.";
 "onboarding_lang_card_title" = "Pilih bahasa";
