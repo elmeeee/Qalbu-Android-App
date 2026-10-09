@@ -130,6 +130,63 @@ enum PrayerCalculationMethod: String, CaseIterable, Sendable, Identifiable, Coda
         }
     }
 
+    var iconName: String {
+        switch self {
+        case .muhammadiyah: return "institution_muhammadiyah"
+        case .kemenag: return "institution_kemenag"
+        case .muis: return "institution_muis"
+        case .jakim: return "institution_jakim"
+        case .brunei: return "institution_muib"
+        case .karachi: return "institution_karachi"
+        case .tehran: return "institution_tehran"
+        case .jafari: return "institution_jafari"
+        case .isna: return "institution_isna"
+        case .mwl: return "institution_mwl"
+        case .ummAlQura: return "institution_umm_al_qura"
+        case .egyptian: return "institution_egyptian"
+        case .mcw: return "institution_mcw"
+        case .gulf: return "institution_gulf"
+        case .kuwait: return "institution_kuwait"
+        case .qatar: return "institution_qatar"
+        case .dubai: return "institution_dubai"
+        case .tunisia: return "institution_tunisia"
+        case .algeria: return "institution_algeria"
+        case .morocco: return "institution_morocco"
+        case .jordan: return "institution_jordan"
+        case .france: return "institution_france"
+        case .turkey: return "institution_turkey"
+        case .russia: return "institution_russia"
+        case .lisbon: return "institution_lisbon"
+        }
+    }
+
+    var countryName: String {
+        switch self {
+        case .muhammadiyah, .kemenag: return "Indonesia"
+        case .muis: return "Singapura"
+        case .jakim: return "Malaysia"
+        case .brunei: return "Brunei Darussalam"
+        case .karachi: return "Pakistan"
+        case .tehran, .jafari: return "Iran"
+        case .isna: return "Amerika Utara"
+        case .mwl, .ummAlQura: return "Arab Saudi"
+        case .egyptian: return "Mesir"
+        case .mcw: return "Global"
+        case .gulf: return "Wilayah Teluk"
+        case .kuwait: return "Kuwait"
+        case .qatar: return "Qatar"
+        case .dubai: return "Uni Emirat Arab"
+        case .tunisia: return "Tunisia"
+        case .algeria: return "Aljazair"
+        case .morocco: return "Maroko"
+        case .jordan: return "Yordania"
+        case .france: return "Prancis"
+        case .turkey: return "Turki"
+        case .russia: return "Rusia"
+        case .lisbon: return "Portugal"
+        }
+    }
+
     var region: String {
         switch section {
         case .southeastAsia: "Southeast Asia"

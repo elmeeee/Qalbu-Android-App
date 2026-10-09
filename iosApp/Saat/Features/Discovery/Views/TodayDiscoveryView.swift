@@ -6,14 +6,15 @@
 //  Copyright © 2026 Elmee. All rights reserved.
 //
 
-import SwiftUI
 import CoreLocation
+import SwiftUI
 
 struct TodayDiscoveryView: View {
     @Environment(\.appContainer) private var container
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("chapterReaderShowTranslation") private var showTranslation = true
-    @AppStorage(ChapterReaderPreferences.translationIdKey) private var chapterTranslationId = ChapterReaderPreferences.defaultTranslationId
+    @AppStorage(ChapterReaderPreferences.translationIdKey) private var chapterTranslationId =
+        ChapterReaderPreferences.defaultTranslationId
 
     @EnvironmentObject private var prayer: PrayerTimesController
     @StateObject private var audio = AudioPlayerController()
@@ -36,12 +37,17 @@ struct TodayDiscoveryView: View {
                 TodayBusyOverlayView(isPosting: actionsViewModel.publishViewModel.isPosting)
             }
         }
-        .allowsHitTesting(!actionsViewModel.isGeneratingShare && !actionsViewModel.publishViewModel.isPosting)
+        .allowsHitTesting(
+            !actionsViewModel.isGeneratingShare && !actionsViewModel.publishViewModel.isPosting
+        )
         .overlay(alignment: .top) {
             if actionsViewModel.publishViewModel.showStatus,
-               let message = actionsViewModel.publishViewModel.statusMessage {
-                TodayStatusToastView(message: message, isError: actionsViewModel.publishViewModel.statusIsError)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                let message = actionsViewModel.publishViewModel.statusMessage
+            {
+                TodayStatusToastView(
+                    message: message, isError: actionsViewModel.publishViewModel.statusIsError
+                )
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
         .onAppear {
@@ -62,16 +68,22 @@ struct TodayDiscoveryView: View {
         .onChange(of: chapterTranslationId) { _, _ in
             coordinator?.discoveryViewModel?.reloadForTranslationChange()
         }
-        .onReceive(NotificationCenter.default.publisher(for: ChapterReaderPreferences.translationDidChangeNotification)) { _ in
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: ChapterReaderPreferences.translationDidChangeNotification)
+        ) { _ in
             coordinator?.discoveryViewModel?.reloadForTranslationChange()
         }
     }
 
     private var prayerBackgroundName: String {
-        guard let target = coordinator?.dashboardViewModel?.nextPrayerDisplayName.lowercased() else {
+        guard let target = coordinator?.dashboardViewModel?.nextPrayerDisplayName.lowercased()
+        else {
             return "prayer_bg_day"
         }
-        if target.contains("fajr") || target.contains("subuh") || target.contains("sunrise") || target.contains("terbit") || target.contains("dhuhr") || target.contains("dzuhur") {
+        if target.contains("fajr") || target.contains("subuh") || target.contains("sunrise")
+            || target.contains("terbit") || target.contains("dhuhr") || target.contains("dzuhur")
+        {
             return "prayer_bg_day"
         } else if target.contains("asr") || target.contains("ashar") || target.contains("maghrib") {
             return "prayer_bg_sunset"
@@ -99,7 +111,7 @@ struct TodayDiscoveryView: View {
                             Color.clear,
                             Color.clear,
                             SaatTokens.Colors.homeBg.opacity(0.30),
-                            SaatTokens.Colors.homeBg
+                            SaatTokens.Colors.homeBg,
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -116,9 +128,12 @@ struct TodayDiscoveryView: View {
 
                     // 1. Prayer Dashboard Card
                     if let dashboard = coordinator?.dashboardViewModel {
-                        PrayerDashboardCard(viewModel: dashboard, onOpenCalendar: {
-                            showingPrayerCalendar = true
-                        })
+                        PrayerDashboardCard(
+                            viewModel: dashboard,
+                            onOpenCalendar: {
+                                showingPrayerCalendar = true
+                            }
+                        )
                         .padding(.horizontal, 20)
                     }
 
@@ -136,14 +151,14 @@ struct TodayDiscoveryView: View {
 
                     // 3. Prayer Tracker Card ("Perjalanan Hari Ini")
                     if let tracker {
-                        PrayerTrackerCard(viewModel: tracker, onOpenCalendar: {
-                            showingTrackerCalendar = true
-                        })
+                        PrayerTrackerCard(
+                            viewModel: tracker,
+                            onOpenCalendar: {
+                                showingTrackerCalendar = true
+                            }
+                        )
                         .padding(.horizontal, 20)
                     }
-
-                    // 4. Verse of the Day Section
-                    verseSection(vm: vm)
                 }
                 .padding(.top, 70)
                 .padding(.bottom, 100)
@@ -196,11 +211,6 @@ struct TodayDiscoveryView: View {
         .onDisappear {
             coordinator?.stopAudio()
         }
-        .sheet(isPresented: tafsirSheetBinding) {
-            if let presenter = coordinator?.tafsirPresenter {
-                TafsirReaderSheet(presenter: presenter)
-            }
-        }
     }
 
     private var locationStatusText: String? {
@@ -217,74 +227,4 @@ struct TodayDiscoveryView: View {
         }
     }
 
-    @ViewBuilder
-    private func verseSection(vm: TodayDiscoveryViewModel) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            if let detail = vm.detail {
-                TodayVerseOfDayCardView(
-                    verse: detail,
-                    showTranslation: showTranslation,
-                    isDetailLoading: vm.isDetailLoading,
-                    reciterName: vm.recitations.first(where: { $0.id == vm.selectedRecitationId })?.displayName ?? "",
-                    isPlaying: audio.isPlayingURL(detail.audio?.url) && audio.isPlaying,
-                    onAudio: { playAudio(for: detail, vm: vm) },
-                    onShare: {
-                        guard actionsViewModel.isGeneratingShare == false else { return }
-                        Task { await actionsViewModel.presentShare(for: detail, shareProvider: vm) }
-                    },
-                    onReflect: {
-                        guard let container else { return }
-                        Task {
-                            await actionsViewModel.publishReflection(
-                                for: detail,
-                                shareProvider: vm,
-                                verseState: verseState,
-                                container: container
-                            )
-                        }
-                    },
-                    onTafsir: {
-                        actionsViewModel.openTafsir(
-                            for: detail,
-                            presenter: coordinator?.tafsirPresenter,
-                            shareProvider: vm
-                        )
-                    },
-                    audioAccessibilityHint: audioHint(vm: vm)
-                )
-            } else if vm.isDetailLoading {
-                LoadingSkeleton()
-            }
-
-            if let error = vm.errorMessage, vm.detail == nil, vm.isDetailLoading == false {
-                Text(error)
-                    .foregroundStyle(.red)
-                    .font(.footnote)
-                    .padding(.top)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
-    }
-
-    private var tafsirSheetBinding: Binding<Bool> {
-        Binding(
-            get: { coordinator?.tafsirPresenter?.isSheetPresented ?? false },
-            set: { coordinator?.tafsirPresenter?.isSheetPresented = $0 }
-        )
-    }
-
-    private func playAudio(for verse: RandomAyahPayload, vm: TodayDiscoveryViewModel) {
-        guard let url = verse.audio?.url else { return }
-        let reciter = vm.recitations
-            .first(where: { $0.id == vm.selectedRecitationId })?.displayName ?? ""
-        let label = verse.verseKey.flatMap { ShareVerseCard.humanLabel(for: $0) } ?? ""
-        audio.playVerse(url: url, surahTitle: label, ayahLabel: reciter, reciterName: reciter)
-    }
-
-    private func audioHint(vm: TodayDiscoveryViewModel) -> String {
-        SaatAccessibility.VerseActions.audio(
-            hint: vm.recitations.first(where: { $0.id == vm.selectedRecitationId })?.displayName ?? ""
-        )
-    }
 }

@@ -178,13 +178,13 @@ struct SpiritualToolsView: View {
     }
 
     private let columns = [
-        GridItem(.flexible(minimum: 140), spacing: 12),
-        GridItem(.flexible(minimum: 140), spacing: 12)
+        GridItem(.flexible(), spacing: 14),
+        GridItem(.flexible(), spacing: 14)
     ]
 
     var body: some View {
         ZStack(alignment: .top) {
-            Color(hex: "#F9F7F2")
+            SaatTokens.Colors.homeBg
                 .ignoresSafeArea()
 
             // Header Background Image
@@ -192,14 +192,14 @@ struct SpiritualToolsView: View {
                 .resizable()
                 .scaledToFill()
                 .frame(maxWidth: .infinity)
-                .frame(height: 250)
+                .frame(height: 280)
                 .clipped()
                 .overlay(
                     LinearGradient(
                         colors: [
-                            Color(hex: "#F9F7F2").opacity(0.15),
-                            Color(hex: "#F9F7F2").opacity(0.60),
-                            Color(hex: "#F9F7F2")
+                            SaatTokens.Colors.homeBg.opacity(0.15),
+                            SaatTokens.Colors.homeBg.opacity(0.65),
+                            SaatTokens.Colors.homeBg
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -208,19 +208,19 @@ struct SpiritualToolsView: View {
                 .ignoresSafeArea(edges: .top)
 
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 14) {
-                    // Header Title & Subtitle (matching Android)
-                    VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Header Title & Subtitle with Safe Area top clearance
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(languageManager.localize("worship_header_title"))
-                            .font(.system(size: 24, weight: .bold))
+                            .font(.system(size: 26, weight: .bold))
                             .foregroundColor(Color(hex: "#153828"))
 
                         Text(languageManager.localize("worship_header_subtitle"))
                             .font(.system(size: 13, weight: .regular))
                             .foregroundColor(Color(hex: "#64748B"))
                     }
-                    .padding(.top, 16)
-                    .padding(.horizontal, 16)
+                    .padding(.top, 56)
+                    .padding(.horizontal, 20)
 
                     // Modern Search Bar
                     HStack(spacing: 10) {
@@ -253,7 +253,7 @@ struct SpiritualToolsView: View {
                             .stroke(Color(hex: "#E8E2D2"), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 1)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 20)
 
                     // Category Filter Pills
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -282,7 +282,7 @@ struct SpiritualToolsView: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 20)
                         .padding(.vertical, 2)
                     }
 
@@ -296,9 +296,9 @@ struct SpiritualToolsView: View {
                             Spacer(minLength: 40)
                         }
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 20)
                     } else {
-                        LazyVGrid(columns: columns, spacing: 12) {
+                        LazyVGrid(columns: columns, spacing: 14) {
                             ForEach(filteredTools) { tool in
                                 NavigationLink(destination: tool.destinationBuilder()) {
                                     VStack(alignment: .center, spacing: 4) {
@@ -336,9 +336,9 @@ struct SpiritualToolsView: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 20)
                         .padding(.top, 4)
-                        .padding(.bottom, 32)
+                        .padding(.bottom, 110)
                     }
                 }
             }

@@ -187,6 +187,8 @@ struct ProfileView: View {
         .navigationBarHidden(true)
         .sheet(isPresented: $showingAppLanguageSheet) {
             LanguageSelectionSheet(selectedLanguage: $languageManager.currentLanguage)
+                .presentationDetents([.height(380)])
+                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingTranslatorSheet) {
             if let container {
@@ -195,6 +197,8 @@ struct ProfileView: View {
                     selectedTranslationName: $selectedTranslationName,
                     contentRepository: container.content
                 )
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
             }
         }
         .sheet(isPresented: $showingAdhanVoiceSheet) {
@@ -202,6 +206,8 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showingMadhabSheet) {
             MadhabSelectionSheet(selectedMadhabRaw: $selectedMadhabRaw)
+                .presentationDetents([.height(420)])
+                .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingUpToDateSheet) {
             UpToDateSheetView(appVersion: appVersion)

@@ -69,7 +69,7 @@ struct RootTabView: View {
             }
             .tabItem {
                 Label {
-                    Text(languageManager.localize("nav_tools"))
+                    Text(languageManager.localize("nav_spiritual"))
                 } icon: {
                     Image(selectedTab == .tools ? "ic_spritual_on" : "ic_spritual_off")
                         .renderingMode(.template)
@@ -84,7 +84,7 @@ struct RootTabView: View {
             }
             .tabItem {
                 Label {
-                    Text(languageManager.localize("nav_other"))
+                    Text(languageManager.localize("nav_setting"))
                 } icon: {
                     Image(selectedTab == .account ? "ic_setting_on" : "ic_setting_off")
                         .renderingMode(.template)
