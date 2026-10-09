@@ -289,7 +289,12 @@ final class PrayerNotificationScheduler {
             tintColor: .green
         )
 
-        let soundName = UserDefaults.standard.string(forKey: "selected_adhan_sound") ?? "default"
+        let soundName: String
+        if prayerName.lowercased() == "fajr" {
+            soundName = UserDefaults.standard.string(forKey: "selected_adhan_fajr_sound") ?? "adhan_fajr_ust_bilal_attaki"
+        } else {
+            soundName = UserDefaults.standard.string(forKey: "selected_adhan_sound") ?? "adhan_ust_daeng_syawal_indonesia"
+        }
         let alertSound: AlertConfiguration.AlertSound = soundName == "default" ? .default : .named("\(soundName).mp3")
 
         let configuration = AlarmManager.AlarmConfiguration(

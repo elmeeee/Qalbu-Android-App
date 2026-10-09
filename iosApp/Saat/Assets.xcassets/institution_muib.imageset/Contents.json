@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "institution_muib.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
