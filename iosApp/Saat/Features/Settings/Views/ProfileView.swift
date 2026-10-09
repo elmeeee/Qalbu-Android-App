@@ -7,65 +7,75 @@
 //
 
 import SwiftUI
-internal import UIKit
+import WebKit
+
+enum LegalSheetType: String, Identifiable {
+    case about
+    case privacy
+    case terms
+
+    var id: String { rawValue }
+
+    func title(_ lang: AppLanguageManager) -> String {
+        switch self {
+        case .about: return lang.localize("settings_item_about")
+        case .privacy: return lang.localize("settings_item_privacy")
+        case .terms: return lang.localize("settings_item_terms")
+        }
+    }
+
+    func urlString(lang: String, version: String) -> String {
+        let tag = lang.isEmpty ? "id" : lang
+        switch self {
+        case .about: return "https://elmee.my/saat/about?lang=\(tag)&version=\(version)"
+        case .privacy: return "https://elmee.my/saat/privacy?lang=\(tag)"
+        case .terms: return "https://elmee.my/saat/terms?lang=\(tag)"
+        }
+    }
+}
 
 struct ProfileView: View {
-    var preferSystemNavigationTitle: Bool = false
-    var verseState: TodayVerseState?
-
+    let preferSystemNavigationTitle: Bool
+    let verseState: TodayVerseState?
+    @ObservedObject private var languageManager = AppLanguageManager.shared
     @Environment(\.appContainer) private var container
-    @ObservedObject var languageManager = AppLanguageManager.shared
 
-    @AppStorage("chapterReaderFontScale") private var fontScale = 1.0
-    @AppStorage("chapterReaderShowTranslation") private var showTranslation = true
-
-    @AppStorage(ChapterReaderPreferences.translationIdKey) private var selectedTranslationId =
-        ChapterReaderPreferences.defaultTranslationId
+    // General
+    @AppStorage(ChapterReaderPreferences.translationIdKey) private var selectedTranslationId = ChapterReaderPreferences.defaultTranslationId
     @AppStorage(ChapterReaderPreferences.translationNameKey) private var selectedTranslationName = ""
-    @AppStorage(PrayerCalculationMethod.storageKey)
-    private var prayerMethodRaw = PrayerCalculationMethod.defaultMethod.rawValue
-    @AppStorage("selected_adhan_sound") private var selectedAdhanSound = "default"
-    @AppStorage("prayer_madhab_setting") private var selectedMadhabRaw = "shafi"
 
-    @State private var showingTranslatorSheet = false
-    @State private var showingAdhanVoiceSheet = false
+    // Prayer Calc
+    @AppStorage(PrayerCalculationMethod.storageKey) private var prayerMethodRaw = PrayerCalculationMethod.defaultMethod.rawValue
+    @AppStorage("prayer_madhab") private var selectedMadhabRaw = "shafi"
+    @AppStorage("selected_adhan_sound") private var selectedAdhanSound = "default"
+
+    // Sheet states
     @State private var showingAppLanguageSheet = false
+    @State private var showingTranslatorSheet = false
     @State private var showingMadhabSheet = false
+    @State private var showingPrayerMethodSheet = false
+    @State private var showingAdhanVoiceSheet = false
     @State private var showingUpToDateSheet = false
+    @State private var activeLegalSheet: LegalSheetType? = nil
 
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.1"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     }
 
     var body: some View {
         ZStack {
-            Color(hex: "#F9F7F2")
+            SaatTokens.Colors.homeBg
                 .ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    // Clean Header bar matching Android
+                    // Header Title (Matching Android)
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(languageManager.localize("settings_main_title"))
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(Color(hex: "#085E43"))
-
-                        Text(languageManager.localize("settings_main_subtitle"))
-                            .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(Color(hex: "#64748B"))
-
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(hex: "#D4AF37"), Color(hex: "#D4AF37").opacity(0.15)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: 48, height: 2.5)
-                            .padding(.top, 4)
+                        Text(languageManager.localize("nav_setting"))
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundColor(Color(hex: "#153828"))
                     }
-                    .padding(.top, 16)
+                    .padding(.top, 24)
                     .padding(.horizontal, 4)
 
                     // 1. General Settings
@@ -109,15 +119,13 @@ struct ProfileView: View {
                             showDivider: true
                         )
 
-                        NavigationLink(destination: PrayerCalculationSettingsView()) {
-                            SettingsRowContent(
-                                iconName: "ic_institution_custom",
-                                title: languageManager.localize("settings_item_institution"),
-                                subtitle: selectedPrayerMethod.displayName,
-                                showDivider: true
-                            )
-                        }
-                        .buttonStyle(.plain)
+                        SettingsRowItem(
+                            iconName: "ic_institution_custom",
+                            title: languageManager.localize("settings_item_institution"),
+                            subtitle: selectedPrayerMethod.displayName,
+                            onClick: { showingPrayerMethodSheet = true },
+                            showDivider: true
+                        )
 
                         SettingsRowItem(
                             iconName: "ic_adhan_voice_custom",
@@ -134,36 +142,24 @@ struct ProfileView: View {
                         SettingsRowItem(
                             iconName: "ic_about_custom",
                             title: languageManager.localize("settings_item_about"),
-                            subtitle: "Sāat: Waktu Shalat & Al-Qur'an",
-                            onClick: {
-                                if let url = URL(string: "https://elmee.my/saat") {
-                                    UIApplication.shared.open(url)
-                                }
-                            },
+                            subtitle: nil,
+                            onClick: { activeLegalSheet = .about },
                             showDivider: true
                         )
 
                         SettingsRowItem(
                             iconName: "ic_privacy_custom",
                             title: languageManager.localize("settings_item_privacy"),
-                            subtitle: languageManager.localize("privacy_policy_subtitle"),
-                            onClick: {
-                                if let url = URL(string: "https://elmee.my/saat/privacy") {
-                                    UIApplication.shared.open(url)
-                                }
-                            },
+                            subtitle: nil,
+                            onClick: { activeLegalSheet = .privacy },
                             showDivider: true
                         )
 
                         SettingsRowItem(
                             iconName: "ic_terms_custom",
                             title: languageManager.localize("settings_item_terms"),
-                            subtitle: languageManager.localize("terms_conditions_subtitle"),
-                            onClick: {
-                                if let url = URL(string: "https://elmee.my/saat/terms") {
-                                    UIApplication.shared.open(url)
-                                }
-                            },
+                            subtitle: nil,
+                            onClick: { activeLegalSheet = .terms },
                             showDivider: true
                         )
 
@@ -180,7 +176,7 @@ struct ProfileView: View {
                     AppFooterCardView(appVersion: appVersion)
                         .padding(.top, 8)
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 20)
                 .padding(.bottom, 120)
             }
         }
@@ -201,16 +197,29 @@ struct ProfileView: View {
                 .presentationDragIndicator(.visible)
             }
         }
-        .sheet(isPresented: $showingAdhanVoiceSheet) {
-            AdhanVoiceSelectionSheet()
-        }
         .sheet(isPresented: $showingMadhabSheet) {
             MadhabSelectionSheet(selectedMadhabRaw: $selectedMadhabRaw)
-                .presentationDetents([.height(420)])
+                .presentationDetents([.height(390)])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showingPrayerMethodSheet) {
+            PrayerMethodSelectionSheet(selectedMethodRaw: $prayerMethodRaw)
+                .presentationDetents([.height(540), .large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $showingAdhanVoiceSheet) {
+            AdhanVoiceSelectionSheet()
+                .presentationDetents([.height(520)])
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingUpToDateSheet) {
             UpToDateSheetView(appVersion: appVersion)
+        }
+        .sheet(item: $activeLegalSheet) { item in
+            InAppLegalWebView(
+                title: item.title(languageManager),
+                urlString: item.urlString(lang: languageManager.currentLanguage.rawValue, version: appVersion)
+            )
         }
     }
 
@@ -244,6 +253,82 @@ struct ProfileView: View {
         case "adhan_sheikh_abdul_karim_malaysia": return "Sheikh Abdul Karim (MY)"
         case "adhan_fajr_mishary_alafasy": return "Mishary Alafasy (Subuh)"
         default: return "Suara Default Sistem"
+        }
+    }
+}
+
+// MARK: - In-App Legal Web View
+private struct InAppLegalWebView: View {
+    let title: String
+    let urlString: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var isLoading = true
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                SwiftUIWebView(urlString: urlString, isLoading: $isLoading)
+                    .ignoresSafeArea(edges: .bottom)
+
+                if isLoading {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                        .tint(Color(hex: "#085E43"))
+                }
+            }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(AppLanguageManager.shared.localize("done")) {
+                        dismiss()
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(hex: "#085E43"))
+                }
+            }
+        }
+    }
+}
+
+private struct SwiftUIWebView: UIViewRepresentable {
+    let urlString: String
+    @Binding var isLoading: Bool
+
+    func makeUIView(context: Context) -> WKWebView {
+        let webView = WKWebView()
+        webView.navigationDelegate = context.coordinator
+        webView.backgroundColor = .clear
+        webView.isOpaque = false
+        if let url = URL(string: urlString) {
+            webView.load(URLRequest(url: url))
+        }
+        return webView
+    }
+
+    func updateUIView(_ uiView: WKWebView, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, WKNavigationDelegate {
+        var parent: SwiftUIWebView
+
+        init(_ parent: SwiftUIWebView) {
+            self.parent = parent
+        }
+
+        func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+            parent.isLoading = true
+        }
+
+        func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            parent.isLoading = false
+        }
+
+        func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            parent.isLoading = false
         }
     }
 }
@@ -395,7 +480,7 @@ struct NotificationSettingsDetailView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "#F9F7F2")
+            SaatTokens.Colors.homeBg
                 .ignoresSafeArea()
 
             ScrollView {
@@ -514,7 +599,7 @@ struct NotificationSettingsDetailView: View {
                         )
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 20)
                 .padding(.vertical, 12)
                 .padding(.bottom, 60)
             }
@@ -657,73 +742,246 @@ struct LanguageSelectionSheet: View {
     }
 }
 
-// MARK: - Madhab Selection Sheet (Matching Android)
+// MARK: - Madhab Selection Sheet (Matching Android with 4 Imam Icons)
 struct MadhabSelectionSheet: View {
     @Binding var selectedMadhabRaw: String
     @Environment(\.dismiss) private var dismiss
 
-    private let madhabs = [
-        ("shafi", "Shafi'i (Standar Indonesia & Malaysia)"),
-        ("hanafi", "Hanafi"),
-        ("maliki", "Maliki"),
-        ("hanbali", "Hanbali")
+    private let madhabs: [(id: String, name: String, icon: String)] = [
+        ("shafi", "Syafi'i", "imam_syafii"),
+        ("hanafi", "Hanafi", "imam_hanafi"),
+        ("maliki", "Maliki", "imam_maliki"),
+        ("hanbali", "Hambali", "imam_hambali")
     ]
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 12) {
-                ForEach(madhabs, id: \.0) { item in
-                    let isSelected = selectedMadhabRaw == item.0
+        VStack(spacing: 14) {
+            // Header Bar
+            HStack(spacing: 12) {
+                Image("ic_madhab_custom")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+
+                Text(AppLanguageManager.shared.localize("madhab_settings_title"))
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color(hex: "#085E43"))
+
+                Spacer()
+
+                Button(action: { dismiss() }) {
+                    Text(AppLanguageManager.shared.localize("done"))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(Color(hex: "#085E43"))
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+
+            // Madhab Items
+            VStack(spacing: 10) {
+                ForEach(madhabs, id: \.id) { item in
+                    let isSelected = selectedMadhabRaw == item.id
                     Button {
-                        selectedMadhabRaw = item.0
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        selectedMadhabRaw = item.id
                         dismiss()
                     } label: {
                         HStack(spacing: 14) {
-                            Image("ic_madhab_custom")
+                            Image(item.icon)
                                 .resizable()
-                                .scaledToFit()
-                                .frame(width: 32, height: 32)
+                                .scaledToFill()
+                                .frame(width: 44, height: 44)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(isSelected ? Color(hex: "#085E43") : Color.black.opacity(0.1), lineWidth: isSelected ? 1.5 : 1)
+                                )
 
-                            Text(item.1)
-                                .font(.system(size: 15, weight: isSelected ? .bold : .medium))
+                            Text(item.name)
+                                .font(.system(size: 16, weight: isSelected ? .bold : .medium))
                                 .foregroundColor(isSelected ? Color(hex: "#085E43") : Color(hex: "#1C1C1E"))
 
                             Spacer()
 
                             if isSelected {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundColor(Color(hex: "#085E43"))
+                                ZStack {
+                                    Circle()
+                                        .fill(Color(hex: "#085E43"))
+                                        .frame(width: 24, height: 24)
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
                             }
                         }
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
+                        .padding(.vertical, 12)
                         .background(isSelected ? Color(hex: "#085E43").opacity(0.08) : Color.white)
-                        .cornerRadius(14)
+                        .cornerRadius(16)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 14)
+                            RoundedRectangle(cornerRadius: 16)
                                 .stroke(isSelected ? Color(hex: "#085E43") : Color(hex: "#EAE4D6"), lineWidth: isSelected ? 1.5 : 1)
                         )
+                        .shadow(color: Color.black.opacity(0.02), radius: 3, x: 0, y: 1)
                     }
                     .buttonStyle(.plain)
                 }
+            }
+            .padding(.horizontal, 20)
+
+            Spacer()
+        }
+        .background(Color(hex: "#F9F7F2").ignoresSafeArea())
+    }
+}
+
+// MARK: - Prayer Method (Institution) Selection Sheet (Matching Android)
+struct PrayerMethodSelectionSheet: View {
+    @Binding var selectedMethodRaw: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchQuery: String = ""
+
+    private var filteredMethods: [PrayerCalculationMethod] {
+        if searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
+            return PrayerCalculationMethod.allCases
+        }
+        let q = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
+        return PrayerCalculationMethod.allCases.filter { method in
+            method.displayName.lowercased().contains(q) ||
+            method.organization.lowercased().contains(q) ||
+            method.countryName.lowercased().contains(q) ||
+            method.region.lowercased().contains(q)
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            // Header Bar
+            HStack(spacing: 12) {
+                Image("ic_institution_custom")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+
+                Text(AppLanguageManager.shared.localize("prayer_calculation_method"))
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color(hex: "#085E43"))
 
                 Spacer()
+
+                Button(action: { dismiss() }) {
+                    Text(AppLanguageManager.shared.localize("done"))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(Color(hex: "#085E43"))
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 20)
-            .background(Color(hex: "#F9F7F2").ignoresSafeArea())
-            .navigationTitle(AppLanguageManager.shared.localize("madhab_settings_title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(AppLanguageManager.shared.localize("cancel")) {
-                        dismiss()
+
+            // Search Bar
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(Color(hex: "#085E43").opacity(0.7))
+
+                TextField(
+                    AppLanguageManager.shared.localize("search_institution_hint"),
+                    text: $searchQuery
+                )
+                .font(.system(size: 14))
+                .foregroundColor(Color(hex: "#1C1C1E"))
+
+                if !searchQuery.isEmpty {
+                    Button(action: { searchQuery = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color(hex: "#94A3B8"))
                     }
-                    .foregroundColor(Color(hex: "#085E43"))
                 }
             }
+            .padding(.horizontal, 14)
+            .frame(height: 44)
+            .background(Color.white)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color(hex: "#E8E2D2"), lineWidth: 1)
+            )
+            .padding(.horizontal, 20)
+
+            // Institutions List
+            ScrollView {
+                LazyVStack(spacing: 10) {
+                    ForEach(filteredMethods) { method in
+                        let isSelected = selectedMethodRaw == method.rawValue
+                        Button {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            selectedMethodRaw = method.rawValue
+                            method.persist(notify: true)
+                            dismiss()
+                        } label: {
+                            HStack(spacing: 14) {
+                                Image(method.iconName)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 44, height: 44)
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Circle()
+                                            .stroke(isSelected ? Color(hex: "#085E43") : Color.black.opacity(0.1), lineWidth: isSelected ? 1.5 : 1)
+                                    )
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(method.displayName)
+                                        .font(.system(size: 15, weight: isSelected ? .bold : .semibold))
+                                        .foregroundColor(isSelected ? Color(hex: "#085E43") : Color(hex: "#1C1C1E"))
+                                        .lineLimit(1)
+
+                                    Text(method.organization)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(Color(hex: "#64748B"))
+                                        .lineLimit(1)
+
+                                    Text(method.countryName)
+                                        .font(.system(size: 10.5, weight: .medium))
+                                        .foregroundColor(Color(hex: "#085E43"))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color(hex: "#085E43").opacity(0.08))
+                                        .cornerRadius(6)
+                                }
+
+                                Spacer()
+
+                                if isSelected {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color(hex: "#085E43"))
+                                            .frame(width: 24, height: 24)
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 12)
+                            .background(isSelected ? Color(hex: "#085E43").opacity(0.08) : Color.white)
+                            .cornerRadius(16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(isSelected ? Color(hex: "#085E43") : Color(hex: "#EAE4D6"), lineWidth: isSelected ? 1.5 : 1)
+                            )
+                            .shadow(color: Color.black.opacity(0.02), radius: 3, x: 0, y: 1)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .padding(.bottom, 24)
+            }
         }
+        .background(Color(hex: "#F9F7F2").ignoresSafeArea())
     }
 }
 

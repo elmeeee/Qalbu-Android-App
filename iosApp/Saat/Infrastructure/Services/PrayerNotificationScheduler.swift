@@ -19,32 +19,50 @@ private enum PrayerNotificationCopy {
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "HH.mm"
+        formatter.dateFormat = "HH:mm"
         formatter.timeZone = .current
         return formatter
     }()
 
+    @MainActor
     static func title(for prayerName: String, at date: Date) -> String {
         let time = timeFormatter.string(from: date)
-        return "It's time for \(prayerName) · \(time)"
+        let localizedPrayer = localizedPrayerName(prayerName)
+        return AppLanguageManager.shared.localizeFormatted("prayer_notif_title", localizedPrayer, time)
     }
 
+    @MainActor
     static func body(for prayerName: String) -> String {
+        let lang = AppLanguageManager.shared
         switch prayerName {
         case "Fajr":
-            return "The world is still asleep. You don't have to be."
+            return lang.localize("prayer_body_fajr")
         case "Dhuhr":
-            return "Pause. Pray. Then carry on."
+            return lang.localize("prayer_body_dhuhr")
         case "Asr":
-            return "The angels are witnessing. Don't let this one pass."
+            return lang.localize("prayer_body_asr")
         case "Maghrib":
-            return "The sun just set. This one can't wait."
+            return lang.localize("prayer_body_maghrib")
         case "Isha":
-            return "End your day the right way."
+            return lang.localize("prayer_body_isha")
         case "Imsak":
-            return "Prepare for your fast. The dawn is near."
+            return lang.localize("prayer_body_imsak")
         default:
-            return "It is now time for the \(prayerName) prayer."
+            return lang.localizeFormatted("prayer_body_default", localizedPrayerName(prayerName))
+        }
+    }
+
+    @MainActor
+    private static func localizedPrayerName(_ name: String) -> String {
+        let lang = AppLanguageManager.shared
+        switch name.lowercased() {
+        case "fajr", "subuh": return lang.localize("prayer_fajr")
+        case "dhuhr", "dzuhur", "zohor": return lang.localize("prayer_dhuhr")
+        case "asr", "ashar": return lang.localize("prayer_asr")
+        case "maghrib": return lang.localize("prayer_maghrib")
+        case "isha", "isya", "isyak": return lang.localize("prayer_isha")
+        case "imsak": return lang.localize("prayer_imsak")
+        default: return name
         }
     }
 }
@@ -59,22 +77,23 @@ struct NightDivisionEntry: Sendable {
 
         var aladhanKey: String { rawValue }
 
+        @MainActor
         var notificationTitle: String {
+            let lang = AppLanguageManager.shared
             switch self {
-            case .midnight: return "🌙 Midnight"
-            case .firstThird: return "🌃 The Night Begins"
-            case .lastThird: return "✨ The Last Third Has Begun"
+            case .midnight: return lang.localize("night_midnight_title")
+            case .firstThird: return lang.localize("night_first_third_title")
+            case .lastThird: return lang.localize("night_last_third_title")
             }
         }
 
+        @MainActor
         var notificationBody: String {
+            let lang = AppLanguageManager.shared
             switch self {
-            case .midnight:
-                return "The night is halfway through. Pray Witr before you sleep - don't let it slip away."
-            case .firstThird:
-                return "Rest well. The last third of the night is yours — rise for what the day can't give you."
-            case .lastThird:
-                return "Allah descends to the lowest heaven. The most powerful hour of the day starts now."
+            case .midnight: return lang.localize("night_midnight_body")
+            case .firstThird: return lang.localize("night_first_third_body")
+            case .lastThird: return lang.localize("night_last_third_body")
             }
         }
     }
