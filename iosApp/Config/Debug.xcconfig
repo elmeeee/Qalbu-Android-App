@@ -2,3 +2,6 @@
 #include "Secrets.xcconfig"
 
 AI_MODEL = llama-3.3-70b-versatile
+
+FRAMEWORK_SEARCH_PATHS = $(inherited) $(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME) $(SRCROOT)/../shared/build/bin/iosSimulatorArm64/debugFramework $(SRCROOT)/../shared/build/bin/iosArm64/debugFramework $(SRCROOT)/../shared/build/bin/iosSimulatorArm64/releaseFramework $(SRCROOT)/../shared/build/bin/iosArm64/releaseFramework
+ENABLE_USER_SCRIPT_SANDBOXING = NO

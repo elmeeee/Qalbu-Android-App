@@ -8,7 +8,10 @@
 
 import Foundation
 
-struct ChapterReaderRoute: Hashable {
+struct ChapterReaderRoute: Hashable, Identifiable {
+    var id: String {
+        "\(chapter?.id ?? 0)_\(juzNumber ?? 0)_\(initialVerseNumber ?? 0)"
+    }
     var chapter: QuranChapter?
     var juzNumber: Int?
     var initialVerseNumber: Int?

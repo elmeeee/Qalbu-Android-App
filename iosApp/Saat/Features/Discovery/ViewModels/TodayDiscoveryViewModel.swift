@@ -70,20 +70,33 @@ final class TodayDiscoveryViewModel {
         await performDailyAyahFetch(clearDetailOnStart: false)
     }
 
-    private func loadContinueReading() async {
-        guard let readingSessions = readingSessions else { return }
-        do {
-            if let session = try await readingSessions.fetchMostRecent() {
+    func loadContinueReading() async {
+        if let readingSessions {
+            if let session = try? await readingSessions.fetchReadingSessions(first: 1).data?.first {
                 self.continueReading = session
-                // Fetch chapter name
-                if let chapter = try? await content.getChapters(language: AppLanguageManager.shared.currentLanguage.rawValue).first(where: { $0.id == session.chapterNumber }) {
-                    self.continueReadingChapterName = chapter.nameSimple
+                let lang = AppLanguageManager.shared.currentLanguage.rawValue
+                if let chapter = try? await content.getChapters(language: lang).first(where: { $0.id == session.chapterNumber }) {
+                    self.continueReadingChapterName = chapter.displayComplexName
                 }
-            } else {
-                self.continueReading = nil
+                return
             }
-        } catch {
-            self.continueReading = nil
+        }
+
+        // Fallback to local storage
+        let localChapter = UserDefaults.standard.integer(forKey: "last_read_chapter")
+        let localVerse = UserDefaults.standard.integer(forKey: "last_read_verse")
+        if localChapter >= 1 {
+            let session = ReadingSession(
+                id: "local_last_read",
+                updatedAt: nil,
+                chapterNumber: localChapter,
+                verseNumber: max(1, localVerse)
+            )
+            self.continueReading = session
+            let lang = AppLanguageManager.shared.currentLanguage.rawValue
+            if let chapter = try? await content.getChapters(language: lang).first(where: { $0.id == localChapter }) {
+                self.continueReadingChapterName = chapter.displayComplexName
+            }
         }
     }
 

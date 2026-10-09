@@ -55,6 +55,12 @@ final class ReadingSessionTracker {
         pendingChapter = nil
         pendingVerse = nil
 
+        // Save locally in UserDefaults immediately so Last Read always works
+        UserDefaults.standard.set(chapter, forKey: "last_read_chapter")
+        UserDefaults.standard.set(verse, forKey: "last_read_verse")
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "last_read_timestamp")
+        NotificationCenter.default.post(name: NSNotification.Name("lastReadQuranDidChange"), object: nil)
+
         guard await userSession.hasUserAccessToken() else { return }
         if lastSentChapter == chapter, lastSentVerse == verse { return }
 

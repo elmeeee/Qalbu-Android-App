@@ -45,6 +45,7 @@ final class TodayDiscoveryCoordinator {
             tafsirPresenter = TafsirPresenter(content: container.content)
         }
         vm.autoRefreshDailyAyahIfNeeded(forceIfNoData: true)
+        await vm.loadContinueReading()
         prayer.refreshIfNeeded()
     }
 
@@ -70,6 +71,7 @@ final class TodayDiscoveryCoordinator {
         async let prayerRefresh: Void = prayer.forceRefresh()
         if let discovery {
             await discovery.refreshDailyAyah()
+            await discovery.loadContinueReading()
         }
         await prayerRefresh
     }

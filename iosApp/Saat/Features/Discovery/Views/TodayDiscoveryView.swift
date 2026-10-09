@@ -23,6 +23,7 @@ struct TodayDiscoveryView: View {
     @State private var tracker: PrayerTrackerViewModel?
     @State private var showingPrayerCalendar = false
     @State private var showingTrackerCalendar = false
+    @State private var activeReaderRoute: ChapterReaderRoute?
     @State private var isScrolled = false
 
     let verseState: TodayVerseState
@@ -63,7 +64,10 @@ struct TodayDiscoveryView: View {
                 tracker?.refresh()
             }
             guard let container, let coordinator else { return }
-            Task { await coordinator.bootstrap(container: container, verseState: verseState) }
+            Task {
+                await coordinator.bootstrap(container: container, verseState: verseState)
+                await coordinator.discoveryViewModel?.loadContinueReading()
+            }
         }
         .onChange(of: chapterTranslationId) { _, _ in
             coordinator?.discoveryViewModel?.reloadForTranslationChange()
@@ -73,6 +77,21 @@ struct TodayDiscoveryView: View {
                 for: ChapterReaderPreferences.translationDidChangeNotification)
         ) { _ in
             coordinator?.discoveryViewModel?.reloadForTranslationChange()
+        }
+        .onReceive(
+            NotificationCenter.default.publisher(
+                for: NSNotification.Name("lastReadQuranDidChange"))
+        ) { _ in
+            Task {
+                await coordinator?.discoveryViewModel?.loadContinueReading()
+            }
+        }
+        .fullScreenCover(item: $activeReaderRoute) { route in
+            ChapterVersesView(
+                chapter: route.chapter,
+                juzNumber: route.juzNumber,
+                initialVerseNumber: route.initialVerseNumber
+            )
         }
     }
 
@@ -143,7 +162,18 @@ struct TodayDiscoveryView: View {
                             session: session,
                             chapterName: vm.continueReadingChapterName,
                             onTap: {
-                                // Handled via coordinator or reader
+                                let chapterNum = session.chapterNumber
+                                let verseNum = session.verseNumber
+                                Task {
+                                    let lang = AppLanguageManager.shared.currentLanguage.rawValue
+                                    let chapters = try? await container?.content.getChapters(language: lang)
+                                    let chapter = chapters?.first(where: { $0.id == chapterNum })
+                                    activeReaderRoute = ChapterReaderRoute(
+                                        chapter: chapter,
+                                        juzNumber: nil,
+                                        initialVerseNumber: verseNum
+                                    )
+                                }
                             }
                         )
                         .padding(.horizontal, 20)

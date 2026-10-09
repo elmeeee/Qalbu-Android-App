@@ -14,6 +14,8 @@ struct ChaptersView: View {
     @State private var navigationPath = NavigationPath()
     @State private var selectedTab: Int = 0
     @State private var isSearchFocused: Bool = false
+    @State private var showingBookmarks: Bool = false
+    @State private var bookmarkedKeysCount: Int = 0
     @ObservedObject private var languageManager = AppLanguageManager.shared
 
     var body: some View {
@@ -37,6 +39,16 @@ struct ChaptersView: View {
                 .toolbar(.hidden, for: .tabBar)
                 .toolbarBackground(.hidden, for: .navigationBar)
             }
+            .sheet(isPresented: $showingBookmarks) {
+                if let vm {
+                    QuranBookmarksSheet(
+                        chapters: vm.chapters,
+                        onSelectVerse: { chapter, ayah in
+                            navigationPath.append(ChapterReaderRoute(chapter: chapter, juzNumber: nil, initialVerseNumber: ayah))
+                        }
+                    )
+                }
+            }
         }
         .id(languageManager.currentLanguage)
         .task {
@@ -48,7 +60,16 @@ struct ChaptersView: View {
             )
             vm = model
             await model.refreshAll()
+            updateBookmarkCount()
         }
+        .onAppear {
+            updateBookmarkCount()
+        }
+    }
+
+    private func updateBookmarkCount() {
+        let keys = UserDefaults.standard.stringArray(forKey: "bookmarked_verses") ?? []
+        bookmarkedKeysCount = keys.count
     }
 
     @ViewBuilder
@@ -261,17 +282,26 @@ struct ChaptersView: View {
         let displayed = vm.filteredChapters
         return ScrollView {
             LazyVStack(spacing: 8) {
-                // Continue reading card if not searching
-                if vm.searchText.isEmpty, let route = vm.continueReadingRoute(), let ch = route.chapter {
-                    NavigationLink(value: route) {
-                        TodayContinueReadingCard(
-                            session: ReadingSession(id: "cr", updatedAt: nil, chapterNumber: ch.id, verseNumber: route.initialVerseNumber ?? 1),
-                            chapterName: ch.displayComplexName,
-                            onTap: {}
-                        )
+                // Bookmarks Card & Continue reading card if not searching
+                if vm.searchText.isEmpty {
+                    if bookmarkedKeysCount > 0 {
+                        MyQuranLibraryCard(bookmarkCount: bookmarkedKeysCount) {
+                            showingBookmarks = true
+                        }
+                        .padding(.bottom, 2)
                     }
-                    .buttonStyle(.plain)
-                    .padding(.bottom, 4)
+
+                    if let route = vm.continueReadingRoute(), let ch = route.chapter {
+                        NavigationLink(value: route) {
+                            TodayContinueReadingCard(
+                                session: ReadingSession(id: "cr", updatedAt: nil, chapterNumber: ch.id, verseNumber: route.initialVerseNumber ?? 1),
+                                chapterName: ch.displayComplexName,
+                                onTap: {}
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.bottom, 4)
+                    }
                 }
 
                 if displayed.isEmpty && vm.searchText.isEmpty == false {
@@ -528,3 +558,151 @@ private struct JuzRow: View {
         .shadow(color: Color.black.opacity(0.03), radius: 3, x: 0, y: 1)
     }
 }
+
+// MARK: - My Quran Library Card (Bookmarks)
+struct MyQuranLibraryCard: View {
+    let bookmarkCount: Int
+    let onTap: () -> Void
+    @ObservedObject private var languageManager = AppLanguageManager.shared
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                ZStack {
+                    Circle()
+                        .fill(Color(hex: 0x085E43).opacity(0.12))
+                        .frame(width: 42, height: 42)
+
+                    Image("ic_bookmark_custom")
+                        .resizable()
+                        .renderingMode(.template)
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(Color(hex: 0x085E43))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(languageManager.localize("bookmarks_title"))
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(Color(hex: 0x124C31))
+
+                    Text(String(format: languageManager.localize("bookmarked_verses_count"), bookmarkCount))
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundColor(Color.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Color(hex: 0x085E43).opacity(0.7))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(Color.white.opacity(0.85))
+            .cornerRadius(18)
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(Color.white.opacity(0.9), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 2)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Quran Bookmarks Sheet
+struct QuranBookmarksSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var languageManager = AppLanguageManager.shared
+    let chapters: [QuranChapter]
+    let onSelectVerse: (QuranChapter, Int) -> Void
+
+    @State private var bookmarkedKeys: [String] = []
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color(hex: "#F9F7F2").ignoresSafeArea()
+
+                if bookmarkedKeys.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "bookmark.slash")
+                            .font(.system(size: 40))
+                            .foregroundColor(Color(hex: 0x085E43).opacity(0.4))
+                        Text(languageManager.localize("bookmarks_empty"))
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                    }
+                } else {
+                    List {
+                        ForEach(bookmarkedKeys, id: \.self) { key in
+                            let parts = key.split(separator: ":")
+                            let chNum = Int(parts.first ?? "1") ?? 1
+                            let ayahNum = Int(parts.last ?? "1") ?? 1
+                            let chapter = chapters.first(where: { $0.id == chNum })
+
+                            Button(action: {
+                                dismiss()
+                                if let chapter {
+                                    onSelectVerse(chapter, ayahNum)
+                                }
+                            }) {
+                                HStack(spacing: 14) {
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color(hex: 0x085E43).opacity(0.12))
+                                            .frame(width: 36, height: 36)
+                                        Text("\(ayahNum)")
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundColor(Color(hex: 0x085E43))
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(chapter?.displayComplexName ?? "\(languageManager.localize("surah")) \(chNum)")
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundColor(Color(hex: 0x0F172A))
+                                        Text("\(languageManager.localize("verse")) \(ayahNum)")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(.secondary)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                        .onDelete(perform: removeBookmarks)
+                    }
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .navigationTitle(languageManager.localize("bookmarks_title"))
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(languageManager.localize("close")) {
+                        dismiss()
+                    }
+                    .foregroundColor(Color(hex: 0x085E43))
+                }
+            }
+            .onAppear {
+                bookmarkedKeys = UserDefaults.standard.stringArray(forKey: "bookmarked_verses") ?? []
+            }
+        }
+    }
+
+    private func removeBookmarks(at offsets: IndexSet) {
+        bookmarkedKeys.remove(atOffsets: offsets)
+        UserDefaults.standard.set(bookmarkedKeys, forKey: "bookmarked_verses")
+    }
+}
+

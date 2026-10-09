@@ -100,11 +100,13 @@ final class QuranRadioPlayerController: ObservableObject {
     }
 
     private func configureAudioSession() {
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.duckOthers])
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            // Audio session config error
+        Task.detached(priority: .userInitiated) {
+            do {
+                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.duckOthers])
+                try AVAudioSession.sharedInstance().setActive(true)
+            } catch {
+                // Audio session config error
+            }
         }
     }
 

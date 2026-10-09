@@ -9,6 +9,7 @@
 import SwiftUI
 import WebKit
 
+@MainActor
 enum LegalSheetType: String, Identifiable {
     case about
     case privacy

@@ -75,45 +75,27 @@ struct DhikrTasbihView: View {
             Spacer().frame(height: 12)
             
             // Main Content Area
-            VStack(spacing: 16) {
-                Spacer()
-                    .frame(height: 12)
-                
+            VStack(spacing: 8) {
                 // Reading Card
                 DhikrReadingCard(preset: currentPreset, language: language)
                 
-                // Interactive Tasbih Tap Area
-                ZStack {
-                    // Transparent full-width click overlay
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            count = DhikrStore.increment(for: currentPreset.id)
-                            pulseKey += 1
-                            
-                            // Tap vibration
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            
-                            // Target milestone feedback
-                            if count > 0 && count % currentPreset.target == 0 {
-                                UINotificationFeedbackGenerator().notificationOccurred(.success)
-                            }
-                        }
-                    
-                    VStack(spacing: 16) {
-                        PremiumTasbihCounter(
-                            count: count,
-                            target: currentPreset.target,
-                            pulseKey: pulseKey,
-                            subtitle: language == "id" ? "dari \(currentPreset.target)" : "of \(currentPreset.target)",
-                            counterSize: 180.0
-                        )
+                // Interactive 33-Bead Physical Tasbih
+                TasbeehCounterWidget(
+                    count: count,
+                    pulseKey: pulseKey,
+                    target: currentPreset.target,
+                    subtitle: language == "id" ? "Putaran \(count > 0 ? ((count - 1) / 33) + 1 : 1)" : "Round \(count > 0 ? ((count - 1) / 33) + 1 : 1)",
+                    onTap: {
+                        count = DhikrStore.increment(for: currentPreset.id)
+                        pulseKey += 1
                         
-                        Text(language == "id" ? "Ketuk di mana saja untuk menghitung" : "Tap anywhere to count")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(Color.Token.slate500.opacity(0.7))
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        
+                        if count > 0 && count % currentPreset.target == 0 {
+                            UINotificationFeedbackGenerator().notificationOccurred(.success)
+                        }
                     }
-                }
+                )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // Stats and Reset Area
@@ -131,7 +113,7 @@ struct DhikrTasbihView: View {
                 .cornerRadius(24)
                 .shadow(color: Color.black.opacity(0.02), radius: 8, x: 0, y: -4)
                 .padding(.horizontal, 16)
-                .padding(.bottom, 20)
+                .padding(.bottom, 16)
             }
         }
         .background(
@@ -268,8 +250,158 @@ struct DhikrStatsRow: View {
     }
 }
 
+// 33-Bead Physical Tasbih Widget (matching Android TasbeehCounterWidget)
+struct TasbeehCounterWidget: View {
+    let count: Int
+    let pulseKey: Int
+    let target: Int
+    let subtitle: String
+    let onTap: () -> Void
+
+    private let totalBeads = 33
+
+    private var activeIndex: Int {
+        if count > 0 {
+            return (count - 1) % totalBeads
+        }
+        return 0
+    }
+
+    var body: some View {
+        GeometryReader { geo in
+            let w = geo.size.width
+            let h = geo.size.height
+            let size = min(w, h)
+            let centerX = w / 2.0
+            let centerY = h * 0.40
+            let radius = size * 0.31
+            let beadSize = size * 0.085
+
+            let deltaGap: CGFloat = 0.32 // radians (~18 deg gap at bottom)
+            let startAngle = (CGFloat.pi / 2.0) + deltaGap
+            let totalSpan = (2.0 * CGFloat.pi) - (2.0 * deltaGap)
+
+            let beadCoords: [CGPoint] = (0..<totalBeads).map { i in
+                let fraction = CGFloat(i) / CGFloat(totalBeads - 1)
+                let angle = startAngle + (fraction * totalSpan)
+                let bx = centerX + cos(angle) * radius
+                let by = centerY + sin(angle) * radius
+                return CGPoint(x: bx, y: by)
+            }
+
+            ZStack {
+                // Background Tap Area
+                Color.clear
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(minimumDistance: 10)
+                            .onEnded { _ in
+                                onTap()
+                            }
+                    )
+                    .onTapGesture {
+                        onTap()
+                    }
+
+                // Layer 1: Connecting Rope/Cord
+                Path { path in
+                    if let first = beadCoords.first {
+                        path.move(to: first)
+                        for pt in beadCoords.dropFirst() {
+                            path.addLine(to: pt)
+                        }
+                        let bottomCenter = CGPoint(x: centerX, y: centerY + radius)
+                        path.addLine(to: bottomCenter)
+                        path.addLine(to: first)
+                    }
+                }
+                .stroke(Color(hex: 0x6E4723), style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+
+                // Layer 2: 33 Beads
+                ForEach(0..<totalBeads, id: \.self) { i in
+                    let coord = beadCoords[i]
+                    let isActive = (i == activeIndex)
+
+                    Image(isActive ? "bead_active" : "bead")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: beadSize, height: beadSize)
+                        .scaleEffect(isActive ? 1.25 : 1.0)
+                        .animation(.spring(response: 0.25, dampingFraction: 0.6), value: pulseKey)
+                        .position(x: coord.x, y: coord.y)
+                }
+
+                // Layer 3: Connector & Tassel
+                let bottomBeadY = centerY + radius
+                let ballSize = size * 0.085
+                let capWidth = size * 0.080
+                let capHeight = capWidth * 0.70
+                let tasselCapWidth = size * 0.075
+                let tasselCapHeight = tasselCapWidth * 0.65
+                let tasselWidth = size * 0.14
+                let tasselHeight = tasselWidth * 1.25
+
+                // Gold Connector Ball
+                Image("connector_ball")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: ballSize, height: ballSize)
+                    .position(x: centerX, y: bottomBeadY + (ballSize * 0.10))
+
+                // Gold Connector Cap
+                Image("connector_cap")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: capWidth, height: capHeight)
+                    .position(x: centerX, y: bottomBeadY + (ballSize * 0.30) + (capHeight * 0.50))
+
+                // Tassel Cap
+                Image("tassel_cap")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: tasselCapWidth, height: tasselCapHeight)
+                    .position(x: centerX, y: bottomBeadY + (ballSize * 0.30) + (capHeight * 0.65) + (tasselCapHeight * 0.50))
+
+                // Tassel
+                Image("tassel")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: tasselWidth, height: tasselHeight)
+                    .position(x: centerX, y: bottomBeadY + (ballSize * 0.30) + (capHeight * 0.65) + (tasselCapHeight * 0.50) + (tasselHeight * 0.45))
+
+                // Layer 4: Center Display
+                VStack(spacing: 4) {
+                    Text("\(count)")
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .foregroundColor(Color.Token.deepEmerald)
+                        .scaleEffect(pulseKey > 0 ? 1.05 : 1.0)
+                        .animation(.spring(response: 0.2, dampingFraction: 0.5), value: pulseKey)
+
+                    Text("/ \(target)")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color.Token.teal)
+
+                    if !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(Color.Token.slate500)
+                            .padding(.top, 2)
+                    }
+                    
+                    Text(AppLanguageManager.shared.currentLanguage == .english ? "Tap anywhere to count" : "Ketuk di mana saja untuk menghitung")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(Color.Token.slate500.opacity(0.7))
+                        .padding(.top, 4)
+                }
+                .position(x: centerX, y: centerY)
+            }
+        }
+    }
+}
+
 #Preview {
     NavigationStack {
         DhikrTasbihView()
     }
 }
+
