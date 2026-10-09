@@ -238,7 +238,7 @@ struct OnboardingView: View {
     }
 }
 
-// -----------------------------------------------------------------------------
+/// -----------------------------------------------------------------------------
 // STEP 1: BRAND INTRO & LANGUAGE SELECTION
 // -----------------------------------------------------------------------------
 private struct LanguageStepView: View {
@@ -249,136 +249,158 @@ private struct LanguageStepView: View {
     @ObservedObject private var lang = AppLanguageManager.shared
     
     var body: some View {
-        ZStack {
-            Image("bg_onboarding_1")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Top Bar: Skip button with safe top area
-                HStack {
-                    Spacer()
-                    Button(action: onSkip) {
-                        Text(lang.localize("onboarding_skip"))
-                            .font(.system(size: 14, weight: .semibold))
+        GeometryReader { geo in
+            ZStack(alignment: .top) {
+                // Full Screen Background (Edge to Edge)
+                Image("bg_onboarding_1")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Top Bar: Skip button sits comfortably below status bar
+                    HStack {
+                        Spacer()
+                        Button(action: onSkip) {
+                            Text(lang.localize("onboarding_skip"))
+                                .font(.system(size: 13.5, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 7)
+                                .background(Color.black.opacity(0.32))
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, max(geo.safeAreaInsets.top, 20) + 4)
+                    
+                    Spacer().frame(height: 8)
+                    
+                    // Translucent Glass Backdrop Card
+                    VStack(spacing: 4) {
+                        Text(lang.localize("onboarding_brand_title"))
+                            .font(.system(size: 32, weight: .bold, design: .serif))
                             .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.black.opacity(0.25))
-                            .clipShape(Capsule())
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 14)
-                
-                Spacer().frame(height: 16)
-                
-                // Translucent Glass Backdrop Card
-                VStack(spacing: 8) {
-                    Text(lang.localize("onboarding_brand_title"))
-                        .font(.system(size: 36, weight: .bold, design: .serif))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .tracking(1.5)
-                    
-                    Text(lang.localize("onboarding_brand_subtitle"))
-                        .font(.system(size: 13.5))
-                        .lineSpacing(4)
-                        .foregroundColor(.white.opacity(0.95))
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(Color.black.opacity(0.35))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .stroke(Color.white.opacity(0.25), lineWidth: 1)
-                        )
-                )
-                .padding(.horizontal, 20)
-                
-                Spacer()
-                
-                // Bottom White Floating Card
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(lang.localize("onboarding_lang_card_title"))
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(OnboardingTitleGreen)
+                            .multilineTextAlignment(.center)
+                            .tracking(1.2)
                         
-                        Text(lang.localize("onboarding_lang_card_subtitle"))
+                        Text(lang.localize("onboarding_brand_subtitle"))
                             .font(.system(size: 12.5))
-                            .foregroundColor(OnboardingSubtext)
+                            .lineSpacing(2.5)
+                            .foregroundColor(.white.opacity(0.95))
+                            .multilineTextAlignment(.center)
                     }
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(Color.black.opacity(0.32))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                            )
+                    )
+                    .padding(.horizontal, 20)
                     
-                    // 3 Language Selector Chips
-                    HStack(spacing: 8) {
-                        LanguageChip(
-                            title: selected == .english ? "Indonesian" : "Indonesia",
-                            flagImage: "ic_flag_id",
-                            isSelected: selected == .indonesian
-                        ) {
-                            onSelect(.indonesian)
-                        }
-                        
-                        LanguageChip(
-                            title: selected == .english ? "Malay" : "Melayu",
-                            flagImage: "ic_flag_ms",
-                            isSelected: selected == .malay
-                        ) {
-                            onSelect(.malay)
-                        }
-                        
-                        LanguageChip(
-                            title: selected == .indonesian ? "Inggris" : (selected == .malay ? "Inggeris" : "English"),
-                            flagImage: "ic_flag_en",
-                            isSelected: selected == .english
-                        ) {
-                            onSelect(.english)
-                        }
-                    }
+                    // Middle space for character illustration
+                    Spacer(minLength: 12)
                     
-                    // "Mulai ->" Action Button
-                    Button(action: onStart) {
-                        HStack(spacing: 8) {
-                            Text(lang.localize("onboarding_start_button"))
+                    // Bottom White Sheet (Hugs bottom screen edge seamlessly)
+                    VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(lang.localize("onboarding_lang_card_title"))
                                 .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(OnboardingTitleGreen)
                             
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
+                            Text(lang.localize("onboarding_lang_card_subtitle"))
+                                .font(.system(size: 12))
+                                .foregroundColor(OnboardingSubtext)
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(OnboardingDarkGreen)
-                        .clipShape(Capsule())
-                        .shadow(color: OnboardingDarkGreen.opacity(0.3), radius: 8, x: 0, y: 4)
+                        
+                        // 3 Language Selector Chips
+                        HStack(spacing: 8) {
+                            LanguageChip(
+                                title: selected == .english ? "Indonesian" : "Indonesia",
+                                flagImage: "ic_flag_id",
+                                isSelected: selected == .indonesian
+                            ) {
+                                onSelect(.indonesian)
+                            }
+                            
+                            LanguageChip(
+                                title: selected == .english ? "Malay" : "Melayu",
+                                flagImage: "ic_flag_ms",
+                                isSelected: selected == .malay
+                            ) {
+                                onSelect(.malay)
+                            }
+                            
+                            LanguageChip(
+                                title: selected == .indonesian ? "Inggris" : (selected == .malay ? "Inggeris" : "English"),
+                                flagImage: "ic_flag_en",
+                                isSelected: selected == .english
+                            ) {
+                                onSelect(.english)
+                            }
+                        }
+                        
+                        // "Mulai ->" Action Button
+                        Button(action: onStart) {
+                            HStack(spacing: 8) {
+                                Text(lang.localize("onboarding_start_button"))
+                                    .font(.system(size: 15.5, weight: .bold))
+                                    .foregroundColor(.white)
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(OnboardingDarkGreen)
+                            .clipShape(Capsule())
+                        }
+                        .padding(.top, 2)
+                        
+                        // Step 1 Footer Text
+                        Text(lang.localize("onboarding_step1_footer"))
+                            .font(.system(size: 11))
+                            .foregroundColor(OnboardingSubtext)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .multilineTextAlignment(.center)
                     }
-                    .padding(.top, 2)
-                    
-                    // Step 1 Footer Text
-                    Text(lang.localize("onboarding_step1_footer"))
-                        .font(.system(size: 11.5))
-                        .foregroundColor(OnboardingSubtext)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                    .padding(.bottom, max(geo.safeAreaInsets.bottom, 12) + 6)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        TopRoundedCorner(radius: 26)
+                            .fill(Color.white)
+                            .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: -4)
+                    )
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 22)
-                .background(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .fill(Color.white)
-                        .shadow(color: Color.black.opacity(0.14), radius: 16, x: 0, y: -4)
-                )
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
+                .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
             }
+            .ignoresSafeArea()
         }
+    }
+}
+
+private struct TopRoundedCorner: Shape {
+    var radius: CGFloat = 26.0
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + radius))
+        path.addArc(center: CGPoint(x: rect.minX + radius, y: rect.minY + radius), radius: radius, startAngle: .degrees(180), endAngle: .degrees(270), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.maxX - radius, y: rect.minY))
+        path.addArc(center: CGPoint(x: rect.maxX - radius, y: rect.minY + radius), radius: radius, startAngle: .degrees(270), endAngle: .degrees(0), clockwise: false)
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -390,24 +412,24 @@ private struct LanguageChip: View {
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 6) {
+            HStack(spacing: 5) {
                 Image(flagImage)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 20, height: 20)
+                    .frame(width: 18, height: 18)
                     .clipShape(Circle())
                 
                 Text(title)
-                    .font(.system(size: title.count > 9 ? 11 : 12.5, weight: isSelected ? .bold : .medium))
+                    .font(.system(size: title.count > 9 ? 11 : 12, weight: isSelected ? .bold : .medium))
                     .foregroundColor(isSelected ? .white : Color(hex: "#334155"))
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 48)
+            .frame(height: 44)
             .background(isSelected ? OnboardingDarkGreen : Color(hex: "#FBF9F4"))
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
                     .stroke(isSelected ? Color.clear : Color(hex: "#E5DFD3"), lineWidth: 1)
             )
         }
@@ -434,98 +456,103 @@ private struct WelcomeStepView: View {
     }
     
     var body: some View {
-        ZStack {
-            Image(bgName)
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Top Bar: Back & Skip with safe area
-                HStack {
-                    Button(action: onBack) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.left")
-                                .font(.system(size: 13, weight: .bold))
-                            Text(lang.localize("onboarding_back"))
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(Color.black.opacity(0.25))
-                        .clipShape(Capsule())
-                    }
-                    
-                    Spacer()
-                    
-                    Button(action: onSkip) {
-                        Text(lang.localize("onboarding_skip"))
-                            .font(.system(size: 14, weight: .semibold))
+        GeometryReader { geo in
+            ZStack(alignment: .top) {
+                Image(bgName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Top Bar: Back & Skip with safe area
+                    HStack {
+                        Button(action: onBack) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.left")
+                                    .font(.system(size: 13, weight: .bold))
+                                Text(lang.localize("onboarding_back"))
+                                    .font(.system(size: 13.5, weight: .semibold))
+                            }
                             .foregroundColor(.white)
                             .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(Color.black.opacity(0.25))
+                            .padding(.vertical, 7)
+                            .background(Color.black.opacity(0.32))
                             .clipShape(Capsule())
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 14)
-                
-                Spacer().frame(height: 16)
-                
-                // Translucent Glass Info Card
-                VStack(spacing: 8) {
-                    Text(lang.localize("onboarding_kimi_title"))
-                        .font(.system(size: 26, weight: .bold, design: .serif))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                    
-                    Text(lang.localize("onboarding_kimi_body"))
-                        .font(.system(size: 13.5))
-                        .lineSpacing(4)
-                        .foregroundColor(.white.opacity(0.95))
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(Color.black.opacity(0.35))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                                .stroke(Color.white.opacity(0.25), lineWidth: 1)
-                        )
-                )
-                .padding(.horizontal, 20)
-                
-                Spacer()
-                
-                // Bottom Action Controls
-                VStack(spacing: 16) {
-                    Button(action: onContinue) {
-                        HStack(spacing: 8) {
-                            Text(lang.localize("onboarding_continue_btn"))
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(OnboardingDarkGreen)
-                        .clipShape(Capsule())
-                        .shadow(color: OnboardingDarkGreen.opacity(0.35), radius: 10, x: 0, y: 5)
+                        
+                        Spacer()
+                        
+                        Button(action: onSkip) {
+                            Text(lang.localize("onboarding_skip"))
+                                .font(.system(size: 13.5, weight: .semibold))
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 7)
+                                .background(Color.black.opacity(0.32))
+                                .clipShape(Capsule())
+                        }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, max(geo.safeAreaInsets.top, 20) + 4)
                     
-                    OnboardingDotsView(activeStep: 2)
+                    Spacer().frame(height: 8)
+                    
+                    // Translucent Glass Info Card
+                    VStack(spacing: 6) {
+                        Text(lang.localize("onboarding_kimi_title"))
+                            .font(.system(size: 22, weight: .bold, design: .serif))
+                            .foregroundColor(.white)
+                            .multilineTextAlignment(.center)
+                        
+                        Text(lang.localize("onboarding_kimi_body"))
+                            .font(.system(size: 12.5))
+                            .lineSpacing(3)
+                            .foregroundColor(.white.opacity(0.95))
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(Color.black.opacity(0.32))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                            )
+                    )
+                    .padding(.horizontal, 20)
+                    
+                    Spacer(minLength: 12)
+                    
+                    // Bottom Action Controls
+                    VStack(spacing: 12) {
+                        Button(action: onContinue) {
+                            HStack(spacing: 8) {
+                                Text(lang.localize("onboarding_continue_btn"))
+                                    .font(.system(size: 15.5, weight: .bold))
+                                    .foregroundColor(.white)
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(OnboardingDarkGreen)
+                            .clipShape(Capsule())
+                            .shadow(color: OnboardingDarkGreen.opacity(0.35), radius: 8, x: 0, y: 4)
+                        }
+                        
+                        OnboardingDotsView(activeStep: 2)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, max(geo.safeAreaInsets.bottom, 12) + 8)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+                .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
             }
+            .ignoresSafeArea()
         }
     }
 }
@@ -544,234 +571,239 @@ private struct PermissionsStepView: View {
     @ObservedObject private var lang = AppLanguageManager.shared
     
     var body: some View {
-        ZStack {
-            OnboardingBgWarm
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Top Bar
-                HStack {
-                    Button(action: onBack) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.left")
-                                .font(.system(size: 13, weight: .bold))
-                            Text(lang.localize("onboarding_back"))
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundColor(OnboardingTitleGreen)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(Color.white)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(OnboardingCardBorder, lineWidth: 1))
-                    }
-                    
-                    Spacer()
-                    
-                    Button(action: onSkip) {
-                        Text(lang.localize("onboarding_skip"))
-                            .font(.system(size: 14, weight: .semibold))
+        GeometryReader { geo in
+            ZStack(alignment: .top) {
+                OnboardingBgWarm
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Top Bar
+                    HStack {
+                        Button(action: onBack) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.left")
+                                    .font(.system(size: 13, weight: .bold))
+                                Text(lang.localize("onboarding_back"))
+                                    .font(.system(size: 13.5, weight: .semibold))
+                            }
                             .foregroundColor(OnboardingTitleGreen)
                             .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 7)
                             .background(Color.white)
                             .clipShape(Capsule())
                             .overlay(Capsule().stroke(OnboardingCardBorder, lineWidth: 1))
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 14)
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        Spacer().frame(height: 4)
+                        }
                         
-                        // Header
-                        VStack(spacing: 6) {
-                            Text(lang.localize("onboarding_perms_title"))
-                                .font(.system(size: 26, weight: .bold, design: .serif))
+                        Spacer()
+                        
+                        Button(action: onSkip) {
+                            Text(lang.localize("onboarding_skip"))
+                                .font(.system(size: 13.5, weight: .semibold))
                                 .foregroundColor(OnboardingTitleGreen)
-                                .multilineTextAlignment(.center)
-                            
-                            Text(lang.localize("onboarding_perms_subtitle"))
-                                .font(.system(size: 13))
-                                .lineSpacing(3)
-                                .foregroundColor(OnboardingSubtext)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 8)
-                        }
-                        
-                        // Card 1: Location Access
-                        VStack(alignment: .leading, spacing: 14) {
-                            HStack(alignment: .top, spacing: 14) {
-                                Image("ic_onboarding_location")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 44, height: 44)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(lang.localize("onboarding_perm_loc_title"))
-                                        .font(.system(size: 14.5, weight: .bold))
-                                        .foregroundColor(OnboardingTitleGreen)
-                                    
-                                    Text(lang.localize("onboarding_perm_loc_desc"))
-                                        .font(.system(size: 12))
-                                        .lineSpacing(2)
-                                        .foregroundColor(OnboardingSubtext)
-                                }
-                            }
-                            
-                            if locationGranted {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(OnboardingSuccessGreen)
-                                    
-                                    Text(lang.localize("onboarding_perm_loc_granted"))
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(OnboardingSuccessGreen)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 44)
-                                .background(OnboardingSuccessBg)
-                                .clipShape(Capsule())
-                            } else {
-                                Button(action: onRequestLocation) {
-                                    Text(lang.localize("onboarding_perm_loc_btn"))
-                                        .font(.system(size: 13.5, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 44)
-                                        .background(OnboardingDarkGreen)
-                                        .clipShape(Capsule())
-                                }
-                            }
-                        }
-                        .padding(18)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .fill(Color.white)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                        .stroke(OnboardingCardBorder, lineWidth: 1)
-                                )
-                                .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
-                        )
-                        
-                        // Card 2: Notification Access
-                        VStack(alignment: .leading, spacing: 14) {
-                            HStack(alignment: .top, spacing: 14) {
-                                Image("ic_onboarding_notification")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 44, height: 44)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(lang.localize("onboarding_perm_notif_title"))
-                                        .font(.system(size: 14.5, weight: .bold))
-                                        .foregroundColor(OnboardingTitleGreen)
-                                    
-                                    Text(lang.localize("onboarding_perm_notif_desc"))
-                                        .font(.system(size: 12))
-                                        .lineSpacing(2)
-                                        .foregroundColor(OnboardingSubtext)
-                                }
-                            }
-                            
-                            if notificationGranted {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 14, weight: .bold))
-                                        .foregroundColor(OnboardingSuccessGreen)
-                                    
-                                    Text(lang.localize("onboarding_perm_notif_granted"))
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundColor(OnboardingSuccessGreen)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 44)
-                                .background(OnboardingSuccessBg)
-                                .clipShape(Capsule())
-                            } else {
-                                Button(action: onRequestNotification) {
-                                    Text(lang.localize("onboarding_perm_notif_btn"))
-                                        .font(.system(size: 13.5, weight: .bold))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .frame(height: 44)
-                                        .background(OnboardingDarkGreen)
-                                        .clipShape(Capsule())
-                                }
-                            }
-                        }
-                        .padding(18)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .fill(Color.white)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                        .stroke(OnboardingCardBorder, lineWidth: 1)
-                                )
-                                .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
-                        )
-                    }
-                    .padding(.horizontal, 20)
-                }
-                
-                // Bottom Actions
-                VStack(spacing: 14) {
-                    if locationGranted && notificationGranted {
-                        Button(action: onContinue) {
-                            HStack(spacing: 6) {
-                                Text(lang.localize("onboarding_continue_btn"))
-                                    .font(.system(size: 15.5, weight: .bold))
-                                    .foregroundColor(.white)
-                                Image(systemName: "arrow.right")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(OnboardingDarkGreen)
-                            .clipShape(Capsule())
-                            .shadow(color: OnboardingDarkGreen.opacity(0.3), radius: 8, x: 0, y: 4)
-                        }
-                    } else {
-                        Button(action: onContinue) {
-                            Text(lang.localize("onboarding_perm_later_btn"))
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(OnboardingTitleGreen)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 48)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 7)
                                 .background(Color.white)
                                 .clipShape(Capsule())
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color(hex: "#D3CCC0"), lineWidth: 1)
-                                )
+                                .overlay(Capsule().stroke(OnboardingCardBorder, lineWidth: 1))
                         }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, max(geo.safeAreaInsets.top, 20) + 4)
                     
-                    // Privacy Note
-                    HStack(spacing: 10) {
-                        Image("ic_onboarding_privacy")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 22, height: 22)
-                        
-                        Text(lang.localize("onboarding_privacy_text"))
-                            .font(.system(size: 11))
-                            .lineSpacing(2)
-                            .foregroundColor(OnboardingSubtext)
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 12) {
+                            Spacer().frame(height: 2)
+                            
+                            // Header
+                            VStack(spacing: 4) {
+                                Text(lang.localize("onboarding_perms_title"))
+                                    .font(.system(size: 22, weight: .bold, design: .serif))
+                                    .foregroundColor(OnboardingTitleGreen)
+                                    .multilineTextAlignment(.center)
+                                
+                                Text(lang.localize("onboarding_perms_subtitle"))
+                                    .font(.system(size: 12))
+                                    .lineSpacing(2)
+                                    .foregroundColor(OnboardingSubtext)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 8)
+                            }
+                            
+                            // Card 1: Location Access
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack(alignment: .top, spacing: 12) {
+                                    Image("ic_onboarding_location")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 38, height: 38)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(lang.localize("onboarding_perm_loc_title"))
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(OnboardingTitleGreen)
+                                        
+                                        Text(lang.localize("onboarding_perm_loc_desc"))
+                                            .font(.system(size: 11.5))
+                                            .lineSpacing(2)
+                                            .foregroundColor(OnboardingSubtext)
+                                    }
+                                }
+                                
+                                if locationGranted {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(OnboardingSuccessGreen)
+                                        
+                                        Text(lang.localize("onboarding_perm_loc_granted"))
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundColor(OnboardingSuccessGreen)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 40)
+                                    .background(OnboardingSuccessBg)
+                                    .clipShape(Capsule())
+                                } else {
+                                    Button(action: onRequestLocation) {
+                                        Text(lang.localize("onboarding_perm_loc_btn"))
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 40)
+                                            .background(OnboardingDarkGreen)
+                                            .clipShape(Capsule())
+                                    }
+                                }
+                            }
+                            .padding(14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .stroke(OnboardingCardBorder, lineWidth: 1)
+                                    )
+                                    .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
+                            )
+                            
+                            // Card 2: Notification Access
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack(alignment: .top, spacing: 12) {
+                                    Image("ic_onboarding_notification")
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 38, height: 38)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(lang.localize("onboarding_perm_notif_title"))
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(OnboardingTitleGreen)
+                                        
+                                        Text(lang.localize("onboarding_perm_notif_desc"))
+                                            .font(.system(size: 11.5))
+                                            .lineSpacing(2)
+                                            .foregroundColor(OnboardingSubtext)
+                                    }
+                                }
+                                
+                                if notificationGranted {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.system(size: 14, weight: .bold))
+                                            .foregroundColor(OnboardingSuccessGreen)
+                                        
+                                        Text(lang.localize("onboarding_perm_notif_granted"))
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundColor(OnboardingSuccessGreen)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 40)
+                                    .background(OnboardingSuccessBg)
+                                    .clipShape(Capsule())
+                                } else {
+                                    Button(action: onRequestNotification) {
+                                        Text(lang.localize("onboarding_perm_notif_btn"))
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 40)
+                                            .background(OnboardingDarkGreen)
+                                            .clipShape(Capsule())
+                                    }
+                                }
+                            }
+                            .padding(14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .stroke(OnboardingCardBorder, lineWidth: 1)
+                                    )
+                                    .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
                     }
-                    .padding(.horizontal, 4)
                     
-                    OnboardingDotsView(activeStep: 3)
+                    // Bottom Actions
+                    VStack(spacing: 10) {
+                        if locationGranted && notificationGranted {
+                            Button(action: onContinue) {
+                                HStack(spacing: 6) {
+                                    Text(lang.localize("onboarding_continue_btn"))
+                                        .font(.system(size: 15, weight: .bold))
+                                        .foregroundColor(.white)
+                                    Image(systemName: "arrow.right")
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundColor(.white)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 46)
+                                .background(OnboardingDarkGreen)
+                                .clipShape(Capsule())
+                                .shadow(color: OnboardingDarkGreen.opacity(0.3), radius: 8, x: 0, y: 4)
+                            }
+                        } else {
+                            Button(action: onContinue) {
+                                Text(lang.localize("onboarding_perm_later_btn"))
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundColor(OnboardingTitleGreen)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 44)
+                                    .background(Color.white)
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(Color(hex: "#D3CCC0"), lineWidth: 1)
+                                    )
+                            }
+                        }
+                        
+                        // Privacy Note
+                        HStack(spacing: 6) {
+                            Image("ic_onboarding_privacy")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 18, height: 18)
+                            
+                            Text(lang.localize("onboarding_privacy_text"))
+                                .font(.system(size: 11))
+                                .lineSpacing(2)
+                                .foregroundColor(OnboardingSubtext)
+                        }
+                        .padding(.horizontal, 4)
+                        
+                        OnboardingDotsView(activeStep: 3)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 6)
+                    .padding(.bottom, max(geo.safeAreaInsets.bottom, 12) + 6)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 20)
+                .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
             }
+            .ignoresSafeArea()
         }
     }
 }
@@ -792,162 +824,167 @@ private struct PrayerNotificationsStepView: View {
     @ObservedObject private var lang = AppLanguageManager.shared
     
     var body: some View {
-        ZStack {
-            OnboardingBgWarm
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Top Bar
-                HStack {
-                    Button(action: onBack) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.left")
-                                .font(.system(size: 13, weight: .bold))
-                            Text(lang.localize("onboarding_back"))
-                                .font(.system(size: 14, weight: .semibold))
-                        }
-                        .foregroundColor(OnboardingTitleGreen)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(Color.white)
-                        .clipShape(Capsule())
-                        .overlay(Capsule().stroke(OnboardingCardBorder, lineWidth: 1))
-                    }
-                    
-                    Spacer()
-                    
-                    Button(action: onSkip) {
-                        Text(lang.localize("onboarding_skip"))
-                            .font(.system(size: 14, weight: .semibold))
+        GeometryReader { geo in
+            ZStack(alignment: .top) {
+                OnboardingBgWarm
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // Top Bar
+                    HStack {
+                        Button(action: onBack) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.left")
+                                    .font(.system(size: 13, weight: .bold))
+                                Text(lang.localize("onboarding_back"))
+                                    .font(.system(size: 13.5, weight: .semibold))
+                            }
                             .foregroundColor(OnboardingTitleGreen)
                             .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
+                            .padding(.vertical, 7)
                             .background(Color.white)
                             .clipShape(Capsule())
                             .overlay(Capsule().stroke(OnboardingCardBorder, lineWidth: 1))
-                    }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 14)
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        Spacer().frame(height: 4)
+                        }
                         
-                        // Header
-                        VStack(spacing: 6) {
-                            Text(lang.localize("onboarding_adhan_new_title"))
-                                .font(.system(size: 26, weight: .bold, design: .serif))
+                        Spacer()
+                        
+                        Button(action: onSkip) {
+                            Text(lang.localize("onboarding_skip"))
+                                .font(.system(size: 13.5, weight: .semibold))
                                 .foregroundColor(OnboardingTitleGreen)
-                                .multilineTextAlignment(.center)
-                            
-                            Text(lang.localize("onboarding_adhan_new_subtitle"))
-                                .font(.system(size: 13))
-                                .lineSpacing(3)
-                                .foregroundColor(OnboardingSubtext)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 8)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 7)
+                                .background(Color.white)
+                                .clipShape(Capsule())
+                                .overlay(Capsule().stroke(OnboardingCardBorder, lineWidth: 1))
                         }
-                        
-                        // Prayer Switches Card
-                        VStack(spacing: 0) {
-                            PrayerToggleRow(
-                                title: lang.localize("prayer_fajr"),
-                                icon: "ic_onboarding_fajr",
-                                isOn: $fajrEnabled
-                            )
-                            
-                            Divider().background(Color(hex: "#F3EFE8"))
-                            
-                            PrayerToggleRow(
-                                title: lang.localize("prayer_dhuhr"),
-                                icon: "ic_onboarding_dhuhr",
-                                isOn: $dhuhrEnabled
-                            )
-                            
-                            Divider().background(Color(hex: "#F3EFE8"))
-                            
-                            PrayerToggleRow(
-                                title: lang.localize("prayer_asr"),
-                                icon: "ic_onboarding_asr",
-                                isOn: $asrEnabled
-                            )
-                            
-                            Divider().background(Color(hex: "#F3EFE8"))
-                            
-                            PrayerToggleRow(
-                                title: lang.localize("prayer_maghrib"),
-                                icon: "ic_onboarding_maghrib",
-                                isOn: $maghribEnabled
-                            )
-                            
-                            Divider().background(Color(hex: "#F3EFE8"))
-                            
-                            PrayerToggleRow(
-                                title: lang.localize("prayer_isha"),
-                                icon: "ic_onboarding_isha",
-                                isOn: $ishaEnabled
-                            )
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 6)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .fill(Color.white)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                        .stroke(OnboardingCardBorder, lineWidth: 1)
-                                )
-                                .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
-                        )
-                        
-                        // Adhan Sound Note Card
-                        HStack(spacing: 12) {
-                            Image(systemName: "speaker.wave.2.fill")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundColor(OnboardingSuccessGreen)
-                            
-                            Text(lang.localize("onboarding_adhan_sound_note"))
-                                .font(.system(size: 12))
-                                .lineSpacing(2)
-                                .foregroundColor(OnboardingTitleGreen)
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 14)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(OnboardingSuccessBg)
-                        )
                     }
                     .padding(.horizontal, 20)
-                }
-                
-                // Bottom Actions
-                VStack(spacing: 14) {
-                    Button(action: onSave) {
-                        HStack(spacing: 8) {
-                            Text(lang.localize("onboarding_save_and_enter"))
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(.white)
+                    .padding(.top, max(geo.safeAreaInsets.top, 20) + 4)
+                    
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 12) {
+                            Spacer().frame(height: 2)
                             
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
+                            // Header
+                            VStack(spacing: 4) {
+                                Text(lang.localize("onboarding_adhan_new_title"))
+                                    .font(.system(size: 22, weight: .bold, design: .serif))
+                                    .foregroundColor(OnboardingTitleGreen)
+                                    .multilineTextAlignment(.center)
+                                
+                                Text(lang.localize("onboarding_adhan_new_subtitle"))
+                                    .font(.system(size: 12))
+                                    .lineSpacing(2)
+                                    .foregroundColor(OnboardingSubtext)
+                                    .multilineTextAlignment(.center)
+                                    .padding(.horizontal, 8)
+                            }
+                            
+                            // Prayer Switches Card
+                            VStack(spacing: 0) {
+                                PrayerToggleRow(
+                                    title: lang.localize("prayer_fajr"),
+                                    icon: "ic_onboarding_fajr",
+                                    isOn: $fajrEnabled
+                                )
+                                
+                                Divider().background(Color(hex: "#F3EFE8"))
+                                
+                                PrayerToggleRow(
+                                    title: lang.localize("prayer_dhuhr"),
+                                    icon: "ic_onboarding_dhuhr",
+                                    isOn: $dhuhrEnabled
+                                )
+                                
+                                Divider().background(Color(hex: "#F3EFE8"))
+                                
+                                PrayerToggleRow(
+                                    title: lang.localize("prayer_asr"),
+                                    icon: "ic_onboarding_asr",
+                                    isOn: $asrEnabled
+                                )
+                                
+                                Divider().background(Color(hex: "#F3EFE8"))
+                                
+                                PrayerToggleRow(
+                                    title: lang.localize("prayer_maghrib"),
+                                    icon: "ic_onboarding_maghrib",
+                                    isOn: $maghribEnabled
+                                )
+                                
+                                Divider().background(Color(hex: "#F3EFE8"))
+                                
+                                PrayerToggleRow(
+                                    title: lang.localize("prayer_isha"),
+                                    icon: "ic_onboarding_isha",
+                                    isOn: $ishaEnabled
+                                )
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(Color.white)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                            .stroke(OnboardingCardBorder, lineWidth: 1)
+                                    )
+                                    .shadow(color: Color.black.opacity(0.03), radius: 6, x: 0, y: 2)
+                            )
+                            
+                            // Adhan Sound Note Card
+                            HStack(spacing: 10) {
+                                Image(systemName: "speaker.wave.2.fill")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(OnboardingSuccessGreen)
+                                
+                                Text(lang.localize("onboarding_adhan_sound_note"))
+                                    .font(.system(size: 11))
+                                    .lineSpacing(2)
+                                    .foregroundColor(OnboardingTitleGreen)
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(OnboardingSuccessBg)
+                            )
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 52)
-                        .background(OnboardingDarkGreen)
-                        .clipShape(Capsule())
-                        .shadow(color: OnboardingDarkGreen.opacity(0.35), radius: 10, x: 0, y: 5)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
                     }
                     
-                    OnboardingDotsView(activeStep: 4)
+                    // Bottom Actions
+                    VStack(spacing: 10) {
+                        Button(action: onSave) {
+                            HStack(spacing: 8) {
+                                Text(lang.localize("onboarding_save_and_enter"))
+                                    .font(.system(size: 15.5, weight: .bold))
+                                    .foregroundColor(.white)
+                                
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(.white)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 48)
+                            .background(OnboardingDarkGreen)
+                            .clipShape(Capsule())
+                            .shadow(color: OnboardingDarkGreen.opacity(0.35), radius: 8, x: 0, y: 4)
+                        }
+                        
+                        OnboardingDotsView(activeStep: 4)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 6)
+                    .padding(.bottom, max(geo.safeAreaInsets.bottom, 12) + 6)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 20)
+                .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
             }
+            .ignoresSafeArea()
         }
     }
 }
@@ -962,10 +999,10 @@ private struct PrayerToggleRow: View {
             Image(icon)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 32, height: 32)
+                .frame(width: 30, height: 30)
             
             Text(title)
-                .font(.system(size: 15, weight: .bold))
+                .font(.system(size: 14.5, weight: .bold))
                 .foregroundColor(OnboardingTitleGreen)
                 .padding(.leading, 8)
             
@@ -975,7 +1012,7 @@ private struct PrayerToggleRow: View {
                 .labelsHidden()
                 .tint(OnboardingSuccessGreen)
         }
-        .padding(.vertical, 10)
+        .padding(.vertical, 8)
     }
 }
 
@@ -994,6 +1031,6 @@ private struct OnboardingDotsView: View {
                     .frame(width: isActive ? 8 : 7, height: isActive ? 8 : 7)
             }
         }
-        .padding(.bottom, 4)
+        .padding(.bottom, 2)
     }
 }
