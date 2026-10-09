@@ -467,7 +467,7 @@ private struct QuranChapterRow: View {
                         .cornerRadius(6)
 
                     if let count = chapter.versesCount {
-                        Text(String(format: languageManager.localize("verse_count_format"), count))
+                        Text(languageManager.localizeFormatted("verse_count_format", count))
                             .font(.system(size: 11.5, weight: .medium))
                             .foregroundColor(Color(hex: "#64748B"))
                     }
@@ -515,21 +515,21 @@ private struct JuzRow: View {
             ChapterNumberBadge(number: juz.juzNumber)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(String(format: languageManager.localize("juz_number"), juz.juzNumber))
+                Text(languageManager.localizeFormatted("juz_number", juz.juzNumber))
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(Color(hex: "#0F172A"))
 
                 if let start = juz.startChapterAndAyah() {
-                    let surahName = chapter?.displayComplexName ?? String(format: languageManager.localize("surah_number"), start.0)
-                    let ayahText = String(format: languageManager.localize("verse_number"), start.1)
-                    Text(String(format: languageManager.localize("juz_starts_at"), "\(surahName) · \(ayahText)"))
+                    let surahName = chapter?.displayComplexName ?? languageManager.localizeFormatted("surah_number", start.0)
+                    let ayahText = languageManager.localizeFormatted("verse_number", start.1)
+                    Text(languageManager.localizeFormatted("juz_starts_at", "\(surahName) · \(ayahText)"))
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(Color(hex: "#64748B"))
                         .lineLimit(1)
                 }
 
                 if let count = juz.versesCount {
-                    Text(String(format: languageManager.localize("verse_count_format"), count))
+                    Text(languageManager.localizeFormatted("verse_count_format", count))
                         .font(.system(size: 11.5, weight: .semibold))
                         .foregroundColor(Color(hex: "#0E7490"))
                         .padding(.top, 4)

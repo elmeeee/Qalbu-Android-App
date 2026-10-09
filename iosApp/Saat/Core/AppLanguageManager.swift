@@ -63,14 +63,44 @@ class AppLanguageManager: ObservableObject {
         return SharedStrings.shared.get(key: key, langCode: currentLanguage.rawValue)
     }
     
-    func localizeFormatted(_ key: String, _ args: CVarArg...) -> String {
+    func localizeFormatted(_ key: String, _ args: Any...) -> String {
         let format = localize(key)
-        let convertedArgs: [CVarArg] = args.map { arg in
-            if let str = arg as? String {
-                return str as NSString
+        return formatString(format, with: args)
+    }
+    
+    func formatString(_ format: String, with args: [Any]) -> String {
+        guard !args.isEmpty else { return format }
+        var result = format
+        
+        // 1. Replace positional specifiers: %1$s, %1$d, %1$f, %1$@, %1$ld, etc.
+        for (index, arg) in args.enumerated() {
+            let position = index + 1
+            let argString = String(describing: arg)
+            let specifiers = [
+                "%\\(position)$s", "%\\(position)$d", "%\\(position)$f", 
+                "%\\(position)$@", "%\\(position)$ld", "%\\(position)$lf"
+            ]
+            for spec in specifiers {
+                result = result.replacingOccurrences(of: spec, with: argString)
             }
-            return arg
         }
-        return String(format: format, arguments: convertedArgs)
+        
+        // 2. Sequential specifiers (%s, %d, %@, %f, etc.) replaced in order
+        let regexPattern = #"%(?:[0-9]+\$)?(@|s|d|f|ld|lf)"#
+        if let regex = try? NSRegularExpression(pattern: regexPattern, options: []) {
+            var argIndex = 0
+            while argIndex < args.count {
+                let range = NSRange(result.startIndex..<result.endIndex, in: result)
+                guard let match = regex.firstMatch(in: result, options: [], range: range),
+                      let matchRange = Range(match.range, in: result) else {
+                    break
+                }
+                let argString = String(describing: args[argIndex])
+                result.replaceSubrange(matchRange, with: argString)
+                argIndex += 1
+            }
+        }
+        
+        return result
     }
 }

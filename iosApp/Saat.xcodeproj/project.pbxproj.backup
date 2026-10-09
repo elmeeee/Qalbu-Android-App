@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		3600CD5D2F9C5793001EC262 /* AlKhatibLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3600CD522F9C5793001EC262 /* AlKhatibLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
 		3600CD332F9C5793001EC262 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -25,34 +21,12 @@
 			remoteGlobalIDString = 3600CD242F9C5791001EC262;
 			remoteInfo = Saat;
 		};
-		3600CD5B2F9C5793001EC262 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 3600CD1D2F9C5791001EC262 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 3600CD512F9C5793001EC262;
-			remoteInfo = AlKhatibLiveActivity;
-		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		3600CD5C2F9C5793001EC262 /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				3600CD5D2F9C5793001EC262 /* AlKhatibLiveActivity.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3600CD252F9C5791001EC262 /* Saat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Saat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3600CD322F9C5793001EC262 /* SaatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SaatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SaatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3600CD522F9C5793001EC262 /* AlKhatibLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AlKhatibLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		36A1B2C12F9E0001001EC262 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		36A1B2C22F9E0001001EC262 /* Secrets.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig.example; sourceTree = "<group>"; };
 		36A1B2C42F9E0001001EC262 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
@@ -88,11 +62,6 @@
 			path = SaatUITests;
 			sourceTree = "<group>";
 		};
-		3600CD552F9C5793001EC262 /* AlKhatibLiveActivity */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AlKhatibLiveActivity;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,13 +86,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3600CD542F9C5793001EC262 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -132,7 +94,6 @@
 			children = (
 				36A1B2C32F9E0001001EC262 /* Config */,
 				3600CD272F9C5791001EC262 /* Saat */,
-				3600CD552F9C5793001EC262 /* AlKhatibLiveActivity */,
 				3600CD352F9C5793001EC262 /* SaatTests */,
 				3600CD3F2F9C5793001EC262 /* SaatUITests */,
 				3600CD262F9C5791001EC262 /* Products */,
@@ -143,7 +104,6 @@
 			isa = PBXGroup;
 			children = (
 				3600CD252F9C5791001EC262 /* Saat.app */,
-				3600CD522F9C5793001EC262 /* AlKhatibLiveActivity.appex */,
 				3600CD322F9C5793001EC262 /* SaatTests.xctest */,
 				3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */,
 			);
@@ -172,12 +132,10 @@
 				3600CD212F9C5791001EC262 /* Sources */,
 				3600CD222F9C5791001EC262 /* Frameworks */,
 				3600CD232F9C5791001EC262 /* Resources */,
-				3600CD5C2F9C5793001EC262 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				3600CD5A2F9C5793001EC262 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				3600CD272F9C5791001EC262 /* Saat */,
@@ -235,28 +193,6 @@
 			productReference = 3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		3600CD512F9C5793001EC262 /* AlKhatibLiveActivity */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 3600CD592F9C5793001EC262 /* Build configuration list for PBXNativeTarget "AlKhatibLiveActivity" */;
-			buildPhases = (
-				3600CD532F9C5793001EC262 /* Sources */,
-				3600CD542F9C5793001EC262 /* Frameworks */,
-				3600CD562F9C5793001EC262 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				3600CD552F9C5793001EC262 /* AlKhatibLiveActivity */,
-			);
-			name = AlKhatibLiveActivity;
-			packageProductDependencies = (
-			);
-			productName = AlKhatibLiveActivity;
-			productReference = 3600CD522F9C5793001EC262 /* AlKhatibLiveActivity.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -277,9 +213,6 @@
 					3600CD3B2F9C5793001EC262 = {
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = 3600CD242F9C5791001EC262;
-					};
-					3600CD512F9C5793001EC262 = {
-						CreatedOnToolsVersion = 26.3;
 					};
 				};
 			};
@@ -302,7 +235,6 @@
 			projectRoot = "";
 			targets = (
 				3600CD242F9C5791001EC262 /* Saat */,
-				3600CD512F9C5793001EC262 /* AlKhatibLiveActivity */,
 				3600CD312F9C5793001EC262 /* SaatTests */,
 				3600CD3B2F9C5793001EC262 /* SaatUITests */,
 			);
@@ -325,13 +257,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		3600CD3A2F9C5793001EC262 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		3600CD562F9C5793001EC262 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -384,13 +309,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		3600CD532F9C5793001EC262 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -403,11 +321,6 @@
 			isa = PBXTargetDependency;
 			target = 3600CD242F9C5791001EC262 /* Saat */;
 			targetProxy = 3600CD3D2F9C5793001EC262 /* PBXContainerItemProxy */;
-		};
-		3600CD5A2F9C5793001EC262 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 3600CD512F9C5793001EC262 /* AlKhatibLiveActivity */;
-			targetProxy = 3600CD5B2F9C5793001EC262 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -756,54 +669,6 @@
 			};
 			name = Release;
 		};
-		3600CD572F9C5793001EC262 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NF3JRRP69D;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Saat Live Activity";
-				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat.LiveActivity;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		3600CD582F9C5793001EC262 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NF3JRRP69D;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Saat Live Activity";
-				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat.LiveActivity;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -839,15 +704,6 @@
 			buildConfigurations = (
 				3600CD4D2F9C5793001EC262 /* Debug */,
 				3600CD4E2F9C5793001EC262 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		3600CD592F9C5793001EC262 /* Build configuration list for PBXNativeTarget "AlKhatibLiveActivity" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				3600CD572F9C5793001EC262 /* Debug */,
-				3600CD582F9C5793001EC262 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

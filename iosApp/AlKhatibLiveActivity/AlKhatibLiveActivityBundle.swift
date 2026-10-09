@@ -12,6 +12,8 @@ import WidgetKit
 @main
 struct SaatLiveActivityBundle: WidgetBundle {
     var body: some Widget {
+        PrayerCountdownLiveActivity()
         QuranPlaybackLiveActivity()
     }
 }
+

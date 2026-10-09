@@ -105,6 +105,14 @@ final class PrayerDashboardViewModel: ObservableObject {
         if let next = controller.nextPrayer {
             self.nextPrayerDisplayName = mapToSoutheastAsianName(next.name)
             self.nextPrayerTime = formatter.string(from: next.date)
+            
+            // Sync Live Activity countdown on Lock Screen & Dynamic Island
+            PrayerCountdownLiveActivityManager.shared.startOrUpdateActivity(
+                nextPrayerName: self.nextPrayerDisplayName,
+                nextPrayerTimeFormatted: self.nextPrayerTime,
+                targetDate: next.date,
+                currentPrayerName: mapToSoutheastAsianName(activeName)
+            )
         } else {
             self.nextPrayerDisplayName = "--"
             self.nextPrayerTime = "--:--"

@@ -25,7 +25,6 @@ struct QuranPlaybackLiveActivity: Widget {
                         Image(systemName: context.state.isPlaying ? "waveform" : "pause.fill")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundStyle(.teal)
-                            .symbolEffect(.variableColor.iterative, isActive: context.state.isPlaying)
                     }
                 }
 
@@ -77,7 +76,6 @@ struct QuranPlaybackLiveActivity: Widget {
                 Image(systemName: context.state.isPlaying ? "waveform" : "book.fill")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(.teal)
-                    .symbolEffect(.variableColor.iterative, isActive: context.state.isPlaying)
             } compactTrailing: {
                 // Compact trailing — verse label
                 Text("Ayah \(context.state.verseLabel)")
@@ -89,7 +87,6 @@ struct QuranPlaybackLiveActivity: Widget {
                 Image(systemName: context.state.isPlaying ? "waveform" : "book.fill")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundStyle(.teal)
-                    .symbolEffect(.variableColor.iterative, isActive: context.state.isPlaying)
             }
         }
     }

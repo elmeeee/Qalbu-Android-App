@@ -478,6 +478,33 @@ struct ChapterVersesView: View {
         )
     }
 
+    private func activePageBinding(_ vm: ChapterVersesViewModel, _ readerCoordinator: ChapterReaderCoordinator) -> Binding<Int> {
+        Binding(
+            get: {
+                let hasIntro = chapter != nil
+                if readerCoordinator.scrollPosition == ChapterReaderCoordinator.ScrollID.intro {
+                    return 0
+                }
+                if let pos = readerCoordinator.scrollPosition,
+                   let idx = vm.verses.firstIndex(where: { $0.listIdentity == pos }) {
+                    return idx + (hasIntro ? 1 : 0)
+                }
+                return 0
+            },
+            set: { newIndex in
+                let hasIntro = chapter != nil
+                if hasIntro && newIndex == 0 {
+                    readerCoordinator.scrollPosition = ChapterReaderCoordinator.ScrollID.intro
+                } else {
+                    let verseIdx = newIndex - (hasIntro ? 1 : 0)
+                    if verseIdx >= 0 && verseIdx < vm.verses.count {
+                        readerCoordinator.scrollPosition = vm.verses[verseIdx].listIdentity
+                    }
+                }
+            }
+        )
+    }
+
     @ViewBuilder
     private func versePager(_ vm: ChapterVersesViewModel) -> some View {
         @Bindable var bindable = vm
@@ -494,32 +521,48 @@ struct ChapterVersesView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let readerCoordinator {
             @Bindable var readerCoordinator = readerCoordinator
+            let hasIntro = chapter != nil
+            let totalPages = (hasIntro ? 1 : 0) + bindable.verses.count
 
-            TabView(selection: $readerCoordinator.scrollPosition) {
-                if let ch = chapter {
+            BookPageCurlPager(
+                pageCount: max(1, totalPages),
+                currentPage: activePageBinding(bindable, readerCoordinator),
+                onPageChanged: { newPage in
+                    let hasIntro = chapter != nil
+                    if hasIntro && newPage == 0 {
+                        readerCoordinator.onScrollPositionChanged(ChapterReaderCoordinator.ScrollID.intro, vm: bindable)
+                    } else {
+                        let verseIdx = newPage - (hasIntro ? 1 : 0)
+                        if verseIdx >= 0 && verseIdx < bindable.verses.count {
+                            let verse = bindable.verses[verseIdx]
+                            readerCoordinator.onScrollPositionChanged(verse.listIdentity, vm: bindable)
+                        }
+                    }
+                }
+            ) { pageIndex in
+                if hasIntro && pageIndex == 0, let ch = chapter {
                     ChapterIntroPage(
                         chapter: ch,
                         isPreparingPlayAll: bindable.isPreparingPlayAll,
                         onPlayAll: { Task { await readerCoordinator.playEntireSurah(vm: bindable) } },
                         onTapScreen: { Task { await readerCoordinator.playEntireSurah(vm: bindable) } }
                     )
-                    .tag(ChapterReaderCoordinator.ScrollID.intro as String?)
-                }
-
-                ForEach(bindable.verses, id: \.listIdentity) { verse in
-                    ChapterAyahPage(
-                        verse: verse,
-                        showTranslation: showTranslation,
-                        showTransliteration: showTransliteration,
-                        isMemorizationMode: isMemorizationMode,
-                        fontScale: fontScale,
-                        isPlaying: audio.isPlayingURL(verse.audio?.url) && audio.isPlaying,
-                        onTapScreen: { readerCoordinator.handleTap(for: verse, vm: bindable) }
-                    )
-                    .tag(verse.listIdentity as String?)
+                } else {
+                    let verseIdx = pageIndex - (hasIntro ? 1 : 0)
+                    if verseIdx >= 0 && verseIdx < bindable.verses.count {
+                        let verse = bindable.verses[verseIdx]
+                        ChapterAyahPage(
+                            verse: verse,
+                            showTranslation: showTranslation,
+                            showTransliteration: showTransliteration,
+                            isMemorizationMode: isMemorizationMode,
+                            fontScale: fontScale,
+                            isPlaying: audio.isPlayingURL(verse.audio?.url) && audio.isPlaying,
+                            onTapScreen: { readerCoordinator.handleTap(for: verse, vm: bindable) }
+                        )
+                    }
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: .never))
             .ignoresSafeArea()
             .onChange(of: readerCoordinator.scrollPosition) { _, newID in
                 readerCoordinator.onScrollPositionChanged(newID, vm: bindable)
