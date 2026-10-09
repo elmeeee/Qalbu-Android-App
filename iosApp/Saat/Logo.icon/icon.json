@@ -1,32 +1,17 @@
 {
-  "color-space-for-untagged-svg-colors" : "display-p3",
-  "fill" : {
-    "automatic-gradient" : "extended-srgb:0.00000,0.53333,1.00000,1.00000"
-  },
+  "fill" : "automatic",
   "groups" : [
     {
       "layers" : [
         {
-          "blend-mode-specializations" : [
-            {
-              "appearance" : "dark",
-              "value" : "normal"
-            },
-            {
-              "appearance" : "tinted",
-              "value" : "normal"
-            }
-          ],
-          "fill" : "automatic",
-          "glass" : true,
-          "hidden" : false,
-          "image-name" : "appstore.png",
+          "glass" : false,
+          "image-name" : "icon.png",
           "name" : "icon",
           "position" : {
-            "scale" : 1,
+            "scale" : 0.5,
             "translation-in-points" : [
               0,
-              5.684341886080802e-14
+              0
             ]
           }
         }

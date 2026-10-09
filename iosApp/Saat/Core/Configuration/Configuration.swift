@@ -2,7 +2,7 @@
 //  Configuration.swift
 //  Sāat
 //
-//  Created by Elmee on 25/04/2026.
+//  Created by Sufiandy Elmy on 09/10/2026.
 //  Copyright © 2026 Elmee. All rights reserved.
 //
 
@@ -43,23 +43,23 @@ struct AppConfiguration: Sendable {
     }
 }
 
-private enum QFCompiledCredentials {
+private enum DefaultAppCredentials {
     static let appGroupIdentifier = "group.co.kamy.Saat"
+    private static let fallbackURL = URL(string: "https://api.aladhan.com")!
 
     static func configuration(for environment: AppEnvironment) -> AppConfiguration {
-        let apiBase = AppEndpoints.Runtime.apiBase
         return AppConfiguration(
             environment: environment,
-            apiBaseURL: apiBase,
-            userAPIBaseURL: apiBase,
-            oauthEndpoint: AppEndpoints.Runtime.oauthToken,
-            oauthAuthorizeEndpoint: AppEndpoints.Runtime.oauthAuthorize,
-            oauthRedirectURI: AppEndpoints.Runtime.oauthCallback,
-            oauthAppRedirectURI: AppEndpoints.Runtime.oauthAppCallback,
-            oauthScopes: AppEndpoints.Runtime.oauthScopes,
-            clientId: AppEndpoints.Runtime.oauthClientId,
-            clientSecret: AppEndpoints.Runtime.oauthClientSecret,
-            defaultTranslationId: AppEndpoints.Runtime.defaultTranslationId,
+            apiBaseURL: fallbackURL,
+            userAPIBaseURL: fallbackURL,
+            oauthEndpoint: fallbackURL,
+            oauthAuthorizeEndpoint: fallbackURL,
+            oauthRedirectURI: fallbackURL,
+            oauthAppRedirectURI: fallbackURL,
+            oauthScopes: "openid",
+            clientId: "saat-app",
+            clientSecret: nil,
+            defaultTranslationId: 33,
             appGroupIdentifier: appGroupIdentifier
         )
     }
@@ -67,6 +67,6 @@ private enum QFCompiledCredentials {
 
 extension AppEnvironment {
     var configuration: AppConfiguration {
-        QFCompiledCredentials.configuration(for: self)
+        DefaultAppCredentials.configuration(for: self)
     }
 }
