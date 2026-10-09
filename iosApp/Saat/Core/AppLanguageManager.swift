@@ -66,18 +66,32 @@ class AppLanguageManager: ObservableObject {
     }
     
     func localize(_ key: String) -> String {
+        let raw: String
         if let dict = translations[key], let val = dict[currentLanguage], !val.isEmpty {
-            return val
+            raw = val
+        } else if currentLanguage == .malay, let idVal = translations[key]?[.indonesian], !idVal.isEmpty {
+            raw = idVal
+        } else {
+            raw = translations[key]?[.indonesian] ?? translations[key]?[.english] ?? key
         }
-        if currentLanguage == .malay, let idVal = translations[key]?[.indonesian], !idVal.isEmpty {
-            return idVal
+        
+        if raw.contains("%") {
+            return raw
+                .replacingOccurrences(of: "%([0-9]+)\\$s", with: "%$1%@", options: .regularExpression)
+                .replacingOccurrences(of: "%s", with: "%@")
         }
-        return translations[key]?[.indonesian] ?? translations[key]?[.english] ?? key
+        return raw
     }
     
     func localizeFormatted(_ key: String, _ args: CVarArg...) -> String {
         let format = localize(key)
-        return String(format: format, arguments: args)
+        let convertedArgs: [CVarArg] = args.map { arg in
+            if let str = arg as? String {
+                return str as NSString
+            }
+            return arg
+        }
+        return String(format: format, arguments: convertedArgs)
     }
     
     private let translations: [String: [AppLanguage: String]] = [
