@@ -5,17 +5,21 @@ import os
 def parse_xml(path):
     if not os.path.exists(path):
         return {}
-    tree = ET.parse(path)
-    root = tree.getroot()
-    res = {}
-    for item in root.findall('string'):
-        name = item.get('name')
-        text = ''.join(item.itertext())
-        if name and text:
-            # clean escaped chars
-            text = text.replace("\\'", "'").replace('\\"', '"')
-            res[name] = text
-    return res
+    try:
+        tree = ET.parse(path)
+        root = tree.getroot()
+        res = {}
+        for item in root.findall('string'):
+            name = item.get('name')
+            text = ''.join(item.itertext())
+            if name and text:
+                # clean escaped chars
+                text = text.replace("\\'", "'").replace('\\"', '"')
+                res[name] = text
+        return res
+    except Exception as e:
+        print(f"Error reading {path}: {e}")
+        return {}
 
 def escape_kotlin(s):
     return s.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('$', '\\$')
@@ -24,13 +28,24 @@ def escape_strings_file(s):
     return s.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
 
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../app/src/main/res'))
-id_strings = parse_xml(os.path.join(base_dir, 'values/strings.xml'))
-id_override = parse_xml(os.path.join(base_dir, 'values-in/strings.xml'))
-id_strings.update(id_override)
-ms_strings = parse_xml(os.path.join(base_dir, 'values-ms/strings.xml'))
 
-all_keys = sorted(list(set(list(id_strings.keys()) + list(ms_strings.keys()))))
+# English (default values)
+en_strings = parse_xml(os.path.join(base_dir, 'values/strings.xml'))
+en_strings.update(parse_xml(os.path.join(base_dir, 'values/share_format_strings.xml')))
+
+# Indonesian (values-in)
+id_strings = parse_xml(os.path.join(base_dir, 'values-in/strings.xml'))
+id_strings.update(parse_xml(os.path.join(base_dir, 'values-in/strings_features.xml')))
+id_strings.update(parse_xml(os.path.join(base_dir, 'values-in/share_format_strings.xml')))
+
+# Malay (values-ms)
+ms_strings = parse_xml(os.path.join(base_dir, 'values-ms/strings.xml'))
+ms_strings.update(parse_xml(os.path.join(base_dir, 'values-ms/strings_features.xml')))
+ms_strings.update(parse_xml(os.path.join(base_dir, 'values-ms/share_format_strings.xml')))
+
+all_keys = sorted(list(set(list(en_strings.keys()) + list(id_strings.keys()) + list(ms_strings.keys()))))
 print(f"Total unique keys: {len(all_keys)}")
+print(f"EN: {len(en_strings)}, ID: {len(id_strings)}, MS: {len(ms_strings)}")
 
 # 1. KMP Shared Strings
 out_kmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../shared/src/commonMain/kotlin/app/kamy/saatApp/shared/localization'))
@@ -77,7 +92,7 @@ object SharedStrings {
         val map = HashMap<String, String>(""" + str(len(all_keys)) + """)\n"""
 
 for k in all_keys:
-    val = id_strings.get(k, "")
+    val = id_strings.get(k, en_strings.get(k, ""))
     if val:
         kt_content += f'        map["{k}"] = "{escape_kotlin(val)}"\n'
 
@@ -88,7 +103,7 @@ kt_content += """        map
         val map = HashMap<String, String>(""" + str(len(all_keys)) + """)\n"""
 
 for k in all_keys:
-    val = ms_strings.get(k, "")
+    val = ms_strings.get(k, id_strings.get(k, en_strings.get(k, "")))
     if val:
         kt_content += f'        map["{k}"] = "{escape_kotlin(val)}"\n'
 
@@ -99,7 +114,7 @@ kt_content += """        map
         val map = HashMap<String, String>(""" + str(len(all_keys)) + """)\n"""
 
 for k in all_keys:
-    val = id_strings.get(k, "")
+    val = en_strings.get(k, id_strings.get(k, ""))
     if val:
         kt_content += f'        map["{k}"] = "{escape_kotlin(val)}"\n'
 
@@ -117,15 +132,15 @@ os.makedirs(os.path.join(ios_res_dir, 'en.lproj'), exist_ok=True)
 os.makedirs(os.path.join(ios_res_dir, 'id.lproj'), exist_ok=True)
 os.makedirs(os.path.join(ios_res_dir, 'ms.lproj'), exist_ok=True)
 
-def write_strings_file(path, data):
+def write_strings_file(path, data, fallback):
     with open(path, 'w', encoding='utf-8') as f:
         for k in all_keys:
-            v = data.get(k, id_strings.get(k, ""))
+            v = data.get(k, fallback.get(k, ""))
             f.write(f'"{k}" = "{escape_strings_file(v)}";\n')
 
-write_strings_file(os.path.join(ios_res_dir, 'id.lproj/Localizable.strings'), id_strings)
-write_strings_file(os.path.join(ios_res_dir, 'ms.lproj/Localizable.strings'), ms_strings)
-write_strings_file(os.path.join(ios_res_dir, 'en.lproj/Localizable.strings'), id_strings)
+write_strings_file(os.path.join(ios_res_dir, 'id.lproj/Localizable.strings'), id_strings, en_strings)
+write_strings_file(os.path.join(ios_res_dir, 'ms.lproj/Localizable.strings'), ms_strings, id_strings)
+write_strings_file(os.path.join(ios_res_dir, 'en.lproj/Localizable.strings'), en_strings, id_strings)
 
 # 3. iOS AppLanguageManager.swift
 swift_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../iosApp/Saat/Core/AppLanguageManager.swift'))
@@ -195,16 +210,17 @@ class AppLanguageManager: ObservableObject {
         if currentLanguage == .malay, let idVal = translations[key]?[.indonesian], !idVal.isEmpty {
             return idVal
         }
-        return translations[key]?[.indonesian] ?? key
+        return translations[key]?[.indonesian] ?? translations[key]?[.english] ?? key
     }
     
     private let translations: [String: [AppLanguage: String]] = [
 """
 
 for k in all_keys:
-    id_v = escape_strings_file(id_strings.get(k, ""))
-    ms_v = escape_strings_file(ms_strings.get(k, id_strings.get(k, "")))
-    swift_content += f'        "{k}": [.indonesian: "{id_v}", .english: "{id_v}", .malay: "{ms_v}"],\n'
+    en_v = escape_strings_file(en_strings.get(k, id_strings.get(k, "")))
+    id_v = escape_strings_file(id_strings.get(k, en_strings.get(k, "")))
+    ms_v = escape_strings_file(ms_strings.get(k, id_strings.get(k, en_v)))
+    swift_content += f'        "{k}": [.indonesian: "{id_v}", .english: "{en_v}", .malay: "{ms_v}"],\n'
 
 swift_content += """    ]
 }

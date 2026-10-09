@@ -2,19 +2,18 @@
 //  RootTabView.swift
 //  Sāat
 //
-//  Created by Elmee on 25/04/2026.
+//  Created by Sufiandy Elmy on 09/10/2026.
 //  Copyright © 2026 Elmee. All rights reserved.
 //
 
 import SwiftUI
 
 struct RootTabView: View {
-    enum Tab: Hashable {
-        case today, journey, tools, account
-    }
-
-    enum TodayNavigation: Hashable {
-        case account
+    enum Tab: Int, Hashable {
+        case today = 0
+        case journey = 1
+        case tools = 2
+        case account = 3
     }
 
     @Environment(\.scenePhase) private var scenePhase
@@ -26,40 +25,75 @@ struct RootTabView: View {
     @StateObject private var prayerController = PrayerTimesController()
     let verseState: TodayVerseState
 
+    enum TodayNavigation: Hashable {
+        case account
+    }
+
     init(verseState: TodayVerseState) {
         self.verseState = verseState
     }
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Group {
-                switch selectedTab {
-                case .today:
-                    NavigationStack(path: $todayNavigationPath) {
-                        TodayDiscoveryView(verseState: verseState)
-                            .toolbar(.hidden, for: .navigationBar)
-                    }
-                case .journey:
-                    ChaptersView()
-                case .tools:
-                    NavigationStack {
-                        SpiritualToolsView()
-                            .toolbar(.hidden, for: .navigationBar)
-                    }
-                case .account:
-                    NavigationStack {
-                        ProfileView(preferSystemNavigationTitle: false, verseState: verseState)
-                            .environment(\.appContainer, container)
-                            .toolbar(.hidden, for: .navigationBar)
-                    }
+        TabView(selection: $selectedTab) {
+            // Tab 1: Beranda
+            NavigationStack(path: $todayNavigationPath) {
+                TodayDiscoveryView(verseState: verseState)
+            }
+            .tabItem {
+                Label {
+                    Text(languageManager.localize("nav_home"))
+                } icon: {
+                    Image(selectedTab == .today ? "ic_home_on" : "ic_home_off")
+                        .renderingMode(.template)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .tag(Tab.today)
 
-            // Floating Tab Bar
-            FloatingTabBar(selectedTab: $selectedTab)
+            // Tab 2: Al-Qur'an
+            NavigationStack {
+                ChaptersView()
+            }
+            .tabItem {
+                Label {
+                    Text(languageManager.localize("nav_quran"))
+                } icon: {
+                    Image(selectedTab == .journey ? "ic_quran_on" : "ic_quran_off")
+                        .renderingMode(.template)
+                }
+            }
+            .tag(Tab.journey)
+
+            // Tab 3: Ibadah
+            NavigationStack {
+                SpiritualToolsView()
+            }
+            .tabItem {
+                Label {
+                    Text(languageManager.localize("nav_tools"))
+                } icon: {
+                    Image(selectedTab == .tools ? "ic_spritual_on" : "ic_spritual_off")
+                        .renderingMode(.template)
+                }
+            }
+            .tag(Tab.tools)
+
+            // Tab 4: Lainnya
+            NavigationStack {
+                ProfileView(preferSystemNavigationTitle: false, verseState: verseState)
+                    .environment(\.appContainer, container)
+            }
+            .tabItem {
+                Label {
+                    Text(languageManager.localize("nav_other"))
+                } icon: {
+                    Image(selectedTab == .account ? "ic_setting_on" : "ic_setting_off")
+                        .renderingMode(.template)
+                }
+            }
+            .tag(Tab.account)
         }
-        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .tint(Color(hex: "#1B4332")) // Dark Emerald Green active tint
+        .id(languageManager.currentLanguage)
         .environmentObject(prayerController)
         .onChangeWithFallback(of: verseState.shouldNavigateToAccount) { shouldNavigate in
             if shouldNavigate {
@@ -75,36 +109,11 @@ struct RootTabView: View {
                 verseState.didSelectTodayTab()
             }
         }
-        .onReceive(NotificationCenter.default.publisher(for: .qfOAuthWebAuthStateDidChange)) { _ in
-            verseState.syncOAuthUIState(container: container)
-        }
-        .onChangeWithFallback(of: scenePhase) { p in
-            if p == .active {
-                Task {
-                    guard container?.oauth.isWebAuthInProgress == false else { return }
-                    await verseState.ensureProfileLoaded(container: container)
-                    await vm.runSync(container: container)
-                }
-            }
-        }
         .onReceive(
             NotificationCenter.default.publisher(
                 for: DailyVerseNotificationPreferences.openTodayTabNotification)
         ) { _ in
             verseState.selectTodayTab()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .qfUserSessionDidChange)) { _ in
-            Task { @MainActor in
-                guard container?.oauth.isWebAuthInProgress == false else { return }
-                guard await vm.shouldResetToDiscover(container: container) else { return }
-                if selectedTab != .today {
-                    selectedTab = .today
-                }
-                if todayNavigationPath.isEmpty == false {
-                    await Task.yield()
-                    todayNavigationPath = []
-                }
-            }
         }
     }
 }

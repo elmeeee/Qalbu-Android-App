@@ -2,29 +2,39 @@
 //  SpiritualToolsView.swift
 //  Saat
 //
-//  Created by Elmee on 25/06/2026.
+//  Created by Sufiandy Elmy on 09/10/2026.
 //  Copyright © 2026 Elmee. All rights reserved.
 //
 
 import SwiftUI
 
 enum ToolCategory: String, CaseIterable, Identifiable {
-    case all = "Semua"
-    case prayer = "Shalat & Waktu"
-    case dhikr = "Dzikir & Doa"
-    case fiqh = "Fiqih & Panduan"
+    case all
+    case prayer
+    case dhikr
+    case fiqh
 
     var id: String { rawValue }
+
+    @MainActor
+    func localizedTitle(_ lang: AppLanguageManager) -> String {
+        switch self {
+        case .all: return lang.localize("tool_category_all")
+        case .prayer: return lang.localize("tool_category_prayer")
+        case .dhikr: return lang.localize("tool_category_dhikr")
+        case .fiqh: return lang.localize("tool_category_fiqh")
+        }
+    }
 }
 
 private struct SpiritualToolItem: Identifiable {
     var id: String { route }
     let iconName: String
-    let title: String
-    let desc: String
+    let titleKey: String
+    let descKey: String
     let route: String
     let category: ToolCategory
-    let destination: AnyView
+    let destinationBuilder: () -> AnyView
 }
 
 struct SpiritualToolsView: View {
@@ -34,131 +44,136 @@ struct SpiritualToolsView: View {
 
     private var allTools: [SpiritualToolItem] {
         [
-            // Prayer & Time
+            // 1. Shalat & Waktu (PRAYER)
             SpiritualToolItem(
                 iconName: "ic_qibla_3d",
-                title: "Arah Kiblat",
-                desc: "Kompas presisi tinggi & AR",
+                titleKey: "tool_qibla_title",
+                descKey: "tool_qibla_desc",
                 route: "qibla",
                 category: .prayer,
-                destination: AnyView(QiblaFinderView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(QiblaFinderView().navigationTitle(AppLanguageManager.shared.localize("tool_qibla_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_sunnah_3d",
-                title: "Shalat Sunnah",
-                desc: "Panduan & niat shalat sunnah",
+                titleKey: "tool_sunnah_practices_title",
+                descKey: "tool_sunnah_practices_desc",
                 route: "sunnah-prayer",
                 category: .prayer,
-                destination: AnyView(QiyamTrackerView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(QiyamTrackerView().navigationTitle(AppLanguageManager.shared.localize("tool_sunnah_practices_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_jamak_3d",
-                title: "Jamak & Qashar",
-                desc: "Syarat & tata cara musafir",
+                titleKey: "tool_jamak_guide_title",
+                descKey: "tool_jamak_guide_desc",
                 route: "jamak-qashar",
                 category: .prayer,
-                destination: AnyView(QiyamTrackerView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(QiyamTrackerView().navigationTitle(AppLanguageManager.shared.localize("tool_jamak_guide_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_radio_3d",
-                title: "Radio Quran",
-                desc: "Siaran murottal 24 jam nonstop",
+                titleKey: "tool_radio_title",
+                descKey: "tool_radio_desc",
                 route: "radio",
                 category: .prayer,
-                destination: AnyView(QiyamTrackerView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_radio_title"))) }
             ),
 
-            // Dhikr & Du'a
+            // 2. Dzikir & Doa (DHIKR)
             SpiritualToolItem(
                 iconName: "ic_doazikir_3d",
-                title: "Doa & Dzikir",
-                desc: "Hisnul Muslim, dzikir pagi petang",
+                titleKey: "tool_dua_dhikr_title",
+                descKey: "tool_dua_dhikr_desc",
                 route: "doa-zikir",
                 category: .dhikr,
-                destination: AnyView(DoaZikirView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_dua_dhikr_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_tasbih_3d",
-                title: "Tasbih Digital",
-                desc: "Hitung wirid & dzikir dengan haptic",
+                titleKey: "tool_tasbih_title",
+                descKey: "tool_tasbih_desc",
                 route: "dhikr",
                 category: .dhikr,
-                destination: AnyView(DhikrTasbihView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(DhikrTasbihView().navigationTitle(AppLanguageManager.shared.localize("tool_tasbih_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_asmaulhusna_3d",
-                title: "Asmaul Husna",
-                desc: "99 Nama Allah beserta makna & audio",
+                titleKey: "tool_asmaul_husna_title",
+                descKey: "tool_asmaul_husna_desc",
                 route: "asmaul-husna",
                 category: .dhikr,
-                destination: AnyView(DoaZikirView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_asmaul_husna_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_manzil_3d",
-                title: "Manzil & Ruqyah",
-                desc: "Ayat-ayat perlindungan harian",
+                titleKey: "tool_manzil_title",
+                descKey: "tool_manzil_desc",
                 route: "manzil",
                 category: .dhikr,
-                destination: AnyView(ManzilView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(ManzilView().navigationTitle(AppLanguageManager.shared.localize("tool_manzil_title"))) }
             ),
 
-            // Fiqh & Guides
+            // 3. Fiqih & Panduan (FIQH)
             SpiritualToolItem(
                 iconName: "ic_zakat_3d",
-                title: "Kalkulator Zakat",
-                desc: "Hitung zakat maal, emas, & fitrah",
+                titleKey: "tool_zakah_title",
+                descKey: "tool_zakah_desc",
                 route: "zakat",
                 category: .fiqh,
-                destination: AnyView(ZakatCalculatorView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(ZakatCalculatorView().navigationTitle(AppLanguageManager.shared.localize("tool_zakah_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_fidyah_3d",
-                title: "Hitung Fidyah",
-                desc: "Kalkulasi tanggungan fidyah puasa",
+                titleKey: "tool_fidyah_tracker_title",
+                descKey: "tool_fidyah_tracker_desc",
                 route: "fidyah",
                 category: .fiqh,
-                destination: AnyView(ZakatCalculatorView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(ZakatCalculatorView().navigationTitle(AppLanguageManager.shared.localize("tool_fidyah_tracker_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_faraidh_3d",
-                title: "Kalkulator Waris",
-                desc: "Bagi warisan sesuai syariat Islam",
+                titleKey: "tool_faraidh_title",
+                descKey: "tool_faraidh_desc",
                 route: "faraidh",
                 category: .fiqh,
-                destination: AnyView(FaraidhCalculatorView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(FaraidhCalculatorView().navigationTitle(AppLanguageManager.shared.localize("tool_faraidh_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_hajj_umrah_3d",
-                title: "Haji & Umrah",
-                desc: "Panduan manasik haji & umrah praktis",
+                titleKey: "tool_hajj_umrah_title",
+                descKey: "tool_hajj_umrah_desc",
                 route: "hajj-umrah",
                 category: .fiqh,
-                destination: AnyView(DoaZikirView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_hajj_umrah_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_jenazah_3d",
-                title: "Panduan Jenazah",
-                desc: "Tata cara memandikan hingga shalat",
+                titleKey: "tool_janazah_guide_title",
+                descKey: "tool_janazah_guide_desc",
                 route: "jenazah",
                 category: .fiqh,
-                destination: AnyView(DoaZikirView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_janazah_guide_title"))) }
             ),
             SpiritualToolItem(
                 iconName: "ic_encyclopedia_3d",
-                title: "Ensiklopedia Islam",
-                desc: "Rangkuman tanya jawab & fatwa fiqih",
+                titleKey: "tool_encyclopedia_title",
+                descKey: "tool_encyclopedia_desc",
                 route: "encyclopedia",
                 category: .fiqh,
-                destination: AnyView(DoaZikirView().toolbar(.hidden, for: .tabBar))
+                destinationBuilder: { AnyView(DoaZikirView().navigationTitle(AppLanguageManager.shared.localize("tool_encyclopedia_title"))) }
             )
         ]
     }
 
     private var filteredTools: [SpiritualToolItem] {
         allTools.filter { tool in
-            let matchesCategory = selectedCategory == .all || tool.category == selectedCategory
-            let matchesSearch = searchQuery.isEmpty || tool.title.localizedCaseInsensitiveContains(searchQuery) || tool.desc.localizedCaseInsensitiveContains(searchQuery)
-            return matchesCategory && matchesSearch
+            let matchesCategory = (selectedCategory == .all || tool.category == selectedCategory)
+            if searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
+                return matchesCategory
+            }
+            let query = searchQuery.trimmingCharacters(in: .whitespaces).lowercased()
+            let title = languageManager.localize(tool.titleKey).lowercased()
+            let desc = languageManager.localize(tool.descKey).lowercased()
+            return matchesCategory && (title.contains(query) || desc.contains(query))
         }
     }
 
@@ -169,7 +184,7 @@ struct SpiritualToolsView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            SaatTokens.Colors.homeBg
+            Color(hex: "#F9F7F2")
                 .ignoresSafeArea()
 
             // Header Background Image
@@ -182,9 +197,9 @@ struct SpiritualToolsView: View {
                 .overlay(
                     LinearGradient(
                         colors: [
-                            SaatTokens.Colors.homeBg.opacity(0.20),
-                            SaatTokens.Colors.homeBg.opacity(0.65),
-                            SaatTokens.Colors.homeBg
+                            Color(hex: "#F9F7F2").opacity(0.15),
+                            Color(hex: "#F9F7F2").opacity(0.60),
+                            Color(hex: "#F9F7F2")
                         ],
                         startPoint: .top,
                         endPoint: .bottom
@@ -192,131 +207,138 @@ struct SpiritualToolsView: View {
                 )
                 .ignoresSafeArea(edges: .top)
 
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 14) {
-                    // Header Title & Subtitle
+                    // Header Title & Subtitle (matching Android)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Ruang Ibadah & Fiqih")
+                        Text(languageManager.localize("worship_header_title"))
                             .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(SaatTokens.Colors.homeDarkGreen)
+                            .foregroundColor(Color(hex: "#153828"))
 
-                        Text("Kumpulan panduan & sarana ibadah harianmu")
+                        Text(languageManager.localize("worship_header_subtitle"))
                             .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(SaatTokens.Colors.slate700)
+                            .foregroundColor(Color(hex: "#64748B"))
                     }
                     .padding(.top, 16)
 
-                    // Search Bar
+                    // Modern Search Bar
                     HStack(spacing: 10) {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(SaatTokens.Colors.homeDarkGreen.opacity(0.7))
+                            .foregroundColor(Color(hex: "#1B4332").opacity(0.7))
 
-                        TextField("Cari fitur atau panduan…", text: $searchQuery)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(SaatTokens.Colors.slate900)
+                        TextField(
+                            languageManager.localize("tool_search_hint"),
+                            text: $searchQuery
+                        )
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(Color(hex: "#1E293B"))
 
                         if !searchQuery.isEmpty {
                             Button(action: { searchQuery = "" }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.system(size: 16))
-                                    .foregroundColor(SaatTokens.Colors.slate500)
+                                    .foregroundColor(Color(hex: "#94A3B8"))
                             }
                             .buttonStyle(.plain)
                         }
                     }
                     .padding(.horizontal, 14)
                     .frame(height: 48)
-                    .background(SaatTokens.Colors.pureWhite)
+                    .background(Color.white)
                     .cornerRadius(16)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color(hex: 0xFFE8_E2D2), lineWidth: 1)
+                            .stroke(Color(hex: "#E8E2D2"), lineWidth: 1)
                     )
-                    .shadow(color: Color.black.opacity(0.02), radius: 4, x: 0, y: 1)
+                    .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 1)
 
                     // Category Filter Pills
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             ForEach(ToolCategory.allCases) { cat in
-                                let isSelected = selectedCategory == cat
+                                let isSelected = (selectedCategory == cat)
                                 Button(action: {
                                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                                     withAnimation(.easeInOut(duration: 0.2)) {
                                         selectedCategory = cat
                                     }
                                 }) {
-                                    Text(cat.rawValue)
+                                    Text(cat.localizedTitle(languageManager))
                                         .font(.system(size: 13, weight: isSelected ? .bold : .medium))
-                                        .foregroundColor(isSelected ? .white : SaatTokens.Colors.slate700)
                                         .padding(.horizontal, 16)
                                         .padding(.vertical, 8)
-                                        .background(isSelected ? SaatTokens.Colors.deepEmerald : Color.white)
+                                        .background(isSelected ? Color(hex: "#085E43") : Color.white)
+                                        .foregroundColor(isSelected ? .white : Color(hex: "#334155"))
                                         .cornerRadius(20)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 20)
-                                                .stroke(isSelected ? SaatTokens.Colors.deepEmerald : Color(hex: 0xFFE8_E2D2), lineWidth: 1)
+                                                .stroke(isSelected ? Color.clear : Color(hex: "#E8E2D2"), lineWidth: 1)
                                         )
+                                        .shadow(color: Color.black.opacity(isSelected ? 0.08 : 0.02), radius: 3, x: 0, y: 1)
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
+                        .padding(.vertical, 2)
                     }
 
-                    // 2-Column Grid
-                    LazyVGrid(columns: columns, spacing: 14) {
-                        ForEach(filteredTools) { tool in
-                            NavigationLink(destination: tool.destination) {
-                                SpiritualToolGridCard(tool: tool)
-                            }
-                            .buttonStyle(.plain)
+                    // 14 Tools 2-Column Grid (100% Android Match)
+                    if filteredTools.isEmpty {
+                        VStack(spacing: 8) {
+                            Spacer(minLength: 40)
+                            Text(languageManager.localize("tool_search_empty"))
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(Color(hex: "#64748B"))
+                            Spacer(minLength: 40)
                         }
+                        .frame(maxWidth: .infinity)
+                    } else {
+                        LazyVGrid(columns: columns, spacing: 14) {
+                            ForEach(filteredTools) { tool in
+                                NavigationLink(destination: tool.destinationBuilder()) {
+                                    VStack(alignment: .center, spacing: 4) {
+                                        Image(tool.iconName)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 76, height: 76)
+                                            .padding(.bottom, 4)
+
+                                        Text(languageManager.localize(tool.titleKey))
+                                            .font(.system(size: 13.5, weight: .semibold))
+                                            .foregroundColor(Color(hex: "#085E43"))
+                                            .lineLimit(1)
+                                            .multilineTextAlignment(.center)
+
+                                        Text(languageManager.localize(tool.descKey))
+                                            .font(.system(size: 10.5, weight: .regular))
+                                            .foregroundColor(Color(hex: "#64748B"))
+                                            .lineLimit(2)
+                                            .multilineTextAlignment(.center)
+                                            .lineSpacing(1.5)
+                                    }
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 14)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 176)
+                                    .background(Color.white)
+                                    .cornerRadius(20)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(Color(hex: "#EAE4D6"), lineWidth: 1)
+                                    )
+                                    .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.top, 4)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.top, 4)
                 }
                 .padding(.horizontal, 18)
-                .padding(.bottom, 120)
             }
         }
-        .toolbar(.hidden, for: .navigationBar)
-    }
-}
-
-// MARK: - Spiritual Tool Grid Card
-private struct SpiritualToolGridCard: View {
-    let tool: SpiritualToolItem
-
-    var body: some View {
-        VStack(spacing: 6) {
-            Image(tool.iconName)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 76, height: 76)
-                .padding(.bottom, 2)
-
-            Text(tool.title)
-                .font(.system(size: 13.5, weight: .semibold))
-                .foregroundColor(SaatTokens.Colors.homeDarkGreen)
-                .multilineTextAlignment(.center)
-                .lineLimit(1)
-
-            Text(tool.desc)
-                .font(.system(size: 10.5, weight: .regular))
-                .foregroundColor(SaatTokens.Colors.slate700)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .frame(height: 28)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity)
-        .frame(height: 176)
-        .background(SaatTokens.Colors.pureWhite)
-        .cornerRadius(20)
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Color(hex: 0xFFEA_E4D6), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+        .navigationBarHidden(true)
     }
 }
