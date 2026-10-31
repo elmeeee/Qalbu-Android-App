@@ -8,8 +8,6 @@
 	<string>$(API_KEY_GROQ)</string>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Saat uses alarms to notify you at prayer times with the beautiful sound of the Adhan.</string>
-	<key>NSSupportsLiveActivities</key>
-	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
