@@ -7,7 +7,13 @@ data class GroqChatRequest(
     val model: String,
     val messages: List<GroqChatMessage>,
     val temperature: Double = 0.75,
-    val maxTokens: Int = 1100
+    val maxTokens: Int = 1100,
+    val responseFormat: GroqResponseFormat? = null
+)
+
+@Serializable
+data class GroqResponseFormat(
+    val type: String = "json_object"
 )
 
 @Serializable

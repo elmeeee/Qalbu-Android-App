@@ -641,7 +641,10 @@ fun TodayScreen(
             onBookmarkVerse = { verseData ->
                 tanyaSaatVm.bookmarkVerse(context, verseData)
             },
-            onClearToast = tanyaSaatVm::clearToast
+            onClearToast = tanyaSaatVm::clearToast,
+            onFollowUp = tanyaSaatVm::askFollowUp,
+            onNewChat = tanyaSaatVm::startNewChat,
+            onRetry = tanyaSaatVm::retryLast
         )
     }
 

@@ -1,12 +1,12 @@
 package app.kamy.saatApp.features.today
 
 import android.content.Context
+import android.content.res.Configuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.qualifiers.ApplicationContext
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.model.ChatSender
-import app.kamy.saatApp.domain.model.DoaItem
 import app.kamy.saatApp.domain.model.KimiAiModel
 import app.kamy.saatApp.domain.model.SaatChatMessage
 import app.kamy.saatApp.domain.model.SaatMood
@@ -16,12 +16,13 @@ import app.kamy.saatApp.infrastructure.preferences.KimiModelPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import app.kamy.saatApp.infrastructure.repository.TanyaSaatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import app.kamy.saatApp.core.locale.AppLanguage
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -45,6 +46,8 @@ class TanyaSaatViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(TanyaSaatUiState())
     val state: StateFlow<TanyaSaatUiState> = _state.asStateFlow()
+
+    private var lastUserQuery: String? = null
 
     init {
         viewModelScope.launch {
@@ -70,45 +73,81 @@ class TanyaSaatViewModel @Inject constructor(
         _state.update { it.copy(inputText = text) }
     }
 
+    /** Starts a brand new conversation (clears history and input). */
+    fun startNewChat() {
+        if (_state.value.isLoading) return
+        lastUserQuery = null
+        _state.update {
+            it.copy(messages = emptyList(), activeMood = null, inputText = "")
+        }
+    }
+
+    /**
+     * Suggestion chips resolve their prompt through a context pinned to the in-app language,
+     * so an English UI always sends an English question even when the device locale differs.
+     */
     fun onMoodSelected(mood: SaatMood) {
-        val prompt = context.getString(mood.promptRes)
-        _state.update { it.copy(activeMood = mood, inputText = prompt) }
+        val prompt = localizedContext().getString(mood.promptRes)
+        _state.update { it.copy(activeMood = mood) }
         sendMessage(prompt)
     }
 
+    fun askFollowUp(question: String) {
+        sendMessage(question)
+    }
+
+    /** Re-sends the last user question (used after a failed reply). */
+    fun retryLast() {
+        val query = lastUserQuery ?: return
+        if (_state.value.isLoading) return
+        // Drop the trailing error bubble so the retry replaces it.
+        _state.update { state ->
+            val trimmed = state.messages.dropLastWhile { it.sender == ChatSender.AI && it.isError }
+            state.copy(messages = trimmed)
+        }
+        requestAnswer(query, appendUserMessage = false)
+    }
+
     fun sendMessage(customQuery: String? = null) {
-        val query = customQuery ?: _state.value.inputText.trim()
+        val query = (customQuery ?: _state.value.inputText).trim()
         if (query.isBlank() || _state.value.isLoading) return
+        requestAnswer(query, appendUserMessage = true)
+    }
 
-        val userMessage = SaatChatMessage(
-            id = UUID.randomUUID().toString(),
-            sender = ChatSender.USER,
-            text = query
-        )
+    private fun requestAnswer(query: String, appendUserMessage: Boolean) {
+        lastUserQuery = query
+        val history = _state.value.messages
 
-        _state.update {
-            it.copy(
-                messages = it.messages + userMessage,
-                inputText = "",
-                isLoading = true
-            )
+        _state.update { state ->
+            val withUser = if (appendUserMessage) {
+                state.messages + SaatChatMessage(
+                    id = UUID.randomUUID().toString(),
+                    sender = ChatSender.USER,
+                    text = query
+                )
+            } else {
+                state.messages
+            }
+            state.copy(messages = withUser, inputText = "", isLoading = true)
         }
 
         viewModelScope.launch {
             val aiResponse = runCatching {
-                repository.processUserQuery(query, _state.value.selectedModel)
+                repository.processUserQuery(
+                    userQuery = query,
+                    history = history,
+                    model = _state.value.selectedModel
+                )
             }.getOrElse {
                 SaatChatMessage(
                     id = UUID.randomUUID().toString(),
                     sender = ChatSender.AI,
-                    text = fallbackErrorMessage()
+                    text = fallbackErrorMessage(),
+                    isError = true
                 )
             }
             _state.update {
-                it.copy(
-                    messages = it.messages + aiResponse,
-                    isLoading = false
-                )
+                it.copy(messages = it.messages + aiResponse, isLoading = false)
             }
         }
     }
@@ -127,8 +166,18 @@ class TanyaSaatViewModel @Inject constructor(
         }
     }
 
+    fun showToast(message: String) {
+        _state.update { it.copy(toastMessage = message) }
+    }
+
     fun clearToast() {
         _state.update { it.copy(toastMessage = null) }
+    }
+
+    private fun localizedContext(): Context {
+        val locale = Locale.forLanguageTag(appLanguageStore.current().tag)
+        val config = Configuration(context.resources.configuration).apply { setLocale(locale) }
+        return runCatching { context.createConfigurationContext(config) }.getOrDefault(context)
     }
 
     private fun fallbackErrorMessage(): String = when (appLanguageStore.current()) {
