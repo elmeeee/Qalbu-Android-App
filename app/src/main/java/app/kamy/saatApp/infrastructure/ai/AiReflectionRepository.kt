@@ -1,9 +1,11 @@
 package app.kamy.saatApp.infrastructure.ai
 
+import android.util.Log
 import app.kamy.saatApp.core.config.AppConfig
 import app.kamy.saatApp.domain.model.GroqChatMessage
 import app.kamy.saatApp.domain.model.GroqChatRequest
 import app.kamy.saatApp.domain.model.GroqChatResponse
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -35,7 +37,11 @@ class AiReflectionRepository @Inject constructor(
         temperature: Double = 0.35,
         maxTokens: Int = 1100
     ): String? = withContext(Dispatchers.IO) {
-        val apiKey = AppConfig.groqApiKey ?: return@withContext null
+        val apiKey = AppConfig.groqApiKey
+        if (apiKey.isNullOrBlank()) {
+            Log.w(TAG, "Groq API key is not configured.")
+            return@withContext null
+        }
         val body = json.encodeToString(
             GroqChatRequest.serializer(),
             GroqChatRequest(
@@ -54,11 +60,12 @@ class AiReflectionRepository @Inject constructor(
             .addHeader("Content-Type", "application/json")
             .post(body.toRequestBody(JSON_MEDIA))
             .build()
-        runCatching {
+        try {
             httpClient.newCall(request).execute().use { response ->
                 val raw = response.body?.string().orEmpty()
                 if (!response.isSuccessful) {
-                    throw AiReflectionException.HttpError(response.code, raw.take(200))
+                    Log.e(TAG, "Groq request failed with HTTP ${response.code}.")
+                    return@withContext null
                 }
                 val parsed = json.decodeFromString(GroqChatResponse.serializer(), raw)
                 val cleaned = sanitizeModelOutput(
@@ -66,7 +73,12 @@ class AiReflectionRepository @Inject constructor(
                 )
                 cleaned.ifBlank { null }
             }
-        }.getOrNull()
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            Log.e(TAG, "Groq request failed (${error.javaClass.simpleName}).")
+            null
+        }
     }
 
     private fun sanitizeModelOutput(raw: String): String =
@@ -77,6 +89,7 @@ class AiReflectionRepository @Inject constructor(
             .trim()
 
     companion object {
+        private const val TAG = "AiReflectionRepository"
         private const val GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions"
         private val JSON_MEDIA = "application/json".toMediaType()
     }

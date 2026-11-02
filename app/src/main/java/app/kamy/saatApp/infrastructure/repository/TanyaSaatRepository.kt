@@ -1,5 +1,6 @@
 package app.kamy.saatApp.infrastructure.repository
 
+import android.util.Log
 import app.kamy.saatApp.core.config.AppConfig
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.model.ChatSender
@@ -11,6 +12,7 @@ import app.kamy.saatApp.domain.model.SaatAiResponseEnvelope
 import app.kamy.saatApp.domain.model.SaatChatMessage
 import app.kamy.saatApp.domain.model.SaatVerseCardData
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -39,8 +41,10 @@ class TanyaSaatRepository @Inject constructor(
         val systemPrompt = buildSystemPrompt(currentLang)
         var envelope: SaatAiResponseEnvelope? = null
 
-        if (!apiKey.isNullOrBlank()) {
-            runCatching {
+        if (apiKey.isNullOrBlank()) {
+            Log.w(TAG, "Groq API key is not configured; using local fallback.")
+        } else {
+            try {
                 val requestBody = json.encodeToString(
                     GroqChatRequest.serializer(),
                     GroqChatRequest(
@@ -67,14 +71,20 @@ class TanyaSaatRepository @Inject constructor(
                         val content = parsedResponse.choices.firstOrNull()?.message?.content.orEmpty()
                         val cleanedJson = sanitizeJsonOutput(content)
                         envelope = json.decodeFromString(SaatAiResponseEnvelope.serializer(), cleanedJson)
+                    } else {
+                        Log.e(TAG, "Groq request failed with HTTP ${response.code}; using local fallback.")
                     }
                 }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Log.e(TAG, "Groq request failed (${error.javaClass.simpleName}); using local fallback.")
             }
         }
 
         // If AI call succeeded, resolve authentic verse and doa cards from local SQLite database (qurannew.db)
-        if (envelope != null) {
-            val env = envelope
+        val env = envelope
+        if (env != null) {
             var verseData: SaatVerseCardData? = null
             val chNum = env.chapterNumber
             val vNum = env.verseNumber
@@ -400,6 +410,7 @@ class TanyaSaatRepository @Inject constructor(
     }
 
     companion object {
+        private const val TAG = "TanyaSaatRepository"
         private const val GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions"
         private const val DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b"
         private val JSON_MEDIA = "application/json".toMediaType()
