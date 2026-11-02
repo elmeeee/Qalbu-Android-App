@@ -13,12 +13,9 @@ data class SaatAiResponseEnvelope(
     val keywords: List<String> = emptyList()
 )
 
-enum class KimiAiModel(val apiId: String) {
-    GPT_OSS_120B("openai/gpt-oss-120b"),
-    QWEN_3_8_27B("qwen/qwen3.8-27b");
-
-    val displayName: String
-        get() = apiId.substringAfter("/")
+enum class KimiAiModel(val apiId: String, val displayName: String) {
+    GPT_OSS_120B("openai/gpt-oss-120b", "GPT-OSS 120B"),
+    QWEN_3_8_27B("qwen/qwen3.8-27b", "Qwen 3.8 27B");
 
     companion object {
         fun fromApiId(apiId: String?): KimiAiModel =
@@ -30,7 +27,7 @@ data class SaatMood(
     val id: String,
     @StringRes val labelRes: Int,
     val iconEmoji: String,
-    val promptQuery: String
+    @StringRes val promptRes: Int
 ) {
     companion object {
         val defaultList: List<SaatMood> = listOf(
@@ -38,37 +35,37 @@ data class SaatMood(
                 id = "quran",
                 labelRes = R.string.mood_quran,
                 iconEmoji = "📖",
-                promptQuery = "Apa pesan utama Al-Qur'an tentang berbuat baik kepada sesama?"
+                promptRes = R.string.mood_prompt_quran
             ),
             SaatMood(
                 id = "hadith",
                 labelRes = R.string.mood_hadith,
                 iconEmoji = "📜",
-                promptQuery = "Apa perbedaan hadis sahih dan daif? Jangan menyebut sumber atau derajat hadis jika tidak yakin."
+                promptRes = R.string.mood_prompt_hadith
             ),
             SaatMood(
                 id = "dua",
                 labelRes = R.string.mood_dua,
                 iconEmoji = "🤲",
-                promptQuery = "Apa doa yang dianjurkan sebelum tidur? Sebutkan sumber hanya jika yakin."
+                promptRes = R.string.mood_prompt_dua
             ),
             SaatMood(
                 id = "worship",
                 labelRes = R.string.mood_worship,
                 iconEmoji = "🕌",
-                promptQuery = "Apa dasar dan tujuan shalat dalam ajaran Islam?"
+                promptRes = R.string.mood_prompt_worship
             ),
             SaatMood(
                 id = "prophets",
                 labelRes = R.string.mood_prophets,
                 iconEmoji = "☪️",
-                promptQuery = "Apa perbedaan nabi dan rasul dalam Islam?"
+                promptRes = R.string.mood_prompt_prophets
             ),
             SaatMood(
                 id = "belief",
                 labelRes = R.string.mood_belief,
                 iconEmoji = "❓",
-                promptQuery = "Apa makna tauhid dalam Islam?"
+                promptRes = R.string.mood_prompt_belief
             )
         )
     }

@@ -3,6 +3,7 @@ package app.kamy.saatApp.features.today
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.qualifiers.ApplicationContext
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.ChatSender
 import app.kamy.saatApp.domain.model.DoaItem
@@ -38,7 +39,8 @@ data class TanyaSaatUiState(
 class TanyaSaatViewModel @Inject constructor(
     private val repository: TanyaSaatRepository,
     private val appLanguageStore: AppLanguageStore,
-    private val kimiModelPreferencesStore: KimiModelPreferencesStore
+    private val kimiModelPreferencesStore: KimiModelPreferencesStore,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TanyaSaatUiState())
@@ -69,8 +71,9 @@ class TanyaSaatViewModel @Inject constructor(
     }
 
     fun onMoodSelected(mood: SaatMood) {
-        _state.update { it.copy(activeMood = mood, inputText = mood.promptQuery) }
-        sendMessage(mood.promptQuery)
+        val prompt = context.getString(mood.promptRes)
+        _state.update { it.copy(activeMood = mood, inputText = prompt) }
+        sendMessage(prompt)
     }
 
     fun sendMessage(customQuery: String? = null) {

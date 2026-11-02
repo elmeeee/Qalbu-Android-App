@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -62,7 +63,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -194,40 +194,6 @@ fun TanyaSaatFullScreen(
                         }
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 12.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        TextButton(
-                            onClick = { isModelMenuExpanded = true },
-                            enabled = !state.isLoading
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    R.string.tanya_saat_model_label,
-                                    state.selectedModel.displayName
-                                ),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = isModelMenuExpanded,
-                            onDismissRequest = { isModelMenuExpanded = false }
-                        ) {
-                            KimiAiModel.entries.forEach { model ->
-                                DropdownMenuItem(
-                                    text = { Text(model.displayName) },
-                                    onClick = {
-                                        onModelSelected(model)
-                                        isModelMenuExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
                     // ── Single-Line Horizontal Scroll Chips ────────────────────
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -336,6 +302,40 @@ fun TanyaSaatFullScreen(
                         .padding(horizontal = 14.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Box {
+                        TextButton(
+                            onClick = { isModelMenuExpanded = true },
+                            enabled = !state.isLoading,
+                            modifier = Modifier.widthIn(min = 88.dp)
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    R.string.tanya_saat_model_label,
+                                    state.selectedModel.displayName
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 2,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = isModelMenuExpanded,
+                            onDismissRequest = { isModelMenuExpanded = false }
+                        ) {
+                            KimiAiModel.entries.forEach { model ->
+                                DropdownMenuItem(
+                                    text = { Text(model.displayName) },
+                                    onClick = {
+                                        onModelSelected(model)
+                                        isModelMenuExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
                     OutlinedTextField(
                         value = state.inputText,
                         onValueChange = onInputChanged,

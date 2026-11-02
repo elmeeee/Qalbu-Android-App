@@ -1002,6 +1002,12 @@
     <string name="mood_worship">Worship</string>
     <string name="mood_prophets">Prophets</string>
     <string name="mood_belief">Belief</string>
+    <string name="mood_prompt_quran">What guidance does the Qur\'an give about treating others well?</string>
+    <string name="mood_prompt_hadith">What is the difference between authentic and weak hadith? Cite sources only when certain.</string>
+    <string name="mood_prompt_dua">What dua is recommended before sleep? Give its source only if certain.</string>
+    <string name="mood_prompt_worship">What is the purpose of prayer in Islam?</string>
+    <string name="mood_prompt_prophets">What is the difference between a prophet and a messenger in Islam?</string>
+    <string name="mood_prompt_belief">What does tawhid mean in Islam?</string>
     <string name="btn_open_in_quran_reader">Open in Qur\'an Reader</string>
     <string name="doa_saved_toast">Saved to Bookmarks!</string>
 

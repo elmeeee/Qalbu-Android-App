@@ -580,6 +580,12 @@
     <string name="mood_worship">Ibadah</string>
     <string name="mood_prophets">Nabi &amp; Rasul</string>
     <string name="mood_belief">Akidah</string>
+    <string name="mood_prompt_quran">Apakah panduan Al-Quran tentang berbuat baik kepada sesama?</string>
+    <string name="mood_prompt_hadith">Apakah perbezaan hadis sahih dan daif? Nyatakan sumber hanya jika pasti.</string>
+    <string name="mood_prompt_dua">Apakah doa yang dianjurkan sebelum tidur? Nyatakan sumber hanya jika pasti.</string>
+    <string name="mood_prompt_worship">Apakah tujuan solat dalam ajaran Islam?</string>
+    <string name="mood_prompt_prophets">Apakah perbezaan nabi dan rasul dalam Islam?</string>
+    <string name="mood_prompt_belief">Apakah maksud tauhid dalam Islam?</string>
     <string name="btn_open_in_quran_reader">Buka dalam Qur\'an Reader</string>
     <string name="doa_saved_toast">Berjaya disimpan ke Penanda!</string>
     <string name="adhan_tab_general">Azan Umum</string>
