@@ -13,6 +13,19 @@ data class SaatAiResponseEnvelope(
     val keywords: List<String> = emptyList()
 )
 
+enum class KimiAiModel(val apiId: String) {
+    GPT_OSS_120B("openai/gpt-oss-120b"),
+    QWEN_3_8_27B("qwen/qwen3.8-27b");
+
+    val displayName: String
+        get() = apiId.substringAfter("/")
+
+    companion object {
+        fun fromApiId(apiId: String?): KimiAiModel =
+            entries.firstOrNull { it.apiId == apiId } ?: GPT_OSS_120B
+    }
+}
+
 data class SaatMood(
     val id: String,
     @StringRes val labelRes: Int,
@@ -22,40 +35,40 @@ data class SaatMood(
     companion object {
         val defaultList: List<SaatMood> = listOf(
             SaatMood(
-                id = "anxious",
-                labelRes = R.string.mood_anxious,
-                iconEmoji = "😰",
-                promptQuery = "Saya merasa cemas dan khawatir tentang masa depan."
+                id = "quran",
+                labelRes = R.string.mood_quran,
+                iconEmoji = "📖",
+                promptQuery = "Apa pesan utama Al-Qur'an tentang berbuat baik kepada sesama?"
             ),
             SaatMood(
-                id = "sad",
-                labelRes = R.string.mood_sad,
-                iconEmoji = "💔",
-                promptQuery = "Saya merasa sedih, kecewa, dan terluka."
+                id = "hadith",
+                labelRes = R.string.mood_hadith,
+                iconEmoji = "📜",
+                promptQuery = "Apa perbedaan hadis sahih dan daif? Jangan menyebut sumber atau derajat hadis jika tidak yakin."
             ),
             SaatMood(
-                id = "grateful",
-                labelRes = R.string.mood_grateful,
+                id = "dua",
+                labelRes = R.string.mood_dua,
                 iconEmoji = "🤲",
-                promptQuery = "Saya merasa sangat bersyukur atas nikmat Allah."
+                promptQuery = "Apa doa yang dianjurkan sebelum tidur? Sebutkan sumber hanya jika yakin."
             ),
             SaatMood(
-                id = "angry",
-                labelRes = R.string.mood_angry,
-                iconEmoji = "😠",
-                promptQuery = "Saya sedang merasa marah dan emosi tak terkontrol."
+                id = "worship",
+                labelRes = R.string.mood_worship,
+                iconEmoji = "🕌",
+                promptQuery = "Apa dasar dan tujuan shalat dalam ajaran Islam?"
             ),
             SaatMood(
-                id = "restless",
-                labelRes = R.string.mood_restless,
-                iconEmoji = "😴",
-                promptQuery = "Saya merasa tidak tenang dan sulit tidur."
+                id = "prophets",
+                labelRes = R.string.mood_prophets,
+                iconEmoji = "☪️",
+                promptQuery = "Apa perbedaan nabi dan rasul dalam Islam?"
             ),
             SaatMood(
-                id = "guidance",
-                labelRes = R.string.mood_guidance,
+                id = "belief",
+                labelRes = R.string.mood_belief,
                 iconEmoji = "❓",
-                promptQuery = "Saya merasa bingung dan butuh petunjuk hidup."
+                promptQuery = "Apa makna tauhid dalam Islam?"
             )
         )
     }

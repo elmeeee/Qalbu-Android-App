@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.ChatSender
 import app.kamy.saatApp.domain.model.DoaItem
+import app.kamy.saatApp.domain.model.KimiAiModel
 import app.kamy.saatApp.domain.model.SaatChatMessage
 import app.kamy.saatApp.domain.model.SaatMood
 import app.kamy.saatApp.domain.model.SaatVerseCardData
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+import app.kamy.saatApp.infrastructure.preferences.KimiModelPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import app.kamy.saatApp.infrastructure.repository.TanyaSaatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +27,7 @@ import javax.inject.Inject
 data class TanyaSaatUiState(
     val messages: List<SaatChatMessage> = emptyList(),
     val isLoading: Boolean = false,
+    val selectedModel: KimiAiModel = KimiAiModel.GPT_OSS_120B,
     val activeMood: SaatMood? = null,
     val inputText: String = "",
     val isSheetVisible: Boolean = false,
@@ -34,11 +37,24 @@ data class TanyaSaatUiState(
 @HiltViewModel
 class TanyaSaatViewModel @Inject constructor(
     private val repository: TanyaSaatRepository,
-    private val appLanguageStore: AppLanguageStore
+    private val appLanguageStore: AppLanguageStore,
+    private val kimiModelPreferencesStore: KimiModelPreferencesStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TanyaSaatUiState())
     val state: StateFlow<TanyaSaatUiState> = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            kimiModelPreferencesStore.selectedModel.collect { model ->
+                _state.update { it.copy(selectedModel = model) }
+            }
+        }
+    }
+
+    fun onModelSelected(model: KimiAiModel) {
+        kimiModelPreferencesStore.setModel(model)
+    }
 
     fun openSheet() {
         _state.update { it.copy(isSheetVisible = true) }
@@ -77,7 +93,7 @@ class TanyaSaatViewModel @Inject constructor(
 
         viewModelScope.launch {
             val aiResponse = runCatching {
-                repository.processUserQuery(query)
+                repository.processUserQuery(query, _state.value.selectedModel)
             }.getOrElse {
                 SaatChatMessage(
                     id = UUID.randomUUID().toString(),
@@ -114,10 +130,10 @@ class TanyaSaatViewModel @Inject constructor(
 
     private fun fallbackErrorMessage(): String = when (appLanguageStore.current()) {
         AppLanguage.INDONESIAN ->
-            "Balasan Sahabat Saat belum berhasil dimuat. Coba kirim lagi dalam beberapa saat."
+            "Balasan Kīmi belum berhasil dimuat. Coba kirim lagi dalam beberapa saat."
         AppLanguage.ENGLISH ->
-            "Sahabat Saat could not load a reply yet. Please try sending your message again shortly."
+            "Kīmi could not load a reply yet. Please try sending your message again shortly."
         AppLanguage.MALAY ->
-            "Balasan Sahabat Saat belum berjaya dimuat. Cuba hantar semula sebentar lagi."
+            "Balasan Kīmi belum berjaya dimuat. Cuba hantar semula sebentar lagi."
     }
 }

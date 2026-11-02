@@ -2,7 +2,7 @@
 # Copy this file to local.properties and fill in. local.properties is gitignored.
 #
 
-# Groq API key (optional — drives AI reflection drafting on Today tab).
+# Groq API key (optional — powers Ask Kīmi and AI reflection drafting).
 API_KEY_GROQ=
 AI_MODEL=qwen/qwen3-32b
 

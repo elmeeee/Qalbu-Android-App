@@ -42,6 +42,8 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -53,8 +55,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,6 +81,7 @@ import app.kamy.saatApp.R
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.ChatSender
 import app.kamy.saatApp.domain.model.DoaItem
+import app.kamy.saatApp.domain.model.KimiAiModel
 import app.kamy.saatApp.domain.model.SaatChatMessage
 import app.kamy.saatApp.domain.model.SaatMood
 import app.kamy.saatApp.domain.model.SaatVerseCardData
@@ -86,6 +94,7 @@ import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 fun TanyaSaatFullScreen(
     state: TanyaSaatUiState,
     onDismiss: () -> Unit,
+    onModelSelected: (KimiAiModel) -> Unit,
     onMoodSelected: (SaatMood) -> Unit,
     onInputChanged: (String) -> Unit,
     onSendMessage: () -> Unit,
@@ -95,6 +104,7 @@ fun TanyaSaatFullScreen(
 ) {
     val context = LocalContext.current
     val listState = rememberLazyListState()
+    var isModelMenuExpanded by remember { mutableStateOf(false) }
 
     BackHandler {
         onDismiss()
@@ -181,6 +191,40 @@ fun TanyaSaatFullScreen(
                                 style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
                                 color = Color(0xFF8E8E93)
                             )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 12.dp),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        TextButton(
+                            onClick = { isModelMenuExpanded = true },
+                            enabled = !state.isLoading
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    R.string.tanya_saat_model_label,
+                                    state.selectedModel.displayName
+                                ),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = isModelMenuExpanded,
+                            onDismissRequest = { isModelMenuExpanded = false }
+                        ) {
+                            KimiAiModel.entries.forEach { model ->
+                                DropdownMenuItem(
+                                    text = { Text(model.displayName) },
+                                    onClick = {
+                                        onModelSelected(model)
+                                        isModelMenuExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
 

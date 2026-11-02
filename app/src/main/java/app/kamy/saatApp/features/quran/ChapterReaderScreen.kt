@@ -1446,21 +1446,21 @@ private fun ReaderSettingsSheet(
                 ) {
                     ReaderSettingToggleItem(
                         title = stringResource(R.string.show_translation),
-                        subtitle = "Tampilkan arti ayat dalam Bahasa Indonesia",
+                        subtitle = stringResource(R.string.reader_show_translation_subtitle),
                         checked = state.showTranslation,
                         onCheckedChange = onToggleTranslation
                     )
                     Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF2EFE9)))
                     ReaderSettingToggleItem(
                         title = stringResource(R.string.show_transliteration),
-                        subtitle = "Tampilkan teks latin / transliterasi",
+                        subtitle = stringResource(R.string.reader_show_transliteration_subtitle),
                         checked = state.showTransliteration,
                         onCheckedChange = onToggleTransliteration
                     )
                     Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFF2EFE9)))
                     ReaderSettingToggleItem(
-                        title = "Warna Tajwid",
-                        subtitle = "Panduan hukum bacaan dengan warna tajwid",
+                        title = stringResource(R.string.reader_tajweed_colors),
+                        subtitle = stringResource(R.string.reader_tajweed_colors_subtitle),
                         checked = state.isTajweedEnabled,
                         onCheckedChange = onToggleTajweed
                     )
@@ -1482,7 +1482,7 @@ private fun ReaderSettingsSheet(
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Text(
-                        text = "Audio & Tilawah",
+                        text = stringResource(R.string.reader_audio_tilawah),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = SaatColors.Slate900
@@ -1490,7 +1490,7 @@ private fun ReaderSettingsSheet(
 
                     ReaderSettingToggleItem(
                         title = stringResource(R.string.continuous_play),
-                        subtitle = "Lanjut putar ayat berikutnya secara otomatis",
+                        subtitle = stringResource(R.string.reader_continuous_play_subtitle),
                         checked = state.playbackMode == AyahPlaybackMode.CONTINUOUS,
                         onCheckedChange = { enabled ->
                             onSetPlaybackMode(

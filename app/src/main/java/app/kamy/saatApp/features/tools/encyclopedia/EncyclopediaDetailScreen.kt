@@ -202,6 +202,7 @@ fun EncyclopediaDetailScreen(
         TanyaSaatFullScreen(
             state = tanyaSaatState,
             onDismiss = { tanyaSaatVm.closeSheet() },
+            onModelSelected = tanyaSaatVm::onModelSelected,
             onMoodSelected = tanyaSaatVm::onMoodSelected,
             onInputChanged = tanyaSaatVm::onInputTextChanged,
             onSendMessage = { tanyaSaatVm.sendMessage() },
