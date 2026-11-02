@@ -304,6 +304,7 @@
     <string name="prayer_widget_next_label">Next prayer</string>
     <string name="prayer_widget_in_progress">Now</string>
     <string name="prayer_widget_at_time">Adhan at %1$s</string>
+    <string name="today_label">Today</string>
     <string name="prayer_calendar_title">Prayer calendar</string>
     <string name="prayer_calendar_hint">Tap a day to see all prayer times for that date.</string>
     <string name="prayer_calendar_loading_day">Loading prayer times…</string>

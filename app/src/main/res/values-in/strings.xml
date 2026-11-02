@@ -245,6 +245,7 @@
     <string name="prayer_widget_next_label">Sholat berikutnya</string>
     <string name="prayer_widget_in_progress">Berlangsung</string>
     <string name="prayer_widget_at_time">Adzan pukul %1$s</string>
+    <string name="today_label">Hari ini</string>
     <string name="prayer_calendar_title">Kalender sholat</string>
     <string name="onboarding_brand_title">Sāat</string>
     <string name="onboarding_brand_subtitle">Teman kecil untuk menemani perjalanan ibadahmu.</string>

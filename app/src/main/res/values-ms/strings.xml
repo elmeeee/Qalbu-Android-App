@@ -241,6 +241,7 @@
     <string name="prayer_widget_next_label">Solat seterusnya</string>
     <string name="prayer_widget_in_progress">Berlangsung</string>
     <string name="prayer_widget_at_time">Azan pada %1$s</string>
+    <string name="today_label">Hari ini</string>
     <string name="prayer_calendar_title">Kalendar solat</string>
     <string name="onboarding_brand_title">Sāat</string>
     <string name="onboarding_brand_subtitle">Teman kecil untuk menemani perjalanan ibadah anda.</string>

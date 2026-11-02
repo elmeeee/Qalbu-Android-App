@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -81,6 +80,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -110,22 +110,23 @@ import app.kamy.saatApp.domain.model.SaatReference
 import app.kamy.saatApp.domain.model.SaatReferenceType
 import app.kamy.saatApp.domain.model.SaatVerseCardData
 import app.kamy.saatApp.features.today.TanyaSaatUiState
+import app.kamy.saatApp.features.tools.components.SpiritualToolTopBar
 import app.kamy.saatApp.ui.common.TajweedHtmlView
-import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 // ─── Palette ────────────────────────────────────────────────────────────────
 
-private val ScreenBg = Color(0xFFF4F7F5)
-private val Ink = Color(0xFF14201B)
-private val InkSoft = Color(0xFF4B5A53)
+// Matches the app's warm cream theme (HomeBg / HomeDarkGreen / ArcGold) used across Tools screens.
+private val ScreenBg = SaatColors.HomeBg
+private val Ink = Color(0xFF1F2A24)
+private val InkSoft = Color(0xFF4F5B55)
 private val InkMuted = Color(0xFF8A9690)
-private val Line = Color(0xFFE3EAE6)
-private val CardWhite = Color(0xFFFFFFFF)
-private val Gold = Color(0xFFD4A017)
+private val Line = Color(0xFFE8E2D2)
+private val CardWhite = Color(0xFFFFFDF7)
+private val Gold = SaatColors.ArcGold
 private val AmberWash = Color(0xFFFFFBEB)
 private val AmberLine = Color(0xFFFDE68A)
-private val MintWash = Color(0xFFEFF8F3)
-private val MintLine = Color(0xFFC6E7D6)
+private val MintWash = Color(0xFFEDF5F0)
+private val MintLine = Color(0xFFCADFD3)
 private val DangerWash = Color(0xFFFEF2F2)
 private val DangerLine = Color(0xFFFECACA)
 private val Danger = Color(0xFFB91C1C)
@@ -175,20 +176,29 @@ fun TanyaSaatFullScreen(
                 onNewChat = onNewChat
             )
 
+            // Chat content scrolls underneath the glass composer.
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
             ) {
                 if (state.messages.isEmpty() && !state.isLoading) {
-                    KimiEmptyState(onMoodSelected = onMoodSelected)
+                    KimiEmptyState(
+                        onMoodSelected = onMoodSelected,
+                        bottomInset = ComposerReservedHeight
+                    )
                 } else {
                     val lastAiId = state.messages.lastOrNull { it.sender == ChatSender.AI }?.id
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(18.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 18.dp)
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 14.dp,
+                            bottom = ComposerReservedHeight
+                        )
                     ) {
                         items(state.messages, key = { it.id }) { msg ->
                             if (msg.sender == ChatSender.USER) {
@@ -216,19 +226,23 @@ fun TanyaSaatFullScreen(
                         }
                     }
                 }
-            }
 
-            KimiComposer(
-                inputText = state.inputText,
-                selectedModel = state.selectedModel,
-                isLoading = state.isLoading,
-                onInputChanged = onInputChanged,
-                onSend = onSendMessage,
-                onModelSelected = onModelSelected
-            )
+                KimiComposer(
+                    inputText = state.inputText,
+                    selectedModel = state.selectedModel,
+                    isLoading = state.isLoading,
+                    onInputChanged = onInputChanged,
+                    onSend = onSendMessage,
+                    onModelSelected = onModelSelected,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
         }
     }
 }
+
+/** Space reserved at the bottom of scrolling content so the floating composer never covers it. */
+private val ComposerReservedHeight = 128.dp
 
 // ─── Header ─────────────────────────────────────────────────────────────────
 
@@ -239,116 +253,50 @@ private fun KimiHeader(
     onBack: () -> Unit,
     onNewChat: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp))
-            .background(KimiGradient)
-    ) {
-        // Decorative soft circles
-        Box(
-            modifier = Modifier
-                .size(170.dp)
-                .offset(x = 250.dp, y = (-70).dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.07f))
-        )
-        Box(
-            modifier = Modifier
-                .size(110.dp)
-                .offset(x = (-40).dp, y = 40.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.05f))
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .tabContentStatusBarInset()
-                .padding(start = 6.dp, end = 10.dp, top = 6.dp, bottom = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back),
-                    tint = Color.White
-                )
-            }
-
-            KimiAvatar(size = 42.dp, inverted = true)
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.tanya_saat_ai_title),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = Color.White
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(7.dp)
-                            .clip(CircleShape)
-                            .background(if (isLoading) Gold else Color(0xFF7CF5C0))
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(R.string.tanya_saat_ai_subtitle),
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
-                        color = Color.White.copy(alpha = 0.85f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
+    SpiritualToolTopBar(
+        title = stringResource(R.string.tanya_saat_ai_title),
+        subtitle = stringResource(R.string.tanya_saat_ai_subtitle),
+        onBack = onBack,
+        actions = {
             AnimatedVisibility(visible = hasConversation, enter = fadeIn(), exit = fadeOut()) {
                 Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = Color.White.copy(alpha = 0.16f),
+                    shape = CircleShape,
+                    color = SaatColors.PureWhite,
+                    border = BorderStroke(1.dp, Line),
                     modifier = Modifier.clickable(enabled = !isLoading, onClick = onNewChat)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.AddComment,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = SaatColors.HomeDarkGreen,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = stringResource(R.string.tanya_saat_new_chat),
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = Color.White
+                            color = SaatColors.HomeDarkGreen
                         )
                     }
                 }
             }
         }
-    }
+    )
 }
 
 @Composable
-private fun KimiAvatar(size: androidx.compose.ui.unit.Dp, inverted: Boolean = false) {
-    val base = Modifier
-        .size(size)
-        .clip(CircleShape)
-    val styled = if (inverted) {
-        base
-            .background(Color.White.copy(alpha = 0.18f))
-            .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
-    } else {
-        base.background(KimiGradient)
-    }
-    Box(modifier = styled, contentAlignment = Alignment.Center) {
+private fun KimiAvatar(size: androidx.compose.ui.unit.Dp) {
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(KimiGradient),
+        contentAlignment = Alignment.Center
+    ) {
         Image(
             painter = painterResource(R.drawable.saat_ai_icon),
             contentDescription = null,
@@ -362,12 +310,15 @@ private fun KimiAvatar(size: androidx.compose.ui.unit.Dp, inverted: Boolean = fa
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun KimiEmptyState(onMoodSelected: (SaatMood) -> Unit) {
+private fun KimiEmptyState(
+    onMoodSelected: (SaatMood) -> Unit,
+    bottomInset: androidx.compose.ui.unit.Dp
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 18.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = bottomInset)
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -611,8 +562,23 @@ private fun KimiAnswer(
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)) {
                 KimiMarkdown(markdown = message.text, textColor = Ink)
 
-                if (message.references.isNotEmpty()) {
+                // Verse, dua, and references all live inside the same bubble.
+                message.verseData?.let { verse ->
                     Spacer(modifier = Modifier.height(14.dp))
+                    EmbeddedVerseCard(
+                        verse = verse,
+                        onOpenInReader = { onOpenVerseInReader(verse.chapterNumber, verse.verseNumber) },
+                        onBookmark = { onBookmarkVerse(verse) }
+                    )
+                }
+
+                message.doaData?.let { doa ->
+                    Spacer(modifier = Modifier.height(10.dp))
+                    EmbeddedDoaCard(doa = doa)
+                }
+
+                if (message.references.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
                     ReferencesSection(references = message.references)
                 }
 
@@ -663,20 +629,6 @@ private fun KimiAnswer(
                     }
                 }
             }
-        }
-
-        message.verseData?.let { verse ->
-            Spacer(modifier = Modifier.height(10.dp))
-            EmbeddedVerseCard(
-                verse = verse,
-                onOpenInReader = { onOpenVerseInReader(verse.chapterNumber, verse.verseNumber) },
-                onBookmark = { onBookmarkVerse(verse) }
-            )
-        }
-
-        message.doaData?.let { doa ->
-            Spacer(modifier = Modifier.height(10.dp))
-            EmbeddedDoaCard(doa = doa)
         }
 
         if (showFollowUps && message.followUps.isNotEmpty()) {
@@ -883,29 +835,47 @@ private fun KimiComposer(
     isLoading: Boolean,
     onInputChanged: (String) -> Unit,
     onSend: () -> Unit,
-    onModelSelected: (KimiAiModel) -> Unit
+    onModelSelected: (KimiAiModel) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var isModelMenuExpanded by remember { mutableStateOf(false) }
     val canSend = inputText.isNotBlank() && !isLoading
+    val fieldShape = RoundedCornerShape(24.dp)
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .imePadding(),
-        color = ScreenBg
-    ) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Only the strip ABOVE the field is translucent: chat fades out underneath it.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(22.dp)
+                .background(Brush.verticalGradient(colors = listOf(Color.Transparent, ScreenBg)))
+        )
+
+        // The field area itself sits on a solid background, with or without the keyboard.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(ScreenBg)
+                .imePadding()
                 .navigationBarsPadding()
-                .padding(horizontal = 12.dp, vertical = 10.dp)
+                .padding(start = 12.dp, end = 12.dp, top = 2.dp, bottom = 10.dp)
         ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                color = CardWhite,
-                border = BorderStroke(1.dp, if (canSend) MintLine else Line),
-                shadowElevation = 4.dp
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = fieldShape,
+                        ambientColor = SaatColors.HomeDarkGreen.copy(alpha = 0.12f),
+                        spotColor = SaatColors.HomeDarkGreen.copy(alpha = 0.16f)
+                    )
+                    .clip(fieldShape)
+                    .background(SaatColors.PureWhite)
+                    .border(
+                        width = 1.dp,
+                        color = if (canSend) SaatColors.HomeDarkGreen.copy(alpha = 0.45f) else Line,
+                        shape = fieldShape
+                    )
             ) {
                 Column(modifier = Modifier.padding(start = 16.dp, end = 10.dp, top = 12.dp, bottom = 8.dp)) {
                     BasicTextField(
@@ -1061,12 +1031,11 @@ private fun EmbeddedVerseCard(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(14.dp),
         color = MintWash,
-        border = BorderStroke(1.dp, MintLine),
-        shadowElevation = 1.dp
+        border = BorderStroke(1.dp, MintLine)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Surface(shape = RoundedCornerShape(10.dp), color = SaatColors.DeepEmerald) {
                     Row(
@@ -1153,12 +1122,11 @@ private fun EmbeddedVerseCard(
 private fun EmbeddedDoaCard(doa: DoaItem) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(14.dp),
         color = AmberWash,
-        border = BorderStroke(1.dp, AmberLine),
-        shadowElevation = 1.dp
+        border = BorderStroke(1.dp, AmberLine)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(14.dp)) {
             Text(
                 text = "🤲 ${doa.title ?: "Doa"}",
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
