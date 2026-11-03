@@ -140,6 +140,14 @@ struct TodayDiscoveryView: View {
 
             ScrollView {
                 VStack(spacing: 14) {
+                    GeometryReader { proxy in
+                        Color.clear.preference(
+                            key: TodayScrollOffsetKey.self,
+                            value: proxy.frame(in: .named("todayScrollSpace")).minY
+                        )
+                    }
+                    .frame(height: 0)
+
                     if let khgt = coordinator?.dashboardViewModel?.khgtToday {
                         TodayImportantDayBanner(info: khgt)
                             .padding(.horizontal, 20)
@@ -196,6 +204,15 @@ struct TodayDiscoveryView: View {
                 .padding(.bottom, 100)
             }
             .scrollIndicators(.hidden)
+            .coordinateSpace(name: "todayScrollSpace")
+            .onPreferenceChange(TodayScrollOffsetKey.self) { minY in
+                let shouldBeScrolled = minY < -12
+                if isScrolled != shouldBeScrolled {
+                    withAnimation(.easeInOut(duration: 0.22)) {
+                        isScrolled = shouldBeScrolled
+                    }
+                }
+            }
             .refreshable {
                 await coordinator?.refreshToday(discovery: vm)
                 tracker?.refresh()
@@ -258,5 +275,11 @@ struct TodayDiscoveryView: View {
             return "Menemukan lokasi…"
         }
     }
+}
 
+private struct TodayScrollOffsetKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
 }

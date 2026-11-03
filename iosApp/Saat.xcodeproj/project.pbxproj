@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3600CD5D2F9C5793001EC262 /* AlKhatibLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3600CD522F9C5793001EC262 /* AlKhatibLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3600CD5D2F9C5793001EC262 /* SaatLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3600CD522F9C5793001EC262 /* SaatLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,7 +30,7 @@
 			containerPortal = 3600CD1D2F9C5791001EC262 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3600CD512F9C5793001EC262;
-			remoteInfo = AlKhatibLiveActivity;
+			remoteInfo = SaatLiveActivity;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -41,7 +41,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				3600CD5D2F9C5793001EC262 /* AlKhatibLiveActivity.appex in Embed App Extensions */,
+				3600CD5D2F9C5793001EC262 /* SaatLiveActivity.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -52,7 +52,7 @@
 		3600CD252F9C5791001EC262 /* Saat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Saat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3600CD322F9C5793001EC262 /* SaatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SaatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SaatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3600CD522F9C5793001EC262 /* AlKhatibLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AlKhatibLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3600CD522F9C5793001EC262 /* SaatLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SaatLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		36A1B2C12F9E0001001EC262 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		36A1B2C22F9E0001001EC262 /* Secrets.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig.example; sourceTree = "<group>"; };
 		36A1B2C42F9E0001001EC262 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
@@ -60,19 +60,34 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		36DC13A030997D2E00307DC1 /* Exceptions for "SaatLiveActivity" folder in "SaatLiveActivity" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Models.swift,
+				PrayerCountdownLiveActivity.swift,
+				QuranPlaybackLiveActivity.swift,
+				SaatLiveActivityBundle.swift,
+			);
+			target = 3600CD512F9C5793001EC262 /* SaatLiveActivity */;
+		};
+		36DC13A130997D2E00307DC1 /* Exceptions for "SaatLiveActivity" folder in "SaatUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Models.swift,
+				PrayerCountdownLiveActivity.swift,
+				QuranPlaybackLiveActivity.swift,
+				SaatLiveActivityBundle.swift,
+			);
+			target = 3600CD3B2F9C5793001EC262 /* SaatUITests */;
+		};
 		36DC5CFD2FBC1881007DDF44 /* Exceptions for "Saat" folder in "Saat" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
 			target = 3600CD242F9C5791001EC262 /* Saat */;
-		};
-		36DC5CFE2FBC1881007DDF44 /* Exceptions for "AlKhatibLiveActivity" folder in "AlKhatibLiveActivity" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 3600CD512F9C5793001EC262 /* AlKhatibLiveActivity */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -95,12 +110,13 @@
 			path = SaatUITests;
 			sourceTree = "<group>";
 		};
-		3600CD552F9C5793001EC262 /* AlKhatibLiveActivity */ = {
+		36DC139A30997D2D00307DC1 /* SaatLiveActivity */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				36DC5CFE2FBC1881007DDF44 /* Exceptions for "AlKhatibLiveActivity" folder in "AlKhatibLiveActivity" target */,
+				36DC13A030997D2E00307DC1 /* Exceptions for "SaatLiveActivity" folder in "SaatLiveActivity" target */,
+				36DC13A130997D2E00307DC1 /* Exceptions for "SaatLiveActivity" folder in "SaatUITests" target */,
 			);
-			path = AlKhatibLiveActivity;
+			path = SaatLiveActivity;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -142,10 +158,10 @@
 			children = (
 				36A1B2C32F9E0001001EC262 /* Config */,
 				3600CD272F9C5791001EC262 /* Saat */,
-				3600CD552F9C5793001EC262 /* AlKhatibLiveActivity */,
 				3600CD352F9C5793001EC262 /* SaatTests */,
 				3600CD3F2F9C5793001EC262 /* SaatUITests */,
 				3600CD262F9C5791001EC262 /* Products */,
+				36DC139A30997D2D00307DC1 /* SaatLiveActivity */,
 			);
 			sourceTree = "<group>";
 		};
@@ -153,7 +169,7 @@
 			isa = PBXGroup;
 			children = (
 				3600CD252F9C5791001EC262 /* Saat.app */,
-				3600CD522F9C5793001EC262 /* AlKhatibLiveActivity.appex */,
+				3600CD522F9C5793001EC262 /* SaatLiveActivity.appex */,
 				3600CD322F9C5793001EC262 /* SaatTests.xctest */,
 				3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */,
 			);
@@ -237,6 +253,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				3600CD3F2F9C5793001EC262 /* SaatUITests */,
+				36DC139A30997D2D00307DC1 /* SaatLiveActivity */,
 			);
 			name = SaatUITests;
 			packageProductDependencies = (
@@ -245,9 +262,9 @@
 			productReference = 3600CD3C2F9C5793001EC262 /* SaatUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		3600CD512F9C5793001EC262 /* AlKhatibLiveActivity */ = {
+		3600CD512F9C5793001EC262 /* SaatLiveActivity */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3600CD592F9C5793001EC262 /* Build configuration list for PBXNativeTarget "AlKhatibLiveActivity" */;
+			buildConfigurationList = 3600CD592F9C5793001EC262 /* Build configuration list for PBXNativeTarget "SaatLiveActivity" */;
 			buildPhases = (
 				3600CD532F9C5793001EC262 /* Sources */,
 				3600CD542F9C5793001EC262 /* Frameworks */,
@@ -257,14 +274,11 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				3600CD552F9C5793001EC262 /* AlKhatibLiveActivity */,
-			);
-			name = AlKhatibLiveActivity;
+			name = SaatLiveActivity;
 			packageProductDependencies = (
 			);
-			productName = AlKhatibLiveActivity;
-			productReference = 3600CD522F9C5793001EC262 /* AlKhatibLiveActivity.appex */;
+			productName = SaatLiveActivity;
+			productReference = 3600CD522F9C5793001EC262 /* SaatLiveActivity.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -312,7 +326,7 @@
 			projectRoot = "";
 			targets = (
 				3600CD242F9C5791001EC262 /* Saat */,
-				3600CD512F9C5793001EC262 /* AlKhatibLiveActivity */,
+				3600CD512F9C5793001EC262 /* SaatLiveActivity */,
 				3600CD312F9C5793001EC262 /* SaatTests */,
 				3600CD3B2F9C5793001EC262 /* SaatUITests */,
 			);
@@ -416,7 +430,7 @@
 		};
 		3600CD5A2F9C5793001EC262 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 3600CD512F9C5793001EC262 /* AlKhatibLiveActivity */;
+			target = 3600CD512F9C5793001EC262 /* SaatLiveActivity */;
 			targetProxy = 3600CD5B2F9C5793001EC262 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -589,7 +603,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
-				IPHONEOS_DEPLOYMENT_TARGET = 27.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat;
@@ -656,7 +670,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
-				IPHONEOS_DEPLOYMENT_TARGET = 27.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat;
@@ -680,7 +694,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NF3JRRP69D;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.SaatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -704,7 +718,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NF3JRRP69D;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.SaatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -727,7 +741,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NF3JRRP69D;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.SaatUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -750,7 +764,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NF3JRRP69D;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.SaatUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -773,9 +787,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NF3JRRP69D;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = AlKhatibLiveActivity/Info.plist;
+				INFOPLIST_FILE = SaatLiveActivity/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Saat Live Activity";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat.LiveActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -797,9 +811,9 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NF3JRRP69D;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = AlKhatibLiveActivity/Info.plist;
+				INFOPLIST_FILE = SaatLiveActivity/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Saat Live Activity";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = co.kamy.Saat.LiveActivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -853,7 +867,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3600CD592F9C5793001EC262 /* Build configuration list for PBXNativeTarget "AlKhatibLiveActivity" */ = {
+		3600CD592F9C5793001EC262 /* Build configuration list for PBXNativeTarget "SaatLiveActivity" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3600CD572F9C5793001EC262 /* Debug */,

@@ -97,62 +97,73 @@ struct TodayDiscoveryHeaderView: View {
     }
 
     var body: some View {
-        ZStack {
-            if isScrolled {
-                SaatTokens.Colors.homeBg
-                    .opacity(0.96)
-                    .ignoresSafeArea(edges: .top)
-            }
+        HStack(alignment: .center) {
+            // Left: Greeting & Rotating Date
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Assalamu'alaikum")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(textColor)
+                    .lineLimit(1)
 
-            HStack(alignment: .center) {
-                // Left: Greeting & Rotating Date
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Assalamu'alaikum")
-                        .font(.system(size: 12, weight: .semibold))
+                Button(action: onCalendarClick) {
+                    Text(dateDisplayText)
+                        .font(.system(size: 15, weight: .bold))
                         .foregroundColor(textColor)
                         .lineLimit(1)
-
-                    Button(action: onCalendarClick) {
-                        Text(dateDisplayText)
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(textColor)
-                            .lineLimit(1)
-                            .contentTransition(.numericText())
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                Spacer()
-
-                // Right: Location Badge Capsule
-                Button(action: onLocationClick) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "mappin.and.ellipse")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(badgeContentColor)
-
-                        Text(displayLocation)
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(badgeContentColor)
-                            .lineLimit(1)
-                            .frame(maxWidth: 140, alignment: .leading)
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(
-                        Capsule()
-                            .fill(badgeBg)
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(badgeBorder, lineWidth: 1)
-                    )
+                        .contentTransition(.numericText())
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+
+            Spacer()
+
+            // Right: Location Badge Capsule
+            Button(action: onLocationClick) {
+                HStack(spacing: 6) {
+                    Image(systemName: "mappin.and.ellipse")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(badgeContentColor)
+
+                    Text(displayLocation)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(badgeContentColor)
+                        .lineLimit(1)
+                        .frame(maxWidth: 140, alignment: .leading)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(
+                    Capsule()
+                        .fill(badgeBg)
+                )
+                .overlay(
+                    Capsule()
+                        .stroke(badgeBorder, lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .frame(maxWidth: 640)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .background {
+            if isScrolled {
+                ZStack(alignment: .bottom) {
+                    Rectangle()
+                        .fill(.ultraThinMaterial)
+                        .overlay(SaatTokens.Colors.homeBg.opacity(0.82))
+
+                    Rectangle()
+                        .fill(SaatTokens.Colors.homeDarkGreen.opacity(0.12))
+                        .frame(height: 0.5)
+                }
+                .ignoresSafeArea(edges: .top)
+                .shadow(color: Color.black.opacity(0.04), radius: 8, y: 3)
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.25), value: isScrolled)
         .onAppear {
             timer?.invalidate()
             timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { _ in
