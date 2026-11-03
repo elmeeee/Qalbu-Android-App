@@ -9,13 +9,10 @@
 import Foundation
 
 struct QuranContentRepository: Sendable {
-    private let client: QFApiClient
     private let local = LocalQuranDataSource()
     private let hadithLocal = LocalHadithDataSource()
 
-    init(client: QFApiClient) {
-        self.client = client
-    }
+    init() {}
 
     func getChapters(language: String = "en") async throws -> [QuranChapter] {
         let normalizedLang = language.hasPrefix("id") || language.hasPrefix("ms") ? "id" : "en"
@@ -88,17 +85,6 @@ struct QuranContentRepository: Sendable {
     }
 
     func getTafsirByAyah(resourceId: String, ayahKey: String) async throws -> TafsirResponse {
-        do {
-            let response: TafsirResponse = try await client.send(
-                QuranContentEndpoint.tafsirByAyah(resourceId: resourceId, ayahKey: ayahKey, query: [])
-            )
-            if let t = response.tafsir, t.text?.isEmpty == false {
-                return response
-            }
-        } catch {
-            print("API Tafsir fetch failed, falling back to local database: \(error.localizedDescription)")
-        }
-        
         let localId = (resourceId == "16" || resourceId == "jalalayn") ? "jalalayn" : "local"
         if let payload = try await local.getTafsirByAyah(ayahKey: ayahKey, resourceId: localId) {
             return TafsirResponse(tafsir: payload)
@@ -113,15 +99,7 @@ struct QuranContentRepository: Sendable {
         limit: Int = 4
     ) async throws -> HadithsByAyahResponse {
         return try await hadithLocal.getHadithsByAyah(ayahKey: ayahKey, page: page, limit: limit, language: language) {
-            let clampedLimit = min(max(limit, 1), 5)
-            let query: [URLQueryItem] = [
-                URLQueryItem(name: "language", value: language),
-                URLQueryItem(name: "page", value: String(max(page, 1))),
-                URLQueryItem(name: "limit", value: String(clampedLimit))
-            ]
-            return try await client.send(
-                QuranContentEndpoint.hadithsByAyah(ayahKey: ayahKey, query: query)
-            )
+            return HadithsByAyahResponse(hadiths: [], page: page, limit: limit, hasMore: false, language: language, direction: nil)
         }
     }
 
@@ -167,7 +145,7 @@ struct QuranContentRepository: Sendable {
 
     private func normalizeRecitationId(_ savedId: Int) -> Int {
         if (1...6).contains(savedId) { return savedId }
-        // Map legacy QF IDs (e.g. 7 or other ones)
+        // Map legacy recitation IDs to default (Mishary Alafasy)
         return 1
     }
 }

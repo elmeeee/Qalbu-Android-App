@@ -505,7 +505,9 @@ struct ContentPagination: Decodable, Sendable {
     }
 }
 
-struct QFTranslation: Decodable, Identifiable, Hashable, Sendable {
+typealias QFTranslation = QuranTranslation
+
+struct QuranTranslation: Decodable, Identifiable, Hashable, Sendable {
     let id: Int
     let name: String
     let authorName: String

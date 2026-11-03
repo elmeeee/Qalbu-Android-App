@@ -140,7 +140,7 @@ final class TodayDiscoveryViewModel {
             let response = try await ayahTask
             guard generation == dailyAyahFetchGeneration else { return }
             guard let verse = response.verse else {
-                throw QFError.parsingError("daily verse payload")
+                throw NSError(domain: "TodayDiscovery", code: -1, userInfo: [NSLocalizedDescriptionKey: "daily verse payload missing"])
             }
 
             detail = .init(verse)

@@ -51,8 +51,7 @@ final class ChapterReaderCoordinator {
         }
         if readingTracker == nil {
             readingTracker = ReadingSessionTracker(
-                repository: container.readingSessions,
-                userSession: container.userSession
+                repository: container.readingSessions
             )
         }
         return model

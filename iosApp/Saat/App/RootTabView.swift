@@ -20,7 +20,6 @@ struct RootTabView: View {
     @Environment(\.appContainer) private var container
     @State private var selectedTab: Tab = .today
     @State private var todayNavigationPath: [TodayNavigation] = []
-    @State private var vm = RootTabViewModel()
     @ObservedObject private var languageManager = AppLanguageManager.shared
     @StateObject private var prayerController = PrayerTimesController()
     let verseState: TodayVerseState

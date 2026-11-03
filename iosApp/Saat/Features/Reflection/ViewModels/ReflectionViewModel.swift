@@ -128,10 +128,6 @@ final class ReflectionViewModel {
                 trimPostsIfNeeded()
             }
             errorMessage = nil
-        } catch QFError.missingUserSession {
-            if Task.isCancelled { return }
-            if let generation, generation != loadGeneration { return }
-            await handleReflectAuthenticationFailure()
         } catch {
             if Task.isCancelled { return }
             if let generation, generation != loadGeneration { return }
@@ -173,7 +169,7 @@ final class ReflectionViewModel {
     }
 
     private static func userFacingMessage(for error: Error, segment: ReflectPostsSegment) -> String {
-        if case QFError.networkError(let urlError) = error {
+        if let urlError = error as? URLError {
             switch urlError.code {
             case .timedOut:
                 return "The server took too long to respond. Check your connection and try again."
@@ -215,10 +211,6 @@ final class ReflectionViewModel {
             if liked != !wasLiked {
                 posts[index].likesCount = max(0, previousCount + (liked ? 1 : -1))
             }
-        } catch QFError.missingUserSession {
-            posts[index].isLiked = wasLiked
-            posts[index].likesCount = previousCount
-            await handleReflectAuthenticationFailure()
         } catch {
             posts[index].isLiked = wasLiked
             posts[index].likesCount = previousCount
@@ -275,18 +267,14 @@ final class ReflectionViewModel {
             clearShareReflection()
             NotificationCenter.default.post(name: .reflectDidPost, object: nil)
             return "Reflection posted!"
-        } catch QFError.missingUserSession {
-            shareError = "Please sign in again."
-            await handleReflectAuthenticationFailure()
-            return "Sign in to post a reflection."
         } catch {
             if TodayVerseState.isAuthenticationFailure(error) {
                 shareError = "Please sign in again."
                 await handleReflectAuthenticationFailure()
                 return "Sign in to post a reflection."
             }
-            shareError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-            return "Post failed: \(shareError ?? "Unknown error")"
+            shareError = (error as? LocalizedError)?.errorDescription ?? "Failed to post."
+            return shareError ?? "Failed to post."
         }
     }
 }

@@ -30,43 +30,14 @@ final class ProfileViewModel {
 
     func fetchProfile(force: Bool = false) async {
         await hydrateFromCacheIfNeeded()
-
-        let hasToken = await container.userSession.hasUserAccessToken()
-        guard hasToken else {
-            if profile == nil {
-                isLoading = false
-            }
-            return
-        }
-
         if profile == nil {
-            isLoading = true
-        }
-        errorMessage = nil
-        do {
-            profile = try await container.habits.fetchMyProfile(force: force)
-        } catch {
-            if TodayVerseState.isAuthenticationFailure(error) {
-                container.invalidateUserSession()
-                profile = nil
-                errorMessage = nil
-            } else if profile == nil {
-                errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-            }
+            profile = try? await container.habits.fetchMyProfile(force: force)
         }
         isLoading = false
     }
 
     func signIn() async {
-        guard container.oauth.isWebAuthInProgress == false else { return }
-        errorMessage = nil
-        do {
-            try await container.oauth.signIn()
-            await fetchProfile(force: true)
-        } catch {
-            if error is CancellationError { return }
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-        }
+        await fetchProfile(force: true)
     }
 
     func signOut() async {
@@ -86,24 +57,9 @@ final class ProfileViewModel {
         await fetchProfile(force: force)
     }
 
-    func handleOAuthDidChange(isInProgress: Bool) async {
-        guard isInProgress == false else { return }
-        if await container.userSession.hasUserAccessToken() {
-            await fetchProfile(force: true)
-        } else {
-            profile = nil
-        }
-    }
+    func handleOAuthDidChange(isInProgress: Bool) async {}
 
-    func handleSessionDidChange() async {
-        guard container.oauth.isWebAuthInProgress != true else { return }
-        if await container.userSession.hasUserAccessToken() {
-            await fetchProfile(force: true)
-        } else {
-            profile = nil
-            isLoading = false
-        }
-    }
+    func handleSessionDidChange() async {}
 
     func sync(to verseState: TodayVerseState?) {
         guard let profile else { return }

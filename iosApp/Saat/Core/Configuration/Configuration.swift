@@ -26,21 +26,7 @@ struct AppConfiguration: Sendable {
         oauthEndpoint.deletingLastPathComponent().deletingLastPathComponent()
     }
 
-    var qfConfiguration: QFConfiguration {
-        QFConfiguration(
-            authBaseURL: oauthBaseURL,
-            oauthAuthorizeURL: oauthAuthorizeEndpoint,
-            oauthRedirectURI: oauthRedirectURI,
-            oauthAppRedirectURI: oauthAppRedirectURI,
-            oauthScopes: oauthScopes,
-            contentAPIBaseURL: apiBaseURL,
-            userAPIBaseURL: userAPIBaseURL,
-            clientId: clientId,
-            clientSecret: clientSecret,
-            defaultTranslationId: defaultTranslationId,
-            appGroupIdentifier: appGroupIdentifier
-        )
-    }
+
 }
 
 private enum DefaultAppCredentials {

@@ -81,8 +81,6 @@ final class QuranChaptersViewModel {
 
         do {
             continueReading = try await readingSessions.fetchMostRecent()
-        } catch QFError.missingUserSession {
-            continueReading = nil
         } catch {
             continueReading = nil
         }
