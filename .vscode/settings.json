@@ -1,3 +1,7 @@
 {
-    "sweetpad.build.scheme": "Saat"
+    "sweetpad.build.scheme": "Saat",
+    "sweetpad.build.destination": {
+        "id": "iosdevice-00008030-001825061E32802E",
+        "type": "iOSDevice"
+    }
 }

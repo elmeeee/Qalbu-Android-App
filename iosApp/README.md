@@ -80,7 +80,6 @@ Engagement is intentional: short daily touchpoints, deeper surah study, and soci
 ### Account / Settings
 
 - Sign in / sign out (OAuth 2.0 + PKCE)
-- Profile from Reflect (`GET .../users/profile`)
 - Prayer calculation method preferences (local + Al-Adhan query params)
 
 ---
@@ -126,14 +125,13 @@ OAuth host (separate from API base):
 **Requested scopes** (`QF_OAUTH_SCOPES` in `Config/Debug.xcconfig` and `Config/Release.xcconfig`):
 
 ```
-openid offline_access user post streak activity_day reading_session
+openid offline_access user post streak reading_session
 ```
 
 | Scope area | How the app uses it |
 |------------|---------------------|
-| `openid`, `offline_access`, `user` | Sign-in, profile, token refresh |
+| `openid`, `offline_access`, `user` | Sign-in, token refresh |
 | `post` | Create reflections, feed, likes |
-| `activity_day` | Log Quran activity when publishing a post with verse references |
 | `reading_session` | Continue reading + background session sync |
 | `streak` | Requested in OAuth scope; **no streak UI** in current build |
 
@@ -174,19 +172,15 @@ Implementation: `QuranContentEndpoints.swift`, `QuranContentRepository.swift`, `
 
 | Endpoint | Method | Query / body | Feature / screen |
 |----------|--------|--------------|------------------|
-| `/users/profile` | `GET` | — | Profile, feed bootstrap (author id) |
-| `/users/profile` | `PATCH` | `{ "post_as": bool }` | `patchMyProfileNoop` — **not used** in UI |
 | `/posts/feed` | `GET` | `tab=feed`, `sortBy=latest`, `page`, `limit`, `filter[postTypeIds]=1` | Reflect — All Reflect |
 | `/posts/my-posts` | `GET` | `tab=my_reflections`, `sortBy=latest`, `page`, `limit` | Reflect — My Reflect |
 | `/posts` | `POST` | Post body, verse `references`, `post_as_author_id`, `published_at`; optional `Idempotency-Key` | Today — publish reflection; Reflect create |
 | `/posts/{postId}/toggle-like` | `POST` | — | Reflect reel — heart button |
-| `/activity_days` | `POST` | `{ type: "QURAN", day, timezone, verses_read }` | Called after successful post **with** verse references (`UserHabitRepository`) |
-
 **Defined but not wired to UI:**
 
 - `GET /posts` (generic list enum case) — unused
 
-Implementation: `ReflectEndpoints.swift`, `ReflectRepository.swift`, `UserHabitRepository.swift`, `ReflectionViewModel.swift`
+Implementation: `ReflectEndpoints.swift`, `ReflectRepository.swift`, `ReflectionViewModel.swift`
 
 ---
 
@@ -227,7 +221,6 @@ flowchart TB
     subgraph ReflectAPI["Reflect API · user token"]
         R1[posts/feed · my-posts]
         R2[POST posts · toggle-like]
-        R3[users/profile · activity_days]
     end
 
     subgraph AuthV1["Auth v1 · user token"]
