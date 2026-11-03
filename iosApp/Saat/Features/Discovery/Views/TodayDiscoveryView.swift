@@ -190,6 +190,8 @@ struct TodayDiscoveryView: View {
                         .padding(.horizontal, 20)
                     }
                 }
+                .frame(maxWidth: 640)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, 70)
                 .padding(.bottom, 100)
             }

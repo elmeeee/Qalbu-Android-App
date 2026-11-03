@@ -48,20 +48,26 @@ struct ReflectReelPageView: View {
 
                     Spacer()
                 }
-                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .top)
+                .frame(maxWidth: 540)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .frame(height: proxy.size.height, alignment: .top)
 
                 VStack {
                     Spacer()
-                    ReflectReelActionRailView(
-                        post: post,
-                        isTogglingLike: isTogglingLike,
-                        onToggleLike: onToggleLike,
-                        showShareSheet: $showShareSheet
-                    )
+                    HStack {
+                        Spacer()
+                        ReflectReelActionRailView(
+                            post: post,
+                            isTogglingLike: isTogglingLike,
+                            onToggleLike: onToggleLike,
+                            showShareSheet: $showShareSheet
+                        )
+                        .padding(.trailing, 12)
+                        .padding(.bottom, actionBottomPadding)
+                    }
                 }
-                .padding(.trailing, 12)
-                .padding(.bottom, actionBottomPadding)
-                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .bottomTrailing)
+                .frame(maxWidth: 540)
+                .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .frame(height: pageHeight)

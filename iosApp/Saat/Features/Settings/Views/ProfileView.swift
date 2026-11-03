@@ -177,6 +177,8 @@ struct ProfileView: View {
                     AppFooterCardView(appVersion: appVersion)
                         .padding(.top, 8)
                 }
+                .frame(maxWidth: 680)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal, 20)
                 .padding(.bottom, 120)
             }

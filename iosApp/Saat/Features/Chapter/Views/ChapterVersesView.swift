@@ -168,6 +168,8 @@ struct ChapterVersesView: View {
             // Top App Bar
             VStack(spacing: 0) {
                 topChrome
+                    .frame(maxWidth: 680)
+                    .frame(maxWidth: .infinity, alignment: .center)
                 Spacer()
             }
 
@@ -175,6 +177,8 @@ struct ChapterVersesView: View {
             VStack(spacing: 0) {
                 Spacer()
                 bottomFloatingControls
+                    .frame(maxWidth: 680)
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
 
             if let toast = toastMessage {

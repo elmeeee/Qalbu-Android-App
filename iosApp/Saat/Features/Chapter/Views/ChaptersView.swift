@@ -316,6 +316,8 @@ struct ChaptersView: View {
                     }
                 }
             }
+            .frame(maxWidth: 680)
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, 18)
             .padding(.top, 6)
             .padding(.bottom, 120)
@@ -401,6 +403,8 @@ struct ChaptersView: View {
                     .buttonStyle(.plain)
                 }
             }
+            .frame(maxWidth: 680)
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, 18)
             .padding(.top, 6)
             .padding(.bottom, 120)

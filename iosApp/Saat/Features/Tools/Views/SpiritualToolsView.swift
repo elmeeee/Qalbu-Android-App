@@ -38,6 +38,7 @@ private struct SpiritualToolItem: Identifiable {
 }
 
 struct SpiritualToolsView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @ObservedObject private var languageManager = AppLanguageManager.shared
     @State private var searchQuery: String = ""
     @State private var selectedCategory: ToolCategory = .all
@@ -177,10 +178,21 @@ struct SpiritualToolsView: View {
         }
     }
 
-    private let columns = [
-        GridItem(.flexible(), spacing: 14),
-        GridItem(.flexible(), spacing: 14)
-    ]
+    private var columns: [GridItem] {
+        if horizontalSizeClass == .regular {
+            return [
+                GridItem(.flexible(), spacing: 14),
+                GridItem(.flexible(), spacing: 14),
+                GridItem(.flexible(), spacing: 14),
+                GridItem(.flexible(), spacing: 14)
+            ]
+        } else {
+            return [
+                GridItem(.flexible(), spacing: 14),
+                GridItem(.flexible(), spacing: 14)
+            ]
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -341,6 +353,8 @@ struct SpiritualToolsView: View {
                         .padding(.bottom, 110)
                     }
                 }
+                .frame(maxWidth: 840)
+                .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .navigationBarHidden(true)
