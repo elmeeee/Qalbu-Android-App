@@ -19,7 +19,7 @@ struct UserHabitRepository: Sendable {
         if force == false, let cached = await APICache.Profile.shared.cached() {
             return cached
         }
-        let profile = UserProfilePayload(id: "local_user", username: "User", name: "User", email: nil, bio: nil, avatarUrl: nil)
+        let profile = UserProfilePayload(id: "local_user", username: "User", firstName: "User", lastName: nil, bio: nil, avatarUrls: nil)
         await APICache.Profile.shared.store(profile)
         return profile
     }

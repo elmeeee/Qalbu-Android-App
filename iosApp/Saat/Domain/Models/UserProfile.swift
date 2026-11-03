@@ -51,6 +51,39 @@ struct UserProfilePayload: Decodable, Sendable {
         case followersCount, likesCount, isAdmin, languageIsoCode, bio, country, followed
     }
 
+    init(
+        id: String = "local_user",
+        username: String? = "User",
+        firstName: String? = "User",
+        lastName: String? = nil,
+        bio: String? = nil,
+        avatarUrls: UserProfileAvatarUrls? = nil
+    ) {
+        self.id = id
+        self.username = username
+        self.firstName = firstName
+        self.lastName = lastName
+        self.bio = bio
+        self.avatarUrls = avatarUrls
+        self.createdAt = nil
+        self.joiningYear = nil
+        self.isPasswordSet = nil
+        self.settings = nil
+        self.verified = nil
+        self.postAs = nil
+        self.postsCount = nil
+        self.averageToxicity = nil
+        self.languageId = nil
+        self.banned = nil
+        self.memberType = nil
+        self.followersCount = nil
+        self.likesCount = nil
+        self.isAdmin = nil
+        self.languageIsoCode = nil
+        self.country = nil
+        self.followed = nil
+    }
+
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         avatarUrls = try c.decodeIfPresent(UserProfileAvatarUrls.self, forKey: .avatarUrls)
