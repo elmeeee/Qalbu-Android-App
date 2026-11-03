@@ -250,6 +250,7 @@ private struct LanguageStepView: View {
     
     var body: some View {
         GeometryReader { geo in
+            let isWide = geo.size.width > 600
             ZStack(alignment: .top) {
                 // Full Screen Background (Edge to Edge)
                 Image("bg_onboarding_1")
@@ -258,133 +259,268 @@ private struct LanguageStepView: View {
                     .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
                     .ignoresSafeArea()
                 
-                VStack(spacing: 0) {
-                    // Top Bar: Skip button sits comfortably below status bar
-                    HStack {
-                        Spacer()
-                        Button(action: onSkip) {
-                            Text(lang.localize("onboarding_skip"))
-                                .font(.system(size: 13.5, weight: .semibold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 7)
-                                .background(Color.black.opacity(0.32))
-                                .clipShape(Capsule())
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, max(geo.safeAreaInsets.top, 20) + 4)
-                    
-                    Spacer().frame(height: 8)
-                    
-                    // Translucent Glass Backdrop Card
-                    VStack(spacing: 4) {
-                        Text(lang.localize("onboarding_brand_title"))
-                            .font(.system(size: 32, weight: .bold, design: .serif))
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .tracking(1.2)
-                        
-                        Text(lang.localize("onboarding_brand_subtitle"))
-                            .font(.system(size: 12.5))
-                            .lineSpacing(2.5)
-                            .foregroundColor(.white.opacity(0.95))
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(Color.black.opacity(0.32))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
-                            )
-                    )
-                    .padding(.horizontal, 20)
-                    
-                    // Middle space for character illustration
-                    Spacer(minLength: 12)
-                    
-                    // Bottom White Sheet (Hugs bottom screen edge seamlessly)
-                    VStack(alignment: .leading, spacing: 12) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(lang.localize("onboarding_lang_card_title"))
-                                .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(OnboardingTitleGreen)
-                            
-                            Text(lang.localize("onboarding_lang_card_subtitle"))
-                                .font(.system(size: 12))
-                                .foregroundColor(OnboardingSubtext)
-                        }
-                        
-                        // 3 Language Selector Chips
-                        HStack(spacing: 8) {
-                            LanguageChip(
-                                title: selected == .english ? "Indonesian" : "Indonesia",
-                                flagImage: "ic_flag_id",
-                                isSelected: selected == .indonesian
-                            ) {
-                                onSelect(.indonesian)
-                            }
-                            
-                            LanguageChip(
-                                title: selected == .english ? "Malay" : "Melayu",
-                                flagImage: "ic_flag_ms",
-                                isSelected: selected == .malay
-                            ) {
-                                onSelect(.malay)
-                            }
-                            
-                            LanguageChip(
-                                title: selected == .indonesian ? "Inggris" : (selected == .malay ? "Inggeris" : "English"),
-                                flagImage: "ic_flag_en",
-                                isSelected: selected == .english
-                            ) {
-                                onSelect(.english)
-                            }
-                        }
-                        
-                        // "Mulai ->" Action Button
-                        Button(action: onStart) {
-                            HStack(spacing: 8) {
-                                Text(lang.localize("onboarding_start_button"))
-                                    .font(.system(size: 15.5, weight: .bold))
-                                    .foregroundColor(.white)
-                                
-                                Image(systemName: "arrow.right")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(.white)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 48)
-                            .background(OnboardingDarkGreen)
-                            .clipShape(Capsule())
-                        }
-                        .padding(.top, 2)
-                        
-                        // Step 1 Footer Text
-                        Text(lang.localize("onboarding_step1_footer"))
-                            .font(.system(size: 11))
-                            .foregroundColor(OnboardingSubtext)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .multilineTextAlignment(.center)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, max(geo.safeAreaInsets.bottom, 12) + 6)
-                    .frame(maxWidth: .infinity)
-                    .background(
-                        TopRoundedCorner(radius: 26)
-                            .fill(Color.white)
-                            .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: -4)
-                    )
+                if isWide {
+                    wideContent(geo)
+                } else {
+                    compactContent(geo)
                 }
-                .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
             }
             .ignoresSafeArea()
         }
+    }
+    
+    @ViewBuilder
+    private func compactContent(_ geo: GeometryProxy) -> some View {
+        VStack(spacing: 0) {
+            // Top Bar: Skip button sits comfortably below status bar
+            HStack {
+                Spacer()
+                Button(action: onSkip) {
+                    Text(lang.localize("onboarding_skip"))
+                        .font(.system(size: 13.5, weight: .semibold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 7)
+                        .background(Color.black.opacity(0.32))
+                        .clipShape(Capsule())
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, max(geo.safeAreaInsets.top, 20) + 4)
+            
+            Spacer().frame(height: 8)
+            
+            // Translucent Glass Backdrop Card
+            VStack(spacing: 4) {
+                Text(lang.localize("onboarding_brand_title"))
+                    .font(.system(size: 32, weight: .bold, design: .serif))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .tracking(1.2)
+                
+                Text(lang.localize("onboarding_brand_subtitle"))
+                    .font(.system(size: 12.5))
+                    .lineSpacing(2.5)
+                    .foregroundColor(.white.opacity(0.95))
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color.black.opacity(0.32))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                    )
+            )
+            .padding(.horizontal, 20)
+            
+            // Middle space for character illustration
+            Spacer(minLength: 12)
+            
+            // Bottom White Sheet (Hugs bottom screen edge seamlessly)
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(lang.localize("onboarding_lang_card_title"))
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(OnboardingTitleGreen)
+                    
+                    Text(lang.localize("onboarding_lang_card_subtitle"))
+                        .font(.system(size: 12))
+                        .foregroundColor(OnboardingSubtext)
+                }
+                
+                // 3 Language Selector Chips
+                HStack(spacing: 8) {
+                    LanguageChip(
+                        title: selected == .english ? "Indonesian" : "Indonesia",
+                        flagImage: "ic_flag_id",
+                        isSelected: selected == .indonesian
+                    ) {
+                        onSelect(.indonesian)
+                    }
+                    
+                    LanguageChip(
+                        title: selected == .english ? "Malay" : "Melayu",
+                        flagImage: "ic_flag_ms",
+                        isSelected: selected == .malay
+                    ) {
+                        onSelect(.malay)
+                    }
+                    
+                    LanguageChip(
+                        title: selected == .indonesian ? "Inggris" : (selected == .malay ? "Inggeris" : "English"),
+                        flagImage: "ic_flag_en",
+                        isSelected: selected == .english
+                    ) {
+                        onSelect(.english)
+                    }
+                }
+                
+                // "Mulai ->" Action Button
+                Button(action: onStart) {
+                    HStack(spacing: 8) {
+                        Text(lang.localize("onboarding_start_button"))
+                            .font(.system(size: 15.5, weight: .bold))
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(OnboardingDarkGreen)
+                    .clipShape(Capsule())
+                }
+                .padding(.top, 2)
+                
+                // Step 1 Footer Text
+                Text(lang.localize("onboarding_step1_footer"))
+                    .font(.system(size: 11))
+                    .foregroundColor(OnboardingSubtext)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, max(geo.safeAreaInsets.bottom, 12) + 6)
+            .frame(maxWidth: .infinity)
+            .background(
+                TopRoundedCorner(radius: 26)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: -4)
+            )
+        }
+        .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
+    }
+    
+    @ViewBuilder
+    private func wideContent(_ geo: GeometryProxy) -> some View {
+        HStack(spacing: 28) {
+            // Left Pane (Visual & Title)
+            VStack(alignment: .leading, spacing: 14) {
+                Spacer()
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(lang.localize("onboarding_brand_title"))
+                        .font(.system(size: 38, weight: .bold, design: .serif))
+                        .foregroundColor(.white)
+                        .tracking(1.2)
+                    
+                    Text(lang.localize("onboarding_brand_subtitle"))
+                        .font(.system(size: 15))
+                        .lineSpacing(3)
+                        .foregroundColor(.white.opacity(0.95))
+                }
+                .padding(24)
+                .background(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color.black.opacity(0.38))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                                .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                        )
+                )
+                
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.leading, max(geo.safeAreaInsets.leading, 24))
+            
+            // Right Pane (Language Chips & Actions)
+            VStack(spacing: 16) {
+                HStack {
+                    Spacer()
+                    Button(action: onSkip) {
+                        Text(lang.localize("onboarding_skip"))
+                            .font(.system(size: 13.5, weight: .semibold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 7)
+                            .background(Color.black.opacity(0.35))
+                            .clipShape(Capsule())
+                    }
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(lang.localize("onboarding_lang_card_title"))
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundColor(OnboardingTitleGreen)
+                        
+                        Text(lang.localize("onboarding_lang_card_subtitle"))
+                            .font(.system(size: 12.5))
+                            .foregroundColor(OnboardingSubtext)
+                    }
+                    
+                    VStack(spacing: 8) {
+                        LanguageChip(
+                            title: selected == .english ? "Indonesian" : "Indonesia",
+                            flagImage: "ic_flag_id",
+                            isSelected: selected == .indonesian
+                        ) {
+                            onSelect(.indonesian)
+                        }
+                        
+                        LanguageChip(
+                            title: selected == .english ? "Malay" : "Melayu",
+                            flagImage: "ic_flag_ms",
+                            isSelected: selected == .malay
+                        ) {
+                            onSelect(.malay)
+                        }
+                        
+                        LanguageChip(
+                            title: selected == .indonesian ? "Inggris" : (selected == .malay ? "Inggeris" : "English"),
+                            flagImage: "ic_flag_en",
+                            isSelected: selected == .english
+                        ) {
+                            onSelect(.english)
+                        }
+                    }
+                    
+                    Button(action: onStart) {
+                        HStack(spacing: 8) {
+                            Text(lang.localize("onboarding_start_button"))
+                                .font(.system(size: 15.5, weight: .bold))
+                                .foregroundColor(.white)
+                            
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundColor(.white)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                        .background(OnboardingDarkGreen)
+                        .clipShape(Capsule())
+                    }
+                    .padding(.top, 4)
+                    
+                    Text(lang.localize("onboarding_step1_footer"))
+                        .font(.system(size: 11.5))
+                        .foregroundColor(OnboardingSubtext)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .padding(22)
+                .background(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.14), radius: 16, x: 0, y: 4)
+                )
+                .frame(maxWidth: 400)
+                
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.trailing, max(geo.safeAreaInsets.trailing, 24))
+        }
+        .padding(.vertical, 24)
+        .frame(width: geo.size.width, height: geo.size.height + geo.safeAreaInsets.top + geo.safeAreaInsets.bottom)
     }
 }
 

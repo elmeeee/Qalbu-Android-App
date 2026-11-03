@@ -38,7 +38,8 @@ struct ChapterVersesView: View {
         GeometryReader { rootGeo in
             let chromeInsets = ChapterReaderChromeInsets.resolved(
                 safeArea: rootGeo.safeAreaInsets,
-                showsNowPlaying: showsNowPlaying
+                showsNowPlaying: showsNowPlaying,
+                hasVisibleTabBar: false
             )
             mainContent(chromeInsets: chromeInsets)
         }

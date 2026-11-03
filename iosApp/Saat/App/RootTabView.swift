@@ -92,6 +92,7 @@ struct RootTabView: View {
             }
             .tag(Tab.account)
         }
+        .tabViewStyle(.sidebarAdaptable)
         .tint(Color(hex: "#1B4332")) // Dark Emerald Green active tint
         .id(languageManager.currentLanguage)
         .environmentObject(prayerController)
