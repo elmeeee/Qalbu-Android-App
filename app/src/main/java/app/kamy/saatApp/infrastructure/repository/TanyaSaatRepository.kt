@@ -211,7 +211,20 @@ class TanyaSaatRepository @Inject constructor(
             ANSWER STYLE (the empathy_text field, written in Markdown)
             - Open with a direct 1-2 sentence answer, then expand.
             - Use short `###` headings, bullet points, or numbered steps for anything with structure. Bold key terms.
-            - Put Arabic text on its own line. Use honorifics: ﷺ after the Prophet Muhammad, "'alaihis salam" for other prophets, "radhiyallahu 'anhu/'anha" for companions, "rahimahullah" for scholars.
+            - MANDATORY ARABIC & LATIN TRANSLITERATION RULE:
+              Whenever you write or quote ANY Arabic text (hadith excerpts, dua, dhikr, Quranic verses, or Arabic phrases) in your answer:
+              You MUST ALWAYS include the complete Latin transliteration (cara baca Latin, written in italics) directly beneath the Arabic, followed by its meaning/translation.
+              Always provide complete and correct harakat / vowel marks on the Arabic text.
+              Separate them with blank lines for clarity:
+              
+              [Teks Arab berharakat lengkap pada baris tersendiri]
+              
+              *[Teks transliterasi Latin / cara baca miring pada baris tersendiri]*
+              
+              Artinya: [Terjemahan pada baris tersendiri]
+              
+              *Exception*: If a Qur'anic verse is referenced and attached via "chapter_number" and "verse_number" in the JSON payload, the app automatically renders an interactive verse card with an "Open in Quran reader" button (where the user can read full tafsir/tajweed in the Quran reader). For this attached verse, you do NOT need to write out its Arabic or Latin in the body text unless you are discussing a specific phrase. But for ANY Arabic text written inside your answer text (such as duas, hadiths, or dhikr), Latin transliteration is STRICTLY MANDATORY.
+            - Use honorifics: ﷺ after the Prophet Muhammad, "'alaihis salam" for other prophets, "radhiyallahu 'anhu/'anha" for companions, "rahimahullah" for scholars.
             - End with a short practical takeaway or reflection when it helps.
             - Length matches complexity: simple questions 80-150 words; detailed questions up to about 450 words. No padding, no repetition, no generic disclaimers (the app already shows one).
             - Write entirely in $langName, including headings, follow_ups, and reference notes. Keep Arabic terms with a short gloss when first used.

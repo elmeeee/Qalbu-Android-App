@@ -8,15 +8,25 @@
 
 import ActivityKit
 import Foundation
+import OSLog
 
 /// Manages the lifecycle of the Live Prayer Countdown Activity on iOS.
 @MainActor
 final class PrayerCountdownLiveActivityManager {
     static let shared = PrayerCountdownLiveActivityManager()
+    static let enabledKey = "live_prayer_countdown_enabled"
 
+    private let logger = Logger(subsystem: "co.kamy.Saat", category: "PrayerCountdownLiveActivity")
     private var currentActivity: Activity<PrayerCountdownAttributes>?
 
     private init() {}
+
+    func setEnabled(_ enabled: Bool) async {
+        UserDefaults.standard.set(enabled, forKey: Self.enabledKey)
+        if !enabled {
+            await endActivity()
+        }
+    }
 
     /// Starts or updates the Live Activity for prayer countdown.
     func startOrUpdateActivity(
@@ -26,15 +36,13 @@ final class PrayerCountdownLiveActivityManager {
         currentPrayerName: String,
         locationName: String? = nil,
         calculationMethod: String = "Saat"
-    ) {
-        let isEnabled = UserDefaults.standard.bool(forKey: "liveCountdownEnabled")
-        // Default to true if not explicitly set
-        if UserDefaults.standard.object(forKey: "liveCountdownEnabled") == nil {
-            UserDefaults.standard.set(true, forKey: "liveCountdownEnabled")
+    ) async {
+        if UserDefaults.standard.object(forKey: Self.enabledKey) == nil {
+            UserDefaults.standard.set(true, forKey: Self.enabledKey)
         }
 
-        guard UserDefaults.standard.bool(forKey: "liveCountdownEnabled") else {
-            endActivity()
+        guard UserDefaults.standard.bool(forKey: Self.enabledKey) else {
+            await endActivity()
             return
         }
 
@@ -50,17 +58,18 @@ final class PrayerCountdownLiveActivityManager {
         )
         let content = ActivityContent(state: state, staleDate: targetDate.addingTimeInterval(900))
 
-        // If activity already exists, update it
         if let activity = currentActivity ?? Activity<PrayerCountdownAttributes>.activities.first {
             currentActivity = activity
+            guard activity.content.state != state else { return }
             let activityID = activity.id
+            let staleDate = targetDate.addingTimeInterval(900)
             Task.detached {
-                if let target = Activity<PrayerCountdownAttributes>.activities.first(where: { $0.id == activityID }) {
-                    await target.update(content)
+                guard let activity = Activity<PrayerCountdownAttributes>.activities.first(where: { $0.id == activityID }) else {
+                    return
                 }
+                await activity.update(ActivityContent(state: state, staleDate: staleDate))
             }
         } else {
-            // Request a new Live Activity
             let attributes = PrayerCountdownAttributes(calculationMethod: calculationMethod)
             do {
                 currentActivity = try Activity.request(
@@ -69,19 +78,23 @@ final class PrayerCountdownLiveActivityManager {
                     pushType: nil
                 )
             } catch {
-                // Silently degrade if not supported or disabled in system settings
+                currentActivity = nil
+                logger.error("Failed to start prayer Live Activity: \(error.localizedDescription, privacy: .public)")
             }
         }
     }
 
     /// End the Live Activity.
-    func endActivity() {
-        let activities = Activity<PrayerCountdownAttributes>.activities
+    func endActivity() async {
+        let activityIDs = Activity<PrayerCountdownAttributes>.activities.map(\.id)
         currentActivity = nil
-        Task.detached {
-            for act in activities {
-                await act.end(nil, dismissalPolicy: .immediate)
+        await Task.detached {
+            for activityID in activityIDs {
+                guard let activity = Activity<PrayerCountdownAttributes>.activities.first(where: { $0.id == activityID }) else {
+                    continue
+                }
+                await activity.end(nil, dismissalPolicy: .immediate)
             }
-        }
+        }.value
     }
 }

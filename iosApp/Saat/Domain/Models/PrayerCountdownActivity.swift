@@ -20,7 +20,7 @@ public struct PrayerCountdownAttributes: ActivityAttributes {
     }
 
     /// Dynamic state that updates as prayer intervals progress.
-    public struct ContentState: Codable, Hashable {
+    public struct ContentState: Codable, Hashable, Sendable {
         public let nextPrayerName: String
         public let nextPrayerTimeFormatted: String
         public let targetDate: Date

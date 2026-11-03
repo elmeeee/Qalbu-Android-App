@@ -123,6 +123,10 @@ struct PrayerCountdownLiveActivity: Widget {
                     Text("SĀAT")
                         .font(.system(size: 10, weight: .heavy))
                         .foregroundColor(Color(hex: 0xFF14_5A43))
+
+                    Text("•  \(context.state.currentPrayerName)")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(Color(hex: 0xFF64_748B))
                     
                     if let loc = context.state.locationName, !loc.isEmpty {
                         Text("•  \(loc)")
@@ -159,7 +163,16 @@ struct PrayerCountdownLiveActivity: Widget {
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color(hex: 0xFFFC_FBF7))
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(hex: 0xFFFF_FFFF),
+                            Color(hex: 0xFFF8_F6_EF)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                         .stroke(Color(hex: 0xFFECE7DE), lineWidth: 1)

@@ -152,10 +152,11 @@ struct TodayDiscoveryHeaderView: View {
                 ZStack(alignment: .bottom) {
                     Rectangle()
                         .fill(.ultraThinMaterial)
-                        .overlay(SaatTokens.Colors.homeBg.opacity(0.82))
+                        .overlay(SaatTokens.Colors.homeBg.opacity(0.36))
+                        .overlay(SaatTokens.Colors.homeDarkGreen.opacity(0.18))
 
                     Rectangle()
-                        .fill(SaatTokens.Colors.homeDarkGreen.opacity(0.12))
+                        .fill(SaatTokens.Colors.homeDarkGreen.opacity(0.28))
                         .frame(height: 0.5)
                 }
                 .ignoresSafeArea(edges: .top)
@@ -163,6 +164,7 @@ struct TodayDiscoveryHeaderView: View {
                 .transition(.opacity)
             }
         }
+        .zIndex(1)
         .animation(.easeInOut(duration: 0.25), value: isScrolled)
         .onAppear {
             timer?.invalidate()

@@ -55,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -522,6 +523,19 @@ private fun EmbeddedDoaCard(doa: DoaItem) {
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp, textAlign = TextAlign.End),
                     color = Color(0xFF1C1C1E),
                     modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+
+            doa.latin?.takeIf { it.isNotBlank() }?.let { lt ->
+                Text(
+                    text = lt.replace("\r\n", "\n"),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp,
+                        fontStyle = FontStyle.Italic
+                    ),
+                    color = Color(0xFF92400E)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
             }

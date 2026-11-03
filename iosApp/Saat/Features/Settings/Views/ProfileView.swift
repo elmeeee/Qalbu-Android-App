@@ -468,7 +468,7 @@ struct NotificationSettingsDetailView: View {
     @AppStorage(PrayerNotificationPreferences.ishaKey) private var ishaEnabled = true
 
     // Live countdown / activity
-    @AppStorage("live_prayer_countdown_enabled") private var liveCountdownEnabled = true
+    @AppStorage(PrayerCountdownLiveActivityManager.enabledKey) private var liveCountdownEnabled = true
 
     // Reading reminders
     @AppStorage(DailyVerseNotificationPreferences.enabledKey) private var dailyVerseEnabled = true
@@ -608,6 +608,11 @@ struct NotificationSettingsDetailView: View {
         }
         .navigationTitle(languageManager.localize("notif_adhan_title"))
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: liveCountdownEnabled) { _, isEnabled in
+            Task {
+                await PrayerCountdownLiveActivityManager.shared.setEnabled(isEnabled)
+            }
+        }
     }
 
     private func sectionHeader(_ title: String) -> some View {

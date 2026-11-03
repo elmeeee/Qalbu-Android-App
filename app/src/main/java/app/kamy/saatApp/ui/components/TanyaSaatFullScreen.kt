@@ -92,6 +92,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -1140,6 +1141,19 @@ private fun EmbeddedDoaCard(doa: DoaItem) {
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp, textAlign = TextAlign.End),
                     color = Ink,
                     modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            doa.latin?.takeIf { it.isNotBlank() }?.let { lt ->
+                Text(
+                    text = lt.replace("\r\n", "\n"),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp,
+                        fontStyle = FontStyle.Italic
+                    ),
+                    color = Color(0xFF92400E)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }

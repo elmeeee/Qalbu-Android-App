@@ -195,32 +195,33 @@ struct SpiritualToolsView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
-            SaatTokens.Colors.homeBg
-                .ignoresSafeArea()
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                SaatTokens.Colors.homeBg
+                    .ignoresSafeArea()
 
-            // Header Background Image
-            Image("bg_worship_header")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity)
-                .frame(height: 280)
-                .clipped()
-                .overlay(
-                    LinearGradient(
-                        colors: [
-                            SaatTokens.Colors.homeBg.opacity(0.15),
-                            SaatTokens.Colors.homeBg.opacity(0.65),
-                            SaatTokens.Colors.homeBg
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
+                // Header Background Image
+                Image("bg_worship_header")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 280)
+                    .clipped()
+                    .overlay(
+                        LinearGradient(
+                            colors: [
+                                SaatTokens.Colors.homeBg.opacity(0.15),
+                                SaatTokens.Colors.homeBg.opacity(0.65),
+                                SaatTokens.Colors.homeBg
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
-                .ignoresSafeArea(edges: .top)
+                    .ignoresSafeArea(edges: .top)
 
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 16) {
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 16) {
                     // Header Title & Subtitle with Safe Area top clearance
                     VStack(alignment: .leading, spacing: 4) {
                         Text(languageManager.localize("worship_header_title"))
@@ -353,8 +354,10 @@ struct SpiritualToolsView: View {
                         .padding(.bottom, 110)
                     }
                 }
-                .frame(maxWidth: 840)
-                .frame(maxWidth: .infinity, alignment: .center)
+                    .frame(width: min(geometry.size.width, 840))
+                    .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .frame(width: geometry.size.width)
             }
         }
         .navigationBarHidden(true)

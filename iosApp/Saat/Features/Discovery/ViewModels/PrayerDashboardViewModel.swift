@@ -44,7 +44,7 @@ final class PrayerDashboardViewModel: ObservableObject {
                     self.cityName = self.controller.cityName
                     self.hijriDate = self.controller.hijriDateLabel
                     self.khgtToday = LocalKhgtCalendar.shared.infoForDate(Date())
-                    self.recalculate(at: Date())
+                    await self.recalculate(at: Date())
                 }
             }
         
@@ -53,7 +53,9 @@ final class PrayerDashboardViewModel: ObservableObject {
             .autoconnect()
             .sink { [weak self] now in
                 guard let self = self else { return }
-                self.recalculate(at: now)
+                Task {
+                    await self.recalculate(at: now)
+                }
             }
 
         // Language change observer
@@ -61,14 +63,18 @@ final class PrayerDashboardViewModel: ObservableObject {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.recalculate(at: Date())
+                Task {
+                    await self.recalculate(at: Date())
+                }
             }
         
         self.khgtToday = LocalKhgtCalendar.shared.infoForDate(Date())
-        recalculate(at: Date())
+        Task {
+            await recalculate(at: Date())
+        }
     }
-    
-    private func recalculate(at now: Date) {
+
+    private func recalculate(at now: Date) async {
         let prayers = controller.dailyPrayers
         guard !prayers.isEmpty else {
             self.mappedPrayers = []
@@ -107,11 +113,12 @@ final class PrayerDashboardViewModel: ObservableObject {
             self.nextPrayerTime = formatter.string(from: next.date)
             
             // Sync Live Activity countdown on Lock Screen & Dynamic Island
-            PrayerCountdownLiveActivityManager.shared.startOrUpdateActivity(
+            await PrayerCountdownLiveActivityManager.shared.startOrUpdateActivity(
                 nextPrayerName: self.nextPrayerDisplayName,
                 nextPrayerTimeFormatted: self.nextPrayerTime,
                 targetDate: next.date,
-                currentPrayerName: mapToSoutheastAsianName(activeName)
+                currentPrayerName: mapToSoutheastAsianName(activeName),
+                locationName: controller.cityName
             )
         } else {
             self.nextPrayerDisplayName = "--"

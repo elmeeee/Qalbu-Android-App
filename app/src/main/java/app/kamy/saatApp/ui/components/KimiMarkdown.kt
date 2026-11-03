@@ -235,8 +235,14 @@ fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
             flushParagraph()
             blocks += MdBlock.Paragraph(line.trim(), true)
         } else {
+            val trimmedLine = line.trim()
+            val isSeparateLine = isTransliterationOrTranslation(trimmedLine) ||
+                (paragraph.isNotEmpty() && isTransliteration(paragraph.toString().trim()))
+            if (isSeparateLine) {
+                flushParagraph()
+            }
             if (paragraph.isNotEmpty()) paragraph.append(' ')
-            paragraph.append(line.trim())
+            paragraph.append(trimmedLine)
         }
     }
     flushParagraph()
@@ -255,6 +261,24 @@ private fun isArabicDominant(text: String): Boolean {
         }
     }
     return letters > 0 && arabic * 100 / letters >= 60
+}
+
+private fun isTransliteration(text: String): Boolean {
+    val t = text.trim()
+    return (t.startsWith("*") && t.endsWith("*") && t.length > 2 && !t.drop(1).dropLast(1).contains("*")) ||
+           (t.startsWith("_") && t.endsWith("_") && t.length > 2 && !t.drop(1).dropLast(1).contains("_")) ||
+           t.startsWith("Latin:", ignoreCase = true) ||
+           t.startsWith("Cara baca:", ignoreCase = true) ||
+           t.startsWith("Transliterasi:", ignoreCase = true)
+}
+
+private fun isTransliterationOrTranslation(text: String): Boolean {
+    val t = text.trim()
+    return isTransliteration(t) ||
+           t.startsWith("Artinya:", ignoreCase = true) ||
+           t.startsWith("Terjemahan:", ignoreCase = true) ||
+           t.startsWith("Meaning:", ignoreCase = true) ||
+           t.startsWith("Maksudnya:", ignoreCase = true)
 }
 
 // ─── Inline styling ─────────────────────────────────────────────────────────
