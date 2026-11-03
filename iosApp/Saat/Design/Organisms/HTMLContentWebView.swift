@@ -61,7 +61,12 @@ struct HTMLContentWebView: UIViewRepresentable {
             controller.add(context.coordinator, name: "tajweedTap")
             config.userContentController = controller
         }
-        let webView = WKWebView(frame: .zero, configuration: config)
+        let initialWidth = Self.defaultLayoutWidth()
+        let initialHeight = AyahArabicWebBlock.placeholderHeight
+        let webView = WKWebView(
+            frame: CGRect(x: 0, y: 0, width: initialWidth, height: initialHeight),
+            configuration: config
+        )
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
@@ -169,7 +174,18 @@ struct HTMLContentWebView: UIViewRepresentable {
         Self.applyVerseWebViewFrame(webView, height: height)
     }
 
-    fileprivate static func verseLayoutWidth(for webView: WKWebView) -> CGFloat? {
+    fileprivate static func defaultLayoutWidth() -> CGFloat {
+        if let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .flatMap({ $0.windows })
+            .first(where: { $0.isKeyWindow || $0.bounds.width > 0 }) {
+            let horizontalInset: CGFloat = 56
+            return max(window.bounds.width - horizontalInset, 280)
+        }
+        return 360
+    }
+
+    fileprivate static func verseLayoutWidth(for webView: WKWebView) -> CGFloat {
         if webView.bounds.width >= 1 {
             return webView.bounds.width
         }
@@ -181,17 +197,15 @@ struct HTMLContentWebView: UIViewRepresentable {
             }
             ancestor = view.superview
         }
-        // Last resort: use screen width minus typical horizontal padding
-        if let screen = webView.window?.windowScene?.screen {
-            let horizontalInset: CGFloat = 56 // 16 outer + 12 inner on each side = 56
-            return max(screen.bounds.width - horizontalInset, 1)
+        if let window = webView.window {
+            return max(window.bounds.width - 56, 280)
         }
-        return nil
+        return defaultLayoutWidth()
     }
 
     fileprivate static func applyVerseWebViewFrame(_ webView: WKWebView, height: CGFloat) {
-        guard let width = verseLayoutWidth(for: webView) else { return }
-        let size = CGSize(width: width, height: height)
+        let width = verseLayoutWidth(for: webView)
+        let size = CGSize(width: width, height: max(height, AyahArabicWebBlock.placeholderHeight))
         webView.frame = CGRect(origin: .zero, size: size)
         webView.scrollView.frame = CGRect(origin: .zero, size: size)
     }
@@ -231,19 +245,13 @@ struct HTMLContentWebView: UIViewRepresentable {
         }
 
         private func measureVerseCardHeight(webView: WKWebView, binding: Binding<CGFloat>) {
-            guard HTMLContentWebView.verseLayoutWidth(for: webView) != nil else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self, weak webView] in
-                    guard let self, let webView else { return }
-                    self.measureVerseCardHeight(webView: webView, binding: binding)
-                }
-                return
-            }
-
             resizeVerseWebView(webView, height: 12_000)
 
             let script = """
             (async function() {
-              if (document.fonts && document.fonts.ready) { await document.fonts.ready; }
+              if (document.fonts && document.fonts.ready) {
+                try { await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 200))]); } catch(e){}
+              }
               await new Promise(function(resolve) {
                 requestAnimationFrame(function() { requestAnimationFrame(resolve); });
               });

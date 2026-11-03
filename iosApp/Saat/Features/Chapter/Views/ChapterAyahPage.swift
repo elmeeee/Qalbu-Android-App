@@ -94,6 +94,7 @@ struct ChapterAyahPage: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
+                    .frame(maxWidth: 640)
                     .frame(maxWidth: .infinity, alignment: .top)
 
                     Spacer(minLength: 0)
@@ -133,7 +134,8 @@ struct ChapterAyahPage: View {
                 .onChange(of: availableHeight) { _, height in
                     recalculateLayoutScale(availableHeight: height, contentWidth: geometry.size.width)
                 }
-                .onChange(of: arabicMeasuredHeight) { _, _ in
+                .onChange(of: arabicMeasuredHeight) { oldHeight, newHeight in
+                    guard abs(oldHeight - newHeight) > 4 else { return }
                     recalculateLayoutScale(availableHeight: availableHeight, contentWidth: geometry.size.width)
                 }
                 .onChange(of: fontScale) { _, _ in
