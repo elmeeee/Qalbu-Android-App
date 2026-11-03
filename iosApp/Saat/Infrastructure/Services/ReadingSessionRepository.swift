@@ -11,18 +11,6 @@ import Foundation
 struct ReadingSessionRepository: Sendable {
     init() {}
 
-    func fetchReadingSessions(
-        first: Int? = nil,
-        after: String? = nil,
-        last: Int? = nil,
-        before: String? = nil
-    ) async throws -> ReadingSessionsPage {
-        if let recent = try await fetchMostRecent() {
-            return ReadingSessionsPage(data: [recent], totalCount: 1)
-        }
-        return ReadingSessionsPage(data: [], totalCount: 0)
-    }
-
     func fetchMostRecent() async throws -> ReadingSession? {
         let chapter = UserDefaults.standard.integer(forKey: "last_read_chapter")
         let verse = UserDefaults.standard.integer(forKey: "last_read_verse")

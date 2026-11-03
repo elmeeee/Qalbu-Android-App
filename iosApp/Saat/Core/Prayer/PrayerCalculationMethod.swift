@@ -250,44 +250,6 @@ enum PrayerCalculationMethod: String, CaseIterable, Sendable, Identifiable, Coda
         }
     }
 
-    var aladhanMethodID: Int {
-        switch self {
-        case .jafari: 0
-        case .karachi: 1
-        case .isna: 2
-        case .mwl: 3
-        case .ummAlQura: 4
-        case .egyptian: 5
-        case .tehran: 7
-        case .gulf: 8
-        case .kuwait: 9
-        case .qatar: 10
-        case .muis: 11
-        case .france: 12
-        case .turkey: 13
-        case .russia: 14
-        case .mcw: 15
-        case .dubai: 16
-        case .jakim, .brunei: 17
-        case .tunisia: 18
-        case .algeria: 19
-        case .kemenag: 20
-        case .morocco: 21
-        case .lisbon: 22
-        case .jordan: 23
-        case .muhammadiyah: 99
-        }
-    }
-
-    var aladhanMethodSettings: String? {
-        switch self {
-        case .muhammadiyah: "18,null,18"
-        default: nil
-        }
-    }
-
-    var aladhanSchool: Int { 0 }
-
     var aladhanTune: String {
         switch self {
         case .muhammadiyah: "0,2,-1,1,1,3,0,2,0"

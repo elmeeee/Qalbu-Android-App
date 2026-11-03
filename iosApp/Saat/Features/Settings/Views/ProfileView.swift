@@ -37,7 +37,6 @@ enum LegalSheetType: String, Identifiable {
 
 struct ProfileView: View {
     let preferSystemNavigationTitle: Bool
-    let verseState: TodayVerseState?
     @ObservedObject private var languageManager = AppLanguageManager.shared
     @Environment(\.appContainer) private var container
 

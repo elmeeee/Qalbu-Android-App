@@ -13,7 +13,6 @@ struct ContentView: View {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var isSplashActive = true
-    @State private var verseState = TodayVerseState()
 
     var body: some View {
         Group {
@@ -32,39 +31,20 @@ struct ContentView: View {
             } else if hasCompletedOnboarding == false {
                 OnboardingView()
             } else {
-                RootTabView(verseState: verseState)
+                RootTabView()
             }
         }
         .preferredColorScheme(.light)
         .tint(Color.Token.deepEmerald)
         .task(id: hasCompletedOnboarding) {
             guard hasCompletedOnboarding else { return }
-            await verseState.ensureProfileLoaded(container: container)
             container?.warmChapterCatalog()
-            container?.warmUserProfileIfSignedIn()
             _ = await DailyVerseNotificationCoordinator.refreshIfNeeded(container: container)
         }
         .onChange(of: scenePhase) { _, phase in
             guard phase == .active, hasCompletedOnboarding else { return }
             Task {
                 _ = await DailyVerseNotificationCoordinator.refreshIfNeeded(container: container)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .qfOAuthWebAuthStateDidChange)) { _ in
-            verseState.syncOAuthUIState(container: container)
-            Task { @MainActor in
-                await verseState.handleOAuthFlowDidChange(container: container)
-                container?.warmReflectDataIfSignedIn()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .qfUserSessionDidChange)) { _ in
-            Task { @MainActor in
-                await verseState.handleUserSessionDidChange(container: container)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .qfUserProfileDidUpdate)) { _ in
-            Task { @MainActor in
-                await verseState.syncFromCachedProfile(container: container)
             }
         }
     }

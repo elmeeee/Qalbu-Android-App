@@ -9,50 +9,10 @@
 import Foundation
 
 struct AppConfiguration: Sendable {
-    let environment: AppEnvironment
-    let apiBaseURL: URL
-    let userAPIBaseURL: URL
-    let oauthEndpoint: URL
-    let oauthAuthorizeEndpoint: URL
-    let oauthRedirectURI: URL
-    let oauthAppRedirectURI: URL
-    let oauthScopes: String
-    let clientId: String
-    let clientSecret: String?
-    let defaultTranslationId: Int
+    /// Shared app group used by the main app and the Live Activity extension.
     let appGroupIdentifier: String
 
-    var oauthBaseURL: URL {
-        oauthEndpoint.deletingLastPathComponent().deletingLastPathComponent()
-    }
-
-
-}
-
-private enum DefaultAppCredentials {
-    static let appGroupIdentifier = "group.co.kamy.Saat"
-    private static let fallbackURL = URL(string: "https://api.aladhan.com")!
-
-    static func configuration(for environment: AppEnvironment) -> AppConfiguration {
-        return AppConfiguration(
-            environment: environment,
-            apiBaseURL: fallbackURL,
-            userAPIBaseURL: fallbackURL,
-            oauthEndpoint: fallbackURL,
-            oauthAuthorizeEndpoint: fallbackURL,
-            oauthRedirectURI: fallbackURL,
-            oauthAppRedirectURI: fallbackURL,
-            oauthScopes: "openid",
-            clientId: "saat-app",
-            clientSecret: nil,
-            defaultTranslationId: 33,
-            appGroupIdentifier: appGroupIdentifier
-        )
-    }
-}
-
-extension AppEnvironment {
-    var configuration: AppConfiguration {
-        DefaultAppCredentials.configuration(for: self)
+    init(appGroupIdentifier: String = "group.co.kamy.Saat") {
+        self.appGroupIdentifier = appGroupIdentifier
     }
 }

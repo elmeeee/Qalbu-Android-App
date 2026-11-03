@@ -14,16 +14,3 @@ struct ReadingSession: Decodable, Sendable, Identifiable, Hashable {
     let chapterNumber: Int
     let verseNumber: Int
 }
-
-struct ReadingSessionsPage: Decodable, Sendable {
-    let success: Bool?
-    let data: [ReadingSession]?
-    let pagination: CursorPagination?
-}
-
-struct CursorPagination: Decodable, Sendable {
-    let startCursor: String?
-    let endCursor: String?
-    let hasNextPage: Bool?
-    let hasPreviousPage: Bool?
-}

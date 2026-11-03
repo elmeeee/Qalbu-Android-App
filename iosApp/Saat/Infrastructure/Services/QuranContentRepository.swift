@@ -117,21 +117,14 @@ struct QuranContentRepository: Sendable {
 
     func getTranslations(language: String = "en") async throws -> TranslationsResponse {
         let trans = [
-            QFTranslation(id: 1, name: "Indonesian", authorName: "Kementerian Agama RI", slug: "id", languageName: "indonesian", translatedName: QFTranslation.TranslatedName(name: "Indonesian", languageName: "indonesian")),
-            QFTranslation(id: 2, name: "Sahih International", authorName: "Sahih International", slug: "en", languageName: "english", translatedName: QFTranslation.TranslatedName(name: "Sahih International", languageName: "english")),
-            QFTranslation(id: 3, name: "Malay", authorName: "DBP", slug: "my", languageName: "malay", translatedName: QFTranslation.TranslatedName(name: "Malay", languageName: "malay")),
-            QFTranslation(id: 4, name: "Kemenag (Arab Latin)", authorName: "Kementerian Agama RI", slug: "kemenag", languageName: "indonesian", translatedName: QFTranslation.TranslatedName(name: "Kemenag", languageName: "indonesian"))
+            QuranTranslation(id: 1, name: "Indonesian", authorName: "Kementerian Agama RI", slug: "id", languageName: "indonesian", translatedName: QuranTranslation.TranslatedName(name: "Indonesian", languageName: "indonesian")),
+            QuranTranslation(id: 2, name: "Sahih International", authorName: "Sahih International", slug: "en", languageName: "english", translatedName: QuranTranslation.TranslatedName(name: "Sahih International", languageName: "english")),
+            QuranTranslation(id: 3, name: "Malay", authorName: "DBP", slug: "my", languageName: "malay", translatedName: QuranTranslation.TranslatedName(name: "Malay", languageName: "malay")),
+            QuranTranslation(id: 4, name: "Kemenag (Arab Latin)", authorName: "Kementerian Agama RI", slug: "kemenag", languageName: "indonesian", translatedName: QuranTranslation.TranslatedName(name: "Kemenag", languageName: "indonesian"))
         ]
         return TranslationsResponse(translations: trans)
     }
 
-    func getVerseByKey(verseKey: String) async throws -> SingleVerseResponse {
-        let normalizedTranslationId = normalizeTranslationId(ChapterReaderPreferences.selectedTranslationId())
-        if let payload = try await local.getVerseByKey(verseKey, translationId: normalizedTranslationId, recitationId: 6) {
-            return SingleVerseResponse(verse: payload)
-        }
-        throw NSError(domain: "LocalQuran", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to load verse."])
-    }
 
     // Normalizers
     private func normalizeTranslationId(_ savedId: Int) -> Int {

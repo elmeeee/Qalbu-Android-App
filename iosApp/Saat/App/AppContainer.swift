@@ -22,45 +22,14 @@ extension EnvironmentValues {
 
 @MainActor
 final class AppContainer {
-    let environment: AppEnvironment
     let configuration: AppConfiguration
     let content: QuranContentRepository
-    let habits: UserHabitRepository
     let readingSessions: ReadingSessionRepository
-    let reflect: ReflectRepository
-    let reflectionStore: ReflectionStore
 
     init() {
-        self.environment = .production
-        self.configuration = environment.configuration
+        self.configuration = AppConfiguration()
         self.content = QuranContentRepository()
-        self.habits = UserHabitRepository()
         self.readingSessions = ReadingSessionRepository()
-        self.reflect = ReflectRepository(habits: habits)
-        self.reflectionStore = ReflectionStore(appGroupIdentifier: configuration.appGroupIdentifier)
-    }
-
-    func clearUserSession() async {
-        await APICache.clearAll()
-        reflectionStore.removeAll()
-    }
-
-    func invalidateUserSession() {
-        Task { @MainActor in
-            await clearUserSession()
-        }
-    }
-
-    func signOut() async {
-        await clearUserSession()
-    }
-
-    func warmReflectDataIfSignedIn() {
-        // Local offline mode
-    }
-
-    func warmUserProfileIfSignedIn() {
-        warmReflectDataIfSignedIn()
     }
 
     func warmChapterCatalog() {

@@ -19,36 +19,16 @@ struct TodayDiscoveryView: View {
     @EnvironmentObject private var prayer: PrayerTimesController
     @StateObject private var audio = AudioPlayerController()
     @State private var coordinator: TodayDiscoveryCoordinator?
-    @State private var actionsViewModel = TodayVerseActionsViewModel()
     @State private var tracker: PrayerTrackerViewModel?
     @State private var showingPrayerCalendar = false
     @State private var showingTrackerCalendar = false
     @State private var activeReaderRoute: ChapterReaderRoute?
     @State private var isScrolled = false
 
-    let verseState: TodayVerseState
-
     var body: some View {
         ZStack {
             if let vm = coordinator?.discoveryViewModel {
                 discoveryShell(vm)
-            }
-
-            if actionsViewModel.isGeneratingShare || actionsViewModel.publishViewModel.isPosting {
-                TodayBusyOverlayView(isPosting: actionsViewModel.publishViewModel.isPosting)
-            }
-        }
-        .allowsHitTesting(
-            !actionsViewModel.isGeneratingShare && !actionsViewModel.publishViewModel.isPosting
-        )
-        .overlay(alignment: .top) {
-            if actionsViewModel.publishViewModel.showStatus,
-                let message = actionsViewModel.publishViewModel.statusMessage
-            {
-                TodayStatusToastView(
-                    message: message, isError: actionsViewModel.publishViewModel.statusIsError
-                )
-                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
         .onAppear {
@@ -65,7 +45,7 @@ struct TodayDiscoveryView: View {
             }
             guard let container, let coordinator else { return }
             Task {
-                await coordinator.bootstrap(container: container, verseState: verseState)
+                await coordinator.bootstrap(container: container)
                 await coordinator.discoveryViewModel?.loadContinueReading()
             }
         }
@@ -255,7 +235,7 @@ struct TodayDiscoveryView: View {
         }
         .onChangeWithFallback(of: vm.detail?.verseKey) { newKey in
             guard let coordinator else { return }
-            coordinator.onVerseKeyChanged(newKey, verseState: verseState, discovery: vm)
+            coordinator.onVerseKeyChanged(newKey)
         }
         .onDisappear {
             coordinator?.stopAudio()
@@ -278,7 +258,7 @@ struct TodayDiscoveryView: View {
 }
 
 private struct TodayScrollOffsetKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
+    static let defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
     }

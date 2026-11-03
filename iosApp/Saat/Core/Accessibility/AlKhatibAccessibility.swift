@@ -94,23 +94,6 @@ extension RandomAyahPayload {
     }
 }
 
-extension ReflectFeedPost {
-    @MainActor
-    var spokenAccessibilitySummary: String {
-        var parts: [String] = []
-        if let name = author?.displayName, name.isEmpty == false {
-            parts.append("Reflection by \(name)")
-        }
-        if let key = references?.first?.verseKey {
-            parts.append(ShareVerseCard.humanLabel(for: key))
-        }
-        if let body = body?.trimmingCharacters(in: .whitespacesAndNewlines), body.isEmpty == false {
-            parts.append(body)
-        }
-        return parts.isEmpty ? "Reflection post" : parts.joined(separator: ". ")
-    }
-}
-
 extension QuranChapter {
     var spokenAccessibilitySummary: String {
         var parts: [String] = [

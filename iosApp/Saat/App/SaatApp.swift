@@ -29,9 +29,6 @@ struct SaatApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.appContainer, appContainer)
-                .onOpenURL { url in
-                    Task { await appContainer.oauth.handleIncomingCallback(url) }
-                }
         }
     }
 }

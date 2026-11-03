@@ -19,24 +19,14 @@ struct RootTabView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.appContainer) private var container
     @State private var selectedTab: Tab = .today
-    @State private var todayNavigationPath: [TodayNavigation] = []
     @ObservedObject private var languageManager = AppLanguageManager.shared
     @StateObject private var prayerController = PrayerTimesController()
-    let verseState: TodayVerseState
-
-    enum TodayNavigation: Hashable {
-        case account
-    }
-
-    init(verseState: TodayVerseState) {
-        self.verseState = verseState
-    }
 
     var body: some View {
         TabView(selection: $selectedTab) {
             // Tab 1: Beranda
-            NavigationStack(path: $todayNavigationPath) {
-                TodayDiscoveryView(verseState: verseState)
+            NavigationStack {
+                TodayDiscoveryView()
             }
             .tabItem {
                 Label {
@@ -78,7 +68,7 @@ struct RootTabView: View {
 
             // Tab 4: Lainnya
             NavigationStack {
-                ProfileView(preferSystemNavigationTitle: false, verseState: verseState)
+                ProfileView(preferSystemNavigationTitle: false)
                     .environment(\.appContainer, container)
             }
             .tabItem {
@@ -95,25 +85,13 @@ struct RootTabView: View {
         .tint(Color(hex: "#1B4332")) // Dark Emerald Green active tint
         .id(languageManager.currentLanguage)
         .environmentObject(prayerController)
-        .onChangeWithFallback(of: verseState.shouldNavigateToAccount) { shouldNavigate in
-            if shouldNavigate {
-                selectedTab = .account
-                verseState.didNavigateToAccount()
-            }
-        }
-        .onChangeWithFallback(of: verseState.shouldSelectTodayTab) { shouldSelect in
-            if shouldSelect {
-                if selectedTab != .today {
-                    withAnimation { selectedTab = .today }
-                }
-                verseState.didSelectTodayTab()
-            }
-        }
         .onReceive(
             NotificationCenter.default.publisher(
                 for: DailyVerseNotificationPreferences.openTodayTabNotification)
         ) { _ in
-            verseState.selectTodayTab()
+            if selectedTab != .today {
+                withAnimation { selectedTab = .today }
+            }
         }
     }
 }

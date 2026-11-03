@@ -67,7 +67,7 @@ struct SaatTests {
         #expect(first.translatedName?.languageName == "english")
     }
 
-    @Test func translationsResponseDecodesNullSlugFromAPI() throws {
+    @Test func translationsResponseDecodesNullSlug() throws {
         let json = """
         {
           "translations": [
@@ -104,10 +104,9 @@ struct SaatTests {
         #expect(response.translations[1].slug == "en-haleem")
     }
 
-    @Test func chaptersResponseDecodesRevelationPlace() throws {
+    @Test func chaptersDecodeRevelationPlace() throws {
         let json = """
-        {
-          "chapters": [
+        [
             {
               "bismillah_pre": false,
               "id": 1,
@@ -132,49 +131,46 @@ struct SaatTests {
               "translated_name": { "language_name": "english", "name": "The Cow" },
               "verses_count": 286
             }
-          ]
-        }
+        ]
         """.data(using: .utf8)!
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let response = try decoder.decode(ChaptersResponse.self, from: json)
-        #expect(response.chapters.count == 2)
-        #expect(response.chapters[0].revelationPlace == "makkah")
-        #expect(response.chapters[1].revelationPlace == "madinah")
-        #expect(response.chapters[0].revelationOrder == 5)
-        #expect(response.chapters[1].bismillahPre == true)
-        #expect(response.chapters[0].revelationLabel == "Makkah")
-        #expect(response.chapters[1].revelationLabel == "Madinah")
-        #expect(response.chapters[0].isMeccan == true)
-        #expect(response.chapters[1].isMeccan == false)
+        let chapters = try decoder.decode([QuranChapter].self, from: json)
+        #expect(chapters.count == 2)
+        #expect(chapters[0].revelationPlace == "makkah")
+        #expect(chapters[1].revelationPlace == "madinah")
+        #expect(chapters[0].revelationOrder == 5)
+        #expect(chapters[1].bismillahPre == true)
+        #expect(chapters[0].revelationLabel == "Makkah")
+        #expect(chapters[1].revelationLabel == "Madinah")
+        #expect(chapters[0].isMeccan == true)
+        #expect(chapters[1].isMeccan == false)
     }
 
-    @Test @MainActor func humanLabelUsesChapterCatalogFromAPI() throws {
+    @Test @MainActor func humanLabelUsesChapterCatalog() throws {
         let json = """
-        {
-          "chapters": [{
+        [{
             "id": 2,
             "name_complex": "Al-Baqarah",
             "name_simple": "Al-Baqarah",
             "revelation_place": "madinah",
             "verses_count": 286
-          }]
-        }
+        }]
         """.data(using: .utf8)!
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let response = try decoder.decode(ChaptersResponse.self, from: json)
-        ChapterCatalog.register(response.chapters)
+        let chapters = try decoder.decode([QuranChapter].self, from: json)
+        ChapterCatalog.register(chapters)
         #expect(VerseKeyFormat.humanLabel(for: "2:255") == "Al-Baqarah・255")
         ChapterCatalog.clear()
     }
 
     @Test func translationsSortingLogicWorksCorrectly() {
-        let t1 = QFTranslation(id: 1, name: "Trans A", authorName: "Author B", slug: "slug-a", languageName: "indonesian", translatedName: nil)
-        let t2 = QFTranslation(id: 2, name: "Trans B", authorName: "Author A", slug: "slug-b", languageName: "english", translatedName: nil)
-        let t3 = QFTranslation(id: 3, name: "Trans C", authorName: "Author C", slug: "slug-c", languageName: "indonesian", translatedName: nil)
-        let t4 = QFTranslation(id: 4, name: "Trans D", authorName: "Author Z", slug: "slug-d", languageName: "english", translatedName: nil)
-        let t5 = QFTranslation(id: 5, name: "Trans E", authorName: "Author A", slug: "slug-e", languageName: "french", translatedName: nil)
+        let t1 = QuranTranslation(id: 1, name: "Trans A", authorName: "Author B", slug: "slug-a", languageName: "indonesian", translatedName: nil)
+        let t2 = QuranTranslation(id: 2, name: "Trans B", authorName: "Author A", slug: "slug-b", languageName: "english", translatedName: nil)
+        let t3 = QuranTranslation(id: 3, name: "Trans C", authorName: "Author C", slug: "slug-c", languageName: "indonesian", translatedName: nil)
+        let t4 = QuranTranslation(id: 4, name: "Trans D", authorName: "Author Z", slug: "slug-d", languageName: "english", translatedName: nil)
+        let t5 = QuranTranslation(id: 5, name: "Trans E", authorName: "Author A", slug: "slug-e", languageName: "french", translatedName: nil)
 
         let original = [t1, t2, t3, t4, t5]
         

@@ -576,9 +576,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Saat/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Sāat";
-				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleTypeRole = Editor;
-				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLName = co.kamy.Saat.oauth;
-				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLSchemes_0 = Saat;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We use your camera to display the Qibla finder in AR mode.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We use your location to show accurate prayer times.";
@@ -643,9 +640,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Saat/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Sāat";
-				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleTypeRole = Editor;
-				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLName = co.kamy.Saat.oauth;
-				INFOPLIST_KEY_CFBundleURLTypes_0_CFBundleURLSchemes_0 = Saat;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.books";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We use your camera to display the Qibla finder in AR mode.";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "We use your location to show accurate prayer times.";
