@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penghapusan Akun & Data - Sāat · KaMy Studio</title>
+    <style>
+        :root {
+            --primary: #0F5132;
+            --primary-dark: #0A3622;
+            --primary-light: #EDF5F0;
+            --danger: #DC2626;
+            --danger-bg: #FEF2F2;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+            --bg: #F8FAFC;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 24px 16px;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            padding: 32px 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .lang-bar {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .lang-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .lang-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .lang-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #ffffff;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+        }
+        .app-badge {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+        h1 {
+            font-size: 24px;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+        h2 {
+            font-size: 18px;
+            color: var(--primary-dark);
+            margin: 24px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        ol, ul {
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+        li {
+            margin-bottom: 8px;
+            color: var(--text-main);
+            font-size: 15px;
+        }
+        .alert-card {
+            background-color: var(--danger-bg);
+            border: 1px solid #FECACA;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+        .alert-card h3 {
+            color: var(--danger);
+            font-size: 15px;
+            margin-bottom: 6px;
+        }
+        .alert-card p {
+            color: #991B1B;
+            font-size: 14px;
+        }
+        .card {
+            background: #F8FAFC;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            margin: 16px 0;
+        }
+        .btn-email {
+            display: inline-block;
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 15px;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .btn-email:hover {
+            background: var(--primary-dark);
+        }
+        .footer {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .lang-content {
+            display: none;
+        }
+        .lang-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Language Switcher Bar -->
+        <div class="lang-bar">
+            <button class="lang-btn active" id="btn-id" onclick="setLang('id')">🇮🇩 Bahasa Indonesia</button>
+            <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
+            <button class="lang-btn" id="btn-ms" onclick="setLang('ms')">🇲🇾 Bahasa Melayu</button>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- 1. BAHASA INDONESIA CONTENT                                    -->
+        <!-- ============================================================== -->
+        <div id="content-id" class="lang-content active">
+            <div class="header">
+                <span class="app-badge">Aplikasi Sāat · Kebijakan Resmi</span>
+                <h1>Penghapusan Akun & Data Pengguna</h1>
+                <p class="subtitle">Kebijakan Resmi Penghapusan Akun & Data Terkait</p>
+            </div>
+
+            <p>Aplikasi <strong>Sāat</strong> yang dikembangkan oleh <strong>KaMy Studio</strong> menghargai privasi dan kepemilikan data Anda sepenuhnya. Kami menyediakan 2 metode mudah untuk menghapus akun dan seluruh data pribadi yang tersimpan.</p>
+
+            <h2>1. Cara Hapus Akun Langsung dari Aplikasi (Instan)</h2>
+            <p>Jika aplikasi Sāat masih terpasang di perangkat Anda, Anda dapat menghapus akun secara instan dengan langkah berikut:</p>
+            <ol>
+                <li>Buka aplikasi <strong>Sāat</strong> di perangkat Anda.</li>
+                <li>Buka tab <strong>Akun / Pengaturan</strong> di pojok kanan bawah.</li>
+                <li>Pada kartu profil akun Anda, scroll ke bawah lalu tekan tombol merah <strong>"Hapus Akun"</strong>.</li>
+                <li>Akan muncul dialog konfirmasi <strong>"Hapus Akun Permanen?"</strong>, pilih <strong>"Hapus Akun"</strong>.</li>
+                <li>Akun beserta seluruh cadangan data cloud Anda akan langsung terhapus secara permanen dari server secara seketika.</li>
+            </ol>
+
+            <h2>2. Permintaan Penghapusan via Web / Email (Bila Aplikasi Telah Dihapus)</h2>
+            <p>Jika Anda sudah mencopot pemasangan (*uninstall*) aplikasi Sāat dari perangkat Anda, Anda tetap dapat meminta penghapusan akun secara manual:</p>
+            <div class="card">
+                <p>Kirimkan email permohonan ke pengembang kami dengan format berikut:</p>
+                <ul style="margin-top: 8px;">
+                    <li><strong>Pengembang:</strong> KaMy Studio</li>
+                    <li><strong>Email Tujuan:</strong> <code>hello@elmee.my</code></li>
+                    <li><strong>Subjek:</strong> Permintaan Penghapusan Akun Sāat</li>
+                    <li><strong>Isi Email:</strong> Cantumkan alamat email yang digunakan untuk mendaftar akun di aplikasi Sāat.</li>
+                </ul>
+                <a href="mailto:hello@elmee.my?subject=Permintaan%20Penghapusan%20Akun%20S%C4%81at&body=Halo%20KaMy%20Studio%2C%0A%0ASaya%20ingin%20meminta%20penghapusan%20akun%20dan%20seluruh%20data%20saya%20pada%20aplikasi%20S%C4%81at.%0A%0AEmail%20terdaftar%3A%20%5BIsi%20email%20Anda%20di%20sini%5D%0ATerima%20kasih." class="btn-email">Kirim Email Permintaan Hapus Akun</a>
+            </div>
+
+            <h2>3. Data Apa Saja yang Dihapus?</h2>
+            <p>Saat Anda menghapus akun, seluruh data berikut akan <strong>dihapus permanen</strong>:</p>
+            <ul>
+                <li><strong>Identitas Autentikasi:</strong> Alamat email, User ID (UID), nama pengguna, dan foto profil.</li>
+                <li><strong>Data Al-Qur'an:</strong> Penanda bacaan (bookmarks), catatan tafsir pribadi (notes), dan status hafalan (hifz/khatam).</li>
+                <li><strong>Pelacak Ibadah:</strong> Riwayat shalat harian, catatan streak, dan evaluasi ibadah.</li>
+                <li><strong>Tasbih:</strong> Seluruh riwayat dan hitungan counter dzikir.</li>
+            </ul>
+
+            <div class="alert-card">
+                <h3>Pemberitahuan Retensi Data (Data Retention)</h3>
+                <p>Penghapusan akun dari dalam aplikasi berlangsung secara <strong>real-time (instan)</strong>. Untuk permintaan melalui email, data akan diproses dan dihapus permanen maksimal dalam <strong>1-3 hari kerja</strong>. Kami tidak menyimpan atau mencadangkan kembali data pribadi Anda setelah proses penghapusan selesai.</p>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- 2. ENGLISH CONTENT                                             -->
+        <!-- ============================================================== -->
+        <div id="content-en" class="lang-content">
+            <div class="header">
+                <span class="app-badge">Sāat App · Official Policy</span>
+                <h1>Account & Associated Data Deletion</h1>
+                <p class="subtitle">Official Account & Data Deletion Policy</p>
+            </div>
+
+            <p>The <strong>Sāat</strong> application developed by <strong>KaMy Studio</strong> fully respects your privacy and data ownership. We provide two straightforward methods to delete your account and all associated personal data.</p>
+
+            <h2>1. In-App Account Deletion (Instant & Real-Time)</h2>
+            <p>If the Sāat app is installed on your device, you can delete your account instantly by following these steps:</p>
+            <ol>
+                <li>Open the <strong>Sāat</strong> app on your Android device.</li>
+                <li>Go to the <strong>Account / Settings</strong> tab at the bottom right corner.</li>
+                <li>In your profile card, scroll down and tap the red <strong>"Delete Account"</strong> button.</li>
+                <li>A confirmation dialog <strong>"Permanently Delete Account?"</strong> will appear. Select <strong>"Delete Account"</strong>.</li>
+                <li>Your account and all synced cloud backup data will be permanently and immediately removed from our servers.</li>
+            </ol>
+
+            <h2>2. Web / Email Deletion Request (If App is Uninstalled)</h2>
+            <p>If you have already uninstalled the Sāat app from your device, you can request account deletion by contacting our developer support:</p>
+            <div class="card">
+                <p>Send an email deletion request to our development team with the following details:</p>
+                <ul style="margin-top: 8px;">
+                    <li><strong>Developer:</strong> KaMy Studio</li>
+                    <li><strong>Support Email:</strong> <code>hello@elmee.my</code></li>
+                    <li><strong>Subject:</strong> Sāat Account Deletion Request</li>
+                    <li><strong>Body:</strong> Specify the email address used to register your Sāat account.</li>
+                </ul>
+                <a href="mailto:hello@elmee.my?subject=S%C4%81at%20Account%20Deletion%20Request&body=Hello%20KaMy%20Studio%20Team%2C%0A%0AI%20would%20like%20to%20request%20the%20permanent%20deletion%20of%20my%20S%C4%81at%20account%20and%20all%20associated%20data.%0A%0ARegistered%20email%3A%20%5BInsert%20your%20registered%20email%20here%5D%0AThank%20you." class="btn-email">Send Account Deletion Request</a>
+            </div>
+
+            <h2>3. What Data is Deleted?</h2>
+            <p>When you delete your account, all the following data is <strong>permanently deleted</strong>:</p>
+            <ul>
+                <li><strong>Authentication Identity:</strong> Email address, User ID (UID), display name, and profile picture.</li>
+                <li><strong>Holy Qur'an Data:</strong> Reading bookmarks, personal verse notes/reflections, and memorization progress (hifz/khatam).</li>
+                <li><strong>Prayer Tracker:</strong> Daily prayer history, streak milestones, and worship records.</li>
+                <li><strong>Tasbih:</strong> All dhikr counters and tally records.</li>
+            </ul>
+
+            <div class="alert-card">
+                <h3>Data Retention Policy</h3>
+                <p>In-app account deletion is executed in <strong>real-time (instantly)</strong>. For email requests, data will be processed and permanently erased within <strong>1-3 business days</strong>. No personal data is retained or backed up once deleted.</p>
+            </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- 3. BAHASA MELAYU CONTENT                                       -->
+        <!-- ============================================================== -->
+        <div id="content-ms" class="lang-content">
+            <div class="header">
+                <span class="app-badge">Aplikasi Sāat · Polisi Rasmi</span>
+                <h1>Pemadaman Akaun & Data Pengguna</h1>
+                <p class="subtitle">Polisi Rasmi Pemadaman Akaun & Data Berkaitan</p>
+            </div>
+
+            <p>Aplikasi <strong>Sāat</strong> yang dibangunkan oleh <strong>KaMy Studio</strong> menghargai privasi dan kawalan penuh ke atas data anda. Kami menyediakan 2 kaedah mudah untuk memadam akaun dan semua data peribadi yang disimpan.</p>
+
+            <h2>1. Cara Padam Akaun Terus dari Aplikasi (Serta-merta)</h2>
+            <p>Jika aplikasi Sāat masih dipasang pada peranti anda, anda boleh memadam akaun secara serta-merta dengan langkah berikut:</p>
+            <ol>
+                <li>Buka aplikasi <strong>Sāat</strong> pada peranti anda.</li>
+                <li>Buka tab <strong>Akaun / Tetapan</strong> di sudut kanan bawah.</li>
+                <li>Pada kad profil akaun anda, tatal ke bawah lalu tekan butang merah <strong>"Padam Akaun"</strong>.</li>
+                <li>Dialog pengesahan <strong>"Padam Akaun Kekal?"</strong> akan dipaparkan. Pilih <strong>"Padam Akaun"</strong>.</li>
+                <li>Akaun berserta semua sandaran data awan anda akan dipadam secara kekal dari pelayan kami serta-merta.</li>
+            </ol>
+
+            <h2>2. Permintaan Pemadaman melalui Web / Emel (Jika Aplikasi Telah Dinyahpasang)</h2>
+            <p>Jika anda telah menyahpasang (*uninstall*) aplikasi Sāat dari peranti anda, anda masih boleh meminta pemadaman akaun secara manual:</p>
+            <div class="card">
+                <p>Hantarkan emel permohonan kepada pembangun kami dengan format berikut:</p>
+                <ul style="margin-top: 8px;">
+                    <li><strong>Pembangun:</strong> KaMy Studio</li>
+                    <li><strong>Emel Sasaran:</strong> <code>hello@elmee.my</code></li>
+                    <li><strong>Subjek:</strong> Permintaan Pemadaman Akaun Sāat</li>
+                    <li><strong>Kandungan Emel:</strong> Sertakan alamat emel yang didaftarkan untuk akaun aplikasi Sāat anda.</li>
+                </ul>
+                <a href="mailto:hello@elmee.my?subject=Permintaan%20Pemadaman%20Akaun%20S%C4%81at&body=Salam%20KaMy%20Studio%2C%0A%0ASaya%20ingin%20memohon%20pemadaman%20akaun%20dan%20semua%20data%20saya%20pada%20aplikasi%20S%C4%81at.%0A%0AEmel%20berdaftar%3A%20%5BIsi%20emel%20anda%20di%20sini%5D%0ATerima%20kasih." class="btn-email">Hantar Emel Permintaan Padam Akaun</a>
+            </div>
+
+            <h2>3. Apakah Data yang Dipadamkan?</h2>
+            <p>Apabila anda memadamkan akaun, semua data berikut akan <strong>dipadam secara kekal</strong>:</p>
+            <ul>
+                <li><strong>Identiti Pengesahan:</strong> Alamat emel, User ID (UID), nama pengguna, dan foto profil.</li>
+                <li><strong>Data Al-Quran:</strong> Penanda bacaan (bookmarks), nota tafsir peribadi (notes), dan status hafazan (hifz/khatam).</li>
+                <li><strong>Penjejak Solat:</strong> Rekod solat harian, catatan streak, dan rekod ibadah.</li>
+                <li><strong>Tasbih:</strong> Semua rekod dan kiraan kaunter zikir.</li>
+            </ul>
+
+            <div class="alert-card">
+                <h3>Notis Pengekalan Data (Data Retention)</h3>
+                <p>Pemadaman akaun dari dalam aplikasi diproses secara <strong>masa nyata (serta-merta)</strong>. Bagi permohonan melalui emel, data akan diproses dan dipadamkan sepenuhnya dalam tempoh <strong>1-3 hari bekerja</strong>. Kami tidak menyimpan atau menyandarkan semula data peribadi anda selepas pemadaman selesai.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>&copy; 2026 Sāat App. All rights reserved.</p>
+            <p>Developer: <strong>KaMy Studio</strong> · <a href="mailto:hello@elmee.my" style="color: inherit; text-decoration: underline;">hello@elmee.my</a></p>
+        </div>
+    </div>
+
+    <!-- Client-side Language Toggle Script -->
+    <script>
+        function setLang(lang) {
+            // Update active buttons
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById('btn-' + lang);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Update visible content
+            document.querySelectorAll('.lang-content').forEach(content => content.classList.remove('active'));
+            const activeContent = document.getElementById('content-' + lang);
+            if (activeContent) activeContent.classList.add('active');
+
+            // Update html lang attribute
+            document.documentElement.lang = lang;
+        }
+
+        // Auto-detect browser language on load
+        (function() {
+            const browserLang = (navigator.language || navigator.userLanguage || 'id').toLowerCase();
+            if (browserLang.startsWith('en')) {
+                setLang('en');
+            } else if (browserLang.startsWith('ms')) {
+                setLang('ms');
+            } else {
+                setLang('id');
+            }
+        })();
+    </script>
+</body>
+</html>
