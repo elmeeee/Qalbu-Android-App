@@ -144,9 +144,11 @@ private val bodyStyle = TextStyle(fontSize = 14.5.sp, lineHeight = 22.sp)
 
 @Composable
 private fun ArabicLine(text: String, color: Color, modifier: Modifier = Modifier) {
+    val clean = unescapeUnicode(text).trim()
+    if (clean.isBlank()) return
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Text(
-            text = text,
+            text = clean,
             modifier = modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
@@ -158,6 +160,14 @@ private fun ArabicLine(text: String, color: Color, modifier: Modifier = Modifier
             ),
             color = color
         )
+    }
+}
+
+fun unescapeUnicode(text: String): String {
+    val regex = Regex("""\\u([0-9a-fA-F]{4})""")
+    return regex.replace(text) { match ->
+        val code = match.groupValues[1].toInt(16)
+        code.toChar().toString()
     }
 }
 

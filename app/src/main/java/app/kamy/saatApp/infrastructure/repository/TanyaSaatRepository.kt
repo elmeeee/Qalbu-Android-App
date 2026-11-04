@@ -256,15 +256,113 @@ class TanyaSaatRepository @Inject constructor(
         if (candidate != null) {
             runCatching { json.decodeFromString(SaatAiResponseEnvelope.serializer(), candidate) }
                 .getOrNull()
-                ?.let { if (it.empathyText.isNotBlank()) return it }
+                ?.let { if (it.empathyText.isNotBlank()) return unescapeEnvelope(it) }
             // Some models leave raw newlines inside JSON strings; try to repair those.
             runCatching {
                 json.decodeFromString(SaatAiResponseEnvelope.serializer(), escapeNewlinesInsideStrings(candidate))
-            }.getOrNull()?.let { if (it.empathyText.isNotBlank()) return it }
+            }.getOrNull()?.let { if (it.empathyText.isNotBlank()) return unescapeEnvelope(it) }
         }
-        // Last resort: treat the whole reply as the answer so the user never gets nothing.
-        Log.w(TAG, "Falling back to raw-text answer; JSON envelope could not be parsed.")
-        return SaatAiResponseEnvelope(empathyText = cleaned)
+        // Extract fields using regex fallback so we never return raw JSON {"empathy_text": ...}
+        val extracted = extractEnvelopeManually(cleaned)
+        if (extracted.empathyText.isNotBlank()) {
+            return extracted
+        }
+        return SaatAiResponseEnvelope(empathyText = unescapeJsonString(cleaned))
+    }
+
+    private fun unescapeEnvelope(envelope: SaatAiResponseEnvelope): SaatAiResponseEnvelope =
+        envelope.copy(
+            empathyText = unescapeJsonString(envelope.empathyText),
+            references = envelope.references.map {
+                it.copy(
+                    citation = unescapeJsonString(it.citation),
+                    note = it.note?.let { n -> unescapeJsonString(n) }
+                )
+            },
+            followUps = envelope.followUps.map { unescapeJsonString(it) }
+        )
+
+    private fun unescapeUnicode(text: String): String {
+        val regex = Regex("""\\u([0-9a-fA-F]{4})""")
+        return regex.replace(text) { match ->
+            val code = match.groupValues[1].toInt(16)
+            code.toChar().toString()
+        }
+    }
+
+    private fun unescapeJsonString(str: String): String =
+        unescapeUnicode(str)
+            .replace("\\n", "\n")
+            .replace("\\r", "\r")
+            .replace("\\t", "\t")
+            .replace("\\\"", "\"")
+            .replace("\\\\", "\\")
+            .trim()
+
+    private fun extractEnvelopeManually(text: String): SaatAiResponseEnvelope {
+        val chapter = Regex(""""(?:chapter_number|chapter)"\s*:\s*"?(\d+)""").find(text)?.groupValues?.get(1)?.toIntOrNull()
+        val verse = Regex(""""(?:verse_number|verse|ayah)"\s*:\s*"?(\d+)""").find(text)?.groupValues?.get(1)?.toIntOrNull()
+        val doaSlug = Regex(""""(?:doa_slug|doa)"\s*:\s*"([^"]+)"""").find(text)?.groupValues?.get(1)
+
+        var empathyText = ""
+        val marker = """"empathy_text""""
+        val markerIdx = text.indexOf(marker)
+        if (markerIdx >= 0) {
+            val colonIdx = text.indexOf(':', markerIdx + marker.length)
+            if (colonIdx >= 0) {
+                val quoteStart = text.indexOf('"', colonIdx + 1)
+                if (quoteStart >= 0) {
+                    val nextKeyMatch = Regex(""",\s*"(?:chapter_number|verse_number|doa_slug|references|follow_ups)"""").find(text, quoteStart + 1)
+                    val rawEmpathy = if (nextKeyMatch != null) {
+                        text.substring(quoteStart + 1, nextKeyMatch.range.first).trimEnd().removeSuffix("\"")
+                    } else {
+                        val lastBrace = text.lastIndexOf('}')
+                        val end = if (lastBrace > quoteStart) lastBrace else text.length
+                        text.substring(quoteStart + 1, end).trimEnd().removeSuffix("\"")
+                    }
+                    empathyText = unescapeJsonString(rawEmpathy)
+                }
+            }
+        }
+
+        if (empathyText.isBlank()) {
+            val stripped = text
+                .replace(Regex("""^\s*\{[\s\S]*?"empathy_text"\s*:\s*""""), "")
+                .replace(Regex("""",\s*"(?:chapter_number|verse_number|doa_slug|references|follow_ups)[\s\S]*$"""), "")
+                .replace(Regex("""^\s*\{|\}\s*$"""), "")
+                .trim()
+            empathyText = unescapeJsonString(stripped)
+        }
+
+        return SaatAiResponseEnvelope(
+            empathyText = empathyText,
+            chapterNumber = chapter,
+            verseNumber = verse,
+            doaSlug = doaSlug
+        )
+    }
+
+    private suspend fun resolveVerseFromText(userQuery: String, answer: String): SaatVerseCardData? {
+        parseVerseReference(userQuery)?.let { ref ->
+            resolveVerse(ref.chapter, ref.ayah)?.let { return it }
+        }
+
+        val pattern = Regex("""(?:QS\.?|Surah|Surat)?\s*([A-Za-z'-]+)?\s*(\d{1,3})\s*[:.]\s*(\d{1,3})""", RegexOption.IGNORE_CASE)
+        for (m in pattern.findAll("$userQuery\n$answer")) {
+            val surahName = m.groupValues[1].takeIf { it.isNotBlank() }
+            val num1 = m.groupValues[2].toIntOrNull() ?: continue
+            val num2 = m.groupValues[3].toIntOrNull() ?: continue
+
+            val chapter = if (surahName != null) {
+                findChapterIdByNameOrAlias(surahName.lowercase()) ?: num1
+            } else {
+                num1
+            }
+            if (chapter in 1..114) {
+                resolveVerse(chapter, num2)?.let { return it }
+            }
+        }
+        return null
     }
 
     private fun stripThinking(raw: String): String = raw
