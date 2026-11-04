@@ -38,7 +38,6 @@ private struct SpiritualToolItem: Identifiable {
 }
 
 struct SpiritualToolsView: View {
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @ObservedObject private var languageManager = AppLanguageManager.shared
     @State private var searchQuery: String = ""
     @State private var selectedCategory: ToolCategory = .all
@@ -178,34 +177,24 @@ struct SpiritualToolsView: View {
         }
     }
 
-    private var columns: [GridItem] {
-        if horizontalSizeClass == .regular {
-            return [
-                GridItem(.flexible(), spacing: 14),
-                GridItem(.flexible(), spacing: 14),
-                GridItem(.flexible(), spacing: 14),
-                GridItem(.flexible(), spacing: 14)
-            ]
-        } else {
-            return [
-                GridItem(.flexible(), spacing: 14),
-                GridItem(.flexible(), spacing: 14)
-            ]
-        }
-    }
-
     var body: some View {
         GeometryReader { geometry in
+            let contentWidth = min(geometry.size.width, 840)
+            let horizontalInset: CGFloat = contentWidth >= 700 ? 28 : 20
+            let columnCount = contentWidth >= 700 ? 4 : 2
+            let gridColumns = Array(
+                repeating: GridItem(.flexible(minimum: 0), spacing: 14, alignment: .top),
+                count: columnCount
+            )
+
             ZStack(alignment: .top) {
                 SaatTokens.Colors.homeBg
                     .ignoresSafeArea()
 
-                // Header Background Image
                 Image("bg_worship_header")
                     .resizable()
                     .scaledToFill()
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 280)
+                    .frame(width: geometry.size.width, height: 300)
                     .clipped()
                     .overlay(
                         LinearGradient(
@@ -219,143 +208,139 @@ struct SpiritualToolsView: View {
                         )
                     )
                     .ignoresSafeArea(edges: .top)
+                    .frame(maxWidth: .infinity, alignment: .top)
 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 16) {
-                    // Header Title & Subtitle with Safe Area top clearance
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(languageManager.localize("worship_header_title"))
-                            .font(.system(size: 26, weight: .bold))
-                            .foregroundColor(Color(hex: "#153828"))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(languageManager.localize("worship_header_title"))
+                                .font(.system(size: 26, weight: .bold))
+                                .foregroundColor(Color(hex: "#153828"))
 
-                        Text(languageManager.localize("worship_header_subtitle"))
-                            .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(Color(hex: "#64748B"))
-                    }
-                    .padding(.top, 56)
-                    .padding(.horizontal, 20)
-
-                    // Modern Search Bar
-                    HStack(spacing: 10) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(Color(hex: "#1B4332").opacity(0.7))
-
-                        TextField(
-                            languageManager.localize("tool_search_hint"),
-                            text: $searchQuery
-                        )
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(Color(hex: "#1E293B"))
-
-                        if !searchQuery.isEmpty {
-                            Button(action: { searchQuery = "" }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(Color(hex: "#94A3B8"))
-                            }
-                            .buttonStyle(.plain)
+                            Text(languageManager.localize("worship_header_subtitle"))
+                                .font(.system(size: 13, weight: .regular))
+                                .foregroundColor(Color(hex: "#64748B"))
                         }
-                    }
-                    .padding(.horizontal, 14)
-                    .frame(height: 48)
-                    .background(Color.white)
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color(hex: "#E8E2D2"), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 1)
-                    .padding(.horizontal, 20)
+                        .padding(.top, 24)
+                        .padding(.horizontal, horizontalInset)
 
-                    // Category Filter Pills
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 8) {
-                            ForEach(ToolCategory.allCases) { cat in
-                                let isSelected = (selectedCategory == cat)
-                                Button(action: {
-                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                                    withAnimation(.easeInOut(duration: 0.2)) {
-                                        selectedCategory = cat
-                                    }
-                                }) {
-                                    Text(cat.localizedTitle(languageManager))
-                                        .font(.system(size: 13, weight: isSelected ? .bold : .medium))
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 8)
-                                        .background(isSelected ? Color(hex: "#085E43") : Color.white)
-                                        .foregroundColor(isSelected ? .white : Color(hex: "#334155"))
-                                        .cornerRadius(20)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .stroke(isSelected ? Color.clear : Color(hex: "#E8E2D2"), lineWidth: 1)
-                                        )
-                                        .shadow(color: Color.black.opacity(isSelected ? 0.08 : 0.02), radius: 3, x: 0, y: 1)
+                        HStack(spacing: 10) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(Color(hex: "#1B4332").opacity(0.7))
+
+                            TextField(
+                                languageManager.localize("tool_search_hint"),
+                                text: $searchQuery
+                            )
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Color(hex: "#1E293B"))
+
+                            if !searchQuery.isEmpty {
+                                Button(action: { searchQuery = "" }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundColor(Color(hex: "#94A3B8"))
                                 }
                                 .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 2)
-                    }
+                        .padding(.horizontal, 14)
+                        .frame(height: 50)
+                        .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(Color(hex: "#E8E2D2"), lineWidth: 1)
+                        }
+                        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 3)
+                        .padding(.horizontal, horizontalInset)
 
-                    // 14 Tools 2-Column Grid (100% Android Match)
-                    if filteredTools.isEmpty {
-                        VStack(spacing: 8) {
-                            Spacer(minLength: 40)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(ToolCategory.allCases) { category in
+                                    let isSelected = selectedCategory == category
+                                    Button {
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                        withAnimation(.easeInOut(duration: 0.2)) {
+                                            selectedCategory = category
+                                        }
+                                    } label: {
+                                        Text(category.localizedTitle(languageManager))
+                                            .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 9)
+                                            .background(
+                                                isSelected ? Color(hex: "#085E43") : .white,
+                                                in: Capsule()
+                                            )
+                                            .foregroundStyle(
+                                                isSelected ? .white : Color(hex: "#334155")
+                                            )
+                                            .overlay {
+                                                Capsule()
+                                                    .stroke(
+                                                        isSelected ? .clear : Color(hex: "#E8E2D2"),
+                                                        lineWidth: 1
+                                                    )
+                                            }
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, horizontalInset)
+                            .padding(.vertical, 2)
+                        }
+
+                        if filteredTools.isEmpty {
                             Text(languageManager.localize("tool_search_empty"))
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(Color(hex: "#64748B"))
-                            Spacer(minLength: 40)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 20)
-                    } else {
-                        LazyVGrid(columns: columns, spacing: 14) {
-                            ForEach(filteredTools) { tool in
-                                NavigationLink(destination: tool.destinationBuilder()) {
-                                    VStack(alignment: .center, spacing: 4) {
-                                        Image(tool.iconName)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 74, height: 74)
-                                            .padding(.bottom, 4)
+                                .frame(maxWidth: .infinity, minHeight: 160)
+                                .padding(.horizontal, horizontalInset)
+                        } else {
+                            LazyVGrid(columns: gridColumns, spacing: 14) {
+                                ForEach(filteredTools) { tool in
+                                    NavigationLink(destination: tool.destinationBuilder()) {
+                                        VStack(spacing: 6) {
+                                            Image(tool.iconName)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 72, height: 72)
 
-                                        Text(languageManager.localize(tool.titleKey))
-                                            .font(.system(size: 13.5, weight: .semibold))
-                                            .foregroundColor(Color(hex: "#085E43"))
-                                            .lineLimit(1)
-                                            .multilineTextAlignment(.center)
+                                            Text(languageManager.localize(tool.titleKey))
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundColor(Color(hex: "#085E43"))
+                                                .lineLimit(2)
+                                                .multilineTextAlignment(.center)
 
-                                        Text(languageManager.localize(tool.descKey))
-                                            .font(.system(size: 10.5, weight: .regular))
-                                            .foregroundColor(Color(hex: "#64748B"))
-                                            .lineLimit(2)
-                                            .multilineTextAlignment(.center)
-                                            .lineSpacing(1.5)
+                                            Text(languageManager.localize(tool.descKey))
+                                                .font(.system(size: 11, weight: .regular))
+                                                .foregroundColor(Color(hex: "#64748B"))
+                                                .lineLimit(2)
+                                                .multilineTextAlignment(.center)
+                                                .lineSpacing(1.5)
+                                        }
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 16)
+                                        .frame(maxWidth: .infinity)
+                                        .frame(minHeight: 186)
+                                        .background(.white, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                                .stroke(Color(hex: "#EAE4D6"), lineWidth: 1)
+                                        }
+                                        .shadow(color: Color(hex: "#263B31").opacity(0.06), radius: 10, x: 0, y: 4)
                                     }
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 14)
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 176)
-                                    .background(Color.white)
-                                    .cornerRadius(20)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color(hex: "#EAE4D6"), lineWidth: 1)
-                                    )
-                                    .shadow(color: Color.black.opacity(0.04), radius: 6, x: 0, y: 2)
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
+                            .padding(.horizontal, horizontalInset)
+                            .padding(.top, 2)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 4)
-                        .padding(.bottom, 110)
                     }
-                }
-                    .frame(width: min(geometry.size.width, 840))
+                    .frame(width: contentWidth)
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.bottom, 110)
                 }
                 .frame(width: geometry.size.width)
             }

@@ -15,6 +15,8 @@ import app.kamy.saatApp.domain.model.SaatChatMessage
 import app.kamy.saatApp.domain.model.SaatReference
 import app.kamy.saatApp.domain.model.SaatReferenceType
 import app.kamy.saatApp.domain.model.SaatVerseCardData
+import app.kamy.saatApp.features.quran.findChapterIdByNameOrAlias
+import app.kamy.saatApp.features.quran.parseVerseReference
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -72,6 +74,7 @@ class TanyaSaatRepository @Inject constructor(
         }
 
         val verseData = resolveVerse(envelope.chapterNumber, envelope.verseNumber)
+            ?: resolveVerseFromText(userQuery, answer)
         val doaData = resolveDoa(envelope.doaSlug)
 
         SaatChatMessage(

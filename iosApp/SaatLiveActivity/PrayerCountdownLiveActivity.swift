@@ -128,11 +128,11 @@ struct PrayerCountdownLiveActivity: Widget {
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundColor(Color(hex: 0xFF64_748B))
                     
-                    if let loc = context.state.locationName, !loc.isEmpty {
-                        Text("•  \(loc)")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(Color(hex: 0xFF64_748B))
-                    }
+                    // if let loc = context.state.locationName, !loc.isEmpty {
+                    //     Text("•  \(loc)")
+                    //         .font(.system(size: 10, weight: .medium))
+                    //         .foregroundColor(Color(hex: 0xFF64_748B))
+                    // }
                 }
 
                 Text(context.state.nextPrayerName)
