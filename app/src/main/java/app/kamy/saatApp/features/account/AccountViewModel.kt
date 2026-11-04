@@ -753,6 +753,33 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    fun updateProfile(displayName: String) {
+        val cleanName = displayName.trim()
+        if (cleanName.isBlank()) {
+            _state.update { it.copy(authErrorMessage = appContext.getString(R.string.auth_error_empty_name)) }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isAuthLoading = true, authErrorMessage = null) }
+            val result = authRepository.updateProfile(cleanName)
+            result.onSuccess {
+                _state.update {
+                    it.copy(
+                        isAuthLoading = false,
+                        authSuccessMessage = appContext.getString(R.string.auth_success_profile_updated)
+                    )
+                }
+            }.onFailure { error ->
+                _state.update {
+                    it.copy(
+                        isAuthLoading = false,
+                        authErrorMessage = error.message ?: appContext.getString(R.string.auth_error_update_profile_failed)
+                    )
+                }
+            }
+        }
+    }
+
     fun signOut(context: Context) {
         viewModelScope.launch {
             _state.update { it.copy(isAuthLoading = true, authErrorMessage = null) }
@@ -773,14 +800,14 @@ class AccountViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isAuthLoading = false,
-                        authSuccessMessage = "Akun dan data Anda telah berhasil dihapus permanen"
+                        authSuccessMessage = appContext.getString(R.string.auth_success_account_deleted)
                     )
                 }
             }.onFailure { error ->
                 _state.update {
                     it.copy(
                         isAuthLoading = false,
-                        authErrorMessage = error.message ?: "Gagal menghapus akun"
+                        authErrorMessage = error.message ?: appContext.getString(R.string.auth_error_delete_failed)
                     )
                 }
             }
@@ -805,7 +832,7 @@ class AccountViewModel @Inject constructor(
 
     fun signInWithEmail(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
-            _state.update { it.copy(authErrorMessage = "Email dan kata sandi tidak boleh kosong") }
+            _state.update { it.copy(authErrorMessage = appContext.getString(R.string.auth_error_empty_credentials)) }
             return
         }
         viewModelScope.launch {
@@ -821,11 +848,11 @@ class AccountViewModel @Inject constructor(
 
     fun signUpWithEmail(name: String, email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
-            _state.update { it.copy(authErrorMessage = "Email dan kata sandi tidak boleh kosong") }
+            _state.update { it.copy(authErrorMessage = appContext.getString(R.string.auth_error_empty_credentials)) }
             return
         }
         if (password.length < 6) {
-            _state.update { it.copy(authErrorMessage = "Kata sandi minimal 6 karakter") }
+            _state.update { it.copy(authErrorMessage = appContext.getString(R.string.auth_error_short_password)) }
             return
         }
         viewModelScope.launch {
@@ -841,7 +868,7 @@ class AccountViewModel @Inject constructor(
 
     fun sendPasswordReset(email: String) {
         if (email.isBlank()) {
-            _state.update { it.copy(authErrorMessage = "Masukkan alamat email Anda terlebih dahulu") }
+            _state.update { it.copy(authErrorMessage = appContext.getString(R.string.auth_error_empty_email)) }
             return
         }
         viewModelScope.launch {
@@ -851,7 +878,7 @@ class AccountViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isAuthLoading = false,
-                        authSuccessMessage = "Tautan reset kata sandi telah dikirim ke email Anda"
+                        authSuccessMessage = appContext.getString(R.string.auth_success_reset_link_sent)
                     )
                 }
             }.onFailure { error ->

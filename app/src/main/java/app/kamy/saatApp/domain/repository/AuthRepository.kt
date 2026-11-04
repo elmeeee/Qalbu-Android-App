@@ -10,6 +10,7 @@ interface AuthRepository {
     suspend fun signInWithEmail(email: String, password: String): Result<AuthUser>
     suspend fun signUpWithEmail(name: String, email: String, password: String): Result<AuthUser>
     suspend fun sendPasswordReset(email: String): Result<Unit>
+    suspend fun updateProfile(displayName: String): Result<AuthUser>
     suspend fun signOut(context: Context): Result<Unit>
     suspend fun deleteAccount(context: Context): Result<Unit>
 }

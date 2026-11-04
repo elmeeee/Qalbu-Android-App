@@ -11,6 +11,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.AuthUser
 import app.kamy.saatApp.domain.repository.AuthRepository
+import app.kamy.saatApp.domain.util.DisposableEmailValidator
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
@@ -18,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.userProfileChangeRequest
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +31,7 @@ import javax.inject.Singleton
 
 @Singleton
 class FirebaseAuthRepository @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     private val auth: FirebaseAuth
 ) : AuthRepository {
 
@@ -63,10 +66,10 @@ class FirebaseAuthRepository @Inject constructor(
                         context = context
                     )
                 } catch (e: GetCredentialCancellationException) {
-                    throw CancellationException("Login dibatalkan oleh pengguna")
+                    throw CancellationException(appContext.getString(R.string.auth_error_login_cancelled))
                 } catch (e: GetCredentialException) {
                     Log.e(TAG, "GetCredential error: ${e.message}", e)
-                    throw Exception("Gagal mendapatkan akun Google: ${e.message ?: "Silakan coba lagi"}")
+                    throw Exception("${appContext.getString(R.string.auth_error_google_failed)}: ${e.message ?: ""}")
                 }
 
                 val credential = result.credential
@@ -76,11 +79,11 @@ class FirebaseAuthRepository @Inject constructor(
                     val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
                     val authResult = auth.signInWithCredential(firebaseCredential).await()
                     val user = authResult.user?.toAuthUser()
-                        ?: throw Exception("User tidak ditemukan setelah autentikasi")
+                        ?: throw Exception(appContext.getString(R.string.auth_error_user_not_found))
                     _currentUser.value = user
                     user
                 } else {
-                    throw Exception("Kredensial tidak valid dari Google")
+                    throw Exception(appContext.getString(R.string.auth_error_generic))
                 }
             }
         }
@@ -91,13 +94,13 @@ class FirebaseAuthRepository @Inject constructor(
                 try {
                     val authResult = auth.signInWithEmailAndPassword(email.trim(), password).await()
                     val user = authResult.user?.toAuthUser()
-                        ?: throw Exception("User tidak ditemukan")
+                        ?: throw Exception(appContext.getString(R.string.auth_error_user_not_found))
                     _currentUser.value = user
                     user
                 } catch (e: FirebaseAuthException) {
                     throw Exception(mapFirebaseAuthError(e))
                 } catch (e: Exception) {
-                    throw Exception(e.message ?: "Gagal masuk dengan email")
+                    throw Exception(e.message ?: appContext.getString(R.string.auth_error_sign_in_failed))
                 }
             }
         }
@@ -105,9 +108,14 @@ class FirebaseAuthRepository @Inject constructor(
     override suspend fun signUpWithEmail(name: String, email: String, password: String): Result<AuthUser> =
         withContext(Dispatchers.IO) {
             runCatching {
+                val cleanEmail = email.trim()
+                if (DisposableEmailValidator.isDisposable(cleanEmail)) {
+                    throw Exception(appContext.getString(R.string.auth_error_disposable_email))
+                }
+
                 try {
-                    val authResult = auth.createUserWithEmailAndPassword(email.trim(), password).await()
-                    val firebaseUser = authResult.user ?: throw Exception("Gagal membuat akun")
+                    val authResult = auth.createUserWithEmailAndPassword(cleanEmail, password).await()
+                    val firebaseUser = authResult.user ?: throw Exception(appContext.getString(R.string.auth_error_create_account_failed))
 
                     if (name.isNotBlank()) {
                         val profileUpdates = userProfileChangeRequest {
@@ -122,7 +130,7 @@ class FirebaseAuthRepository @Inject constructor(
                 } catch (e: FirebaseAuthException) {
                     throw Exception(mapFirebaseAuthError(e))
                 } catch (e: Exception) {
-                    throw Exception(e.message ?: "Gagal mendaftar akun")
+                    throw Exception(e.message ?: appContext.getString(R.string.auth_error_create_account_failed))
                 }
             }
         }
@@ -136,8 +144,27 @@ class FirebaseAuthRepository @Inject constructor(
                 } catch (e: FirebaseAuthException) {
                     throw Exception(mapFirebaseAuthError(e))
                 } catch (e: Exception) {
-                    throw Exception(e.message ?: "Gagal mengirim email reset kata sandi")
+                    throw Exception(e.message ?: appContext.getString(R.string.auth_error_reset_failed))
                 }
+            }
+        }
+
+    override suspend fun updateProfile(displayName: String): Result<AuthUser> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val firebaseUser = auth.currentUser ?: throw Exception(appContext.getString(R.string.auth_error_user_not_signed_in))
+                val cleanName = displayName.trim()
+                if (cleanName.isBlank()) {
+                    throw Exception(appContext.getString(R.string.auth_error_empty_name))
+                }
+                val profileUpdates = userProfileChangeRequest {
+                    this.displayName = cleanName
+                }
+                firebaseUser.updateProfile(profileUpdates).await()
+                firebaseUser.reload().await()
+                val updatedUser = auth.currentUser?.toAuthUser() ?: firebaseUser.toAuthUser()
+                _currentUser.value = updatedUser
+                updatedUser
             }
         }
 
@@ -159,7 +186,7 @@ class FirebaseAuthRepository @Inject constructor(
     override suspend fun deleteAccount(context: Context): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
-                val user = auth.currentUser ?: throw Exception("Tidak ada pengguna yang sedang masuk")
+                val user = auth.currentUser ?: throw Exception(appContext.getString(R.string.auth_error_user_not_signed_in))
                 try {
                     user.delete().await()
                 } catch (e: Exception) {
@@ -191,9 +218,9 @@ class FirebaseAuthRepository @Inject constructor(
                                     request = request
                                 )
                             } catch (cancelEx: GetCredentialCancellationException) {
-                                throw CancellationException("Penghapusan akun dibatalkan")
+                                throw CancellationException(appContext.getString(R.string.auth_error_login_cancelled))
                             } catch (ex: Exception) {
-                                throw Exception("Demi keamanan, silakan keluar lalu masuk kembali sebelum menghapus akun.")
+                                throw Exception(appContext.getString(R.string.auth_error_recent_login_required))
                             }
                             val cred = credResult.credential
                             if (cred is CustomCredential && cred.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
@@ -202,15 +229,15 @@ class FirebaseAuthRepository @Inject constructor(
                                 user.reauthenticate(firebaseCredential).await()
                                 user.delete().await()
                             } else {
-                                throw Exception("Kredensial tidak valid. Silakan masuk kembali.")
+                                throw Exception(appContext.getString(R.string.auth_error_recent_login_required))
                             }
                         } else {
-                            throw Exception("Demi keamanan, sesi login Anda sudah berakhir. Silakan keluar lalu masuk kembali sebelum menghapus akun.")
+                            throw Exception(appContext.getString(R.string.auth_error_recent_login_required))
                         }
                     } else if (e is FirebaseAuthException) {
                         throw Exception(mapFirebaseAuthError(e))
                     } else {
-                        throw Exception(e.message ?: "Gagal menghapus akun")
+                        throw Exception(e.message ?: appContext.getString(R.string.auth_error_delete_failed))
                     }
                 }
                 _currentUser.value = null
@@ -228,22 +255,29 @@ class FirebaseAuthRepository @Inject constructor(
         "ERROR_REQUIRES_RECENT_LOGIN", "requires-recent-login",
         "ERROR_CREDENTIAL_TOO_OLD_LOGIN_AGAIN", "credential-too-old-login-again",
         "ERROR_USER_TOKEN_EXPIRED", "user-token-expired" ->
-            "Demi keamanan, sesi login Anda sudah berakhir. Silakan keluar lalu masuk kembali sebelum menghapus akun."
-        "ERROR_INVALID_EMAIL", "invalid-email" -> "Format email tidak valid"
-        "ERROR_WRONG_PASSWORD", "wrong-password", "invalid-credential" -> "Email atau kata sandi salah"
-        "ERROR_USER_NOT_FOUND", "user-not-found" -> "Akun dengan email ini tidak ditemukan"
-        "ERROR_USER_DISABLED", "user-disabled" -> "Akun telah dinonaktifkan"
-        "ERROR_EMAIL_ALREADY_IN_USE", "email-already-in-use" -> "Email ini sudah terdaftar. Silakan masuk."
-        "ERROR_WEAK_PASSWORD", "weak-password" -> "Kata sandi terlalu lemah (minimal 6 karakter)"
-        "ERROR_TOO_MANY_REQUESTS", "too-many-requests" -> "Terlalu banyak percobaan. Silakan coba beberapa saat lagi."
+            appContext.getString(R.string.auth_error_recent_login_required)
+        "ERROR_INVALID_EMAIL", "invalid-email" ->
+            appContext.getString(R.string.auth_error_invalid_email)
+        "ERROR_WRONG_PASSWORD", "wrong-password", "invalid-credential" ->
+            appContext.getString(R.string.auth_error_wrong_credentials)
+        "ERROR_USER_NOT_FOUND", "user-not-found" ->
+            appContext.getString(R.string.auth_error_user_not_found)
+        "ERROR_USER_DISABLED", "user-disabled" ->
+            appContext.getString(R.string.auth_error_user_disabled)
+        "ERROR_EMAIL_ALREADY_IN_USE", "email-already-in-use" ->
+            appContext.getString(R.string.auth_error_email_already_in_use)
+        "ERROR_WEAK_PASSWORD", "weak-password" ->
+            appContext.getString(R.string.auth_error_weak_password)
+        "ERROR_TOO_MANY_REQUESTS", "too-many-requests" ->
+            appContext.getString(R.string.auth_error_too_many_requests)
         else -> {
             val msg = e.localizedMessage.orEmpty()
             if (msg.contains("credential is no longer valid", ignoreCase = true) ||
                 msg.contains("sign in again", ignoreCase = true) ||
                 msg.contains("recent", ignoreCase = true)) {
-                "Demi keamanan, sesi login Anda sudah berakhir. Silakan keluar lalu masuk kembali sebelum menghapus akun."
+                appContext.getString(R.string.auth_error_recent_login_required)
             } else {
-                e.localizedMessage ?: "Terjadi kesalahan autentikasi"
+                e.localizedMessage ?: appContext.getString(R.string.auth_error_generic)
             }
         }
     }
@@ -262,3 +296,4 @@ class FirebaseAuthRepository @Inject constructor(
         private const val TAG = "FirebaseAuthRepo"
     }
 }
+
