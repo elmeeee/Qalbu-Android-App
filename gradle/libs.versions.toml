@@ -50,6 +50,12 @@ prowl = "1.0.1"
 # Prayer times
 adhan = "1.2.1"
 
+# Firebase
+googleServices = "4.4.2"
+firebaseBom = "33.9.0"
+credentials = "1.3.0"
+googleid = "1.1.1"
+
 # Test
 junit = "4.13.2"
 junitVersion = "1.3.0"
@@ -125,6 +131,15 @@ androidx-camera-view = { group = "androidx.camera", name = "camera-view", versio
 prowl = { group = "io.github.prowllabs", name = "prowl", version.ref = "prowl" }
 prowl-grpc = { group = "io.github.prowllabs", name = "prowl-grpc", version.ref = "prowl" }
 
+# Firebase
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+
 # Test
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -143,3 +158,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

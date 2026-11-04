@@ -32,6 +32,8 @@ import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.widget.WidgetCoordinator
 import app.kamy.saatApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.saatApp.infrastructure.repository.QuranRepository
+import app.kamy.saatApp.domain.model.AuthUser
+import app.kamy.saatApp.domain.repository.AuthRepository
 import app.kamy.saatApp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -41,6 +43,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+enum class EmailAuthMode { LOGIN, REGISTER, FORGOT_PASSWORD }
 
 data class AccountUiState(
     val isLoading: Boolean = false,
@@ -105,7 +109,13 @@ data class AccountUiState(
     val selectedFajrVoice: FajrAdhanVoice = FajrAdhanVoice.DEFAULT,
     val previewingAdhanVoiceId: String? = null,
     val forceRamadanMode: Boolean = false,
-    val forceTenLastNights: Boolean = false
+    val forceTenLastNights: Boolean = false,
+    val authUser: AuthUser? = null,
+    val isAuthLoading: Boolean = false,
+    val authErrorMessage: String? = null,
+    val showEmailAuthSheet: Boolean = false,
+    val emailAuthMode: EmailAuthMode = EmailAuthMode.LOGIN,
+    val authSuccessMessage: String? = null
 ) {
     fun isPrayerNotificationEnabled(type: PrayerType): Boolean = when (type) {
         PrayerType.FAJR -> fajrNotificationEnabled
@@ -131,7 +141,8 @@ class AccountViewModel @Inject constructor(
     private val appLanguageStore: AppLanguageStore,
     private val shareComposer: VerseShareTextComposer,
     private val themeStore: ThemePreferencesStore,
-    private val surahReminderStore: SurahReminderStore
+    private val surahReminderStore: SurahReminderStore,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountUiState())
@@ -139,6 +150,11 @@ class AccountViewModel @Inject constructor(
 
     init {
         syncPreferencesIntoState()
+        viewModelScope.launch {
+            authRepository.currentUser.collect { user ->
+                _state.update { it.copy(authUser = user, isAuthLoading = false) }
+            }
+        }
         viewModelScope.launch {
             themeStore.themeFlow.collect { theme ->
                 _state.update { it.copy(appTheme = theme) }
@@ -699,5 +715,105 @@ class AccountViewModel @Inject constructor(
                 it.authorName.lowercase().contains(q) ||
                 it.languageName.lowercase().contains(q)
         }
+    }
+
+    fun signInWithGoogle(activityContext: Context) {
+        viewModelScope.launch {
+            _state.update { it.copy(isAuthLoading = true, authErrorMessage = null) }
+            val result = authRepository.signInWithGoogle(activityContext)
+            result.onFailure { error ->
+                _state.update {
+                    it.copy(
+                        isAuthLoading = false,
+                        authErrorMessage = error.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun signOut(context: Context) {
+        viewModelScope.launch {
+            _state.update { it.copy(isAuthLoading = true, authErrorMessage = null) }
+            authRepository.signOut(context)
+            _state.update { it.copy(isAuthLoading = false) }
+        }
+    }
+
+    fun dismissAuthError() {
+        _state.update { it.copy(authErrorMessage = null) }
+    }
+
+    fun openEmailAuth(mode: EmailAuthMode = EmailAuthMode.LOGIN) {
+        _state.update { it.copy(showEmailAuthSheet = true, emailAuthMode = mode, authErrorMessage = null, authSuccessMessage = null) }
+    }
+
+    fun closeEmailAuth() {
+        _state.update { it.copy(showEmailAuthSheet = false, authErrorMessage = null, authSuccessMessage = null) }
+    }
+
+    fun setEmailAuthMode(mode: EmailAuthMode) {
+        _state.update { it.copy(emailAuthMode = mode, authErrorMessage = null, authSuccessMessage = null) }
+    }
+
+    fun signInWithEmail(email: String, password: String) {
+        if (email.isBlank() || password.isBlank()) {
+            _state.update { it.copy(authErrorMessage = "Email dan kata sandi tidak boleh kosong") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isAuthLoading = true, authErrorMessage = null) }
+            val result = authRepository.signInWithEmail(email, password)
+            result.onSuccess {
+                _state.update { it.copy(showEmailAuthSheet = false, isAuthLoading = false) }
+            }.onFailure { error ->
+                _state.update { it.copy(isAuthLoading = false, authErrorMessage = error.message) }
+            }
+        }
+    }
+
+    fun signUpWithEmail(name: String, email: String, password: String) {
+        if (email.isBlank() || password.isBlank()) {
+            _state.update { it.copy(authErrorMessage = "Email dan kata sandi tidak boleh kosong") }
+            return
+        }
+        if (password.length < 6) {
+            _state.update { it.copy(authErrorMessage = "Kata sandi minimal 6 karakter") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isAuthLoading = true, authErrorMessage = null) }
+            val result = authRepository.signUpWithEmail(name, email, password)
+            result.onSuccess {
+                _state.update { it.copy(showEmailAuthSheet = false, isAuthLoading = false) }
+            }.onFailure { error ->
+                _state.update { it.copy(isAuthLoading = false, authErrorMessage = error.message) }
+            }
+        }
+    }
+
+    fun sendPasswordReset(email: String) {
+        if (email.isBlank()) {
+            _state.update { it.copy(authErrorMessage = "Masukkan alamat email Anda terlebih dahulu") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(isAuthLoading = true, authErrorMessage = null) }
+            val result = authRepository.sendPasswordReset(email)
+            result.onSuccess {
+                _state.update {
+                    it.copy(
+                        isAuthLoading = false,
+                        authSuccessMessage = "Tautan reset kata sandi telah dikirim ke email Anda"
+                    )
+                }
+            }.onFailure { error ->
+                _state.update { it.copy(isAuthLoading = false, authErrorMessage = error.message) }
+            }
+        }
+    }
+
+    fun dismissAuthSuccessMessage() {
+        _state.update { it.copy(authSuccessMessage = null) }
     }
 }

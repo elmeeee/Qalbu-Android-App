@@ -943,6 +943,39 @@
     <!-- Revamped Settings Strings -->
     <string name="settings_main_title">More</string>
     <string name="settings_main_subtitle">App preferences and configuration</string>
+    <!-- Account & Sync -->
+    <string name="account_sync_title">Backup &amp; Sync</string>
+    <string name="account_sync_desc">Save your bookmarks, khatam progress, and worship records safely across devices.</string>
+    <string name="account_sign_in_google">Sign in with Google</string>
+    <string name="account_sign_in_optional">Optional · You can always use the app without logging in</string>
+    <string name="account_status_synced">Synced with Cloud</string>
+    <string name="account_sign_out">Sign out</string>
+    <string name="account_sign_out_confirm_title">Sign out from account?</string>
+    <string name="account_sign_out_confirm_desc">Your local data will remain on this device, but new data won\'t be synced until you sign in again.</string>
+    <string name="account_sign_out_cancel">Cancel</string>
+    <string name="account_sign_in_email">Sign in with Email</string>
+    <string name="account_or_divider">or</string>
+    <string name="account_email_label">Email address</string>
+    <string name="account_email_hint">name@example.com</string>
+    <string name="account_name_label">Full name</string>
+    <string name="account_name_hint">Your name</string>
+    <string name="account_password_label">Password</string>
+    <string name="account_password_hint">At least 6 characters</string>
+    <string name="account_tab_login">Sign in</string>
+    <string name="account_tab_register">Create account</string>
+    <string name="account_forgot_password">Forgot password?</string>
+    <string name="account_submit_login">Sign in to Account</string>
+    <string name="account_submit_register">Register New Account</string>
+    <string name="account_no_account">Don\'t have an account? Create one</string>
+    <string name="account_already_have_account">Already have an account? Sign in</string>
+    <string name="account_connecting">Connecting…</string>
+    <string name="account_forgot_password_title">Reset Password</string>
+    <string name="account_forgot_password_desc">Enter your email and we will send a password reset link.</string>
+    <string name="account_action_reset_password">Send Reset Link</string>
+    <string name="account_back_to_sign_in">Back to Sign In</string>
+    <string name="account_sign_in_subtitle">Sign in to continue syncing your data</string>
+    <string name="account_sign_up_subtitle">Create a new account to backup your worship data</string>
+
     <string name="settings_section_general">General settings</string>
     <string name="settings_section_prayer_calc">Prayer Calculation</string>
     <string name="settings_section_ramadan_testing">Ramadan &amp; The Last 10 Nights (Testing)</string>
