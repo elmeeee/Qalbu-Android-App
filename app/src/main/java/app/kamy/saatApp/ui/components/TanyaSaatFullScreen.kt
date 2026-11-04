@@ -1,5 +1,6 @@
 package app.kamy.saatApp.ui.components
 
+import android.os.Build.VERSION.SDK_INT
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -81,6 +82,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.ContentScale
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.request.ImageRequest
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -765,29 +772,22 @@ private fun ReferenceRow(ref: SaatReference) {
 
 @Composable
 private fun KimiThinkingBubble() {
-    val transition = rememberInfiniteTransition(label = "kimi_thinking")
-    val phase by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1100, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "kimi_dots"
-    )
-    val pulse by transition.animateFloat(
-        initialValue = 0.6f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(900, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "kimi_pulse"
-    )
+    val context = LocalContext.current
+    val imageLoader = remember(context) {
+        ImageLoader.Builder(context)
+            .components {
+                if (SDK_INT >= 28) {
+                    add(ImageDecoderDecoder.Factory())
+                } else {
+                    add(GifDecoder.Factory())
+                }
+            }
+            .build()
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.alpha(pulse)) { KimiAvatar(size = 28.dp) }
+            KimiAvatar(size = 28.dp)
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Kīmi",
@@ -795,32 +795,26 @@ private fun KimiThinkingBubble() {
                 color = Ink
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Surface(
             shape = RoundedCornerShape(topStart = 6.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 20.dp),
             color = CardWhite,
             border = BorderStroke(1.dp, Line),
             shadowElevation = 1.dp
         ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                repeat(3) { index ->
-                    val active = phase.toInt() % 3 == index
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 2.5.dp)
-                            .size(if (active) 8.dp else 6.dp)
-                            .clip(CircleShape)
-                            .background(if (active) SaatColors.DeepEmerald else MintLine)
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = stringResource(R.string.tanya_saat_ai_thinking),
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
-                    color = InkSoft
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(R.drawable.kimi_thinking_preview)
+                        .crossfade(true)
+                        .build(),
+                    imageLoader = imageLoader,
+                    contentDescription = stringResource(R.string.tanya_saat_ai_thinking),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(52.dp)
                 )
             }
         }
