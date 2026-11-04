@@ -8,6 +8,7 @@ import app.kamy.saatApp.domain.adhan.AdhanVoiceCatalog
 import app.kamy.saatApp.domain.adhan.FajrAdhanVoice
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.domain.model.QuranTranslation
+import app.kamy.saatApp.domain.model.QuranReadingStyle
 import app.kamy.saatApp.domain.model.PrayerType
 import app.kamy.saatApp.domain.prayer.PrayerCalculationMethod
 import app.kamy.saatApp.domain.prayer.PrayerMethodOption
@@ -62,6 +63,8 @@ data class AccountUiState(
     val selectedTranslationId: Int = 0,
     val selectedTranslationName: String = "",
     val fontScale: Float = 1.0f,
+    val readingStyle: QuranReadingStyle = QuranReadingStyle.PAGER,
+    val showReadingStyleSheet: Boolean = false,
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
     val prayerMethod: PrayerCalculationMethod = PrayerCalculationMethod.defaultMethod,
@@ -218,6 +221,11 @@ class AccountViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            translationStore.readingStyle.collect { style ->
+                _state.update { it.copy(readingStyle = style) }
+            }
+        }
+        viewModelScope.launch {
             notificationStore.enabled.collect { enabled ->
                 _state.update { it.copy(dailyVerseEnabled = enabled) }
             }
@@ -325,6 +333,7 @@ class AccountViewModel @Inject constructor(
                 showTranslation = translationStore.showTranslation.value,
                 showTransliteration = translationStore.showTransliteration.value,
                 fontScale = translationStore.fontScale.value,
+                readingStyle = translationStore.readingStyle.value,
                 dailyVerseEnabled = notificationStore.isEnabled(),
                 reminderHour = notificationStore.morningHour(),
                 reminderMinute = notificationStore.morningMinute(),
@@ -479,6 +488,13 @@ class AccountViewModel @Inject constructor(
     fun openFontScale() = _state.update { it.copy(showFontScaleSheet = true) }
     fun closeFontScale() = _state.update { it.copy(showFontScaleSheet = false) }
     fun setFontScale(value: Float) = translationStore.setFontScale(value)
+
+    fun openReadingStyleSheet() = _state.update { it.copy(showReadingStyleSheet = true) }
+    fun closeReadingStyleSheet() = _state.update { it.copy(showReadingStyleSheet = false) }
+    fun setReadingStyle(style: QuranReadingStyle) {
+        translationStore.setReadingStyle(style)
+        _state.update { it.copy(readingStyle = style, showReadingStyleSheet = false) }
+    }
 
     fun openTranslator() {
         _state.update { it.copy(showTranslatorSheet = true) }

@@ -4,6 +4,7 @@ import android.content.Context
 import app.kamy.saatApp.core.config.AppConfig
 import app.kamy.saatApp.core.config.LocalQuranConfig
 import app.kamy.saatApp.domain.model.ArabicTextType
+import app.kamy.saatApp.domain.model.QuranReadingStyle
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +44,9 @@ class TranslationPreferencesStore @Inject constructor(
 
     private val _tafsirSource = MutableStateFlow(loadTafsirSource())
     val tafsirSource: StateFlow<String> = _tafsirSource.asStateFlow()
+
+    private val _readingStyle = MutableStateFlow(loadReadingStyle())
+    val readingStyle: StateFlow<QuranReadingStyle> = _readingStyle.asStateFlow()
 
     fun currentTranslationId(): Int = _translationId.value
 
@@ -94,6 +98,16 @@ class TranslationPreferencesStore @Inject constructor(
     fun setTafsirSource(sourceId: String) {
         prefs.edit().putString(KEY_TAFSIR_SOURCE, sourceId).apply()
         _tafsirSource.value = sourceId
+    }
+
+    fun setReadingStyle(style: QuranReadingStyle) {
+        prefs.edit().putString(KEY_READING_STYLE, style.name).apply()
+        _readingStyle.value = style
+    }
+
+    private fun loadReadingStyle(): QuranReadingStyle {
+        val saved = prefs.getString(KEY_READING_STYLE, null) ?: return QuranReadingStyle.PAGER
+        return runCatching { QuranReadingStyle.valueOf(saved) }.getOrDefault(QuranReadingStyle.PAGER)
     }
 
     private fun loadFontScale(): Float {
@@ -156,5 +170,6 @@ class TranslationPreferencesStore @Inject constructor(
         private const val KEY_TAJWEED_ENABLED = "chapterReaderTajweedEnabled"
         private const val KEY_FONT_SCALE = "chapterReaderFontScale"
         private const val KEY_TAFSIR_SOURCE = "chapterReaderTafsirSource"
+        private const val KEY_READING_STYLE = "chapterReaderReadingStyle"
     }
 }

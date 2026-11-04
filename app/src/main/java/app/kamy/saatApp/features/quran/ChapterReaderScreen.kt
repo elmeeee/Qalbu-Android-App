@@ -40,6 +40,15 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import app.kamy.saatApp.domain.model.QuranReadingStyle
+import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.flow.distinctUntilChanged
 import app.kamy.saatApp.features.quran.components.PageCurlPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.key
@@ -371,7 +380,44 @@ fun ChapterReaderScreen(
         }
     }
 
+    val scrollListState = rememberLazyListState()
+
+    // Sync scroll list when target verse index changes (e.g. from bookmark, last read, or switching mode)
+    LaunchedEffect(state.currentVerseIndex) {
+        if (state.readingStyle == QuranReadingStyle.SCROLL && state.verses.isNotEmpty()) {
+            val targetIndex = (state.currentVerseIndex + 1).coerceIn(0, state.verses.size)
+            if (kotlin.math.abs(scrollListState.firstVisibleItemIndex - targetIndex) > 1) {
+                scrollListState.scrollToItem(targetIndex)
+            }
+        }
+    }
+
+    // Auto-scroll in scroll mode when audio plays and advances
     val playingVerseKey = state.currentlyPlayingVerseKey
+    LaunchedEffect(playingVerseKey) {
+        if (state.readingStyle == QuranReadingStyle.SCROLL && !playingVerseKey.isNullOrBlank() && state.verses.isNotEmpty()) {
+            val idx = state.verses.indexOfFirst { it.verseKey == playingVerseKey }
+            if (idx >= 0) {
+                val targetIndex = idx + 1
+                if (kotlin.math.abs(scrollListState.firstVisibleItemIndex - targetIndex) > 1) {
+                    runCatching { scrollListState.animateScrollToItem(targetIndex) }
+                }
+            }
+        }
+    }
+
+    // Track last read & visible ayah during vertical scrolling
+    LaunchedEffect(scrollListState) {
+        snapshotFlow { scrollListState.firstVisibleItemIndex }
+            .distinctUntilChanged()
+            .collect { firstVisible ->
+                if (state.readingStyle == QuranReadingStyle.SCROLL && state.verses.isNotEmpty()) {
+                    val verseIdx = (firstVisible - 1).coerceIn(0, (state.verses.size - 1).coerceAtLeast(0))
+                    vm.onPageChanged(verseIdx)
+                }
+            }
+    }
+
     LaunchedEffect(playingVerseKey, verseCount) {
         if (playingVerseKey.isNullOrBlank() || verseCount == 0) return@LaunchedEffect
         val idx = state.verses.indexOfFirst { it.verseKey == playingVerseKey }
@@ -411,72 +457,88 @@ fun ChapterReaderScreen(
                 )
             }
         } else if (state.verses.isNotEmpty()) {
-            PageCurlPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize(),
-                userScrollEnabled = true
-            ) { pageIndex ->
-                when {
-                    showPreviousTransition && pageIndex == 0 -> {
-                        val prevChapterNum = (state.chapterNumber - 1).coerceAtLeast(1)
-                        val prevSurahName = state.chapterLookup[prevChapterNum]
-                        PreviousSurahTransitionPage(
-                            currentSurahName = state.chapterDisplayName,
-                            prevSurahName = prevSurahName,
-                            isJuz = state.juzNumber != null,
-                            currentJuzNumber = state.juzNumber,
-                            onTriggerTransition = {
-                                scope.launch {
-                                    pagerState.scrollToPage(pageOffset)
+            if (state.readingStyle == QuranReadingStyle.SCROLL) {
+                ContinuousScrollReader(
+                    state = state,
+                    listState = scrollListState,
+                    audioBarVisible = audioBarVisible,
+                    audioPlaybackState = audioPlaybackState,
+                    onPlay = vm::onTapAyah,
+                    onBookmark = vm::toggleBookmark,
+                    onTafsir = vm::openTafsir,
+                    onAiShare = vm::openAiShare,
+                    onTajweedClick = { activeTajweedType.value = it },
+                    onLoadPrevious = vm::loadPreviousSurahOrJuz,
+                    onLoadNext = vm::loadNextSurahOrJuz
+                )
+            } else {
+                PageCurlPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    userScrollEnabled = true
+                ) { pageIndex ->
+                    when {
+                        showPreviousTransition && pageIndex == 0 -> {
+                            val prevChapterNum = (state.chapterNumber - 1).coerceAtLeast(1)
+                            val prevSurahName = state.chapterLookup[prevChapterNum]
+                            PreviousSurahTransitionPage(
+                                currentSurahName = state.chapterDisplayName,
+                                prevSurahName = prevSurahName,
+                                isJuz = state.juzNumber != null,
+                                currentJuzNumber = state.juzNumber,
+                                onTriggerTransition = {
+                                    scope.launch {
+                                        pagerState.scrollToPage(pageOffset)
+                                    }
+                                    vm.loadPreviousSurahOrJuz()
                                 }
-                                vm.loadPreviousSurahOrJuz()
-                            }
-                        )
-                    }
-                    showNextTransition && pageIndex == (verseCount + pageOffset) -> {
-                        val nextChapterNum = state.chapterNumber + 1
-                        val nextSurahName = state.chapterLookup[nextChapterNum]
-                        NextSurahTransitionPage(
-                            currentSurahName = state.chapterDisplayName,
-                            nextSurahName = nextSurahName,
-                            isJuz = state.juzNumber != null,
-                            currentJuzNumber = state.juzNumber,
-                            onTriggerTransition = {
-                                scope.launch {
-                                    pagerState.scrollToPage(pageOffset)
+                            )
+                        }
+                        showNextTransition && pageIndex == (verseCount + pageOffset) -> {
+                            val nextChapterNum = state.chapterNumber + 1
+                            val nextSurahName = state.chapterLookup[nextChapterNum]
+                            NextSurahTransitionPage(
+                                currentSurahName = state.chapterDisplayName,
+                                nextSurahName = nextSurahName,
+                                isJuz = state.juzNumber != null,
+                                currentJuzNumber = state.juzNumber,
+                                onTriggerTransition = {
+                                    scope.launch {
+                                        pagerState.scrollToPage(pageOffset)
+                                    }
+                                    vm.loadNextSurahOrJuz()
                                 }
-                                vm.loadNextSurahOrJuz()
-                            }
-                        )
-                    }
-                    else -> {
-                        val verseIdx = pageIndex - pageOffset
-                        val verse = state.verses.getOrNull(verseIdx) ?: return@PageCurlPager
-                        SaatAyahPage(
-                            verse = verse,
-                            fontScale = state.fontScale,
-                            showTranslation = state.showTranslation,
-                            showTransliteration = state.showTransliteration,
-                            translationId = state.selectedTranslationId,
-                            isTajweedEnabled = state.isTajweedEnabled,
-                            arabicTextType = state.arabicTextType,
-                            audioBarVisible = audioBarVisible,
-                            personalDataRevision = state.personalDataRevision,
-                            showBismillahPre = verseIdx == 0 && state.bismillahPre,
-                            audioPlaybackState = audioPlaybackState,
-                            onPlay = { vm.onTapAyah(verseIdx) },
-                            onContentScroll = if (verseIdx == 0) ::dismissScrollHint else null,
-                            onTajweedClick = { activeTajweedType.value = it },
-                            modifier = if (verseIdx == 0) {
-                                Modifier.coachMarkTarget(
-                                    state = coachMarkState,
-                                    step = 3,
-                                    titleRes = R.string.coach_mark_quran_swipe_title,
-                                    descriptionRes = R.string.coach_mark_quran_swipe_desc,
-                                    gesture = CoachMarkGesture.SWIPE_HORIZONTAL
-                                )
-                            } else Modifier
-                        )
+                            )
+                        }
+                        else -> {
+                            val verseIdx = pageIndex - pageOffset
+                            val verse = state.verses.getOrNull(verseIdx) ?: return@PageCurlPager
+                            SaatAyahPage(
+                                verse = verse,
+                                fontScale = state.fontScale,
+                                showTranslation = state.showTranslation,
+                                showTransliteration = state.showTransliteration,
+                                translationId = state.selectedTranslationId,
+                                isTajweedEnabled = state.isTajweedEnabled,
+                                arabicTextType = state.arabicTextType,
+                                audioBarVisible = audioBarVisible,
+                                personalDataRevision = state.personalDataRevision,
+                                showBismillahPre = verseIdx == 0 && state.bismillahPre,
+                                audioPlaybackState = audioPlaybackState,
+                                onPlay = { vm.onTapAyah(verseIdx) },
+                                onContentScroll = if (verseIdx == 0) ::dismissScrollHint else null,
+                                onTajweedClick = { activeTajweedType.value = it },
+                                modifier = if (verseIdx == 0) {
+                                    Modifier.coachMarkTarget(
+                                        state = coachMarkState,
+                                        step = 3,
+                                        titleRes = R.string.coach_mark_quran_swipe_title,
+                                        descriptionRes = R.string.coach_mark_quran_swipe_desc,
+                                        gesture = CoachMarkGesture.SWIPE_HORIZONTAL
+                                    )
+                                } else Modifier
+                            )
+                        }
                     }
                 }
             }
@@ -552,59 +614,83 @@ fun ChapterReaderScreen(
                     )
                 }
 
-                IconButton(
-                    onClick = {
-                        vm.toggleBookmark(currentVerseIndex)
-                    },
-                    modifier = Modifier.coachMarkTarget(
-                        state = coachMarkState,
-                        step = 2,
-                        titleRes = R.string.coach_mark_quran_bookmark_title,
-                        descriptionRes = R.string.coach_mark_quran_bookmark_desc,
-                        gesture = CoachMarkGesture.TAP
-                    )
-                ) {
-                    Icon(
-                        painter = androidx.compose.ui.res.painterResource(R.drawable.ic_bookmark_custom),
-                        contentDescription = stringResource(if (state.currentVerseBookmarked) R.string.remove_bookmark else R.string.bookmark),
-                        tint = if (state.currentVerseBookmarked) SaatColors.DeepEmerald else SaatColors.Slate900,
-                        modifier = Modifier.size(24.dp)
-                    )
+                if (state.readingStyle == QuranReadingStyle.SCROLL) {
+                    IconButton(
+                        onClick = { settingsVisible.value = true }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(SaatColors.DeepEmerald.copy(alpha = 0.12f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Aa",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = SaatColors.DeepEmerald
+                            )
+                        }
+                    }
+                } else {
+                    IconButton(
+                        onClick = {
+                            vm.toggleBookmark(currentVerseIndex)
+                        },
+                        modifier = Modifier.coachMarkTarget(
+                            state = coachMarkState,
+                            step = 2,
+                            titleRes = R.string.coach_mark_quran_bookmark_title,
+                            descriptionRes = R.string.coach_mark_quran_bookmark_desc,
+                            gesture = CoachMarkGesture.TAP
+                        )
+                    ) {
+                        Icon(
+                            painter = androidx.compose.ui.res.painterResource(R.drawable.ic_bookmark_custom),
+                            contentDescription = stringResource(if (state.currentVerseBookmarked) R.string.remove_bookmark else R.string.bookmark),
+                            tint = if (state.currentVerseBookmarked) SaatColors.DeepEmerald else SaatColors.Slate900,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            SaatColors.ScreenBackground.copy(alpha = 0.35f),
-                            SaatColors.ScreenBackground.copy(alpha = 0.85f),
-                            SaatColors.ScreenBackground.copy(alpha = 0.96f),
-                            SaatColors.ScreenBackground
+        val showBottomFloatingBar = state.readingStyle != QuranReadingStyle.SCROLL || audioPlaybackState.currentUrl != null
+        if (showBottomFloatingBar) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                SaatColors.ScreenBackground.copy(alpha = 0.35f),
+                                SaatColors.ScreenBackground.copy(alpha = 0.85f),
+                                SaatColors.ScreenBackground.copy(alpha = 0.96f),
+                                SaatColors.ScreenBackground
+                            )
                         )
                     )
-                )
-                .navigationBarsPadding()
-                .padding(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 28.dp,
-                    bottom = 24.dp
-                )
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .navigationBarsPadding()
+                    .padding(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 28.dp,
+                        bottom = 24.dp
+                    )
             ) {
-                // Left Action: Menu Book / Actions popup
-                Column(
-                    horizontalAlignment = Alignment.Start
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = if (state.readingStyle == QuranReadingStyle.SCROLL) Arrangement.Center else Arrangement.SpaceBetween
+                ) {
+                    if (state.readingStyle != QuranReadingStyle.SCROLL) {
+                        // Left Action: Menu Book / Actions popup
+                        Column(
+                            horizontalAlignment = Alignment.Start
                 ) {
                     if (state.verses.isNotEmpty()) {
                         ReaderVerseActionsMenu(
@@ -664,6 +750,7 @@ fun ChapterReaderScreen(
                         }
                     }
                 }
+            }
 
                 // Center Action: Audio Playback Capsule (Liquid Glass between Tafsir and Aa)
                 AnimatedVisibility(
@@ -778,41 +865,44 @@ fun ChapterReaderScreen(
                     }
                 }
 
-                // Right Action: "Aa" (Reading Settings Liquid Glass)
-                Surface(
-                    onClick = { settingsVisible.value = true },
-                    shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.40f),
-                    tonalElevation = 0.dp,
-                    shadowElevation = 0.dp,
-                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
-                    modifier = Modifier
-                        .size(48.dp)
-                        .coachMarkTarget(
-                            state = coachMarkState,
-                            step = 1,
-                            titleRes = R.string.coach_mark_quran_settings_title,
-                            descriptionRes = R.string.coach_mark_quran_settings_desc,
-                            gesture = CoachMarkGesture.TAP
-                        )
-                        .shadow(
-                            elevation = 6.dp,
-                            shape = CircleShape,
-                            ambientColor = Color.Black.copy(alpha = 0.08f),
-                            spotColor = Color.Black.copy(alpha = 0.06f)
-                        )
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "Aa",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = SaatColors.Slate800
-                        )
+                if (state.readingStyle != QuranReadingStyle.SCROLL) {
+                    // Right Action: "Aa" (Reading Settings Liquid Glass)
+                    Surface(
+                        onClick = { settingsVisible.value = true },
+                        shape = CircleShape,
+                        color = Color.White.copy(alpha = 0.40f),
+                        tonalElevation = 0.dp,
+                        shadowElevation = 0.dp,
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.75f)),
+                        modifier = Modifier
+                            .size(48.dp)
+                            .coachMarkTarget(
+                                state = coachMarkState,
+                                step = 1,
+                                titleRes = R.string.coach_mark_quran_settings_title,
+                                descriptionRes = R.string.coach_mark_quran_settings_desc,
+                                gesture = CoachMarkGesture.TAP
+                            )
+                            .shadow(
+                                elevation = 6.dp,
+                                shape = CircleShape,
+                                ambientColor = Color.Black.copy(alpha = 0.08f),
+                                spotColor = Color.Black.copy(alpha = 0.06f)
+                            )
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "Aa",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = SaatColors.Slate800
+                            )
+                        }
                     }
                 }
             }
         }
+    }
 
         SnackbarHost(
             hostState = snackbarHostState,
@@ -894,7 +984,8 @@ fun ChapterReaderScreen(
             onToggleTajweed = vm::toggleTajweed,
             onSelectRecitation = vm::selectRecitation,
             onSetPlaybackMode = vm::setPlaybackMode,
-            onArabicTextTypeChange = vm::setArabicTextType
+            onArabicTextTypeChange = vm::setArabicTextType,
+            onReadingStyleChange = vm::setReadingStyle
         )
     }
 
@@ -1279,7 +1370,8 @@ private fun ReaderSettingsSheet(
     onToggleTajweed: (Boolean) -> Unit,
     onSelectRecitation: (Int) -> Unit,
     onSetPlaybackMode: (AyahPlaybackMode) -> Unit,
-    onArabicTextTypeChange: (ArabicTextType) -> Unit
+    onArabicTextTypeChange: (ArabicTextType) -> Unit,
+    onReadingStyleChange: (QuranReadingStyle) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -1355,6 +1447,56 @@ private fun ReaderSettingsSheet(
                         tint = SaatColors.Slate700,
                         modifier = Modifier.size(18.dp)
                     )
+                }
+            }
+
+            // Section 0: Quran Reading Style (Gaya Membaca Qur'an)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = SaatColors.PureWhite,
+                border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+                shadowElevation = 0.5.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.reading_style_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.Slate900
+                    )
+                    Text(
+                        text = stringResource(R.string.reading_style_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SaatColors.Slate500
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        ReadingStyleCard(
+                            title = stringResource(R.string.reading_style_pager),
+                            desc = stringResource(R.string.reading_style_pager_desc),
+                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            selected = state.readingStyle == QuranReadingStyle.PAGER,
+                            onClick = { onReadingStyleChange(QuranReadingStyle.PAGER) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        ReadingStyleCard(
+                            title = stringResource(R.string.reading_style_scroll),
+                            desc = stringResource(R.string.reading_style_scroll_desc),
+                            icon = Icons.Filled.AutoStories,
+                            selected = state.readingStyle == QuranReadingStyle.SCROLL,
+                            onClick = { onReadingStyleChange(QuranReadingStyle.SCROLL) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                 }
             }
 
@@ -2101,4 +2243,629 @@ private fun PreviousSurahTransitionPage(
         icon = Icons.AutoMirrored.Filled.MenuBook,
         onTrigger = onTriggerTransition
     )
+}
+
+@Composable
+private fun ContinuousScrollReader(
+    state: ChapterReaderUiState,
+    listState: LazyListState,
+    audioBarVisible: Boolean,
+    audioPlaybackState: AudioPlaybackState?,
+    onPlay: (Int) -> Unit,
+    onBookmark: (Int) -> Unit,
+    onTafsir: (String) -> Unit,
+    onAiShare: (Int) -> Unit,
+    onTajweedClick: (TajweedType) -> Unit,
+    onLoadPrevious: () -> Unit,
+    onLoadNext: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val contentTopPadding = statusBarTop + 68.dp
+    val contentBottomPadding = if (audioBarVisible) 160.dp else 110.dp
+
+    LazyColumn(
+        state = listState,
+        contentPadding = PaddingValues(top = contentTopPadding, bottom = contentBottomPadding),
+        modifier = modifier
+            .fillMaxSize()
+            .background(SaatColors.ScreenBackground)
+    ) {
+        // Header: Previous Surah/Juz button + Surah Title Banner + Bismillah
+        item(key = "header") {
+            val prevChapterNum = (state.chapterNumber - 1).coerceAtLeast(1)
+            val prevSurahName = state.chapterLookup[prevChapterNum]
+            if (state.chapterNumber > 1 || (state.juzNumber != null && state.juzNumber > 1)) {
+                Surface(
+                    onClick = onLoadPrevious,
+                    shape = RoundedCornerShape(14.dp),
+                    color = SaatColors.PureWhite,
+                    border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            tint = SaatColors.DeepEmerald,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        val text = if (state.juzNumber != null) {
+                            val prevJuz = (state.juzNumber - 1).coerceAtLeast(1)
+                            stringResource(R.string.transition_prev_juz, prevJuz)
+                        } else {
+                            val targetSurah = prevSurahName ?: stringResource(R.string.transition_prev_surah_default)
+                            stringResource(R.string.transition_prev_surah, targetSurah)
+                        }
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = SaatColors.DeepEmerald
+                        )
+                    }
+                }
+            }
+
+            // Surah Header Banner (Premium Islamic Card)
+            Surface(
+                shape = RoundedCornerShape(22.dp),
+                color = Color.Transparent,
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)),
+                shadowElevation = 4.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(22.dp),
+                        ambientColor = SaatColors.DeepEmerald.copy(alpha = 0.30f),
+                        spotColor = SaatColors.DeepEmerald.copy(alpha = 0.25f)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFF064E3B), // Deep Emerald
+                                    Color(0xFF0F766E), // Emerald Teal
+                                    Color(0xFF10B981)  // Vibrant Mint
+                                )
+                            )
+                        )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 20.dp, horizontal = 18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Top Badge Row: Surah Number & Revelation Place & Verse count
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val surahNumberLabel = if (state.juzNumber != null) {
+                                stringResource(R.string.juz_number, state.juzNumber)
+                            } else {
+                                stringResource(R.string.surah_number, state.chapterNumber)
+                            }
+                            val revelationPlace = state.chapterRevelationPlace?.takeIf { it.isNotBlank() } ?: "Makkah"
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(Color.White.copy(alpha = 0.18f))
+                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "$surahNumberLabel · $revelationPlace".uppercase(),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White.copy(alpha = 0.95f),
+                                    letterSpacing = 0.6.sp
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(Color.White.copy(alpha = 0.18f))
+                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "${state.verses.size} ${stringResource(R.string.verses)}".uppercase(),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White.copy(alpha = 0.95f),
+                                    letterSpacing = 0.6.sp
+                                )
+                            }
+                        }
+
+                        Spacer(Modifier.height(14.dp))
+
+                        // Arabic Surah Name Calligraphy
+                        state.chapterArabicName?.takeIf { it.isNotBlank() }?.let { arabicName ->
+                            Text(
+                                text = arabicName,
+                                fontFamily = TajweedFontFamily,
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = Color.White,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(4.dp))
+                        }
+
+                        // Latin Surah Display Name
+                        Text(
+                            text = state.chapterDisplayName.orEmpty(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        )
+
+                        // Surah Meaning / Translation Name
+                        state.chapterTranslatedName?.takeIf { it.isNotBlank() }?.let { meaning ->
+                            Spacer(Modifier.height(3.dp))
+                            Text(
+                                text = "($meaning)",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.85f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Calligraphic Bismillah for all Surahs except At-Tawbah (9)
+            if (state.chapterNumber != 9) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 18.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+                        fontFamily = TajweedFontFamily,
+                        fontSize = (32 * state.fontScale).sp,
+                        fontWeight = FontWeight.Normal,
+                        color = SaatColors.DeepEmerald,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(140.dp)
+                            .height(1.dp)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        Color.Transparent,
+                                        SaatColors.DeepEmerald.copy(alpha = 0.40f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                    )
+                }
+            }
+        }
+
+        // Verse Items
+        itemsIndexed(
+            items = state.verses,
+            key = { _, verse -> verse.verseKey.orEmpty() }
+        ) { index, verse ->
+            ContinuousVerseRow(
+                verse = verse,
+                index = index,
+                fontScale = state.fontScale,
+                showTranslation = state.showTranslation,
+                showTransliteration = state.showTransliteration,
+                translationId = state.selectedTranslationId,
+                isTajweedEnabled = state.isTajweedEnabled,
+                arabicTextType = state.arabicTextType,
+                personalDataRevision = state.personalDataRevision,
+                audioPlaybackState = audioPlaybackState,
+                onPlay = { onPlay(index) },
+                onBookmark = { onBookmark(index) },
+                onTafsir = { onTafsir(verse.verseKey.orEmpty()) },
+                onAiShare = { onAiShare(index) },
+                onTajweedClick = onTajweedClick
+            )
+        }
+
+        // Footer: Next Surah/Juz button
+        item(key = "footer") {
+            val nextChapterNum = state.chapterNumber + 1
+            val nextSurahName = state.chapterLookup[nextChapterNum]
+            if (state.chapterNumber < 114 || (state.juzNumber != null && state.juzNumber < 30)) {
+                Surface(
+                    onClick = onLoadNext,
+                    shape = RoundedCornerShape(16.dp),
+                    color = SaatColors.DeepEmerald,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 20.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        val text = if (state.juzNumber != null) {
+                            val nextJuz = (state.juzNumber + 1).coerceAtMost(30)
+                            stringResource(R.string.transition_next_juz, nextJuz)
+                        } else {
+                            val targetSurah = nextSurahName ?: stringResource(R.string.transition_next_surah_default)
+                            stringResource(R.string.transition_next_surah, targetSurah)
+                        }
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = SaatColors.PureWhite
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                            contentDescription = null,
+                            tint = SaatColors.PureWhite,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+private fun ContinuousVerseRow(
+    verse: RandomAyahPayload,
+    index: Int,
+    fontScale: Float,
+    showTranslation: Boolean,
+    showTransliteration: Boolean,
+    translationId: Int,
+    isTajweedEnabled: Boolean,
+    arabicTextType: ArabicTextType,
+    personalDataRevision: Int,
+    audioPlaybackState: AudioPlaybackState?,
+    onPlay: () -> Unit,
+    onBookmark: () -> Unit,
+    onTafsir: () -> Unit,
+    onAiShare: () -> Unit,
+    onTajweedClick: (TajweedType) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val isBookmarked = remember(verse.verseKey, personalDataRevision) {
+        val key = verse.verseKey
+        if (key != null) QuranPersonalStore.isBookmarked(context, key) else false
+    }
+    val isPlayingThisVerse = audioPlaybackState != null &&
+        audioPlaybackState.trackSubtitle == verse.verseKey &&
+        audioPlaybackState.currentUrl != null
+
+    val backgroundColor = if (isPlayingThisVerse) {
+        SaatColors.DeepEmerald.copy(alpha = 0.06f)
+    } else {
+        Color.Transparent
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .padding(horizontal = 20.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // Toolbar: Ayah Number Badge + Badges + Actions (Play, Bookmark, Tafsir, Share)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(SaatColors.DeepEmerald.copy(alpha = 0.10f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = verse.resolvedVerseNumber.toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = SaatColors.DeepEmerald
+                    )
+                }
+
+                VersePersonalBadges(
+                    verseKey = verse.verseKey,
+                    personalDataRevision = personalDataRevision,
+                    compact = true
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                IconButton(
+                    onClick = onPlay,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isPlayingThisVerse && audioPlaybackState?.isPlaying == true) {
+                            Icons.Filled.Pause
+                        } else {
+                            Icons.Filled.PlayArrow
+                        },
+                        contentDescription = if (isPlayingThisVerse && audioPlaybackState?.isPlaying == true) {
+                            stringResource(R.string.pause)
+                        } else {
+                            stringResource(R.string.play)
+                        },
+                        tint = if (isPlayingThisVerse) SaatColors.DeepEmerald else SaatColors.Slate500,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onBookmark,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_bookmark_custom),
+                        contentDescription = stringResource(
+                            if (isBookmarked) R.string.remove_bookmark else R.string.bookmark
+                        ),
+                        tint = if (isBookmarked) SaatColors.DeepEmerald else SaatColors.Slate500,
+                        modifier = Modifier.size(19.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onTafsir,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_tafsir),
+                        contentDescription = stringResource(R.string.tafsir),
+                        tint = SaatColors.Slate500,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onAiShare,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.AutoAwesome,
+                        contentDescription = stringResource(R.string.share_ayah),
+                        tint = SaatColors.Slate500,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+        }
+
+        // Arabic text with Tajweed and word sync
+        val textToRender = if (arabicTextType == ArabicTextType.INDOPAK) {
+            verse.textIndopak ?: verse.textUthmani
+        } else {
+            verse.textUthmani
+        }
+
+        val (words, weights, totalWeight) = remember(textToRender) {
+            val parsedWords = textToRender?.split("\\s+".toRegex())
+                ?.filter { it.isNotBlank() }
+                ?.map { word ->
+                    word.replace("""^[﴿\(]?\d+[﴾\)]?""".toRegex(), "").trim()
+                }
+                ?.filter { it.isNotBlank() } ?: emptyList()
+
+            val parsedWeights = parsedWords.mapIndexed { wIdx, word ->
+                var weight = word.length.toFloat().coerceAtLeast(1f)
+                if (word.contains('ٓ') || word.contains('ۤ') || word.contains('ۧ') || word.contains('ۨ') || word.contains('\u0653') || word.contains('\u06E4')) {
+                    weight += 8.0f
+                }
+                if (word.contains('ّ') || word.contains('\u0651')) {
+                    if (word.contains('ن') || word.contains('م')) {
+                        weight += 4.0f
+                    } else {
+                        weight += 2.0f
+                    }
+                }
+                if (word.contains('ۘ') || word.contains('ۚ') || word.contains('ۖ') || word.contains('ۗ') || word.contains('۬') || word.contains('ۥ') || word.contains('ۙ')) {
+                    weight += 6.0f
+                }
+                if (wIdx == parsedWords.lastIndex && parsedWords.size > 1) {
+                    weight *= 1.25f
+                }
+                weight
+            }
+            Triple(parsedWords, parsedWeights, parsedWeights.sum().coerceAtLeast(1f))
+        }
+
+        val activeWordIndex by remember(
+            isPlayingThisVerse,
+            audioPlaybackState?.currentPositionMs,
+            audioPlaybackState?.durationMs,
+            audioPlaybackState?.progress,
+            words,
+            weights,
+            totalWeight
+        ) {
+            derivedStateOf {
+                if (!isPlayingThisVerse || words.isEmpty()) {
+                    null
+                } else {
+                    val dur = audioPlaybackState?.durationMs ?: 0L
+                    val pos = audioPlaybackState?.currentPositionMs ?: 0L
+                    val rawProg = if (dur > 0L) (pos.toFloat() / dur.toFloat()).coerceIn(0f, 1f)
+                    else (audioPlaybackState?.progress ?: 0f).coerceIn(0f, 1f)
+                    val leadPaddingRatio = 0.03f
+                    val trailPaddingRatio = 0.05f
+                    val prog = ((rawProg - leadPaddingRatio) / (1f - leadPaddingRatio - trailPaddingRatio)).coerceIn(0f, 1f)
+                    val targetWeight = prog * totalWeight
+                    var accum = 0f
+                    var foundIndex = 0
+                    for (i in words.indices) {
+                        accum += weights[i]
+                        if (targetWeight <= accum) {
+                            foundIndex = i
+                            break
+                        }
+                        foundIndex = i
+                    }
+                    foundIndex
+                }
+            }
+        }
+
+        TajweedHtmlView(
+            textUthmani = textToRender ?: "",
+            ayahNumber = verse.resolvedVerseNumber,
+            fontSizeSp = (30 * fontScale).toInt(),
+            compact = true,
+            textAlign = TajweedTextAlign.Justify,
+            isTajweedEnabled = isTajweedEnabled,
+            activeWordIndex = activeWordIndex,
+            onTajweedClick = onTajweedClick,
+            modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
+        )
+
+        // Transliteration
+        if (showTransliteration) {
+            verse.displayTransliteration(translationId)?.let { transliteration ->
+                Text(
+                    text = transliteration,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        lineHeight = (22 * fontScale).sp,
+                        fontSize = (15 * fontScale).sp
+                    ),
+                    color = SaatColors.DeepEmerald,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                )
+            }
+        }
+
+        // Translation
+        if (showTranslation) {
+            verse.translations?.firstOrNull()?.text?.let { translation ->
+                val clean = translation.toVerseTranslationPlainText()
+                if (clean.isNotEmpty()) {
+                    Text(
+                        text = clean,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            lineHeight = (24 * fontScale).sp,
+                            fontSize = (15 * fontScale).sp
+                        ),
+                        color = SaatColors.Slate900,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp)
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color(0xFFEBE7DF).copy(alpha = 0.7f))
+        )
+    }
+}
+
+@Composable
+private fun ReadingStyleCard(
+    title: String,
+    desc: String,
+    icon: ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = if (selected) SaatColors.DeepEmerald.copy(alpha = 0.08f) else SaatColors.ScreenBackground,
+        border = BorderStroke(
+            width = if (selected) 1.5.dp else 1.dp,
+            color = if (selected) SaatColors.DeepEmerald else Color(0xFFEBE7DF)
+        ),
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (selected) SaatColors.DeepEmerald else SaatColors.Slate500,
+                    modifier = Modifier.size(22.dp)
+                )
+                if (selected) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (selected) SaatColors.DeepEmerald else SaatColors.Slate900
+            )
+            Text(
+                text = desc,
+                style = MaterialTheme.typography.bodySmall,
+                color = SaatColors.Slate500,
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
+        }
+    }
 }

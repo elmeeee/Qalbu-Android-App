@@ -591,6 +591,12 @@
     <string name="account_syncing">Menyegerakkan…</string>
     <string name="account_last_synced">Disegerakkan</string>
     <string name="account_just_now">Sebentar tadi</string>
+    <string name="reading_style_title">Gaya Membaca Al-Quran</string>
+    <string name="reading_style_subtitle">Pilih paparan per ayat (halaman buku) atau tatal menegak</string>
+    <string name="reading_style_pager">Per Ayat (Halaman Buku)</string>
+    <string name="reading_style_pager_desc">1 halaman untuk 1 ayat dengan kesan leret/membalik halaman</string>
+    <string name="reading_style_scroll">Tatal Menegak (Klasik)</string>
+    <string name="reading_style_scroll_desc">Senarai ayat mengalir berterusan, ditatal ke bawah</string>
     <string name="account_connected_title">Akaun Disambungkan</string>
     <string name="account_detail_verified">Disahkan</string>
     <string name="auth_error_disposable_email">Alamat emel sementara tidak dibenarkan. Sila gunakan emel peribadi atau kerja.</string>
@@ -868,4 +874,8 @@
     <string name="coach_mark_ten_nights_worship_desc">Tandakan amalan malam anda: Tahajjud, Zikir, Witir, Doa, Tilawah, dan I\'tikaf.</string>
     <string name="coach_mark_ten_nights_actions_title">Doa &amp; Panduan Lailatul Qadr</string>
     <string name="coach_mark_ten_nights_actions_desc">Akses koleksi doa sahih daripada sunnah Nabi dan panduan lengkap tentang Lailatul Qadr.</string>
+
+    <string name="play">Main</string>
+    <string name="share_ayah">Kongsi Ayat</string>
+    <string name="verses">Ayat</string>
 </resources>

@@ -595,6 +595,12 @@
     <string name="account_syncing">Menyinkronkan…</string>
     <string name="account_last_synced">Disinkronkan</string>
     <string name="account_just_now">Baru saja</string>
+    <string name="reading_style_title">Gaya Membaca Qur\'an</string>
+    <string name="reading_style_subtitle">Pilih tampilan per ayat (halaman buku) atau gulir vertikal</string>
+    <string name="reading_style_pager">Per Ayat (Halaman Buku)</string>
+    <string name="reading_style_pager_desc">1 halaman untuk 1 ayat dengan efek geser/membalik halaman</string>
+    <string name="reading_style_scroll">Gulir Vertikal (Klasik)</string>
+    <string name="reading_style_scroll_desc">Daftar ayat mengalir berkelanjutan, digulir ke bawah</string>
     <string name="account_connected_title">Akun Terhubung</string>
     <string name="account_detail_verified">Terverifikasi</string>
     <string name="auth_error_disposable_email">Alamat email sementara tidak diizinkan. Silakan gunakan email pribadi atau kerja.</string>
@@ -872,4 +878,8 @@
     <string name="coach_mark_ten_nights_worship_desc">Centang amalan malammu: Tahajud, Dzikir, Witir, Doa, Tilawah, dan I\'tikaf.</string>
     <string name="coach_mark_ten_nights_actions_title">Doa &amp; Panduan Lailatul Qadr</string>
     <string name="coach_mark_ten_nights_actions_desc">Akses kumpulan doa shahih dari sunnah Nabi dan penjelasan lengkap seputar Lailatul Qadr.</string>
+
+    <string name="play">Putar</string>
+    <string name="share_ayah">Bagikan Ayat</string>
+    <string name="verses">Ayat</string>
 </resources>
