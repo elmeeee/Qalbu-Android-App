@@ -240,12 +240,16 @@ fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
             blocks += MdBlock.ListItem("•", text, indent, isArabicDominant(text))
             continue
         }
+        val cleanLine = unescapeUnicode(line)
         // Arabic lines are kept as their own block so they can be rendered RTL.
-        if (isArabicDominant(line)) {
+        if (isArabicDominant(cleanLine)) {
             flushParagraph()
-            blocks += MdBlock.Paragraph(line.trim(), true)
+            val text = cleanLine.trim()
+            if (text.isNotBlank()) {
+                blocks += MdBlock.Paragraph(text, true)
+            }
         } else {
-            val trimmedLine = line.trim()
+            val trimmedLine = cleanLine.trim()
             val isSeparateLine = isTransliterationOrTranslation(trimmedLine) ||
                 (paragraph.isNotEmpty() && isTransliteration(paragraph.toString().trim()))
             if (isSeparateLine) {
