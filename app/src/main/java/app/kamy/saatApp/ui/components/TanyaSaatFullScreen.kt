@@ -300,17 +300,13 @@ private fun KimiHeader(
         ) {
             IconButton(
                 onClick = onBack,
-                modifier = Modifier
-                    .size(34.dp)
-                    .clip(CircleShape)
-                    .background(SaatColors.PureWhite)
-                    .border(1.dp, Line, CircleShape)
+                modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back),
                     tint = SaatColors.HomeDarkGreen,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
 

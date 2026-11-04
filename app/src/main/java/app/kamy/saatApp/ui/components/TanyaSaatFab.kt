@@ -172,7 +172,7 @@ fun TanyaSaatFab(
                 shadowElevation = 2.dp
             ) {
                 Text(
-                    text = "Ask Kīmi",
+                    text = stringResource(R.string.tanya_saat_ai_title),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold
