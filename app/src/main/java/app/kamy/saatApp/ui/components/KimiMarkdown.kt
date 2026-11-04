@@ -54,89 +54,99 @@ fun KimiMarkdown(
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
         blocks.forEach { block ->
-            when (block) {
-                is MdBlock.Heading -> {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = inlineMarkdown(block.text, textColor, accentColor),
-                        style = TextStyle(
-                            fontSize = if (block.level <= 2) 16.sp else 15.sp,
-                            lineHeight = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        color = accentColor
-                    )
-                }
+            RenderSingleBlock(block, textColor, accentColor)
+        }
+    }
+}
 
-                is MdBlock.Paragraph -> {
-                    if (block.isArabic) {
-                        ArabicLine(text = block.text, color = textColor)
-                    } else {
-                        Text(
-                            text = inlineMarkdown(block.text, textColor, accentColor),
-                            style = bodyStyle,
-                            color = textColor
-                        )
-                    }
-                }
+@Composable
+private fun RenderSingleBlock(
+    block: MdBlock,
+    textColor: Color,
+    accentColor: Color
+) {
+    when (block) {
+        is MdBlock.Heading -> {
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = inlineMarkdown(block.text, textColor, accentColor),
+                style = TextStyle(
+                    fontSize = if (block.level <= 2) 16.sp else 15.sp,
+                    lineHeight = 22.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = accentColor
+            )
+        }
 
-                is MdBlock.ListItem -> {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = block.marker,
-                            style = bodyStyle.copy(fontWeight = FontWeight.SemiBold),
-                            color = accentColor,
-                            modifier = Modifier
-                                .padding(start = (block.indent * 12).dp)
-                                .width(if (block.marker.length > 2) 26.dp else 16.dp)
-                        )
-                        if (block.isArabic) {
-                            ArabicLine(text = block.text, color = textColor, modifier = Modifier.weight(1f))
-                        } else {
-                            Text(
-                                text = inlineMarkdown(block.text, textColor, accentColor),
-                                style = bodyStyle,
-                                color = textColor,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                }
-
-                is MdBlock.Quote -> {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Min)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(accentColor.copy(alpha = 0.06f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .width(3.dp)
-                                .fillMaxHeight()
-                                .background(accentColor)
-                        )
-                        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                            if (block.isArabic) {
-                                ArabicLine(text = block.text, color = textColor)
-                            } else {
-                                Text(
-                                    text = inlineMarkdown(block.text, textColor, accentColor),
-                                    style = bodyStyle.copy(fontStyle = FontStyle.Italic),
-                                    color = textColor.copy(alpha = 0.9f)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                MdBlock.Rule -> HorizontalDivider(
-                    color = accentColor.copy(alpha = 0.18f),
-                    modifier = Modifier.padding(vertical = 2.dp)
+        is MdBlock.Paragraph -> {
+            if (block.text.isBlank()) return
+            if (block.isArabic) {
+                ArabicLine(text = block.text, color = textColor)
+            } else {
+                Text(
+                    text = inlineMarkdown(block.text, textColor, accentColor),
+                    style = bodyStyle,
+                    color = textColor
                 )
             }
         }
+
+        is MdBlock.ListItem -> {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = block.marker,
+                    style = bodyStyle.copy(fontWeight = FontWeight.SemiBold),
+                    color = accentColor,
+                    modifier = Modifier
+                        .padding(start = (block.indent * 12).dp)
+                        .width(if (block.marker.length > 2) 26.dp else 16.dp)
+                )
+                if (block.isArabic) {
+                    ArabicLine(text = block.text, color = textColor, modifier = Modifier.weight(1f))
+                } else {
+                    Text(
+                        text = inlineMarkdown(block.text, textColor, accentColor),
+                        style = bodyStyle,
+                        color = textColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
+        is MdBlock.Quote -> {
+            if (block.children.isEmpty()) return
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(accentColor.copy(alpha = 0.06f))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(3.dp)
+                        .fillMaxHeight()
+                        .background(accentColor)
+                )
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    block.children.forEach { child ->
+                        RenderSingleBlock(child, textColor, accentColor)
+                    }
+                }
+            }
+        }
+
+        MdBlock.Rule -> HorizontalDivider(
+            color = accentColor.copy(alpha = 0.18f),
+            modifier = Modifier.padding(vertical = 2.dp)
+        )
     }
 }
 
@@ -177,7 +187,7 @@ sealed class MdBlock {
     data class Heading(val level: Int, val text: String) : MdBlock()
     data class Paragraph(val text: String, val isArabic: Boolean) : MdBlock()
     data class ListItem(val marker: String, val text: String, val indent: Int, val isArabic: Boolean) : MdBlock()
-    data class Quote(val text: String, val isArabic: Boolean) : MdBlock()
+    data class Quote(val children: List<MdBlock>) : MdBlock()
     data object Rule : MdBlock()
 }
 
@@ -188,40 +198,71 @@ private val quoteRegex = Regex("^>\\s?(.*)$")
 private val ruleRegex = Regex("^\\s*([-*_])\\s*\\1\\s*\\1[\\s\\-*_]*$")
 
 fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
-    val lines = markdown.replace("\r\n", "\n").replace("\\n", "\n").split('\n')
+    val rawLines = markdown.replace("\r\n", "\n").replace("\\n", "\n").split('\n')
     val blocks = mutableListOf<MdBlock>()
     val paragraph = StringBuilder()
 
     fun flushParagraph() {
         if (paragraph.isNotBlank()) {
             val text = paragraph.toString().trim()
-            blocks += MdBlock.Paragraph(text, isArabicDominant(text))
+            if (text.isNotBlank()) {
+                blocks += MdBlock.Paragraph(text, isArabicDominant(text))
+            }
         }
         paragraph.clear()
     }
 
-    for (rawLine in lines) {
+    var i = 0
+    while (i < rawLines.size) {
+        val rawLine = rawLines[i]
         val line = rawLine.trimEnd()
         if (line.isBlank()) {
             flushParagraph()
+            i++
             continue
         }
+
+        val quoteMatch = quoteRegex.find(line)
+        if (quoteMatch != null) {
+            flushParagraph()
+            val quoteLines = mutableListOf<String>()
+            while (i < rawLines.size) {
+                val qLine = rawLines[i].trimEnd()
+                val qm = quoteRegex.find(qLine)
+                if (qm != null) {
+                    quoteLines.add(qm.groupValues[1])
+                    i++
+                } else if (qLine.isBlank() && i + 1 < rawLines.size && quoteRegex.find(rawLines[i + 1].trimEnd()) != null) {
+                    quoteLines.add("")
+                    i++
+                } else {
+                    break
+                }
+            }
+            val innerBlocks = parseMarkdownBlocks(quoteLines.joinToString("\n")).filter {
+                when (it) {
+                    is MdBlock.Paragraph -> it.text.isNotBlank()
+                    is MdBlock.Quote -> it.children.isNotEmpty()
+                    else -> true
+                }
+            }
+            if (innerBlocks.isNotEmpty()) {
+                blocks += MdBlock.Quote(innerBlocks)
+            }
+            continue
+        }
+
         val heading = headingRegex.find(line)
         if (heading != null) {
             flushParagraph()
             blocks += MdBlock.Heading(heading.groupValues[1].length, heading.groupValues[2].trim())
+            i++
             continue
         }
         if (ruleRegex.matches(line)) {
             flushParagraph()
             blocks += MdBlock.Rule
-            continue
-        }
-        val quote = quoteRegex.find(line)
-        if (quote != null) {
-            flushParagraph()
-            val text = quote.groupValues[1].trim()
-            blocks += MdBlock.Quote(text, isArabicDominant(text))
+            i++
             continue
         }
         val numbered = numberedRegex.find(line)
@@ -230,6 +271,7 @@ fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
             val indent = numbered.groupValues[1].length / 2
             val text = numbered.groupValues[3].trim()
             blocks += MdBlock.ListItem("${numbered.groupValues[2]}.", text, indent, isArabicDominant(text))
+            i++
             continue
         }
         val bullet = bulletRegex.find(line)
@@ -238,6 +280,7 @@ fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
             val indent = bullet.groupValues[1].length / 2
             val text = bullet.groupValues[2].trim()
             blocks += MdBlock.ListItem("•", text, indent, isArabicDominant(text))
+            i++
             continue
         }
         val cleanLine = unescapeUnicode(line)
@@ -258,6 +301,7 @@ fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
             if (paragraph.isNotEmpty()) paragraph.append(' ')
             paragraph.append(trimmedLine)
         }
+        i++
     }
     flushParagraph()
     return blocks
@@ -291,6 +335,7 @@ private fun isTransliterationOrTranslation(text: String): Boolean {
     return isTransliteration(t) ||
            t.startsWith("Artinya:", ignoreCase = true) ||
            t.startsWith("Terjemahan:", ignoreCase = true) ||
+           t.startsWith("Translation:", ignoreCase = true) ||
            t.startsWith("Meaning:", ignoreCase = true) ||
            t.startsWith("Maksudnya:", ignoreCase = true)
 }

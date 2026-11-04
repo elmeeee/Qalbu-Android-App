@@ -81,7 +81,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import coil.ImageLoader
 import coil.compose.AsyncImage
@@ -120,6 +122,7 @@ import app.kamy.saatApp.domain.model.SaatVerseCardData
 import app.kamy.saatApp.features.today.TanyaSaatUiState
 import app.kamy.saatApp.features.tools.components.SpiritualToolTopBar
 import app.kamy.saatApp.ui.common.TajweedHtmlView
+import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 
 // ─── Palette ────────────────────────────────────────────────────────────────
 
@@ -235,6 +238,19 @@ fun TanyaSaatFullScreen(
                     }
                 }
 
+                // Top fade strip: chat messages fade out smoothly before scrolling under the header
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(24.dp)
+                        .align(Alignment.TopCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(ScreenBg, Color.Transparent)
+                            )
+                        )
+                )
+
                 KimiComposer(
                     inputText = state.inputText,
                     selectedModel = state.selectedModel,
@@ -261,55 +277,146 @@ private fun KimiHeader(
     onBack: () -> Unit,
     onNewChat: () -> Unit
 ) {
-    SpiritualToolTopBar(
-        title = stringResource(R.string.tanya_saat_ai_title),
-        subtitle = stringResource(R.string.tanya_saat_ai_subtitle),
-        onBack = onBack,
-        actions = {
-            AnimatedVisibility(visible = hasConversation, enter = fadeIn(), exit = fadeOut()) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(ScreenBg)
+            .drawWithContent {
+                drawContent()
+                drawLine(
+                    color = SaatColors.HomeDarkGreen.copy(alpha = 0.08f),
+                    start = Offset(0f, size.height),
+                    end = Offset(size.width, size.height),
+                    strokeWidth = 1.dp.toPx()
+                )
+            }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .tabContentStatusBarInset()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(SaatColors.PureWhite)
+                    .border(1.dp, Line, CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = SaatColors.HomeDarkGreen,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Box {
+                    KimiAvatar(size = 38.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .align(Alignment.BottomEnd)
+                            .background(SaatColors.DeepEmerald, CircleShape)
+                            .border(1.5.dp, SaatColors.PureWhite, CircleShape)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(R.string.tanya_saat_ai_title),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            ),
+                            color = SaatColors.HomeDarkGreen,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.tanya_saat_ai_subtitle),
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                        color = InkMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = hasConversation,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 Surface(
-                    shape = CircleShape,
+                    shape = RoundedCornerShape(20.dp),
                     color = SaatColors.PureWhite,
                     border = BorderStroke(1.dp, Line),
-                    modifier = Modifier.clickable(enabled = !isLoading, onClick = onNewChat)
+                    shadowElevation = 0.5.dp,
+                    modifier = Modifier.clickable(
+                        enabled = !isLoading,
+                        onClick = onNewChat
+                    )
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.AddComment,
                             contentDescription = null,
                             tint = SaatColors.HomeDarkGreen,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(15.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         Text(
                             text = stringResource(R.string.tanya_saat_new_chat),
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            ),
                             color = SaatColors.HomeDarkGreen
                         )
                     }
                 }
             }
         }
-    )
+    }
 }
 
 @Composable
-private fun KimiAvatar(size: androidx.compose.ui.unit.Dp) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(KimiGradient),
-        contentAlignment = Alignment.Center
+private fun KimiAvatar(
+    size: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.size(size),
+        shape = CircleShape,
+        color = MintWash,
+        border = BorderStroke(1.dp, MintLine.copy(alpha = 0.7f)),
+        shadowElevation = 0.5.dp
     ) {
         Image(
-            painter = painterResource(R.drawable.saat_ai_icon),
-            contentDescription = null,
-            colorFilter = ColorFilter.tint(Color.White),
-            modifier = Modifier.size(size * 0.52f)
+            painter = painterResource(R.drawable.kimi_thinking_11),
+            contentDescription = "Kīmi",
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(size * 0.08f)
+                .clip(CircleShape),
+            contentScale = ContentScale.Fit
         )
     }
 }
@@ -516,17 +623,6 @@ private fun KimiAnswer(
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = Ink
             )
-            message.modelName?.let { model ->
-                Spacer(modifier = Modifier.width(8.dp))
-                Surface(shape = RoundedCornerShape(8.dp), color = MintWash) {
-                    Text(
-                        text = model,
-                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                        color = SaatColors.DeepEmerald,
-                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
-                    )
-                }
-            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
