@@ -8,6 +8,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import app.kamy.saatApp.MainActivity
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.util.UserProfileUtils
 import app.kamy.saatApp.infrastructure.preferences.DailyVerseNotificationStoreReader
 import app.kamy.saatApp.infrastructure.preferences.DailyVerseSnapshot
 import app.kamy.saatApp.infrastructure.preferences.DailyVerseSnapshotStore
@@ -137,11 +138,15 @@ object DailyVerseNotificationScheduler {
             openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val firstName = UserProfileUtils.getCurrentUserFirstName()
+        val baseTitle = localContext.getString(R.string.daily_verse_notif_title)
+        val displayTitle = if (!firstName.isNullOrBlank()) "$baseTitle, $firstName" else baseTitle
+
         val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/raw/off_toggle_adzan")
         val vibrationPattern = longArrayOf(0, 400, 200, 400)
         val notification = NotificationCompat.Builder(context, NotificationChannels.DAILY_VERSE)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(localContext.getString(R.string.daily_verse_notif_title))
+            .setContentTitle(displayTitle)
             .setContentText(displayBody)
             .setStyle(NotificationCompat.BigTextStyle().bigText(displayBody))
             .setContentIntent(pending)

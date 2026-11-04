@@ -196,7 +196,8 @@ fun TanyaSaatFullScreen(
                 if (state.messages.isEmpty() && !state.isLoading) {
                     KimiEmptyState(
                         onMoodSelected = onMoodSelected,
-                        bottomInset = ComposerReservedHeight
+                        bottomInset = ComposerReservedHeight,
+                        userFirstName = state.userFirstName
                     )
                 } else {
                     val lastAiId = state.messages.lastOrNull { it.sender == ChatSender.AI }?.id
@@ -423,7 +424,8 @@ private fun KimiAvatar(
 @Composable
 private fun KimiEmptyState(
     onMoodSelected: (SaatMood) -> Unit,
-    bottomInset: androidx.compose.ui.unit.Dp
+    bottomInset: androidx.compose.ui.unit.Dp,
+    userFirstName: String? = null
 ) {
     Column(
         modifier = Modifier
@@ -443,8 +445,13 @@ private fun KimiEmptyState(
                     KimiAvatar(size = 46.dp)
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
+                        val welcomeTitle = if (!userFirstName.isNullOrBlank()) {
+                            "Assalamu'alaikum, $userFirstName 👋"
+                        } else {
+                            stringResource(R.string.tanya_saat_welcome_title)
+                        }
                         Text(
-                            text = stringResource(R.string.tanya_saat_welcome_title),
+                            text = welcomeTitle,
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold

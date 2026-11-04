@@ -47,7 +47,8 @@ class TanyaSaatRepository @Inject constructor(
     suspend fun processUserQuery(
         userQuery: String,
         history: List<SaatChatMessage>,
-        model: KimiAiModel
+        model: KimiAiModel,
+        userFirstName: String? = null
     ): SaatChatMessage = withContext(Dispatchers.IO) {
         val currentLang = appLanguageStore.current()
         val apiKey = AppConfig.groqApiKey
@@ -58,7 +59,7 @@ class TanyaSaatRepository @Inject constructor(
         }
 
         val messages = buildConversation(
-            systemPrompt = buildSystemPrompt(currentLang),
+            systemPrompt = buildSystemPrompt(currentLang, userFirstName),
             history = history,
             userQuery = userQuery
         )
@@ -192,8 +193,17 @@ class TanyaSaatRepository @Inject constructor(
 
     // ── Prompt ──────────────────────────────────────────────────────────────
 
-    private fun buildSystemPrompt(lang: AppLanguage): String {
+    private fun buildSystemPrompt(lang: AppLanguage, userFirstName: String? = null): String {
         val langName = lang.aiPromptLanguage
+
+        val personalization = if (!userFirstName.isNullOrBlank()) {
+            """
+            
+            USER PERSONALIZATION:
+            - The user's name is "$userFirstName".
+            - Address and greet the user politely and respectfully by their first name when appropriate (e.g. "$userFirstName" or "Saudaraku $userFirstName" / "Brother/Sister $userFirstName") to create a warm, welcoming, and personal scholarly conversation.
+            """.trimIndent()
+        } else ""
 
         val transliterationExample = when (lang) {
             AppLanguage.ENGLISH -> """
@@ -293,6 +303,7 @@ class TanyaSaatRepository @Inject constructor(
             - Length: Simple factual questions: 120-200 words. Comprehensive history, sirah, comparative fiqh, or deep spiritual questions: 350-700 words, rich with depth, context, and clear structure.
             - Write entirely in $langName, including headings, follow_ups, and reference notes.
             - Earlier assistant turns appear as plain text for context; your reply must always be the JSON object below.
+            $personalization
 
             OUTPUT: respond ONLY with one raw JSON object (no markdown fences, no text outside it):
             {

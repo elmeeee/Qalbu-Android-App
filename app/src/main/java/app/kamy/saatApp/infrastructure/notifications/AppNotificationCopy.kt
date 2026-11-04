@@ -4,6 +4,7 @@ import android.content.Context
 import app.kamy.saatApp.R
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.core.locale.AppLocale
+import app.kamy.saatApp.core.util.UserProfileUtils
 import app.kamy.saatApp.infrastructure.local.ImportantDayRegistry
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import java.text.SimpleDateFormat
@@ -25,9 +26,9 @@ object AppNotificationCopy {
         return ctx.getString(R.string.prayer_notif_title, prayerDisp, locationOrTime)
     }
 
-    fun prayerBody(context: Context, prayerName: String): String {
+    fun prayerBody(context: Context, prayerName: String, userFirstName: String? = UserProfileUtils.getCurrentUserFirstName()): String {
         val ctx = localized(context)
-        return when (prayerName) {
+        val base = when (prayerName) {
             "Fajr" -> ctx.getString(R.string.prayer_body_fajr)
             "Dhuhr" -> ctx.getString(R.string.prayer_body_dhuhr)
             "Asr" -> ctx.getString(R.string.prayer_body_asr)
@@ -36,6 +37,7 @@ object AppNotificationCopy {
             "Imsak" -> ctx.getString(R.string.prayer_body_imsak)
             else -> ctx.getString(R.string.prayer_body_default, prayerDisplayName(ctx, prayerName))
         }
+        return if (!userFirstName.isNullOrBlank()) "$base, $userFirstName" else base
     }
 
     fun nightTitle(context: Context, kind: NightDivisionKind): String {
@@ -47,12 +49,17 @@ object AppNotificationCopy {
         }
     }
 
-    fun nightBody(context: Context, kind: NightDivisionKind): String {
+    fun nightBody(context: Context, kind: NightDivisionKind, userFirstName: String? = UserProfileUtils.getCurrentUserFirstName()): String {
         val ctx = localized(context)
-        return when (kind) {
+        val base = when (kind) {
             NightDivisionKind.MIDNIGHT -> ctx.getString(R.string.night_midnight_body)
             NightDivisionKind.FIRST_THIRD -> ctx.getString(R.string.night_first_third_body)
             NightDivisionKind.LAST_THIRD -> ctx.getString(R.string.tahajud_alarm_body)
+        }
+        return if (!userFirstName.isNullOrBlank() && kind == NightDivisionKind.LAST_THIRD) {
+            "$base, $userFirstName"
+        } else {
+            base
         }
     }
 
@@ -104,16 +111,16 @@ object AppNotificationCopy {
         return ""
     }
 
-    fun resolveBody(context: Context, kind: String?, prayerName: String?): String {
+    fun resolveBody(context: Context, kind: String?, prayerName: String?, userFirstName: String? = UserProfileUtils.getCurrentUserFirstName()): String {
         if (!prayerName.isNullOrBlank() && kind?.startsWith("prayer_") == true) {
-            return prayerBody(context, prayerName)
+            return prayerBody(context, prayerName, userFirstName)
         }
         if (kind == "imsak") {
-            return prayerBody(context, "Imsak")
+            return prayerBody(context, "Imsak", userFirstName)
         }
         kind?.removePrefix("night_")?.let { raw ->
             runCatching { NightDivisionKind.valueOf(raw) }.getOrNull()?.let {
-                return nightBody(context, it)
+                return nightBody(context, it, userFirstName)
             }
         }
         sunnahBody(context, kind.orEmpty())?.let { return it }

@@ -11,6 +11,7 @@ import app.kamy.saatApp.domain.model.KimiAiModel
 import app.kamy.saatApp.domain.model.SaatChatMessage
 import app.kamy.saatApp.domain.model.SaatMood
 import app.kamy.saatApp.domain.model.SaatVerseCardData
+import app.kamy.saatApp.domain.repository.AuthRepository
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.KimiModelPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
@@ -33,7 +34,8 @@ data class TanyaSaatUiState(
     val activeMood: SaatMood? = null,
     val inputText: String = "",
     val isSheetVisible: Boolean = false,
-    val toastMessage: String? = null
+    val toastMessage: String? = null,
+    val userFirstName: String? = null
 )
 
 @HiltViewModel
@@ -41,6 +43,7 @@ class TanyaSaatViewModel @Inject constructor(
     private val repository: TanyaSaatRepository,
     private val appLanguageStore: AppLanguageStore,
     private val kimiModelPreferencesStore: KimiModelPreferencesStore,
+    private val authRepository: AuthRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -50,6 +53,11 @@ class TanyaSaatViewModel @Inject constructor(
     private var lastUserQuery: String? = null
 
     init {
+        viewModelScope.launch {
+            authRepository.currentUser.collect { user ->
+                _state.update { it.copy(userFirstName = user?.firstName) }
+            }
+        }
         viewModelScope.launch {
             kimiModelPreferencesStore.selectedModel.collect { model ->
                 _state.update { it.copy(selectedModel = model) }
@@ -132,11 +140,13 @@ class TanyaSaatViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            val userFirstName = _state.value.userFirstName
             val aiResponse = runCatching {
                 repository.processUserQuery(
                     userQuery = query,
                     history = history,
-                    model = _state.value.selectedModel
+                    model = _state.value.selectedModel,
+                    userFirstName = userFirstName
                 )
             }.getOrElse {
                 SaatChatMessage(

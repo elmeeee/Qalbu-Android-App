@@ -443,6 +443,7 @@ fun TodayScreen(
                         },
                         hijriLabel = prayerState.hijriLabel,
                         gregorianLabel = prayerState.gregorianLabel,
+                        userFirstName = todayState.userFirstName,
                         isScrolled = isScrolled,
                         isDarkBackground = cardDrawable != R.drawable.day,
                         onLocationClick = prayerVm::openLocationSheet,

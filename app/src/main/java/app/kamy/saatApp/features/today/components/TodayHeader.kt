@@ -56,6 +56,7 @@ fun TodayHeader(
     locationStatus: String? = null,
     hijriLabel: String?,
     gregorianLabel: String?,
+    userFirstName: String? = null,
     isScrolled: Boolean = false,
     isDarkBackground: Boolean = false,
     onLocationClick: () -> Unit = {},
@@ -151,8 +152,11 @@ fun TodayHeader(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
+                        val greetingText = remember(userFirstName) {
+                            if (!userFirstName.isNullOrBlank()) "Assalamu'alaikum, $userFirstName" else "Assalamu'alaikum"
+                        }
                         Text(
-                            text = "Assalamu'alaikum",
+                            text = greetingText,
                             style = MaterialTheme.typography.labelSmall,
                             color = greetingColor,
                             fontWeight = FontWeight.SemiBold,

@@ -9,6 +9,7 @@ import app.kamy.saatApp.core.error.AppErrorKind
 import app.kamy.saatApp.core.error.toAppError
 import app.kamy.saatApp.domain.model.RandomAyahPayload
 import app.kamy.saatApp.domain.model.ReadingSession
+import app.kamy.saatApp.domain.repository.AuthRepository
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.TranslationPreferencesStore
 import app.kamy.saatApp.infrastructure.quran.DailyVerseLoader
@@ -36,7 +37,8 @@ data class TodayUiState(
     val isOfflineData: Boolean = false,
     val continueReading: ReadingSession? = null,
     val continueReadingChapterName: String? = null,
-    val continueReadingTotalVerses: Int? = null
+    val continueReadingTotalVerses: Int? = null,
+    val userFirstName: String? = null
 )
 
 @HiltViewModel
@@ -48,13 +50,19 @@ class TodayViewModel @Inject constructor(
     private val readingSessions: ReadingSessionRepository,
     private val dailyQuoteRepository: DailyQuoteRepository,
     private val khgtCalendarRepository: KhgtCalendarRepository,
-    private val appLanguageStore: AppLanguageStore
+    private val appLanguageStore: AppLanguageStore,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TodayUiState())
     val state: StateFlow<TodayUiState> = _state.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            authRepository.currentUser.collect { user ->
+                _state.update { it.copy(userFirstName = user?.firstName) }
+            }
+        }
         loadDailyAyah()
         loadContinueReading()
 
