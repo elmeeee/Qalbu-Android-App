@@ -162,12 +162,56 @@ class FirebaseAuthRepository @Inject constructor(
                 val user = auth.currentUser ?: throw Exception("Tidak ada pengguna yang sedang masuk")
                 try {
                     user.delete().await()
-                } catch (e: com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException) {
-                    throw Exception("Demi keamanan, silakan keluar lalu masuk kembali sebelum menghapus akun.")
-                } catch (e: FirebaseAuthException) {
-                    throw Exception(mapFirebaseAuthError(e))
                 } catch (e: Exception) {
-                    throw Exception(e.message ?: "Gagal menghapus akun")
+                    val msg = e.localizedMessage.orEmpty()
+                    val isRecentLoginRequired = e is com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException ||
+                        (e is FirebaseAuthException && (
+                            e.errorCode in setOf("ERROR_REQUIRES_RECENT_LOGIN", "requires-recent-login", "ERROR_USER_TOKEN_EXPIRED", "user-token-expired", "ERROR_CREDENTIAL_TOO_OLD_LOGIN_AGAIN", "credential-too-old-login-again") ||
+                            msg.contains("credential is no longer valid", ignoreCase = true) ||
+                            msg.contains("sign in again", ignoreCase = true) ||
+                            msg.contains("recent", ignoreCase = true)
+                        ))
+
+                    if (isRecentLoginRequired) {
+                        val isGoogleUser = user.providerData.any { it.providerId == GoogleAuthProvider.PROVIDER_ID }
+                        if (isGoogleUser) {
+                            val serverClientId = context.getString(R.string.default_web_client_id)
+                            val credentialManager = CredentialManager.create(context)
+                            val googleIdOption = GetGoogleIdOption.Builder()
+                                .setFilterByAuthorizedAccounts(false)
+                                .setServerClientId(serverClientId)
+                                .setAutoSelectEnabled(false)
+                                .build()
+                            val request = GetCredentialRequest.Builder()
+                                .addCredentialOption(googleIdOption)
+                                .build()
+                            val credResult = try {
+                                credentialManager.getCredential(
+                                    context = context,
+                                    request = request
+                                )
+                            } catch (cancelEx: GetCredentialCancellationException) {
+                                throw CancellationException("Penghapusan akun dibatalkan")
+                            } catch (ex: Exception) {
+                                throw Exception("Demi keamanan, silakan keluar lalu masuk kembali sebelum menghapus akun.")
+                            }
+                            val cred = credResult.credential
+                            if (cred is CustomCredential && cred.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(cred.data)
+                                val firebaseCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
+                                user.reauthenticate(firebaseCredential).await()
+                                user.delete().await()
+                            } else {
+                                throw Exception("Kredensial tidak valid. Silakan masuk kembali.")
+                            }
+                        } else {
+                            throw Exception("Demi keamanan, sesi login Anda sudah berakhir. Silakan keluar lalu masuk kembali sebelum menghapus akun.")
+                        }
+                    } else if (e is FirebaseAuthException) {
+                        throw Exception(mapFirebaseAuthError(e))
+                    } else {
+                        throw Exception(e.message ?: "Gagal menghapus akun")
+                    }
                 }
                 _currentUser.value = null
                 try {
@@ -181,6 +225,10 @@ class FirebaseAuthRepository @Inject constructor(
         }
 
     private fun mapFirebaseAuthError(e: FirebaseAuthException): String = when (e.errorCode) {
+        "ERROR_REQUIRES_RECENT_LOGIN", "requires-recent-login",
+        "ERROR_CREDENTIAL_TOO_OLD_LOGIN_AGAIN", "credential-too-old-login-again",
+        "ERROR_USER_TOKEN_EXPIRED", "user-token-expired" ->
+            "Demi keamanan, sesi login Anda sudah berakhir. Silakan keluar lalu masuk kembali sebelum menghapus akun."
         "ERROR_INVALID_EMAIL", "invalid-email" -> "Format email tidak valid"
         "ERROR_WRONG_PASSWORD", "wrong-password", "invalid-credential" -> "Email atau kata sandi salah"
         "ERROR_USER_NOT_FOUND", "user-not-found" -> "Akun dengan email ini tidak ditemukan"
@@ -188,7 +236,16 @@ class FirebaseAuthRepository @Inject constructor(
         "ERROR_EMAIL_ALREADY_IN_USE", "email-already-in-use" -> "Email ini sudah terdaftar. Silakan masuk."
         "ERROR_WEAK_PASSWORD", "weak-password" -> "Kata sandi terlalu lemah (minimal 6 karakter)"
         "ERROR_TOO_MANY_REQUESTS", "too-many-requests" -> "Terlalu banyak percobaan. Silakan coba beberapa saat lagi."
-        else -> e.localizedMessage ?: "Terjadi kesalahan autentikasi"
+        else -> {
+            val msg = e.localizedMessage.orEmpty()
+            if (msg.contains("credential is no longer valid", ignoreCase = true) ||
+                msg.contains("sign in again", ignoreCase = true) ||
+                msg.contains("recent", ignoreCase = true)) {
+                "Demi keamanan, sesi login Anda sudah berakhir. Silakan keluar lalu masuk kembali sebelum menghapus akun."
+            } else {
+                e.localizedMessage ?: "Terjadi kesalahan autentikasi"
+            }
+        }
     }
 
     private fun FirebaseUser.toAuthUser(): AuthUser =
