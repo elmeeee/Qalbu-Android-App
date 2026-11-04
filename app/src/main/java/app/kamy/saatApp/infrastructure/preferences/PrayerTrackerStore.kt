@@ -187,6 +187,32 @@ object PrayerTrackerStore {
         }
     }
 
+    fun getAllRecords(context: Context): Map<String, Boolean> {
+        val all = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).all
+        val result = mutableMapOf<String, Boolean>()
+        for ((key, value) in all) {
+            if (value is Boolean) {
+                result[key] = value
+            }
+        }
+        return result
+    }
+
+    fun restoreRecords(context: Context, cloudRecords: Map<String, Boolean>, cloudBestStreak: Int = 0) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        for ((key, cloudValue) in cloudRecords) {
+            val localValue = prefs.getBoolean(key, false)
+            editor.putBoolean(key, localValue || cloudValue)
+        }
+        val currentBest = prefs.getInt(KEY_BEST_STREAK, 0)
+        if (cloudBestStreak > currentBest) {
+            editor.putInt(KEY_BEST_STREAK, cloudBestStreak)
+        }
+        editor.apply()
+        updateBestStreakIfNeeded(context)
+    }
+
     private fun prefKey(prayer: PrayerType, dayKey: String): String =
         "${dayKey}_${prayer.name.lowercase()}"
 

@@ -63,4 +63,25 @@ object DhikrStore {
             .putInt(KEY_COUNT_PREFIX + presetId, 0)
             .apply()
     }
+
+    fun getAllCounters(context: Context): Map<String, Int> {
+        val all = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).all
+        val result = mutableMapOf<String, Int>()
+        for ((key, value) in all) {
+            if (value is Number) {
+                result[key] = value.toInt()
+            }
+        }
+        return result
+    }
+
+    fun restoreCounters(context: Context, cloudCounters: Map<String, Int>) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        for ((key, cloudValue) in cloudCounters) {
+            val localValue = prefs.getInt(key, 0)
+            editor.putInt(key, maxOf(localValue, cloudValue))
+        }
+        editor.apply()
+    }
 }

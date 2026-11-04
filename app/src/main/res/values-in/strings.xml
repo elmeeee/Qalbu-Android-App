@@ -564,6 +564,10 @@
     <string name="account_back_to_sign_in">Kembali ke Masuk</string>
     <string name="account_sign_in_subtitle">Masuk untuk melanjutkan sinkronisasi data Anda</string>
     <string name="account_sign_up_subtitle">Buat akun baru untuk mencadangkan data ibadah Anda</string>
+    <string name="account_sync_now">Sinkronkan</string>
+    <string name="account_syncing">Menyinkronkan…</string>
+    <string name="account_last_synced">Disinkronkan</string>
+    <string name="account_just_now">Baru saja</string>
 
     <string name="settings_section_general">Pengaturan Umum</string>
     <string name="settings_section_prayer_calc">Perhitungan Waktu Solat</string>

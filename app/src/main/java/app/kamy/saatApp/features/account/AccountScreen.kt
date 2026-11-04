@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Stop
@@ -410,8 +411,44 @@ private fun AccountSettingsContent(
                 AccountSyncProfileCard(
                     user = state.authUser!!,
                     isLoading = state.isAuthLoading,
+                    isSyncing = state.isSyncing,
+                    lastSyncTimeMillis = state.lastSyncTimeMillis,
+                    onSyncNow = { vm.syncNow() },
                     onSignOut = { vm.signOut(context) }
                 )
+            }
+
+            state.syncErrorMessage?.let { errMsg ->
+                Spacer(Modifier.height(10.dp))
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFFEF2F2),
+                    border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = errMsg,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFFB91C1C),
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = { vm.dismissSyncError() },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = Color(0xFFB91C1C),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
             }
 
             state.authErrorMessage?.let { errMsg ->
@@ -2759,6 +2796,9 @@ private fun AccountSyncAuthCard(
 private fun AccountSyncProfileCard(
     user: AuthUser,
     isLoading: Boolean,
+    isSyncing: Boolean,
+    lastSyncTimeMillis: Long?,
+    onSyncNow: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -2808,98 +2848,178 @@ private fun AccountSyncProfileCard(
         border = BorderStroke(1.dp, Color(0xFFE8E2D2)),
         shadowElevation = 0.5.dp
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (!user.photoUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = user.photoUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .border(1.dp, Color(0xFFE8E2D2), CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFEDF5F0)),
-                    contentAlignment = Alignment.Center
-                ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (!user.photoUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = user.photoUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .border(1.dp, Color(0xFFE8E2D2), CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFEDF5F0)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = SaatColors.HomeDarkGreen
+                            )
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
+                        text = user.displayName ?: "Akun Terhubung",
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            color = SaatColors.HomeDarkGreen
-                        )
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = user.displayName ?: "Akun Terhubung",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
-                    ),
-                    color = Color(0xFF1E293B),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                if (!user.email.isNullOrBlank()) {
-                    Text(
-                        text = user.email,
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                        color = Color(0xFF64748B),
+                            fontSize = 15.sp
+                        ),
+                        color = Color(0xFF1E293B),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                    if (!user.email.isNullOrBlank()) {
+                        Text(
+                            text = user.email,
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                            color = Color(0xFF64748B),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(3.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(7.dp)
-                            .background(SaatColors.DeepEmerald, CircleShape)
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFFF1F5F9),
+                    modifier = Modifier.clickable(
+                        enabled = !isLoading && !isSyncing,
+                        onClick = { showSignOutDialog = true }
                     )
-                    Spacer(modifier = Modifier.width(5.dp))
+                ) {
                     Text(
-                        text = stringResource(R.string.account_status_synced),
+                        text = stringResource(R.string.account_sign_out),
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
                         ),
-                        color = SaatColors.DeepEmerald
+                        color = Color(0xFF64748B),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            HorizontalDivider(color = Color(0xFFF1F5F9))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = Color(0xFFF1F5F9),
-                modifier = Modifier.clickable(
-                    enabled = !isLoading,
-                    onClick = { showSignOutDialog = true }
-                )
+            // Sync Status & Action Bar
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = stringResource(R.string.account_sign_out),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    color = Color(0xFF64748B),
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    if (isSyncing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(12.dp),
+                            color = SaatColors.HomeDarkGreen,
+                            strokeWidth = 1.5.dp
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.account_syncing),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = Color(0xFF64748B)
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .background(SaatColors.DeepEmerald, CircleShape)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        val syncLabel = remember(lastSyncTimeMillis) {
+                            if (lastSyncTimeMillis != null && lastSyncTimeMillis > 0L) {
+                                val diff = System.currentTimeMillis() - lastSyncTimeMillis
+                                val timeStr = if (diff < 60_000L) {
+                                    null
+                                } else {
+                                    java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(lastSyncTimeMillis))
+                                }
+                                timeStr
+                            } else null
+                        }
+                        Text(
+                            text = if (syncLabel != null) {
+                                "${stringResource(R.string.account_last_synced)} $syncLabel"
+                            } else if (lastSyncTimeMillis != null && lastSyncTimeMillis > 0L) {
+                                "${stringResource(R.string.account_last_synced)} ${stringResource(R.string.account_just_now)}"
+                            } else {
+                                stringResource(R.string.account_status_synced)
+                            },
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = SaatColors.DeepEmerald
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFFEDF5F0),
+                    modifier = Modifier.clickable(
+                        enabled = !isSyncing && !isLoading,
+                        onClick = onSyncNow
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null,
+                            tint = SaatColors.HomeDarkGreen,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.account_sync_now),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = SaatColors.HomeDarkGreen
+                        )
+                    }
+                }
             }
         }
     }

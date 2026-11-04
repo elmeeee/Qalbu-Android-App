@@ -34,6 +34,8 @@ import app.kamy.saatApp.infrastructure.repository.AlAdhanRepository
 import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import app.kamy.saatApp.domain.model.AuthUser
 import app.kamy.saatApp.domain.repository.AuthRepository
+import app.kamy.saatApp.domain.repository.UserDataSyncRepository
+import app.kamy.saatApp.domain.repository.SyncStatus
 import app.kamy.saatApp.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -115,7 +117,10 @@ data class AccountUiState(
     val authErrorMessage: String? = null,
     val showEmailAuthSheet: Boolean = false,
     val emailAuthMode: EmailAuthMode = EmailAuthMode.LOGIN,
-    val authSuccessMessage: String? = null
+    val authSuccessMessage: String? = null,
+    val isSyncing: Boolean = false,
+    val lastSyncTimeMillis: Long? = null,
+    val syncErrorMessage: String? = null
 ) {
     fun isPrayerNotificationEnabled(type: PrayerType): Boolean = when (type) {
         PrayerType.FAJR -> fajrNotificationEnabled
@@ -142,7 +147,8 @@ class AccountViewModel @Inject constructor(
     private val shareComposer: VerseShareTextComposer,
     private val themeStore: ThemePreferencesStore,
     private val surahReminderStore: SurahReminderStore,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val syncRepository: UserDataSyncRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountUiState())
@@ -152,7 +158,22 @@ class AccountViewModel @Inject constructor(
         syncPreferencesIntoState()
         viewModelScope.launch {
             authRepository.currentUser.collect { user ->
+                val prevUser = _state.value.authUser
                 _state.update { it.copy(authUser = user, isAuthLoading = false) }
+                if (user != null && prevUser == null) {
+                    syncRepository.syncAll(user.uid)
+                }
+            }
+        }
+        viewModelScope.launch {
+            syncRepository.syncState.collect { syncState ->
+                _state.update {
+                    it.copy(
+                        isSyncing = syncState.status == SyncStatus.SYNCING,
+                        lastSyncTimeMillis = syncState.lastSyncTimeMillis,
+                        syncErrorMessage = syncState.errorMessage
+                    )
+                }
             }
         }
         viewModelScope.launch {
@@ -815,5 +836,16 @@ class AccountViewModel @Inject constructor(
 
     fun dismissAuthSuccessMessage() {
         _state.update { it.copy(authSuccessMessage = null) }
+    }
+
+    fun syncNow() {
+        val user = _state.value.authUser ?: return
+        viewModelScope.launch {
+            syncRepository.syncAll(user.uid)
+        }
+    }
+
+    fun dismissSyncError() {
+        _state.update { it.copy(syncErrorMessage = null) }
     }
 }

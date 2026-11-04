@@ -560,6 +560,10 @@
     <string name="account_back_to_sign_in">Kembali ke Log Masuk</string>
     <string name="account_sign_in_subtitle">Log masuk untuk meneruskan penyegerakan data anda</string>
     <string name="account_sign_up_subtitle">Daftar akaun baharu untuk membuat sandaran data ibadah anda</string>
+    <string name="account_sync_now">Segerakkan</string>
+    <string name="account_syncing">Menyegerakkan…</string>
+    <string name="account_last_synced">Disegerakkan</string>
+    <string name="account_just_now">Sebentar tadi</string>
 
     <string name="settings_section_general">Tetapan Umum</string>
     <string name="settings_section_prayer_calc">Pengiraan Waktu Solat</string>
