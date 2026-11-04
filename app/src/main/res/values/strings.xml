@@ -1006,6 +1006,12 @@
     <string name="account_syncing">Syncing…</string>
     <string name="account_last_synced">Synced</string>
     <string name="account_just_now">Just now</string>
+    <string name="reading_style_title">Quran Reading Style</string>
+    <string name="reading_style_subtitle">Choose between per ayah (book page) or vertical scroll</string>
+    <string name="reading_style_pager">Per Ayah (Book Page)</string>
+    <string name="reading_style_pager_desc">1 page per ayah with swipe/flip page effect</string>
+    <string name="reading_style_scroll">Vertical Scroll (Classic)</string>
+    <string name="reading_style_scroll_desc">Continuous flow of ayahs scrollable downwards</string>
     <string name="account_connected_title">Connected Account</string>
     <string name="account_detail_verified">Verified</string>
     <string name="auth_error_disposable_email">Temporary email addresses are not allowed. Please use a personal or work email.</string>
@@ -1356,4 +1362,8 @@
     <string name="coach_mark_ten_nights_worship_desc">Check off your nightly deeds: Tahajjud, Dhikr, Witr, Dua, Quran recitation, and I\'tikaf.</string>
     <string name="coach_mark_ten_nights_actions_title">Duas &amp; Lailatul Qadr Guide</string>
     <string name="coach_mark_ten_nights_actions_desc">Access authentic Duas from the Sunnah and a comprehensive guide about Lailatul Qadr.</string>
+
+    <string name="play">Play</string>
+    <string name="share_ayah">Share Ayah</string>
+    <string name="verses">Verses</string>
 </resources>

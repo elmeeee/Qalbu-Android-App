@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -66,6 +67,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import app.kamy.saatApp.domain.model.AuthUser
+import app.kamy.saatApp.domain.model.QuranReadingStyle
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -269,6 +271,14 @@ fun AccountScreen(
             selected = state.appLanguage,
             onSelect = vm::setAppLanguage,
             onDismiss = vm::closeLanguageSheet
+        )
+    }
+
+    if (state.showReadingStyleSheet) {
+        QuranReadingStyleSheet(
+            selected = state.readingStyle,
+            onSelect = vm::setReadingStyle,
+            onDismiss = vm::closeReadingStyleSheet
         )
     }
 
@@ -519,6 +529,17 @@ private fun AccountSettingsContent(
                     title = stringResource(R.string.reading_translator),
                     subtitle = state.selectedTranslationName.ifBlank { LocalQuranConfig.translationForAppLanguage(state.appLanguage).authorName },
                     onClick = { vm.openTranslator() },
+                    showChevron = true,
+                    showDivider = true
+                )
+                SettingsCustomRow(
+                    iconRes = R.drawable.ic_quran_on,
+                    title = stringResource(R.string.reading_style_title),
+                    subtitle = stringResource(
+                        if (state.readingStyle == QuranReadingStyle.SCROLL) R.string.reading_style_scroll
+                        else R.string.reading_style_pager
+                    ),
+                    onClick = { vm.openReadingStyleSheet() },
                     showChevron = true,
                     showDivider = true
                 )
@@ -1221,6 +1242,139 @@ private fun LanguageSheet(
                     }
                 }
             }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun QuranReadingStyleSheet(
+    selected: QuranReadingStyle,
+    onSelect: (QuranReadingStyle) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
+    SaatModalBottomSheet(onDismiss, sheetState) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = stringResource(R.string.reading_style_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(R.string.reading_style_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SaatColors.Slate500
+                )
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                QuranReadingStyle.entries.forEach { style ->
+                    val isSelected = style == selected
+                    val (titleRes, descRes) = when (style) {
+                        QuranReadingStyle.PAGER -> Pair(R.string.reading_style_pager, R.string.reading_style_pager_desc)
+                        QuranReadingStyle.SCROLL -> Pair(R.string.reading_style_scroll, R.string.reading_style_scroll_desc)
+                    }
+
+                    Surface(
+                        onClick = {
+                            scope.launch {
+                                onSelect(style)
+                                sheetState.hide()
+                                onDismiss()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isSelected) {
+                            SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                        } else {
+                            SaatColors.LightGrey.copy(alpha = 0.4f)
+                        },
+                        border = if (isSelected) {
+                            BorderStroke(1.5.dp, SaatColors.DeepEmerald)
+                        } else {
+                            BorderStroke(1.dp, SaatColors.SoftGrey.copy(alpha = 0.6f))
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (isSelected) SaatColors.DeepEmerald.copy(alpha = 0.15f)
+                                        else Color(0xFFF8F4F7)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(
+                                        if (style == QuranReadingStyle.PAGER) R.drawable.ic_quran_on
+                                        else R.drawable.ic_remainders_custom
+                                    ),
+                                    contentDescription = null,
+                                    tint = if (isSelected) SaatColors.DeepEmerald else SaatColors.Slate500,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            Spacer(Modifier.width(14.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(titleRes),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isSelected) SaatColors.DeepEmerald else SaatColors.Slate900
+                                )
+                                Text(
+                                    text = stringResource(descRes),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = SaatColors.Slate500
+                                )
+                            }
+
+                            if (isSelected) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(SaatColors.DeepEmerald),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_check_custom),
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             Spacer(Modifier.height(8.dp))
         }
     }

@@ -14,6 +14,7 @@ import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.domain.model.TafsirPayload
 import app.kamy.saatApp.domain.model.AudioPayload
 import app.kamy.saatApp.domain.model.ArabicTextType
+import app.kamy.saatApp.domain.model.QuranReadingStyle
 import app.kamy.saatApp.domain.share.VerseShareTextComposer
 import app.kamy.saatApp.infrastructure.audio.AudioQueueItem
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
@@ -43,6 +44,9 @@ data class ChapterReaderUiState(
     val chapterNumber: Int = 1,
     val juzNumber: Int? = null,
     val chapterDisplayName: String? = null,
+    val chapterArabicName: String? = null,
+    val chapterTranslatedName: String? = null,
+    val chapterRevelationPlace: String? = null,
     val chapterLookup: Map<Int, String> = emptyMap(),
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
@@ -50,6 +54,7 @@ data class ChapterReaderUiState(
     val recitations: List<RecitationPayload> = emptyList(),
     val selectedRecitationId: Int = TranslationPreferencesStore.DEFAULT_RECITATION_ID,
     val playbackMode: AyahPlaybackMode = AyahPlaybackMode.CONTINUOUS,
+    val readingStyle: QuranReadingStyle = QuranReadingStyle.PAGER,
     val fontScale: Float = 1.0f,
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
@@ -193,6 +198,11 @@ class ChapterReaderViewModel @Inject constructor(
                 _state.update { it.copy(fontScale = scale) }
             }
         }
+        viewModelScope.launch {
+            translationStore.readingStyle.collect { style ->
+                _state.update { it.copy(readingStyle = style) }
+            }
+        }
 
         // Sync ViewModel with player state to update currently playing verse key UI and auto-advance page.
         viewModelScope.launch {
@@ -283,6 +293,9 @@ class ChapterReaderViewModel @Inject constructor(
                     _state.update { 
                         it.copy(
                             chapterDisplayName = name, 
+                            chapterArabicName = chapter?.nameArabic,
+                            chapterTranslatedName = chapter?.displayTranslatedName,
+                            chapterRevelationPlace = chapter?.revelationLabel,
                             chapterLookup = lookup,
                             bismillahPre = chapter?.bismillahPre ?: false
                         ) 
@@ -504,6 +517,11 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun setFontScale(scale: Float) {
         translationStore.setFontScale(scale)
+    }
+
+    fun setReadingStyle(style: QuranReadingStyle) {
+        translationStore.setReadingStyle(style)
+        _state.update { it.copy(readingStyle = style) }
     }
 
     fun setPlaybackMode(mode: AyahPlaybackMode) {
