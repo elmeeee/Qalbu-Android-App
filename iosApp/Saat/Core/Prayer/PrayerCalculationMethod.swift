@@ -130,6 +130,63 @@ enum PrayerCalculationMethod: String, CaseIterable, Sendable, Identifiable, Coda
         }
     }
 
+    var iconName: String {
+        switch self {
+        case .muhammadiyah: return "institution_muhammadiyah"
+        case .kemenag: return "institution_kemenag"
+        case .muis: return "institution_muis"
+        case .jakim: return "institution_jakim"
+        case .brunei: return "institution_muib"
+        case .karachi: return "institution_karachi"
+        case .tehran: return "institution_tehran"
+        case .jafari: return "institution_jafari"
+        case .isna: return "institution_isna"
+        case .mwl: return "institution_mwl"
+        case .ummAlQura: return "institution_umm_al_qura"
+        case .egyptian: return "institution_egyptian"
+        case .mcw: return "institution_mcw"
+        case .gulf: return "institution_gulf"
+        case .kuwait: return "institution_kuwait"
+        case .qatar: return "institution_qatar"
+        case .dubai: return "institution_dubai"
+        case .tunisia: return "institution_tunisia"
+        case .algeria: return "institution_algeria"
+        case .morocco: return "institution_morocco"
+        case .jordan: return "institution_jordan"
+        case .france: return "institution_france"
+        case .turkey: return "institution_turkey"
+        case .russia: return "institution_russia"
+        case .lisbon: return "institution_lisbon"
+        }
+    }
+
+    var countryName: String {
+        switch self {
+        case .muhammadiyah, .kemenag: return "Indonesia"
+        case .muis: return "Singapura"
+        case .jakim: return "Malaysia"
+        case .brunei: return "Brunei Darussalam"
+        case .karachi: return "Pakistan"
+        case .tehran, .jafari: return "Iran"
+        case .isna: return "Amerika Utara"
+        case .mwl, .ummAlQura: return "Arab Saudi"
+        case .egyptian: return "Mesir"
+        case .mcw: return "Global"
+        case .gulf: return "Wilayah Teluk"
+        case .kuwait: return "Kuwait"
+        case .qatar: return "Qatar"
+        case .dubai: return "Uni Emirat Arab"
+        case .tunisia: return "Tunisia"
+        case .algeria: return "Aljazair"
+        case .morocco: return "Maroko"
+        case .jordan: return "Yordania"
+        case .france: return "Prancis"
+        case .turkey: return "Turki"
+        case .russia: return "Rusia"
+        case .lisbon: return "Portugal"
+        }
+    }
+
     var region: String {
         switch section {
         case .southeastAsia: "Southeast Asia"
@@ -192,44 +249,6 @@ enum PrayerCalculationMethod: String, CaseIterable, Sendable, Identifiable, Coda
         default: return .mwl
         }
     }
-
-    var aladhanMethodID: Int {
-        switch self {
-        case .jafari: 0
-        case .karachi: 1
-        case .isna: 2
-        case .mwl: 3
-        case .ummAlQura: 4
-        case .egyptian: 5
-        case .tehran: 7
-        case .gulf: 8
-        case .kuwait: 9
-        case .qatar: 10
-        case .muis: 11
-        case .france: 12
-        case .turkey: 13
-        case .russia: 14
-        case .mcw: 15
-        case .dubai: 16
-        case .jakim, .brunei: 17
-        case .tunisia: 18
-        case .algeria: 19
-        case .kemenag: 20
-        case .morocco: 21
-        case .lisbon: 22
-        case .jordan: 23
-        case .muhammadiyah: 99
-        }
-    }
-
-    var aladhanMethodSettings: String? {
-        switch self {
-        case .muhammadiyah: "18,null,18"
-        default: nil
-        }
-    }
-
-    var aladhanSchool: Int { 0 }
 
     var aladhanTune: String {
         switch self {

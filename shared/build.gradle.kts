@@ -1,16 +1,14 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
-    androidTarget {
-        compilations.all {
-            compileTaskProvider.configure {
-                compilerOptions {
-                    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-                }
-            }
-        }
+    androidLibrary {
+        namespace = "app.kamy.saatApp.shared"
+        compileSdk = 36
+        minSdk = 30
     }
 
     listOf(
@@ -27,6 +25,13 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
         }
     }
+}
+
+tasks.register<Exec>("syncSharedStrings") {
+    group = "localization"
+    description = "Synchronizes strings.xml into KMP SharedStrings and iOS Localizable.strings"
+    commandLine("python3", "${rootProject.rootDir}/scripts/generate_kmp_strings.py")
 }

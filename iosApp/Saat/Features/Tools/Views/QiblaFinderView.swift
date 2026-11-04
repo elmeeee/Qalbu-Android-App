@@ -162,6 +162,8 @@ struct QiblaFinderView: View {
             manager.stop()
         }
         .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarHidden(true)
     }
     
     private var locationRequiredOverlay: some View {

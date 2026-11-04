@@ -13,10 +13,6 @@ struct RandomAyahResponse: Decodable, Sendable {
     let verse: RandomAyahPayload?
 }
 
-struct SingleVerseResponse: Decodable, Sendable {
-    let verse: RandomAyahPayload?
-}
-
 struct RandomAyahPayload: Decodable, Sendable {
     let id: Int?
     let verseNumber: Int?
@@ -131,10 +127,6 @@ private enum QuranAyahEndBadge {
         """
     }
 
-    static func appendNativeMarker(to arabic: String, ayahNumber: Int?) -> String {
-        guard let n = ayahNumber, n > 0 else { return arabic }
-        return "\(arabic) \(rosette)\u{200C}\(easternArabicIndicDigits(n))"
-    }
 }
 
 private extension String {
@@ -157,19 +149,6 @@ private extension String {
         return range(of: #"class\s*=\s*['"]?\s*end\b"#, options: [.regularExpression, .caseInsensitive]) != nil
     }
 
-    var htmlEscapedForWebBody: String {
-        var out = ""
-        out.reserveCapacity(count)
-        for scalar in unicodeScalars {
-            switch scalar {
-            case "&": out += "&amp;"
-            case "<": out += "&lt;"
-            case ">": out += "&gt;"
-            default: out.unicodeScalars.append(scalar)
-            }
-        }
-        return out
-    }
 
     func normalizedForQuranRenderingPreservingResponse() -> String {
         precomposedStringWithCanonicalMapping
@@ -354,19 +333,6 @@ struct RecitationTranslatedName: Decodable, Sendable {
     let name: String?
 }
 
-struct ChaptersResponse: Decodable, Sendable {
-    let chapters: [QuranChapter]
-
-    enum CodingKeys: String, CodingKey {
-        case chapters
-    }
-
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        chapters = (try? c.decode([QuranChapter].self, forKey: .chapters)) ?? []
-    }
-}
-
 struct QuranChapter: Decodable, Sendable, Identifiable, Hashable {
     let id: Int
     let revelationPlace: String?
@@ -505,7 +471,7 @@ struct ContentPagination: Decodable, Sendable {
     }
 }
 
-struct QFTranslation: Decodable, Identifiable, Hashable, Sendable {
+struct QuranTranslation: Decodable, Identifiable, Hashable, Sendable {
     let id: Int
     let name: String
     let authorName: String
@@ -536,7 +502,7 @@ struct QFTranslation: Decodable, Identifiable, Hashable, Sendable {
 }
 
 struct TranslationsResponse: Decodable, Sendable {
-    let translations: [QFTranslation]
+    let translations: [QuranTranslation]
 }
 
 struct QuranJuz: Decodable, Sendable, Identifiable, Hashable {
@@ -563,8 +529,6 @@ struct QuranJuz: Decodable, Sendable, Identifiable, Hashable {
         self.versesCount = versesCount
     }
 
-    var displayJuzNumber: Int { juzNumber }
-
     func startChapterAndAyah() -> (Int, Int)? {
         guard let verseMapping, !verseMapping.isEmpty else { return nil }
         let chapters = verseMapping.keys.compactMap { Int($0) }
@@ -576,10 +540,6 @@ struct QuranJuz: Decodable, Sendable, Identifiable, Hashable {
         return (minChapter, startAyah)
     }
 
-    func firstChapterNumber() -> Int? {
-        guard let verseMapping else { return nil }
-        return verseMapping.keys.compactMap { Int($0) }.min()
-    }
 }
 
 struct PagesLookupResponse: Decodable, Sendable {

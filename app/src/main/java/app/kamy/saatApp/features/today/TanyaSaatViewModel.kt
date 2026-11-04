@@ -1,44 +1,73 @@
 package app.kamy.saatApp.features.today
 
 import android.content.Context
+import android.content.res.Configuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.kamy.saatApp.R
+import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.model.ChatSender
-import app.kamy.saatApp.domain.model.DoaItem
+import app.kamy.saatApp.domain.model.KimiAiModel
 import app.kamy.saatApp.domain.model.SaatChatMessage
 import app.kamy.saatApp.domain.model.SaatMood
 import app.kamy.saatApp.domain.model.SaatVerseCardData
+import app.kamy.saatApp.domain.repository.AuthRepository
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+import app.kamy.saatApp.infrastructure.preferences.KimiModelPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.QuranPersonalStore
 import app.kamy.saatApp.infrastructure.repository.TanyaSaatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import app.kamy.saatApp.core.locale.AppLanguage
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
 data class TanyaSaatUiState(
     val messages: List<SaatChatMessage> = emptyList(),
     val isLoading: Boolean = false,
+    val selectedModel: KimiAiModel = KimiAiModel.GPT_OSS_120B,
     val activeMood: SaatMood? = null,
     val inputText: String = "",
     val isSheetVisible: Boolean = false,
-    val toastMessage: String? = null
+    val toastMessage: String? = null,
+    val userFirstName: String? = null
 )
 
 @HiltViewModel
 class TanyaSaatViewModel @Inject constructor(
     private val repository: TanyaSaatRepository,
-    private val appLanguageStore: AppLanguageStore
+    private val appLanguageStore: AppLanguageStore,
+    private val kimiModelPreferencesStore: KimiModelPreferencesStore,
+    private val authRepository: AuthRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TanyaSaatUiState())
     val state: StateFlow<TanyaSaatUiState> = _state.asStateFlow()
+
+    private var lastUserQuery: String? = null
+
+    init {
+        viewModelScope.launch {
+            authRepository.currentUser.collect { user ->
+                _state.update { it.copy(userFirstName = user?.firstName) }
+            }
+        }
+        viewModelScope.launch {
+            kimiModelPreferencesStore.selectedModel.collect { model ->
+                _state.update { it.copy(selectedModel = model) }
+            }
+        }
+    }
+
+    fun onModelSelected(model: KimiAiModel) {
+        kimiModelPreferencesStore.setModel(model)
+    }
 
     fun openSheet() {
         _state.update { it.copy(isSheetVisible = true) }
@@ -52,44 +81,83 @@ class TanyaSaatViewModel @Inject constructor(
         _state.update { it.copy(inputText = text) }
     }
 
+    /** Starts a brand new conversation (clears history and input). */
+    fun startNewChat() {
+        if (_state.value.isLoading) return
+        lastUserQuery = null
+        _state.update {
+            it.copy(messages = emptyList(), activeMood = null, inputText = "")
+        }
+    }
+
+    /**
+     * Suggestion chips resolve their prompt through a context pinned to the in-app language,
+     * so an English UI always sends an English question even when the device locale differs.
+     */
     fun onMoodSelected(mood: SaatMood) {
-        _state.update { it.copy(activeMood = mood, inputText = mood.promptQuery) }
-        sendMessage(mood.promptQuery)
+        val prompt = localizedContext().getString(mood.promptRes)
+        _state.update { it.copy(activeMood = mood) }
+        sendMessage(prompt)
+    }
+
+    fun askFollowUp(question: String) {
+        sendMessage(question)
+    }
+
+    /** Re-sends the last user question (used after a failed reply). */
+    fun retryLast() {
+        val query = lastUserQuery ?: return
+        if (_state.value.isLoading) return
+        // Drop the trailing error bubble so the retry replaces it.
+        _state.update { state ->
+            val trimmed = state.messages.dropLastWhile { it.sender == ChatSender.AI && it.isError }
+            state.copy(messages = trimmed)
+        }
+        requestAnswer(query, appendUserMessage = false)
     }
 
     fun sendMessage(customQuery: String? = null) {
-        val query = customQuery ?: _state.value.inputText.trim()
+        val query = (customQuery ?: _state.value.inputText).trim()
         if (query.isBlank() || _state.value.isLoading) return
+        requestAnswer(query, appendUserMessage = true)
+    }
 
-        val userMessage = SaatChatMessage(
-            id = UUID.randomUUID().toString(),
-            sender = ChatSender.USER,
-            text = query
-        )
+    private fun requestAnswer(query: String, appendUserMessage: Boolean) {
+        lastUserQuery = query
+        val history = _state.value.messages
 
-        _state.update {
-            it.copy(
-                messages = it.messages + userMessage,
-                inputText = "",
-                isLoading = true
-            )
+        _state.update { state ->
+            val withUser = if (appendUserMessage) {
+                state.messages + SaatChatMessage(
+                    id = UUID.randomUUID().toString(),
+                    sender = ChatSender.USER,
+                    text = query
+                )
+            } else {
+                state.messages
+            }
+            state.copy(messages = withUser, inputText = "", isLoading = true)
         }
 
         viewModelScope.launch {
+            val userFirstName = _state.value.userFirstName
             val aiResponse = runCatching {
-                repository.processUserQuery(query)
+                repository.processUserQuery(
+                    userQuery = query,
+                    history = history,
+                    model = _state.value.selectedModel,
+                    userFirstName = userFirstName
+                )
             }.getOrElse {
                 SaatChatMessage(
                     id = UUID.randomUUID().toString(),
                     sender = ChatSender.AI,
-                    text = fallbackErrorMessage()
+                    text = fallbackErrorMessage(),
+                    isError = true
                 )
             }
             _state.update {
-                it.copy(
-                    messages = it.messages + aiResponse,
-                    isLoading = false
-                )
+                it.copy(messages = it.messages + aiResponse, isLoading = false)
             }
         }
     }
@@ -108,16 +176,26 @@ class TanyaSaatViewModel @Inject constructor(
         }
     }
 
+    fun showToast(message: String) {
+        _state.update { it.copy(toastMessage = message) }
+    }
+
     fun clearToast() {
         _state.update { it.copy(toastMessage = null) }
     }
 
+    private fun localizedContext(): Context {
+        val locale = Locale.forLanguageTag(appLanguageStore.current().tag)
+        val config = Configuration(context.resources.configuration).apply { setLocale(locale) }
+        return runCatching { context.createConfigurationContext(config) }.getOrDefault(context)
+    }
+
     private fun fallbackErrorMessage(): String = when (appLanguageStore.current()) {
         AppLanguage.INDONESIAN ->
-            "Balasan Sahabat Saat belum berhasil dimuat. Coba kirim lagi dalam beberapa saat."
+            "Balasan Kīmi belum berhasil dimuat. Coba kirim lagi dalam beberapa saat."
         AppLanguage.ENGLISH ->
-            "Sahabat Saat could not load a reply yet. Please try sending your message again shortly."
+            "Kīmi could not load a reply yet. Please try sending your message again shortly."
         AppLanguage.MALAY ->
-            "Balasan Sahabat Saat belum berjaya dimuat. Cuba hantar semula sebentar lagi."
+            "Balasan Kīmi belum berjaya dimuat. Cuba hantar semula sebentar lagi."
     }
 }

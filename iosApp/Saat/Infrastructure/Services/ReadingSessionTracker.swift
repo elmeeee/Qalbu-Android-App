@@ -11,7 +11,6 @@ import Foundation
 @MainActor
 final class ReadingSessionTracker {
     private let repository: ReadingSessionRepository
-    private let userSession: QFUserSession
     private let debounceNanoseconds: UInt64
 
     private var debounceTask: Task<Void, Never>?
@@ -22,11 +21,9 @@ final class ReadingSessionTracker {
 
     init(
         repository: ReadingSessionRepository,
-        userSession: QFUserSession,
         debounceSeconds: TimeInterval = 1.5
     ) {
         self.repository = repository
-        self.userSession = userSession
         self.debounceNanoseconds = UInt64(debounceSeconds * 1_000_000_000)
     }
 
@@ -55,17 +52,8 @@ final class ReadingSessionTracker {
         pendingChapter = nil
         pendingVerse = nil
 
-        guard await userSession.hasUserAccessToken() else { return }
-        if lastSentChapter == chapter, lastSentVerse == verse { return }
-
-        do {
-            try await repository.upsertReadingSession(chapterNumber: chapter, verseNumber: verse)
-            lastSentChapter = chapter
-            lastSentVerse = verse
-        } catch QFError.missingUserSession {
-            return
-        } catch {
-            return
-        }
+        try? await repository.upsertReadingSession(chapterNumber: chapter, verseNumber: verse)
+        lastSentChapter = chapter
+        lastSentVerse = verse
     }
 }

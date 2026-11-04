@@ -258,6 +258,75 @@ object QuranPersonalStore {
         return HifzSummary(learning, memorized, review)
     }
 
+    fun restoreBookmarks(context: Context, cloudBookmarks: List<VerseBookmark>) {
+        if (cloudBookmarks.isEmpty()) return
+        val current = bookmarks(context).associateBy { it.verseKey }.toMutableMap()
+        for (item in cloudBookmarks) {
+            val local = current[item.verseKey]
+            if (local == null || item.createdAtMillis > local.createdAtMillis) {
+                current[item.verseKey] = item
+            }
+        }
+        saveList(context, KEY_BOOKMARKS, BookmarkList(current.values.sortedByDescending { it.createdAtMillis }))
+    }
+
+    fun restoreNotes(context: Context, cloudNotes: List<VerseNote>) {
+        if (cloudNotes.isEmpty()) return
+        val current = notes(context).associateBy { it.verseKey }.toMutableMap()
+        for (item in cloudNotes) {
+            val local = current[item.verseKey]
+            if (local == null || item.updatedAtMillis > local.updatedAtMillis) {
+                current[item.verseKey] = item
+            }
+        }
+        saveList(context, KEY_NOTES, NoteList(current.values.sortedByDescending { it.updatedAtMillis }))
+    }
+
+    fun restoreHifz(context: Context, cloudHifz: List<HifzEntry>) {
+        if (cloudHifz.isEmpty()) return
+        val current = hifzEntries(context).associateBy { it.verseKey }.toMutableMap()
+        for (item in cloudHifz) {
+            if (!current.containsKey(item.verseKey)) {
+                current[item.verseKey] = item
+            }
+        }
+        saveList(context, KEY_HIFZ, HifzList(current.values.toList()))
+    }
+
+    fun restoreKhatam(
+        context: Context,
+        cloudChapters: List<Int>,
+        cloudJuzs: List<Int>,
+        cloudLastReadJuz: Int?,
+        cloudLastReadVerseKey: String?,
+        cloudLastReadUpdatedAtMillis: Long?
+    ) {
+        val local = loadList(context, KEY_KHATAM, KhatamList())
+        val combinedChapters = (local.chapters.toSet() + cloudChapters.toSet()).toList()
+        val combinedJuzs = (local.juzs.toSet() + cloudJuzs.toSet()).toList()
+
+        val localTime = local.lastReadUpdatedAtMillis ?: 0L
+        val cloudTime = cloudLastReadUpdatedAtMillis ?: 0L
+
+        val (bestJuz, bestVerseKey, bestTime) = if (cloudTime > localTime && cloudLastReadVerseKey != null) {
+            Triple(cloudLastReadJuz, cloudLastReadVerseKey, cloudLastReadUpdatedAtMillis)
+        } else {
+            Triple(local.lastReadJuz, local.lastReadVerseKey, local.lastReadUpdatedAtMillis)
+        }
+
+        saveList(
+            context,
+            KEY_KHATAM,
+            KhatamList(
+                chapters = combinedChapters,
+                juzs = combinedJuzs,
+                lastReadJuz = bestJuz,
+                lastReadVerseKey = bestVerseKey,
+                lastReadUpdatedAtMillis = bestTime
+            )
+        )
+    }
+
     @Serializable
     private data class LocalDevicePersonalBackup(
         val version: Int = 1,

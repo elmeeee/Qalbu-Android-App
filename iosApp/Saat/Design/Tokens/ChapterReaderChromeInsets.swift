@@ -17,10 +17,11 @@ struct ChapterReaderChromeInsets: Equatable {
     private static let bottomContentGap: CGFloat = 24
     private static let tabBarClearance: CGFloat = 56
 
-    static func resolved(safeArea: EdgeInsets, showsNowPlaying: Bool) -> ChapterReaderChromeInsets {
+    static func resolved(safeArea: EdgeInsets, showsNowPlaying: Bool, hasVisibleTabBar: Bool = false) -> ChapterReaderChromeInsets {
         let top = safeArea.top + headerRowHeight + topContentGap
         let playerClearance = showsNowPlaying ? TabBarLayout.nowPlayingChromeHeight + 12 : 0
-        let bottom = safeArea.bottom + tabBarClearance + playerClearance + bottomContentGap
+        let barClearance = (hasVisibleTabBar && safeArea.bottom > 0) ? tabBarClearance : 0
+        let bottom = safeArea.bottom + barClearance + playerClearance + bottomContentGap
         return ChapterReaderChromeInsets(top: top, bottom: bottom)
     }
 }

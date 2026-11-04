@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "95130978195",
+    "project_id": "saatnya-hijra",
+    "storage_bucket": "saatnya-hijra.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95130978195:android:d2b2b53378f2b3309b8a66",
+        "android_client_info": {
+          "package_name": "app.kamy.saatApp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "95130978195-l84s87hbn8q4mnnlgpre8jutm10ccfs7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.kamy.saatApp",
+            "certificate_hash": "ab349f374149deeeb3b5e231d5eb6a8b92e2eba6"
+          }
+        },
+        {
+          "client_id": "95130978195-r8q7nockv3v8gt4rdbvcv12qhjj553h1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.kamy.saatApp",
+            "certificate_hash": "ef7abcbe7cd7fc1d841e535832c26e4288426ad6"
+          }
+        },
+        {
+          "client_id": "95130978195-1ecirv7ks1tcp33qcp3qd76si26kia6r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCq6vmQacAG3zg5FjL7PEsHKZzwZn2Plmc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "95130978195-1ecirv7ks1tcp33qcp3qd76si26kia6r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

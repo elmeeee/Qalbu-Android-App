@@ -13,7 +13,7 @@ import Observation
 @Observable
 final class TranslatorSelectionViewModel {
     var searchQuery = ""
-    var translations: [QFTranslation] = []
+    var translations: [QuranTranslation] = []
     var isLoading = false
     var errorMessage: String?
 
@@ -23,7 +23,7 @@ final class TranslatorSelectionViewModel {
         self.contentRepository = contentRepository
     }
 
-    var filteredTranslations: [QFTranslation] {
+    var filteredTranslations: [QuranTranslation] {
         let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard query.isEmpty == false else { return translations }
         return translations.filter { trans in
@@ -45,15 +45,15 @@ final class TranslatorSelectionViewModel {
         isLoading = false
     }
 
-    func displayName(for translation: QFTranslation) -> String {
+    func displayName(for translation: QuranTranslation) -> String {
         translation.authorName.isEmpty ? translation.name : translation.authorName
     }
 
-    func subtitle(for translation: QFTranslation) -> String {
+    func subtitle(for translation: QuranTranslation) -> String {
         "\(translation.languageName.capitalized) · \(translation.name)"
     }
 
-    private static func sorted(_ items: [QFTranslation]) -> [QFTranslation] {
+    private static func sorted(_ items: [QuranTranslation]) -> [QuranTranslation] {
         items.sorted { a, b in
             if a.languageName == "english" && b.languageName != "english" { return true }
             if b.languageName == "english" && a.languageName != "english" { return false }

@@ -1,5 +1,6 @@
 package app.kamy.saatApp.ui.components
 
+import android.os.Build.VERSION.SDK_INT
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -53,8 +54,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.request.ImageRequest
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -248,20 +256,32 @@ fun TanyaSaatChatSheet(
 
                         if (state.isLoading) {
                             item(key = "loading_indicator") {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.padding(start = 8.dp, top = 8.dp)
+                                val context = LocalContext.current
+                                val imageLoader = remember(context) {
+                                    ImageLoader.Builder(context)
+                                        .components {
+                                            if (SDK_INT >= 28) {
+                                                add(ImageDecoderDecoder.Factory())
+                                            } else {
+                                                add(GifDecoder.Factory())
+                                            }
+                                        }
+                                        .build()
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .padding(start = 8.dp, top = 8.dp)
+                                        .size(50.dp)
                                 ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(18.dp),
-                                        color = SaatColors.DeepEmerald,
-                                        strokeWidth = 2.dp
-                                    )
-                                    Spacer(modifier = Modifier.width(10.dp))
-                                    Text(
-                                        text = "Tanya Sāat AI sedang menyiapkan nasihat & rekomendasi...",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = Color(0xFF8E8E93)
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(R.drawable.kimi_thinking_preview)
+                                            .crossfade(true)
+                                            .build(),
+                                        imageLoader = imageLoader,
+                                        contentDescription = "Kīmi thinking",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.size(50.dp)
                                     )
                                 }
                             }
@@ -522,6 +542,19 @@ private fun EmbeddedDoaCard(doa: DoaItem) {
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 20.sp, textAlign = TextAlign.End),
                     color = Color(0xFF1C1C1E),
                     modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+
+            doa.latin?.takeIf { it.isNotBlank() }?.let { lt ->
+                Text(
+                    text = lt.replace("\r\n", "\n"),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp,
+                        fontStyle = FontStyle.Italic
+                    ),
+                    color = Color(0xFF92400E)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
             }

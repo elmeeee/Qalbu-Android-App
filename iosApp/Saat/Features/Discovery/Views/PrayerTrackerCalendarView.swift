@@ -256,6 +256,8 @@ struct PrayerTrackerCalendarView: View {
         .background(SaatTokens.Colors.screenBackground)
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
+        .navigationBarHidden(true)
         .onAppear {
             reloadStoreData()
         }

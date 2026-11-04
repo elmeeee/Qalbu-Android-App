@@ -1,0 +1,175 @@
+rules_version = '2';
+
+/**
+ * ===============================================================
+ * Firestore Security Rules - Qalbu / Saat Islamic App
+ * ===============================================================
+ *
+ * Prinsip Desain Keamanan:
+ * 1. Default Deny: Semua akses ke seluruh database ditolak secara default di root.
+ * 2. User Data Isolation (Least Privilege): Setiap pengguna terotentikasi HANYA
+ *    dapat mengakses datanya sendiri (/users/{userId}/...) berdasarkan UID otentikasi.
+ *    Semua akses lintas-pengguna (cross-user) maupun akses publik diblokir total.
+ * 3. Validator Function Pattern: Validasi skema, batasan DoS, dan integritas identitas
+ *    diterapkan secara konsisten pada operasi CREATE dan UPDATE untuk mencegah Update Bypass.
+ * 4. PII Protection: Profil dan data pengguna terlindungi dari akses publik maupun pengguna lain.
+ * 5. DoS & Resource Exhaustion Mitigation: Batasan ukuran maksimal string, list/array,
+ *    dan map diterapkan untuk mencegah eksploitasi payload berlebih.
+ * 6. Immutability & Anti-Hijacking: Memastikan identitas dokumen (uid/userId) dan timestamp
+ *    pembuatan tidak dapat diubah ke identitas atau nilai lain saat pembaruan (SetOptions.merge).
+ * 7. Flexible Schema for Subcollections: Mendukung struktur sinkronisasi aplikasi:
+ *    - quran/personal (bookmarks [list], notes [list], hifz [list], chapters [list], juzs [list], dll.)
+ *    - tracker/prayer (records [map], bestStreak [int])
+ *    - tasbih/dhikr (counters [map])
+ *    - catatan tunggal atau teks refleksi (notes [string], content [string], text [string])
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions (Fungsi Bantuan Keamanan & Validasi)
+    // ===============================================================
+
+    // Memverifikasi apakah request berasal dari pengguna yang terotentikasi
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Memverifikasi apakah pengguna adalah pemilik sah dari path dokumen
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Memastikan field 'uid' atau 'userId' dalam payload sesuai dengan request.auth.uid
+    function uidMatchesAuth() {
+      return (!('uid' in request.resource.data) || (request.resource.data.uid is string && request.resource.data.uid == request.auth.uid)) &&
+             (!('userId' in request.resource.data) || (request.resource.data.userId is string && request.resource.data.userId == request.auth.uid));
+    }
+
+    // Memastikan field identitas ('uid' atau 'userId') tidak diubah ke identitas lain saat update
+    function uidNotModified() {
+      return (!('uid' in resource.data) || ('uid' in request.resource.data && request.resource.data.uid == resource.data.uid)) &&
+             (!('userId' in resource.data) || ('userId' in request.resource.data && request.resource.data.userId == resource.data.userId));
+    }
+
+    // Memastikan timestamp pembuatan (createdAt / createdAtMillis) tidak diubah nilainya jika sudah ada
+    function isCreatedAtImmutable() {
+      return (!('createdAt' in resource.data) || ('createdAt' in request.resource.data && request.resource.data.createdAt == resource.data.createdAt)) &&
+             (!('createdAtMillis' in resource.data) || ('createdAtMillis' in request.resource.data && request.resource.data.createdAtMillis == resource.data.createdAtMillis));
+    }
+
+    // Memeriksa apakah nilai waktu valid (berupa Firestore timestamp atau epoch millis non-negatif)
+    function isValidTimeValue(val) {
+      return val is timestamp || (val is int && val >= 0);
+    }
+
+    // Memastikan payload tidak menyuntikkan peran administratif (mencegah Privilege Escalation)
+    function hasNoPrivilegeEscalation(data) {
+      return !('role' in data) &&
+             !('isAdmin' in data) &&
+             !('admin' in data) &&
+             !('isSuperAdmin' in data) &&
+             !('permissions' in data);
+    }
+
+    // ===============================================================
+    // Domain Validators (Validator Fungsi Domain)
+    // ===============================================================
+
+    // Validasi data profil dokumen /users/{userId}
+    function isValidUserProfile(data) {
+      return hasNoPrivilegeEscalation(data) &&
+             uidMatchesAuth() &&
+             data.keys().size() <= 30 &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('bio' in data) || (data.bio is string && data.bio.size() <= 500)) &&
+             (!('locale' in data) || (data.locale is string && data.locale.size() <= 20)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 100)) &&
+             (!('photoUrl' in data) || (data.photoUrl is string && data.photoUrl.size() <= 1000)) &&
+             (!('createdAt' in data) || isValidTimeValue(data.createdAt)) &&
+             (!('updatedAt' in data) || isValidTimeValue(data.updatedAt)) &&
+             (!('lastLoginAt' in data) || isValidTimeValue(data.lastLoginAt));
+    }
+
+    // Validasi keamanan umum untuk semua dokumen subkoleksi di bawah /users/{userId}/{document=**}
+    function isValidSubcollectionDoc(data) {
+      return hasNoPrivilegeEscalation(data) &&
+             uidMatchesAuth() &&
+             data.keys().size() <= 100 &&
+             // Field teks / string: batas ukuran wajar untuk mencegah Resource Exhaustion
+             (!('text' in data) || (data.text is string && data.text.size() <= 20000)) &&
+             (!('content' in data) || (data.content is string && data.content.size() <= 20000)) &&
+             (!('title' in data) || (data.title is string && data.title.size() <= 500)) &&
+             (!('verseKey' in data) || (data.verseKey is string && data.verseKey.size() <= 50)) &&
+             (!('lastReadVerseKey' in data) || (data.lastReadVerseKey is string && data.lastReadVerseKey.size() <= 50)) &&
+             (!('surahLabel' in data) || (data.surahLabel is string && data.surahLabel.size() <= 100)) &&
+             (!('dayKey' in data) || (data.dayKey is string && data.dayKey.size() <= 50)) &&
+             (!('presetId' in data) || (data.presetId is string && data.presetId.size() <= 100)) &&
+             (!('status' in data) || (data.status is string && data.status.size() <= 50)) &&
+             // Field 'notes': fleksibel untuk List catatan ayat (quran/personal) maupun string teks catatan
+             (!('notes' in data) ||
+               (data.notes is list && data.notes.size() <= 5000) ||
+               (data.notes is string && data.notes.size() <= 20000)) &&
+             // Batasan array / list (mencegah DoS)
+             (!('bookmarks' in data) || (data.bookmarks is list && data.bookmarks.size() <= 5000)) &&
+             (!('hifz' in data) || (data.hifz is list && data.hifz.size() <= 7000)) &&
+             (!('chapters' in data) || (data.chapters is list && data.chapters.size() <= 114)) &&
+             (!('juzs' in data) || (data.juzs is list && data.juzs.size() <= 30)) &&
+             (!('items' in data) || (data.items is list && data.items.size() <= 5000)) &&
+             // Batasan map (tracker records, dhikr counters)
+             (!('records' in data) || (data.records is map && data.records.keys().size() <= 10000)) &&
+             (!('counters' in data) || (data.counters is map && data.counters.keys().size() <= 5000)) &&
+             // Batasan nilai angka & waktu
+             (!('lastReadJuz' in data) || (data.lastReadJuz is int && data.lastReadJuz >= 0 && data.lastReadJuz <= 30)) &&
+             (!('bestStreak' in data) || (data.bestStreak is int && data.bestStreak >= 0)) &&
+             (!('createdAtMillis' in data) || isValidTimeValue(data.createdAtMillis)) &&
+             (!('updatedAtMillis' in data) || isValidTimeValue(data.updatedAtMillis)) &&
+             (!('lastReadUpdatedAtMillis' in data) || isValidTimeValue(data.lastReadUpdatedAtMillis));
+    }
+
+    // ===============================================================
+    // Security Rules (Aturan Akses Koleksi)
+    // ===============================================================
+
+    // 1. Kunci semua akses database secara default (Default Deny)
+    // Akses publik atau dokumen di luar /users/{userId} ditolak sepenuhnya.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Ruang Lingkup Data Pengguna (User-Scoped Isolation)
+    // Hanya pemilik akun yang terotentikasi (request.auth.uid == userId)
+    // yang dapat membaca, membuat, memperbarui, dan menghapus datanya sendiri.
+    match /users/{userId} {
+      // Profil dokumen /users/{userId}
+      allow read: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidUserProfile(request.resource.data);
+
+      allow update: if isOwner(userId) &&
+                       isValidUserProfile(request.resource.data) &&
+                       uidNotModified() &&
+                       isCreatedAtImmutable();
+
+      allow delete: if isOwner(userId);
+
+      // Semua subkoleksi pengguna: /users/{userId}/{document=**}
+      // Mendukung: quran/personal, tracker/prayer, tasbih/dhikr, bookmarks, notes, dll.
+      match /{document=**} {
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidSubcollectionDoc(request.resource.data);
+
+        allow update: if isOwner(userId) &&
+                         isValidSubcollectionDoc(request.resource.data) &&
+                         uidNotModified() &&
+                         isCreatedAtImmutable();
+
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

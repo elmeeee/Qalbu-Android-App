@@ -22,20 +22,37 @@ struct AyahArabicWebBlock: View {
     @State private var webHeight: CGFloat = placeholderHeight
 
     var body: some View {
-        HTMLContentWebView(
-            htmlFragment: htmlFragment,
-            style: style,
-            rendersTajweedHTML: showTajweed,
-            fontScale: fontScale,
-            contentHeight: $webHeight,
-            onTajweedTap: showTajweed ? onTajweedTap : nil
-        )
+        ZStack(alignment: .top) {
+            // Immediate native Arabic text preview/fallback
+            if let displayText = payload.displayText, !displayText.isEmpty {
+                Text(displayText)
+                    .font(SaatTypography.quranArabic(size: CGFloat(24 * fontScale)))
+                    .foregroundColor(style == .verseCardOnDark ? .white : Color.Token.slate900)
+                    .multilineTextAlignment(.center)
+                    .environment(\.layoutDirection, .rightToLeft)
+                    .lineSpacing(10)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .opacity(webHeight > Self.placeholderHeight && showTajweed ? 0 : 1)
+            }
+
+            HTMLContentWebView(
+                htmlFragment: htmlFragment,
+                style: style,
+                rendersTajweedHTML: showTajweed,
+                fontScale: fontScale,
+                contentHeight: $webHeight,
+                onTajweedTap: showTajweed ? onTajweedTap : nil
+            )
+            .frame(maxWidth: .infinity, alignment: .top)
+            .frame(height: max(webHeight, Self.placeholderHeight))
+            .opacity(showTajweed ? 1 : 0)
+            .allowsHitTesting(showTajweed && onTajweedTap != nil)
+        }
         .frame(maxWidth: .infinity, alignment: .top)
-        .frame(height: webHeight)
+        .frame(height: max(webHeight, Self.placeholderHeight))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(payload.spokenAccessibilitySummary(includeTranslation: includeTranslationInAccessibility))
         .accessibilityAddTraits(.isStaticText)
-        .allowsHitTesting(showTajweed && onTajweedTap != nil)
         .animation(nil, value: webHeight)
         .id(stableId)
         .onChangeWithFallback(of: reloadKey) { _ in
@@ -64,10 +81,10 @@ struct AyahArabicWebBlock: View {
         } else {
             base = "ayah"
         }
-        return "\(base)-tajweed-\(showTajweed)-\(style)-\(fontScale)"
+        return "\(base)-tajweed-\(showTajweed)-\(style)"
     }
 
     private var reloadKey: String {
-        "\(payload.verseKey ?? "")-\(showTajweed)-\(fontScale)"
+        "\(payload.verseKey ?? "")-\(showTajweed)"
     }
 }

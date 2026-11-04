@@ -41,13 +41,31 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.CloudSync
+import androidx.compose.material.icons.outlined.DeleteForever
+import androidx.compose.material.icons.outlined.Mail
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import coil.compose.AsyncImage
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import app.kamy.saatApp.domain.model.AuthUser
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -58,6 +76,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
@@ -85,7 +104,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -144,6 +162,7 @@ fun AccountScreen(
             vm = vm,
             scrollState = mainScrollState,
             onBack = onBack,
+            onOpenAccountDetail = { currentDetailScreen.value = "ACCOUNT_DETAIL" },
             onOpenNotificationAdhan = { currentDetailScreen.value = "NOTIFICATION_ADHAN" },
             onOpenAbout = { currentDetailScreen.value = "ABOUT_SAAT" },
             onOpenPrivacyPolicy = { currentDetailScreen.value = "PRIVACY_POLICY" },
@@ -152,6 +171,13 @@ fun AccountScreen(
         )
 
         when (currentDetailScreen.value) {
+            "ACCOUNT_DETAIL" -> {
+                AccountDetailScreen(
+                    state = state,
+                    vm = vm,
+                    onBack = { currentDetailScreen.value = null }
+                )
+            }
             "NOTIFICATION_ADHAN" -> {
                 NotificationAdhanScreen(
                     state = state,
@@ -274,6 +300,27 @@ fun AccountScreen(
             onDismiss = { showUpToDateSheet = false }
         )
     }
+
+    LaunchedEffect(state.authSuccessMessage) {
+        state.authSuccessMessage?.let { msg ->
+            android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
+            vm.dismissAuthSuccessMessage()
+        }
+    }
+
+    if (state.showEmailAuthSheet) {
+        EmailAuthBottomSheet(
+            mode = state.emailAuthMode,
+            isLoading = state.isAuthLoading,
+            errorMessage = state.authErrorMessage,
+            onModeChange = vm::setEmailAuthMode,
+            onSignIn = vm::signInWithEmail,
+            onSignUp = vm::signUpWithEmail,
+            onForgotPassword = vm::sendPasswordReset,
+            onDismiss = vm::closeEmailAuth,
+            onDismissError = vm::dismissAuthError
+        )
+    }
 }
 
 // ─── Main Settings View (Mockup 1) ───────────────────────────────────────────
@@ -284,6 +331,7 @@ private fun AccountSettingsContent(
     vm: AccountViewModel,
     scrollState: ScrollState,
     onBack: (() -> Unit)?,
+    onOpenAccountDetail: () -> Unit,
     onOpenNotificationAdhan: () -> Unit,
     onOpenAbout: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
@@ -291,6 +339,7 @@ private fun AccountSettingsContent(
     onCheckUpdate: () -> Unit
 ) {
     val context = LocalContext.current
+
     val packageInfo = remember {
         try {
             context.packageManager.getPackageInfo(context.packageName, 0)
@@ -368,6 +417,92 @@ private fun AccountSettingsContent(
                     bottom = floatingNavBottomPadding() + 24.dp
                 )
         ) {
+            // 0. Account & Sync Card (Optional)
+            if (state.authUser == null) {
+                AccountSyncAuthCard(
+                    isLoading = state.isAuthLoading,
+                    onSignIn = { vm.signInWithGoogle(context) },
+                    onOpenEmailAuth = { vm.openEmailAuth() }
+                )
+            } else {
+                AccountSyncProfileCard(
+                    user = state.authUser!!,
+                    isLoading = state.isAuthLoading,
+                    isSyncing = state.isSyncing,
+                    lastSyncTimeMillis = state.lastSyncTimeMillis,
+                    onSyncNow = { vm.syncNow() },
+                    onClick = onOpenAccountDetail
+                )
+            }
+
+            state.syncErrorMessage?.let { errMsg ->
+                Spacer(Modifier.height(10.dp))
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFFEF2F2),
+                    border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = errMsg,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFFB91C1C),
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = { vm.dismissSyncError() },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = Color(0xFFB91C1C),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            state.authErrorMessage?.let { errMsg ->
+                Spacer(Modifier.height(10.dp))
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFFEF2F2),
+                    border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = errMsg,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color(0xFFB91C1C),
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = { vm.dismissAuthError() },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = Color(0xFFB91C1C),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
             // 1. General settings
             SettingsSectionHeader(stringResource(R.string.settings_section_general))
             SettingsCard {
@@ -2490,6 +2625,1517 @@ private fun AppFooterCard(appVersion: String) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     textAlign = TextAlign.Center
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountSyncAuthCard(
+    isLoading: Boolean,
+    onSignIn: () -> Unit,
+    onOpenEmailAuth: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = SaatColors.PureWhite,
+        border = BorderStroke(1.dp, Color(0xFFE8E2D2)),
+        shadowElevation = 0.5.dp
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFEDF5F0)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CloudSync,
+                        contentDescription = null,
+                        tint = SaatColors.HomeDarkGreen,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.account_sync_title),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
+                        color = SaatColors.HomeDarkGreen
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = stringResource(R.string.account_sync_desc),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp
+                        ),
+                        color = Color(0xFF64748B)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 1. Google Sign-In
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(enabled = !isLoading, onClick = onSignIn),
+                shape = RoundedCornerShape(12.dp),
+                color = SaatColors.PureWhite,
+                border = BorderStroke(1.dp, Color(0xFFD1D5DB)),
+                shadowElevation = 0.5.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 11.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = SaatColors.HomeDarkGreen,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = stringResource(R.string.account_connecting),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp
+                            ),
+                            color = Color(0xFF334155)
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(R.drawable.ic_google_logo),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = stringResource(R.string.account_sign_in_google),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp
+                            ),
+                            color = Color(0xFF1E293B)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Or divider
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFE2E8F0))
+                Text(
+                    text = stringResource(R.string.account_or_divider),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                    color = Color(0xFF94A3B8),
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFE2E8F0))
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 2. Email Sign-In / Register
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(enabled = !isLoading, onClick = onOpenEmailAuth),
+                shape = RoundedCornerShape(12.dp),
+                color = Color(0xFFF8FAFC),
+                border = BorderStroke(1.dp, Color(0xFFE2E8F0))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 11.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Mail,
+                        contentDescription = null,
+                        tint = SaatColors.HomeDarkGreen,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = stringResource(R.string.account_sign_in_email),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        ),
+                        color = Color(0xFF1E293B)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = stringResource(R.string.account_sign_in_optional),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 11.sp
+                ),
+                color = Color(0xFF94A3B8),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun AccountSyncProfileCard(
+    user: AuthUser,
+    isLoading: Boolean,
+    isSyncing: Boolean,
+    lastSyncTimeMillis: Long?,
+    onSyncNow: () -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = SaatColors.PureWhite,
+        border = BorderStroke(1.dp, Color(0xFFE8E2D2)),
+        shadowElevation = 0.5.dp
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (!user.photoUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = user.photoUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .border(1.5.dp, SaatColors.DeepEmerald.copy(alpha = 0.3f), CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFEDF5F0)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = SaatColors.HomeDarkGreen
+                            )
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = user.displayName ?: stringResource(R.string.account_connected_title),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        ),
+                        color = Color(0xFF1E293B),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (!user.email.isNullOrBlank()) {
+                        Text(
+                            text = user.email,
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                            color = Color(0xFF64748B),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color(0xFF94A3B8),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+            HorizontalDivider(color = Color(0xFFF1F5F9))
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Hint & Quick Sync Action
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .background(Color(0xFF10B981), CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.account_profile_click_hint),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = Color(0xFF047857)
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFFEDF5F0),
+                    modifier = Modifier.clickable(
+                        enabled = !isSyncing && !isLoading,
+                        onClick = onSyncNow
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (isSyncing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(11.dp),
+                                color = SaatColors.HomeDarkGreen,
+                                strokeWidth = 1.5.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null,
+                                tint = SaatColors.HomeDarkGreen,
+                                modifier = Modifier.size(11.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (isSyncing) stringResource(R.string.account_syncing) else stringResource(R.string.account_sync_now),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = SaatColors.HomeDarkGreen
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AccountDetailScreen(
+    state: AccountUiState,
+    vm: AccountViewModel,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val user = state.authUser
+
+    LaunchedEffect(user) {
+        if (user == null) {
+            onBack()
+        }
+    }
+
+    if (user == null) return
+
+    var displayNameInput by rememberSaveable(user.uid, user.displayName) {
+        mutableStateOf(user.displayName ?: "")
+    }
+    val hasNameChanged = remember(displayNameInput, user.displayName) {
+        displayNameInput.trim() != (user.displayName ?: "").trim() && displayNameInput.isNotBlank()
+    }
+
+    var showSignOutSheet by rememberSaveable { mutableStateOf(false) }
+    var showDeleteSheet by rememberSaveable { mutableStateOf(false) }
+
+    if (showSignOutSheet) {
+        SignOutBottomSheet(
+            isLoading = state.isAuthLoading,
+            onConfirmSignOut = {
+                showSignOutSheet = false
+                vm.signOut(context)
+            },
+            onDismiss = { showSignOutSheet = false }
+        )
+    }
+
+    if (showDeleteSheet) {
+        DeleteAccountBottomSheet(
+            isLoading = state.isAuthLoading,
+            onConfirmDelete = {
+                showDeleteSheet = false
+                vm.deleteAccount(context)
+            },
+            onDismiss = { showDeleteSheet = false }
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(SaatColors.HomeBg)
+    ) {
+        // Sticky Header bar
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = SaatColors.HomeBg,
+            shadowElevation = 0.5.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .tabContentStatusBarInset()
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        tint = Color(0xFF1C1C1E)
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.account_detail_title),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color(0xFF1C1C1E)
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            // 1. Profile Hero Card
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = SaatColors.PureWhite,
+                border = BorderStroke(1.dp, Color(0xFFE8E2D2)),
+                shadowElevation = 0.5.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp, horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (!user.photoUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = user.photoUrl,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(76.dp)
+                                .clip(CircleShape)
+                                .border(2.dp, SaatColors.DeepEmerald.copy(alpha = 0.4f), CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(76.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFEDF5F0))
+                                .border(2.dp, Color(0xFFA7F3D0), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = SaatColors.HomeDarkGreen
+                                )
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Text(
+                        text = user.displayName ?: stringResource(R.string.account_connected_title),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        ),
+                        color = Color(0xFF0F172A),
+                        textAlign = TextAlign.Center
+                    )
+
+                    if (!user.email.isNullOrBlank()) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = user.email,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
+                            color = Color(0xFF64748B),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Spacer(Modifier.height(10.dp))
+
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFECFDF5),
+                        border = BorderStroke(1.dp, Color(0xFFA7F3D0))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .background(Color(0xFF10B981), CircleShape)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.account_status_synced),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                ),
+                                color = Color(0xFF047857)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // 2. Section: Informasi Profil (Editable)
+            SettingsSectionHeader(stringResource(R.string.account_detail_section_profile))
+            SettingsCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = stringResource(R.string.account_name_label),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = Color(0xFF334155)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = displayNameInput,
+                        onValueChange = { displayNameInput = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        placeholder = { Text(stringResource(R.string.account_name_hint)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Person,
+                                contentDescription = null,
+                                tint = Color(0xFF64748B),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        trailingIcon = {
+                            if (hasNameChanged) {
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = SaatColors.DeepEmerald,
+                                    modifier = Modifier
+                                        .padding(end = 4.dp)
+                                        .clickable(
+                                            enabled = !state.isAuthLoading,
+                                            onClick = { vm.updateProfile(displayNameInput) }
+                                        )
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        if (state.isAuthLoading) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(12.dp),
+                                                color = Color.White,
+                                                strokeWidth = 1.5.dp
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Check,
+                                                contentDescription = null,
+                                                tint = Color.White,
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                            Spacer(Modifier.width(4.dp))
+                                            Text(
+                                                text = stringResource(R.string.account_detail_save_changes),
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 11.sp
+                                                ),
+                                                color = Color.White
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFF8FAFC),
+                            unfocusedContainerColor = Color(0xFFF8FAFC),
+                            focusedBorderColor = SaatColors.DeepEmerald,
+                            unfocusedBorderColor = Color(0xFFE2E8F0)
+                        )
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    Spacer(Modifier.height(16.dp))
+
+                    Text(
+                        text = stringResource(R.string.account_email_label),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = Color(0xFF334155)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = user.email ?: "-",
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Mail,
+                                contentDescription = null,
+                                tint = Color(0xFF64748B),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        trailingIcon = {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = Color(0xFFECFDF5)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.CheckCircle,
+                                        contentDescription = null,
+                                        tint = Color(0xFF10B981),
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.account_detail_verified),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp, fontWeight = FontWeight.Bold),
+                                        color = Color(0xFF047857)
+                                    )
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFF1F5F9),
+                            unfocusedContainerColor = Color(0xFFF1F5F9),
+                            focusedBorderColor = Color(0xFFE2E8F0),
+                            unfocusedBorderColor = Color(0xFFE2E8F0)
+                        )
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    Spacer(Modifier.height(14.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(R.string.account_detail_sign_in_method),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            color = Color(0xFF475569)
+                        )
+                        val providerName = if (user.photoUrl != null && user.photoUrl.contains("google")) {
+                            stringResource(R.string.account_detail_provider_google)
+                        } else {
+                            stringResource(R.string.account_detail_provider_email)
+                        }
+                        Text(
+                            text = providerName,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = Color(0xFF0F172A)
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // 3. Section: Sinkronisasi Cloud
+            SettingsSectionHeader(stringResource(R.string.account_detail_section_sync))
+            SettingsCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Color(0xFFECFDF5)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CloudSync,
+                                    contentDescription = null,
+                                    tint = SaatColors.DeepEmerald,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.account_detail_cloud_status),
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                                    color = Color(0xFF0F172A)
+                                )
+                                Spacer(Modifier.height(2.dp))
+                                val syncLabel = remember(state.lastSyncTimeMillis) {
+                                    if (state.lastSyncTimeMillis != null && state.lastSyncTimeMillis > 0L) {
+                                        val diff = System.currentTimeMillis() - state.lastSyncTimeMillis
+                                        if (diff < 60_000L) null
+                                        else java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(state.lastSyncTimeMillis))
+                                    } else null
+                                }
+                                Text(
+                                    text = if (state.isSyncing) {
+                                        stringResource(R.string.account_syncing)
+                                    } else if (syncLabel != null) {
+                                        "${stringResource(R.string.account_last_synced)} $syncLabel"
+                                    } else if (state.lastSyncTimeMillis != null && state.lastSyncTimeMillis > 0L) {
+                                        "${stringResource(R.string.account_last_synced)} ${stringResource(R.string.account_just_now)}"
+                                    } else {
+                                        stringResource(R.string.account_status_synced)
+                                    },
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                        }
+
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFEDF5F0),
+                            modifier = Modifier.clickable(
+                                enabled = !state.isSyncing && !state.isAuthLoading,
+                                onClick = { vm.syncNow() }
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = null,
+                                    tint = SaatColors.HomeDarkGreen,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.account_sync_now),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    ),
+                                    color = SaatColors.HomeDarkGreen
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(R.string.account_detail_sync_desc),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 12.sp,
+                            lineHeight = 17.sp
+                        ),
+                        color = Color(0xFF64748B)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            // 4. Section: Pengaturan Akun & Keamanan (Logout & Delete)
+            SettingsSectionHeader(stringResource(R.string.account_section_security))
+            SettingsCard {
+                AccountActionRow(
+                    icon = Icons.AutoMirrored.Outlined.Logout,
+                    iconTint = Color(0xFF64748B),
+                    title = stringResource(R.string.account_sign_out_row_title),
+                    subtitle = stringResource(R.string.account_sign_out_row_subtitle),
+                    onClick = { showSignOutSheet = true },
+                    showDivider = true
+                )
+                AccountActionRow(
+                    icon = Icons.Outlined.DeleteForever,
+                    iconTint = Color(0xFFDC2626),
+                    title = stringResource(R.string.account_delete_row_title),
+                    titleColor = Color(0xFFDC2626),
+                    subtitle = stringResource(R.string.account_delete_row_subtitle),
+                    subtitleColor = Color(0xFFEF4444),
+                    onClick = { showDeleteSheet = true },
+                    showDivider = false
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountActionRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconTint: Color,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    titleColor: Color = Color(0xFF1E293B),
+    subtitleColor: Color = Color(0xFF64748B),
+    showDivider: Boolean = true
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(iconTint.copy(alpha = 0.08f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Spacer(Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    ),
+                    color = titleColor
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp
+                    ),
+                    color = subtitleColor
+                )
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = Color(0xFFCBD5E1),
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        if (showDivider) {
+            HorizontalDivider(
+                modifier = Modifier.padding(start = 68.dp, end = 16.dp),
+                color = Color(0xFFF1F5F9),
+                thickness = 0.8.dp
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SignOutBottomSheet(
+    isLoading: Boolean,
+    onConfirmSignOut: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        sheetState = sheetState,
+        containerColor = SaatColors.PureWhite,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 36.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFF1F5F9)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.Logout,
+                    contentDescription = null,
+                    tint = Color(0xFF475569),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.account_sign_out_confirm_title),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                ),
+                color = Color(0xFF0F172A),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.account_sign_out_confirm_desc),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 13.sp,
+                    lineHeight = 19.sp
+                ),
+                color = Color(0xFF64748B),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            Button(
+                onClick = onConfirmSignOut,
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0F172A),
+                    contentColor = Color.White
+                )
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = stringResource(R.string.account_sign_out_row_title),
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            OutlinedButton(
+                onClick = onDismiss,
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF475569))
+            ) {
+                Text(
+                    text = stringResource(R.string.account_sign_out_cancel),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DeleteAccountBottomSheet(
+    isLoading: Boolean,
+    onConfirmDelete: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        sheetState = sheetState,
+        containerColor = SaatColors.PureWhite,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 36.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(60.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFFEF2F2)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFFEE2E2)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.DeleteForever,
+                        contentDescription = null,
+                        tint = Color(0xFFDC2626),
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = stringResource(R.string.account_delete_sheet_title),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 19.sp
+                ),
+                color = Color(0xFF991B1B),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.account_delete_sheet_desc),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp
+                ),
+                color = Color(0xFF64748B),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(18.dp))
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                color = Color(0xFFFFF5F5),
+                border = BorderStroke(1.dp, Color(0xFFFED7D7))
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+                    DeleteItemRow(text = stringResource(R.string.account_delete_item_quran))
+                    Spacer(Modifier.height(8.dp))
+                    DeleteItemRow(text = stringResource(R.string.account_delete_item_tracker))
+                    Spacer(Modifier.height(8.dp))
+                    DeleteItemRow(text = stringResource(R.string.account_delete_item_dhikr))
+                    Spacer(Modifier.height(8.dp))
+                    DeleteItemRow(text = stringResource(R.string.account_delete_item_auth))
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Button(
+                onClick = onConfirmDelete,
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFDC2626),
+                    contentColor = Color.White
+                )
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Outlined.DeleteForever,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.account_delete_confirm_action),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            OutlinedButton(
+                onClick = onDismiss,
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF475569))
+            ) {
+                Text(
+                    text = stringResource(R.string.account_delete_cancel_action),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeleteItemRow(text: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(16.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFFCA5A5).copy(alpha = 0.35f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFDC2626))
+            )
+        }
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.Medium
+            ),
+            color = Color(0xFF7F1D1D)
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EmailAuthBottomSheet(
+    mode: EmailAuthMode,
+    isLoading: Boolean,
+    errorMessage: String?,
+    onModeChange: (EmailAuthMode) -> Unit,
+    onSignIn: (email: String, password: String) -> Unit,
+    onSignUp: (name: String, email: String, password: String) -> Unit,
+    onForgotPassword: (email: String) -> Unit,
+    onDismiss: () -> Unit,
+    onDismissError: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var name by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = SaatColors.PureWhite,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 36.dp)
+        ) {
+            // Header Title
+            val title = when (mode) {
+                EmailAuthMode.LOGIN -> stringResource(R.string.account_tab_login)
+                EmailAuthMode.REGISTER -> stringResource(R.string.account_tab_register)
+                EmailAuthMode.FORGOT_PASSWORD -> stringResource(R.string.account_forgot_password_title)
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                ),
+                color = SaatColors.HomeDarkGreen
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            val subtitle = when (mode) {
+                EmailAuthMode.LOGIN -> stringResource(R.string.account_sign_in_subtitle)
+                EmailAuthMode.REGISTER -> stringResource(R.string.account_sign_up_subtitle)
+                EmailAuthMode.FORGOT_PASSWORD -> stringResource(R.string.account_forgot_password_desc)
+            }
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 13.sp),
+                color = Color(0xFF64748B)
+            )
+
+            // Segmented switch between Sign In and Sign Up (only if not forgot password)
+            if (mode != EmailAuthMode.FORGOT_PASSWORD) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFF1F5F9)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(4.dp)
+                    ) {
+                        val isSignIn = mode == EmailAuthMode.LOGIN
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    onDismissError()
+                                    onModeChange(EmailAuthMode.LOGIN)
+                                },
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (isSignIn) SaatColors.PureWhite else Color.Transparent,
+                            shadowElevation = if (isSignIn) 1.dp else 0.dp
+                        ) {
+                            Text(
+                                text = stringResource(R.string.account_tab_login),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isSignIn) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 13.sp
+                                ),
+                                color = if (isSignIn) SaatColors.HomeDarkGreen else Color(0xFF64748B),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+
+                        val isSignUp = mode == EmailAuthMode.REGISTER
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    onDismissError()
+                                    onModeChange(EmailAuthMode.REGISTER)
+                                },
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (isSignUp) SaatColors.PureWhite else Color.Transparent,
+                            shadowElevation = if (isSignUp) 1.dp else 0.dp
+                        ) {
+                            Text(
+                                text = stringResource(R.string.account_tab_register),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (isSignUp) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 13.sp
+                                ),
+                                color = if (isSignUp) SaatColors.HomeDarkGreen else Color(0xFF64748B),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Error Message Box
+            errorMessage?.let { err ->
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0xFFFEF2F2),
+                    border = BorderStroke(1.dp, Color(0xFFFECACA)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = err,
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                            color = Color(0xFFB91C1C),
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(
+                            onClick = onDismissError,
+                            modifier = Modifier.size(20.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = Color(0xFFB91C1C),
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // Name Field (only if REGISTER)
+            if (mode == EmailAuthMode.REGISTER) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(R.string.account_name_label)) },
+                    placeholder = { Text(stringResource(R.string.account_name_hint)) },
+                    singleLine = true,
+                    enabled = !isLoading,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = SaatColors.HomeDarkGreen,
+                        unfocusedBorderColor = Color(0xFFCBD5E1),
+                        focusedLabelColor = SaatColors.HomeDarkGreen
+                    )
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // Email Field
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text(stringResource(R.string.account_email_label)) },
+                placeholder = { Text(stringResource(R.string.account_email_hint)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = SaatColors.HomeDarkGreen,
+                    unfocusedBorderColor = Color(0xFFCBD5E1),
+                    focusedLabelColor = SaatColors.HomeDarkGreen
+                )
+            )
+
+            // Password Field (if not FORGOT_PASSWORD)
+            if (mode != EmailAuthMode.FORGOT_PASSWORD) {
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text(stringResource(R.string.account_password_label)) },
+                    placeholder = { Text(stringResource(R.string.account_password_hint)) },
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                                contentDescription = null,
+                                tint = Color(0xFF64748B)
+                            )
+                        }
+                    },
+                    enabled = !isLoading,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = SaatColors.HomeDarkGreen,
+                        unfocusedBorderColor = Color(0xFFCBD5E1),
+                        focusedLabelColor = SaatColors.HomeDarkGreen
+                    )
+                )
+            }
+
+            // Forgot password button (only when LOGIN)
+            if (mode == EmailAuthMode.LOGIN) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(
+                        onClick = {
+                            onDismissError()
+                            onModeChange(EmailAuthMode.FORGOT_PASSWORD)
+                        },
+                        enabled = !isLoading
+                    ) {
+                        Text(
+                            text = stringResource(R.string.account_forgot_password),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = SaatColors.HomeDarkGreen
+                        )
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
+
+            // Submit Button
+            val submitButtonText = when (mode) {
+                EmailAuthMode.LOGIN -> stringResource(R.string.account_submit_login)
+                EmailAuthMode.REGISTER -> stringResource(R.string.account_submit_register)
+                EmailAuthMode.FORGOT_PASSWORD -> stringResource(R.string.account_action_reset_password)
+            }
+            Button(
+                onClick = {
+                    onDismissError()
+                    when (mode) {
+                        EmailAuthMode.LOGIN -> onSignIn(email, password)
+                        EmailAuthMode.REGISTER -> onSignUp(name, email, password)
+                        EmailAuthMode.FORGOT_PASSWORD -> onForgotPassword(email)
+                    }
+                },
+                enabled = !isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = SaatColors.HomeDarkGreen,
+                    contentColor = SaatColors.PureWhite
+                )
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = SaatColors.PureWhite,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = submitButtonText,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    )
+                }
+            }
+
+            // Back to sign in if in forgot password mode
+            if (mode == EmailAuthMode.FORGOT_PASSWORD) {
+                Spacer(modifier = Modifier.height(10.dp))
+                TextButton(
+                    onClick = {
+                        onDismissError()
+                        onModeChange(EmailAuthMode.LOGIN)
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    enabled = !isLoading
+                ) {
+                    Text(
+                        text = stringResource(R.string.account_back_to_sign_in),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        ),
+                        color = Color(0xFF64748B)
+                    )
+                }
             }
         }
     }

@@ -176,6 +176,8 @@ struct DoaZikirView: View {
             }
         }
         .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .tabBar)
         .onAppear {
             Task {
                 await viewModel.loadCatalog()

@@ -39,7 +39,12 @@ import app.kamy.saatApp.ui.permissions.ExactAlarmPermissionGate
 import app.kamy.saatApp.ui.root.RootScreen
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import app.kamy.saatApp.domain.repository.UserDataSyncRepository
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -48,6 +53,17 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var onboardingStore: OnboardingStore
     @Inject lateinit var themePreferencesStore: ThemePreferencesStore
     @Inject lateinit var appLanguageStore: AppLanguageStore
+    @Inject lateinit var syncRepository: UserDataSyncRepository
+
+    override fun onStart() {
+        super.onStart()
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                syncRepository.syncAll(currentUser.uid)
+            }
+        }
+    }
 
     private val deepLinkRoute = mutableStateOf<String?>(null)
 

@@ -42,6 +42,7 @@
 
 ### 5. AI-Powered Spiritual Reflection
 * **AI Reflection**: Daily Islamic reflection draft feature on the *Today* tab powered by generative LLM APIs (Groq API).
+* **Ask Kīmi**: Groq-powered Q&A on Islamic teachings, Qur'an, hadith, duas, fiqh, and Islamic history, with selectable GPT-OSS 120B and Qwen 3.8 27B models and Quran/dua cards resolved from local app data.
 
 ### 6. Home Screen Widget (Jetpack Glance)
 * **Glance App Widget (`PrayerNextGlanceWidget`)**: Upcoming prayer time information placed directly on the Android home screen with minimal battery consumption.
@@ -191,7 +192,7 @@ Populate the required credentials in `local.properties`:
 QF_OAUTH_CLIENT_SECRET_DEBUG=your_debug_client_secret
 QF_OAUTH_CLIENT_SECRET_RELEASE=your_release_client_secret
 
-# Groq API Key (Optional: Powers AI Reflection on Today tab)
+# Groq API Key (Optional: Powers Ask Kīmi and AI Reflection)
 API_KEY_GROQ=your_groq_api_key
 AI_MODEL=qwen/qwen3-32b
 

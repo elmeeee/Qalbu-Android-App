@@ -120,6 +120,7 @@ struct ManzilView: View {
         }
         .navigationBarHidden(true)
         .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.hidden, for: .tabBar)
     }
     
     private func toggleSection(_ section: ManzilSection) {

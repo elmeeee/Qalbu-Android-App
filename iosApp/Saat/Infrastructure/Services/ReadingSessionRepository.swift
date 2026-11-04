@@ -9,59 +9,26 @@
 import Foundation
 
 struct ReadingSessionRepository: Sendable {
-    private let client: QFApiClient
-
-    init(client: QFApiClient) {
-        self.client = client
-    }
-
-    func fetchReadingSessions(
-        first: Int? = nil,
-        after: String? = nil,
-        last: Int? = nil,
-        before: String? = nil
-    ) async throws -> ReadingSessionsPage {
-        var query: [URLQueryItem] = []
-        if let first {
-            query.append(URLQueryItem(name: "first", value: String(clampedPageSize(first))))
-        }
-        if let after, after.isEmpty == false {
-            query.append(URLQueryItem(name: "after", value: after))
-        }
-        if let last {
-            query.append(URLQueryItem(name: "last", value: String(clampedPageSize(last))))
-        }
-        if let before, before.isEmpty == false {
-            query.append(URLQueryItem(name: "before", value: before))
-        }
-        return try await client.send(ReadingSessionGetEndpoint(queryItems: query))
-    }
+    init() {}
 
     func fetchMostRecent() async throws -> ReadingSession? {
-        let page = try await fetchReadingSessions(first: 1)
-        return page.data?.first
+        let chapter = UserDefaults.standard.integer(forKey: "last_read_chapter")
+        let verse = UserDefaults.standard.integer(forKey: "last_read_verse")
+        guard chapter >= 1 else { return nil }
+        let timestamp = UserDefaults.standard.double(forKey: "last_read_timestamp")
+        let dateString = timestamp > 0 ? ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: timestamp)) : nil
+        return ReadingSession(
+            id: "local_last_read",
+            updatedAt: dateString,
+            chapterNumber: chapter,
+            verseNumber: max(1, verse)
+        )
     }
 
     func upsertReadingSession(chapterNumber: Int, verseNumber: Int) async throws {
-        let body = ReadingSessionRequestBody(
-            chapterNumber: chapterNumber,
-            verseNumber: verseNumber
-        )
-        let encoder = JSONEncoder()
-        let endpoint = ReadingSessionPostEndpoint(payload: try encoder.encode(body))
-        let _: ReadingSessionPostEnvelope = try await client.send(endpoint)
+        UserDefaults.standard.set(chapterNumber, forKey: "last_read_chapter")
+        UserDefaults.standard.set(verseNumber, forKey: "last_read_verse")
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: "last_read_timestamp")
+        NotificationCenter.default.post(name: NSNotification.Name("lastReadQuranDidChange"), object: nil)
     }
-
-    private func clampedPageSize(_ value: Int) -> Int {
-        min(max(value, 1), 20)
-    }
-}
-
-private struct ReadingSessionRequestBody: Encodable, Sendable {
-    let chapterNumber: Int
-    let verseNumber: Int
-}
-
-private struct ReadingSessionPostEnvelope: Decodable, Sendable {
-    let success: Bool?
 }

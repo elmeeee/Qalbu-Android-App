@@ -21,7 +21,6 @@ final class TodayDiscoveryViewModel {
     var continueReadingChapterName: String?
 
     private let content: QuranContentRepository
-    private let shareComposer: TodayShareTextComposer
     private let readingSessions: ReadingSessionRepository?
     private let defaults = UserDefaults.standard
     private var loadedTranslationId: Int?
@@ -29,11 +28,9 @@ final class TodayDiscoveryViewModel {
 
     init(
         content: QuranContentRepository,
-        shareComposer: TodayShareTextComposer? = nil,
         readingSessions: ReadingSessionRepository? = nil
     ) {
         self.content = content
-        self.shareComposer = shareComposer ?? TodayShareTextComposer(content: content)
         self.readingSessions = readingSessions
     }
 
@@ -60,7 +57,6 @@ final class TodayDiscoveryViewModel {
         guard isDetailLoading == false else { return }
         loadedTranslationId = nil
         DailyAyahRefreshPolicy.clearLastFetch(defaults: defaults)
-        shareComposer.clearCaches()
         loadDailyAyahWithHadith()
     }
 
@@ -70,37 +66,18 @@ final class TodayDiscoveryViewModel {
         await performDailyAyahFetch(clearDetailOnStart: false)
     }
 
-    private func loadContinueReading() async {
-        guard let readingSessions = readingSessions else { return }
-        do {
-            if let session = try await readingSessions.fetchMostRecent() {
-                self.continueReading = session
-                // Fetch chapter name
-                if let chapter = try? await content.getChapters(language: AppLanguageManager.shared.currentLanguage.rawValue).first(where: { $0.id == session.chapterNumber }) {
-                    self.continueReadingChapterName = chapter.nameSimple
-                }
-            } else {
-                self.continueReading = nil
-            }
-        } catch {
-            self.continueReading = nil
+    func loadContinueReading() async {
+        let repository = readingSessions ?? ReadingSessionRepository()
+        guard let session = try? await repository.fetchMostRecent() else {
+            continueReading = nil
+            continueReadingChapterName = nil
+            return
         }
-    }
-
-    func prefetchShareTextIfNeeded(for verse: RandomAyahPayload) async {
-        await shareComposer.prefetchShareTextIfNeeded(for: verse)
-    }
-
-    func cachedShareText(for verse: RandomAyahPayload) -> String? {
-        shareComposer.cachedShareText(for: verse)
-    }
-
-    func quickReflectionText(for verse: RandomAyahPayload) -> String {
-        shareComposer.quickReflectionText(for: verse)
-    }
-
-    func prepareShareText(for verse: RandomAyahPayload) async -> String {
-        await shareComposer.prepareShareText(for: verse)
+        continueReading = session
+        let lang = AppLanguageManager.shared.currentLanguage.rawValue
+        if let chapter = try? await content.getChapters(language: lang).first(where: { $0.id == session.chapterNumber }) {
+            continueReadingChapterName = chapter.displayComplexName
+        }
     }
 
     private func performDailyAyahFetch(clearDetailOnStart: Bool) async {
@@ -127,7 +104,7 @@ final class TodayDiscoveryViewModel {
             let response = try await ayahTask
             guard generation == dailyAyahFetchGeneration else { return }
             guard let verse = response.verse else {
-                throw QFError.parsingError("daily verse payload")
+                throw NSError(domain: "TodayDiscovery", code: -1, userInfo: [NSLocalizedDescriptionKey: "daily verse payload missing"])
             }
 
             detail = .init(verse)

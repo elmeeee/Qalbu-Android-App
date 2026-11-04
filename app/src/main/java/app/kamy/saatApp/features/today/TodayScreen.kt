@@ -96,6 +96,7 @@ import app.kamy.saatApp.infrastructure.preferences.LocationMode
 import app.kamy.saatApp.infrastructure.preferences.LocationPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.OnboardingStore
 import app.kamy.saatApp.ui.components.CoachMarkOverlay
+import app.kamy.saatApp.ui.components.TanyaSaatFab
 import app.kamy.saatApp.ui.components.coachMarkTarget
 import app.kamy.saatApp.ui.components.rememberCoachMarkState
 import app.kamy.saatApp.infrastructure.audio.AudioPlayerController
@@ -442,6 +443,7 @@ fun TodayScreen(
                         },
                         hijriLabel = prayerState.hijriLabel,
                         gregorianLabel = prayerState.gregorianLabel,
+                        userFirstName = todayState.userFirstName,
                         isScrolled = isScrolled,
                         isDarkBackground = cardDrawable != R.drawable.day,
                         onLocationClick = prayerVm::openLocationSheet,
@@ -607,14 +609,29 @@ fun TodayScreen(
                         }
                     }
                 }
+
             }
         }
+
+        if (!tanyaSaatState.isSheetVisible) {
+            TanyaSaatFab(
+                onClick = tanyaSaatVm::openSheet,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        end = 20.dp,
+                        bottom = floatingNavAndAudioBottomPadding(audioState.currentUrl != null) + 12.dp
+                    )
+            )
+        }
+
     }
 
     if (tanyaSaatState.isSheetVisible) {
         app.kamy.saatApp.ui.components.TanyaSaatFullScreen(
             state = tanyaSaatState,
             onDismiss = tanyaSaatVm::closeSheet,
+            onModelSelected = tanyaSaatVm::onModelSelected,
             onMoodSelected = tanyaSaatVm::onMoodSelected,
             onInputChanged = tanyaSaatVm::onInputTextChanged,
             onSendMessage = tanyaSaatVm::sendMessage,
@@ -625,7 +642,10 @@ fun TodayScreen(
             onBookmarkVerse = { verseData ->
                 tanyaSaatVm.bookmarkVerse(context, verseData)
             },
-            onClearToast = tanyaSaatVm::clearToast
+            onClearToast = tanyaSaatVm::clearToast,
+            onFollowUp = tanyaSaatVm::askFollowUp,
+            onNewChat = tanyaSaatVm::startNewChat,
+            onRetry = tanyaSaatVm::retryLast
         )
     }
 

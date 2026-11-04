@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "bead_small_04.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

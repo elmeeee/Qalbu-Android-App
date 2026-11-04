@@ -15,7 +15,7 @@ enum ChapterReaderPreferences {
     static let translationDidChangeNotification = Notification.Name("chapterReaderTranslationDidChange")
 
     static var defaultTranslationId: Int {
-        max(AppEndpoints.Runtime.defaultTranslationId, 1)
+        33 // Indonesian Kemenag translation ID default
     }
 
     static func selectedTranslationId(defaults: UserDefaults = .standard) -> Int {

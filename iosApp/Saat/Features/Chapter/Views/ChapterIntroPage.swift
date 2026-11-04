@@ -22,7 +22,16 @@ struct ChapterIntroPage: View {
 
     var body: some View {
         ZStack {
-            ChapterReaderBackground()
+            LinearGradient(
+                colors: [
+                    Color(hex: 0xFF042F22),
+                    Color(hex: 0xFF064E3B),
+                    Color(hex: 0xFF02241A)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer(minLength: 20)
@@ -91,11 +100,11 @@ struct ChapterIntroPage: View {
                 // ── Arabic Name ──────────────────────────────────────
                 if let arabic = chapter.nameArabic, arabic.isEmpty == false {
                     Text(arabic)
-                        .font(.system(size: 60, weight: .bold))
+                        .font(SaatTypography.quranArabic(size: 56))
                         .foregroundColor(.white)
                         .environment(\.layoutDirection, .rightToLeft)
                         .multilineTextAlignment(.center)
-                        .shadow(color: Color.Token.gold.opacity(0.35), radius: 12, y: 6)
+                        .shadow(color: Color.Token.gold.opacity(0.45), radius: 14, y: 6)
                         .offset(y: appear ? 0 : 10)
                         .opacity(appear ? 1 : 0)
                         .padding(.bottom, 8)
@@ -169,6 +178,7 @@ struct ChapterIntroPage: View {
             .padding(.horizontal, 28)
             .padding(.top, chromeInsets.top)
             .padding(.bottom, chromeInsets.bottom)
+            .frame(maxWidth: 600)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .contentShape(Rectangle())
             .onTapGesture {

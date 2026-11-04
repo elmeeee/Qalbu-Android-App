@@ -24,11 +24,10 @@ final class TodayDiscoveryCoordinator {
         self.audio = audio
     }
 
-    func bootstrap(container: AppContainer, verseState: TodayVerseState) async {
+    func bootstrap(container: AppContainer) async {
         if dashboardViewModel == nil {
             dashboardViewModel = PrayerDashboardViewModel(controller: prayer)
         }
-        await verseState.syncFromCachedProfile(container: container)
 
         guard discoveryViewModel == nil else {
             discoveryViewModel?.autoRefreshDailyAyahIfNeeded(forceIfNoData: true)
@@ -45,31 +44,20 @@ final class TodayDiscoveryCoordinator {
             tafsirPresenter = TafsirPresenter(content: container.content)
         }
         vm.autoRefreshDailyAyahIfNeeded(forceIfNoData: true)
+        await vm.loadContinueReading()
         prayer.refreshIfNeeded()
     }
 
-    func onVerseKeyChanged(
-        _ newKey: String?,
-        verseState: TodayVerseState,
-        discovery: TodayDiscoveryViewModel
-    ) {
-        let arabic = discovery.detail?.displayText ?? ""
-        let label = newKey.flatMap { ShareVerseCard.humanLabel(for: $0) }
-        verseState.setVerse(key: newKey, label: label, arabic: arabic)
-
+    func onVerseKeyChanged(_ newKey: String?) {
         guard let newKey else { return }
-        Task {
-            await tafsirPresenter?.prefetch(ayahKey: newKey)
-            if let verse = discovery.detail {
-                await discovery.prefetchShareTextIfNeeded(for: verse)
-            }
-        }
+        Task { await tafsirPresenter?.prefetch(ayahKey: newKey) }
     }
 
     func refreshToday(discovery: TodayDiscoveryViewModel?) async {
         async let prayerRefresh: Void = prayer.forceRefresh()
         if let discovery {
             await discovery.refreshDailyAyah()
+            await discovery.loadContinueReading()
         }
         await prayerRefresh
     }

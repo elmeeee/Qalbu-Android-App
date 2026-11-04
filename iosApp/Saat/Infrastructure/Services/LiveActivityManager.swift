@@ -72,8 +72,11 @@ final class LiveActivityManager {
         )
         let content = ActivityContent(state: state, staleDate: nil)
 
-        Task {
-            await activity.update(content)
+        let activityID = activity.id
+        Task.detached {
+            if let targetActivity = Activity<QuranPlaybackAttributes>.activities.first(where: { $0.id == activityID }) {
+                await targetActivity.update(content)
+            }
         }
     }
 
@@ -89,10 +92,14 @@ final class LiveActivityManager {
             totalVerses: 0
         )
         let content = ActivityContent(state: finalState, staleDate: nil)
-
-        Task {
-            await activity.end(content, dismissalPolicy: .immediate)
-        }
+        let activityID = activity.id
         currentActivity = nil
+
+        Task.detached {
+            if let targetActivity = Activity<QuranPlaybackAttributes>.activities.first(where: { $0.id == activityID }) {
+                await targetActivity.end(content, dismissalPolicy: .immediate)
+            }
+        }
     }
 }
+

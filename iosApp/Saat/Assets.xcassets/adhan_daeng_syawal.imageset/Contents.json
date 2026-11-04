@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "adhan_daeng_syawal.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

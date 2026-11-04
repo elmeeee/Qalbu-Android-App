@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "sahih_international.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

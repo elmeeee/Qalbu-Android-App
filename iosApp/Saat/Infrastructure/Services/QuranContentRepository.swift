@@ -9,13 +9,10 @@
 import Foundation
 
 struct QuranContentRepository: Sendable {
-    private let client: QFApiClient
     private let local = LocalQuranDataSource()
     private let hadithLocal = LocalHadithDataSource()
 
-    init(client: QFApiClient) {
-        self.client = client
-    }
+    init() {}
 
     func getChapters(language: String = "en") async throws -> [QuranChapter] {
         let normalizedLang = language.hasPrefix("id") || language.hasPrefix("ms") ? "id" : "en"
@@ -88,17 +85,6 @@ struct QuranContentRepository: Sendable {
     }
 
     func getTafsirByAyah(resourceId: String, ayahKey: String) async throws -> TafsirResponse {
-        do {
-            let response: TafsirResponse = try await client.send(
-                QuranContentEndpoint.tafsirByAyah(resourceId: resourceId, ayahKey: ayahKey, query: [])
-            )
-            if let t = response.tafsir, t.text?.isEmpty == false {
-                return response
-            }
-        } catch {
-            print("API Tafsir fetch failed, falling back to local database: \(error.localizedDescription)")
-        }
-        
         let localId = (resourceId == "16" || resourceId == "jalalayn") ? "jalalayn" : "local"
         if let payload = try await local.getTafsirByAyah(ayahKey: ayahKey, resourceId: localId) {
             return TafsirResponse(tafsir: payload)
@@ -113,15 +99,7 @@ struct QuranContentRepository: Sendable {
         limit: Int = 4
     ) async throws -> HadithsByAyahResponse {
         return try await hadithLocal.getHadithsByAyah(ayahKey: ayahKey, page: page, limit: limit, language: language) {
-            let clampedLimit = min(max(limit, 1), 5)
-            let query: [URLQueryItem] = [
-                URLQueryItem(name: "language", value: language),
-                URLQueryItem(name: "page", value: String(max(page, 1))),
-                URLQueryItem(name: "limit", value: String(clampedLimit))
-            ]
-            return try await client.send(
-                QuranContentEndpoint.hadithsByAyah(ayahKey: ayahKey, query: query)
-            )
+            return HadithsByAyahResponse(hadiths: [], page: page, limit: limit, hasMore: false, language: language, direction: nil)
         }
     }
 
@@ -139,21 +117,14 @@ struct QuranContentRepository: Sendable {
 
     func getTranslations(language: String = "en") async throws -> TranslationsResponse {
         let trans = [
-            QFTranslation(id: 1, name: "Indonesian", authorName: "Kementerian Agama RI", slug: "id", languageName: "indonesian", translatedName: QFTranslation.TranslatedName(name: "Indonesian", languageName: "indonesian")),
-            QFTranslation(id: 2, name: "Sahih International", authorName: "Sahih International", slug: "en", languageName: "english", translatedName: QFTranslation.TranslatedName(name: "Sahih International", languageName: "english")),
-            QFTranslation(id: 3, name: "Malay", authorName: "DBP", slug: "my", languageName: "malay", translatedName: QFTranslation.TranslatedName(name: "Malay", languageName: "malay")),
-            QFTranslation(id: 4, name: "Kemenag (Arab Latin)", authorName: "Kementerian Agama RI", slug: "kemenag", languageName: "indonesian", translatedName: QFTranslation.TranslatedName(name: "Kemenag", languageName: "indonesian"))
+            QuranTranslation(id: 1, name: "Indonesian", authorName: "Kementerian Agama RI", slug: "id", languageName: "indonesian", translatedName: QuranTranslation.TranslatedName(name: "Indonesian", languageName: "indonesian")),
+            QuranTranslation(id: 2, name: "Sahih International", authorName: "Sahih International", slug: "en", languageName: "english", translatedName: QuranTranslation.TranslatedName(name: "Sahih International", languageName: "english")),
+            QuranTranslation(id: 3, name: "Malay", authorName: "DBP", slug: "my", languageName: "malay", translatedName: QuranTranslation.TranslatedName(name: "Malay", languageName: "malay")),
+            QuranTranslation(id: 4, name: "Kemenag (Arab Latin)", authorName: "Kementerian Agama RI", slug: "kemenag", languageName: "indonesian", translatedName: QuranTranslation.TranslatedName(name: "Kemenag", languageName: "indonesian"))
         ]
         return TranslationsResponse(translations: trans)
     }
 
-    func getVerseByKey(verseKey: String) async throws -> SingleVerseResponse {
-        let normalizedTranslationId = normalizeTranslationId(ChapterReaderPreferences.selectedTranslationId())
-        if let payload = try await local.getVerseByKey(verseKey, translationId: normalizedTranslationId, recitationId: 6) {
-            return SingleVerseResponse(verse: payload)
-        }
-        throw NSError(domain: "LocalQuran", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to load verse."])
-    }
 
     // Normalizers
     private func normalizeTranslationId(_ savedId: Int) -> Int {
@@ -167,7 +138,7 @@ struct QuranContentRepository: Sendable {
 
     private func normalizeRecitationId(_ savedId: Int) -> Int {
         if (1...6).contains(savedId) { return savedId }
-        // Map legacy QF IDs (e.g. 7 or other ones)
+        // Map legacy recitation IDs to default (Mishary Alafasy)
         return 1
     }
 }
