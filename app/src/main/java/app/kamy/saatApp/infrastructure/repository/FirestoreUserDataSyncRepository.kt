@@ -350,6 +350,24 @@ class FirestoreUserDataSyncRepository @Inject constructor(
         userDocRef.set(profileMeta, SetOptions.merge()).await()
     }
 
+    override suspend fun deleteCloudUserData(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val userDocRef = firestore.collection("users").document(userId)
+            val docsToDelete = listOf(
+                userDocRef.collection("quran").document("personal"),
+                userDocRef.collection("tracker").document("prayer"),
+                userDocRef.collection("tasbih").document("dhikr")
+            )
+            for (doc in docsToDelete) {
+                runCatching { doc.delete().await() }
+            }
+            runCatching { userDocRef.delete().await() }
+            prefs.edit().remove(KEY_LAST_SYNC_TIME).apply()
+            _syncState.value = SyncState(status = SyncStatus.IDLE)
+            Unit
+        }
+    }
+
     companion object {
         private const val PREFS_NAME = "saat_cloud_sync_prefs"
         private const val KEY_LAST_SYNC_TIME = "last_sync_time_millis"

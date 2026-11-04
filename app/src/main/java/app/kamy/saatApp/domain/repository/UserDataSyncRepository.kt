@@ -33,5 +33,10 @@ interface UserDataSyncRepository {
      * Downloads cloud data from Firestore and restores it to local stores.
      */
     suspend fun downloadCloudToLocal(userId: String): Result<Unit>
+
+    /**
+     * Deletes all cloud data for the given [userId] in Firestore.
+     */
+    suspend fun deleteCloudUserData(userId: String): Result<Unit>
 }
 

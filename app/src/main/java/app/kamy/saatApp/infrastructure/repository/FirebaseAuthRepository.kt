@@ -156,6 +156,30 @@ class FirebaseAuthRepository @Inject constructor(
             }
         }
 
+    override suspend fun deleteAccount(context: Context): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val user = auth.currentUser ?: throw Exception("Tidak ada pengguna yang sedang masuk")
+                try {
+                    user.delete().await()
+                } catch (e: com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException) {
+                    throw Exception("Demi keamanan, silakan keluar lalu masuk kembali sebelum menghapus akun.")
+                } catch (e: FirebaseAuthException) {
+                    throw Exception(mapFirebaseAuthError(e))
+                } catch (e: Exception) {
+                    throw Exception(e.message ?: "Gagal menghapus akun")
+                }
+                _currentUser.value = null
+                try {
+                    val credentialManager = CredentialManager.create(context)
+                    credentialManager.clearCredentialState(ClearCredentialStateRequest())
+                } catch (e: Exception) {
+                    Log.w(TAG, "Gagal membersihkan sesi kredensial: ${e.message}")
+                }
+                Unit
+            }
+        }
+
     private fun mapFirebaseAuthError(e: FirebaseAuthException): String = when (e.errorCode) {
         "ERROR_INVALID_EMAIL", "invalid-email" -> "Format email tidak valid"
         "ERROR_WRONG_PASSWORD", "wrong-password", "invalid-credential" -> "Email atau kata sandi salah"

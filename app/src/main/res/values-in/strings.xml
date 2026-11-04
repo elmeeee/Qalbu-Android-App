@@ -542,6 +542,9 @@
     <string name="account_sign_out_confirm_title">Keluar dari akun?</string>
     <string name="account_sign_out_confirm_desc">Data lokal tetap ada di perangkat ini, namun sinkronisasi otomatis akan dijeda sampai Anda masuk kembali.</string>
     <string name="account_sign_out_cancel">Batal</string>
+    <string name="account_delete_button">Hapus Akun</string>
+    <string name="account_delete_confirm_title">Hapus Akun Permanen?</string>
+    <string name="account_delete_confirm_desc">Seluruh data akun dan cadangan di cloud (bookmark, catatan, khatam, tracker shalat, dan tasbih) akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.</string>
     <string name="account_sign_in_email">Masuk / Daftar dengan Email</string>
     <string name="account_or_divider">atau</string>
     <string name="account_email_label">Alamat Email</string>

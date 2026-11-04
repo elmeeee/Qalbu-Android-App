@@ -953,6 +953,9 @@
     <string name="account_sign_out_confirm_title">Sign out from account?</string>
     <string name="account_sign_out_confirm_desc">Your local data will remain on this device, but new data won\'t be synced until you sign in again.</string>
     <string name="account_sign_out_cancel">Cancel</string>
+    <string name="account_delete_button">Delete Account</string>
+    <string name="account_delete_confirm_title">Permanently Delete Account?</string>
+    <string name="account_delete_confirm_desc">All your account data and cloud backups (bookmarks, notes, khatam, prayer tracker, and dhikr) will be permanently deleted. This action cannot be undone.</string>
     <string name="account_sign_in_email">Sign in with Email</string>
     <string name="account_or_divider">or</string>
     <string name="account_email_label">Email address</string>

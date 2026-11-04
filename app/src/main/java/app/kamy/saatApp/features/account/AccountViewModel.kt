@@ -761,6 +761,32 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    fun deleteAccount(context: Context) {
+        val user = _state.value.authUser ?: return
+        viewModelScope.launch {
+            _state.update { it.copy(isAuthLoading = true, authErrorMessage = null) }
+            // 1. Delete cloud user data in Firestore
+            syncRepository.deleteCloudUserData(user.uid)
+            // 2. Delete user from Firebase Auth & clear credential session
+            val result = authRepository.deleteAccount(context)
+            result.onSuccess {
+                _state.update {
+                    it.copy(
+                        isAuthLoading = false,
+                        authSuccessMessage = "Akun dan data Anda telah berhasil dihapus permanen"
+                    )
+                }
+            }.onFailure { error ->
+                _state.update {
+                    it.copy(
+                        isAuthLoading = false,
+                        authErrorMessage = error.message ?: "Gagal menghapus akun"
+                    )
+                }
+            }
+        }
+    }
+
     fun dismissAuthError() {
         _state.update { it.copy(authErrorMessage = null) }
     }

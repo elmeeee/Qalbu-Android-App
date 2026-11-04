@@ -538,6 +538,9 @@
     <string name="account_sign_out_confirm_title">Log keluar dari akaun?</string>
     <string name="account_sign_out_confirm_desc">Data setempat akan kekal pada peranti ini, tetapi penyegerakan baharu akan dijeda sehingga anda log masuk semula.</string>
     <string name="account_sign_out_cancel">Batal</string>
+    <string name="account_delete_button">Padam Akaun</string>
+    <string name="account_delete_confirm_title">Padam Akaun Kekal?</string>
+    <string name="account_delete_confirm_desc">Semua data akaun dan sandaran awan anda (penanda halaman, nota, khatam, penjejak solat, dan tasbih) akan dipadam secara kekal. Tindakan ini tidak boleh dibatalkan.</string>
     <string name="account_sign_in_email">Log masuk / Daftar dengan Emel</string>
     <string name="account_or_divider">atau</string>
     <string name="account_email_label">Alamat Emel</string>

@@ -414,7 +414,8 @@ private fun AccountSettingsContent(
                     isSyncing = state.isSyncing,
                     lastSyncTimeMillis = state.lastSyncTimeMillis,
                     onSyncNow = { vm.syncNow() },
-                    onSignOut = { vm.signOut(context) }
+                    onSignOut = { vm.signOut(context) },
+                    onDeleteAccount = { vm.deleteAccount(context) }
                 )
             }
 
@@ -2800,9 +2801,52 @@ private fun AccountSyncProfileCard(
     lastSyncTimeMillis: Long?,
     onSyncNow: () -> Unit,
     onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showSignOutDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { if (!isLoading) showDeleteDialog = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.account_delete_confirm_title),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = Color(0xFFB91C1C))
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(R.string.account_delete_confirm_desc),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !isLoading,
+                    onClick = {
+                        showDeleteDialog = false
+                        onDeleteAccount()
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.account_delete_button),
+                        color = Color(0xFFB91C1C),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    enabled = !isLoading,
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text(stringResource(R.string.account_sign_out_cancel))
+                }
+            }
+        )
+    }
 
     if (showSignOutDialog) {
         AlertDialog(
@@ -3020,6 +3064,32 @@ private fun AccountSyncProfileCard(
                         )
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+            HorizontalDivider(color = Color(0xFFF1F5F9))
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.account_delete_button),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = Color(0xFFDC2626),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable(
+                            enabled = !isLoading && !isSyncing,
+                            onClick = { showDeleteDialog = true }
+                        )
+                        .padding(horizontal = 6.dp, vertical = 4.dp)
+                )
             }
         }
     }
