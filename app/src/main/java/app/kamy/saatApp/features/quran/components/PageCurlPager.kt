@@ -22,6 +22,8 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
 
+private val PaperBack = Color(0xFFF1E9D8)
+
 @Composable
 fun PageCurlPager(
     state: PagerState,
@@ -56,7 +58,7 @@ fun PageCurlPager(
                         return@graphicsLayer
                     }
 
-                    cameraDistance = 32f * density
+                    cameraDistance = 14f * density
 
                     when {
                         // Turning page (folding forward around the spine hinge at the left)
@@ -160,10 +162,19 @@ fun PageCurlPager(
                                 }
 
                                 // 4. Ambient Tilt Darkening (as the page turns away from the light)
-                                val tiltDarkening = (0.20f * sinP).coerceIn(0f, 1f)
+                                // Light falls off toward the free edge as the leaf lifts away from the page.
+                                val tiltDarkening = (0.26f * sinP).coerceIn(0f, 1f)
                                 if (tiltDarkening > 0.005f) {
                                     drawRect(
-                                        color = Color.Black.copy(alpha = tiltDarkening),
+                                        brush = Brush.horizontalGradient(
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                Color.Black.copy(alpha = tiltDarkening * 0.4f),
+                                                Color.Black.copy(alpha = tiltDarkening)
+                                            ),
+                                            startX = 0f,
+                                            endX = w
+                                        ),
                                         size = size
                                     )
                                 }
@@ -180,6 +191,11 @@ fun PageCurlPager(
                             } else {
                                 // Back face of the physical page (p in 0.5f..1.0f)
                                 val backProgress = (p - 0.5f) * 2f // 0 to 1
+
+                                // Opaque reverse side of the paper: blank, slightly warmer than the front.
+                                drawRect(color = PaperBack, size = size)
+                                // Faint bleed-through of the printed side so the leaf feels thin.
+                                drawRect(color = Color.Black.copy(alpha = 0.03f), size = size)
 
                                 // Spine crease shadow on the right side of the back-face
                                 val spineWidth = w * 0.18f
