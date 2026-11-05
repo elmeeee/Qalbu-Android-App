@@ -5,7 +5,7 @@
     -->
     <style name="Theme.Saat" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/al_khatib_screen_background</item>
-        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="28">shortEdges</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">always</item>
     </style>
 
     <!-- Splash screen: #FCEFD5 bg with centered logo icon.

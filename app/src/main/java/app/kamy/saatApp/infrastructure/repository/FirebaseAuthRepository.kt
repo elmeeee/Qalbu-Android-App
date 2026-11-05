@@ -232,19 +232,9 @@ class FirebaseAuthRepository @Inject constructor(
                 val keepAvatar = _currentUser.value?.takeIf { it.uid == firebaseUser.uid }?.avatarKey
                 val updatedUser = (auth.currentUser ?: firebaseUser).toAuthUser(keepAvatar)
                 _currentUser.value = updatedUser
-                // Persist the name to users/{uid} so it survives re-login and other devices.
-                // Auth already holds the new name, so a Firestore failure is logged, not thrown.
-                runCatching {
-                    firestore.collection("users").document(firebaseUser.uid)
-                        .set(
-                            mapOf(
-                                "uid" to firebaseUser.uid,
-                                "displayName" to cleanName,
-                                "updatedAt" to FieldValue.serverTimestamp()
-                            ),
-                            SetOptions.merge()
-                        ).await()
-                }.onFailure { Log.w(TAG, "Failed to save displayName to Firestore", it) }
+                // Persist to users/{uid} in the background. Firestore's write Task completes only
+                // after server acknowledgement, so awaiting it would keep the UI loading when offline.
+                saveDisplayName(firebaseUser.uid, cleanName)
                 updatedUser
             }
         }
@@ -370,7 +360,8 @@ class FirebaseAuthRepository @Inject constructor(
             email = email,
             displayName = displayName,
             photoUrl = photoUrl?.toString(),
-            avatarKey = avatarKey
+            avatarKey = avatarKey,
+            providerIds = providerData.map { it.providerId }
         )
 
     private class CancellationException(message: String) : Exception(message)

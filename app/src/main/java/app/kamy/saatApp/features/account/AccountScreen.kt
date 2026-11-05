@@ -142,6 +142,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.graphicsLayer
 import android.content.Context
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material.icons.filled.CheckCircle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,6 +160,19 @@ fun AccountScreen(
     val currentDetailScreen = rememberSaveable { mutableStateOf<String?>(null) }
     var showUpToDateSheet by rememberSaveable { mutableStateOf(false) }
     val mainScrollState = rememberScrollState()
+    val accountSnackbar = remember { SnackbarHostState() }
+    val snackbarScope = rememberCoroutineScope()
+    LaunchedEffect(state.authSuccessMessage) {
+        state.authSuccessMessage?.let { msg ->
+            // Show on a composition-bound scope: clearing the message below changes this
+            // effect's key, which would otherwise cancel the snackbar before it appears.
+            snackbarScope.launch {
+                accountSnackbar.currentSnackbarData?.dismiss()
+                accountSnackbar.showSnackbar(msg)
+            }
+            vm.dismissAuthSuccessMessage()
+        }
+    }
 
     LaunchedEffect(currentDetailScreen.value) {
         onAccountDetailScreenChanged(currentDetailScreen.value != null)
@@ -186,6 +204,7 @@ fun AccountScreen(
                 AccountDetailScreen(
                     state = state,
                     vm = vm,
+                    snackbarHostState = accountSnackbar,
                     onBack = { currentDetailScreen.value = null }
                 )
             }
@@ -326,12 +345,7 @@ fun AccountScreen(
         )
     }
 
-    LaunchedEffect(state.authSuccessMessage) {
-        state.authSuccessMessage?.let { msg ->
-            android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
-            vm.dismissAuthSuccessMessage()
-        }
-    }
+
 
     if (state.showEmailAuthSheet) {
         EmailAuthBottomSheet(
@@ -3252,6 +3266,7 @@ private fun AccountSyncProfileCard(
 fun AccountDetailScreen(
     state: AccountUiState,
     vm: AccountViewModel,
+    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -3309,6 +3324,7 @@ fun AccountDetailScreen(
         )
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -3465,21 +3481,19 @@ fun AccountDetailScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // 2. Section: Informasi Profil (Editable)
+            // 2. Section: Profile information. Name is editable with an explicit save row,
+            // email is read-only with its verified state shown outside the field.
             SettingsSectionHeader(stringResource(R.string.account_detail_section_profile))
             SettingsCard {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.account_name_label),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color(0xFF334155)
-                    )
-                    Spacer(Modifier.height(6.dp))
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+                    ProfileFieldLabel(stringResource(R.string.account_name_label))
+                    Spacer(Modifier.height(8.dp))
                     OutlinedTextField(
                         value = displayNameInput,
                         onValueChange = { displayNameInput = it },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        enabled = !state.isAuthLoading,
                         placeholder = { Text(stringResource(R.string.account_name_hint)) },
                         leadingIcon = {
                             Icon(
@@ -3489,50 +3503,7 @@ fun AccountDetailScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                         },
-                        trailingIcon = {
-                            if (hasNameChanged) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = SaatColors.DeepEmerald,
-                                    modifier = Modifier
-                                        .padding(end = 4.dp)
-                                        .clickable(
-                                            enabled = !state.isAuthLoading,
-                                            onClick = { vm.updateProfile(displayNameInput) }
-                                        )
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        if (state.isAuthLoading) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(12.dp),
-                                                color = Color.White,
-                                                strokeWidth = 1.5.dp
-                                            )
-                                        } else {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Check,
-                                                contentDescription = null,
-                                                tint = Color.White,
-                                                modifier = Modifier.size(13.dp)
-                                            )
-                                            Spacer(Modifier.width(4.dp))
-                                            Text(
-                                                text = stringResource(R.string.account_detail_save_changes),
-                                                style = MaterialTheme.typography.labelSmall.copy(
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 11.sp
-                                                ),
-                                                color = Color.White
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = Color(0xFFF8FAFC),
                             unfocusedContainerColor = Color(0xFFF8FAFC),
@@ -3540,66 +3511,121 @@ fun AccountDetailScreen(
                             unfocusedBorderColor = Color(0xFFE2E8F0)
                         )
                     )
-
-                    Spacer(Modifier.height(16.dp))
-                    HorizontalDivider(color = Color(0xFFF1F5F9))
-                    Spacer(Modifier.height(16.dp))
-
-                    Text(
-                        text = stringResource(R.string.account_email_label),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color(0xFF334155)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    OutlinedTextField(
-                        value = user.email ?: "-",
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.Mail,
-                                contentDescription = null,
-                                tint = Color(0xFF64748B),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        trailingIcon = {
-                            Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFFECFDF5)
+                    AnimatedVisibility(visible = hasNameChanged) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextButton(
+                                onClick = { displayNameInput = user.displayName ?: "" },
+                                enabled = !state.isAuthLoading
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.CheckCircle,
-                                        contentDescription = null,
-                                        tint = Color(0xFF10B981),
-                                        modifier = Modifier.size(12.dp)
+                                Text(
+                                    text = stringResource(R.string.account_detail_cancel),
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = { vm.updateProfile(displayNameInput) },
+                                enabled = !state.isAuthLoading,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
+                            ) {
+                                if (state.isAuthLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(14.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
                                     )
-                                    Spacer(Modifier.width(4.dp))
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = stringResource(R.string.account_detail_verified),
-                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp, fontWeight = FontWeight.Bold),
-                                        color = Color(0xFF047857)
+                                        text = stringResource(R.string.account_detail_save_changes),
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                                     )
                                 }
                             }
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFF1F5F9),
-                            unfocusedContainerColor = Color(0xFFF1F5F9),
-                            focusedBorderColor = Color(0xFFE2E8F0),
-                            unfocusedBorderColor = Color(0xFFE2E8F0)
-                        )
-                    )
+                        }
+                    }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(18.dp))
                     HorizontalDivider(color = Color(0xFFF1F5F9))
-                    Spacer(Modifier.height(14.dp))
+                    Spacer(Modifier.height(18.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ProfileFieldLabel(stringResource(R.string.account_email_label))
+                        Spacer(Modifier.weight(1f))
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Color(0xFFECFDF5),
+                            border = BorderStroke(1.dp, Color(0xFFA7F3D0))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = null,
+                                    tint = Color(0xFF10B981),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.account_detail_verified),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = Color(0xFF047857)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFFF1F5F9))
+                            .padding(horizontal = 14.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Mail,
+                            contentDescription = null,
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = user.email ?: "-",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color(0xFF334155),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = Icons.Outlined.Lock,
+                            contentDescription = null,
+                            tint = Color(0xFF94A3B8),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Spacer(Modifier.height(18.dp))
+                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    Spacer(Modifier.height(16.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -3608,16 +3634,16 @@ fun AccountDetailScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.account_detail_sign_in_method),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            color = Color(0xFF475569)
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF64748B)
                         )
-                        val providerName = if (user.photoUrl != null && user.photoUrl.contains("google")) {
-                            stringResource(R.string.account_detail_provider_google)
-                        } else {
-                            stringResource(R.string.account_detail_provider_email)
-                        }
+                        val isGoogle = user.providerIds.contains("google.com")
                         Text(
-                            text = providerName,
+                            text = if (isGoogle) {
+                                stringResource(R.string.account_detail_provider_google)
+                            } else {
+                                stringResource(R.string.account_detail_provider_email)
+                            },
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = Color(0xFF0F172A)
                         )
@@ -3754,6 +3780,51 @@ fun AccountDetailScreen(
             }
         }
     }
+    // Custom snackbar, same style as the Ramadan / Ten Nights screens.
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .navigationBarsPadding()
+            .padding(bottom = 20.dp, start = 20.dp, end = 20.dp)
+    ) { data ->
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = SaatColors.HomeDarkGreen,
+            shadowElevation = 10.dp,
+            border = BorderStroke(1.dp, SaatColors.ArcGold.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE6F4EA)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = SaatColors.HomeDarkGreen,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Text(
+                    text = data.visuals.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+    }
 }
 
 /**
@@ -3781,6 +3852,15 @@ private fun BrandAvatarImage(
             contentScale = ContentScale.Fit
         )
     }
+}
+
+@Composable
+private fun ProfileFieldLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.3.sp),
+        color = Color(0xFF475569)
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
