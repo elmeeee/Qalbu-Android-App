@@ -99,6 +99,7 @@ enum class AyahPlaybackMode {
 }
 
 private const val HADITH_PAGE_LIMIT = 4
+private const val END_PAGE_SIZE = 50
 
 @HiltViewModel
 class ChapterReaderViewModel @Inject constructor(
@@ -1038,23 +1039,31 @@ class ChapterReaderViewModel @Inject constructor(
         }
         viewModelScope.launch {
             runCatching {
-                fetchVersePage(page = 1)
-            }.onSuccess { resp ->
+                // Load every page from 1..N so the reader has the full surah/juz in order,
+                // then land on the true final ayah (not just the first 50).
+                val first = fetchVersePage(page = 1, perPage = END_PAGE_SIZE)
+                val totalPages = first.pagination?.totalPages ?: 1
+                val all = first.verses.toMutableList()
+                for (p in 2..totalPages) {
+                    all += fetchVersePage(page = p, perPage = END_PAGE_SIZE).verses
+                }
+                all.distinctBy { it.listIdentity } to totalPages
+            }.onSuccess { (allVerses, totalPages) ->
                 val trans = translationStore.showTranslation.value
                 val translit = translationStore.showTransliteration.value
                 val tajweed = translationStore.isTajweedEnabled.value
                 val arabicType = translationStore.arabicTextType.value
                 val rec = translationStore.currentRecitationId()
                 val tid = LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
-                val lastIdx = (resp.verses.size - 1).coerceAtLeast(0)
+                val firstIdx = 0
 
                 _state.update { 
                     it.copy(
                         isLoading = false,
-                        verses = resp.verses,
-                        currentVerseIndex = lastIdx,
-                        loadedApiPage = resp.pagination?.currentPage ?: 1,
-                        hasMore = resp.pagination?.hasNextPage ?: false,
+                        verses = allVerses,
+                        currentVerseIndex = firstIdx,
+                        loadedApiPage = totalPages,
+                        hasMore = false,
                         selectedTranslationId = tid,
                         showTranslation = trans,
                         showTransliteration = translit,
@@ -1063,8 +1072,8 @@ class ChapterReaderViewModel @Inject constructor(
                         selectedRecitationId = rec
                     ) 
                 }
-                _events.tryEmit(ReaderEvent.AnimateToPage(lastIdx))
-                refreshPersonalVerseState(lastIdx)
+                _events.tryEmit(ReaderEvent.AnimateToPage(firstIdx))
+                refreshPersonalVerseState(firstIdx)
             }.onFailure { t ->
                 _state.update { it.copy(isLoading = false, error = t.toAppError()) }
             }

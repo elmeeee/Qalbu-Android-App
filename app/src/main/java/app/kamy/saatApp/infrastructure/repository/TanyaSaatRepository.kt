@@ -22,6 +22,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -58,8 +62,10 @@ class TanyaSaatRepository @Inject constructor(
             return@withContext createAiUnavailableMessage(currentLang)
         }
 
+        // Greeting is only allowed in the very first reply of a conversation.
+        val isFirstTurn = history.none { it.sender == ChatSender.AI && !it.isError }
         val messages = buildConversation(
-            systemPrompt = buildSystemPrompt(currentLang, userFirstName),
+            systemPrompt = buildSystemPrompt(currentLang, userFirstName, isFirstTurn),
             history = history,
             userQuery = userQuery
         )
@@ -193,8 +199,18 @@ class TanyaSaatRepository @Inject constructor(
 
     // ── Prompt ──────────────────────────────────────────────────────────────
 
-    private fun buildSystemPrompt(lang: AppLanguage, userFirstName: String? = null): String {
+    private fun buildSystemPrompt(
+        lang: AppLanguage,
+        userFirstName: String? = null,
+        isFirstTurn: Boolean = true
+    ): String {
         val langName = lang.aiPromptLanguage
+
+        val greetingRule = if (isFirstTurn) {
+            "- GREETING (first reply only): This is the first reply of the conversation, so you may open with \"Assalamu'alaikum\" once. Never repeat it in later replies."
+        } else {
+            "- GREETING: This is NOT the first reply. Do NOT open with \"Assalamu'alaikum\", \"Halo\", or any other greeting. Start directly with the answer."
+        }
 
         val personalization = if (!userFirstName.isNullOrBlank()) {
             """
@@ -205,33 +221,34 @@ class TanyaSaatRepository @Inject constructor(
             """.trimIndent()
         } else ""
 
+        // Concrete example (not bracketed placeholders) so the model never echoes "[Arabic]" labels.
         val transliterationExample = when (lang) {
             AppLanguage.ENGLISH -> """
-              Separate them with blank lines:
-              
-              [Complete Arabic text with full harakat on its own line]
-              
-              *[Complete Latin transliteration in italics on its own line]*
-              
-              Translation: [Translation in English on its own line]
+              Write the real Arabic, then the real transliteration, then the real meaning, each on its own line with a blank line between them. Example shape (use real content, never labels):
+
+              اِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ
+
+              *Innamal-mu'minuna ikhwah*
+
+              Translation: "Indeed, the believers are but brothers."
             """.trimIndent()
             AppLanguage.INDONESIAN -> """
-              Pisahkan dengan baris kosong:
-              
-              [Teks Arab berharakat lengkap pada baris tersendiri]
-              
-              *[Teks transliterasi Latin / cara baca miring pada baris tersendiri]*
-              
-              Artinya: [Terjemahan bahasa Indonesia pada baris tersendiri]
+              Tulis teks Arab asli, lalu transliterasinya, lalu artinya, masing-masing pada baris sendiri dengan baris kosong di antaranya. Contoh bentuk (gunakan isi nyata, JANGAN pernah menulis label seperti [Arabic]):
+
+              اِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ
+
+              *Innamal-mu'minuna ikhwah*
+
+              Artinya: "Sesungguhnya orang-orang beriman itu bersaudara."
             """.trimIndent()
             AppLanguage.MALAY -> """
-              Pisahkan dengan baris kosong:
-              
-              [Teks Arab berbaris lengkap pada baris tersendiri]
-              
-              *[Teks transliterasi Latin condong pada baris tersendiri]*
-              
-              Artinya: [Terjemahan bahasa Melayu pada baris tersendiri]
+              Tulis teks Arab asli, kemudian transliterasi, kemudian maksudnya, setiap satu pada baris sendiri dengan baris kosong di antaranya. Contoh bentuk (gunakan isi sebenar, JANGAN tulis label seperti [Arabic]):
+
+              اِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ
+
+              *Innamal-mu'minuna ikhwah*
+
+              Artinya: "Sesungguhnya orang-orang beriman itu bersaudara."
             """.trimIndent()
         }
 
@@ -248,7 +265,15 @@ class TanyaSaatRepository @Inject constructor(
         }
 
         return """
-            You are Kīmi, the Islamic knowledge companion inside the Sāat app: warm, humble, scholarly, profound, and precise. You speak like a deeply knowledgeable, wise ustadz and Islamic scholar who loves to teach with patience and adab, never like a robotic search engine.
+            You are Kīmi, the Islamic knowledge companion inside the Sāat app. You answer the way a wise, humble, long-experienced ustadz or senior scholar answers a student or a visitor who comes to a majlis: calm, sincere, clear, and kind. Never sound like an AI assistant, a search engine, or a customer-service bot.
+
+            VOICE & NATURALNESS (most important style rule)
+            - Speak in natural, flowing prose like a real scholar talking, not a template. Vary sentence length. Use warm, dignified phrasing.
+            - Start directly with the substance of the answer. Do NOT open with filler such as "Tentu!", "Pertanyaan yang bagus", "Berikut adalah", "Sebagai asisten AI", "Great question", "Certainly", "Here is".
+            - Do NOT over-structure short answers. Use headings, bullets, and bold only when the topic really needs them (long fiqh or history). A simple question deserves a few well-written paragraphs.
+            - Avoid robotic repetition, stiff disclaimers in every reply, and lists of hollow platitudes. A brief, natural reminder to consult a local scholar is enough when the matter truly needs it.
+            - Show wisdom through reasoning: explain the why behind a ruling, give a relatable example from daily life, and end with a short, sincere line of nasihat or doa when fitting.
+            - Keep the adab of the ulama: never belittle the reader, never sneer at other opinions, and be gentle when correcting a misconception.
 
             STRICT ISLAMIC SCOPE ONLY
             - You answer EXCLUSIVELY questions connected to Islam: the Qur'an and its tafsir; hadith and the sciences of hadith; aqidah (theology); fiqh of worship, family, finance, halal/haram, food, and daily life; the four classical madhhabs (Hanafi, Maliki, Shafi'i, Hanbali); dua and dhikr; akhlaq (character) and tazkiyatun nafs (spiritual purification); the Prophet Muhammad's ﷺ Sirah; the prophets, companions (Sahabah), Tabi'in, and classical scholars; Islamic history, civilizations, and dynasties (Khulafa' ar-Rashidun, Umayyads, Abbasids, al-Andalus, Seljuks, Ayyubids, Mamluks, Ottomans, Islam in Nusantara / Southeast Asia, etc.); the Islamic calendar; and contemporary ethical/social questions evaluated strictly through Islamic principles.
@@ -303,6 +328,8 @@ class TanyaSaatRepository @Inject constructor(
             - Length: Simple factual questions: 120-200 words. Comprehensive history, sirah, comparative fiqh, or deep spiritual questions: 350-700 words, rich with depth, context, and clear structure.
             - Write entirely in $langName, including headings, follow_ups, and reference notes.
             - Earlier assistant turns appear as plain text for context; your reply must always be the JSON object below.
+            $greetingRule
+            - PLAIN TEXT ONLY: Never output backslashes ("\\") in empathy_text, except the JSON escapes \n and \".
             $personalization
 
             OUTPUT: respond ONLY with one raw JSON object (no markdown fences, no text outside it):
@@ -368,7 +395,13 @@ class TanyaSaatRepository @Inject constructor(
             .replace("\\r", "\r")
             .replace("\\t", "\t")
             .replace("\\\"", "\"")
-            .replace("\\\\", "\\")
+            // Stray backslashes from the model (e.g. "\\\\\\") render as garbage in the chat.
+            .replace("\\", "")
+            // Drop placeholder labels the model sometimes echoes from the prompt, e.g. "[Arabic]".
+            .replace(
+                Regex("""(?m)^\s*\*?\[(?:Arabic|Latin|Translation|Teks|Terjemahan|Transliterasi)[^\]\n]*\]\*?\s*$\n?""", RegexOption.IGNORE_CASE),
+                ""
+            )
             .trim()
 
     private fun extractEnvelopeManually(text: String): SaatAiResponseEnvelope {
@@ -524,6 +557,76 @@ class TanyaSaatRepository @Inject constructor(
         }.getOrNull()
     }
 
+    private var cachedModels: List<KimiAiModel>? = null
+
+    /**
+     * Dynamically fetches active models from the Groq API and filters for
+     * models suitable for Saat / Tanya Kīmi (conversational LLMs, excluding
+     * audio and internal guard models).
+     */
+    suspend fun getAvailableModels(): List<KimiAiModel> = withContext(Dispatchers.IO) {
+        cachedModels?.let { return@withContext it }
+        val apiKey = AppConfig.groqApiKey
+        if (apiKey.isNullOrBlank()) {
+            return@withContext KimiAiModel.defaultList
+        }
+
+        try {
+            val request = Request.Builder()
+                .url(GROQ_MODELS_URL)
+                .addHeader("Authorization", "Bearer $apiKey")
+                .addHeader("Content-Type", "application/json")
+                .get()
+                .build()
+
+            val response = httpClient.newCall(request).execute()
+            if (!response.isSuccessful) {
+                Log.w(TAG, "Failed to fetch models from Groq: ${response.code}")
+                return@withContext KimiAiModel.defaultList
+            }
+
+            val body = response.body?.string() ?: return@withContext KimiAiModel.defaultList
+            val jsonRoot = json.parseToJsonElement(body).jsonObject
+            val dataArray = jsonRoot["data"]?.jsonArray ?: return@withContext KimiAiModel.defaultList
+
+            val suitableModels = mutableListOf<KimiAiModel>()
+            for (element in dataArray) {
+                val obj = element.jsonObject
+                val id = obj["id"]?.jsonPrimitive?.content ?: continue
+                val active = obj["active"]?.jsonPrimitive?.booleanOrNull ?: true
+                if (!active) continue
+
+                val lowerId = id.lowercase()
+                // Filter out non-chat models (audio, moderation, safety guards)
+                if (lowerId.contains("guard") || lowerId.contains("safeguard")) continue
+                if (lowerId.contains("whisper") || lowerId.contains("orpheus")) continue
+                // Models hidden from the picker by product decision
+                if (KimiAiModel.isHidden(id)) continue
+
+                suitableModels.add(KimiAiModel.createFromId(id))
+            }
+
+            if (suitableModels.isNotEmpty()) {
+                val sorted = suitableModels.sortedBy { model ->
+                    when (model.apiId) {
+                        "openai/gpt-oss-120b" -> 0
+                        "qwen/qwen3.8-27b" -> 1
+                        "openai/gpt-oss-20b" -> 2
+                        "allam-2-7b" -> 3
+                        else -> 10
+                    }
+                }
+                cachedModels = sorted
+                sorted
+            } else {
+                KimiAiModel.defaultList
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error fetching models from Groq", e)
+            KimiAiModel.defaultList
+        }
+    }
+
     private fun createAiUnavailableMessage(lang: AppLanguage): SaatChatMessage {
         val text = when (lang) {
             AppLanguage.INDONESIAN ->
@@ -544,6 +647,7 @@ class TanyaSaatRepository @Inject constructor(
     companion object {
         private const val TAG = "TanyaSaatRepository"
         private const val GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions"
+        private const val GROQ_MODELS_URL = "https://api.groq.com/openai/v1/models"
         private const val MAX_HISTORY_MESSAGES = 10
         private const val MAX_HISTORY_CHARS = 2400
         private val JSON_MEDIA = "application/json".toMediaType()

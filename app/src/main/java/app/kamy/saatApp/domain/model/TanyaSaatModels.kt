@@ -27,28 +27,77 @@ data class SaatAiReferenceDto(
     val grade: String? = null
 )
 
-enum class KimiAiModel(
+@Serializable
+data class KimiAiModel(
     val apiId: String,
     val displayName: String,
     val shortName: String,
     val tagline: String
 ) {
-    GPT_OSS_120B(
-        apiId = "openai/gpt-oss-120b",
-        displayName = "GPT-OSS 120B",
-        shortName = "GPT-OSS",
-        tagline = "Deep & detailed"
-    ),
-    QWEN_3_8_27B(
-        apiId = "qwen/qwen3.8-27b",
-        displayName = "Qwen 3.8 27B",
-        shortName = "Qwen",
-        tagline = "Fast & concise"
-    );
-
     companion object {
+        val GPT_OSS_120B = KimiAiModel(
+            apiId = "openai/gpt-oss-120b",
+            displayName = "GPT-OSS 120B",
+            shortName = "GPT-OSS",
+            tagline = "Deep & detailed"
+        )
+        val QWEN_3_8_27B = KimiAiModel(
+            apiId = "qwen/qwen3.8-27b",
+            displayName = "Qwen 3.8 27B",
+            shortName = "Qwen",
+            tagline = "Fast & concise"
+        )
+        val GPT_OSS_20B = KimiAiModel(
+            apiId = "openai/gpt-oss-20b",
+            displayName = "GPT-OSS 20B",
+            shortName = "GPT-20B",
+            tagline = "Ultra-fast & efficient"
+        )
+        val ALLAM_2_7B = KimiAiModel(
+            apiId = "allam-2-7b",
+            displayName = "ALLaM 2.0 7B",
+            shortName = "ALLaM",
+            tagline = "SDAIA Islamic & Arabic"
+        )
+
+        val defaultList: List<KimiAiModel> = listOf(
+            GPT_OSS_120B,
+            QWEN_3_8_27B
+        )
+
+        /** Models intentionally hidden from the Kīmi model picker. */
+        private val hiddenApiIds = setOf("openai/gpt-oss-20b", "allam-2-7b")
+
+        fun isHidden(apiId: String): Boolean =
+            hiddenApiIds.contains(apiId) ||
+                apiId.contains("allam", ignoreCase = true) ||
+                apiId.contains("gpt-oss-20b", ignoreCase = true)
+
         fun fromApiId(apiId: String?): KimiAiModel =
-            entries.firstOrNull { it.apiId == apiId } ?: GPT_OSS_120B
+            defaultList.firstOrNull { it.apiId == apiId }
+                ?: if (!apiId.isNullOrBlank() && !isHidden(apiId)) {
+                    createFromId(apiId)
+                } else {
+                    GPT_OSS_120B
+                }
+
+        fun createFromId(id: String): KimiAiModel {
+            return when {
+                id.contains("gpt-oss-120b", ignoreCase = true) -> GPT_OSS_120B
+                id.contains("qwen3.8-27b", ignoreCase = true) || id.contains("qwen", ignoreCase = true) -> QWEN_3_8_27B
+                else -> {
+                    val cleanName = id.substringAfterLast("/")
+                        .replace("-", " ")
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                    KimiAiModel(
+                        apiId = id,
+                        displayName = cleanName,
+                        shortName = cleanName.split(" ").firstOrNull() ?: cleanName,
+                        tagline = "Hosted on Groq"
+                    )
+                }
+            }
+        }
     }
 }
 
