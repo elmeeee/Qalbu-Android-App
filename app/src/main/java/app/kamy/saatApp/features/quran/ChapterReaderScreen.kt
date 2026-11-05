@@ -288,9 +288,19 @@ fun ChapterReaderScreen(
 
     val currentVerseIndex = (pagerState.currentPage - pageOffset).coerceIn(0, (verseCount - 1).coerceAtLeast(0))
     val currentVerse = s.verses.getOrNull(currentVerseIndex)
+    val scrollListState = rememberLazyListState()
+    // Scroll mode: the header follows the ayah that is most visible, not the pager page.
+    val scrollVerseIdx by remember(s.verses.size) {
+        derivedStateOf { scrollListState.dominantVerseIndex(s.verses.size) }
+    }
+    val titleVerse = if (s.readingStyle == QuranReadingStyle.SCROLL) {
+        scrollVerseIdx?.let { s.verses.getOrNull(it) } ?: currentVerse
+    } else {
+        currentVerse
+    }
     val surahTitle = when {
         state.juzNumber != null -> {
-            val chapterNum = currentVerse?.chapterNumber
+            val chapterNum = titleVerse?.chapterNumber
             state.chapterLookup[chapterNum]
                 ?: chapterNum?.let { stringResource(R.string.surah_number, it) }
                 ?: state.chapterDisplayName.orEmpty()
@@ -385,7 +395,6 @@ fun ChapterReaderScreen(
         }
     }
 
-    val scrollListState = rememberLazyListState()
     val scrollAnchor = remember { ScrollTapTracker() }
 
     // Reset scroll to the top (header, then ayat 1) once a NEW surah/juz list has actually been
@@ -612,9 +621,9 @@ fun ChapterReaderScreen(
                     )
                     Spacer(Modifier.height(2.dp))
                     val ayahLabel = if (state.juzNumber != null) {
-                        val verseLabel = currentVerse?.displayVerseReference?.let { ref ->
+                        val verseLabel = titleVerse?.displayVerseReference?.let { ref ->
                             stringResource(R.string.verse_key_label, ref)
-                        } ?: currentVerse?.resolvedVerseNumber?.let { num ->
+                        } ?: titleVerse?.resolvedVerseNumber?.let { num ->
                             stringResource(R.string.verse_number, num)
                         } ?: stringResource(R.string.verse_label, "—")
                         listOfNotNull(
@@ -622,9 +631,9 @@ fun ChapterReaderScreen(
                             state.juzNumber?.let { stringResource(R.string.juz_number, it) }
                         ).joinToString(" · ")
                     } else {
-                        currentVerse?.resolvedVerseNumber?.let { num ->
+                        titleVerse?.resolvedVerseNumber?.let { num ->
                             stringResource(R.string.verse_number, num)
-                        } ?: currentVerse?.displayVerseReference?.let { ref ->
+                        } ?: titleVerse?.displayVerseReference?.let { ref ->
                             stringResource(R.string.verse_key_label, ref)
                         } ?: stringResource(R.string.verse_label, "—")
                     }
@@ -843,8 +852,9 @@ fun ChapterReaderScreen(
                                     state.recitations.firstOrNull { it.identifiableId == state.selectedRecitationId }?.displayName ?: ""
                                 }
 
+                                val juzLabel = audioPlaybackState.juzNumber?.let { stringResource(R.string.juz_number, it) }
                                 Text(
-                                    text = "$surahTitle · $ayahLabel",
+                                    text = listOfNotNull(juzLabel, surahTitle, ayahLabel).joinToString(" · "),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = SaatColors.Slate900,
@@ -2401,24 +2411,40 @@ private fun ContinuousScrollReader(
             items = state.verses,
             key = { _, verse -> verse.verseKey.orEmpty() }
         ) { index, verse ->
-            ContinuousVerseRow(
-                verse = verse,
-                index = index,
-                fontScale = state.fontScale,
-                showTranslation = state.showTranslation,
-                showTransliteration = state.showTransliteration,
-                translationId = state.selectedTranslationId,
-                isTajweedEnabled = state.isTajweedEnabled,
-                arabicTextType = state.arabicTextType,
-                personalDataRevision = state.personalDataRevision,
-                audioPlaybackState = audioPlaybackState,
-                onPlay = { onPlay(index) },
-                onBookmark = { onBookmark(index) },
-                onTafsir = { onTafsir(verse.verseKey.orEmpty()) },
-                onAiShare = { onAiShare(index) },
-                onSetLastRead = { onSetLastRead(index) },
-                onTajweedClick = onTajweedClick
-            )
+            // In juz mode, the first ayah of each surah gets a surah divider above it.
+            // The divider lives inside the same item so list indices (used for scroll sync) stay unchanged.
+            val prevChapter = if (index > 0) state.verses[index - 1].chapterNumber else null
+            val isNewSurah = state.juzNumber != null &&
+                verse.chapterNumber != null &&
+                verse.chapterNumber != prevChapter
+            Column {
+                if (isNewSurah) {
+                    SurahDivider(
+                        chapterNumber = verse.chapterNumber!!,
+                        surahName = state.chapterLookup[verse.chapterNumber],
+                        verseCount = state.verses.count { it.chapterNumber == verse.chapterNumber },
+                        isFirstInJuz = index == 0
+                    )
+                }
+                ContinuousVerseRow(
+                    verse = verse,
+                    index = index,
+                    fontScale = state.fontScale,
+                    showTranslation = state.showTranslation,
+                    showTransliteration = state.showTransliteration,
+                    translationId = state.selectedTranslationId,
+                    isTajweedEnabled = state.isTajweedEnabled,
+                    arabicTextType = state.arabicTextType,
+                    personalDataRevision = state.personalDataRevision,
+                    audioPlaybackState = audioPlaybackState,
+                    onPlay = { onPlay(index) },
+                    onBookmark = { onBookmark(index) },
+                    onTafsir = { onTafsir(verse.verseKey.orEmpty()) },
+                    onAiShare = { onAiShare(index) },
+                    onSetLastRead = { onSetLastRead(index) },
+                    onTajweedClick = onTajweedClick
+                )
+            }
         }
 
         // Footer: Next Surah/Juz button
@@ -2759,6 +2785,16 @@ private class ScrollTapTracker {
     var reported: Int? = null
 }
 
+/** Verse index (0-based) under the upper third of the viewport; null while the header dominates. */
+private fun LazyListState.dominantVerseIndex(verseCount: Int): Int? {
+    val info = layoutInfo
+    val items = info.visibleItemsInfo
+    if (items.isEmpty() || verseCount == 0) return null
+    val anchorY = info.viewportStartOffset + (info.viewportEndOffset - info.viewportStartOffset) / 3
+    val hit = items.firstOrNull { it.offset <= anchorY && anchorY < it.offset + it.size } ?: items.first()
+    return (hit.index - 1).takeIf { it in 0 until verseCount }
+}
+
 @Composable
 private fun OrnamentLine(modifier: Modifier = Modifier) {
     Box(
@@ -2773,6 +2809,78 @@ private fun OrnamentLine(modifier: Modifier = Modifier) {
                 )
             )
     )
+}
+
+/**
+ * Surah header shown above the first ayah of a surah inside a juz (scroll mode).
+ * Gold frame and cream card so it reads apart from the teal ayah badges.
+ */
+@Composable
+private fun SurahDivider(
+    chapterNumber: Int,
+    surahName: String?,
+    verseCount: Int,
+    isFirstInJuz: Boolean
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = if (isFirstInJuz) 4.dp else 22.dp, bottom = 14.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = Color.Transparent,
+        border = BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.45f)),
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Color(0xFFFBF3DC), Color(0xFFFFFCF4))
+                    )
+                )
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.size(46.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.frame_number_icon),
+                    contentDescription = null,
+                    tint = SaatColors.GoldDeep,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Text(
+                    text = chapterNumber.toString(),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = SaatColors.DeepEmerald
+                )
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = surahName ?: stringResource(R.string.surah_number, chapterNumber),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = SaatColors.DeepEmerald,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = "$verseCount ${stringResource(R.string.verses)}",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = SaatColors.Slate500
+                )
+            }
+            Icon(
+                imageVector = Icons.Filled.AutoStories,
+                contentDescription = null,
+                tint = SaatColors.GoldDeep.copy(alpha = 0.7f),
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
 }
 
 /** Ayah number inside the same frame ornament used by the Quran chapter list. */

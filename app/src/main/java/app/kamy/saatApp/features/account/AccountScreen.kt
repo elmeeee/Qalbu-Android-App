@@ -175,6 +175,7 @@ fun AccountScreen(
             onOpenAbout = { currentDetailScreen.value = "ABOUT_SAAT" },
             onOpenPrivacyPolicy = { currentDetailScreen.value = "PRIVACY_POLICY" },
             onOpenTerms = { currentDetailScreen.value = "TERMS_CONDITIONS" },
+            onOpenSupport = { currentDetailScreen.value = "SUPPORT_SAAT" },
             onCheckUpdate = { showUpToDateSheet = true }
         )
 
@@ -204,6 +205,12 @@ fun AccountScreen(
                 TermsAndConditionsScreen(
                     appLanguage = state.appLanguage,
                     appTheme = state.appTheme,
+                    onBack = { currentDetailScreen.value = null }
+                )
+            }
+            "SUPPORT_SAAT" -> {
+                SupportSaatScreen(
+                    appLanguage = state.appLanguage,
                     onBack = { currentDetailScreen.value = null }
                 )
             }
@@ -352,6 +359,7 @@ private fun AccountSettingsContent(
     onOpenAbout: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
     onOpenTerms: () -> Unit,
+    onOpenSupport: () -> Unit,
     onCheckUpdate: () -> Unit
 ) {
     val context = LocalContext.current
@@ -652,7 +660,7 @@ private fun AccountSettingsContent(
             }
 
             Spacer(Modifier.height(16.dp))
-            AppFooterCard(appVersion = appVersion)
+            AppFooterCard(appVersion = appVersion, onOpenSupport = onOpenSupport)
         }
     }
 }
@@ -2467,6 +2475,50 @@ private fun SaatModalBottomSheet(
 
 // ─── Legal Web Views & Info Screens ──────────────────────────────────────────
 
+/** Support Saat: Ko-fi page shown inside the app, same chrome as the About screen. */
+@Composable
+fun SupportSaatScreen(
+    appLanguage: AppLanguage,
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                text = stringResource(R.string.settings_item_support),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        LegalWebView(
+            url = "https://ko-fi.com/R8T12A3G16",
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        )
+    }
+}
+
 @Composable
 fun AboutSaatScreen(
     appLanguage: AppLanguage,
@@ -2680,7 +2732,7 @@ private fun LegalWebView(
 }
 
 @Composable
-private fun AppFooterCard(appVersion: String) {
+private fun AppFooterCard(appVersion: String, onOpenSupport: () -> Unit) {
     val context = LocalContext.current
     val haptic = app.kamy.saatApp.ui.feedback.rememberTapHaptic()
     val targetUrl = "https://masjidku.app?ref=saat_android"
@@ -2769,6 +2821,20 @@ private fun AppFooterCard(appVersion: String) {
                 }
                 }
             }
+
+            // Support Saat: Ko-fi button, opens the in-app support page
+            Image(
+                painter = painterResource(R.drawable.kofi_button),
+                contentDescription = stringResource(R.string.settings_item_support),
+                modifier = Modifier
+                    .height(36.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        haptic()
+                        onOpenSupport()
+                    },
+                contentScale = ContentScale.Fit
+            )
 
             // App Tagline & Version
             Column(
@@ -3636,8 +3702,8 @@ fun AccountDetailScreen(
 }
 
 /**
- * Brand mascot inside a circle. The source art has transparent padding, so it is scaled up
- * slightly and cropped to the circle so the character fills the avatar.
+ * Full brand mascot inside a circle: the whole artwork is shown (no crop), with a small inset
+ * so the character sits inside the ring.
  */
 @Composable
 private fun BrandAvatarImage(
@@ -3656,12 +3722,8 @@ private fun BrandAvatarImage(
             painter = painterResource(drawableRes),
             contentDescription = null,
             modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = 1.35f
-                    scaleY = 1.35f
-                },
-            contentScale = ContentScale.Crop
+                .fillMaxSize(0.86f),
+            contentScale = ContentScale.Fit
         )
     }
 }
@@ -4107,6 +4169,7 @@ private fun EmailAuthBottomSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var name by rememberSaveable { mutableStateOf("") }
+    var nameTouched by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -4264,6 +4327,12 @@ private fun EmailAuthBottomSheet(
                     placeholder = { Text(stringResource(R.string.account_name_hint)) },
                     singleLine = true,
                     enabled = !isLoading,
+                    isError = nameTouched && name.isBlank(),
+                    supportingText = {
+                        if (nameTouched && name.isBlank()) {
+                            Text(stringResource(R.string.auth_error_empty_name))
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -4363,11 +4432,14 @@ private fun EmailAuthBottomSheet(
                     onDismissError()
                     when (mode) {
                         EmailAuthMode.LOGIN -> onSignIn(email, password)
-                        EmailAuthMode.REGISTER -> onSignUp(name, email, password)
+                        EmailAuthMode.REGISTER -> {
+                            nameTouched = true
+                            if (name.isNotBlank()) onSignUp(name, email, password)
+                        }
                         EmailAuthMode.FORGOT_PASSWORD -> onForgotPassword(email)
                     }
                 },
-                enabled = !isLoading,
+                enabled = !isLoading && (mode != EmailAuthMode.REGISTER || name.isNotBlank()),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),

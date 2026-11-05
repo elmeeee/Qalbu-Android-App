@@ -49,7 +49,11 @@ class FirebaseAuthRepository @Inject constructor(
             val fbUser = firebaseAuth.currentUser
             val keep = _currentUser.value?.takeIf { it.uid == fbUser?.uid }?.avatarKey
             _currentUser.value = fbUser?.toAuthUser(keep)
-            if (fbUser != null) ensureBrandAvatar(fbUser.uid)
+            if (fbUser != null) {
+                // Backfill: any account whose name exists in Auth gets it in Firestore too.
+                fbUser.displayName?.takeIf { it.isNotBlank() }?.let { saveDisplayName(fbUser.uid, it) }
+                ensureBrandAvatar(fbUser.uid)
+            }
         }
     }
 
@@ -71,6 +75,20 @@ class FirebaseAuthRepository @Inject constructor(
                         .addOnSuccessListener { applyAvatarKey(picked.key) }
                 }
             }
+    }
+
+    /** Writes the name to users/{uid} (merge). Failures are logged; Auth still holds the name. */
+    private fun saveDisplayName(uid: String, name: String) {
+        firestore.collection("users").document(uid)
+            .set(
+                mapOf(
+                    "uid" to uid,
+                    "displayName" to name.trim(),
+                    "updatedAt" to FieldValue.serverTimestamp()
+                ),
+                SetOptions.merge()
+            )
+            .addOnFailureListener { Log.w(TAG, "Failed to save displayName to Firestore", it) }
     }
 
     private fun applyAvatarKey(key: String) {
@@ -156,19 +174,24 @@ class FirebaseAuthRepository @Inject constructor(
                     throw Exception(appContext.getString(R.string.auth_error_disposable_email))
                 }
 
+                val cleanName = name.trim()
+                if (cleanName.isBlank()) {
+                    throw Exception(appContext.getString(R.string.auth_error_empty_name))
+                }
+
                 try {
                     val authResult = auth.createUserWithEmailAndPassword(cleanEmail, password).await()
                     val firebaseUser = authResult.user ?: throw Exception(appContext.getString(R.string.auth_error_create_account_failed))
 
-                    if (name.isNotBlank()) {
-                        val profileUpdates = userProfileChangeRequest {
-                            displayName = name.trim()
-                        }
-                        firebaseUser.updateProfile(profileUpdates).await()
+                    val profileUpdates = userProfileChangeRequest {
+                        displayName = cleanName
                     }
+                    firebaseUser.updateProfile(profileUpdates).await()
+                    firebaseUser.reload().await()
 
-                    val user = auth.currentUser?.toAuthUser() ?: firebaseUser.toAuthUser()
+                    val user = (auth.currentUser ?: firebaseUser).toAuthUser()
                     _currentUser.value = user
+                    saveDisplayName(user.uid, cleanName)
                     user
                 } catch (e: FirebaseAuthException) {
                     throw Exception(mapFirebaseAuthError(e))

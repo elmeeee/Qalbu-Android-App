@@ -365,6 +365,7 @@ class ChapterReaderViewModel @Inject constructor(
                 }
                 tryScrollToPendingVerse()
                 refreshPersonalVerseState(restoredIndex)
+                if (_state.value.juzNumber != null && _state.value.hasMore) loadRemainingJuzPages()
 
                 if (autoPlayAfterLoad) {
                     val page = resp.verses.getOrNull(restoredIndex)
@@ -384,6 +385,34 @@ class ChapterReaderViewModel @Inject constructor(
         if (s.isLoadingMore || !s.hasMore || s.verses.isEmpty()) return
         if (pendingScrollVerseKey == null && currentIndex < s.verses.size - 3) return
         loadNextPage()
+    }
+
+    /**
+     * A juz is shown as one continuous list (scroll mode needs surah dividers and true counts),
+     * so pull the remaining pages in order. Appended at the end, so current indices stay valid.
+     */
+    private fun loadRemainingJuzPages() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingMore = true) }
+            while (true) {
+                val s = _state.value
+                if (!s.hasMore || s.juzNumber == null) break
+                val page = s.loadedApiPage + 1
+                val resp = runCatching { fetchVersePage(page = page) }.getOrNull() ?: break
+                if (resp.verses.isEmpty()) {
+                    _state.update { it.copy(hasMore = false) }
+                    break
+                }
+                _state.update {
+                    it.copy(
+                        verses = (it.verses + resp.verses).distinctBy { v -> v.listIdentity },
+                        loadedApiPage = page,
+                        hasMore = resp.pagination?.hasNextPage ?: false
+                    )
+                }
+            }
+            _state.update { it.copy(isLoadingMore = false) }
+        }
     }
 
     private fun loadNextPage() {
@@ -699,7 +728,10 @@ class ChapterReaderViewModel @Inject constructor(
                     verseKey = v.verseKey.orEmpty(),
                     ayahNumber = v.resolvedVerseNumber ?: 0,
                     url = audioUrl,
-                    label = v.verseKey.orEmpty()
+                    label = v.verseKey.orEmpty(),
+                    chapterName = v.chapterNumber?.let { s.chapterLookup[it] },
+                    chapterNumber = v.chapterNumber,
+                    juzNumber = v.juzNumber ?: s.juzNumber
                 )
             }
             val queueStartIndex = queueItems.indexOfFirst { it.verseKey == page.verseKey }.coerceAtLeast(0)
@@ -709,7 +741,8 @@ class ChapterReaderViewModel @Inject constructor(
                     surahTitle = surahTitle,
                     reciterName = reciterName,
                     startIndex = queueStartIndex,
-                    chapterNumber = chapterNum
+                    chapterNumber = chapterNum,
+                    juzNumber = page.juzNumber ?: s.juzNumber
                 )
                 return
             }
@@ -721,7 +754,8 @@ class ChapterReaderViewModel @Inject constructor(
             ayahLabel = page.verseKey.orEmpty(),
             reciterName = reciterName,
             chapterNumber = chapterNum,
-            ayahNumber = page.resolvedVerseNumber
+            ayahNumber = page.resolvedVerseNumber,
+            juzNumber = page.juzNumber ?: s.juzNumber
         )
     }
 

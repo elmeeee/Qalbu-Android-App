@@ -64,6 +64,14 @@ service cloud.firestore {
       return val is timestamp || (val is int && val >= 0);
     }
 
+    // Brand avatar key (harus sama dengan enum BrandAvatar di aplikasi)
+    function isValidAvatarKey(val) {
+      return val is string && val in [
+        'quran_quote', 'lentera', 'bawa_lentera', 'reading',
+        'ilmu', 'prayer', 'smile', 'toa'
+      ];
+    }
+
     // Memastikan payload tidak menyuntikkan peran administratif (mencegah Privilege Escalation)
     function hasNoPrivilegeEscalation(data) {
       return !('role' in data) &&
@@ -76,14 +84,6 @@ service cloud.firestore {
     // ===============================================================
     // Domain Validators (Validator Fungsi Domain)
     // ===============================================================
-
-    // Brand avatar keys yang valid (harus sama dengan enum BrandAvatar di aplikasi)
-    function isValidAvatarKey(val) {
-      return val is string && val in [
-        'quran_quote', 'lentera', 'bawa_lentera', 'reading',
-        'ilmu', 'prayer', 'smile', 'toa'
-      ];
-    }
 
     // Validasi data profil dokumen /users/{userId}
     function isValidUserProfile(data) {

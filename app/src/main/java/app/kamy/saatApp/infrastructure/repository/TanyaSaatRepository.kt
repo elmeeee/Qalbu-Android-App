@@ -329,6 +329,7 @@ class TanyaSaatRepository @Inject constructor(
             - Write entirely in $langName, including headings, follow_ups, and reference notes.
             - Earlier assistant turns appear as plain text for context; your reply must always be the JSON object below.
             $greetingRule
+            - QURAN CITATION: Whenever you cite or quote a verse of the Quran, always state the surah name, the surah number, and the ayah number, for example "QS. Al-Baqarah (2): 153" or "Al-Baqarah 2:153". Never name only the surah without the ayah number.
             - PLAIN TEXT ONLY: Never output backslashes ("\\") in empathy_text, except the JSON escapes \n and \".
             $personalization
 
