@@ -883,4 +883,7 @@
     <string name="share_ayah">Bagikan Ayat</string>
     <string name="verses">Ayat</string>
     <string name="last_read_marked">Ditandai sebagai terakhir dibaca</string>
+    <string name="account_avatar_change">Ganti avatar</string>
+    <string name="account_avatar_pick_title">Pilih avatarmu</string>
+    <string name="account_avatar_pick_desc">Pilih avatar brand yang tampil di profilmu.</string>
 </resources>

@@ -19,11 +19,15 @@ import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import app.kamy.saatApp.domain.model.BrandAvatar
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -32,7 +36,8 @@ import javax.inject.Singleton
 @Singleton
 class FirebaseAuthRepository @Inject constructor(
     @ApplicationContext private val appContext: Context,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) : AuthRepository {
 
     private val _currentUser = MutableStateFlow(auth.currentUser?.toAuthUser())
@@ -40,7 +45,44 @@ class FirebaseAuthRepository @Inject constructor(
 
     init {
         auth.addAuthStateListener { firebaseAuth ->
-            _currentUser.value = firebaseAuth.currentUser?.toAuthUser()
+            val fbUser = firebaseAuth.currentUser
+            val keep = _currentUser.value?.takeIf { it.uid == fbUser?.uid }?.avatarKey
+            _currentUser.value = fbUser?.toAuthUser(keep)
+            if (fbUser != null) ensureBrandAvatar(fbUser.uid)
+        }
+    }
+
+    /**
+     * Reads `users/{uid}.avatarKey`. If the account has none yet, picks a random brand avatar
+     * and stores it (merge, so other fields are untouched). Runs in the background; the UI
+     * shows the initial letter until the key arrives.
+     */
+    private fun ensureBrandAvatar(uid: String) {
+        firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                val existing = BrandAvatar.fromKey(doc.getString("avatarKey"))
+                if (existing != null) {
+                    applyAvatarKey(existing.key)
+                } else {
+                    val picked = BrandAvatar.random()
+                    firestore.collection("users").document(uid)
+                        .set(mapOf("avatarKey" to picked.key), SetOptions.merge())
+                        .addOnSuccessListener { applyAvatarKey(picked.key) }
+                }
+            }
+    }
+
+    private fun applyAvatarKey(key: String) {
+        _currentUser.update { it?.copy(avatarKey = key) }
+    }
+
+    /** Lets the user switch to another brand avatar; persisted to Firestore. */
+    override suspend fun setAvatarKey(key: String): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val uid = auth.currentUser?.uid ?: throw Exception(appContext.getString(R.string.auth_error_user_not_signed_in))
+            firestore.collection("users").document(uid)
+                .set(mapOf("avatarKey" to key), SetOptions.merge()).await()
+            applyAvatarKey(key)
         }
     }
 
@@ -282,12 +324,14 @@ class FirebaseAuthRepository @Inject constructor(
         }
     }
 
-    private fun FirebaseUser.toAuthUser(): AuthUser =
+    // Must not read _currentUser: it is called while the property is still being initialised.
+    private fun FirebaseUser.toAuthUser(avatarKey: String? = null): AuthUser =
         AuthUser(
             uid = uid,
             email = email,
             displayName = displayName,
-            photoUrl = photoUrl?.toString()
+            photoUrl = photoUrl?.toString(),
+            avatarKey = avatarKey
         )
 
     private class CancellationException(message: String) : Exception(message)

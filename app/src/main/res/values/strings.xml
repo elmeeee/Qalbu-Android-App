@@ -1367,4 +1367,7 @@
     <string name="share_ayah">Share Ayah</string>
     <string name="verses">Verses</string>
     <string name="last_read_marked">Marked as last read</string>
+    <string name="account_avatar_change">Change avatar</string>
+    <string name="account_avatar_pick_title">Choose your avatar</string>
+    <string name="account_avatar_pick_desc">Pick the brand avatar shown on your profile.</string>
 </resources>

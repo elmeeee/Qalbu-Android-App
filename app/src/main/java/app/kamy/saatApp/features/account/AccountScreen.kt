@@ -135,6 +135,8 @@ import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.util.Locale
+import app.kamy.saatApp.domain.model.BrandAvatar
+import androidx.compose.material.icons.outlined.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -2991,14 +2993,16 @@ private fun AccountSyncProfileCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (!user.photoUrl.isNullOrBlank()) {
-                    AsyncImage(
-                        model = user.photoUrl,
+                val brand = BrandAvatar.fromKey(user.avatarKey)
+                if (brand != null) {
+                    Image(
+                        painter = painterResource(brand.drawableRes),
                         contentDescription = null,
                         modifier = Modifier
                             .size(46.dp)
                             .clip(CircleShape)
-                            .border(1.5.dp, SaatColors.DeepEmerald.copy(alpha = 0.3f), CircleShape),
+                            .background(Color(0xFFE6F4EE))
+                            .border(1.5.dp, SaatColors.GoldDeep.copy(alpha = 0.55f), CircleShape),
                         contentScale = ContentScale.Crop
                     )
                 } else {
@@ -3150,7 +3154,19 @@ fun AccountDetailScreen(
     }
 
     var showSignOutSheet by rememberSaveable { mutableStateOf(false) }
+    var showAvatarPicker by rememberSaveable { mutableStateOf(false) }
     var showDeleteSheet by rememberSaveable { mutableStateOf(false) }
+
+    if (showAvatarPicker) {
+        AvatarPickerSheet(
+            selectedKey = user.avatarKey,
+            onSelect = { key ->
+                vm.setAvatarKey(key)
+                showAvatarPicker = false
+            },
+            onDismiss = { showAvatarPicker = false }
+        )
+    }
 
     if (showSignOutSheet) {
         SignOutBottomSheet(
@@ -3217,63 +3233,84 @@ fun AccountDetailScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .padding(bottom = 32.dp)
         ) {
-            // 1. Profile Hero Card
+            // 1. Profile hero: brand avatar on a soft emerald glow, name, email, sync state
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(24.dp),
                 color = SaatColors.PureWhite,
-                border = BorderStroke(1.dp, Color(0xFFE8E2D2)),
-                shadowElevation = 0.5.dp
+                border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+                shadowElevation = 1.dp
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 24.dp, horizontal = 16.dp),
+                        .padding(vertical = 26.dp, horizontal = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (!user.photoUrl.isNullOrBlank()) {
-                        AsyncImage(
-                            model = user.photoUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(76.dp)
-                                .clip(CircleShape)
-                                .border(2.dp, SaatColors.DeepEmerald.copy(alpha = 0.4f), CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
+                    val brand = BrandAvatar.fromKey(user.avatarKey)
+                    Box(contentAlignment = Alignment.BottomEnd) {
                         Box(
                             modifier = Modifier
-                                .size(76.dp)
+                                .size(104.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFEDF5F0))
-                                .border(2.dp, Color(0xFFA7F3D0), CircleShape),
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(Color(0xFFE6F4EE), Color(0xFFF7F3EA))
+                                    )
+                                )
+                                .border(2.dp, SaatColors.GoldDeep.copy(alpha = 0.55f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = SaatColors.HomeDarkGreen
+                            if (brand != null) {
+                                Image(
+                                    painter = painterResource(brand.drawableRes),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(84.dp).clip(CircleShape),
+                                    contentScale = ContentScale.Crop
                                 )
+                            } else {
+                                Text(
+                                    text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = SaatColors.HomeDarkGreen
+                                    )
+                                )
+                            }
+                        }
+                        // Edit badge: opens the brand avatar picker
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(SaatColors.DeepEmerald)
+                                .border(2.dp, SaatColors.PureWhite, CircleShape)
+                                .clickable { showAvatarPicker = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Edit,
+                                contentDescription = stringResource(R.string.account_avatar_change),
+                                tint = Color.White,
+                                modifier = Modifier.size(15.dp)
                             )
                         }
                     }
 
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(14.dp))
 
                     Text(
                         text = user.displayName ?: stringResource(R.string.account_connected_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = 19.sp
                         ),
                         color = Color(0xFF0F172A),
                         textAlign = TextAlign.Center
                     )
 
                     if (!user.email.isNullOrBlank()) {
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(2.dp))
                         Text(
                             text = user.email,
                             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
@@ -3282,15 +3319,15 @@ fun AccountDetailScreen(
                         )
                     }
 
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(12.dp))
 
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(50),
                         color = Color(0xFFECFDF5),
                         border = BorderStroke(1.dp, Color(0xFFA7F3D0))
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
@@ -3600,6 +3637,70 @@ fun AccountDetailScreen(
                     onClick = { showDeleteSheet = true },
                     showDivider = false
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AvatarPickerSheet(
+    selectedKey: String?,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = SaatColors.PureWhite
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, bottom = 32.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.account_avatar_pick_title),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = Color(0xFF0F172A)
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.account_avatar_pick_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF64748B)
+            )
+            Spacer(Modifier.height(16.dp))
+
+            val options = BrandAvatar.entries
+            options.chunked(4).forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    rowItems.forEach { option ->
+                        val isSelected = option.key == selectedKey
+                        Box(
+                            modifier = Modifier
+                                .size(70.dp)
+                                .clip(CircleShape)
+                                .background(if (isSelected) Color(0xFFE6F4EE) else Color(0xFFF7F3EA))
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) SaatColors.DeepEmerald else Color(0xFFE8E2D2),
+                                    shape = CircleShape
+                                )
+                                .clickable { onSelect(option.key) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(option.drawableRes),
+                                contentDescription = null,
+                                modifier = Modifier.size(58.dp).clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+                }
             }
         }
     }

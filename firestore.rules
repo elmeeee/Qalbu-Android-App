@@ -77,11 +77,20 @@ service cloud.firestore {
     // Domain Validators (Validator Fungsi Domain)
     // ===============================================================
 
+    // Brand avatar keys yang valid (harus sama dengan enum BrandAvatar di aplikasi)
+    function isValidAvatarKey(val) {
+      return val is string && val in [
+        'quran_quote', 'lentera', 'bawa_lentera', 'reading',
+        'ilmu', 'prayer', 'smile', 'toa'
+      ];
+    }
+
     // Validasi data profil dokumen /users/{userId}
     function isValidUserProfile(data) {
       return hasNoPrivilegeEscalation(data) &&
              uidMatchesAuth() &&
              data.keys().size() <= 30 &&
+             (!('avatarKey' in data) || isValidAvatarKey(data.avatarKey)) &&
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
              (!('bio' in data) || (data.bio is string && data.bio.size() <= 500)) &&
              (!('locale' in data) || (data.locale is string && data.locale.size() <= 20)) &&

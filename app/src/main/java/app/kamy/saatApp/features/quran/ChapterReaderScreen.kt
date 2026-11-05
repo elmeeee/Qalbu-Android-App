@@ -123,6 +123,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -2341,67 +2342,55 @@ private fun ContinuousScrollReader(
                 )
             }
 
-            // Bismillah card — ornamental frame, shown for all Surahs except At-Tawbah (9)
-            if (state.chapterNumber != 9) {
-                Surface(
-                    shape = RoundedCornerShape(24.dp),
-                    color = SaatColors.PureWhite,
-                    border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+            // Bismillah: same ﷽ glyph and emerald colour as the pager, framed by gold ornament
+            // lines. Not shown for Al-Fatihah (its bismillah is already verse 1) nor At-Tawbah.
+            if (state.chapterNumber != 1 && state.chapterNumber != 9) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 12.dp, bottom = 16.dp)
+                        .padding(top = 16.dp, bottom = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OrnamentLine(modifier = Modifier.weight(1f))
+                        Spacer(Modifier.width(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .rotate(45f)
+                                .background(SaatColors.GoldDeep)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        OrnamentLine(modifier = Modifier.weight(1f))
+                    }
+
+                    Text(
+                        text = "﷽",
+                        fontSize = (44 * state.fontScale).sp,
+                        color = SaatColors.DeepEmerald,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 22.dp, horizontal = 20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(vertical = 14.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OrnamentLine(modifier = Modifier.weight(1f))
-                            Spacer(Modifier.width(10.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .rotate(45f)
-                                    .background(SaatColors.GoldDeep)
-                            )
-                            Spacer(Modifier.width(10.dp))
-                            OrnamentLine(modifier = Modifier.weight(1f))
-                        }
-
-                        Spacer(Modifier.height(16.dp))
-
-                        Text(
-                            text = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
-                            fontFamily = TajweedFontFamily,
-                            fontSize = (34 * state.fontScale).sp,
-                            fontWeight = FontWeight.Normal,
-                            color = SaatColors.DeepEmerald,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                        OrnamentLine(modifier = Modifier.weight(1f))
+                        Spacer(Modifier.width(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .rotate(45f)
+                                .background(SaatColors.GoldDeep)
                         )
-
-                        Spacer(Modifier.height(16.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            OrnamentLine(modifier = Modifier.weight(1f))
-                            Spacer(Modifier.width(10.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .rotate(45f)
-                                    .background(SaatColors.GoldDeep)
-                            )
-                            Spacer(Modifier.width(10.dp))
-                            OrnamentLine(modifier = Modifier.weight(1f))
-                        }
+                        Spacer(Modifier.width(10.dp))
+                        OrnamentLine(modifier = Modifier.weight(1f))
                     }
                 }
             }
