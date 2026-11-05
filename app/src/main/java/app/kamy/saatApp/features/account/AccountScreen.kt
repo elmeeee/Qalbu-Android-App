@@ -137,6 +137,9 @@ import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.util.Locale
 import app.kamy.saatApp.domain.model.BrandAvatar
 import androidx.compose.material.icons.outlined.Edit
+import androidx.annotation.DrawableRes
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.graphicsLayer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -2995,15 +2998,10 @@ private fun AccountSyncProfileCard(
             ) {
                 val brand = BrandAvatar.fromKey(user.avatarKey)
                 if (brand != null) {
-                    Image(
-                        painter = painterResource(brand.drawableRes),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(46.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFE6F4EE))
-                            .border(1.5.dp, SaatColors.GoldDeep.copy(alpha = 0.55f), CircleShape),
-                        contentScale = ContentScale.Crop
+                    BrandAvatarImage(
+                        drawableRes = brand.drawableRes,
+                        size = 46.dp,
+                        modifier = Modifier.border(1.5.dp, SaatColors.GoldDeep.copy(alpha = 0.55f), CircleShape)
                     )
                 } else {
                     Box(
@@ -3262,12 +3260,7 @@ fun AccountDetailScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             if (brand != null) {
-                                Image(
-                                    painter = painterResource(brand.drawableRes),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(84.dp).clip(CircleShape),
-                                    contentScale = ContentScale.Crop
-                                )
+                                BrandAvatarImage(drawableRes = brand.drawableRes, size = 104.dp)
                             } else {
                                 Text(
                                     text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
@@ -3642,6 +3635,37 @@ fun AccountDetailScreen(
     }
 }
 
+/**
+ * Brand mascot inside a circle. The source art has transparent padding, so it is scaled up
+ * slightly and cropped to the circle so the character fills the avatar.
+ */
+@Composable
+private fun BrandAvatarImage(
+    @DrawableRes drawableRes: Int,
+    size: Dp,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Color(0xFFF7F3EA)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(drawableRes),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = 1.35f
+                    scaleY = 1.35f
+                },
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AvatarPickerSheet(
@@ -3692,12 +3716,7 @@ private fun AvatarPickerSheet(
                                 .clickable { onSelect(option.key) },
                             contentAlignment = Alignment.Center
                         ) {
-                            Image(
-                                painter = painterResource(option.drawableRes),
-                                contentDescription = null,
-                                modifier = Modifier.size(58.dp).clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
+                            BrandAvatarImage(drawableRes = option.drawableRes, size = 70.dp)
                         }
                     }
                 }
