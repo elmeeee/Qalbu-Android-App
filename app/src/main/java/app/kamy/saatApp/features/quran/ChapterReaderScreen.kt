@@ -2270,23 +2270,26 @@ private fun ContinuousScrollReader(
         modifier = modifier
             .fillMaxSize()
             .background(SaatColors.ScreenBackground)
+            .padding(horizontal = 16.dp)
     ) {
         // Header: Previous Surah/Juz button + Surah Title Banner + Bismillah
         item(key = "header") {
+            Spacer(Modifier.height(8.dp))
             val prevChapterNum = (state.chapterNumber - 1).coerceAtLeast(1)
             val prevSurahName = state.chapterLookup[prevChapterNum]
             if (state.chapterNumber > 1 || (state.juzNumber != null && state.juzNumber > 1)) {
                 Surface(
                     onClick = onLoadPrevious,
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(20.dp),
                     color = SaatColors.PureWhite,
                     border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+                    tonalElevation = 2.dp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 6.dp)
+                        .padding(vertical = 8.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
@@ -2316,19 +2319,12 @@ private fun ContinuousScrollReader(
 
             // Surah Header Banner (Premium Islamic Card)
             Surface(
-                shape = RoundedCornerShape(22.dp),
+                shape = RoundedCornerShape(28.dp),
                 color = Color.Transparent,
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)),
-                shadowElevation = 4.dp,
+                shadowElevation = 8.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(22.dp),
-                        ambientColor = SaatColors.DeepEmerald.copy(alpha = 0.30f),
-                        spotColor = SaatColors.DeepEmerald.copy(alpha = 0.25f)
-                    )
+                    .padding(vertical = 12.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -2336,9 +2332,8 @@ private fun ContinuousScrollReader(
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
-                                    Color(0xFF064E3B), // Deep Emerald
+                                    Color(0xFF065F46), // Darker Emerald
                                     Color(0xFF0F766E), // Emerald Teal
-                                    Color(0xFF10B981)  // Vibrant Mint
                                 )
                             )
                         )
@@ -2346,13 +2341,13 @@ private fun ContinuousScrollReader(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 20.dp, horizontal = 18.dp),
+                            .padding(vertical = 28.dp, horizontal = 24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // Top Badge Row: Surah Number & Revelation Place & Verse count
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             val surahNumberLabel = if (state.juzNumber != null) {
                                 stringResource(R.string.juz_number, state.juzNumber)
@@ -2363,54 +2358,38 @@ private fun ContinuousScrollReader(
 
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(Color.White.copy(alpha = 0.18f))
-                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color.White.copy(alpha = 0.2f))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
                             ) {
                                 Text(
                                     text = "$surahNumberLabel · $revelationPlace".uppercase(),
-                                    fontSize = 11.sp,
+                                    fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White.copy(alpha = 0.95f),
-                                    letterSpacing = 0.6.sp
-                                )
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(Color.White.copy(alpha = 0.18f))
-                                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "${state.verses.size} ${stringResource(R.string.verses)}".uppercase(),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White.copy(alpha = 0.95f),
-                                    letterSpacing = 0.6.sp
+                                    color = Color.White.copy(alpha = 0.9f),
+                                    letterSpacing = 0.8.sp
                                 )
                             }
                         }
 
-                        Spacer(Modifier.height(14.dp))
+                        Spacer(Modifier.height(16.dp))
 
                         // Arabic Surah Name Calligraphy
                         state.chapterArabicName?.takeIf { it.isNotBlank() }?.let { arabicName ->
                             Text(
                                 text = arabicName,
                                 fontFamily = TajweedFontFamily,
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.Normal,
+                                fontSize = 42.sp,
                                 color = Color.White,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(Modifier.height(4.dp))
+                            Spacer(Modifier.height(8.dp))
                         }
 
                         // Latin Surah Display Name
                         Text(
                             text = state.chapterDisplayName.orEmpty(),
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             textAlign = TextAlign.Center
@@ -2418,11 +2397,11 @@ private fun ContinuousScrollReader(
 
                         // Surah Meaning / Translation Name
                         state.chapterTranslatedName?.takeIf { it.isNotBlank() }?.let { meaning ->
-                            Spacer(Modifier.height(3.dp))
+                            Spacer(Modifier.height(6.dp))
                             Text(
-                                text = "($meaning)",
+                                text = meaning,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.85f),
+                                color = Color.White.copy(alpha = 0.8f),
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -2435,32 +2414,16 @@ private fun ContinuousScrollReader(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 18.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
+                        .padding(top = 24.dp, bottom = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
                         fontFamily = TajweedFontFamily,
-                        fontSize = (32 * state.fontScale).sp,
+                        fontSize = (36 * state.fontScale).sp,
                         fontWeight = FontWeight.Normal,
                         color = SaatColors.DeepEmerald,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Box(
-                        modifier = Modifier
-                            .width(140.dp)
-                            .height(1.dp)
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color.Transparent,
-                                        SaatColors.DeepEmerald.copy(alpha = 0.40f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
+                        textAlign = TextAlign.Center
                     )
                 }
             }
