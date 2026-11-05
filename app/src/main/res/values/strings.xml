@@ -1366,4 +1366,5 @@
     <string name="play">Play</string>
     <string name="share_ayah">Share Ayah</string>
     <string name="verses">Verses</string>
+    <string name="last_read_marked">Marked as last read</string>
 </resources>

@@ -385,6 +385,7 @@ fun ChapterReaderScreen(
     }
 
     val scrollListState = rememberLazyListState()
+    val scrollAnchor = remember { ScrollTapTracker() }
 
     // Reset scroll to the top (header, then ayat 1) once a NEW surah/juz list has actually been
     // loaded. Keyed on the first verse key so it fires after the list is composed again,
@@ -392,12 +393,15 @@ fun ChapterReaderScreen(
     val firstLoadedVerseKey = state.verses.firstOrNull()?.verseKey
     LaunchedEffect(firstLoadedVerseKey) {
         if (state.readingStyle == QuranReadingStyle.SCROLL && firstLoadedVerseKey != null) {
+            scrollAnchor.reported = null
             scrollListState.scrollToItem(0)
         }
     }
 
     // Sync scroll list when target verse index changes (e.g. from bookmark, last read, or switching mode)
     LaunchedEffect(state.currentVerseIndex, state.verses.size) {
+        // Index that came from the user's own scrolling must not pull the list back.
+        if (state.currentVerseIndex == scrollAnchor.reported) return@LaunchedEffect
         if (state.readingStyle == QuranReadingStyle.SCROLL && state.verses.isNotEmpty()) {
             val targetIndex = (state.currentVerseIndex + 1).coerceIn(0, state.verses.size)
             if (kotlin.math.abs(scrollListState.firstVisibleItemIndex - targetIndex) > 1) {
@@ -420,17 +424,17 @@ fun ChapterReaderScreen(
         }
     }
 
-    // Track last read & visible ayah during vertical scrolling
-    LaunchedEffect(scrollListState) {
-        snapshotFlow { scrollListState.firstVisibleItemIndex }
+    // Scroll mode: keep fetching the next page of verses as the user nears the end of the list.
+    // Without this, a juz/surah stops at the first 50 verses (the pager calls this separately).
+    LaunchedEffect(scrollListState, state.readingStyle) {
+        if (state.readingStyle != QuranReadingStyle.SCROLL) return@LaunchedEffect
+        snapshotFlow { scrollListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .distinctUntilChanged()
-            .collect { firstVisible ->
-                if (state.readingStyle == QuranReadingStyle.SCROLL && state.verses.isNotEmpty()) {
-                    val verseIdx = (firstVisible - 1).coerceIn(0, (state.verses.size - 1).coerceAtLeast(0))
-                    vm.onPageChanged(verseIdx)
-                }
+            .collect { lastIdx ->
+                if (lastIdx != null) vm.loadMoreIfNeeded(lastIdx - 1)
             }
     }
+
 
     LaunchedEffect(playingVerseKey, verseCount) {
         if (playingVerseKey.isNullOrBlank() || verseCount == 0) return@LaunchedEffect
@@ -481,6 +485,10 @@ fun ChapterReaderScreen(
                     onBookmark = vm::toggleBookmark,
                     onTafsir = vm::openTafsir,
                     onAiShare = vm::openAiShare,
+                    onSetLastRead = { idx ->
+                        scrollAnchor.reported = idx
+                        vm.markLastReadFromTap(idx)
+                    },
                     onTajweedClick = { activeTajweedType.value = it },
                     onLoadPrevious = vm::loadPreviousSurahOrJuz,
                     onLoadNext = vm::loadNextSurahOrJuz
@@ -1497,7 +1505,7 @@ private fun ReaderSettingsSheet(
                         ReadingStyleCard(
                             title = stringResource(R.string.reading_style_pager),
                             desc = stringResource(R.string.reading_style_pager_desc),
-                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            iconRes = R.drawable.ic_quran_on,
                             selected = state.readingStyle == QuranReadingStyle.PAGER,
                             onClick = { onReadingStyleChange(QuranReadingStyle.PAGER) },
                             modifier = Modifier.weight(1f)
@@ -1505,7 +1513,7 @@ private fun ReaderSettingsSheet(
                         ReadingStyleCard(
                             title = stringResource(R.string.reading_style_scroll),
                             desc = stringResource(R.string.reading_style_scroll_desc),
-                            icon = Icons.Filled.AutoStories,
+                            iconRes = R.drawable.ic_tafsir,
                             selected = state.readingStyle == QuranReadingStyle.SCROLL,
                             onClick = { onReadingStyleChange(QuranReadingStyle.SCROLL) },
                             modifier = Modifier.weight(1f)
@@ -2269,6 +2277,7 @@ private fun ContinuousScrollReader(
     onBookmark: (Int) -> Unit,
     onTafsir: (String) -> Unit,
     onAiShare: (Int) -> Unit,
+    onSetLastRead: (Int) -> Unit,
     onTajweedClick: (TajweedType) -> Unit,
     onLoadPrevious: () -> Unit,
     onLoadNext: () -> Unit,
@@ -2418,6 +2427,7 @@ private fun ContinuousScrollReader(
                 onBookmark = { onBookmark(index) },
                 onTafsir = { onTafsir(verse.verseKey.orEmpty()) },
                 onAiShare = { onAiShare(index) },
+                onSetLastRead = { onSetLastRead(index) },
                 onTajweedClick = onTajweedClick
             )
         }
@@ -2464,6 +2474,7 @@ private fun ContinuousVerseRow(
     onBookmark: () -> Unit,
     onTafsir: () -> Unit,
     onAiShare: () -> Unit,
+    onSetLastRead: () -> Unit,
     onTajweedClick: (TajweedType) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -2486,6 +2497,7 @@ private fun ContinuousVerseRow(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
+            .clickable(onClick = onSetLastRead)
             .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -2658,6 +2670,7 @@ private fun ContinuousVerseRow(
             isTajweedEnabled = isTajweedEnabled,
             activeWordIndex = activeWordIndex,
             onTajweedClick = onTajweedClick,
+            onTextTap = onSetLastRead,
             modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
         )
 
@@ -2752,6 +2765,11 @@ private fun NavigationPillButton(
     }
 }
 
+/** Remembers the ayah last tapped in scroll mode so the list does not pull back to it. */
+private class ScrollTapTracker {
+    var reported: Int? = null
+}
+
 @Composable
 private fun OrnamentLine(modifier: Modifier = Modifier) {
     Box(
@@ -2816,7 +2834,7 @@ private fun VerseActionButton(
 private fun ReadingStyleCard(
     title: String,
     desc: String,
-    icon: ImageVector,
+    iconRes: Int,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -2843,7 +2861,7 @@ private fun ReadingStyleCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = icon,
+                    painter = painterResource(iconRes),
                     contentDescription = null,
                     tint = if (selected) SaatColors.DeepEmerald else SaatColors.Slate500,
                     modifier = Modifier.size(22.dp)

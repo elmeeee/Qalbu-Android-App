@@ -102,6 +102,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -534,6 +535,7 @@ private fun AccountSettingsContent(
                 )
                 SettingsCustomRow(
                     iconRes = R.drawable.ic_quran_on,
+                    iconTint = Color(0xFF1C1C1E),
                     title = stringResource(R.string.reading_style_title),
                     subtitle = stringResource(
                         if (state.readingStyle == QuranReadingStyle.SCROLL) R.string.reading_style_scroll
@@ -983,7 +985,8 @@ private fun SettingsCustomRow(
     checked: Boolean? = null,
     onCheckedChange: ((Boolean) -> Unit)? = null,
     showChevron: Boolean = false,
-    showDivider: Boolean = true
+    showDivider: Boolean = true,
+    iconTint: Color? = null
 ) {
     Row(
         modifier = Modifier
@@ -1001,7 +1004,8 @@ private fun SettingsCustomRow(
         Image(
             painter = painterResource(iconRes),
             contentDescription = title,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
+            colorFilter = iconTint?.let { ColorFilter.tint(it) }
         )
 
         Spacer(modifier = Modifier.width(14.dp))
@@ -1330,7 +1334,7 @@ private fun QuranReadingStyleSheet(
                                 Icon(
                                     painter = painterResource(
                                         if (style == QuranReadingStyle.PAGER) R.drawable.ic_quran_on
-                                        else R.drawable.ic_remainders_custom
+                                        else R.drawable.ic_tafsir
                                     ),
                                     contentDescription = null,
                                     tint = if (isSelected) SaatColors.DeepEmerald else SaatColors.Slate500,

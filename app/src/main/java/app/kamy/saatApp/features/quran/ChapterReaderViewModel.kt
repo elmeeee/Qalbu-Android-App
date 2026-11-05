@@ -623,6 +623,26 @@ class ChapterReaderViewModel @Inject constructor(
         logScrollPosition(chapterNum, ayah, force = force)
     }
 
+    /**
+     * Scroll mode: tapping an ayah marks it as the last read position (local progress,
+     * Khatam last-read, and the reading log), then confirms with the reader toast.
+     */
+    fun markLastReadFromTap(index: Int) {
+        val s = _state.value
+        val page = s.verses.getOrNull(index) ?: return
+        val chapterNum = page.chapterNumber ?: s.chapterNumber
+        val ayah = page.resolvedVerseNumber ?: return
+        _state.update { it.copy(currentVerseIndex = index) }
+        refreshPersonalVerseState(index)
+        LocalReadingProgressStore.save(appContext, chapterNum, ayah)
+        logScrollPosition(chapterNum, ayah, force = true)
+        page.verseKey?.let { vKey ->
+            val jNum = page.juzNumber ?: s.juzNumber ?: deriveJuzFromChapter(chapterNum)
+            QuranPersonalStore.updateLastReadJuz(appContext, jNum, vKey)
+        }
+        _events.tryEmit(ReaderEvent.ShowToast(appContext.getString(R.string.last_read_marked), true))
+    }
+
     fun onTapAyah(index: Int) {
         val s = _state.value
         if (index !in s.verses.indices) return
@@ -946,6 +966,9 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun loadNextSurahOrJuz() {
         val s = _state.value
+        // Moving to another surah/juz must not carry over a pending deep-link target
+        // from the previous position; the new list always starts at ayat 1.
+        clearPendingScrollForNavigation()
         if (s.juzNumber != null) {
             val nextJuz = s.juzNumber + 1
             if (nextJuz <= 30) {
@@ -987,6 +1010,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun loadPreviousSurahOrJuz() {
         val s = _state.value
+        clearPendingScrollForNavigation()
         if (s.juzNumber != null) {
             val prevJuz = s.juzNumber - 1
             if (prevJuz >= 1) {
@@ -1024,6 +1048,11 @@ class ChapterReaderViewModel @Inject constructor(
                 loadInitialForEnd()
             }
         }
+    }
+
+    private fun clearPendingScrollForNavigation() {
+        pendingScrollVerseKey = null
+        initialScrollPending = false
     }
 
     private fun loadInitialForEnd() {

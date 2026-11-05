@@ -878,4 +878,5 @@
     <string name="play">Main</string>
     <string name="share_ayah">Kongsi Ayat</string>
     <string name="verses">Ayat</string>
+    <string name="last_read_marked">Ditandai sebagai bacaan terakhir</string>
 </resources>

@@ -882,4 +882,5 @@
     <string name="play">Putar</string>
     <string name="share_ayah">Bagikan Ayat</string>
     <string name="verses">Ayat</string>
+    <string name="last_read_marked">Ditandai sebagai terakhir dibaca</string>
 </resources>
