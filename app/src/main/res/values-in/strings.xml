@@ -887,4 +887,5 @@
     <string name="account_avatar_pick_title">Pilih avatarmu</string>
     <string name="account_avatar_pick_desc">Pilih avatar brand yang tampil di profilmu.</string>
     <string name="settings_item_support">Dukung Saat</string>
+    <string name="support_trakteer_label">Dukung di Trakteer</string>
 </resources>

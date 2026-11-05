@@ -883,4 +883,5 @@
     <string name="account_avatar_pick_title">Pilih avatar anda</string>
     <string name="account_avatar_pick_desc">Pilih avatar jenama yang dipaparkan pada profil anda.</string>
     <string name="settings_item_support">Sokong Saat</string>
+    <string name="support_trakteer_label">Sokong di Trakteer</string>
 </resources>

@@ -140,6 +140,8 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.graphicsLayer
+import android.content.Context
+import androidx.compose.material.icons.filled.Favorite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -2475,12 +2477,34 @@ private fun SaatModalBottomSheet(
 
 // ─── Legal Web Views & Info Screens ──────────────────────────────────────────
 
-/** Support Saat: Ko-fi page shown inside the app, same chrome as the About screen. */
+/** Extracts the https target from an `intent:https://...#intent;...;end` URL, or null. */
+private fun intentToHttps(url: String): String? {
+    if (!url.startsWith("intent:")) return null
+    val inner = url.removePrefix("intent:").substringBefore("#intent")
+    return inner.takeIf { it.startsWith("https://") || it.startsWith("http://") }
+}
+
+/** True when the user's active location (or device country) is Indonesia. */
+private fun isIndonesiaUser(context: Context): Boolean {
+    val activeCC = LocationPreferencesStore.from(context).activeCountryCode()
+    if (!activeCC.isNullOrBlank()) {
+        return activeCC.equals("ID", ignoreCase = true) || activeCC.equals("IDN", ignoreCase = true)
+    }
+    val detected = CountryDefaultsProvider.detectCountryCode(context) ?: Locale.getDefault().country
+    return detected.equals("ID", ignoreCase = true) || detected.equals("IDN", ignoreCase = true)
+}
+
+private const val KOFI_URL = "https://ko-fi.com/R8T12A3G16"
+private const val TRAKTEER_URL = "https://trakteer.id/SaatApp"
+
+/** Support Saat: donation page inside the app. Trakteer for Indonesia, Ko-fi elsewhere. */
 @Composable
 fun SupportSaatScreen(
     appLanguage: AppLanguage,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val supportUrl = remember(context) { if (isIndonesiaUser(context)) TRAKTEER_URL else KOFI_URL }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -2511,7 +2535,7 @@ fun SupportSaatScreen(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         LegalWebView(
-            url = "https://ko-fi.com/R8T12A3G16",
+            url = supportUrl,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
@@ -2702,7 +2726,18 @@ private fun LegalWebView(
 
                     webViewClient = object : WebViewClient() {
                         override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
-                            return false
+                            val target = request?.url?.toString() ?: return false
+                            if (target.startsWith("http://") || target.startsWith("https://")) return false
+                            // intent:https://... (e.g. Trakteer redirects): load the https target in place.
+                            val httpsTarget = intentToHttps(target)
+                            if (httpsTarget != null) {
+                                view?.loadUrl(httpsTarget)
+                                return true
+                            }
+                            // Other app schemes: hand off to the system.
+                            return runCatching {
+                                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(target)))
+                            }.isSuccess
                         }
 
                         override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
@@ -2737,17 +2772,7 @@ private fun AppFooterCard(appVersion: String, onOpenSupport: () -> Unit) {
     val haptic = app.kamy.saatApp.ui.feedback.rememberTapHaptic()
     val targetUrl = "https://masjidku.app?ref=saat_android"
 
-    val isIndonesiaUser = remember(context) {
-        val locationStore = LocationPreferencesStore.from(context)
-        val activeCC = locationStore.activeCountryCode()
-        if (!activeCC.isNullOrBlank()) {
-            activeCC.equals("ID", ignoreCase = true) || activeCC.equals("IDN", ignoreCase = true)
-        } else {
-            val detected = CountryDefaultsProvider.detectCountryCode(context)
-                ?: Locale.getDefault().country
-            detected.equals("ID", ignoreCase = true) || detected.equals("IDN", ignoreCase = true)
-        }
-    }
+    val isIndonesiaUser = remember(context) { isIndonesiaUser(context) }
 
     Surface(
         modifier = Modifier
@@ -2822,19 +2847,49 @@ private fun AppFooterCard(appVersion: String, onOpenSupport: () -> Unit) {
                 }
             }
 
-            // Support Saat: Ko-fi button, opens the in-app support page
-            Image(
-                painter = painterResource(R.drawable.kofi_button),
-                contentDescription = stringResource(R.string.settings_item_support),
-                modifier = Modifier
-                    .height(36.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable {
+            // Support Saat: Trakteer for Indonesia, Ko-fi elsewhere. Both open the in-app page.
+            if (isIndonesiaUser) {
+                Surface(
+                    onClick = {
                         haptic()
                         onOpenSupport()
                     },
-                contentScale = ContentScale.Fit
-            )
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFFBE1E2D),
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.support_trakteer_label),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                            color = Color.White
+                        )
+                    }
+                }
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.kofi_button),
+                    contentDescription = stringResource(R.string.settings_item_support),
+                    modifier = Modifier
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            haptic()
+                            onOpenSupport()
+                        },
+                    contentScale = ContentScale.Fit
+                )
+            }
 
             // App Tagline & Version
             Column(
