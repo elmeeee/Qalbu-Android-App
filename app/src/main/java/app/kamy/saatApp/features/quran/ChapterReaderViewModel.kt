@@ -99,6 +99,7 @@ enum class AyahPlaybackMode {
 }
 
 private const val HADITH_PAGE_LIMIT = 4
+private const val END_PAGE_SIZE = 50
 
 @HiltViewModel
 class ChapterReaderViewModel @Inject constructor(
@@ -364,6 +365,7 @@ class ChapterReaderViewModel @Inject constructor(
                 }
                 tryScrollToPendingVerse()
                 refreshPersonalVerseState(restoredIndex)
+                if (_state.value.juzNumber != null && _state.value.hasMore) loadRemainingJuzPages()
 
                 if (autoPlayAfterLoad) {
                     val page = resp.verses.getOrNull(restoredIndex)
@@ -383,6 +385,34 @@ class ChapterReaderViewModel @Inject constructor(
         if (s.isLoadingMore || !s.hasMore || s.verses.isEmpty()) return
         if (pendingScrollVerseKey == null && currentIndex < s.verses.size - 3) return
         loadNextPage()
+    }
+
+    /**
+     * A juz is shown as one continuous list (scroll mode needs surah dividers and true counts),
+     * so pull the remaining pages in order. Appended at the end, so current indices stay valid.
+     */
+    private fun loadRemainingJuzPages() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoadingMore = true) }
+            while (true) {
+                val s = _state.value
+                if (!s.hasMore || s.juzNumber == null) break
+                val page = s.loadedApiPage + 1
+                val resp = runCatching { fetchVersePage(page = page) }.getOrNull() ?: break
+                if (resp.verses.isEmpty()) {
+                    _state.update { it.copy(hasMore = false) }
+                    break
+                }
+                _state.update {
+                    it.copy(
+                        verses = (it.verses + resp.verses).distinctBy { v -> v.listIdentity },
+                        loadedApiPage = page,
+                        hasMore = resp.pagination?.hasNextPage ?: false
+                    )
+                }
+            }
+            _state.update { it.copy(isLoadingMore = false) }
+        }
     }
 
     private fun loadNextPage() {
@@ -622,6 +652,26 @@ class ChapterReaderViewModel @Inject constructor(
         logScrollPosition(chapterNum, ayah, force = force)
     }
 
+    /**
+     * Scroll mode: tapping an ayah marks it as the last read position (local progress,
+     * Khatam last-read, and the reading log), then confirms with the reader toast.
+     */
+    fun markLastReadFromTap(index: Int) {
+        val s = _state.value
+        val page = s.verses.getOrNull(index) ?: return
+        val chapterNum = page.chapterNumber ?: s.chapterNumber
+        val ayah = page.resolvedVerseNumber ?: return
+        _state.update { it.copy(currentVerseIndex = index) }
+        refreshPersonalVerseState(index)
+        LocalReadingProgressStore.save(appContext, chapterNum, ayah)
+        logScrollPosition(chapterNum, ayah, force = true)
+        page.verseKey?.let { vKey ->
+            val jNum = page.juzNumber ?: s.juzNumber ?: deriveJuzFromChapter(chapterNum)
+            QuranPersonalStore.updateLastReadJuz(appContext, jNum, vKey)
+        }
+        _events.tryEmit(ReaderEvent.ShowToast(appContext.getString(R.string.last_read_marked), true))
+    }
+
     fun onTapAyah(index: Int) {
         val s = _state.value
         if (index !in s.verses.indices) return
@@ -678,7 +728,10 @@ class ChapterReaderViewModel @Inject constructor(
                     verseKey = v.verseKey.orEmpty(),
                     ayahNumber = v.resolvedVerseNumber ?: 0,
                     url = audioUrl,
-                    label = v.verseKey.orEmpty()
+                    label = v.verseKey.orEmpty(),
+                    chapterName = v.chapterNumber?.let { s.chapterLookup[it] },
+                    chapterNumber = v.chapterNumber,
+                    juzNumber = v.juzNumber ?: s.juzNumber
                 )
             }
             val queueStartIndex = queueItems.indexOfFirst { it.verseKey == page.verseKey }.coerceAtLeast(0)
@@ -688,7 +741,8 @@ class ChapterReaderViewModel @Inject constructor(
                     surahTitle = surahTitle,
                     reciterName = reciterName,
                     startIndex = queueStartIndex,
-                    chapterNumber = chapterNum
+                    chapterNumber = chapterNum,
+                    juzNumber = page.juzNumber ?: s.juzNumber
                 )
                 return
             }
@@ -700,7 +754,8 @@ class ChapterReaderViewModel @Inject constructor(
             ayahLabel = page.verseKey.orEmpty(),
             reciterName = reciterName,
             chapterNumber = chapterNum,
-            ayahNumber = page.resolvedVerseNumber
+            ayahNumber = page.resolvedVerseNumber,
+            juzNumber = page.juzNumber ?: s.juzNumber
         )
     }
 
@@ -945,6 +1000,9 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun loadNextSurahOrJuz() {
         val s = _state.value
+        // Moving to another surah/juz must not carry over a pending deep-link target
+        // from the previous position; the new list always starts at ayat 1.
+        clearPendingScrollForNavigation()
         if (s.juzNumber != null) {
             val nextJuz = s.juzNumber + 1
             if (nextJuz <= 30) {
@@ -986,6 +1044,7 @@ class ChapterReaderViewModel @Inject constructor(
 
     fun loadPreviousSurahOrJuz() {
         val s = _state.value
+        clearPendingScrollForNavigation()
         if (s.juzNumber != null) {
             val prevJuz = s.juzNumber - 1
             if (prevJuz >= 1) {
@@ -1025,6 +1084,11 @@ class ChapterReaderViewModel @Inject constructor(
         }
     }
 
+    private fun clearPendingScrollForNavigation() {
+        pendingScrollVerseKey = null
+        initialScrollPending = false
+    }
+
     private fun loadInitialForEnd() {
         _state.update {
             it.copy(
@@ -1038,23 +1102,31 @@ class ChapterReaderViewModel @Inject constructor(
         }
         viewModelScope.launch {
             runCatching {
-                fetchVersePage(page = 1)
-            }.onSuccess { resp ->
+                // Load every page from 1..N so the reader has the full surah/juz in order,
+                // then land on the true final ayah (not just the first 50).
+                val first = fetchVersePage(page = 1, perPage = END_PAGE_SIZE)
+                val totalPages = first.pagination?.totalPages ?: 1
+                val all = first.verses.toMutableList()
+                for (p in 2..totalPages) {
+                    all += fetchVersePage(page = p, perPage = END_PAGE_SIZE).verses
+                }
+                all.distinctBy { it.listIdentity } to totalPages
+            }.onSuccess { (allVerses, totalPages) ->
                 val trans = translationStore.showTranslation.value
                 val translit = translationStore.showTransliteration.value
                 val tajweed = translationStore.isTajweedEnabled.value
                 val arabicType = translationStore.arabicTextType.value
                 val rec = translationStore.currentRecitationId()
                 val tid = LocalQuranConfig.normalizeTranslationId(translationStore.currentTranslationId())
-                val lastIdx = (resp.verses.size - 1).coerceAtLeast(0)
+                val firstIdx = 0
 
                 _state.update { 
                     it.copy(
                         isLoading = false,
-                        verses = resp.verses,
-                        currentVerseIndex = lastIdx,
-                        loadedApiPage = resp.pagination?.currentPage ?: 1,
-                        hasMore = resp.pagination?.hasNextPage ?: false,
+                        verses = allVerses,
+                        currentVerseIndex = firstIdx,
+                        loadedApiPage = totalPages,
+                        hasMore = false,
                         selectedTranslationId = tid,
                         showTranslation = trans,
                         showTransliteration = translit,
@@ -1063,8 +1135,8 @@ class ChapterReaderViewModel @Inject constructor(
                         selectedRecitationId = rec
                     ) 
                 }
-                _events.tryEmit(ReaderEvent.AnimateToPage(lastIdx))
-                refreshPersonalVerseState(lastIdx)
+                _events.tryEmit(ReaderEvent.AnimateToPage(firstIdx))
+                refreshPersonalVerseState(firstIdx)
             }.onFailure { t ->
                 _state.update { it.copy(isLoading = false, error = t.toAppError()) }
             }

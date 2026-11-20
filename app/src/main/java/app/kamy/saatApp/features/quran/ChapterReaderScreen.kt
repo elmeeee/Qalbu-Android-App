@@ -13,6 +13,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -59,6 +61,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.AutoStories
@@ -115,10 +118,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -283,9 +288,19 @@ fun ChapterReaderScreen(
 
     val currentVerseIndex = (pagerState.currentPage - pageOffset).coerceIn(0, (verseCount - 1).coerceAtLeast(0))
     val currentVerse = s.verses.getOrNull(currentVerseIndex)
+    val scrollListState = rememberLazyListState()
+    // Scroll mode: the header follows the ayah that is most visible, not the pager page.
+    val scrollVerseIdx by remember(s.verses.size) {
+        derivedStateOf { scrollListState.dominantVerseIndex(s.verses.size) }
+    }
+    val titleVerse = if (s.readingStyle == QuranReadingStyle.SCROLL) {
+        scrollVerseIdx?.let { s.verses.getOrNull(it) } ?: currentVerse
+    } else {
+        currentVerse
+    }
     val surahTitle = when {
         state.juzNumber != null -> {
-            val chapterNum = currentVerse?.chapterNumber
+            val chapterNum = titleVerse?.chapterNumber
             state.chapterLookup[chapterNum]
                 ?: chapterNum?.let { stringResource(R.string.surah_number, it) }
                 ?: state.chapterDisplayName.orEmpty()
@@ -380,10 +395,23 @@ fun ChapterReaderScreen(
         }
     }
 
-    val scrollListState = rememberLazyListState()
+    val scrollAnchor = remember { ScrollTapTracker() }
+
+    // Reset scroll to the top (header, then ayat 1) once a NEW surah/juz list has actually been
+    // loaded. Keyed on the first verse key so it fires after the list is composed again,
+    // not while the previous list is being cleared (which made the reset get lost).
+    val firstLoadedVerseKey = state.verses.firstOrNull()?.verseKey
+    LaunchedEffect(firstLoadedVerseKey) {
+        if (state.readingStyle == QuranReadingStyle.SCROLL && firstLoadedVerseKey != null) {
+            scrollAnchor.reported = null
+            scrollListState.scrollToItem(0)
+        }
+    }
 
     // Sync scroll list when target verse index changes (e.g. from bookmark, last read, or switching mode)
-    LaunchedEffect(state.currentVerseIndex) {
+    LaunchedEffect(state.currentVerseIndex, state.verses.size) {
+        // Index that came from the user's own scrolling must not pull the list back.
+        if (state.currentVerseIndex == scrollAnchor.reported) return@LaunchedEffect
         if (state.readingStyle == QuranReadingStyle.SCROLL && state.verses.isNotEmpty()) {
             val targetIndex = (state.currentVerseIndex + 1).coerceIn(0, state.verses.size)
             if (kotlin.math.abs(scrollListState.firstVisibleItemIndex - targetIndex) > 1) {
@@ -406,17 +434,17 @@ fun ChapterReaderScreen(
         }
     }
 
-    // Track last read & visible ayah during vertical scrolling
-    LaunchedEffect(scrollListState) {
-        snapshotFlow { scrollListState.firstVisibleItemIndex }
+    // Scroll mode: keep fetching the next page of verses as the user nears the end of the list.
+    // Without this, a juz/surah stops at the first 50 verses (the pager calls this separately).
+    LaunchedEffect(scrollListState, state.readingStyle) {
+        if (state.readingStyle != QuranReadingStyle.SCROLL) return@LaunchedEffect
+        snapshotFlow { scrollListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index }
             .distinctUntilChanged()
-            .collect { firstVisible ->
-                if (state.readingStyle == QuranReadingStyle.SCROLL && state.verses.isNotEmpty()) {
-                    val verseIdx = (firstVisible - 1).coerceIn(0, (state.verses.size - 1).coerceAtLeast(0))
-                    vm.onPageChanged(verseIdx)
-                }
+            .collect { lastIdx ->
+                if (lastIdx != null) vm.loadMoreIfNeeded(lastIdx - 1)
             }
     }
+
 
     LaunchedEffect(playingVerseKey, verseCount) {
         if (playingVerseKey.isNullOrBlank() || verseCount == 0) return@LaunchedEffect
@@ -467,6 +495,10 @@ fun ChapterReaderScreen(
                     onBookmark = vm::toggleBookmark,
                     onTafsir = vm::openTafsir,
                     onAiShare = vm::openAiShare,
+                    onSetLastRead = { idx ->
+                        scrollAnchor.reported = idx
+                        vm.markLastReadFromTap(idx)
+                    },
                     onTajweedClick = { activeTajweedType.value = it },
                     onLoadPrevious = vm::loadPreviousSurahOrJuz,
                     onLoadNext = vm::loadNextSurahOrJuz
@@ -589,9 +621,9 @@ fun ChapterReaderScreen(
                     )
                     Spacer(Modifier.height(2.dp))
                     val ayahLabel = if (state.juzNumber != null) {
-                        val verseLabel = currentVerse?.displayVerseReference?.let { ref ->
+                        val verseLabel = titleVerse?.displayVerseReference?.let { ref ->
                             stringResource(R.string.verse_key_label, ref)
-                        } ?: currentVerse?.resolvedVerseNumber?.let { num ->
+                        } ?: titleVerse?.resolvedVerseNumber?.let { num ->
                             stringResource(R.string.verse_number, num)
                         } ?: stringResource(R.string.verse_label, "—")
                         listOfNotNull(
@@ -599,9 +631,9 @@ fun ChapterReaderScreen(
                             state.juzNumber?.let { stringResource(R.string.juz_number, it) }
                         ).joinToString(" · ")
                     } else {
-                        currentVerse?.resolvedVerseNumber?.let { num ->
+                        titleVerse?.resolvedVerseNumber?.let { num ->
                             stringResource(R.string.verse_number, num)
-                        } ?: currentVerse?.displayVerseReference?.let { ref ->
+                        } ?: titleVerse?.displayVerseReference?.let { ref ->
                             stringResource(R.string.verse_key_label, ref)
                         } ?: stringResource(R.string.verse_label, "—")
                     }
@@ -820,8 +852,9 @@ fun ChapterReaderScreen(
                                     state.recitations.firstOrNull { it.identifiableId == state.selectedRecitationId }?.displayName ?: ""
                                 }
 
+                                val juzLabel = audioPlaybackState.juzNumber?.let { stringResource(R.string.juz_number, it) }
                                 Text(
-                                    text = "$surahTitle · $ayahLabel",
+                                    text = listOfNotNull(juzLabel, surahTitle, ayahLabel).joinToString(" · "),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = SaatColors.Slate900,
@@ -1483,7 +1516,7 @@ private fun ReaderSettingsSheet(
                         ReadingStyleCard(
                             title = stringResource(R.string.reading_style_pager),
                             desc = stringResource(R.string.reading_style_pager_desc),
-                            icon = Icons.AutoMirrored.Filled.MenuBook,
+                            iconRes = R.drawable.ic_quran_on,
                             selected = state.readingStyle == QuranReadingStyle.PAGER,
                             onClick = { onReadingStyleChange(QuranReadingStyle.PAGER) },
                             modifier = Modifier.weight(1f)
@@ -1491,7 +1524,7 @@ private fun ReaderSettingsSheet(
                         ReadingStyleCard(
                             title = stringResource(R.string.reading_style_scroll),
                             desc = stringResource(R.string.reading_style_scroll_desc),
-                            icon = Icons.Filled.AutoStories,
+                            iconRes = R.drawable.ic_tafsir,
                             selected = state.readingStyle == QuranReadingStyle.SCROLL,
                             onClick = { onReadingStyleChange(QuranReadingStyle.SCROLL) },
                             modifier = Modifier.weight(1f)
@@ -2255,6 +2288,7 @@ private fun ContinuousScrollReader(
     onBookmark: (Int) -> Unit,
     onTafsir: (String) -> Unit,
     onAiShare: (Int) -> Unit,
+    onSetLastRead: (Int) -> Unit,
     onTajweedClick: (TajweedType) -> Unit,
     onLoadPrevious: () -> Unit,
     onLoadNext: () -> Unit,
@@ -2270,198 +2304,104 @@ private fun ContinuousScrollReader(
         modifier = modifier
             .fillMaxSize()
             .background(SaatColors.ScreenBackground)
+            .padding(horizontal = 16.dp)
     ) {
         // Header: Previous Surah/Juz button + Surah Title Banner + Bismillah
         item(key = "header") {
+            Spacer(Modifier.height(8.dp))
             val prevChapterNum = (state.chapterNumber - 1).coerceAtLeast(1)
             val prevSurahName = state.chapterLookup[prevChapterNum]
             if (state.chapterNumber > 1 || (state.juzNumber != null && state.juzNumber > 1)) {
-                Surface(
-                    onClick = onLoadPrevious,
-                    shape = RoundedCornerShape(14.dp),
-                    color = SaatColors.PureWhite,
-                    border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 6.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            tint = SaatColors.DeepEmerald,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        val text = if (state.juzNumber != null) {
-                            val prevJuz = (state.juzNumber - 1).coerceAtLeast(1)
-                            stringResource(R.string.transition_prev_juz, prevJuz)
-                        } else {
-                            val targetSurah = prevSurahName ?: stringResource(R.string.transition_prev_surah_default)
-                            stringResource(R.string.transition_prev_surah, targetSurah)
-                        }
-                        Text(
-                            text = text,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = SaatColors.DeepEmerald
-                        )
-                    }
+                val prevLabel = if (state.juzNumber != null) {
+                    val prevJuz = (state.juzNumber - 1).coerceAtLeast(1)
+                    stringResource(R.string.transition_prev_juz, prevJuz)
+                } else {
+                    val targetSurah = prevSurahName ?: stringResource(R.string.transition_prev_surah_default)
+                    stringResource(R.string.transition_prev_surah, targetSurah)
                 }
+                NavigationPillButton(
+                    label = prevLabel,
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    iconAtStart = true,
+                    onClick = onLoadPrevious
+                )
             }
 
-            // Surah Header Banner (Premium Islamic Card)
-            Surface(
-                shape = RoundedCornerShape(22.dp),
-                color = Color.Transparent,
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)),
-                shadowElevation = 4.dp,
+            // Slim surah meta line (name & meaning already live in the top bar)
+            val surahMetaLabel = if (state.juzNumber != null) {
+                stringResource(R.string.juz_number, state.juzNumber)
+            } else {
+                stringResource(R.string.surah_number, state.chapterNumber)
+            }
+            val revelationPlace = state.chapterRevelationPlace?.takeIf { it.isNotBlank() } ?: "Makkah"
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(22.dp),
-                        ambientColor = SaatColors.DeepEmerald.copy(alpha = 0.30f),
-                        spotColor = SaatColors.DeepEmerald.copy(alpha = 0.25f)
-                    )
+                    .padding(top = 12.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFF064E3B), // Deep Emerald
-                                    Color(0xFF0F766E), // Emerald Teal
-                                    Color(0xFF10B981)  // Vibrant Mint
-                                )
-                            )
-                        )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 20.dp, horizontal = 18.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Top Badge Row: Surah Number & Revelation Place & Verse count
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            val surahNumberLabel = if (state.juzNumber != null) {
-                                stringResource(R.string.juz_number, state.juzNumber)
-                            } else {
-                                stringResource(R.string.surah_number, state.chapterNumber)
-                            }
-                            val revelationPlace = state.chapterRevelationPlace?.takeIf { it.isNotBlank() } ?: "Makkah"
-
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(Color.White.copy(alpha = 0.18f))
-                                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "$surahNumberLabel · $revelationPlace".uppercase(),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White.copy(alpha = 0.95f),
-                                    letterSpacing = 0.6.sp
-                                )
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(Color.White.copy(alpha = 0.18f))
-                                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "${state.verses.size} ${stringResource(R.string.verses)}".uppercase(),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White.copy(alpha = 0.95f),
-                                    letterSpacing = 0.6.sp
-                                )
-                            }
-                        }
-
-                        Spacer(Modifier.height(14.dp))
-
-                        // Arabic Surah Name Calligraphy
-                        state.chapterArabicName?.takeIf { it.isNotBlank() }?.let { arabicName ->
-                            Text(
-                                text = arabicName,
-                                fontFamily = TajweedFontFamily,
-                                fontSize = 32.sp,
-                                fontWeight = FontWeight.Normal,
-                                color = Color.White,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(Modifier.height(4.dp))
-                        }
-
-                        // Latin Surah Display Name
-                        Text(
-                            text = state.chapterDisplayName.orEmpty(),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            textAlign = TextAlign.Center
-                        )
-
-                        // Surah Meaning / Translation Name
-                        state.chapterTranslatedName?.takeIf { it.isNotBlank() }?.let { meaning ->
-                            Spacer(Modifier.height(3.dp))
-                            Text(
-                                text = "($meaning)",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.85f),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
+                Text(
+                    text = "$surahMetaLabel  ·  $revelationPlace  ·  ${state.verses.size} ${stringResource(R.string.verses)}",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.6.sp
+                    ),
+                    color = SaatColors.Slate500,
+                    textAlign = TextAlign.Center
+                )
             }
 
-            // Calligraphic Bismillah for all Surahs except At-Tawbah (9)
-            if (state.chapterNumber != 9) {
+            // Bismillah: same ﷽ glyph and emerald colour as the pager, framed by gold ornament
+            // lines. Not shown for Al-Fatihah (its bismillah is already verse 1) nor At-Tawbah.
+            if (state.chapterNumber != 1 && state.chapterNumber != 9) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 18.dp, bottom = 12.dp, start = 20.dp, end = 20.dp),
+                        .padding(top = 16.dp, bottom = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OrnamentLine(modifier = Modifier.weight(1f))
+                        Spacer(Modifier.width(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .rotate(45f)
+                                .background(SaatColors.GoldDeep)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        OrnamentLine(modifier = Modifier.weight(1f))
+                    }
+
                     Text(
-                        text = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
-                        fontFamily = TajweedFontFamily,
-                        fontSize = (32 * state.fontScale).sp,
-                        fontWeight = FontWeight.Normal,
+                        text = "﷽",
+                        fontSize = (44 * state.fontScale).sp,
                         color = SaatColors.DeepEmerald,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Box(
                         modifier = Modifier
-                            .width(140.dp)
-                            .height(1.dp)
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        Color.Transparent,
-                                        SaatColors.DeepEmerald.copy(alpha = 0.40f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
+                            .fillMaxWidth()
+                            .padding(vertical = 14.dp)
                     )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OrnamentLine(modifier = Modifier.weight(1f))
+                        Spacer(Modifier.width(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .rotate(45f)
+                                .background(SaatColors.GoldDeep)
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        OrnamentLine(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
@@ -2471,23 +2411,40 @@ private fun ContinuousScrollReader(
             items = state.verses,
             key = { _, verse -> verse.verseKey.orEmpty() }
         ) { index, verse ->
-            ContinuousVerseRow(
-                verse = verse,
-                index = index,
-                fontScale = state.fontScale,
-                showTranslation = state.showTranslation,
-                showTransliteration = state.showTransliteration,
-                translationId = state.selectedTranslationId,
-                isTajweedEnabled = state.isTajweedEnabled,
-                arabicTextType = state.arabicTextType,
-                personalDataRevision = state.personalDataRevision,
-                audioPlaybackState = audioPlaybackState,
-                onPlay = { onPlay(index) },
-                onBookmark = { onBookmark(index) },
-                onTafsir = { onTafsir(verse.verseKey.orEmpty()) },
-                onAiShare = { onAiShare(index) },
-                onTajweedClick = onTajweedClick
-            )
+            // In juz mode, the first ayah of each surah gets a surah divider above it.
+            // The divider lives inside the same item so list indices (used for scroll sync) stay unchanged.
+            val prevChapter = if (index > 0) state.verses[index - 1].chapterNumber else null
+            val isNewSurah = state.juzNumber != null &&
+                verse.chapterNumber != null &&
+                verse.chapterNumber != prevChapter
+            Column {
+                if (isNewSurah) {
+                    SurahDivider(
+                        chapterNumber = verse.chapterNumber!!,
+                        surahName = state.chapterLookup[verse.chapterNumber],
+                        verseCount = state.verses.count { it.chapterNumber == verse.chapterNumber },
+                        isFirstInJuz = index == 0
+                    )
+                }
+                ContinuousVerseRow(
+                    verse = verse,
+                    index = index,
+                    fontScale = state.fontScale,
+                    showTranslation = state.showTranslation,
+                    showTransliteration = state.showTransliteration,
+                    translationId = state.selectedTranslationId,
+                    isTajweedEnabled = state.isTajweedEnabled,
+                    arabicTextType = state.arabicTextType,
+                    personalDataRevision = state.personalDataRevision,
+                    audioPlaybackState = audioPlaybackState,
+                    onPlay = { onPlay(index) },
+                    onBookmark = { onBookmark(index) },
+                    onTafsir = { onTafsir(verse.verseKey.orEmpty()) },
+                    onAiShare = { onAiShare(index) },
+                    onSetLastRead = { onSetLastRead(index) },
+                    onTajweedClick = onTajweedClick
+                )
+            }
         }
 
         // Footer: Next Surah/Juz button
@@ -2495,41 +2452,21 @@ private fun ContinuousScrollReader(
             val nextChapterNum = state.chapterNumber + 1
             val nextSurahName = state.chapterLookup[nextChapterNum]
             if (state.chapterNumber < 114 || (state.juzNumber != null && state.juzNumber < 30)) {
-                Surface(
-                    onClick = onLoadNext,
-                    shape = RoundedCornerShape(16.dp),
-                    color = SaatColors.DeepEmerald,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 20.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        val text = if (state.juzNumber != null) {
-                            val nextJuz = (state.juzNumber + 1).coerceAtMost(30)
-                            stringResource(R.string.transition_next_juz, nextJuz)
-                        } else {
-                            val targetSurah = nextSurahName ?: stringResource(R.string.transition_next_surah_default)
-                            stringResource(R.string.transition_next_surah, targetSurah)
-                        }
-                        Text(
-                            text = text,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.PureWhite
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                            contentDescription = null,
-                            tint = SaatColors.PureWhite,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+                val nextLabel = if (state.juzNumber != null) {
+                    val nextJuz = (state.juzNumber + 1).coerceAtMost(30)
+                    stringResource(R.string.transition_next_juz, nextJuz)
+                } else {
+                    val targetSurah = nextSurahName ?: stringResource(R.string.transition_next_surah_default)
+                    stringResource(R.string.transition_next_surah, targetSurah)
                 }
+                Spacer(Modifier.height(16.dp))
+                NavigationPillButton(
+                    label = nextLabel,
+                    icon = Icons.AutoMirrored.Filled.ArrowForward,
+                    iconAtStart = false,
+                    onClick = onLoadNext,
+                    filled = true
+                )
             }
             Spacer(Modifier.height(32.dp))
         }
@@ -2552,6 +2489,7 @@ private fun ContinuousVerseRow(
     onBookmark: () -> Unit,
     onTafsir: () -> Unit,
     onAiShare: () -> Unit,
+    onSetLastRead: () -> Unit,
     onTajweedClick: (TajweedType) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -2574,6 +2512,7 @@ private fun ContinuousVerseRow(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
+            .clickable(onClick = onSetLastRead)
             .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -2587,85 +2526,75 @@ private fun ContinuousVerseRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(SaatColors.DeepEmerald.copy(alpha = 0.10f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = verse.resolvedVerseNumber.toString(),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald
-                    )
-                }
+                VerseNumberFrame(label = verse.resolvedVerseNumber.toString())
 
                 VersePersonalBadges(
                     verseKey = verse.verseKey,
                     personalDataRevision = personalDataRevision,
-                    compact = true
+                    compact = true,
+                    fillWidth = false
                 )
             }
 
+            // Action pill: play, bookmark, tafsir, AI — all always visible
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(SaatColors.PureWhite)
+                    .border(1.dp, Color(0xFFEBE7DF), RoundedCornerShape(50))
+                    .padding(horizontal = 2.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
+                val isPlayingNow = isPlayingThisVerse && audioPlaybackState?.isPlaying == true
+                VerseActionButton(
                     onClick = onPlay,
-                    modifier = Modifier.size(36.dp)
+                    contentDescription = stringResource(if (isPlayingNow) R.string.pause else R.string.play),
+                    active = isPlayingThisVerse
                 ) {
                     Icon(
-                        imageVector = if (isPlayingThisVerse && audioPlaybackState?.isPlaying == true) {
-                            Icons.Filled.Pause
-                        } else {
-                            Icons.Filled.PlayArrow
-                        },
-                        contentDescription = if (isPlayingThisVerse && audioPlaybackState?.isPlaying == true) {
-                            stringResource(R.string.pause)
-                        } else {
-                            stringResource(R.string.play)
-                        },
+                        imageVector = if (isPlayingNow) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        contentDescription = null,
                         tint = if (isPlayingThisVerse) SaatColors.DeepEmerald else SaatColors.Slate500,
                         modifier = Modifier.size(20.dp)
                     )
                 }
 
-                IconButton(
+                VerseActionButton(
                     onClick = onBookmark,
-                    modifier = Modifier.size(36.dp)
+                    contentDescription = stringResource(
+                        if (isBookmarked) R.string.remove_bookmark else R.string.bookmark
+                    ),
+                    active = isBookmarked
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_bookmark_custom),
-                        contentDescription = stringResource(
-                            if (isBookmarked) R.string.remove_bookmark else R.string.bookmark
-                        ),
+                        contentDescription = null,
                         tint = if (isBookmarked) SaatColors.DeepEmerald else SaatColors.Slate500,
                         modifier = Modifier.size(19.dp)
                     )
                 }
 
-                IconButton(
+                VerseActionButton(
                     onClick = onTafsir,
-                    modifier = Modifier.size(36.dp)
+                    contentDescription = stringResource(R.string.tafsir),
+                    active = false
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_tafsir),
-                        contentDescription = stringResource(R.string.tafsir),
+                        contentDescription = null,
                         tint = SaatColors.Slate500,
                         modifier = Modifier.size(18.dp)
                     )
                 }
 
-                IconButton(
+                VerseActionButton(
                     onClick = onAiShare,
-                    modifier = Modifier.size(36.dp)
+                    contentDescription = stringResource(R.string.share_ayah),
+                    active = false
                 ) {
                     Icon(
                         imageVector = Icons.Filled.AutoAwesome,
-                        contentDescription = stringResource(R.string.share_ayah),
+                        contentDescription = null,
                         tint = SaatColors.Slate500,
                         modifier = Modifier.size(18.dp)
                     )
@@ -2756,6 +2685,7 @@ private fun ContinuousVerseRow(
             isTajweedEnabled = isTajweedEnabled,
             activeWordIndex = activeWordIndex,
             onTajweedClick = onTajweedClick,
+            onTextTap = onSetLastRead,
             modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
         )
 
@@ -2809,10 +2739,199 @@ private fun ContinuousVerseRow(
 }
 
 @Composable
+private fun NavigationPillButton(
+    label: String,
+    icon: ImageVector,
+    iconAtStart: Boolean,
+    onClick: () -> Unit,
+    filled: Boolean = false
+) {
+    val container = if (filled) SaatColors.DeepEmerald else SaatColors.PureWhite
+    val content = if (filled) SaatColors.PureWhite else SaatColors.DeepEmerald
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = container,
+        border = if (filled) null else BorderStroke(1.dp, Color(0xFFEBE7DF)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (iconAtStart) {
+                Icon(imageVector = icon, contentDescription = null, tint = content, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = content
+            )
+            if (!iconAtStart) {
+                Spacer(Modifier.width(8.dp))
+                Icon(imageVector = icon, contentDescription = null, tint = content, modifier = Modifier.size(16.dp))
+            }
+        }
+    }
+}
+
+/** Remembers the ayah last tapped in scroll mode so the list does not pull back to it. */
+private class ScrollTapTracker {
+    var reported: Int? = null
+}
+
+/** Verse index (0-based) under the upper third of the viewport; null while the header dominates. */
+private fun LazyListState.dominantVerseIndex(verseCount: Int): Int? {
+    val info = layoutInfo
+    val items = info.visibleItemsInfo
+    if (items.isEmpty() || verseCount == 0) return null
+    val anchorY = info.viewportStartOffset + (info.viewportEndOffset - info.viewportStartOffset) / 3
+    val hit = items.firstOrNull { it.offset <= anchorY && anchorY < it.offset + it.size } ?: items.first()
+    return (hit.index - 1).takeIf { it in 0 until verseCount }
+}
+
+@Composable
+private fun OrnamentLine(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .height(1.dp)
+            .background(
+                Brush.horizontalGradient(
+                    listOf(
+                        Color.Transparent,
+                        SaatColors.GoldDeep.copy(alpha = 0.55f)
+                    )
+                )
+            )
+    )
+}
+
+/**
+ * Surah header shown above the first ayah of a surah inside a juz (scroll mode).
+ * Gold frame and cream card so it reads apart from the teal ayah badges.
+ */
+@Composable
+private fun SurahDivider(
+    chapterNumber: Int,
+    surahName: String?,
+    verseCount: Int,
+    isFirstInJuz: Boolean
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = if (isFirstInJuz) 4.dp else 22.dp, bottom = 14.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = Color.Transparent,
+        border = BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.45f)),
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Color(0xFFFBF3DC), Color(0xFFFFFCF4))
+                    )
+                )
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier.size(46.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.frame_number_icon),
+                    contentDescription = null,
+                    tint = SaatColors.GoldDeep,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Text(
+                    text = chapterNumber.toString(),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = SaatColors.DeepEmerald
+                )
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = surahName ?: stringResource(R.string.surah_number, chapterNumber),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = SaatColors.DeepEmerald,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = "$verseCount ${stringResource(R.string.verses)}",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = SaatColors.Slate500
+                )
+            }
+            Icon(
+                imageVector = Icons.Filled.AutoStories,
+                contentDescription = null,
+                tint = SaatColors.GoldDeep.copy(alpha = 0.7f),
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+/** Ayah number inside the same frame ornament used by the Quran chapter list. */
+@Composable
+private fun VerseNumberFrame(label: String) {
+    Box(
+        modifier = Modifier.size(38.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.frame_number_icon),
+            contentDescription = null,
+            tint = SaatColors.Teal,
+            modifier = Modifier.fillMaxSize()
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontSize = if (label.length >= 3) 11.sp else 12.sp,
+                fontWeight = FontWeight.Bold
+            ),
+            color = SaatColors.Slate900
+        )
+    }
+}
+
+@Composable
+private fun VerseActionButton(
+    onClick: () -> Unit,
+    contentDescription: String,
+    active: Boolean,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(if (active) SaatColors.DeepEmerald.copy(alpha = 0.10f) else Color.Transparent)
+            .clickable(onClick = onClick)
+            .semantics { this.contentDescription = contentDescription },
+        contentAlignment = Alignment.Center
+    ) {
+        content()
+    }
+}
+
+@Composable
 private fun ReadingStyleCard(
     title: String,
     desc: String,
-    icon: ImageVector,
+    iconRes: Int,
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -2839,7 +2958,7 @@ private fun ReadingStyleCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = icon,
+                    painter = painterResource(iconRes),
                     contentDescription = null,
                     tint = if (selected) SaatColors.DeepEmerald else SaatColors.Slate500,
                     modifier = Modifier.size(22.dp)

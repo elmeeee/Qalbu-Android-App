@@ -27,7 +27,11 @@ data class AudioQueueItem(
     val verseKey: String,
     val ayahNumber: Int,
     val url: String,
-    val label: String
+    val label: String,
+    /** Each ayah carries its own surah/juz so the player info follows the audio that is playing. */
+    val chapterName: String? = null,
+    val chapterNumber: Int? = null,
+    val juzNumber: Int? = null
 )
 
 data class AudioPlaybackState(
@@ -41,6 +45,7 @@ data class AudioPlaybackState(
     val activeIndex: Int? = null,
     val queue: List<AudioQueueItem> = emptyList(),
     val chapterNumber: Int? = null,
+    val juzNumber: Int? = null,
     val ayahNumber: Int? = null,
     val currentPositionMs: Long = 0L,
     val lastError: String? = null
@@ -100,9 +105,11 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
                     val parsed = parseVerseKey(item.verseKey)
                     _state.value = current.copy(
                         currentUrl = item.url,
+                        trackTitle = item.chapterName ?: current.trackTitle,
                         trackSubtitle = item.label,
                         activeIndex = newIndex,
-                        chapterNumber = parsed?.first ?: current.chapterNumber,
+                        chapterNumber = item.chapterNumber ?: parsed?.first ?: current.chapterNumber,
+                        juzNumber = item.juzNumber ?: current.juzNumber,
                         ayahNumber = parsed?.second ?: item.ayahNumber.takeIf { it > 0 }
                     )
                 }
@@ -138,7 +145,8 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         ayahLabel: String,
         reciterName: String,
         chapterNumber: Int? = null,
-        ayahNumber: Int? = null
+        ayahNumber: Int? = null,
+        juzNumber: Int? = null
     ) {
         if (AirplaneModeReceiver.isAirplaneModeOn(context)) return
         val absolute = AppConfig.formatAudioUrl(url)
@@ -161,6 +169,7 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
             queue = listOf(queueItem),
             activeIndex = 0,
             chapterNumber = chapter,
+            juzNumber = juzNumber,
             ayahNumber = ayah,
             lastError = null
         )
@@ -210,7 +219,8 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
         surahTitle: String,
         reciterName: String,
         startIndex: Int = 0,
-        chapterNumber: Int? = null
+        chapterNumber: Int? = null,
+        juzNumber: Int? = null
     ) {
         if (items.isEmpty()) return
         if (AirplaneModeReceiver.isAirplaneModeOn(context)) return
@@ -231,7 +241,8 @@ class AudioPlayerController @OptIn(UnstableApi::class) @Inject constructor(
             reciterName = reciterName,
             queue = resolved,
             activeIndex = startIndex,
-            chapterNumber = chapterNumber ?: parsed?.first,
+            chapterNumber = starting?.chapterNumber ?: chapterNumber ?: parsed?.first,
+            juzNumber = starting?.juzNumber ?: juzNumber,
             ayahNumber = parsed?.second ?: starting?.ayahNumber?.takeIf { it > 0 },
             lastError = null
         )

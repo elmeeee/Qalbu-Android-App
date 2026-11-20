@@ -222,7 +222,8 @@ fun VersePersonalBadges(
     verseKey: String?,
     personalDataRevision: Int,
     modifier: Modifier = Modifier,
-    compact: Boolean = false
+    compact: Boolean = false,
+    fillWidth: Boolean = true
 ) {
     if (verseKey.isNullOrBlank()) return
     val context = LocalContext.current
@@ -232,7 +233,7 @@ fun VersePersonalBadges(
     if (!bookmarked) return
 
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = if (fillWidth) modifier.fillMaxWidth() else modifier,
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {

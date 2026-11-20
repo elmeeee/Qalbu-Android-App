@@ -769,6 +769,15 @@ class AccountViewModel @Inject constructor(
         }
     }
 
+    fun setAvatarKey(key: String) {
+        viewModelScope.launch {
+            authRepository.setAvatarKey(key)
+                .onFailure { error ->
+                    _state.update { it.copy(authErrorMessage = error.message) }
+                }
+        }
+    }
+
     fun updateProfile(displayName: String) {
         val cleanName = displayName.trim()
         if (cleanName.isBlank()) {
@@ -863,6 +872,10 @@ class AccountViewModel @Inject constructor(
     }
 
     fun signUpWithEmail(name: String, email: String, password: String) {
+        if (name.isBlank()) {
+            _state.update { it.copy(authErrorMessage = appContext.getString(R.string.auth_error_empty_name)) }
+            return
+        }
         if (email.isBlank() || password.isBlank()) {
             _state.update { it.copy(authErrorMessage = appContext.getString(R.string.auth_error_empty_credentials)) }
             return

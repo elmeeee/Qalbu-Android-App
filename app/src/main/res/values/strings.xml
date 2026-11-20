@@ -1366,4 +1366,11 @@
     <string name="play">Play</string>
     <string name="share_ayah">Share Ayah</string>
     <string name="verses">Verses</string>
+    <string name="last_read_marked">Marked as last read</string>
+    <string name="account_avatar_change">Change avatar</string>
+    <string name="account_avatar_pick_title">Choose your avatar</string>
+    <string name="account_avatar_pick_desc">Pick the brand avatar shown on your profile.</string>
+    <string name="settings_item_support">Support Saat</string>
+    <string name="support_trakteer_label">Support on Trakteer</string>
+    <string name="account_detail_cancel">Cancel</string>
 </resources>

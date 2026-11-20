@@ -1,0 +1,343 @@
+/**
+ * Bahasa Indonesia — source locale.
+ * The shape of this object defines the `Messages` type. `en.ts` and `ms.ts`
+ * must provide exactly the same keys (enforced by TypeScript).
+ *
+ * Prayer names and worship terms follow the wording already used in the
+ * Sāat app (app/src/main/res/values-in/strings.xml).
+ */
+const id = {
+  meta: {
+    title: 'Sāat — Teman Ibadah Harian',
+    description:
+      'Sāat menemani ibadah harianmu: waktu shalat dan pengingat adzan, arah kiblat, tasbih digital, doa & dzikir, pelacak ibadah, dan Kīmi. Tersedia di Google Play.',
+    ogLocale: 'id_ID',
+  },
+  common: {
+    skip: 'Lewati ke konten utama',
+    sample: 'Contoh tampilan',
+    comingSoon: 'Segera hadir',
+    availableAndroid: 'Tersedia di Android',
+    newTab: '(membuka tab baru)',
+    illustration: 'Ilustrasi antarmuka',
+  },
+  nav: {
+    label: 'Navigasi utama',
+    home: 'Sāat — kembali ke atas',
+    features: 'Fitur',
+    kimi: 'Kīmi',
+    platforms: 'Platform',
+    about: 'Tentang Sāat',
+    faq: 'FAQ',
+    download: 'Unduh',
+    menuOpen: 'Buka menu',
+    menuClose: 'Tutup menu',
+    menuTitle: 'Menu',
+  },
+  lang: {
+    label: 'Bahasa',
+    choose: 'Pilih bahasa',
+    changed: 'Bahasa diubah ke Bahasa Indonesia',
+  },
+  motion: {
+    pause: 'Jeda animasi',
+    play: 'Putar animasi',
+    pausedNote: 'Animasi dijeda',
+  },
+  store: {
+    eyebrow: 'Unduh di',
+    name: 'Google Play',
+    full: 'Unduh Sāat di Google Play',
+  },
+  hero: {
+    eyebrow: 'Teman ibadah harian',
+    titleA: 'Lebih dekat kepada Allah,',
+    titleB: 'setiap hari.',
+    lead: 'Sāat menghadirkan waktu shalat dan pengingat adzan, arah kiblat, tasbih, doa & dzikir, hingga Kīmi yang menemanimu — dalam satu aplikasi yang tenang dan sederhana.',
+    explore: 'Jelajahi fitur',
+    platformNote: 'Tersedia untuk Android. iOS, macOS, Huawei AppGallery, dan Windows segera hadir.',
+    illustrationNote: 'Ilustrasi antarmuka berdasarkan aplikasi Sāat. Jadwal yang tampil hanyalah contoh.',
+    phoneLabel: 'Ilustrasi layar Beranda Sāat yang menampilkan contoh jadwal shalat',
+    momentLabel: 'Momen hari ini pada ilustrasi',
+    moments: {
+      morning: 'Pagi',
+      afternoon: 'Sore',
+      night: 'Malam',
+    },
+    fallback3d: 'Tampilan 3D tidak tersedia di perangkat ini, jadi kami menampilkan versi statis.',
+  },
+  screen: {
+    greeting: 'Assalamu’alaikum',
+    date: 'Tanggal contoh',
+    location: 'Lokasi contoh',
+    nextPrayer: 'Shalat berikutnya',
+    untilPrayer: 'menuju shalat',
+    journeyTitle: 'Perjalanan Hari Ini',
+    journeySub: 'Lengkapi amalan ibadah harianmu',
+    journey: {
+      prayer: 'Shalat',
+      dhikr: 'Zikir',
+      sunnah: 'Sunnah',
+    },
+    tabs: {
+      home: 'Beranda',
+      worship: 'Ibadah',
+      more: 'Lainnya',
+    },
+  },
+  prayers: {
+    fajr: 'Subuh',
+    sunrise: 'Terbit',
+    dhuhr: 'Dzuhur',
+    asr: 'Ashar',
+    maghrib: 'Maghrib',
+    isha: 'Isya',
+  },
+  prayer: {
+    eyebrow: 'Waktu shalat',
+    title: 'Ritme harian yang tenang, dari Subuh hingga Isya.',
+    lead: 'Di aplikasi, Sāat menghitung waktu shalat berdasarkan lokasimu, lengkap dengan pengingat dan pilihan suara adzan. Jadwal yang sudah tersimpan tetap bisa dibuka saat offline.',
+    sampleNote: 'Semua waktu di bagian ini adalah contoh, bukan jadwal shalat untuk lokasimu.',
+    scheduleLabel: 'Contoh jadwal shalat',
+    selectHint: 'Pilih waktu shalat untuk melihat suasananya.',
+    countdownLabel: 'Contoh hitung mundur',
+    countdownUntil: 'menuju {prayer}',
+    notLive: 'Hitung mundur ini statis dan hanya untuk ilustrasi.',
+    points: [
+      'Waktu shalat sesuai lokasi perangkatmu',
+      'Pengingat dengan suara adzan yang bisa diatur',
+      'Jadwal tersimpan tetap tersedia saat offline',
+    ],
+    artAlt: 'Ilustrasi suasana waktu {prayer} dari aplikasi Sāat, bersama Kīmi',
+    useApp: 'Untuk jadwal sesuai lokasimu, gunakan aplikasi Sāat.',
+  },
+  features: {
+    eyebrow: 'Fitur',
+    title: 'Semua yang menemani ibadahmu, dalam satu tempat.',
+    lead: 'Fitur-fitur berikut tersedia di aplikasi Sāat untuk Android. Pratinjau di halaman ini adalah ilustrasi interaktif, bukan data milikmu.',
+    tabsLabel: 'Fitur Sāat',
+    items: {
+      reminders: {
+        tab: 'Pengingat',
+        title: 'Pengingat shalat & adzan',
+        body: 'Dapatkan pengingat saat waktu shalat tiba, dengan suara adzan yang bisa kamu pilih. Kīmi juga mengingatkan amalan sunnah dengan lembut.',
+      },
+      qibla: {
+        tab: 'Kiblat',
+        title: 'Arah kiblat',
+        body: 'Temukan arah Ka’bah dengan kompas kiblat yang memanfaatkan sensor perangkatmu.',
+      },
+      tasbih: {
+        tab: 'Tasbih',
+        title: 'Tasbih digital',
+        body: 'Hitung zikir dengan mudah lewat tasbih digital yang responsif, lengkap dengan target hitungan.',
+      },
+      dua: {
+        tab: 'Doa & Dzikir',
+        title: 'Doa, dzikir & amalan',
+        body: 'Temukan kumpulan doa, dzikir, Asmaul Husna, amalan sunnah, dan panduan ibadah untuk keseharian.',
+      },
+      tracker: {
+        tab: 'Pelacak',
+        title: 'Pelacak ibadah',
+        body: 'Catat shalat dan ibadah harian dengan cara yang sederhana. Sāat mengingatkan tanpa menghakimi, karena setiap langkah kecil berarti.',
+      },
+      widget: {
+        tab: 'Widget',
+        title: 'Widget waktu shalat',
+        body: 'Lihat waktu shalat berikutnya langsung dari layar utama Android, tanpa harus membuka aplikasi.',
+      },
+    },
+    widgetNote: 'Pratinjau dibuat berdasarkan desain widget di aplikasi. Ketersediaan dapat berbeda menurut versi aplikasi dan perangkat.',
+    moreTitle: 'Dan masih banyak alat ibadah lainnya',
+    moreLead: 'Semua tersedia di tab Ibadah pada aplikasi Sāat.',
+    tools: {
+      faraidh: { name: 'Faraidh', desc: 'Kalkulator waris Islam' },
+      zakat: { name: 'Zakat', desc: 'Hitung zakatmu' },
+      hajj: { name: 'Haji & Umrah', desc: 'Panduan haji dan umrah' },
+      jamak: { name: 'Panduan Jamak', desc: 'Cara menjamak shalat' },
+      janazah: { name: 'Shalat Jenazah', desc: 'Panduan shalat jenazah' },
+      fidyah: { name: 'Fidyah', desc: 'Catat pembayaran fidyah' },
+      encyclopedia: { name: 'Ensiklopedia', desc: 'Jelajahi ilmu keislaman' },
+      asmaulhusna: { name: 'Asmaul Husna', desc: '99 nama Allah' },
+      sunnah: { name: 'Amalan Sunnah', desc: 'Amalan sunnah harian' },
+      radio: { name: 'Radio', desc: 'Stasiun radio Islami' },
+    },
+    calendar: { name: 'Kalender Islam', desc: 'Tanggal dan momen penting' },
+  },
+  demos: {
+    reminders: {
+      label: 'Contoh notifikasi',
+      now: 'sekarang',
+      prayerTitle: 'Saatnya shalat {prayer}',
+      prayerBody: 'Waktu {prayer} telah tiba.',
+      dhuhaTitle: 'Shalat Duha',
+      dhuhaBody: 'Kīmi mengingatkan: Sudah waktunya shalat Duha. Sempatkan melaksanakan shalat sunnah Duha.',
+      fastTitle: 'Puasa Sunnah Senin',
+      fastBody: 'Kīmi mengingatkan: Besok adalah hari Senin. Jangan lupa persiapkan puasa sunnah.',
+      replay: 'Putar ulang contoh',
+    },
+    qibla: {
+      label: 'Demonstrasi kompas',
+      disclaimer: 'Demonstrasi visual — bukan arah kiblat yang sebenarnya.',
+      instructions: 'Seret kompas atau gunakan tombol panah untuk memutarnya.',
+      rotateLeft: 'Putar ke kiri',
+      rotateRight: 'Putar ke kanan',
+      heading: 'Arah hadap contoh: {deg}°',
+      aligned: 'Selaras dengan penanda contoh',
+      dial: 'Kompas demonstrasi',
+    },
+    tasbih: {
+      label: 'Coba tasbih',
+      count: 'Hitungan',
+      target: 'Target: {target} | Sisa: {left}',
+      tap: 'Ketuk untuk menghitung',
+      reset: 'Atur ulang',
+      done: 'Target tercapai',
+      live: 'Hitungan {count} dari {target}',
+      note: 'Hitungan di sini tidak disimpan.',
+    },
+    dua: {
+      label: 'Contoh kategori',
+      items: [
+        { title: 'Dzikir Pagi', meta: 'Dibaca setelah Subuh' },
+        { title: 'Dzikir Petang', meta: 'Dibaca setelah Ashar' },
+        { title: 'Doa Harian', meta: 'Untuk aktivitas sehari-hari' },
+        { title: 'Asmaul Husna', meta: '99 nama Allah' },
+      ],
+    },
+    tracker: {
+      label: 'Contoh pelacak — ketuk untuk menandai',
+      done: 'selesai',
+      notDone: 'belum',
+      progress: '{done} dari {total} selesai',
+    },
+    widget: {
+      label: 'Contoh widget',
+      nextLabel: 'Shalat berikutnya',
+    },
+  },
+  kimi: {
+    eyebrow: 'Kenalan dengan Kīmi',
+    title: 'Teman kecil yang menemani langkahmu.',
+    lead: 'Kīmi adalah lentera kecil yang menemanimu di Sāat — dari waktu shalat hingga pengingat amalan — agar ibadah terasa ringan dan menyenangkan.',
+    greet: 'Sapa Kīmi',
+    greeting: 'Assalamu’alaikum! Senang bertemu denganmu.',
+    imageAlt: 'Kīmi, maskot lentera Sāat, tersenyum',
+    cards: {
+      reminders: {
+        title: 'Pengingat dari Kīmi',
+        body: 'Kīmi mengingatkan shalat Duha, puasa sunnah, dan waktu sepertiga malam terakhir dengan bahasa yang hangat.',
+      },
+      ask: {
+        title: 'Tanya Kīmi',
+        body: 'Tanyakan seputar Islam, doa, hadis, dan ibadah harian kepada Kīmi, asisten AI di dalam aplikasi.',
+      },
+    },
+    chat: {
+      label: 'Contoh antarmuka Tanya Kīmi',
+      welcome: 'Assalamu’alaikum! Tanya Kīmi seputar Islam, doa, hadis, atau ibadah harian.',
+      topicsLabel: 'Contoh topik',
+      topics: ['Shalat jamak', 'Dzikir pagi', 'Puasa sunnah'],
+      thinking: 'Kīmi sedang menyiapkan jawaban...',
+      inApp: 'Jawaban Kīmi hanya tersedia di aplikasi Sāat.',
+      disclaimer: 'Kīmi adalah asisten AI. Kroscek hukum yang penting kepada ustaz/ulama yang kompeten.',
+    },
+    moments: 'Kīmi di berbagai momen',
+    momentAlts: {
+      prayer: 'Kīmi sedang berdoa di atas sajadah',
+      lantern: 'Kīmi membawa lentera dan bulan sabit',
+      announce: 'Kīmi memegang pengeras suara dengan gembira',
+    },
+  },
+  platforms: {
+    eyebrow: 'Platform',
+    title: 'Sāat di berbagai perangkat.',
+    lead: 'Sāat tersedia untuk Android sekarang. Platform lain sedang dipersiapkan — fitur di setiap platform bisa berbeda saat dirilis.',
+    available: 'Tersedia',
+    android: { name: 'Android', desc: 'Unduh melalui Google Play.', cta: 'Buka Google Play' },
+    ios: { name: 'iOS', desc: 'Untuk iPhone.' },
+    macos: { name: 'macOS', desc: 'Untuk Mac.' },
+    huawei: { name: 'Huawei AppGallery', desc: 'Saluran distribusi untuk perangkat Huawei.' },
+    windows: { name: 'Windows', desc: 'Untuk PC Windows.' },
+    noDates: 'Belum ada tanggal rilis untuk platform lain.',
+  },
+  about: {
+    eyebrow: 'Tentang Sāat',
+    title: 'Dibuat agar ibadah harian terasa sederhana, tenang, dan dekat.',
+    body: [
+      'Sāat adalah teman ibadah harian. Waktu shalat, pelacak ibadah, doa & dzikir, dan berbagai alat Islami lainnya hadir dalam satu tempat, sehingga kamu bisa fokus pada hal yang paling penting.',
+      'Bersama Kīmi, Sāat hadir untuk menyemangati langkah-langkah kecil yang membuat setiap hari lebih bermakna.',
+    ],
+    values: [
+      { title: 'Tenang & sederhana', body: 'Tampilan yang lembut dan rapi, agar kamu tidak terdistraksi.' },
+      { title: 'Mengingatkan tanpa menghakimi', body: 'Setiap langkah kecil berarti. Sāat menemanimu dengan lembut.' },
+      { title: 'Menghargai privasi', body: 'Lokasimu dipakai untuk menentukan waktu shalat dan tidak dikirim keluar dari perangkatmu.' },
+    ],
+    imageAlt: 'Ilustrasi suasana senja dari aplikasi Sāat bersama Kīmi',
+  },
+  faq: {
+    eyebrow: 'FAQ',
+    title: 'Pertanyaan yang sering diajukan',
+    items: {
+      download: {
+        q: 'Bagaimana cara mengunduh Sāat?',
+        a: 'Sāat untuk Android tersedia di Google Play. Buka halaman Sāat di Google Play, lalu ketuk Instal.',
+        link: 'Buka Sāat di Google Play',
+      },
+      platforms: {
+        q: 'Platform apa saja yang tersedia?',
+        a: 'Saat ini Sāat tersedia untuk Android melalui Google Play. Versi iOS, macOS, Huawei AppGallery, dan Windows segera hadir. Belum ada tanggal rilis untuk platform tersebut.',
+        link: '',
+      },
+      deletion: {
+        q: 'Bagaimana cara menghapus akun dan data terkait?',
+        a: 'Di aplikasi, buka tab Akun / Pengaturan, lalu tekan tombol “Hapus Akun” dan konfirmasi. Jika aplikasi sudah dicopot, kamu bisa mengirim permintaan lewat email. Langkah lengkap dan data yang dihapus dijelaskan di halaman penghapusan akun.',
+        link: 'Baca panduan penghapusan akun & data',
+      },
+      support: {
+        q: 'Bagaimana cara menghubungi dukungan?',
+        a: 'Kirim email ke hello@elmee.my. Tim kami akan membantu pertanyaan seputar aplikasi Sāat.',
+        link: 'Kirim email ke hello@elmee.my',
+      },
+      offline: {
+        q: 'Fitur apa yang bisa dipakai saat offline?',
+        a: 'Jadwal shalat yang sudah tersimpan tetap tersedia saat offline. Fitur yang mengambil data dari internet, seperti Tanya Kīmi dan radio, memerlukan koneksi internet.',
+        link: '',
+      },
+      kimi: {
+        q: 'Apakah jawaban Tanya Kīmi bisa dijadikan rujukan hukum?',
+        a: 'Kīmi adalah asisten AI dan jawabannya bisa keliru. Untuk hukum atau masalah yang penting, kroscek kepada ustaz/ulama yang kompeten.',
+        link: '',
+      },
+      location: {
+        q: 'Untuk apa Sāat menggunakan lokasi saya?',
+        a: 'Lokasi dipakai untuk menentukan waktu shalat dan arah kiblat, dan tidak dikirim keluar dari perangkatmu. Website ini sendiri tidak meminta lokasimu.',
+        link: '',
+      },
+      sample: {
+        q: 'Apakah waktu shalat di website ini akurat untuk lokasi saya?',
+        a: 'Tidak. Semua waktu shalat di website ini hanyalah contoh tampilan. Untuk jadwal sesuai lokasimu, gunakan aplikasi Sāat.',
+        link: '',
+      },
+    },
+  },
+  cta: {
+    title: 'Mulai langkah kecilmu hari ini.',
+    lead: 'Unduh Sāat dan biarkan Kīmi menemani ibadah harianmu.',
+  },
+  footer: {
+    tagline: 'Teman ibadah harian.',
+    explore: 'Jelajahi',
+    legal: 'Privasi & akun',
+    help: 'Bantuan',
+    privacy: 'Kebijakan Privasi',
+    terms: 'Syarat & Ketentuan',
+    deletion: 'Penghapusan akun & data',
+    support: 'Dukungan: hello@elmee.my',
+    rights: 'Hak cipta dilindungi.',
+  },
+}
+
+export default id
+export type Messages = typeof id

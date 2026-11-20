@@ -233,7 +233,7 @@ class AdhanPlaybackService : Service() {
         exo.play()
 
         player = exo
-        scheduleVolumeStopListener()
+        // Volume keys now adjust the adhan loudness (STREAM_ALARM) instead of stopping playback.
     }
 
     private fun acquireWakeLock() {

@@ -42,6 +42,7 @@ fun TajweedHtmlView(
     isTajweedEnabled: Boolean = true,
     activeWordIndex: Int? = null,
     onTajweedClick: ((TajweedType) -> Unit)? = null,
+    onTextTap: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val lineHeightMultiplier = if (compact) 2.05f else 2.35f
@@ -64,7 +65,7 @@ fun TajweedHtmlView(
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         BasicText(
             text = annotated,
-            modifier = modifier.pointerInput(onTajweedClick, annotated) {
+            modifier = modifier.pointerInput(onTajweedClick, onTextTap, annotated) {
                 detectTapGestures { offsetPosition ->
                     val layoutResult = currentTextLayoutResult ?: return@detectTapGestures
                     val offset = layoutResult.getOffsetForPosition(offsetPosition)
@@ -98,8 +99,11 @@ fun TajweedHtmlView(
                         val tajweedType = runCatching { TajweedType.valueOf(tajweedName) }.getOrNull()
                         if (tajweedType != null) {
                             onTajweedClick?.invoke(tajweedType)
+                            return@detectTapGestures
                         }
                     }
+                    // Tap on plain Arabic text (no tajweed span): let the caller treat it as a tap.
+                    onTextTap?.invoke()
                 }
             },
             style = TextStyle(

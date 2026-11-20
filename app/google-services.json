@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "95130978195-3m3vkv4trl5pc8kqrm9tucr3962hduus.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.kamy.saatApp",
+            "certificate_hash": "7f8e9b252af1e899b7ca38ba56e3cc4a86d04b5a"
+          }
+        },
+        {
           "client_id": "95130978195-l84s87hbn8q4mnnlgpre8jutm10ccfs7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

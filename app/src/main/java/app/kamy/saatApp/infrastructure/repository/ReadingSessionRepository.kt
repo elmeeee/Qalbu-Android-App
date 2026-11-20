@@ -35,19 +35,15 @@ class ReadingSessionRepository @Inject constructor(
         }
     }
 
+    /**
+     * Single source of truth: [LocalReadingProgressStore]. Khatam's last-read fields are only
+     * used as a fallback when the plain store has never been written (fresh install restored
+     * from backup), so a stale Khatam value can no longer override the position the user just read.
+     */
     private fun bestDeviceProgress(): LocalReadingProgress? {
         val local = LocalReadingProgressStore.load(appContext)
+        if (local != null && local.chapterNumber > 0 && local.verseNumber > 0) return local
         val personal = QuranPersonalStore.lastReadProgress(appContext)
-        return when {
-            local != null && local.chapterNumber > 0 && local.verseNumber > 0 -> {
-                if (personal != null && personal.updatedAtMillis > local.updatedAtMillis && personal.chapterNumber > 0 && personal.verseNumber > 0) {
-                    personal
-                } else {
-                    local
-                }
-            }
-            personal != null && personal.chapterNumber > 0 && personal.verseNumber > 0 -> personal
-            else -> null
-        }
+        return personal?.takeIf { it.chapterNumber > 0 && it.verseNumber > 0 }
     }
 }

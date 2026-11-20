@@ -48,6 +48,21 @@ class PlaybackEngine @Inject constructor(
         MediaSession.Builder(context, player)
             .setId("SaatRecitation")
             .setSessionActivity(sessionActivity)
+            // Recitation items carry no artwork. Replace media3's default SimpleBitmapLoader so
+            // no bitmap loading (and no network fetch) happens inside the media session.
+            .setBitmapLoader(NoArtworkBitmapLoader())
             .build()
     }
+}
+
+/** Loads no artwork. Recitations have no cover art, so media3 never decodes or fetches bitmaps. */
+@OptIn(UnstableApi::class)
+private class NoArtworkBitmapLoader : androidx.media3.common.util.BitmapLoader {
+    override fun supportsMimeType(mimeType: String): Boolean = false
+
+    override fun decodeBitmap(data: ByteArray): com.google.common.util.concurrent.ListenableFuture<android.graphics.Bitmap> =
+        com.google.common.util.concurrent.Futures.immediateFailedFuture(UnsupportedOperationException("No artwork"))
+
+    override fun loadBitmap(uri: android.net.Uri): com.google.common.util.concurrent.ListenableFuture<android.graphics.Bitmap> =
+        com.google.common.util.concurrent.Futures.immediateFailedFuture(UnsupportedOperationException("No artwork"))
 }

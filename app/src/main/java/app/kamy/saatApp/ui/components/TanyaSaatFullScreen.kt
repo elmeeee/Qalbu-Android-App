@@ -255,6 +255,7 @@ fun TanyaSaatFullScreen(
                 KimiComposer(
                     inputText = state.inputText,
                     selectedModel = state.selectedModel,
+                    availableModels = state.availableModels,
                     isLoading = state.isLoading,
                     onInputChanged = onInputChanged,
                     onSend = onSendMessage,
@@ -926,6 +927,7 @@ private fun KimiThinkingBubble() {
 private fun KimiComposer(
     inputText: String,
     selectedModel: KimiAiModel,
+    availableModels: List<KimiAiModel> = KimiAiModel.defaultList,
     isLoading: Boolean,
     onInputChanged: (String) -> Unit,
     onSend: () -> Unit,
@@ -1050,7 +1052,7 @@ private fun KimiComposer(
                                     color = InkMuted,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
                                 )
-                                KimiAiModel.entries.forEach { model ->
+                                availableModels.forEach { model ->
                                     val selected = model == selectedModel
                                     DropdownMenuItem(
                                         text = {

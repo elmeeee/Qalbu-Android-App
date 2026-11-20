@@ -31,6 +31,7 @@ data class TanyaSaatUiState(
     val messages: List<SaatChatMessage> = emptyList(),
     val isLoading: Boolean = false,
     val selectedModel: KimiAiModel = KimiAiModel.GPT_OSS_120B,
+    val availableModels: List<KimiAiModel> = KimiAiModel.defaultList,
     val activeMood: SaatMood? = null,
     val inputText: String = "",
     val isSheetVisible: Boolean = false,
@@ -62,6 +63,10 @@ class TanyaSaatViewModel @Inject constructor(
             kimiModelPreferencesStore.selectedModel.collect { model ->
                 _state.update { it.copy(selectedModel = model) }
             }
+        }
+        viewModelScope.launch {
+            val models = repository.getAvailableModels()
+            _state.update { it.copy(availableModels = models) }
         }
     }
 

@@ -102,6 +102,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -134,6 +135,18 @@ import app.kamy.saatApp.ui.common.rememberErrorDisplay
 import app.kamy.saatApp.ui.layout.floatingNavBottomPadding
 import app.kamy.saatApp.ui.layout.tabContentStatusBarInset
 import java.util.Locale
+import app.kamy.saatApp.domain.model.BrandAvatar
+import androidx.compose.material.icons.outlined.Edit
+import androidx.annotation.DrawableRes
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.graphicsLayer
+import android.content.Context
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material.icons.filled.CheckCircle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,6 +160,19 @@ fun AccountScreen(
     val currentDetailScreen = rememberSaveable { mutableStateOf<String?>(null) }
     var showUpToDateSheet by rememberSaveable { mutableStateOf(false) }
     val mainScrollState = rememberScrollState()
+    val accountSnackbar = remember { SnackbarHostState() }
+    val snackbarScope = rememberCoroutineScope()
+    LaunchedEffect(state.authSuccessMessage) {
+        state.authSuccessMessage?.let { msg ->
+            // Show on a composition-bound scope: clearing the message below changes this
+            // effect's key, which would otherwise cancel the snackbar before it appears.
+            snackbarScope.launch {
+                accountSnackbar.currentSnackbarData?.dismiss()
+                accountSnackbar.showSnackbar(msg)
+            }
+            vm.dismissAuthSuccessMessage()
+        }
+    }
 
     LaunchedEffect(currentDetailScreen.value) {
         onAccountDetailScreenChanged(currentDetailScreen.value != null)
@@ -169,6 +195,7 @@ fun AccountScreen(
             onOpenAbout = { currentDetailScreen.value = "ABOUT_SAAT" },
             onOpenPrivacyPolicy = { currentDetailScreen.value = "PRIVACY_POLICY" },
             onOpenTerms = { currentDetailScreen.value = "TERMS_CONDITIONS" },
+            onOpenSupport = { currentDetailScreen.value = "SUPPORT_SAAT" },
             onCheckUpdate = { showUpToDateSheet = true }
         )
 
@@ -177,6 +204,7 @@ fun AccountScreen(
                 AccountDetailScreen(
                     state = state,
                     vm = vm,
+                    snackbarHostState = accountSnackbar,
                     onBack = { currentDetailScreen.value = null }
                 )
             }
@@ -198,6 +226,12 @@ fun AccountScreen(
                 TermsAndConditionsScreen(
                     appLanguage = state.appLanguage,
                     appTheme = state.appTheme,
+                    onBack = { currentDetailScreen.value = null }
+                )
+            }
+            "SUPPORT_SAAT" -> {
+                SupportSaatScreen(
+                    appLanguage = state.appLanguage,
                     onBack = { currentDetailScreen.value = null }
                 )
             }
@@ -311,12 +345,7 @@ fun AccountScreen(
         )
     }
 
-    LaunchedEffect(state.authSuccessMessage) {
-        state.authSuccessMessage?.let { msg ->
-            android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_LONG).show()
-            vm.dismissAuthSuccessMessage()
-        }
-    }
+
 
     if (state.showEmailAuthSheet) {
         EmailAuthBottomSheet(
@@ -346,6 +375,7 @@ private fun AccountSettingsContent(
     onOpenAbout: () -> Unit,
     onOpenPrivacyPolicy: () -> Unit,
     onOpenTerms: () -> Unit,
+    onOpenSupport: () -> Unit,
     onCheckUpdate: () -> Unit
 ) {
     val context = LocalContext.current
@@ -534,6 +564,7 @@ private fun AccountSettingsContent(
                 )
                 SettingsCustomRow(
                     iconRes = R.drawable.ic_quran_on,
+                    iconTint = Color(0xFF1C1C1E),
                     title = stringResource(R.string.reading_style_title),
                     subtitle = stringResource(
                         if (state.readingStyle == QuranReadingStyle.SCROLL) R.string.reading_style_scroll
@@ -645,7 +676,7 @@ private fun AccountSettingsContent(
             }
 
             Spacer(Modifier.height(16.dp))
-            AppFooterCard(appVersion = appVersion)
+            AppFooterCard(appVersion = appVersion, onOpenSupport = onOpenSupport)
         }
     }
 }
@@ -983,7 +1014,8 @@ private fun SettingsCustomRow(
     checked: Boolean? = null,
     onCheckedChange: ((Boolean) -> Unit)? = null,
     showChevron: Boolean = false,
-    showDivider: Boolean = true
+    showDivider: Boolean = true,
+    iconTint: Color? = null
 ) {
     Row(
         modifier = Modifier
@@ -1001,7 +1033,8 @@ private fun SettingsCustomRow(
         Image(
             painter = painterResource(iconRes),
             contentDescription = title,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
+            colorFilter = iconTint?.let { ColorFilter.tint(it) }
         )
 
         Spacer(modifier = Modifier.width(14.dp))
@@ -1330,7 +1363,7 @@ private fun QuranReadingStyleSheet(
                                 Icon(
                                     painter = painterResource(
                                         if (style == QuranReadingStyle.PAGER) R.drawable.ic_quran_on
-                                        else R.drawable.ic_remainders_custom
+                                        else R.drawable.ic_tafsir
                                     ),
                                     contentDescription = null,
                                     tint = if (isSelected) SaatColors.DeepEmerald else SaatColors.Slate500,
@@ -2458,6 +2491,72 @@ private fun SaatModalBottomSheet(
 
 // ─── Legal Web Views & Info Screens ──────────────────────────────────────────
 
+/** Extracts the https target from an `intent:https://...#intent;...;end` URL, or null. */
+private fun intentToHttps(url: String): String? {
+    if (!url.startsWith("intent:")) return null
+    val inner = url.removePrefix("intent:").substringBefore("#intent")
+    return inner.takeIf { it.startsWith("https://") || it.startsWith("http://") }
+}
+
+/** True when the user's active location (or device country) is Indonesia. */
+private fun isIndonesiaUser(context: Context): Boolean {
+    val activeCC = LocationPreferencesStore.from(context).activeCountryCode()
+    if (!activeCC.isNullOrBlank()) {
+        return activeCC.equals("ID", ignoreCase = true) || activeCC.equals("IDN", ignoreCase = true)
+    }
+    val detected = CountryDefaultsProvider.detectCountryCode(context) ?: Locale.getDefault().country
+    return detected.equals("ID", ignoreCase = true) || detected.equals("IDN", ignoreCase = true)
+}
+
+private const val KOFI_URL = "https://ko-fi.com/R8T12A3G16"
+private const val TRAKTEER_URL = "https://trakteer.id/SaatApp"
+
+/** Support Saat: donation page inside the app. Trakteer for Indonesia, Ko-fi elsewhere. */
+@Composable
+fun SupportSaatScreen(
+    appLanguage: AppLanguage,
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val supportUrl = remember(context) { if (isIndonesiaUser(context)) TRAKTEER_URL else KOFI_URL }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .tabContentStatusBarInset()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            Text(
+                text = stringResource(R.string.settings_item_support),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        LegalWebView(
+            url = supportUrl,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        )
+    }
+}
+
 @Composable
 fun AboutSaatScreen(
     appLanguage: AppLanguage,
@@ -2641,7 +2740,18 @@ private fun LegalWebView(
 
                     webViewClient = object : WebViewClient() {
                         override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
-                            return false
+                            val target = request?.url?.toString() ?: return false
+                            if (target.startsWith("http://") || target.startsWith("https://")) return false
+                            // intent:https://... (e.g. Trakteer redirects): load the https target in place.
+                            val httpsTarget = intentToHttps(target)
+                            if (httpsTarget != null) {
+                                view?.loadUrl(httpsTarget)
+                                return true
+                            }
+                            // Other app schemes: hand off to the system.
+                            return runCatching {
+                                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(target)))
+                            }.isSuccess
                         }
 
                         override fun onPageStarted(view: WebView?, url: String?, favicon: android.graphics.Bitmap?) {
@@ -2671,22 +2781,12 @@ private fun LegalWebView(
 }
 
 @Composable
-private fun AppFooterCard(appVersion: String) {
+private fun AppFooterCard(appVersion: String, onOpenSupport: () -> Unit) {
     val context = LocalContext.current
     val haptic = app.kamy.saatApp.ui.feedback.rememberTapHaptic()
     val targetUrl = "https://masjidku.app?ref=saat_android"
 
-    val isIndonesiaUser = remember(context) {
-        val locationStore = LocationPreferencesStore.from(context)
-        val activeCC = locationStore.activeCountryCode()
-        if (!activeCC.isNullOrBlank()) {
-            activeCC.equals("ID", ignoreCase = true) || activeCC.equals("IDN", ignoreCase = true)
-        } else {
-            val detected = CountryDefaultsProvider.detectCountryCode(context)
-                ?: Locale.getDefault().country
-            detected.equals("ID", ignoreCase = true) || detected.equals("IDN", ignoreCase = true)
-        }
-    }
+    val isIndonesiaUser = remember(context) { isIndonesiaUser(context) }
 
     Surface(
         modifier = Modifier
@@ -2759,6 +2859,50 @@ private fun AppFooterCard(appVersion: String) {
                     )
                 }
                 }
+            }
+
+            // Support Saat: Trakteer for Indonesia, Ko-fi elsewhere. Both open the in-app page.
+            if (isIndonesiaUser) {
+                Surface(
+                    onClick = {
+                        haptic()
+                        onOpenSupport()
+                    },
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFFBE1E2D),
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 18.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.support_trakteer_label),
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                            color = Color.White
+                        )
+                    }
+                }
+            } else {
+                Image(
+                    painter = painterResource(R.drawable.kofi_button),
+                    contentDescription = stringResource(R.string.settings_item_support),
+                    modifier = Modifier
+                        .height(36.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable {
+                            haptic()
+                            onOpenSupport()
+                        },
+                    contentScale = ContentScale.Fit
+                )
             }
 
             // App Tagline & Version
@@ -2987,15 +3131,12 @@ private fun AccountSyncProfileCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (!user.photoUrl.isNullOrBlank()) {
-                    AsyncImage(
-                        model = user.photoUrl,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(46.dp)
-                            .clip(CircleShape)
-                            .border(1.5.dp, SaatColors.DeepEmerald.copy(alpha = 0.3f), CircleShape),
-                        contentScale = ContentScale.Crop
+                val brand = BrandAvatar.fromKey(user.avatarKey)
+                if (brand != null) {
+                    BrandAvatarImage(
+                        drawableRes = brand.drawableRes,
+                        size = 46.dp,
+                        modifier = Modifier.border(1.5.dp, SaatColors.GoldDeep.copy(alpha = 0.55f), CircleShape)
                     )
                 } else {
                     Box(
@@ -3125,6 +3266,7 @@ private fun AccountSyncProfileCard(
 fun AccountDetailScreen(
     state: AccountUiState,
     vm: AccountViewModel,
+    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -3146,7 +3288,19 @@ fun AccountDetailScreen(
     }
 
     var showSignOutSheet by rememberSaveable { mutableStateOf(false) }
+    var showAvatarPicker by rememberSaveable { mutableStateOf(false) }
     var showDeleteSheet by rememberSaveable { mutableStateOf(false) }
+
+    if (showAvatarPicker) {
+        AvatarPickerSheet(
+            selectedKey = user.avatarKey,
+            onSelect = { key ->
+                vm.setAvatarKey(key)
+                showAvatarPicker = false
+            },
+            onDismiss = { showAvatarPicker = false }
+        )
+    }
 
     if (showSignOutSheet) {
         SignOutBottomSheet(
@@ -3170,6 +3324,7 @@ fun AccountDetailScreen(
         )
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -3213,63 +3368,79 @@ fun AccountDetailScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .padding(bottom = 32.dp)
         ) {
-            // 1. Profile Hero Card
+            // 1. Profile hero: brand avatar on a soft emerald glow, name, email, sync state
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(24.dp),
                 color = SaatColors.PureWhite,
-                border = BorderStroke(1.dp, Color(0xFFE8E2D2)),
-                shadowElevation = 0.5.dp
+                border = BorderStroke(1.dp, Color(0xFFEBE7DF)),
+                shadowElevation = 1.dp
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 24.dp, horizontal = 16.dp),
+                        .padding(vertical = 26.dp, horizontal = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (!user.photoUrl.isNullOrBlank()) {
-                        AsyncImage(
-                            model = user.photoUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(76.dp)
-                                .clip(CircleShape)
-                                .border(2.dp, SaatColors.DeepEmerald.copy(alpha = 0.4f), CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
-                    } else {
+                    val brand = BrandAvatar.fromKey(user.avatarKey)
+                    Box(contentAlignment = Alignment.BottomEnd) {
                         Box(
                             modifier = Modifier
-                                .size(76.dp)
+                                .size(104.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFEDF5F0))
-                                .border(2.dp, Color(0xFFA7F3D0), CircleShape),
+                                .background(
+                                    Brush.radialGradient(
+                                        colors = listOf(Color(0xFFE6F4EE), Color(0xFFF7F3EA))
+                                    )
+                                )
+                                .border(2.dp, SaatColors.GoldDeep.copy(alpha = 0.55f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = SaatColors.HomeDarkGreen
+                            if (brand != null) {
+                                BrandAvatarImage(drawableRes = brand.drawableRes, size = 104.dp)
+                            } else {
+                                Text(
+                                    text = user.displayName?.firstOrNull()?.uppercase() ?: "U",
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = SaatColors.HomeDarkGreen
+                                    )
                                 )
+                            }
+                        }
+                        // Edit badge: opens the brand avatar picker
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(SaatColors.DeepEmerald)
+                                .border(2.dp, SaatColors.PureWhite, CircleShape)
+                                .clickable { showAvatarPicker = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Edit,
+                                contentDescription = stringResource(R.string.account_avatar_change),
+                                tint = Color.White,
+                                modifier = Modifier.size(15.dp)
                             )
                         }
                     }
 
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(14.dp))
 
                     Text(
                         text = user.displayName ?: stringResource(R.string.account_connected_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = 19.sp
                         ),
                         color = Color(0xFF0F172A),
                         textAlign = TextAlign.Center
                     )
 
                     if (!user.email.isNullOrBlank()) {
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(2.dp))
                         Text(
                             text = user.email,
                             style = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp),
@@ -3278,15 +3449,15 @@ fun AccountDetailScreen(
                         )
                     }
 
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(12.dp))
 
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(50),
                         color = Color(0xFFECFDF5),
                         border = BorderStroke(1.dp, Color(0xFFA7F3D0))
                     ) {
                         Row(
-                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
@@ -3310,21 +3481,19 @@ fun AccountDetailScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // 2. Section: Informasi Profil (Editable)
+            // 2. Section: Profile information. Name is editable with an explicit save row,
+            // email is read-only with its verified state shown outside the field.
             SettingsSectionHeader(stringResource(R.string.account_detail_section_profile))
             SettingsCard {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = stringResource(R.string.account_name_label),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color(0xFF334155)
-                    )
-                    Spacer(Modifier.height(6.dp))
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+                    ProfileFieldLabel(stringResource(R.string.account_name_label))
+                    Spacer(Modifier.height(8.dp))
                     OutlinedTextField(
                         value = displayNameInput,
                         onValueChange = { displayNameInput = it },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                        enabled = !state.isAuthLoading,
                         placeholder = { Text(stringResource(R.string.account_name_hint)) },
                         leadingIcon = {
                             Icon(
@@ -3334,50 +3503,7 @@ fun AccountDetailScreen(
                                 modifier = Modifier.size(20.dp)
                             )
                         },
-                        trailingIcon = {
-                            if (hasNameChanged) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = SaatColors.DeepEmerald,
-                                    modifier = Modifier
-                                        .padding(end = 4.dp)
-                                        .clickable(
-                                            enabled = !state.isAuthLoading,
-                                            onClick = { vm.updateProfile(displayNameInput) }
-                                        )
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        if (state.isAuthLoading) {
-                                            CircularProgressIndicator(
-                                                modifier = Modifier.size(12.dp),
-                                                color = Color.White,
-                                                strokeWidth = 1.5.dp
-                                            )
-                                        } else {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Check,
-                                                contentDescription = null,
-                                                tint = Color.White,
-                                                modifier = Modifier.size(13.dp)
-                                            )
-                                            Spacer(Modifier.width(4.dp))
-                                            Text(
-                                                text = stringResource(R.string.account_detail_save_changes),
-                                                style = MaterialTheme.typography.labelSmall.copy(
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 11.sp
-                                                ),
-                                                color = Color.White
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = Color(0xFFF8FAFC),
                             unfocusedContainerColor = Color(0xFFF8FAFC),
@@ -3385,66 +3511,121 @@ fun AccountDetailScreen(
                             unfocusedBorderColor = Color(0xFFE2E8F0)
                         )
                     )
-
-                    Spacer(Modifier.height(16.dp))
-                    HorizontalDivider(color = Color(0xFFF1F5F9))
-                    Spacer(Modifier.height(16.dp))
-
-                    Text(
-                        text = stringResource(R.string.account_email_label),
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color(0xFF334155)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    OutlinedTextField(
-                        value = user.email ?: "-",
-                        onValueChange = {},
-                        readOnly = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Outlined.Mail,
-                                contentDescription = null,
-                                tint = Color(0xFF64748B),
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        trailingIcon = {
-                            Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFFECFDF5)
+                    AnimatedVisibility(visible = hasNameChanged) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 10.dp),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            TextButton(
+                                onClick = { displayNameInput = user.displayName ?: "" },
+                                enabled = !state.isAuthLoading
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.CheckCircle,
-                                        contentDescription = null,
-                                        tint = Color(0xFF10B981),
-                                        modifier = Modifier.size(12.dp)
+                                Text(
+                                    text = stringResource(R.string.account_detail_cancel),
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = { vm.updateProfile(displayNameInput) },
+                                enabled = !state.isAuthLoading,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SaatColors.DeepEmerald)
+                            ) {
+                                if (state.isAuthLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(14.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
                                     )
-                                    Spacer(Modifier.width(4.dp))
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = stringResource(R.string.account_detail_verified),
-                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.5.sp, fontWeight = FontWeight.Bold),
-                                        color = Color(0xFF047857)
+                                        text = stringResource(R.string.account_detail_save_changes),
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
                                     )
                                 }
                             }
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFFF1F5F9),
-                            unfocusedContainerColor = Color(0xFFF1F5F9),
-                            focusedBorderColor = Color(0xFFE2E8F0),
-                            unfocusedBorderColor = Color(0xFFE2E8F0)
-                        )
-                    )
+                        }
+                    }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(18.dp))
                     HorizontalDivider(color = Color(0xFFF1F5F9))
-                    Spacer(Modifier.height(14.dp))
+                    Spacer(Modifier.height(18.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ProfileFieldLabel(stringResource(R.string.account_email_label))
+                        Spacer(Modifier.weight(1f))
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = Color(0xFFECFDF5),
+                            border = BorderStroke(1.dp, Color(0xFFA7F3D0))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = null,
+                                    tint = Color(0xFF10B981),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = stringResource(R.string.account_detail_verified),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = Color(0xFF047857)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFFF1F5F9))
+                            .padding(horizontal = 14.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Mail,
+                            contentDescription = null,
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = user.email ?: "-",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color(0xFF334155),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Icon(
+                            imageVector = Icons.Outlined.Lock,
+                            contentDescription = null,
+                            tint = Color(0xFF94A3B8),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Spacer(Modifier.height(18.dp))
+                    HorizontalDivider(color = Color(0xFFF1F5F9))
+                    Spacer(Modifier.height(16.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -3453,16 +3634,16 @@ fun AccountDetailScreen(
                     ) {
                         Text(
                             text = stringResource(R.string.account_detail_sign_in_method),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            color = Color(0xFF475569)
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color(0xFF64748B)
                         )
-                        val providerName = if (user.photoUrl != null && user.photoUrl.contains("google")) {
-                            stringResource(R.string.account_detail_provider_google)
-                        } else {
-                            stringResource(R.string.account_detail_provider_email)
-                        }
+                        val isGoogle = user.providerIds.contains("google.com")
                         Text(
-                            text = providerName,
+                            text = if (isGoogle) {
+                                stringResource(R.string.account_detail_provider_google)
+                            } else {
+                                stringResource(R.string.account_detail_provider_email)
+                            },
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = Color(0xFF0F172A)
                         )
@@ -3596,6 +3777,146 @@ fun AccountDetailScreen(
                     onClick = { showDeleteSheet = true },
                     showDivider = false
                 )
+            }
+        }
+    }
+    // Custom snackbar, same style as the Ramadan / Ten Nights screens.
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .navigationBarsPadding()
+            .padding(bottom = 20.dp, start = 20.dp, end = 20.dp)
+    ) { data ->
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = SaatColors.HomeDarkGreen,
+            shadowElevation = 10.dp,
+            border = BorderStroke(1.dp, SaatColors.ArcGold.copy(alpha = 0.5f)),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE6F4EA)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = SaatColors.HomeDarkGreen,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Text(
+                    text = data.visuals.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+    }
+}
+
+/**
+ * Full brand mascot inside a circle: the whole artwork is shown (no crop), with a small inset
+ * so the character sits inside the ring.
+ */
+@Composable
+private fun BrandAvatarImage(
+    @DrawableRes drawableRes: Int,
+    size: Dp,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Color(0xFFF7F3EA)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(drawableRes),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize(0.86f),
+            contentScale = ContentScale.Fit
+        )
+    }
+}
+
+@Composable
+private fun ProfileFieldLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 0.3.sp),
+        color = Color(0xFF475569)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AvatarPickerSheet(
+    selectedKey: String?,
+    onSelect: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = SaatColors.PureWhite
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, bottom = 32.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.account_avatar_pick_title),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = Color(0xFF0F172A)
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.account_avatar_pick_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF64748B)
+            )
+            Spacer(Modifier.height(16.dp))
+
+            val options = BrandAvatar.entries
+            options.chunked(4).forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    rowItems.forEach { option ->
+                        val isSelected = option.key == selectedKey
+                        Box(
+                            modifier = Modifier
+                                .size(70.dp)
+                                .clip(CircleShape)
+                                .background(if (isSelected) Color(0xFFE6F4EE) else Color(0xFFF7F3EA))
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) SaatColors.DeepEmerald else Color(0xFFE8E2D2),
+                                    shape = CircleShape
+                                )
+                                .clickable { onSelect(option.key) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BrandAvatarImage(drawableRes = option.drawableRes, size = 70.dp)
+                        }
+                    }
+                }
             }
         }
     }
@@ -3983,6 +4304,7 @@ private fun EmailAuthBottomSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var name by rememberSaveable { mutableStateOf("") }
+    var nameTouched by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -4140,6 +4462,12 @@ private fun EmailAuthBottomSheet(
                     placeholder = { Text(stringResource(R.string.account_name_hint)) },
                     singleLine = true,
                     enabled = !isLoading,
+                    isError = nameTouched && name.isBlank(),
+                    supportingText = {
+                        if (nameTouched && name.isBlank()) {
+                            Text(stringResource(R.string.auth_error_empty_name))
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -4239,11 +4567,14 @@ private fun EmailAuthBottomSheet(
                     onDismissError()
                     when (mode) {
                         EmailAuthMode.LOGIN -> onSignIn(email, password)
-                        EmailAuthMode.REGISTER -> onSignUp(name, email, password)
+                        EmailAuthMode.REGISTER -> {
+                            nameTouched = true
+                            if (name.isNotBlank()) onSignUp(name, email, password)
+                        }
                         EmailAuthMode.FORGOT_PASSWORD -> onForgotPassword(email)
                     }
                 },
-                enabled = !isLoading,
+                enabled = !isLoading && (mode != EmailAuthMode.REGISTER || name.isNotBlank()),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
