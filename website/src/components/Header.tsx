@@ -88,7 +88,7 @@ export function Header() {
       }
     }
     const onResize = () => {
-      if (window.innerWidth >= 1024) close(false)
+      if (window.innerWidth >= 1200) close(false)
     }
     document.addEventListener('keydown', onKey)
     window.addEventListener('resize', onResize)
@@ -125,7 +125,7 @@ export function Header() {
           <div className="hide-mobile">
             <LanguageSwitcher idPrefix="desk" />
           </div>
-          <MotionToggle className="hide-mobile" />
+          <MotionToggle className="hide-tablet" />
           <a className="btn btn--primary btn--sm hide-mobile" href={playUrl(locale)} target="_blank" rel="noopener">
             <GooglePlayIcon className="btn__icon" />
             {t.nav.download}
