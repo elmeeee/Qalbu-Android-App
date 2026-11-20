@@ -798,7 +798,7 @@ main:focus {
   isolation: isolate;
   background:
     radial-gradient(1200px 600px at 85% 10%, rgba(231, 183, 92, 0.22), transparent 60%),
-    radial-gradient(900px 500px at 0% 100%, rgba(21, 170, 124, 0.1), transparent 60%),
+    radial-gradient(700px 420px at 0% 60%, rgba(21, 170, 124, 0.08), transparent 70%),
     var(--cream);
 }
 .hero__sky {
