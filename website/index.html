@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Sāat — Teman Ibadah Harian</title>
+    <meta name="description" content="Sāat menemani ibadah harianmu: waktu shalat dan pengingat adzan, arah kiblat, tasbih digital, doa &amp; dzikir, pelacak ibadah, dan Kīmi. Tersedia di Google Play." />
+    <meta name="theme-color" content="#085E43" />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href="https://saatnya-hijra.web.app/" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sāat" />
+    <meta property="og:url" content="https://saatnya-hijra.web.app/" />
+    <meta property="og:title" content="Sāat — Teman Ibadah Harian" />
+    <meta property="og:description" content="Sāat menemani ibadah harianmu: waktu shalat dan pengingat adzan, arah kiblat, tasbih digital, doa &amp; dzikir, pelacak ibadah, dan Kīmi. Tersedia di Google Play." />
+    <meta property="og:image" content="https://saatnya-hijra.web.app/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:locale:alternate" content="ms_MY" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preload" as="image" href="/assets/app/day.webp" type="image/webp" />
+    <script>
+      // Early language + JS detection (keep in sync with src/i18n/index.tsx detectLocale()).
+      ;(function () {
+        var d = document.documentElement
+        var L = ['id', 'en', 'ms']
+        function match(t) {
+          t = (t || '').toLowerCase()
+          if (t.indexOf('id') === 0 || t.indexOf('in') === 0) return 'id'
+          if (t.indexOf('ms') === 0 || t.indexOf('zsm') === 0) return 'ms'
+          if (t.indexOf('en') === 0) return 'en'
+          return null
+        }
+        var lang = null
+        try {
+          var q = new URLSearchParams(location.search).get('lang')
+          if (L.indexOf(q) > -1) lang = q
+          if (!lang) {
+            var s = localStorage.getItem('saat.lang')
+            if (L.indexOf(s) > -1) lang = s
+          }
+        } catch (e) {}
+        if (!lang) {
+          var ls = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language]
+          for (var i = 0; i < ls.length && !lang; i++) lang = match(ls[i])
+        }
+        lang = lang || 'id'
+        d.lang = lang
+        d.className += ' js' + (lang !== 'id' ? ' lang-pending' : '')
+        // Failsafe: if the app never boots, reveal everything.
+        setTimeout(function () {
+          if (!window.__saatBooted) d.className = d.className.replace(/\b(js|lang-pending)\b/g, '')
+        }, 4000)
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"><!--app-html--></div>
+    <noscript><style>[data-reveal]{opacity:1!important;transform:none!important}</style></noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

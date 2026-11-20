@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Penghapusan Akun & Data - Sāat · KaMy Studio</title>
+    <meta name="description" content="Cara menghapus akun Sāat dan data terkait — Account & associated data deletion for the Sāat app — Pemadaman akaun & data Sāat.">
+    <meta name="theme-color" content="#085E43">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <style>
         :root {
             --primary: #0F5132;
@@ -114,7 +118,7 @@
             margin: 20px 0;
         }
         .alert-card h3 {
-            color: var(--danger);
+            color: #B91C1C; /* was var(--danger); darkened for WCAG AA contrast */
             font-size: 15px;
             margin-bottom: 6px;
         }
@@ -155,18 +159,43 @@
         .lang-content {
             display: none;
         }
+        /* Added: link back to the Sāat homepage + visible focus */
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+            margin-bottom: 16px;
+            font-size: 15px;
+        }
+        .home-link img {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+        }
+        .home-link:hover span { text-decoration: underline; }
+        a:focus-visible, button:focus-visible {
+            outline: 3px solid #15AA7C;
+            outline-offset: 2px;
+        }
         .lang-content.active {
             display: block;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <main class="container">
+        <a class="home-link" href="/" aria-label="Sāat — homepage">
+            <img src="/assets/app/saat-icon.webp" alt="" width="28" height="28">
+            <span>&larr; Sāat</span>
+        </a>
         <!-- Language Switcher Bar -->
-        <div class="lang-bar">
-            <button class="lang-btn active" id="btn-id" onclick="setLang('id')">🇮🇩 Bahasa Indonesia</button>
-            <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 English</button>
-            <button class="lang-btn" id="btn-ms" onclick="setLang('ms')">🇲🇾 Bahasa Melayu</button>
+        <div class="lang-bar" role="group" aria-label="Bahasa / Language">
+            <button type="button" class="lang-btn active" id="btn-id" lang="id" aria-pressed="true" onclick="setLang('id', true)">🇮🇩 Bahasa Indonesia</button>
+            <button type="button" class="lang-btn" id="btn-en" lang="en" aria-pressed="false" onclick="setLang('en', true)">🇬🇧 English</button>
+            <button type="button" class="lang-btn" id="btn-ms" lang="ms" aria-pressed="false" onclick="setLang('ms', true)">🇲🇾 Bahasa Melayu</button>
         </div>
 
         <!-- ============================================================== -->
@@ -324,15 +353,25 @@
             <p>&copy; 2026 Sāat App. All rights reserved.</p>
             <p>Developer: <strong>KaMy Studio</strong> · <a href="mailto:hello@elmee.my" style="color: inherit; text-decoration: underline;">hello@elmee.my</a></p>
         </div>
-    </div>
+    </main>
 
     <!-- Client-side Language Toggle Script -->
     <script>
-        function setLang(lang) {
+        function setLang(lang, remember) {
             // Update active buttons
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
             const activeBtn = document.getElementById('btn-' + lang);
-            if (activeBtn) activeBtn.classList.add('active');
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-pressed', 'true');
+            }
+            // Share the language choice with the Sāat homepage
+            if (remember) {
+                try { localStorage.setItem('saat.lang', lang); } catch (e) {}
+            }
 
             // Update visible content
             document.querySelectorAll('.lang-content').forEach(content => content.classList.remove('active'));
@@ -343,8 +382,12 @@
             document.documentElement.lang = lang;
         }
 
-        // Auto-detect browser language on load
+        // Auto-detect browser language on load (a language chosen on the Sāat website wins)
         (function() {
+            try {
+                const saved = localStorage.getItem('saat.lang');
+                if (saved === 'id' || saved === 'en' || saved === 'ms') { setLang(saved); return; }
+            } catch (e) {}
             const browserLang = (navigator.language || navigator.userLanguage || 'id').toLowerCase();
             if (browserLang.startsWith('en')) {
                 setLang('en');
