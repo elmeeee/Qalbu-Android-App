@@ -20,6 +20,7 @@ object NotificationChannels {
     const val ADHAN_ALERT = "adhan_alert_v5"
     const val MEDIA_PLAYBACK = "media_playback"
     const val LIVE_PRAYER_COUNTDOWN = "live_prayer_countdown_v2"
+    const val RAMADAN_COUNTDOWN = "ramadan_countdown_v1"
     /** Old channel IDs that must be deleted so the new configuration takes effect. */
     private val DEPRECATED_CHANNELS = listOf(
         "daily_verse_v1", "daily_verse_v2", "daily_verse_v3", "daily_verse_v4", "daily_verse_v5",
@@ -153,6 +154,18 @@ object NotificationChannels {
                 enableVibration(false)
                 setShowBadge(false)
                 lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(
+                RAMADAN_COUNTDOWN,
+                context.getString(R.string.channel_ramadan_countdown),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = context.getString(R.string.channel_ramadan_countdown_desc)
+                setSound(soundUri, notificationAudioAttributes)
+                enableVibration(true)
+                setVibrationPattern(vibrationPattern)
             }
         )
     }

@@ -1,12 +1,14 @@
 package app.kamy.saatApp.features.tools.encyclopedia
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -129,29 +131,68 @@ fun EncyclopediaDetailScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     topic.quranReferences.forEach { qRef ->
+                        val startAyah = qRef.ayahRange
+                            .split("-", ":", ",")
+                            .firstOrNull()
+                            ?.trim()
+                            ?.filter { it.isDigit() }
+                            ?.toIntOrNull() ?: 1
+
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 6.dp),
+                                .padding(vertical = 6.dp)
+                                .clickable { onOpenVerse(qRef.surahNumber, startAyah) },
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = Color.White),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = stringResource(
-                                        R.string.encyclopedia_surah_label,
-                                        qRef.localizedSurahName(state.currentLanguage),
-                                        qRef.surahNumber,
-                                        qRef.ayahRange
-                                    ),
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = SaatColors.GoldDeep
-                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.encyclopedia_surah_label,
+                                            qRef.localizedSurahName(state.currentLanguage),
+                                            qRef.surahNumber,
+                                            qRef.ayahRange
+                                        ),
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = SaatColors.GoldDeep,
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = SaatColors.DeepEmerald.copy(alpha = 0.08f)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.encyclopedia_open_verse),
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = SaatColors.DeepEmerald
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(12.dp),
+                                                tint = SaatColors.DeepEmerald
+                                            )
+                                        }
+                                    }
+                                }
 
                                 if (qRef.verseTextAr.isNotBlank()) {
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(10.dp))
                                     Text(
                                         text = qRef.verseTextAr,
                                         fontSize = 20.sp,
@@ -186,12 +227,35 @@ fun EncyclopediaDetailScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            text = content,
-                            fontSize = 15.sp,
-                            color = SaatColors.Slate900,
-                            lineHeight = 24.sp
-                        )
+                        val paragraphs = content.split("\n\n").map { it.trim() }.filter { it.isNotBlank() }
+                        paragraphs.forEachIndexed { index, para ->
+                            val isHeader = para.length <= 60 && !para.contains("\n") && (
+                                para.endsWith(":") ||
+                                para.startsWith("#") ||
+                                (para.all { it.isLetterOrDigit() || it.isWhitespace() || it == '.' || it == ':' || it == '-' || it == '\'' } && para.length < 45)
+                            ) && !para.contains(" adalah ", ignoreCase = true) && !para.contains(" ialah ", ignoreCase = true)
+
+                            if (index > 0) {
+                                Spacer(modifier = Modifier.height(if (isHeader) 18.dp else 12.dp))
+                            }
+
+                            if (isHeader) {
+                                Text(
+                                    text = para.removePrefix("#").trim(),
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SaatColors.DeepEmerald,
+                                    lineHeight = 24.sp
+                                )
+                            } else {
+                                Text(
+                                    text = para,
+                                    fontSize = 15.sp,
+                                    color = SaatColors.Slate900,
+                                    lineHeight = 24.sp
+                                )
+                            }
+                        }
                     }
                 }
             }

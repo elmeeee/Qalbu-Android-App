@@ -117,7 +117,9 @@ class PrayerDashboardViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         timings = cached.timings,
-                        cityName = cached.cityName ?: locationPrefs.displayLabel() ?: "",
+                        cityName = cached.cityName?.takeIf { it.isNotBlank() && it.any { ch -> ch.isLetter() } }
+                            ?: locationPrefs.displayLabel()
+                            ?: "",
                         hijriLabel = cached.hijriLabel,
                         gregorianLabel = cached.gregorianLabel,
                         isOfflineData = true,
@@ -271,7 +273,7 @@ class PrayerDashboardViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         timings = cached.timings,
-                        cityName = cached.cityName ?: location.cityLabel,
+                        cityName = cached.cityName?.takeIf { it.isNotBlank() && it.any { ch -> ch.isLetter() } } ?: location.cityLabel,
                         hijriLabel = cached.hijriLabel,
                         gregorianLabel = cached.gregorianLabel,
                         needsPermission = false,
@@ -325,18 +327,18 @@ class PrayerDashboardViewModel @Inject constructor(
             return LocationResolveResult.Unavailable
         }
         val geocode = locationProvider.reverseGeocode(loc.latitude, loc.longitude)
-        val cityLabel = geocode.cityName
-            ?: locationPrefs.gpsLocation()?.label
+        val nearestCity = locationProvider.findNearestCity(loc.latitude, loc.longitude)
+        val cityLabel = geocode.cityName?.takeIf { it.isNotBlank() }
+            ?: nearestCity?.displayLabel
+            ?: nearestCity?.name
             ?: locationProvider.coordinateLabel(loc.latitude, loc.longitude)
-        if (geocode.cityName != null) {
-            locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, cityLabel, geocode.countryCode)
-        }
+        locationPrefs.saveGpsLocation(loc.latitude, loc.longitude, cityLabel, geocode.countryCode ?: nearestCity?.countryCode)
         return LocationResolveResult.Success(
             ResolvedPrayerLocation(
                 latitude = loc.latitude,
                 longitude = loc.longitude,
                 cityLabel = cityLabel,
-                countryCode = geocode.countryCode,
+                countryCode = geocode.countryCode ?: nearestCity?.countryCode,
                 isManual = false
             )
         )

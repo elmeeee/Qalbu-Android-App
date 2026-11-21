@@ -74,6 +74,14 @@
             android:exported="false" />
 
         <receiver
+            android:name=".infrastructure.notifications.RamadanCountdownNotificationReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="app.kamy.saatApp.action.TRIGGER_RAMADAN_COUNTDOWN" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
             android:name=".infrastructure.notifications.PrayerNotificationReceiver"
             android:exported="false" />
 

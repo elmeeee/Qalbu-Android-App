@@ -68,25 +68,90 @@ class LocationProvider @Inject constructor(
 
     suspend fun reverseGeocode(latitude: Double, longitude: Double): ReverseGeocodeResult =
         withContext(Dispatchers.IO) {
-            if (!Geocoder.isPresent()) return@withContext ReverseGeocodeResult()
-            try {
-                kotlinx.coroutines.withTimeout(3500L) {
-                    @Suppress("DEPRECATION")
-                    val address = Geocoder(context, Locale.getDefault())
-                        .getFromLocation(latitude, longitude, 1)
-                        ?.firstOrNull()
-                    ReverseGeocodeResult(
-                        cityName = address?.subLocality?.takeIf { it.isNotBlank() }
-                            ?: address?.locality?.takeIf { it.isNotBlank() }
-                            ?: address?.subAdminArea?.takeIf { it.isNotBlank() }
-                            ?: address?.adminArea?.takeIf { it.isNotBlank() },
-                        countryCode = address?.countryCode?.takeIf { it.isNotBlank() }
+            if (Geocoder.isPresent()) {
+                try {
+                    val address = kotlinx.coroutines.withTimeout(5000L) {
+                        @Suppress("DEPRECATION")
+                        Geocoder(context, Locale.getDefault())
+                            .getFromLocation(latitude, longitude, 1)
+                            ?.firstOrNull()
+                    }
+                    android.util.Log.d(
+                        "LocationProvider",
+                        "Address geocoded: subLocality=${address?.subLocality}, locality=${address?.locality}, subAdminArea=${address?.subAdminArea}, adminArea=${address?.adminArea}"
                     )
+                    // Priority: subLocality (Kelurahan) first, then locality (Kecamatan/Kota), then subAdminArea (Kabupaten)
+                    val name = address?.subLocality?.takeIf { it.isNotBlank() }
+                        ?: address?.locality?.takeIf { it.isNotBlank() }
+                        ?: address?.subAdminArea?.takeIf { it.isNotBlank() }
+                        ?: address?.adminArea?.takeIf { it.isNotBlank() }
+                    if (name != null) {
+                        return@withContext ReverseGeocodeResult(
+                            cityName = name,
+                            countryCode = address?.countryCode?.takeIf { it.isNotBlank() }
+                        )
+                    }
+                } catch (e: Throwable) {
+                    android.util.Log.w("LocationProvider", "Android Geocoder failed: ${e.message}")
                 }
-            } catch (_: Throwable) {
-                ReverseGeocodeResult()
             }
+
+            // HTTP Fallback to guarantee accurate Kelurahan resolution even when Google Play Services Geocoder is unavailable
+            fallbackReverseGeocodeHttp(latitude, longitude)?.let { httpResult ->
+                android.util.Log.d("LocationProvider", "HTTP fallback geocoded: ${httpResult.cityName}")
+                return@withContext httpResult
+            }
+
+            val nearest = LocalCityCatalog.findNearest(latitude, longitude)
+            ReverseGeocodeResult(
+                cityName = nearest?.name,
+                countryCode = nearest?.countryCode
+            )
         }
+
+    private fun fallbackReverseGeocodeHttp(latitude: Double, longitude: Double): ReverseGeocodeResult? {
+        return try {
+            val urlString = String.format(
+                Locale.US,
+                "https://nominatim.openstreetmap.org/reverse?lat=%.6f&lon=%.6f&format=json&accept-language=id",
+                latitude,
+                longitude
+            )
+            val connection = (java.net.URL(urlString).openConnection() as java.net.HttpURLConnection).apply {
+                connectTimeout = 4000
+                readTimeout = 4000
+                setRequestProperty("User-Agent", "SaatApp/1.0 (Android)")
+            }
+            if (connection.responseCode == 200) {
+                val body = connection.inputStream.bufferedReader().use { it.readText() }
+                val root = org.json.JSONObject(body)
+                val address = root.optJSONObject("address")
+                if (address != null) {
+                    val kelurahan = address.optString("village").takeIf { it.isNotBlank() }
+                        ?: address.optString("suburb").takeIf { it.isNotBlank() }
+                        ?: address.optString("neighbourhood").takeIf { it.isNotBlank() }
+                        ?: address.optString("municipality").takeIf { it.isNotBlank() }
+                        ?: address.optString("city").takeIf { it.isNotBlank() }
+                        ?: address.optString("town").takeIf { it.isNotBlank() }
+                        ?: address.optString("county").takeIf { it.isNotBlank() }
+                    val countryCode = address.optString("country_code").takeIf { it.isNotBlank() }?.uppercase(Locale.US)
+                    if (kelurahan != null) {
+                        return ReverseGeocodeResult(
+                            cityName = kelurahan,
+                            countryCode = countryCode
+                        )
+                    }
+                }
+            }
+            null
+        } catch (e: Throwable) {
+            android.util.Log.w("LocationProvider", "HTTP fallback reverse geocode failed", e)
+            null
+        }
+    }
+
+    fun findNearestCity(latitude: Double, longitude: Double): OfflineCity? =
+        LocalCityCatalog.findNearest(latitude, longitude)
 
     suspend fun reverseGeocodeCity(latitude: Double, longitude: Double): String? =
         reverseGeocode(latitude, longitude).cityName

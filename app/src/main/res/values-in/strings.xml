@@ -73,6 +73,19 @@
 
     <string name="channel_daily_verse">Ayat harian</string>
     <string name="channel_daily_verse_desc">Pengingat ayat Al-Quran pagi</string>
+    <string name="channel_ramadan_countdown">Menuju Ramadan bersama Kīmi</string>
+    <string name="channel_ramadan_countdown_desc">Hitung mundur harian dan persiapan menyambut Ramadan bersama Kīmi</string>
+    <string name="kimi_ramadan_countdown_title">Kīmi: %d Hari Menuju Ramadan 🌙</string>
+    <string name="kimi_ramadan_countdown_title_named">Kīmi: %1$d Hari Menuju Ramadan, %2$s! 🌙</string>
+    <string name="kimi_ramadan_countdown_title_h1">Kīmi: Besok Ramadan Tiba! 🌙</string>
+    <string name="kimi_ramadan_countdown_title_h1_named">Kīmi: Besok Ramadan Tiba, %s! 🌙</string>
+    <string name="kimi_ramadan_countdown_body_h1">Hilal Ramadan sudah di depan mata! Sudah siap niat, sahur perdana, dan tarawih malam ini? Kīmi selalu menemanimu!</string>
+    <string name="kimi_ramadan_countdown_body_h2_3">Tinggal %d hari lagi! Yuk mulai siapkan fisik, rapikan target ibadah, dan perbanyak doa agar dipertemukan dengan Ramadan.</string>
+    <string name="kimi_ramadan_countdown_body_h4_7">Seminggu lagi Ramadan! Kīmi ingatkan untuk cek kembali qadha puasa dan mulai rutinkan tilawah Al-Qur\'an ya.</string>
+    <string name="kimi_ramadan_countdown_body_h8_15">%d hari menuju Ramadan! Waktu yang pas untuk merencanakan target khatam, sedekah harian, dan shalat malam bersama Kīmi.</string>
+    <string name="kimi_ramadan_countdown_body_h16_30">%d hari lagi. Yuk mulai biasakan puasa sunnah Senin-Kamis dan bersihkan hati menyambut bulan mulia bersama Kīmi.</string>
+    <string name="kimi_ramadan_countdown_body_general">%1$d hari menuju Ramadan %2$d H. Kīmi siap menemani perjalanan persiapan ibadahmu selangkah demi selangkah setiap hari.</string>
+    <string name="kimi_ramadan_countdown_action">Buka Persiapan Ramadan</string>
     <string name="channel_quran_reminder">Pengingat Al-Qur\'an</string>
     <string name="channel_quran_reminder_desc">Pengingat untuk melanjutkan membaca Al-Qur\'an</string>
     <string name="last_read_reminder_3d_title">Kīmi Mengingatkan 📖</string>
@@ -329,6 +342,7 @@
     <string name="encyclopedia_empty_desc">Coba cari dengan kata kunci nabi, sahabat, atau istilah lain.</string>
     <string name="encyclopedia_quran_references">Dalil &amp; Referensi Al-Qur\'an</string>
     <string name="encyclopedia_surah_label">Surah %1$s (%2$d) : %3$s</string>
+    <string name="encyclopedia_open_verse">Buka di Al-Qur\'an</string>
     <string name="hadith_load_error">Gagal memuat hadits</string>
     <string name="hadith_empty">Belum ada hadits di sini</string>
     <string name="ai_share_placeholder">Refleksi Anda akan muncul di sini…</string>

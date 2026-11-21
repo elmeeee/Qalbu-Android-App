@@ -90,7 +90,9 @@ data class ChapterReaderUiState(
     val publishMessage: String? = null,
     val currentVerseBookmarked: Boolean = false,
     val personalDataRevision: Int = 0,
-    val bismillahPre: Boolean = false
+    val bismillahPre: Boolean = false,
+    val totalVerses: Int? = null,
+    val chapterVersesCountLookup: Map<Int, Int> = emptyMap()
 )
 
 enum class AyahPlaybackMode {
@@ -280,11 +282,15 @@ class ChapterReaderViewModel @Inject constructor(
             runCatching {
                 val chapters = quranRepository.getChapters()
                 val lookup = chapters.associate { it.id to it.displayComplexName }
+                val countLookup = chapters.associate { it.id to (it.versesCount ?: 0) }
                 val currentJuz = _state.value.juzNumber
                 if (currentJuz != null) {
+                    val juz = quranRepository.getJuz(currentJuz)
                     _state.update {
                         it.copy(
                             chapterLookup = lookup,
+                            chapterVersesCountLookup = countLookup,
+                            totalVerses = juz?.versesCount,
                             chapterDisplayName = appContext.getString(R.string.juz_number, currentJuz)
                         )
                     }
@@ -297,7 +303,9 @@ class ChapterReaderViewModel @Inject constructor(
                             chapterArabicName = chapter?.nameArabic,
                             chapterTranslatedName = chapter?.displayTranslatedName,
                             chapterRevelationPlace = chapter?.revelationLabel,
+                            totalVerses = chapter?.versesCount,
                             chapterLookup = lookup,
+                            chapterVersesCountLookup = countLookup,
                             bismillahPre = chapter?.bismillahPre ?: false
                         ) 
                     }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 import app.kamy.saatApp.domain.model.RamadanDayInfo
+import app.kamy.saatApp.domain.model.KhgtRamadanCountdown
 
 @Singleton
 class LocalKhgtCalendar @Inject constructor(
@@ -66,6 +67,87 @@ class LocalKhgtCalendar @Inject constructor(
             }
         }
         null
+    }
+
+    suspend fun ramadanCountdown(date: Calendar = Calendar.getInstance()): KhgtRamadanCountdown? = withContext(Dispatchers.IO) {
+        val current = ramadanInfo(date)
+        if (current != null && current.isRamadan) {
+            return@withContext KhgtRamadanCountdown(
+                hijriYear = current.hijriYear,
+                startDate = date,
+                daysRemaining = 0,
+                isRamadanNow = true
+            )
+        }
+
+        val todayMidnight = (date.clone() as Calendar).apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val formatter = SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH)
+        val candidateYears = listOf(1447, 1448, 1449)
+
+        var closest: KhgtRamadanCountdown? = null
+
+        for (year in candidateYears) {
+            val calendar = loadYear(year) ?: continue
+            val months = calendar.data.orEmpty()
+            for (month in months) {
+                if (month.name.equals("Ramadan", ignoreCase = true)) {
+                    val days = month.days.orEmpty()
+                    if (days.isEmpty()) continue
+                    val firstDay = days.first()
+                    val masehi = firstDay.masehi ?: continue
+                    val parsedStart = runCatching { formatter.parse(masehi) }.getOrNull() ?: continue
+                    val startCal = Calendar.getInstance().apply {
+                        time = parsedStart
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+
+                    val lastDay = days.last()
+                    val lastMasehi = lastDay.masehi
+                    val parsedEnd = lastMasehi?.let { runCatching { formatter.parse(it) }.getOrNull() }
+                    val endCal = parsedEnd?.let {
+                        Calendar.getInstance().apply {
+                            time = it
+                            set(Calendar.HOUR_OF_DAY, 23)
+                            set(Calendar.MINUTE, 59)
+                            set(Calendar.SECOND, 59)
+                            set(Calendar.MILLISECOND, 999)
+                        }
+                    }
+
+                    if (endCal != null && todayMidnight.timeInMillis >= startCal.timeInMillis && todayMidnight.timeInMillis <= endCal.timeInMillis) {
+                        return@withContext KhgtRamadanCountdown(
+                            hijriYear = month.year ?: year,
+                            startDate = startCal,
+                            daysRemaining = 0,
+                            isRamadanNow = true
+                        )
+                    }
+
+                    if (startCal.timeInMillis > todayMidnight.timeInMillis) {
+                        val diffMillis = startCal.timeInMillis - todayMidnight.timeInMillis
+                        val daysRemaining = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(diffMillis).toInt()
+                        if (closest == null || daysRemaining < closest.daysRemaining) {
+                            closest = KhgtRamadanCountdown(
+                                hijriYear = month.year ?: year,
+                                startDate = startCal,
+                                daysRemaining = daysRemaining,
+                                isRamadanNow = false
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        closest
     }
 
     suspend fun infoForDate(date: Calendar): KhgtTodayInfo? = withContext(Dispatchers.IO) {

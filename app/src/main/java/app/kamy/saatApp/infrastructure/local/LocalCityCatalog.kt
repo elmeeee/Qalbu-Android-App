@@ -108,4 +108,12 @@ object LocalCityCatalog {
                 it.displayLabel.lowercase(Locale.getDefault()) == q
         }
     }
+
+    fun findNearest(latitude: Double, longitude: Double): OfflineCity? {
+        return cities.minByOrNull { city ->
+            val dLat = city.latitude - latitude
+            val dLon = city.longitude - longitude
+            dLat * dLat + dLon * dLon
+        }
+    }
 }

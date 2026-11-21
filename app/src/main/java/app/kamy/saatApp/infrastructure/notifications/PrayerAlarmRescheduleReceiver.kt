@@ -48,6 +48,7 @@ class PrayerAlarmRescheduleReceiver : BroadcastReceiver() {
                 PrayerNotificationCoordinator.rescheduleFromCache(appContext)
             }
             runCatching { DailyVerseNotificationScheduler.reschedule(appContext) }
+            runCatching { RamadanCountdownNotificationScheduler.reschedule(appContext) }
             runCatching { QuranLastReadReminderScheduler.enqueue(appContext) }
             runCatching {
                 app.kamy.saatApp.infrastructure.preferences.SurahReminderStore

@@ -70,6 +70,19 @@
     <string name="notif_summary_count">%1$d peringatan aktif</string>
     <string name="channel_daily_verse">Ayat harian</string>
     <string name="channel_daily_verse_desc">Peringatan ayat Al-Quran pagi</string>
+    <string name="channel_ramadan_countdown">Menjelang Ramadan bersama Kīmi</string>
+    <string name="channel_ramadan_countdown_desc">Kiraan detik harian dan persiapan menyambut Ramadan bersama Kīmi</string>
+    <string name="kimi_ramadan_countdown_title">Kīmi: %d Hari Menjelang Ramadan 🌙</string>
+    <string name="kimi_ramadan_countdown_title_named">Kīmi: %1$d Hari Menjelang Ramadan, %2$s! 🌙</string>
+    <string name="kimi_ramadan_countdown_title_h1">Kīmi: Esok Ramadan Tiba! 🌙</string>
+    <string name="kimi_ramadan_countdown_title_h1_named">Kīmi: Esok Ramadan Tiba, %s! 🌙</string>
+    <string name="kimi_ramadan_countdown_body_h1">Hilal Ramadan sudah di ambang pintu! Sudah bersedia dengan niat, sahur pertama, dan tarawih malam ini? Kīmi sentiasa menemani anda!</string>
+    <string name="kimi_ramadan_countdown_body_h2_3">Hanya %d hari lagi! Jom mula persiapkan diri, susun sasaran ibadah, dan perbanyakkan doa agar dipertemukan dengan Ramadan.</string>
+    <string name="kimi_ramadan_countdown_body_h4_7">Kira-kira seminggu lagi menjelang Ramadan! Kīmi ingatkan untuk selesaikan qada puasa dan mulakan rutin tilawah Al-Quran ya.</string>
+    <string name="kimi_ramadan_countdown_body_h8_15">%d hari menjelang Ramadan! Masa yang sesuai untuk merancang sasaran khatam, sedekah harian, dan solat malam bersama Kīmi.</string>
+    <string name="kimi_ramadan_countdown_body_h16_30">%d hari lagi. Jom mula latih diri dengan puasa sunat Isnin-Khamis dan bersihkan hati menyambut bulan mulia bersama Kīmi.</string>
+    <string name="kimi_ramadan_countdown_body_general">%1$d hari menjelang Ramadan %2$d H. Kīmi bersedia menemani perjalanan persiapan ibadah anda langkah demi langkah setiap hari.</string>
+    <string name="kimi_ramadan_countdown_action">Buka Persiapan Ramadan</string>
     <string name="channel_quran_reminder">Peringatan Al-Quran</string>
     <string name="channel_quran_reminder_desc">Peringatan untuk menyambung bacaan Al-Quran</string>
     <string name="last_read_reminder_3d_title">Kīmi Mengingatkan 📖</string>
@@ -325,6 +338,7 @@
     <string name="encyclopedia_empty_desc">Cuba cari dengan kata kunci nabi, sahabat, atau istilah lain.</string>
     <string name="encyclopedia_quran_references">Dalil &amp; Rujukan Al-Quran</string>
     <string name="encyclopedia_surah_label">Surah %1$s (%2$d) : %3$s</string>
+    <string name="encyclopedia_open_verse">Buka dalam Al-Quran</string>
     <string name="hadith_load_error">Gagal memuatkan hadis</string>
     <string name="hadith_empty">Tiada hadis di sini</string>
     <string name="ai_share_placeholder">Refleksi anda akan muncul di sini…</string>

@@ -74,7 +74,7 @@ class LocationPreferencesStore @Inject constructor(
         val lat = prefs.getFloat(KEY_GPS_LAT, Float.NaN).toDouble()
         val lon = prefs.getFloat(KEY_GPS_LON, Float.NaN).toDouble()
         if (lat.isNaN() || lon.isNaN()) return null
-        val label = prefs.getString(KEY_GPS_LABEL, null)?.takeIf { it.isNotBlank() } ?: return null
+        val label = prefs.getString(KEY_GPS_LABEL, null)?.takeIf { it.isNotBlank() && it.any { ch -> ch.isLetter() } } ?: return null
         return SavedManualLocation(
             latitude = lat,
             longitude = lon,
@@ -96,7 +96,7 @@ class LocationPreferencesStore @Inject constructor(
     }
 
     fun displayLabel(): String? =
-        prefs.getString(KEY_ACTIVE_LABEL, null)?.takeIf { it.isNotBlank() }
+        prefs.getString(KEY_ACTIVE_LABEL, null)?.takeIf { it.isNotBlank() && it.any { ch -> ch.isLetter() } }
             ?: manualLocation()?.label
 
     companion object {

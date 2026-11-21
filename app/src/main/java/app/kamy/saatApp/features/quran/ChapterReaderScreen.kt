@@ -2334,6 +2334,7 @@ private fun ContinuousScrollReader(
                 stringResource(R.string.surah_number, state.chapterNumber)
             }
             val revelationPlace = state.chapterRevelationPlace?.takeIf { it.isNotBlank() } ?: "Makkah"
+            val totalAyahCount = state.totalVerses ?: state.verses.size
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2342,7 +2343,7 @@ private fun ContinuousScrollReader(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "$surahMetaLabel  ·  $revelationPlace  ·  ${state.verses.size} ${stringResource(R.string.verses)}",
+                    text = "$surahMetaLabel  ·  $revelationPlace  ·  $totalAyahCount ${stringResource(R.string.verses)}",
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 0.6.sp
@@ -2422,7 +2423,8 @@ private fun ContinuousScrollReader(
                     SurahDivider(
                         chapterNumber = verse.chapterNumber!!,
                         surahName = state.chapterLookup[verse.chapterNumber],
-                        verseCount = state.verses.count { it.chapterNumber == verse.chapterNumber },
+                        verseCount = state.chapterVersesCountLookup[verse.chapterNumber]
+                            ?: state.verses.count { it.chapterNumber == verse.chapterNumber },
                         isFirstInJuz = index == 0
                     )
                 }

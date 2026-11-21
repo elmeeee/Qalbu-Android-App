@@ -53,3 +53,10 @@ data class RamadanDayInfo(
     val imsakTime: String? = null,
     val iftarTime: String? = null
 )
+
+data class KhgtRamadanCountdown(
+    val hijriYear: Int,
+    val startDate: java.util.Calendar,
+    val daysRemaining: Int,
+    val isRamadanNow: Boolean
+)
