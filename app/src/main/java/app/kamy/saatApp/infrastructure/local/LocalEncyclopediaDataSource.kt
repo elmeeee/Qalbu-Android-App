@@ -46,6 +46,8 @@ class LocalEncyclopediaDataSource @Inject constructor(
                                 surahNameMs = refObj.optString("surahNameMs"),
                                 ayahRange = refObj.optString("ayahRange"),
                                 verseTextAr = refObj.optString("verseTextAr"),
+                                verseTextLatin = refObj.optString("verseTextLatin"),
+                                verseTextLatinEn = refObj.optString("verseTextLatinEn"),
                                 verseTextTranslation = refObj.optString("verseTextTranslation"),
                                 verseTextTranslationEn = refObj.optString("verseTextTranslationEn"),
                                 verseTextTranslationMs = refObj.optString("verseTextTranslationMs")

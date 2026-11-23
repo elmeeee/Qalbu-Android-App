@@ -28,6 +28,8 @@ data class QuranReference(
     val surahNameMs: String = "",
     val ayahRange: String,
     val verseTextAr: String = "",
+    val verseTextLatin: String = "",
+    val verseTextLatinEn: String = "",
     val verseTextTranslation: String = "",
     val verseTextTranslationEn: String = "",
     val verseTextTranslationMs: String = ""
@@ -36,6 +38,11 @@ data class QuranReference(
         AppLanguage.ENGLISH -> surahNameEn.ifBlank { surahName }
         AppLanguage.MALAY -> surahNameMs.ifBlank { surahName }
         else -> surahName
+    }
+
+    fun localizedVerseLatin(language: AppLanguage): String = when (language) {
+        AppLanguage.ENGLISH -> verseTextLatinEn.ifBlank { verseTextLatin }
+        else -> verseTextLatin
     }
 
     fun localizedVerseTranslation(language: AppLanguage): String = when (language) {
