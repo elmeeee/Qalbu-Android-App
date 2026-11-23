@@ -2,6 +2,14 @@ package app.kamy.saatApp.infrastructure.repository
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
+import android.os.Build
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.IOException
+import java.util.Locale
+import kotlin.coroutines.resume
 import android.util.Log
 import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.domain.adhan.AdhanVoice
@@ -17,6 +25,7 @@ import app.kamy.saatApp.domain.prayer.PrayerMadhab
 import app.kamy.saatApp.domain.repository.SyncState
 import app.kamy.saatApp.domain.repository.SyncStatus
 import app.kamy.saatApp.domain.repository.UserDataSyncRepository
+import app.kamy.saatApp.infrastructure.local.LocalCityCatalog
 import app.kamy.saatApp.infrastructure.preferences.AdhanPreferencesStore
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.AppThemeColor
@@ -170,6 +179,10 @@ class FirestoreUserDataSyncRepository @Inject constructor(
     private fun saveLastSyncTime(uid: String, time: Long) {
         prefs.edit().putLong("last_sync_time_millis_$uid", time).apply()
     }
+
+    /** Resolves a fresh prayer-time location for local use. */
+    suspend fun resolvePrayerLocationAddress(location: Location): DeviceAddress? =
+        DeviceAddressResolver.resolve(context, location)
 
     override suspend fun syncAll(userId: String): Result<Unit> = withContext(Dispatchers.IO) {
         if (userId.isBlank()) {
@@ -420,26 +433,57 @@ class FirestoreUserDataSyncRepository @Inject constructor(
                 // 5. Location Preferences
                 val locMap = prefDoc.get("location") as? Map<*, *>
                 if (locMap != null) {
-                    val isAutomatic = (locMap["isAutomatic"] as? Boolean)
-                        ?: (locMap["mode"] as? String == LocationMode.GPS.name)
-                    val manualCity = (locMap["city"] as? String) ?: (locMap["label"] as? String)
-                    val lat = (locMap["latitude"] as? Number)?.toDouble()
-                    val lon = (locMap["longitude"] as? Number)?.toDouble()
-                    val cc = locMap["countryCode"] as? String
-
-                    if (manualCity != null && lat != null && lon != null) {
-                        locationStore.saveManual(SavedManualLocation(lat, lon, manualCity, cc))
-                    } else if (manualCity != null) {
-                        val offline = app.kamy.saatApp.infrastructure.local.LocalCityCatalog.findExact(manualCity)
-                        if (offline != null) {
-                            locationStore.saveManual(SavedManualLocation(offline.latitude, offline.longitude, offline.name, offline.countryCode))
+                    val savedMode = when (locMap["mode"] as? String) {
+                        LocationMode.GPS.name -> LocationMode.GPS
+                        LocationMode.MANUAL.name -> LocationMode.MANUAL
+                        else -> when (locMap["isAutomatic"] as? Boolean) {
+                            true -> LocationMode.GPS
+                            false -> LocationMode.MANUAL
+                            null -> null
                         }
                     }
 
-                    if (isAutomatic) {
-                        locationStore.setMode(LocationMode.GPS)
+                    val manualSelection = locMap["manualSelection"] as? Map<*, *>
+                    val manualCity = when {
+                        manualSelection != null -> manualSelection["city"] as? String
+                        savedMode == LocationMode.MANUAL ->
+                            (locMap["city"] as? String) ?: (locMap["label"] as? String)
+                        else -> null
+                    }
+                    val countryCode = if (manualSelection != null) {
+                        manualSelection["countryCode"] as? String
                     } else {
-                        locationStore.setMode(LocationMode.MANUAL)
+                        locMap["countryCode"] as? String
+                    }
+
+                    val catalogCity = manualCity
+                        ?.trim()
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.let { LocalCityCatalog.findExact(it) }
+                        ?.takeIf { city ->
+                            countryCode.isNullOrBlank() ||
+                                countryCode.equals(city.countryCode, ignoreCase = true)
+                        }
+
+                    if (catalogCity != null) {
+                        locationStore.saveManual(
+                            SavedManualLocation(
+                                catalogCity.latitude,
+                                catalogCity.longitude,
+                                catalogCity.name,
+                                catalogCity.countryCode
+                            )
+                        )
+                    }
+
+                    when (savedMode) {
+                        LocationMode.GPS -> locationStore.setMode(LocationMode.GPS)
+                        LocationMode.MANUAL -> {
+                            if (catalogCity != null) {
+                                locationStore.setMode(LocationMode.MANUAL)
+                            }
+                        }
+                        null -> Unit
                     }
                 }
 
@@ -611,25 +655,23 @@ class FirestoreUserDataSyncRepository @Inject constructor(
             .await()
 
         // 4. Upload Account Preferences Data (/users/{userId}/preferences/settings)
-        val locManual = locationStore.manualLocation()
         val locMode = locationStore.mode()
         val locMap = mutableMapOf<String, Any>(
             "isAutomatic" to (locMode == LocationMode.GPS),
-            "mode" to locMode.name
+            "mode" to locMode.name,
+            "latitude" to FieldValue.delete(),
+            "longitude" to FieldValue.delete()
         )
-        if (locManual != null) {
-            locMap["city"] = locManual.label
-            locMap["label"] = locManual.label
-            locMap["latitude"] = locManual.latitude
-            locMap["longitude"] = locManual.longitude
-            locManual.countryCode?.let { locMap["countryCode"] = it }
 
-            val matchedCity = app.kamy.saatApp.infrastructure.local.LocalCityCatalog.findExact(locManual.label)
-                ?: app.kamy.saatApp.infrastructure.local.LocalCityCatalog.findNearest(locManual.latitude, locManual.longitude)
-            val regionId = matchedCity?.name?.lowercase(java.util.Locale.ROOT)?.replace(" ", "_")
-                ?: locManual.label.lowercase(java.util.Locale.ROOT).replace(" ", "_")
-            locMap["regionId"] = regionId
-            locMap["cityCode"] = regionId
+        val manualLocation = locationStore.manualLocation()
+        if (manualLocation != null && manualLocation.label.isNotBlank()) {
+            val countryCode = manualLocation.countryCode
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+            locMap["manualSelection"] = mapOf<String, Any>(
+                "city" to manualLocation.label.trim(),
+                "countryCode" to (countryCode ?: FieldValue.delete())
+            )
         }
 
         val notifMap = mapOf<String, Any>(
@@ -752,4 +794,92 @@ class FirestoreUserDataSyncRepository @Inject constructor(
         private const val TAG = "FirestoreUserDataSync"
         private const val PREFS_NAME = "saat_cloud_sync_prefs"
     }
+}
+
+data class DeviceAddress(
+    val formattedAddress: String?,
+    val streetName: String?,
+    val houseNumber: String?,
+    val neighborhood: String?,
+    val locality: String?,
+    val administrativeSubdivision: String?,
+    val provinceOrState: String?,
+    val postalCode: String?,
+    val countryName: String?,
+    val countryCode: String?,
+    val premises: String?,
+    val featureName: String?
+)
+
+private object DeviceAddressResolver {
+    suspend fun resolve(
+        context: Context,
+        location: Location,
+        locale: Locale = Locale.getDefault()
+    ): DeviceAddress? = resolve(context, location.latitude, location.longitude, locale)
+
+    suspend fun resolve(
+        context: Context,
+        latitude: Double,
+        longitude: Double,
+        locale: Locale = Locale.getDefault()
+    ): DeviceAddress? {
+        if (latitude !in -90.0..90.0 || longitude !in -180.0..180.0 ||
+            !Geocoder.isPresent()
+        ) return null
+
+        val geocoder = Geocoder(context.applicationContext, locale)
+        val address = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            suspendCancellableCoroutine<Address?> { continuation ->
+                geocoder.getFromLocation(
+                    latitude,
+                    longitude,
+                    1,
+                    object : Geocoder.GeocodeListener {
+                        override fun onGeocode(addresses: MutableList<Address>) {
+                            continuation.resume(addresses.firstOrNull())
+                        }
+
+                        override fun onError(errorMessage: String?) {
+                            continuation.resume(null)
+                        }
+                    }
+                )
+            }
+        } else {
+            withContext(Dispatchers.IO) {
+                try {
+                    @Suppress("DEPRECATION")
+                    geocoder.getFromLocation(latitude, longitude, 1)?.firstOrNull()
+                } catch (_: IOException) {
+                    null
+                }
+            }
+        }
+
+        return address?.toDeviceAddress()
+    }
+
+    private fun Address.toDeviceAddress(): DeviceAddress {
+        val lines = (0..maxAddressLineIndex)
+            .mapNotNull { getAddressLine(it).clean() }
+            .distinct()
+
+        return DeviceAddress(
+            formattedAddress = lines.joinToString(", ").clean(),
+            streetName = thoroughfare.clean(),
+            houseNumber = subThoroughfare.clean(),
+            neighborhood = subLocality.clean(),
+            locality = locality.clean(),
+            administrativeSubdivision = subAdminArea.clean(),
+            provinceOrState = adminArea.clean(),
+            postalCode = postalCode.clean(),
+            countryName = countryName.clean(),
+            countryCode = countryCode.clean()?.uppercase(Locale.ROOT),
+            premises = premises.clean(),
+            featureName = featureName.clean()
+        )
+    }
+
+    private fun String?.clean(): String? = this?.trim()?.takeIf { it.isNotEmpty() }
 }
