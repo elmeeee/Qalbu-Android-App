@@ -213,6 +213,13 @@ object PrayerTrackerStore {
         updateBestStreakIfNeeded(context)
     }
 
+    fun clearAll(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .apply()
+    }
+
     private fun prefKey(prayer: PrayerType, dayKey: String): String =
         "${dayKey}_${prayer.name.lowercase()}"
 

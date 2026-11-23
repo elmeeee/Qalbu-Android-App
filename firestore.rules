@@ -2,26 +2,58 @@ rules_version = '2';
 
 /**
  * ===============================================================
- * Firestore Security Rules - Qalbu / Saat Islamic App
+ * Assumed Data Model & Architecture
  * ===============================================================
+ *
+ * Collection: /users/{userId}
+ * Document ID: {userId} (Firebase Auth UID)
+ * Fields:
+ *   - uid: string (optional, matches auth.uid, immutable)
+ *   - userId: string (optional, matches auth.uid, immutable)
+ *   - displayName / name: string (optional, max 100 chars)
+ *   - avatarKey: string (optional, valid BrandAvatar enum key)
+ *   - bio: string (optional, max 500 chars)
+ *   - locale: string (optional, max 20 chars)
+ *   - email: string (optional, max 100 chars)
+ *   - photoUrl: string (optional, max 1000 chars)
+ *   - fcmToken / pushToken: string (optional, max 500 chars)
+ *   - createdAt / createdAtMillis: timestamp / int millis (optional, immutable)
+ *   - updatedAt / updatedAtMillis: timestamp / int millis (optional)
+ *   - lastLoginAt / lastActiveAt / lastSeenAt: timestamp / int millis (optional)
+ *   * Note: 'residence' is RETIRED. Creation/update containing 'residence' is rejected.
+ *           FieldValue.delete() is allowed to purge legacy residence data.
+ *
+ * Subcollections under /users/{userId}/{subcollection}/{document=**}:
+ *   - quran/personal: bookmarks (list <= 5000), notes (list <= 5000 | string <= 20000),
+ *                     hifz (list <= 7000), chapters (list <= 114), juzs (list <= 30),
+ *                     lastReadJuz (int 0..30), lastReadVerseKey (string <= 50),
+ *                     lastReadUpdatedAtMillis (timestamp | int millis)
+ *   - tracker/prayer: records (map <= 10000), bestStreak (int >= 0)
+ *   - tasbih/dhikr: counters (map <= 5000)
+ *   - preferences/settings: language (string <= 20), theme (string <= 50),
+ *                           prayerMethod (string <= 100), prayerMadhab (string <= 100),
+ *                           quran (map <= 50 keys),
+ *                           location (map <= 20 keys: isAutomatic, mode, city, label,
+ *                                     latitude, longitude, countryCode, regionId, cityCode),
+ *                           notifications (map <= 50 keys), surahReminders (list <= 100)
+ *   - encyclopedia/reading: pages (map <= 1000 keys), updatedAtMillis (valid time)
+ *   - private/{document=**}: RETIRED. Writes (create/update) are blocked; deletes permitted.
  *
  * Prinsip Desain Keamanan:
  * 1. Default Deny: Semua akses ke seluruh database ditolak secara default di root.
  * 2. User Data Isolation (Least Privilege): Setiap pengguna terotentikasi HANYA
  *    dapat mengakses datanya sendiri (/users/{userId}/...) berdasarkan UID otentikasi.
- *    Semua akses lintas-pengguna (cross-user) maupun akses publik diblokir total.
  * 3. Validator Function Pattern: Validasi skema, batasan DoS, dan integritas identitas
  *    diterapkan secara konsisten pada operasi CREATE dan UPDATE untuk mencegah Update Bypass.
- * 4. PII Protection: Profil dan data pengguna terlindungi dari akses publik maupun pengguna lain.
+ * 4. PII Protection & Deprecation: Menolak penyimpanan lokasi profil pengguna ('residence')
+ *    serta memblokir penulisan ke subkoleksi private (residence/lastKnownAddress).
  * 5. DoS & Resource Exhaustion Mitigation: Batasan ukuran maksimal string, list/array,
  *    dan map diterapkan untuk mencegah eksploitasi payload berlebih.
  * 6. Immutability & Anti-Hijacking: Memastikan identitas dokumen (uid/userId) dan timestamp
  *    pembuatan tidak dapat diubah ke identitas atau nilai lain saat pembaruan (SetOptions.merge).
- * 7. Flexible Schema for Subcollections: Mendukung struktur sinkronisasi aplikasi:
- *    - quran/personal (bookmarks [list], notes [list], hifz [list], chapters [list], juzs [list], dll.)
- *    - tracker/prayer (records [map], bestStreak [int])
- *    - tasbih/dhikr (counters [map])
- *    - catatan tunggal atau teks refleksi (notes [string], content [string], text [string])
+ * 7. Path Overlap Prevention: Menggunakan /{subcollection}/{document=**} sehingga aturan
+ *    subkoleksi tidak pernah mencocokkan dokumen pengguna root (/users/{userId}) pada Rules v2.
+ * ===============================================================
  */
 
 service cloud.firestore {
@@ -81,6 +113,26 @@ service cloud.firestore {
              !('permissions' in data);
     }
 
+    // Validasi map location di preferences/settings (prayer-time calculation location)
+    function isValidLocationMap(loc) {
+      return loc is map &&
+             loc.keys().size() <= 20 &&
+             loc.keys().hasOnly([
+               'isAutomatic', 'mode', 'city', 'label',
+               'latitude', 'longitude', 'countryCode',
+               'regionId', 'cityCode'
+             ]) &&
+             (!('isAutomatic' in loc) || loc.isAutomatic is bool) &&
+             (!('mode' in loc) || (loc.mode is string && loc.mode.size() <= 30)) &&
+             (!('city' in loc) || (loc.city is string && loc.city.size() <= 100)) &&
+             (!('label' in loc) || (loc.label is string && loc.label.size() <= 150)) &&
+             (!('latitude' in loc) || loc.latitude is number) &&
+             (!('longitude' in loc) || loc.longitude is number) &&
+             (!('countryCode' in loc) || (loc.countryCode is string && loc.countryCode.size() <= 10)) &&
+             (!('regionId' in loc) || (loc.regionId is string && loc.regionId.size() <= 50)) &&
+             (!('cityCode' in loc) || (loc.cityCode is string && loc.cityCode.size() <= 50));
+    }
+
     // ===============================================================
     // Domain Validators (Validator Fungsi Domain)
     // ===============================================================
@@ -89,19 +141,34 @@ service cloud.firestore {
     function isValidUserProfile(data) {
       return hasNoPrivilegeEscalation(data) &&
              uidMatchesAuth() &&
-             data.keys().size() <= 30 &&
+             // Fitur residence dipensiunkan sepenuhnya: payload tulis dilarang memuat residence
+             !('residence' in data) &&
+             data.keys().hasOnly([
+               'uid', 'userId', 'displayName', 'name', 'avatarKey',
+               'bio', 'locale', 'email', 'photoUrl',
+               'createdAt', 'createdAtMillis', 'updatedAt', 'updatedAtMillis',
+               'lastLoginAt', 'lastActiveAt', 'lastSeenAt',
+               'fcmToken', 'pushToken'
+             ]) &&
              (!('avatarKey' in data) || isValidAvatarKey(data.avatarKey)) &&
              (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+             (!('name' in data) || (data.name is string && data.name.size() <= 100)) &&
              (!('bio' in data) || (data.bio is string && data.bio.size() <= 500)) &&
              (!('locale' in data) || (data.locale is string && data.locale.size() <= 20)) &&
              (!('email' in data) || (data.email is string && data.email.size() <= 100)) &&
              (!('photoUrl' in data) || (data.photoUrl is string && data.photoUrl.size() <= 1000)) &&
+             (!('fcmToken' in data) || (data.fcmToken is string && data.fcmToken.size() <= 500)) &&
+             (!('pushToken' in data) || (data.pushToken is string && data.pushToken.size() <= 500)) &&
              (!('createdAt' in data) || isValidTimeValue(data.createdAt)) &&
+             (!('createdAtMillis' in data) || isValidTimeValue(data.createdAtMillis)) &&
              (!('updatedAt' in data) || isValidTimeValue(data.updatedAt)) &&
-             (!('lastLoginAt' in data) || isValidTimeValue(data.lastLoginAt));
+             (!('updatedAtMillis' in data) || isValidTimeValue(data.updatedAtMillis)) &&
+             (!('lastLoginAt' in data) || isValidTimeValue(data.lastLoginAt)) &&
+             (!('lastActiveAt' in data) || isValidTimeValue(data.lastActiveAt)) &&
+             (!('lastSeenAt' in data) || isValidTimeValue(data.lastSeenAt));
     }
 
-    // Validasi keamanan umum untuk semua dokumen subkoleksi di bawah /users/{userId}/{document=**}
+    // Validasi keamanan umum untuk semua dokumen subkoleksi di bawah /users/{userId}/{subcollection}/{document=**}
     function isValidSubcollectionDoc(data) {
       return hasNoPrivilegeEscalation(data) &&
              uidMatchesAuth() &&
@@ -116,6 +183,11 @@ service cloud.firestore {
              (!('dayKey' in data) || (data.dayKey is string && data.dayKey.size() <= 50)) &&
              (!('presetId' in data) || (data.presetId is string && data.presetId.size() <= 100)) &&
              (!('status' in data) || (data.status is string && data.status.size() <= 50)) &&
+             // Field preferensi akun (preferences/settings)
+             (!('language' in data) || (data.language is string && data.language.size() <= 20)) &&
+             (!('theme' in data) || (data.theme is string && data.theme.size() <= 50)) &&
+             (!('prayerMethod' in data) || (data.prayerMethod is string && data.prayerMethod.size() <= 100)) &&
+             (!('prayerMadhab' in data) || (data.prayerMadhab is string && data.prayerMadhab.size() <= 100)) &&
              // Field 'notes': fleksibel untuk List catatan ayat (quran/personal) maupun string teks catatan
              (!('notes' in data) ||
                (data.notes is list && data.notes.size() <= 5000) ||
@@ -126,15 +198,22 @@ service cloud.firestore {
              (!('chapters' in data) || (data.chapters is list && data.chapters.size() <= 114)) &&
              (!('juzs' in data) || (data.juzs is list && data.juzs.size() <= 30)) &&
              (!('items' in data) || (data.items is list && data.items.size() <= 5000)) &&
-             // Batasan map (tracker records, dhikr counters)
+             (!('surahReminders' in data) || (data.surahReminders is list && data.surahReminders.size() <= 100)) &&
+             // Batasan map (tracker records, dhikr counters, preferences, encyclopedia)
              (!('records' in data) || (data.records is map && data.records.keys().size() <= 10000)) &&
              (!('counters' in data) || (data.counters is map && data.counters.keys().size() <= 5000)) &&
+             (!('quran' in data) || (data.quran is map && data.quran.keys().size() <= 50)) &&
+             (!('location' in data) || isValidLocationMap(data.location)) &&
+             (!('notifications' in data) || (data.notifications is map && data.notifications.keys().size() <= 50)) &&
+             (!('pages' in data) || (data.pages is map && data.pages.keys().size() <= 1000)) &&
              // Batasan nilai angka & waktu
              (!('lastReadJuz' in data) || (data.lastReadJuz is int && data.lastReadJuz >= 0 && data.lastReadJuz <= 30)) &&
              (!('bestStreak' in data) || (data.bestStreak is int && data.bestStreak >= 0)) &&
              (!('createdAtMillis' in data) || isValidTimeValue(data.createdAtMillis)) &&
              (!('updatedAtMillis' in data) || isValidTimeValue(data.updatedAtMillis)) &&
-             (!('lastReadUpdatedAtMillis' in data) || isValidTimeValue(data.lastReadUpdatedAtMillis));
+             (!('lastReadUpdatedAtMillis' in data) || isValidTimeValue(data.lastReadUpdatedAtMillis)) &&
+             (!('createdAt' in data) || isValidTimeValue(data.createdAt)) &&
+             (!('updatedAt' in data) || isValidTimeValue(data.updatedAt));
     }
 
     // ===============================================================
@@ -151,7 +230,7 @@ service cloud.firestore {
     // Hanya pemilik akun yang terotentikasi (request.auth.uid == userId)
     // yang dapat membaca, membuat, memperbarui, dan menghapus datanya sendiri.
     match /users/{userId} {
-      // Profil dokumen /users/{userId}
+      // Profil dokumen root: /users/{userId}
       allow read: if isOwner(userId);
 
       allow create: if isOwner(userId) &&
@@ -164,15 +243,30 @@ service cloud.firestore {
 
       allow delete: if isOwner(userId);
 
-      // Semua subkoleksi pengguna: /users/{userId}/{document=**}
-      // Mendukung: quran/personal, tracker/prayer, tasbih/dhikr, bookmarks, notes, dll.
-      match /{document=**} {
+      // Dokumen privat/sensitif yang dipensiunkan: /users/{userId}/private/{document=**}
+      // Pembuatan dan pembaruan (create/update) DITOLAK sepenuhnya untuk mencegah persistensi
+      // data lokasi/alamat perangkat lawas (misal private/residence, private/lastKnownAddress).
+      // Operasi read dan delete tetap diizinkan agar pemilik sah dapat mengaudit dan membersihkan data lama.
+      match /private/{document=**} {
+        allow read: if isOwner(userId);
+        allow create, update: if false;
+        allow delete: if isOwner(userId);
+      }
+
+      // Semua subkoleksi pengguna: /users/{userId}/{subcollection}/{document=**}
+      // Pemisahan eksplisit /{subcollection}/{document=**} mengeliminasi kerentanan Rules v2
+      // di mana wildcard rekursif /{document=**} dapat mencocokkan 0-segmen (dokumen profil root).
+      // Menolak create/update pada subkoleksi 'private' agar pembatasan private tidak dapat dibypass.
+      // Mendukung: quran/personal, tracker/prayer, tasbih/dhikr, preferences/settings, encyclopedia/reading, dll.
+      match /{subcollection}/{document=**} {
         allow read: if isOwner(userId);
 
         allow create: if isOwner(userId) &&
+                         subcollection != 'private' &&
                          isValidSubcollectionDoc(request.resource.data);
 
         allow update: if isOwner(userId) &&
+                         subcollection != 'private' &&
                          isValidSubcollectionDoc(request.resource.data) &&
                          uidNotModified() &&
                          isCreatedAtImmutable();

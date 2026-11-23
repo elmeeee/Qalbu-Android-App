@@ -84,4 +84,11 @@ object DhikrStore {
         }
         editor.apply()
     }
+
+    fun clearAll(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .apply()
+    }
 }

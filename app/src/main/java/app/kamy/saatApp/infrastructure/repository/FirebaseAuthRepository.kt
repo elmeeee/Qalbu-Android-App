@@ -10,6 +10,7 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import app.kamy.saatApp.R
 import app.kamy.saatApp.domain.model.AuthUser
+import app.kamy.saatApp.domain.model.BrandAvatar
 import app.kamy.saatApp.domain.repository.AuthRepository
 import app.kamy.saatApp.domain.util.DisposableEmailValidator
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -22,7 +23,6 @@ import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import app.kamy.saatApp.domain.model.BrandAvatar
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,33 +47,36 @@ class FirebaseAuthRepository @Inject constructor(
     init {
         auth.addAuthStateListener { firebaseAuth ->
             val fbUser = firebaseAuth.currentUser
-            val keep = _currentUser.value?.takeIf { it.uid == fbUser?.uid }?.avatarKey
-            _currentUser.value = fbUser?.toAuthUser(keep)
+            val keepAvatar = _currentUser.value?.takeIf { it.uid == fbUser?.uid }?.avatarKey
+            _currentUser.value = fbUser?.toAuthUser(keepAvatar)
             if (fbUser != null) {
                 // Backfill: any account whose name exists in Auth gets it in Firestore too.
                 fbUser.displayName?.takeIf { it.isNotBlank() }?.let { saveDisplayName(fbUser.uid, it) }
-                ensureBrandAvatar(fbUser.uid)
+                fetchUserProfileExtra(fbUser.uid)
             }
         }
     }
 
     /**
-     * Reads `users/{uid}.avatarKey`. If the account has none yet, picks a random brand avatar
-     * and stores it (merge, so other fields are untouched). Runs in the background; the UI
-     * shows the initial letter until the key arrives.
+     * Reads `users/{uid}.avatarKey`. If the account has no avatar yet,
+     * picks a random brand avatar and stores it (merge, so other fields are untouched).
      */
-    private fun ensureBrandAvatar(uid: String) {
+    private fun fetchUserProfileExtra(uid: String) {
         firestore.collection("users").document(uid).get()
             .addOnSuccessListener { doc ->
-                val existing = BrandAvatar.fromKey(doc.getString("avatarKey"))
-                if (existing != null) {
-                    applyAvatarKey(existing.key)
+                val existingAvatar = BrandAvatar.fromKey(doc.getString("avatarKey"))
+                if (existingAvatar != null) {
+                    applyProfileExtra(existingAvatar.key)
                 } else {
                     val picked = BrandAvatar.random()
                     firestore.collection("users").document(uid)
                         .set(mapOf("avatarKey" to picked.key), SetOptions.merge())
-                        .addOnSuccessListener { applyAvatarKey(picked.key) }
+                        .addOnSuccessListener { applyProfileExtra(picked.key) }
+                        .addOnFailureListener { applyProfileExtra(null) }
                 }
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Failed to fetch user profile extras from Firestore", e)
             }
     }
 
@@ -89,6 +92,14 @@ class FirebaseAuthRepository @Inject constructor(
                 SetOptions.merge()
             )
             .addOnFailureListener { Log.w(TAG, "Failed to save displayName to Firestore", it) }
+    }
+
+    private fun applyProfileExtra(avatarKey: String?) {
+        _currentUser.update { current ->
+            current?.copy(
+                avatarKey = avatarKey ?: current.avatarKey
+            )
+        }
     }
 
     private fun applyAvatarKey(key: String) {
@@ -354,7 +365,9 @@ class FirebaseAuthRepository @Inject constructor(
     }
 
     // Must not read _currentUser: it is called while the property is still being initialised.
-    private fun FirebaseUser.toAuthUser(avatarKey: String? = null): AuthUser =
+    private fun FirebaseUser.toAuthUser(
+        avatarKey: String? = null
+    ): AuthUser =
         AuthUser(
             uid = uid,
             email = email,

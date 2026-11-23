@@ -3653,7 +3653,7 @@ fun AccountDetailScreen(
 
             Spacer(Modifier.height(20.dp))
 
-            // 3. Section: Sinkronisasi Cloud
+            // 2. Section: Sinkronisasi Cloud
             SettingsSectionHeader(stringResource(R.string.account_detail_section_sync))
             SettingsCard {
                 Column(modifier = Modifier.padding(16.dp)) {

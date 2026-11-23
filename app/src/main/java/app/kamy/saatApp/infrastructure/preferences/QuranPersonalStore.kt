@@ -258,28 +258,47 @@ object QuranPersonalStore {
         return HifzSummary(learning, memorized, review)
     }
 
-    fun restoreBookmarks(context: Context, cloudBookmarks: List<VerseBookmark>) {
-        if (cloudBookmarks.isEmpty()) return
-        val current = bookmarks(context).associateBy { it.verseKey }.toMutableMap()
-        for (item in cloudBookmarks) {
-            val local = current[item.verseKey]
-            if (local == null || item.createdAtMillis > local.createdAtMillis) {
-                current[item.verseKey] = item
+    fun restoreBookmarks(context: Context, cloudBookmarks: List<VerseBookmark>, lastSyncTimeMillis: Long = 0L) {
+        val current = bookmarks(context)
+        // Keep bookmarks added locally after last sync
+        val newLocal = if (lastSyncTimeMillis > 0L) {
+            current.filter { it.createdAtMillis > lastSyncTimeMillis }
+        } else {
+            current
+        }
+        val combinedMap = cloudBookmarks.associateBy { it.verseKey }.toMutableMap()
+        for (item in newLocal) {
+            val existing = combinedMap[item.verseKey]
+            if (existing == null || item.createdAtMillis > existing.createdAtMillis) {
+                combinedMap[item.verseKey] = item
             }
         }
-        saveList(context, KEY_BOOKMARKS, BookmarkList(current.values.sortedByDescending { it.createdAtMillis }))
+        saveList(context, KEY_BOOKMARKS, BookmarkList(combinedMap.values.sortedByDescending { it.createdAtMillis }))
     }
 
-    fun restoreNotes(context: Context, cloudNotes: List<VerseNote>) {
-        if (cloudNotes.isEmpty()) return
-        val current = notes(context).associateBy { it.verseKey }.toMutableMap()
-        for (item in cloudNotes) {
-            val local = current[item.verseKey]
-            if (local == null || item.updatedAtMillis > local.updatedAtMillis) {
-                current[item.verseKey] = item
+    fun restoreNotes(context: Context, cloudNotes: List<VerseNote>, lastSyncTimeMillis: Long = 0L) {
+        val current = notes(context)
+        // Keep notes edited locally after last sync
+        val newLocal = if (lastSyncTimeMillis > 0L) {
+            current.filter { it.updatedAtMillis > lastSyncTimeMillis }
+        } else {
+            current
+        }
+        val combinedMap = cloudNotes.associateBy { it.verseKey }.toMutableMap()
+        for (item in newLocal) {
+            val existing = combinedMap[item.verseKey]
+            if (existing == null || item.updatedAtMillis > existing.updatedAtMillis) {
+                combinedMap[item.verseKey] = item
             }
         }
-        saveList(context, KEY_NOTES, NoteList(current.values.sortedByDescending { it.updatedAtMillis }))
+        saveList(context, KEY_NOTES, NoteList(combinedMap.values.sortedByDescending { it.updatedAtMillis }))
+    }
+
+    fun clearAll(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .apply()
     }
 
     fun restoreHifz(context: Context, cloudHifz: List<HifzEntry>) {

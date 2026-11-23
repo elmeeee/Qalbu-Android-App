@@ -30,4 +30,11 @@ object LocalReadingProgressStore {
             updatedAtMillis = prefs.getLong(KEY_UPDATED, 0L)
         )
     }
+
+    fun clear(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .apply()
+    }
 }

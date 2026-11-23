@@ -19,7 +19,7 @@ playReview = "2.0.2"
 playUpdate = "2.1.0"
 
 # Compose
-composeBom = "2024.12.01"
+composeBom = "2025.10.00"
 composeNavigation = "2.8.4"
 accompanistPermissions = "0.34.0"
 
