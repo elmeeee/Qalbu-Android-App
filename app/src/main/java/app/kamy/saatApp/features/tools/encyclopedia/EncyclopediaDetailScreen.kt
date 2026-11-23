@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,24 +48,24 @@ import app.kamy.saatApp.core.locale.AppLanguage
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.EncyclopediaTopic
 import app.kamy.saatApp.domain.model.QuranReference
-import app.kamy.saatApp.features.today.TanyaSaatViewModel
-import app.kamy.saatApp.ui.components.TanyaSaatFullScreen
 import kotlinx.coroutines.launch
 
 private val WarmSand = Color(0xFFE8E2D5)
 private val Slate400 = Color(0xFF94A3B8)
 private val Slate600 = Color(0xFF475569)
+private val BookCanvas = Color(0xFFEDE5D8)
+private val BookPaper = Color(0xFFFFFBF2)
+private val BookInk = Color(0xFF30271F)
+private val BookRule = Color(0xFFD8C9AF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EncyclopediaDetailScreen(
     onBack: () -> Unit,
     onOpenVerse: (surahNumber: Int, ayahNumber: Int) -> Unit = { _, _ -> },
-    viewModel: EncyclopediaDetailViewModel = hiltViewModel(),
-    tanyaSaatVm: TanyaSaatViewModel = hiltViewModel()
+    viewModel: EncyclopediaDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val tanyaSaatState by tanyaSaatVm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
     val coroutineScope = rememberCoroutineScope()
@@ -147,19 +148,14 @@ fun EncyclopediaDetailScreen(
                                 coroutineScope.launch {
                                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                 }
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.encyclopedia_finish_reading),
-                                    Toast.LENGTH_SHORT
-                                ).show()
                             }
                         },
+                        onFinishReading = onBack,
                         onOpenToc = { showTocSheet = true }
                     )
                 }
             },
-            containerColor = SaatColors.HomeBg
+            containerColor = BookCanvas
         ) { innerPadding ->
             if (state.isLoading) {
                 Box(
@@ -216,13 +212,9 @@ fun EncyclopediaDetailScreen(
                             StoryChapterPage(
                                 chapter = chapter,
                                 state = state,
-                                isLastChapter = pageIndex == chapters.size && !hasHikmah,
+                                bookTitle = topic.localizedTitle(state.currentLanguage),
+                                pageNumber = pageIndex + 1,
                                 onOpenVerse = onOpenVerse,
-                                onNextPage = {
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(pageIndex + 1)
-                                    }
-                                },
                                 onCopyVerse = { text ->
                                     clipboardManager.setText(AnnotatedString(text))
                                     Toast.makeText(
@@ -241,12 +233,7 @@ fun EncyclopediaDetailScreen(
                                     hikmah = hikmah,
                                     topic = topic,
                                     state = state,
-                                    onAskAi = {
-                                        tanyaSaatVm.onInputTextChanged(
-                                            "Bisa ceritakan lebih dalam mengenai hikmah dan teladan dari ${topic.localizedTitle(state.currentLanguage)}?"
-                                        )
-                                        tanyaSaatVm.openSheet()
-                                    },
+                                    pageNumber = pageIndex + 1,
                                     onSelectTopic = { newTopicId ->
                                         viewModel.selectTopic(newTopicId)
                                     }
@@ -275,28 +262,6 @@ fun EncyclopediaDetailScreen(
             )
         }
 
-        // TanyaSaat AI FullScreen Sheet
-        if (tanyaSaatState.isSheetVisible) {
-            TanyaSaatFullScreen(
-                state = tanyaSaatState,
-                onDismiss = { tanyaSaatVm.closeSheet() },
-                onModelSelected = tanyaSaatVm::onModelSelected,
-                onMoodSelected = tanyaSaatVm::onMoodSelected,
-                onInputChanged = tanyaSaatVm::onInputTextChanged,
-                onSendMessage = { tanyaSaatVm.sendMessage() },
-                onOpenVerseInReader = { chapter, verse ->
-                    tanyaSaatVm.closeSheet()
-                    onOpenVerse(chapter, verse)
-                },
-                onBookmarkVerse = { verseData ->
-                    tanyaSaatVm.bookmarkVerse(context, verseData)
-                },
-                onClearToast = tanyaSaatVm::clearToast,
-                onFollowUp = tanyaSaatVm::askFollowUp,
-                onNewChat = tanyaSaatVm::startNewChat,
-                onRetry = tanyaSaatVm::retryLast
-            )
-        }
     }
 }
 
@@ -325,39 +290,51 @@ private fun StoryCoverPage(
     ) {
         // Book Cover Hero Card
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-            border = BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.25f))
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 520.dp)
+                .align(Alignment.CenterHorizontally),
+            shape = RoundedCornerShape(4.dp),
+            colors = CardDefaults.cardColors(containerColor = SaatColors.DeepEmerald),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            border = BorderStroke(1.5.dp, SaatColors.GoldDeep.copy(alpha = 0.7f))
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
-                // Decorative gradient wash
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp)
+                        .height(220.dp)
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    SaatColors.DeepEmerald.copy(alpha = 0.10f),
+                                    SaatColors.GoldDeep.copy(alpha = 0.20f),
                                     Color.Transparent
                                 )
                             )
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .padding(12.dp)
+                        .border(
+                            1.dp,
+                            SaatColors.GoldDeep.copy(alpha = 0.45f),
+                            RoundedCornerShape(2.dp)
                         )
                 )
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
+                        .padding(horizontal = 30.dp, vertical = 34.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Category Badge Pill
                     Surface(
-                        shape = RoundedCornerShape(20.dp),
-                        color = SaatColors.DeepEmerald.copy(alpha = 0.12f),
-                        border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.20f))
+                        shape = RoundedCornerShape(2.dp),
+                        color = SaatColors.GoldDeep.copy(alpha = 0.18f),
+                        border = BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.55f))
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
@@ -367,14 +344,14 @@ private fun StoryCoverPage(
                                 imageVector = Icons.AutoMirrored.Filled.MenuBook,
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
-                                tint = SaatColors.DeepEmerald
+                                tint = Color(0xFFFFE6A6)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = stringResource(R.string.encyclopedia_cat_prophets).uppercase(),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = SaatColors.DeepEmerald,
+                                color = Color(0xFFFFE6A6),
                                 letterSpacing = 1.sp
                             )
                         }
@@ -385,11 +362,12 @@ private fun StoryCoverPage(
                     // Big Decorative Story Title
                     Text(
                         text = title,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald,
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = FontFamily.Serif,
+                        color = BookPaper,
                         textAlign = TextAlign.Center,
-                        lineHeight = 32.sp
+                        lineHeight = 40.sp
                     )
 
                     if (subtitle.isNotBlank()) {
@@ -398,7 +376,7 @@ private fun StoryCoverPage(
                             text = subtitle,
                             fontSize = 13.5.sp,
                             fontWeight = FontWeight.Medium,
-                            color = SaatColors.GoldDeep,
+                            color = BookPaper.copy(alpha = 0.78f),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -409,35 +387,41 @@ private fun StoryCoverPage(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(SaatColors.HomeBg)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Color.White.copy(alpha = 0.08f))
                             .padding(vertical = 12.dp, horizontal = 8.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         StatItem(
                             value = "${chapters.size}",
-                            label = stringResource(R.string.encyclopedia_toc_button)
+                            label = stringResource(R.string.encyclopedia_toc_button),
+                            valueColor = BookPaper,
+                            labelColor = BookPaper.copy(alpha = 0.72f)
                         )
                         Box(
                             modifier = Modifier
                                 .width(1.dp)
                                 .height(28.dp)
-                                .background(WarmSand)
+                                .background(SaatColors.GoldDeep.copy(alpha = 0.45f))
                         )
                         StatItem(
-                            value = "${topic.readTimeMinutes} mnt",
-                            label = "Bacaan"
+                            value = "${topic.readTimeMinutes}",
+                            label = stringResource(R.string.encyclopedia_reading_minutes),
+                            valueColor = BookPaper,
+                            labelColor = BookPaper.copy(alpha = 0.72f)
                         )
                         Box(
                             modifier = Modifier
                                 .width(1.dp)
                                 .height(28.dp)
-                                .background(WarmSand)
+                                .background(SaatColors.GoldDeep.copy(alpha = 0.45f))
                         )
                         StatItem(
                             value = "${topic.quranReferences.size}",
-                            label = "Dalil Ayat"
+                            label = stringResource(R.string.encyclopedia_quran_reference_count),
+                            valueColor = BookPaper,
+                            labelColor = BookPaper.copy(alpha = 0.72f)
                         )
                     }
 
@@ -446,23 +430,24 @@ private fun StoryCoverPage(
                     // Sinopsis / Summary Box
                     if (summary.isNotBlank()) {
                         Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = WarmSand.copy(alpha = 0.35f),
+                            shape = RoundedCornerShape(2.dp),
+                            color = Color.White.copy(alpha = 0.06f),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.14f)),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "Sinopsis Kisah",
+                                    text = stringResource(R.string.encyclopedia_story_overview),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = SaatColors.DeepEmerald,
+                                    color = Color(0xFFFFE6A6),
                                     letterSpacing = 0.5.sp
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
                                     text = summary,
                                     fontSize = 13.5.sp,
-                                    color = SaatColors.Slate700,
+                                    color = BookPaper.copy(alpha = 0.88f),
                                     lineHeight = 21.sp
                                 )
                             }
@@ -477,10 +462,10 @@ private fun StoryCoverPage(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(2.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = SaatColors.DeepEmerald,
-                            contentColor = Color.White
+                            containerColor = SaatColors.GoldDeep,
+                            contentColor = SaatColors.DeepEmerald
                         ),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                     ) {
@@ -505,18 +490,26 @@ private fun StoryCoverPage(
         // Table of Contents Section
         Text(
             text = stringResource(R.string.encyclopedia_table_of_contents),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium,
+            fontFamily = FontFamily.Serif,
             color = SaatColors.DeepEmerald,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+            modifier = Modifier
+                .widthIn(max = 520.dp)
+                .align(Alignment.CenterHorizontally)
+                .padding(horizontal = 4.dp, vertical = 4.dp)
         )
         Spacer(modifier = Modifier.height(8.dp))
 
         Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 520.dp)
+                .align(Alignment.CenterHorizontally),
+            shape = RoundedCornerShape(3.dp),
+            colors = CardDefaults.cardColors(containerColor = BookPaper),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+            border = BorderStroke(1.dp, BookRule)
         ) {
             Column(modifier = Modifier.padding(vertical = 8.dp)) {
                 chapters.forEachIndexed { index, ch ->
@@ -531,7 +524,7 @@ private fun StoryCoverPage(
                         Box(
                             modifier = Modifier
                                 .size(28.dp)
-                                .clip(CircleShape)
+                                .clip(RoundedCornerShape(2.dp))
                                 .background(SaatColors.DeepEmerald.copy(alpha = 0.10f)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -557,7 +550,10 @@ private fun StoryCoverPage(
                             if (ch.verses.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "📜 ${ch.verses.size} Dalil Al-Qur'an ditengah cerita",
+                                    text = stringResource(
+                                        R.string.encyclopedia_chapter_quran_references,
+                                        ch.verses.size
+                                    ),
                                     fontSize = 11.5.sp,
                                     color = SaatColors.GoldDeep
                                 )
@@ -616,7 +612,7 @@ private fun StoryCoverPage(
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Mutiara hikmah, iktibar & penutup",
+                                text = stringResource(R.string.encyclopedia_hikmah_summary),
                                 fontSize = 11.5.sp,
                                 color = SaatColors.Slate500
                             )
@@ -638,18 +634,23 @@ private fun StoryCoverPage(
 }
 
 @Composable
-private fun StatItem(value: String, label: String) {
+private fun StatItem(
+    value: String,
+    label: String,
+    valueColor: Color = SaatColors.DeepEmerald,
+    labelColor: Color = SaatColors.Slate500
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = SaatColors.DeepEmerald
+            color = valueColor
         )
         Text(
             text = label,
             fontSize = 11.sp,
-            color = SaatColors.Slate500
+            color = labelColor
         )
     }
 }
@@ -659,12 +660,61 @@ private fun StatItem(value: String, label: String) {
 // =============================================================================
 
 @Composable
+private fun BookPageSheet(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(3.dp),
+        color = BookPaper,
+        shadowElevation = 4.dp,
+        border = BorderStroke(1.dp, BookRule)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun BookPageHeader(bookTitle: String) {
+    Text(
+        text = bookTitle.uppercase(),
+        fontSize = 9.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = SaatColors.Slate500,
+        letterSpacing = 1.2.sp,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+    Spacer(modifier = Modifier.height(10.dp))
+    HorizontalDivider(thickness = 0.7.dp, color = BookRule)
+}
+
+@Composable
+private fun BookPageFooter(pageNumber: Int) {
+    Spacer(modifier = Modifier.height(24.dp))
+    HorizontalDivider(thickness = 0.7.dp, color = BookRule)
+    Spacer(modifier = Modifier.height(10.dp))
+    Text(
+        text = pageNumber.toString(),
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        fontSize = 10.sp,
+        fontFamily = FontFamily.Serif,
+        color = SaatColors.Slate500
+    )
+}
+
+@Composable
 private fun StoryChapterPage(
     chapter: StoryChapterUiModel,
     state: EncyclopediaDetailUiState,
-    isLastChapter: Boolean,
+    bookTitle: String,
+    pageNumber: Int,
     onOpenVerse: (surahNumber: Int, ayahNumber: Int) -> Unit,
-    onNextPage: () -> Unit,
     onCopyVerse: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -675,112 +725,79 @@ private fun StoryChapterPage(
             .verticalScroll(scrollState)
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            border = BorderStroke(0.5.dp, WarmSand)
+        BookPageSheet(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 620.dp)
+                .align(Alignment.CenterHorizontally)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                // Chapter Badge Pill
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = SaatColors.GoldDeep.copy(alpha = 0.12f)
-                ) {
-                    Text(
-                        text = stringResource(R.string.encyclopedia_chapter_badge, chapter.index, state.chapters.size).uppercase(),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.GoldDeep,
-                        letterSpacing = 0.8.sp,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            BookPageHeader(bookTitle)
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            Text(
+                text = stringResource(
+                    R.string.encyclopedia_chapter_badge,
+                    chapter.index,
+                    state.chapters.size
+                ).uppercase(),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = SaatColors.GoldDeep,
+                letterSpacing = 1.4.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = chapter.title,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 27.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = FontFamily.Serif,
+                color = BookInk,
+                lineHeight = 34.sp
+            )
+            Spacer(modifier = Modifier.height(18.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 36.dp),
+                thickness = 1.dp,
+                color = BookRule
+            )
+            Spacer(modifier = Modifier.height(22.dp))
+
+            chapter.paragraphsBefore.forEachIndexed { idx, para ->
+                StoryParagraph(text = para)
+                if (idx < chapter.paragraphsBefore.lastIndex) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
+            if (chapter.verses.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                chapter.verses.forEach { qRef ->
+                    QuranVerseEmbeddedCard(
+                        qRef = qRef,
+                        language = state.currentLanguage,
+                        onOpenVerse = onOpenVerse,
+                        onCopy = onCopyVerse
                     )
+                    Spacer(modifier = Modifier.height(18.dp))
                 }
+            }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Chapter Title
-                Text(
-                    text = chapter.title,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.DeepEmerald,
-                    lineHeight = 28.sp
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = WarmSand.copy(alpha = 0.7f)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // First half of narrative paragraphs (leading up to the verse)
-                chapter.paragraphsBefore.forEachIndexed { idx, para ->
+            if (chapter.paragraphsAfter.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                chapter.paragraphsAfter.forEachIndexed { idx, para ->
                     StoryParagraph(text = para)
-                    if (idx < chapter.paragraphsBefore.lastIndex) {
-                        Spacer(modifier = Modifier.height(14.dp))
-                    }
-                }
-
-                // =============================================================
-                // QUR'AN VERSES: Interspersed right in the middle of the story!
-                // =============================================================
-                if (chapter.verses.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    chapter.verses.forEach { qRef ->
-                        QuranVerseEmbeddedCard(
-                            qRef = qRef,
-                            language = state.currentLanguage,
-                            onOpenVerse = onOpenVerse,
-                            onCopy = onCopyVerse
-                        )
+                    if (idx < chapter.paragraphsAfter.lastIndex) {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
-
-                // Second half of narrative paragraphs (continuation after verse)
-                if (chapter.paragraphsAfter.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    chapter.paragraphsAfter.forEachIndexed { idx, para ->
-                        StoryParagraph(text = para)
-                        if (idx < chapter.paragraphsAfter.lastIndex) {
-                            Spacer(modifier = Modifier.height(14.dp))
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Chapter Bottom Hint / Next Page Button
-                if (!isLastChapter) {
-                    OutlinedButton(
-                        onClick = onNextPage,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = SaatColors.DeepEmerald
-                        ),
-                        border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.35f))
-                    ) {
-                        Text(
-                            text = stringResource(R.string.encyclopedia_next_page),
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
             }
+
+            BookPageFooter(pageNumber)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -792,9 +809,11 @@ private fun StoryParagraph(text: String) {
     val isDialogue = text.startsWith("”") || text.startsWith("\"") || text.startsWith("‘") || text.startsWith("'")
     Text(
         text = text,
-        fontSize = 15.sp,
-        color = if (isDialogue) SaatColors.Slate900 else Color(0xFF1E293B),
-        lineHeight = 25.sp,
+        fontSize = 16.sp,
+        fontFamily = FontFamily.Serif,
+        color = if (isDialogue) SaatColors.Slate900 else BookInk,
+        lineHeight = 28.sp,
+        textAlign = if (isDialogue) TextAlign.Start else TextAlign.Justify,
         fontWeight = if (isDialogue) FontWeight.Medium else FontWeight.Normal
     )
 }
@@ -825,7 +844,7 @@ private fun QuranVerseEmbeddedCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(3.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF4F9F6)
         ),
@@ -840,7 +859,7 @@ private fun QuranVerseEmbeddedCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(2.dp),
                     color = SaatColors.DeepEmerald.copy(alpha = 0.12f)
                 ) {
                     Text(
@@ -853,7 +872,7 @@ private fun QuranVerseEmbeddedCard(
                 }
 
                 Surface(
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(2.dp),
                     color = Color.White,
                     border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.25f)),
                     modifier = Modifier.clickable { onOpenVerse(qRef.surahNumber, startAyah) }
@@ -897,7 +916,7 @@ private fun QuranVerseEmbeddedCard(
             if (verseLatin.isNotBlank()) {
                 Spacer(modifier = Modifier.height(14.dp))
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(2.dp),
                     color = Color.White.copy(alpha = 0.85f),
                     border = BorderStroke(0.5.dp, WarmSand)
                 ) {
@@ -992,7 +1011,7 @@ private fun StoryHikmahPage(
     hikmah: StoryHikmahUiModel,
     topic: EncyclopediaTopic,
     state: EncyclopediaDetailUiState,
-    onAskAi: () -> Unit,
+    pageNumber: Int,
     onSelectTopic: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -1003,156 +1022,109 @@ private fun StoryHikmahPage(
             .verticalScroll(scrollState)
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
-        // Hero Header Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            border = BorderStroke(1.dp, SaatColors.GoldDeep.copy(alpha = 0.3f))
+        BookPageSheet(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 620.dp)
+                .align(Alignment.CenterHorizontally)
         ) {
-            Column(modifier = Modifier.padding(22.dp)) {
-                Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = SaatColors.GoldDeep.copy(alpha = 0.15f)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp),
-                            tint = SaatColors.GoldDeep
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.encyclopedia_hikmah_badge).uppercase(),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = SaatColors.GoldDeep,
-                            letterSpacing = 0.8.sp
-                        )
-                    }
-                }
+            BookPageHeader(
+                topic.localizedTitle(state.currentLanguage)
+            )
 
-                Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = stringResource(R.string.encyclopedia_hikmah_badge).uppercase(),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = SaatColors.GoldDeep,
+                letterSpacing = 1.4.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = hikmah.title,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 27.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = FontFamily.Serif,
+                color = BookInk,
+                lineHeight = 34.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(
+                    R.string.encyclopedia_hikmah_intro,
+                    topic.localizedTitle(state.currentLanguage)
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                fontSize = 13.sp,
+                color = SaatColors.Slate500
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 36.dp),
+                thickness = 1.dp,
+                color = BookRule
+            )
+            Spacer(modifier = Modifier.height(20.dp))
 
-                Text(
-                    text = hikmah.title,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SaatColors.DeepEmerald
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                    text = "Refleksi dan intisari berharga dari perjalanan ${topic.localizedTitle(state.currentLanguage)}",
-                    fontSize = 13.5.sp,
-                    color = SaatColors.Slate500
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(18.dp))
-
-        // Lessons List Cards
-        hikmah.lessons.forEachIndexed { idx, lesson ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 5.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-            ) {
+            hikmah.lessons.forEachIndexed { idx, lesson ->
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.Top
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(SaatColors.DeepEmerald),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "${idx + 1}",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(14.dp))
-
+                    Text(
+                        text = "${idx + 1}.",
+                        modifier = Modifier.width(30.dp),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Serif,
+                        color = SaatColors.GoldDeep
+                    )
                     Text(
                         text = lesson,
-                        fontSize = 14.sp,
-                        color = SaatColors.Slate800,
-                        lineHeight = 22.sp
+                        modifier = Modifier.weight(1f),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Serif,
+                        color = BookInk,
+                        lineHeight = 28.sp,
+                        textAlign = TextAlign.Justify
                     )
                 }
+                if (idx < hikmah.lessons.lastIndex) {
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
             }
-        }
 
-        if (hikmah.conclusion.isNotBlank()) {
-            Spacer(modifier = Modifier.height(14.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = WarmSand.copy(alpha = 0.25f)
+            if (hikmah.conclusion.isNotBlank()) {
+                Spacer(modifier = Modifier.height(22.dp))
+                HorizontalDivider(thickness = 0.7.dp, color = BookRule)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.encyclopedia_closing_reflection).uppercase(),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = SaatColors.GoldDeep,
+                    letterSpacing = 1.2.sp
                 )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Tadabbur Penutup",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = SaatColors.DeepEmerald,
-                        letterSpacing = 0.5.sp
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = hikmah.conclusion,
-                        fontSize = 13.5.sp,
-                        color = SaatColors.Slate700,
-                        lineHeight = 21.sp
-                    )
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = hikmah.conclusion,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily.Serif,
+                    color = BookInk,
+                    lineHeight = 28.sp,
+                    textAlign = TextAlign.Justify
+                )
             }
+
+            BookPageFooter(pageNumber)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        // TanyaSaat AI Discussion Button
-        Button(
-            onClick = onAskAi,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = SaatColors.DeepEmerald,
-                contentColor = Color.White
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Default.AutoAwesome,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.encyclopedia_ask_ai),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
 
         // Previous and Next Prophet Navigation
         if (state.nextTopicId != null || state.prevTopicId != null) {
@@ -1218,13 +1190,14 @@ private fun BookBottomNavBar(
     hasHikmah: Boolean,
     onPrev: () -> Unit,
     onNext: () -> Unit,
+    onFinishReading: () -> Unit,
     onOpenToc: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = Color.White,
-        shadowElevation = 8.dp,
-        border = BorderStroke(1.dp, WarmSand.copy(alpha = 0.6f))
+        color = BookPaper,
+        shadowElevation = 5.dp,
+        border = BorderStroke(1.dp, BookRule)
     ) {
         Row(
             modifier = Modifier
@@ -1290,9 +1263,9 @@ private fun BookBottomNavBar(
 
             // Next / Finish Button
             Button(
-                onClick = onNext,
+                onClick = if (currentPage == totalPages - 1) onFinishReading else onNext,
                 modifier = Modifier.widthIn(min = 80.dp),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(3.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (currentPage == totalPages - 1) SaatColors.GoldDeep else SaatColors.DeepEmerald,
                     contentColor = Color.White
@@ -1364,7 +1337,7 @@ private fun TableOfContentsSheet(
             TocItemRow(
                 pageIndex = 0,
                 title = stringResource(R.string.encyclopedia_cover_label),
-                subtitle = "Ringkasan dan informasi awal kisah",
+                subtitle = stringResource(R.string.encyclopedia_cover_toc_description),
                 isSelected = currentPage == 0,
                 onClick = { onSelectPage(0) }
             )
@@ -1380,8 +1353,17 @@ private fun TableOfContentsSheet(
                 val pageIndex = index + 1
                 TocItemRow(
                     pageIndex = pageIndex,
-                    title = "Bab ${chapter.index}: ${chapter.title}",
-                    subtitle = if (chapter.verses.isNotEmpty()) "${chapter.verses.size} Dalil Ayat Al-Qur'an" else null,
+                    title = stringResource(
+                        R.string.encyclopedia_toc_chapter_title,
+                        chapter.index,
+                        chapter.title
+                    ),
+                    subtitle = if (chapter.verses.isNotEmpty()) {
+                        stringResource(
+                            R.string.encyclopedia_chapter_quran_references,
+                            chapter.verses.size
+                        )
+                    } else null,
                     isSelected = currentPage == pageIndex,
                     onClick = { onSelectPage(pageIndex) }
                 )
@@ -1399,7 +1381,7 @@ private fun TableOfContentsSheet(
                 TocItemRow(
                     pageIndex = hikmahPage,
                     title = hikmah.title,
-                    subtitle = "Hikmah, iktibar dan refleksi akhir",
+                    subtitle = stringResource(R.string.encyclopedia_hikmah_summary),
                     isSelected = currentPage == hikmahPage,
                     onClick = { onSelectPage(hikmahPage) }
                 )

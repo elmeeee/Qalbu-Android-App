@@ -287,7 +287,9 @@ class EncyclopediaDetailViewModel @Inject constructor(
             val chunkSize = (rawSections.size + 4) / 5
             for (i in rawSections.indices step chunkSize) {
                 val chunk = rawSections.subList(i, minOf(i + chunkSize, rawSections.size))
-                val title = chunk.first().first.ifBlank { "Bab ${chaptersList.size + 1}" }
+                val title = chunk.first().first.ifBlank {
+                    defaultChapterTitle(language, chaptersList.size + 1)
+                }
                 val combinedParas = chunk.flatMap { it.second }
                 chaptersList.add(Pair(title, combinedParas))
             }
@@ -323,7 +325,12 @@ class EncyclopediaDetailViewModel @Inject constructor(
                     }
                 }
             } else {
-                chaptersList.add(Pair("Kisah & Perjalanan", allParas))
+                val title = when (language) {
+                    AppLanguage.ENGLISH -> "Story & Journey"
+                    AppLanguage.MALAY -> "Kisah & Perjalanan"
+                    else -> "Kisah & Perjalanan"
+                }
+                chaptersList.add(Pair(title, allParas))
             }
         }
 
@@ -347,7 +354,7 @@ class EncyclopediaDetailViewModel @Inject constructor(
         // 5. Construct StoryChapterUiModel with paragraphsBefore, verses (in the middle!), paragraphsAfter
         val resultChapters = chaptersList.mapIndexed { idx, (title, paras) ->
             val chVerses = assignedVerses[idx]
-            val cleanTitle = title.ifBlank { "Bab ${idx + 1}" }
+            val cleanTitle = title.ifBlank { defaultChapterTitle(language, idx + 1) }
             if (paras.isEmpty()) {
                 StoryChapterUiModel(
                     index = idx + 1,
@@ -370,6 +377,12 @@ class EncyclopediaDetailViewModel @Inject constructor(
 
         return Pair(resultChapters, hikmahUi)
     }
+
+    private fun defaultChapterTitle(language: AppLanguage, index: Int): String =
+        when (language) {
+            AppLanguage.ENGLISH -> "Chapter $index"
+            AppLanguage.MALAY, AppLanguage.INDONESIAN -> "Bab $index"
+        }
 
     private data class Quadruple<A, B, C, D>(
         val first: A,
