@@ -349,6 +349,8 @@
     <string name="encyclopedia_prev_page">Sebelumnya</string>
     <string name="encyclopedia_next_page">Selanjutnya</string>
     <string name="encyclopedia_page_indicator">Hal. %1$d dari %2$d</string>
+    <string name="encyclopedia_accessibility_next_page">Halaman berikutnya</string>
+    <string name="encyclopedia_accessibility_previous_page">Halaman sebelumnya</string>
     <string name="encyclopedia_chapter_badge">Bab %1$d dari %2$d</string>
     <string name="encyclopedia_hikmah_badge">Hikmah &amp; Pelajaran</string>
     <string name="encyclopedia_transliteration_label">Latin</string>

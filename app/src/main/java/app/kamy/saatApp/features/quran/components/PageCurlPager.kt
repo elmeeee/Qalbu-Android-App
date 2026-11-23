@@ -1,9 +1,12 @@
 package app.kamy.saatApp.features.quran.components
 
+import android.animation.ValueAnimator
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.runtime.Composable
@@ -29,14 +32,30 @@ fun PageCurlPager(
     state: PagerState,
     modifier: Modifier = Modifier,
     userScrollEnabled: Boolean = true,
+    excludeSystemGestures: Boolean = true,
+    instantSnapWhenAnimationsDisabled: Boolean = false,
     content: @Composable (pageIndex: Int) -> Unit
 ) {
+    val pagerModifier = modifier
+        .fillMaxSize()
+        .background(Color.Transparent)
+        .then(
+            if (excludeSystemGestures) Modifier.systemGestureExclusion() else Modifier
+        )
+    val flingBehavior = if (
+        instantSnapWhenAnimationsDisabled && !ValueAnimator.areAnimatorsEnabled()
+    ) {
+        PagerDefaults.flingBehavior(
+            state = state,
+            snapAnimationSpec = tween(durationMillis = 0)
+        )
+    } else {
+        PagerDefaults.flingBehavior(state = state)
+    }
     HorizontalPager(
         state = state,
-        modifier = modifier
-            .fillMaxSize()
-            .systemGestureExclusion()
-            .background(Color.Transparent),
+        modifier = pagerModifier,
+        flingBehavior = flingBehavior,
         userScrollEnabled = userScrollEnabled,
         beyondViewportPageCount = 1,
         key = { it }

@@ -1,5 +1,6 @@
 package app.kamy.saatApp.features.tools.encyclopedia
 
+import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,9 +10,11 @@ import app.kamy.saatApp.domain.model.EncyclopediaCategory
 import app.kamy.saatApp.domain.model.EncyclopediaTopic
 import app.kamy.saatApp.domain.model.QuranReference
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
+import app.kamy.saatApp.infrastructure.preferences.EncyclopediaReadingProgressStore
 import app.kamy.saatApp.infrastructure.repository.EncyclopediaRepository
 import app.kamy.saatApp.infrastructure.repository.QuranRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +55,7 @@ data class EncyclopediaDetailUiState(
 
 @HiltViewModel
 class EncyclopediaDetailViewModel @Inject constructor(
+    @ApplicationContext private val appContext: Context,
     savedStateHandle: SavedStateHandle,
     private val repository: EncyclopediaRepository,
     private val quranRepository: QuranRepository,
@@ -79,6 +83,13 @@ class EncyclopediaDetailViewModel @Inject constructor(
     fun selectTopic(topicId: String) {
         activeTopicId = topicId
         loadTopic(topicId)
+    }
+
+    fun loadReadingPage(topicId: String): Int =
+        EncyclopediaReadingProgressStore.loadPage(appContext, topicId) ?: 0
+
+    fun saveReadingPage(topicId: String, page: Int) {
+        EncyclopediaReadingProgressStore.savePage(appContext, topicId, page)
     }
 
     private fun loadTopic(id: String) {
