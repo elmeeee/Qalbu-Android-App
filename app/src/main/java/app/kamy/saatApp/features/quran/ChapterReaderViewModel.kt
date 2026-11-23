@@ -10,6 +10,7 @@ import app.kamy.saatApp.core.error.AppError
 import app.kamy.saatApp.core.error.toAppError
 import app.kamy.saatApp.domain.model.HadithReference
 import app.kamy.saatApp.domain.model.RandomAyahPayload
+import app.kamy.saatApp.domain.model.QuranChapter
 import app.kamy.saatApp.domain.model.RecitationPayload
 import app.kamy.saatApp.domain.model.TafsirPayload
 import app.kamy.saatApp.domain.model.AudioPayload
@@ -47,6 +48,7 @@ data class ChapterReaderUiState(
     val chapterArabicName: String? = null,
     val chapterTranslatedName: String? = null,
     val chapterRevelationPlace: String? = null,
+    val availableChapters: List<QuranChapter> = emptyList(),
     val chapterLookup: Map<Int, String> = emptyMap(),
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
@@ -288,6 +290,7 @@ class ChapterReaderViewModel @Inject constructor(
                     val juz = quranRepository.getJuz(currentJuz)
                     _state.update {
                         it.copy(
+                            availableChapters = chapters,
                             chapterLookup = lookup,
                             chapterVersesCountLookup = countLookup,
                             totalVerses = juz?.versesCount,
@@ -299,6 +302,7 @@ class ChapterReaderViewModel @Inject constructor(
                     val name = chapter?.displayComplexName
                     _state.update { 
                         it.copy(
+                            availableChapters = chapters,
                             chapterDisplayName = name, 
                             chapterArabicName = chapter?.nameArabic,
                             chapterTranslatedName = chapter?.displayTranslatedName,

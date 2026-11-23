@@ -185,6 +185,13 @@
     <string name="quran_subtitle_juz">30 Juz · The Noble Quran</string>
     <string name="quran_tab_surah">Surah</string>
     <string name="quran_tab_juz">Juz</string>
+    <string name="reader_select_surah">Choose surah</string>
+    <string name="reader_select_juz">Choose juz</string>
+    <string name="reader_surah_list_title">Select a surah</string>
+    <string name="reader_juz_list_title">Select a juz</string>
+    <string name="reader_search_surah">Search surah or translation</string>
+    <string name="reader_search_juz">Search juz</string>
+    <string name="reader_no_results">No results found</string>
     <string name="prayer_marked_success">%1$s marked ✓</string>
     <string name="optional_qiyam">Qiyamul lail</string>
     <string name="optional_mon_thu_fast">Mon &amp; Thu fast</string>

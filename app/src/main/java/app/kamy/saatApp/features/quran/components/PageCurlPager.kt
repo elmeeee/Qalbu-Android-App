@@ -3,45 +3,102 @@ package app.kamy.saatApp.features.quran.components
 import android.animation.ValueAnimator
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.systemGestureExclusion
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import app.kamy.saatApp.design.theme.SaatColors
+import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sin
-
-private val PaperBack = Color(0xFFF1E9D8)
 
 @Composable
 fun PageCurlPager(
     state: PagerState,
     modifier: Modifier = Modifier,
     userScrollEnabled: Boolean = true,
-    excludeSystemGestures: Boolean = true,
+    excludeSystemGestures: Boolean = false,
     instantSnapWhenAnimationsDisabled: Boolean = false,
     content: @Composable (pageIndex: Int) -> Unit
 ) {
-    val pagerModifier = modifier
-        .fillMaxSize()
-        .background(Color.Transparent)
-        .then(
-            if (excludeSystemGestures) Modifier.systemGestureExclusion() else Modifier
-        )
+    val contentLayoutDirection = LocalLayoutDirection.current
+    val viewConfiguration = LocalViewConfiguration.current
+    var settledPage by remember(state) { mutableIntStateOf(state.currentPage) }
+    var turningPage by remember(state) { mutableIntStateOf(state.currentPage) }
+    var turnDirection by remember(state) { mutableIntStateOf(0) }
+    var isPointerDown by remember(state) { mutableStateOf(false) }
+    var isUserDragging by remember(state) { mutableStateOf(false) }
+    var gestureStartX by remember(state) { mutableFloatStateOf(0f) }
+    var gestureX by remember(state) { mutableFloatStateOf(0f) }
+    var gestureStartY by remember(state) { mutableFloatStateOf(0f) }
+    var gestureY by remember(state) { mutableFloatStateOf(0f) }
+    var isCornerDrag by remember(state) { mutableStateOf(false) }
+    var isTopCornerDrag by remember(state) { mutableStateOf(false) }
+
+    LaunchedEffect(state) {
+        launch {
+            state.interactionSource.interactions.collect { interaction ->
+                when (interaction) {
+                    is DragInteraction.Start -> isUserDragging = true
+                    is DragInteraction.Stop, is DragInteraction.Cancel -> isUserDragging = false
+                }
+            }
+        }
+
+        snapshotFlow {
+            Triple(state.isScrollInProgress, state.currentPage, state.targetPage)
+        }.collect { (isScrolling, currentPage, targetPage) ->
+            if (!isScrolling) {
+                settledPage = currentPage
+                turningPage = currentPage
+                turnDirection = 0
+                isCornerDrag = false
+            } else if (turnDirection == 0 && targetPage != settledPage) {
+                val distance = targetPage - settledPage
+                if (abs(distance) == 1) {
+                    turningPage = settledPage
+                    turnDirection = distance
+                }
+            }
+        }
+    }
+
     val flingBehavior = if (
         instantSnapWhenAnimationsDisabled && !ValueAnimator.areAnimatorsEnabled()
     ) {
@@ -52,266 +109,325 @@ fun PageCurlPager(
     } else {
         PagerDefaults.flingBehavior(state = state)
     }
-    HorizontalPager(
-        state = state,
-        modifier = pagerModifier,
-        flingBehavior = flingBehavior,
-        userScrollEnabled = userScrollEnabled,
-        beyondViewportPageCount = 1,
-        key = { it }
-    ) { pageIndex ->
-        val pageOffset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
-        val isTurningPage = pageOffset > 0f && pageOffset < 1f
-        val zIndexVal = if (isTurningPage) 2f else 1f
+    val pagerModifier = modifier
+        .fillMaxSize()
+        .background(Color.Transparent)
+        .then(if (excludeSystemGestures) Modifier.systemGestureExclusion() else Modifier)
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .zIndex(zIndexVal)
-                .background(Color.Transparent)
-                .graphicsLayer {
-                    val offset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
+    Box(
+        modifier = pagerModifier.pointerInput(state, userScrollEnabled, viewConfiguration) {
+            awaitEachGesture {
+                val down = awaitFirstDown(
+                    requireUnconsumed = false,
+                    pass = PointerEventPass.Initial
+                )
+                isPointerDown = true
+                val startX = down.position.x
+                val startY = down.position.y
+                val screenWidth = size.width.toFloat()
+                val screenHeight = size.height.toFloat()
+                val systemEdgeWidth = 24.dp.toPx()
+                val isSystemBackEdge = (
+                    (startX < systemEdgeWidth || startX > screenWidth - systemEdgeWidth) &&
+                        startY > screenHeight * 0.08f &&
+                        startY < screenHeight * 0.92f
+                    )
+                val wasSettlingAtDown = state.isScrollInProgress && !isUserDragging
+                var recognized = false
 
-                    if (abs(offset) >= 1.05f) {
-                        alpha = 0f
-                        return@graphicsLayer
+                do {
+                    val event = awaitPointerEvent(PointerEventPass.Initial)
+                    val pointer = event.changes.firstOrNull { it.id == down.id } ?: break
+                    val deltaX = pointer.position.x - startX
+                    val deltaY = pointer.position.y - startY
+
+                    if (
+                        wasSettlingAtDown &&
+                        abs(deltaX) > viewConfiguration.touchSlop &&
+                        abs(deltaX) > abs(deltaY) * 1.1f
+                    ) {
+                        pointer.consume()
                     }
 
-                    cameraDistance = 14f * density
-
-                    when {
-                        // Turning page (folding forward around the spine hinge at the left)
-                        offset > 0f && offset < 1f -> {
-                            translationX = offset * size.width
-                            transformOrigin = TransformOrigin(0f, 0.5f)
-                            // 3D rotation around the left spine hinge: 0 deg -> -180 deg
-                            rotationY = -180f * offset
-                            alpha = 1f
-                        }
-                        // Stationary page underneath being revealed
-                        offset < 0f && offset > -1f -> {
-                            // Cancel horizontal slide to keep stationary under the turning page
-                            translationX = offset * size.width
-                            transformOrigin = TransformOrigin(0f, 0.5f)
-                            rotationY = 0f
-                            alpha = 1f
-                        }
-                        // Resting page
-                        else -> {
-                            translationX = 0f
-                            rotationY = 0f
-                            alpha = 1f
-                            transformOrigin = TransformOrigin(0f, 0.5f)
-                        }
-                    }
-                }
-                .drawWithContent {
-                    val offset = (state.currentPage - pageIndex) + state.currentPageOffsetFraction
-                    val w = size.width
-                    val h = size.height
-
-                    if (abs(offset) >= 1.05f) {
-                        return@drawWithContent
-                    }
-
-                    when {
-                        // Page turning over (p in 0f..1f)
-                        offset > 0f && offset < 1f -> {
-                            val p = offset
-                            if (p <= 0.5f) {
-                                // Front face visible
-                                drawContent()
-
-                                val sinP = sin(p * PI).toFloat()
-
-                                // 1. Spine Crease Shadow (near left hinge x = 0)
-                                val spineShadowWidth = w * 0.14f
-                                val spineAlpha = (0.24f * sinP).coerceIn(0f, 1f)
-                                if (spineAlpha > 0.005f) {
-                                    drawRect(
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(
-                                                Color.Black.copy(alpha = spineAlpha),
-                                                Color.Transparent
-                                            ),
-                                            startX = 0f,
-                                            endX = spineShadowWidth
-                                        ),
-                                        size = Size(spineShadowWidth, h)
-                                    )
-                                }
-
-                                // 2. Dynamic Traveling Paper Curl Highlight
-                                val curlCenter = w * (1f - p * 0.72f)
-                                val curlHalfWidth = w * 0.12f
-                                val curlHighlightAlpha = (0.22f * sinP).coerceIn(0f, 1f)
-                                if (curlHighlightAlpha > 0.005f) {
-                                    drawRect(
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(
-                                                Color.Transparent,
-                                                Color.White.copy(alpha = curlHighlightAlpha),
-                                                Color.Transparent
-                                            ),
-                                            startX = (curlCenter - curlHalfWidth).coerceAtLeast(0f),
-                                            endX = (curlCenter + curlHalfWidth).coerceAtMost(w)
-                                        ),
-                                        topLeft = Offset((curlCenter - curlHalfWidth).coerceAtLeast(0f), 0f),
-                                        size = Size(curlHalfWidth * 2f, h)
-                                    )
-                                }
-
-                                // 3. Curl Valley Shadow (immediately behind curl highlight)
-                                val valleyCenter = curlCenter - curlHalfWidth * 0.8f
-                                val valleyAlpha = (0.16f * sinP).coerceIn(0f, 1f)
-                                if (valleyAlpha > 0.005f && valleyCenter > 0f) {
-                                    drawRect(
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(
-                                                Color.Transparent,
-                                                Color.Black.copy(alpha = valleyAlpha),
-                                                Color.Transparent
-                                            ),
-                                            startX = (valleyCenter - curlHalfWidth).coerceAtLeast(0f),
-                                            endX = (valleyCenter + curlHalfWidth).coerceAtMost(w)
-                                        ),
-                                        topLeft = Offset((valleyCenter - curlHalfWidth).coerceAtLeast(0f), 0f),
-                                        size = Size(curlHalfWidth * 2f, h)
-                                    )
-                                }
-
-                                // 4. Ambient Tilt Darkening (as the page turns away from the light)
-                                // Light falls off toward the free edge as the leaf lifts away from the page.
-                                val tiltDarkening = (0.26f * sinP).coerceIn(0f, 1f)
-                                if (tiltDarkening > 0.005f) {
-                                    drawRect(
-                                        brush = Brush.horizontalGradient(
-                                            colors = listOf(
-                                                Color.Transparent,
-                                                Color.Black.copy(alpha = tiltDarkening * 0.4f),
-                                                Color.Black.copy(alpha = tiltDarkening)
-                                            ),
-                                            startX = 0f,
-                                            endX = w
-                                        ),
-                                        size = size
-                                    )
-                                }
-
-                                // 5. Right Paper Edge Bevel (tactile paper thickness)
-                                val edgeAlpha = (0.18f * (1f - p)).coerceIn(0f, 1f)
-                                if (edgeAlpha > 0.01f) {
-                                    drawRect(
-                                        color = Color.Black.copy(alpha = edgeAlpha),
-                                        topLeft = Offset(w - 2.dp.toPx(), 0f),
-                                        size = Size(2.dp.toPx(), h)
-                                    )
-                                }
+                    if (
+                        !recognized &&
+                        userScrollEnabled &&
+                        !state.isScrollInProgress &&
+                        !isSystemBackEdge &&
+                        abs(deltaX) > viewConfiguration.touchSlop &&
+                        abs(deltaX) > abs(deltaY) * 1.1f
+                    ) {
+                        val direction = if (deltaX < 0f) 1 else -1
+                        val sourcePage = settledPage
+                        val targetPage = sourcePage + direction
+                        if (targetPage in 0 until state.pageCount) {
+                            turningPage = sourcePage
+                            turnDirection = direction
+                            gestureStartX = startX
+                            gestureX = pointer.position.x
+                            gestureStartY = startY
+                            gestureY = pointer.position.y
+                            isCornerDrag = if (direction > 0) {
+                                startX >= screenWidth * 0.72f &&
+                                    (startY <= screenHeight * 0.2f || startY >= screenHeight * 0.8f)
                             } else {
-                                // Back face of the physical page (p in 0.5f..1.0f)
-                                val backProgress = (p - 0.5f) * 2f // 0 to 1
+                                startX <= screenWidth * 0.28f &&
+                                    (startY <= screenHeight * 0.2f || startY >= screenHeight * 0.8f)
+                            }
+                            isTopCornerDrag = startY < screenHeight * 0.5f
+                            recognized = true
+                        }
+                    } else if (recognized) {
+                        gestureX = pointer.position.x
+                        gestureY = pointer.position.y
+                    }
+                } while (pointer.pressed)
 
-                                // Opaque reverse side of the paper: blank, slightly warmer than the front.
-                                drawRect(color = PaperBack, size = size)
-                                // Faint bleed-through of the printed side so the leaf feels thin.
-                                drawRect(color = Color.Black.copy(alpha = 0.03f), size = size)
+                isPointerDown = false
+            }
+        }
+    ) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            HorizontalPager(
+                state = state,
+                modifier = Modifier.fillMaxSize(),
+                flingBehavior = flingBehavior,
+                userScrollEnabled = userScrollEnabled,
+                reverseLayout = false,
+                beyondViewportPageCount = 1,
+                key = { it }
+            ) { pageIndex ->
+                val isCurling = turnDirection != 0 &&
+                    (isPointerDown || isUserDragging || state.isScrollInProgress)
+                val isTurningPage = isCurling && pageIndex == turningPage
+                val isAdjacentPage = isCurling && pageIndex == turningPage + turnDirection
+                val isActivePage = if (turnDirection == 0) {
+                    pageIndex == state.currentPage
+                } else {
+                    !isCurling || isTurningPage || isAdjacentPage
+                }
+                val paperBack = MaterialTheme.colorScheme.surface
 
-                                // Spine crease shadow on the right side of the back-face
-                                val spineWidth = w * 0.18f
-                                val backSpineAlpha = (0.26f * (1f - backProgress)).coerceIn(0f, 1f)
-                                if (backSpineAlpha > 0.005f) {
-                                    drawRect(
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .zIndex(
+                            when {
+                                isTurningPage -> 2f
+                                isAdjacentPage -> 1f
+                                pageIndex == state.currentPage -> 2f
+                                else -> 0f
+                            }
+                        )
+                        .graphicsLayer {
+                            translationX = if (isCurling) {
+                                val pageOffset = (pageIndex - state.currentPage) -
+                                    state.currentPageOffsetFraction
+                                -pageOffset * size.width
+                            } else {
+                                0f
+                            }
+                            alpha = if (isActivePage) 1f else 0f
+                            transformOrigin = TransformOrigin(0f, 0f)
+                        }
+                        .semantics {
+                            if (isCurling && (!isActivePage || pageIndex != turningPage)) {
+                                hideFromAccessibility()
+                            }
+                        }
+                        .drawWithContent {
+                            if (!isCurling || !state.isScrollInProgress) {
+                                drawContent()
+                                return@drawWithContent
+                            }
+
+                            val pageWidth = size.width
+                            val pageHeight = size.height
+                            if (pageWidth <= 0f || pageHeight <= 0f) {
+                                drawContent()
+                                return@drawWithContent
+                            }
+
+                            val sourceOffset = (turningPage - state.currentPage) -
+                                state.currentPageOffsetFraction
+                            val progress = abs(sourceOffset).coerceIn(0f, 1f)
+                            if (progress <= 0.001f) {
+                                drawContent()
+                                return@drawWithContent
+                            }
+
+                            val forward = turnDirection > 0
+                            val direction = if (forward) 1f else -1f
+                            val edgeX = if (forward) {
+                                pageWidth * (1f - progress)
+                            } else {
+                                pageWidth * progress
+                            }
+                            val dragProgress = sin(progress * PI).toFloat()
+                            val originBias = (
+                                (gestureStartY / pageHeight) - 0.5f
+                                ) * pageWidth * 0.04f * dragProgress
+                            val verticalPull = (
+                                (gestureY - gestureStartY) * 0.2f * dragProgress
+                                ).coerceIn(-pageWidth * 0.05f, pageWidth * 0.05f)
+                            val curveAmount = originBias + verticalPull
+                            var topX = edgeX - direction * curveAmount
+                            var bottomX = edgeX + direction * curveAmount
+
+                            if (isCornerDrag) {
+                                val cornerX = gestureX.coerceIn(0f, pageWidth)
+                                if (isTopCornerDrag) {
+                                    topX = cornerX
+                                } else {
+                                    bottomX = cornerX
+                                }
+                            }
+
+                            topX = topX.coerceIn(0f, pageWidth)
+                            bottomX = bottomX.coerceIn(0f, pageWidth)
+                            val curlRadius = 8.dp.toPx() + pageWidth * 0.035f * dragProgress
+                            val foldLine = Path().apply {
+                                moveTo(topX, 0f)
+                                cubicTo(
+                                    topX - direction * curlRadius,
+                                    pageHeight * 0.34f,
+                                    bottomX + direction * curlRadius,
+                                    pageHeight * 0.66f,
+                                    bottomX,
+                                    pageHeight
+                                )
+                            }
+                            val frontPath = Path().apply {
+                                if (forward) {
+                                    moveTo(0f, 0f)
+                                    lineTo(topX, 0f)
+                                    cubicTo(
+                                        topX - direction * curlRadius,
+                                        pageHeight * 0.34f,
+                                        bottomX + direction * curlRadius,
+                                        pageHeight * 0.66f,
+                                        bottomX,
+                                        pageHeight
+                                    )
+                                    lineTo(0f, pageHeight)
+                                } else {
+                                    moveTo(topX, 0f)
+                                    lineTo(pageWidth, 0f)
+                                    lineTo(pageWidth, pageHeight)
+                                    lineTo(bottomX, pageHeight)
+                                    cubicTo(
+                                        bottomX + direction * curlRadius,
+                                        pageHeight * 0.66f,
+                                        topX - direction * curlRadius,
+                                        pageHeight * 0.34f,
+                                        topX,
+                                        0f
+                                    )
+                                }
+                                close()
+                            }
+                            val bandWidth = (6.dp.toPx() + curlRadius * 0.45f)
+                                .coerceAtMost(pageWidth * 0.12f)
+                            val undersidePath = Path().apply {
+                                val side = direction
+                                moveTo(topX, 0f)
+                                lineTo((topX + side * bandWidth).coerceIn(0f, pageWidth), 0f)
+                                cubicTo(
+                                    topX + side * (bandWidth + curlRadius),
+                                    pageHeight * 0.34f,
+                                    bottomX + side * (bandWidth - curlRadius),
+                                    pageHeight * 0.66f,
+                                    (bottomX + side * bandWidth).coerceIn(0f, pageWidth),
+                                    pageHeight
+                                )
+                                lineTo(bottomX, pageHeight)
+                                cubicTo(
+                                    bottomX + side * curlRadius,
+                                    pageHeight * 0.66f,
+                                    topX - side * curlRadius,
+                                    pageHeight * 0.34f,
+                                    topX,
+                                    0f
+                                )
+                                close()
+                            }
+                            when {
+                                isTurningPage -> {
+                                    clipPath(frontPath) {
+                                        this@drawWithContent.drawContent()
+                                    }
+                                    drawPath(
+                                        path = undersidePath,
                                         brush = Brush.horizontalGradient(
-                                            colors = listOf(
-                                                Color.Transparent,
-                                                Color.Black.copy(alpha = backSpineAlpha)
-                                            ),
-                                            startX = w - spineWidth,
-                                            endX = w
+                                            colors = if (forward) {
+                                                listOf(
+                                                    Color.Black.copy(alpha = 0.16f),
+                                                    paperBack,
+                                                    Color.White.copy(alpha = 0.28f)
+                                                )
+                                            } else {
+                                                listOf(
+                                                    Color.White.copy(alpha = 0.28f),
+                                                    paperBack,
+                                                    Color.Black.copy(alpha = 0.16f)
+                                                )
+                                            },
+                                            startX = (edgeX - bandWidth).coerceAtLeast(0f),
+                                            endX = (edgeX + bandWidth).coerceAtMost(pageWidth)
+                                        )
+                                    )
+                                    drawPath(
+                                        path = foldLine,
+                                        color = Color.Black.copy(alpha = 0.12f * dragProgress),
+                                        style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round)
+                                    )
+                                    drawPath(
+                                        path = foldLine,
+                                        color = Color.White.copy(alpha = 0.48f * dragProgress),
+                                        style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
+                                    )
+                                }
+
+                                isAdjacentPage -> {
+                                    drawContent()
+                                    drawPath(
+                                        path = foldLine,
+                                        brush = Brush.horizontalGradient(
+                                            colors = if (forward) {
+                                                listOf(
+                                                    Color.Black.copy(alpha = 0.14f * dragProgress),
+                                                    Color.Black.copy(alpha = 0.06f * dragProgress),
+                                                    Color.Transparent
+                                                )
+                                            } else {
+                                                listOf(
+                                                    Color.Transparent,
+                                                    Color.Black.copy(alpha = 0.06f * dragProgress),
+                                                    Color.Black.copy(alpha = 0.14f * dragProgress)
+                                                )
+                                            },
+                                            startX = (edgeX - curlRadius).coerceAtLeast(0f),
+                                            endX = (edgeX + curlRadius).coerceAtMost(pageWidth)
                                         ),
-                                        topLeft = Offset(w - spineWidth, 0f),
-                                        size = Size(spineWidth, h)
+                                        style = Stroke(
+                                            width = bandWidth * 1.4f,
+                                            cap = StrokeCap.Round
+                                        )
                                     )
                                 }
 
-                                // Back face ambient shadow (light settling on back paper)
-                                val backAmbientAlpha = (0.16f * (1f - backProgress)).coerceIn(0f, 1f)
-                                if (backAmbientAlpha > 0.005f) {
-                                    drawRect(
-                                        color = Color.Black.copy(alpha = backAmbientAlpha),
-                                        size = size
-                                    )
-                                }
-
-                                // Left edge subtle paper thickness stroke
-                                val leftEdgeAlpha = (0.14f * backProgress).coerceIn(0f, 1f)
-                                if (leftEdgeAlpha > 0.01f) {
-                                    drawRect(
-                                        color = Color.Black.copy(alpha = leftEdgeAlpha),
-                                        topLeft = Offset.Zero,
-                                        size = Size(2.dp.toPx(), h)
-                                    )
-                                }
+                                else -> drawContent()
                             }
                         }
-
-                        // Stationary under-page (offset in -1f..0f)
-                        offset < 0f && offset > -1f -> {
-                            drawContent()
-
-                            val revealProgress = 1f + offset // 0 = fully covered, 1 = fully open
-                            val unrevealAmount = 1f - revealProgress // 1 = covered, 0 = open
-
-                            // 1. Spine Gutter Cast Shadow (cast by the lifting page onto the under-page)
-                            val castShadowWidth = w * (0.22f + 0.28f * unrevealAmount)
-                            val castShadowAlpha = (0.38f * unrevealAmount).coerceIn(0f, 1f)
-                            if (castShadowAlpha > 0.005f) {
-                                drawRect(
-                                    brush = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            Color.Black.copy(alpha = castShadowAlpha),
-                                            Color.Black.copy(alpha = castShadowAlpha * 0.35f),
-                                            Color.Transparent
-                                        ),
-                                        startX = 0f,
-                                        endX = castShadowWidth
-                                    ),
-                                    size = Size(castShadowWidth, h)
-                                )
-                            }
-
-                            // 2. Ambient occlusion across under-page while covered
-                            val ambientCoverAlpha = (0.12f * unrevealAmount).coerceIn(0f, 1f)
-                            if (ambientCoverAlpha > 0.005f) {
-                                drawRect(
-                                    color = Color.Black.copy(alpha = ambientCoverAlpha),
-                                    size = size
-                                )
-                            }
-                        }
-
-                        // Resting page
-                        else -> {
-                            drawContent()
-
-                            // Subtle permanent spine depth on the left edge (gives feeling of a bound book)
-                            val permanentSpineWidth = 8.dp.toPx()
-                            drawRect(
-                                brush = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        Color.Black.copy(alpha = 0.05f),
-                                        Color.Transparent
-                                    ),
-                                    startX = 0f,
-                                    endX = permanentSpineWidth
-                                ),
-                                size = Size(permanentSpineWidth, h)
-                            )
-                        }
+                ) {
+                    CompositionLocalProvider(
+                        LocalLayoutDirection provides contentLayoutDirection
+                    ) {
+                        content(pageIndex)
                     }
                 }
-        ) {
-            content(pageIndex)
+            }
         }
+
     }
 }

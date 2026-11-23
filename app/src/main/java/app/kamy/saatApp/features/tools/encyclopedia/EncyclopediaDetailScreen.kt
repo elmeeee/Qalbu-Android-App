@@ -6,8 +6,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -26,9 +24,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -48,7 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.Dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.kamy.saatApp.R
@@ -57,6 +58,7 @@ import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.domain.model.EncyclopediaTopic
 import app.kamy.saatApp.domain.model.QuranReference
 import app.kamy.saatApp.features.quran.components.PageCurlPager
+import app.kamy.saatApp.features.quran.components.QuranReaderHeader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -96,11 +98,13 @@ fun EncyclopediaDetailScreen(
         initialPage = 0,
         pageCount = { totalPages }
     )
+    val readerBackdropLayer = rememberGraphicsLayer()
+    val statusBarInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    var readerHeaderHeight by remember(statusBarInset) { mutableStateOf(statusBarInset + 60.dp) }
+    val headerContentInset = readerHeaderHeight
 
     var settledPage by remember(topic?.id) { mutableIntStateOf(0) }
     var restoredTopicId by remember { mutableStateOf<String?>(null) }
-    var isUserDragging by remember(pagerState) { mutableStateOf(false) }
-    var isPageTurnSettling by remember(pagerState) { mutableStateOf(false) }
     var showTocSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(topic?.id, totalPages, state.isLoading) {
@@ -121,79 +125,42 @@ fun EncyclopediaDetailScreen(
             .collect { (page, isScrolling) ->
                 if (!isScrolling && restoredTopicId == topicId) {
                     val completedPage = page.coerceIn(0, (totalPages - 1).coerceAtLeast(0))
+                    val didTurnPage = completedPage != settledPage
                     settledPage = completedPage
-                    viewModel.saveReadingPage(topicId, completedPage)
-                }
-            }
-    }
-
-    LaunchedEffect(pagerState) {
-        launch {
-            pagerState.interactionSource.interactions.collect { interaction ->
-                when (interaction) {
-                    is DragInteraction.Start -> isUserDragging = true
-                    is DragInteraction.Stop, is DragInteraction.Cancel -> isUserDragging = false
-                }
-            }
-        }
-        snapshotFlow { pagerState.isScrollInProgress to isUserDragging }
-            .distinctUntilChanged()
-            .collect { (isScrolling, isDragging) ->
-                isPageTurnSettling = isScrolling && !isDragging
-            }
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            topBar = {
-                app.kamy.saatApp.features.tools.components.SpiritualToolTopBar(
-                    title = title.ifBlank { stringResource(R.string.encyclopedia_title) },
-                    subtitle = if (pagerState.currentPage == 0) {
-                        subtitle.takeIf { it.isNotBlank() } ?: stringResource(R.string.encyclopedia_cover_label)
-                    } else if (pagerState.currentPage <= chapters.size) {
-                        val ch = chapters.getOrNull(pagerState.currentPage - 1)
-                        ch?.title ?: stringResource(R.string.encyclopedia_chapter_badge, pagerState.currentPage, chapters.size)
-                    } else {
-                        stringResource(R.string.encyclopedia_hikmah_badge)
-                    },
-                    onBack = onBack,
-                    actions = {
-                        if (topic != null) {
-                            IconButton(
-                                onClick = { showTocSheet = true },
-                                modifier = Modifier
-                                    .size(38.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White)
-                                    .border(1.dp, WarmSand, CircleShape)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                                    contentDescription = stringResource(R.string.encyclopedia_toc_button),
-                                    tint = SaatColors.DeepEmerald,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
+                    if (didTurnPage) {
+                        viewModel.saveReadingPage(topicId, completedPage)
                     }
-                )
-            },
-            containerColor = BookCanvas
-        ) { innerPadding ->
-            if (state.isLoading) {
+                }
+            }
+    }
+
+    val headerSubtitle = if (pagerState.currentPage == 0) {
+        subtitle.takeIf { it.isNotBlank() } ?: stringResource(R.string.encyclopedia_cover_label)
+    } else if (pagerState.currentPage <= chapters.size) {
+        val chapter = chapters.getOrNull(pagerState.currentPage - 1)
+        chapter?.title ?: stringResource(R.string.encyclopedia_chapter_badge, pagerState.currentPage, chapters.size)
+    } else {
+        stringResource(R.string.encyclopedia_hikmah_badge)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BookCanvas)
+    ) {
+        when {
+            state.isLoading -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
+                    modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = SaatColors.DeepEmerald)
                 }
-            } else if (topic == null) {
+            }
+
+            topic == null -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
+                    modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -201,7 +168,9 @@ fun EncyclopediaDetailScreen(
                         color = SaatColors.Slate500
                     )
                 }
-            } else {
+            }
+
+            else -> {
                 val pageActionsEnabled = restoredTopicId == topic.id &&
                     !pagerState.isScrollInProgress
                 val currentPageDescription = stringResource(
@@ -209,120 +178,142 @@ fun EncyclopediaDetailScreen(
                     settledPage + 1,
                     totalPages
                 )
-                Box(
+                PageCurlPager(
+                    state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
-                ) {
-                    PageCurlPager(
-                        state = pagerState,
+                        .navigationBarsPadding()
+                        .drawWithContent {
+                            if (pagerState.isScrollInProgress) {
+                                drawContent()
+                            } else {
+                                readerBackdropLayer.record {
+                                    this@drawWithContent.drawContent()
+                                }
+                                drawLayer(readerBackdropLayer)
+                            }
+                        }
+                        .semantics {
+                            stateDescription = currentPageDescription
+                            liveRegion = LiveRegionMode.Polite
+                            customActions = buildList {
+                                if (pageActionsEnabled && settledPage > 0) {
+                                    add(
+                                        CustomAccessibilityAction(
+                                            label = context.getString(R.string.encyclopedia_accessibility_previous_page)
+                                        ) {
+                                            requestPageTurn(
+                                                pagerState,
+                                                settledPage - 1,
+                                                coroutineScope
+                                            )
+                                            true
+                                        }
+                                    )
+                                }
+                                if (pageActionsEnabled && settledPage < totalPages - 1) {
+                                    add(
+                                        CustomAccessibilityAction(
+                                            label = context.getString(R.string.encyclopedia_accessibility_next_page)
+                                        ) {
+                                            requestPageTurn(
+                                                pagerState,
+                                                settledPage + 1,
+                                                coroutineScope
+                                            )
+                                            true
+                                        }
+                                    )
+                                }
+                            }
+                        },
+                    userScrollEnabled = restoredTopicId == topic.id,
+                    excludeSystemGestures = false,
+                    instantSnapWhenAnimationsDisabled = true
+                ) { pageIndex ->
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .semantics {
-                                stateDescription = currentPageDescription
-                                liveRegion = LiveRegionMode.Polite
-                                customActions = buildList {
-                                    if (pageActionsEnabled && settledPage > 0) {
-                                        add(
-                                            CustomAccessibilityAction(
-                                                label = context.getString(R.string.encyclopedia_accessibility_previous_page)
-                                            ) {
-                                                requestPageTurn(
-                                                    pagerState,
-                                                    settledPage - 1,
-                                                    coroutineScope
-                                                )
-                                                true
-                                            }
-                                        )
+                                if (pageIndex != settledPage) hideFromAccessibility()
+                            }
+                    ) {
+                        when {
+                            pageIndex == 0 -> {
+                                StoryCoverPage(
+                                    topic = topic,
+                                    state = state,
+                                    chapters = chapters,
+                                    contentTopInset = headerContentInset,
+                                    onStartReading = {
+                                        requestPageTurn(pagerState, 1, coroutineScope)
+                                    },
+                                    onSelectChapter = { targetPage ->
+                                        requestPageTurn(pagerState, targetPage, coroutineScope)
                                     }
-                                    if (pageActionsEnabled && settledPage < totalPages - 1) {
-                                        add(
-                                            CustomAccessibilityAction(
-                                                label = context.getString(R.string.encyclopedia_accessibility_next_page)
-                                            ) {
-                                                requestPageTurn(
-                                                    pagerState,
-                                                    settledPage + 1,
-                                                    coroutineScope
-                                                )
-                                                true
-                                            }
-                                        )
+                                )
+                            }
+                            pageIndex <= chapters.size -> {
+                                val chapter = chapters[pageIndex - 1]
+                                StoryChapterPage(
+                                    chapter = chapter,
+                                    state = state,
+                                    bookTitle = topic.localizedTitle(state.currentLanguage),
+                                    pageNumber = pageIndex + 1,
+                                    contentTopInset = headerContentInset,
+                                    onOpenVerse = onOpenVerse,
+                                    onCopyVerse = { text ->
+                                        clipboardManager.setText(AnnotatedString(text))
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.encyclopedia_copied_toast),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
-                                }
-                            },
-                        userScrollEnabled = restoredTopicId == topic.id,
-                        excludeSystemGestures = false,
-                        instantSnapWhenAnimationsDisabled = true
-                    ) { pageIndex ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .semantics {
-                                    if (pageIndex != settledPage) hideFromAccessibility()
-                                }
-                        ) {
-                            when {
-                                pageIndex == 0 -> {
-                                    StoryCoverPage(
+                                )
+                            }
+                            else -> {
+                                val hikmah = state.hikmah
+                                if (hikmah != null) {
+                                    StoryHikmahPage(
+                                        hikmah = hikmah,
                                         topic = topic,
                                         state = state,
-                                        chapters = chapters,
-                                        onStartReading = {
-                                            requestPageTurn(pagerState, 1, coroutineScope)
-                                        },
-                                        onSelectChapter = { targetPage ->
-                                            requestPageTurn(pagerState, targetPage, coroutineScope)
-                                        }
-                                    )
-                                }
-                                pageIndex <= chapters.size -> {
-                                    val chapter = chapters[pageIndex - 1]
-                                    StoryChapterPage(
-                                        chapter = chapter,
-                                        state = state,
-                                        bookTitle = topic.localizedTitle(state.currentLanguage),
                                         pageNumber = pageIndex + 1,
-                                        onOpenVerse = onOpenVerse,
-                                        onCopyVerse = { text ->
-                                            clipboardManager.setText(AnnotatedString(text))
-                                            Toast.makeText(
-                                                context,
-                                                context.getString(R.string.encyclopedia_copied_toast),
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                                        contentTopInset = headerContentInset
                                     )
-                                }
-                                else -> {
-                                    val hikmah = state.hikmah
-                                    if (hikmah != null) {
-                                        StoryHikmahPage(
-                                            hikmah = hikmah,
-                                            topic = topic,
-                                            state = state,
-                                            pageNumber = pageIndex + 1,
-                                            onSelectTopic = viewModel::selectTopic
-                                        )
-                                    }
                                 }
                             }
                         }
                     }
+                }
+            }
+        }
 
-                    if (isPageTurnSettling) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .pointerInput(Unit) {
-                                    detectHorizontalDragGestures { change, _ ->
-                                        change.consume()
-                                    }
-                                }
-                                .semantics { hideFromAccessibility() }
-                        )
-                    }
+        QuranReaderHeader(
+            title = title.ifBlank { stringResource(R.string.encyclopedia_title) },
+            subtitle = headerSubtitle,
+            onBack = onBack,
+            modifier = Modifier.align(Alignment.TopCenter),
+            backdropLayer = readerBackdropLayer,
+            isPageTurning = pagerState.isScrollInProgress,
+            onHeightChanged = { readerHeaderHeight = it }
+        ) {
+            if (topic != null) {
+                IconButton(
+                    onClick = { showTocSheet = true },
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .border(1.dp, WarmSand, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                        contentDescription = stringResource(R.string.encyclopedia_toc_button),
+                        tint = SaatColors.DeepEmerald,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
         }
@@ -370,6 +361,7 @@ private fun StoryCoverPage(
     topic: EncyclopediaTopic,
     state: EncyclopediaDetailUiState,
     chapters: List<StoryChapterUiModel>,
+    contentTopInset: Dp,
     onStartReading: () -> Unit,
     onSelectChapter: (Int) -> Unit
 ) {
@@ -382,7 +374,12 @@ private fun StoryCoverPage(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(
+                start = 20.dp,
+                top = contentTopInset + 16.dp,
+                end = 20.dp,
+                bottom = 16.dp
+            )
     ) {
         // Book Cover Hero Card
         Card(
@@ -809,6 +806,7 @@ private fun StoryChapterPage(
     state: EncyclopediaDetailUiState,
     bookTitle: String,
     pageNumber: Int,
+    contentTopInset: Dp,
     onOpenVerse: (surahNumber: Int, ayahNumber: Int) -> Unit,
     onCopyVerse: (String) -> Unit
 ) {
@@ -818,7 +816,12 @@ private fun StoryChapterPage(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(
+                start = 16.dp,
+                top = contentTopInset + 12.dp,
+                end = 16.dp,
+                bottom = 12.dp
+            )
     ) {
         BookPageSheet(
             modifier = Modifier
@@ -1106,7 +1109,7 @@ private fun StoryHikmahPage(
     topic: EncyclopediaTopic,
     state: EncyclopediaDetailUiState,
     pageNumber: Int,
-    onSelectTopic: (String) -> Unit
+    contentTopInset: Dp
 ) {
     val scrollState = rememberScrollState()
 
@@ -1114,7 +1117,12 @@ private fun StoryHikmahPage(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(
+                start = 20.dp,
+                top = contentTopInset + 16.dp,
+                end = 20.dp,
+                bottom = 16.dp
+            )
     ) {
         BookPageSheet(
             modifier = Modifier
@@ -1215,57 +1223,6 @@ private fun StoryHikmahPage(
 
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Previous and Next Prophet Navigation
-        if (state.nextTopicId != null || state.prevTopicId != null) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (state.nextTopicId != null && state.nextTopicTitle != null) {
-                OutlinedButton(
-                    onClick = { onSelectTopic(state.nextTopicId) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = SaatColors.DeepEmerald),
-                    border = BorderStroke(1.dp, SaatColors.DeepEmerald.copy(alpha = 0.35f))
-                ) {
-                    Text(
-                        text = stringResource(R.string.encyclopedia_read_next_topic, state.nextTopicTitle),
-                        fontSize = 13.5.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
-            }
-
-            if (state.prevTopicId != null && state.prevTopicTitle != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                TextButton(
-                    onClick = { onSelectTopic(state.prevTopicId) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = SaatColors.Slate500
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(R.string.encyclopedia_read_prev_topic, state.prevTopicTitle),
-                        fontSize = 13.sp,
-                        color = SaatColors.Slate500
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 

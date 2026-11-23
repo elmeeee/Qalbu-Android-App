@@ -367,7 +367,25 @@ fun RootScreen(
                 ChapterReaderScreen(
                     initialVerseNumber = initialAyah,
                     audioBarVisible = showAudioBar,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onSelectSurah = { chapter ->
+                        val readerDestination = navController.currentDestination?.id
+                        navController.navigate("quran/reader/$chapter?ayah=-1") {
+                            readerDestination?.let { destinationId ->
+                                popUpTo(destinationId) { inclusive = true }
+                            }
+                            launchSingleTop = true
+                        }
+                    },
+                    onSelectJuz = { juz ->
+                        val readerDestination = navController.currentDestination?.id
+                        navController.navigate("quran/juz/$juz?verseKey=") {
+                            readerDestination?.let { destinationId ->
+                                popUpTo(destinationId) { inclusive = true }
+                            }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
             composable(
@@ -383,7 +401,25 @@ fun RootScreen(
                 ChapterReaderScreen(
                     initialVerseKey = verseKey,
                     audioBarVisible = showAudioBar,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onSelectSurah = { chapter ->
+                        val readerDestination = navController.currentDestination?.id
+                        navController.navigate("quran/reader/$chapter?ayah=-1") {
+                            readerDestination?.let { destinationId ->
+                                popUpTo(destinationId) { inclusive = true }
+                            }
+                            launchSingleTop = true
+                        }
+                    },
+                    onSelectJuz = { juz ->
+                        val readerDestination = navController.currentDestination?.id
+                        navController.navigate("quran/juz/$juz?verseKey=") {
+                            readerDestination?.let { destinationId ->
+                                popUpTo(destinationId) { inclusive = true }
+                            }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
             composable(

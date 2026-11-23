@@ -186,6 +186,13 @@
     <string name="quran_subtitle_juz">30 Juz · Al-Quran</string>
     <string name="quran_tab_surah">Surah</string>
     <string name="quran_tab_juz">Juz</string>
+    <string name="reader_select_surah">Pilih surah</string>
+    <string name="reader_select_juz">Pilih juz</string>
+    <string name="reader_surah_list_title">Daftar surah</string>
+    <string name="reader_juz_list_title">Daftar juz</string>
+    <string name="reader_search_surah">Cari surah atau terjemahan</string>
+    <string name="reader_search_juz">Cari juz</string>
+    <string name="reader_no_results">Tidak ada hasil</string>
     <string name="prayer_marked_success">%1$s ditandai ✓</string>
     <string name="optional_qiyam">Qiyamul lail</string>
     <string name="optional_mon_thu_fast">Puasa Senin &amp; Kamis</string>
