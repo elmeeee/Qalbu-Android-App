@@ -19,3 +19,9 @@ keystore/
 *.jks
 *.keystore
 iosApp/Config/Secrets.xcconfig
+
+# Node & Firebase Emulator
+node_modules/
+firestore-debug.log
+firebase-debug.log
+.firebase/

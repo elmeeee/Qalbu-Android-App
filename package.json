@@ -1,0 +1,27 @@
+{
+  "name": "qalbuandroid",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elmeeee/Qalbu-Android-App.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/elmeeee/Qalbu-Android-App/issues"
+  },
+  "homepage": "https://github.com/elmeeee/Qalbu-Android-App#readme",
+  "devDependencies": {
+    "firebase-admin": "^14.5.1"
+  }
+}
