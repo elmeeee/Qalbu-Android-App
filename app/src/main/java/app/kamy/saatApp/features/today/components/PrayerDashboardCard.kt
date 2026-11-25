@@ -146,7 +146,8 @@ fun PrayerDashboardCard(
     onRetry: () -> Unit = {},
     onOpenCalendar: () -> Unit = {},
     onLocationClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isRefreshing: Boolean = false
 ) {
     val fetchErrorDisplay = state.error
         ?.takeIf { !state.needsPermission }
@@ -186,7 +187,7 @@ fun PrayerDashboardCard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             when {
-                state.isLoading || state.timings.isEmpty() -> {
+                state.isLoading || isRefreshing || state.timings.isEmpty() -> {
                     PrayerCardLoading()
                 }
                 fetchErrorDisplay != null && state.timings.isEmpty() -> {

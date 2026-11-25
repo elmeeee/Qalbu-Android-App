@@ -468,6 +468,7 @@ fun TodayScreen(
                         onRetry = { scope.launch { prayerVm.refresh(force = true) } },
                         onOpenCalendar = onOpenPrayerCalendar,
                         onLocationClick = prayerVm::openLocationSheet,
+                        isRefreshing = isPullRefreshing,
                         modifier = Modifier
                             .padding(horizontal = 20.dp)
                             .coachMarkTarget(
