@@ -321,20 +321,26 @@ private fun TopicCardItem(
                     fontWeight = FontWeight.Bold,
                     color = SaatColors.DeepEmerald
                 )
-                Text(
-                    text = topic.localizedSubtitle(state.currentLanguage),
-                    fontSize = 12.sp,
-                    color = SaatColors.GoldDeep,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = topic.localizedSummary(state.currentLanguage),
-                    fontSize = 13.sp,
-                    color = SaatColors.Slate500,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                val subtitle = topic.localizedSubtitle(state.currentLanguage)
+                if (subtitle.isNotBlank()) {
+                    Text(
+                        text = subtitle,
+                        fontSize = 12.sp,
+                        color = SaatColors.GoldDeep,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                val summary = topic.localizedSummary(state.currentLanguage)
+                if (summary.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = summary,
+                        fontSize = 13.sp,
+                        color = SaatColors.Slate500,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
     }
