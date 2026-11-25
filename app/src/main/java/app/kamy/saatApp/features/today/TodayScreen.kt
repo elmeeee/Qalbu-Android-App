@@ -482,71 +482,89 @@ fun TodayScreen(
 
                 todayState.continueReading?.let { session ->
                     item(key = "continue_reading") {
-                        TodayContinueReadingCard(
-                            session = session,
-                            chapterName = todayState.continueReadingChapterName,
-                            totalVerses = todayState.continueReadingTotalVerses,
-                            onTap = {
-                                onOpenChapterReader(session.chapterNumber, session.verseNumber)
-                            },
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp)
-                                .coachMarkTarget(
-                                    coachMarkState,
-                                    3,
-                                    R.string.coach_mark_today_continue_title,
-                                    R.string.coach_mark_today_continue_desc
-                                )
-                        )
+                        if (isPullRefreshing) {
+                            TodayContinueReadingSkeleton(
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        } else {
+                            TodayContinueReadingCard(
+                                session = session,
+                                chapterName = todayState.continueReadingChapterName,
+                                totalVerses = todayState.continueReadingTotalVerses,
+                                onTap = {
+                                    onOpenChapterReader(session.chapterNumber, session.verseNumber)
+                                },
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp)
+                                    .coachMarkTarget(
+                                        coachMarkState,
+                                        3,
+                                        R.string.coach_mark_today_continue_title,
+                                        R.string.coach_mark_today_continue_desc
+                                    )
+                            )
+                        }
                     }
                 }
 
                 prayerState.ramadanInfo?.takeIf { it.isRamadan }?.let { ramadanInfo ->
                     item(key = "ramadan_card") {
-                        TodayRamadanCard(
-                            info = ramadanInfo,
-                            backgroundRes = prayerState.ramadanCardBackground,
-                            onTap = onOpenRamadanDetail,
-                            modifier = Modifier
-                                .padding(horizontal = 20.dp)
-                                .coachMarkTarget(
-                                    ramadanCoachMarkState,
-                                    0,
-                                    R.string.coach_mark_today_ramadan_title,
-                                    R.string.coach_mark_today_ramadan_desc
-                                )
-                        )
+                        if (isPullRefreshing) {
+                            TodayRamadanSkeleton(
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        } else {
+                            TodayRamadanCard(
+                                info = ramadanInfo,
+                                backgroundRes = prayerState.ramadanCardBackground,
+                                onTap = onOpenRamadanDetail,
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp)
+                                    .coachMarkTarget(
+                                        ramadanCoachMarkState,
+                                        0,
+                                        R.string.coach_mark_today_ramadan_title,
+                                        R.string.coach_mark_today_ramadan_desc
+                                    )
+                            )
+                        }
                     }
                 }
 
                 item(key = "prayer_tracker") {
-                    val isAfterIsha = remember(prayerState.activePrayer, prayerState.nextPrayer) {
-                        prayerState.activePrayer == app.kamy.saatApp.domain.model.PrayerType.ISHA
+                    if (isPullRefreshing) {
+                        TodayPrayerTrackerSkeleton(
+                            modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+                    } else {
+                        val isAfterIsha = remember(prayerState.activePrayer, prayerState.nextPrayer) {
+                            prayerState.activePrayer == app.kamy.saatApp.domain.model.PrayerType.ISHA
+                        }
+                        PrayerTrackerCard(
+                            state = trackerState,
+                            verse = todayState.verse,
+                            referenceLabel = todayState.verseReferenceLabel,
+                            dailyQuote = todayState.dailyQuote,
+                            isAfterIsha = isAfterIsha,
+                            onShowToastMessage = { msg ->
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar(msg)
+                                }
+                            },
+                            onToggleDailyPrayer = trackerVm::toggleDailyPrayer,
+                            onToggleOptional = trackerVm::toggleOptionalHabit,
+                            onOpenCalendar = onOpenTrackerCalendar,
+                            modifier = Modifier
+                                .padding(horizontal = 20.dp)
+                                .coachMarkTarget(
+                                    coachMarkState,
+                                    4,
+                                    R.string.coach_mark_today_tracker_title,
+                                    R.string.coach_mark_today_tracker_desc
+                                )
+                        )
                     }
-                    PrayerTrackerCard(
-                        state = trackerState,
-                        verse = todayState.verse,
-                        referenceLabel = todayState.verseReferenceLabel,
-                        dailyQuote = todayState.dailyQuote,
-                        isAfterIsha = isAfterIsha,
-                        onShowToastMessage = { msg ->
-                            scope.launch {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar(msg)
-                            }
-                        },
-                        onToggleDailyPrayer = trackerVm::toggleDailyPrayer,
-                        onToggleOptional = trackerVm::toggleOptionalHabit,
-                        onOpenCalendar = onOpenTrackerCalendar,
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .coachMarkTarget(
-                                coachMarkState,
-                                4,
-                                R.string.coach_mark_today_tracker_title,
-                                R.string.coach_mark_today_tracker_desc
-                            )
-                    )
                 }
             }
         }
@@ -663,6 +681,131 @@ fun TodayScreen(
 
     CoachMarkOverlay(state = coachMarkState, onDismiss = { coachMarkState.skip() })
     CoachMarkOverlay(state = ramadanCoachMarkState, onDismiss = { ramadanCoachMarkState.skip() })
+}
+
+@Composable
+private fun TodayContinueReadingSkeleton(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp)),
+        shape = RoundedCornerShape(24.dp),
+        color = SaatColors.LastReadBg,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                    modifier = Modifier.fillMaxWidth(0.45f).height(13.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                    modifier = Modifier.fillMaxWidth(0.75f).height(20.dp)
+                )
+                Spacer(Modifier.height(10.dp))
+                app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                    modifier = Modifier.fillMaxWidth(0.8f).height(6.dp),
+                    shape = CircleShape
+                )
+            }
+            Spacer(Modifier.width(16.dp))
+            app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                modifier = Modifier.size(44.dp),
+                shape = CircleShape
+            )
+        }
+    }
+}
+
+@Composable
+private fun TodayRamadanSkeleton(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = SaatColors.PureWhite,
+        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.6f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                modifier = Modifier.fillMaxWidth(0.55f).height(18.dp)
+            )
+            app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                modifier = Modifier.fillMaxWidth(0.85f).height(14.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TodayPrayerTrackerSkeleton(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        color = SaatColors.PureWhite,
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0).copy(alpha = 0.6f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                    modifier = Modifier.fillMaxWidth(0.5f).height(18.dp)
+                )
+                app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                    modifier = Modifier.width(64.dp).height(24.dp),
+                    shape = CircleShape
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                repeat(5) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                            modifier = Modifier.size(56.dp),
+                            shape = CircleShape
+                        )
+                        app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                            modifier = Modifier.width(36.dp).height(10.dp)
+                        )
+                    }
+                }
+            }
+            app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                modifier = Modifier.fillMaxWidth().height(72.dp),
+                shape = RoundedCornerShape(16.dp)
+            )
+            app.kamy.saatApp.design.components.SaatSkeletonBlock(
+                modifier = Modifier.fillMaxWidth().height(64.dp),
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
+    }
 }
 
 @Composable

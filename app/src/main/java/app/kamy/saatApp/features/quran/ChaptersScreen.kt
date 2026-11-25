@@ -227,6 +227,7 @@ fun ChaptersScreen(
                 onRefresh = {
                     scope.launch {
                         isPullRefreshing = true
+                        val startTime = System.currentTimeMillis()
                         runCatching { vm.refresh(force = true) }
                             .onFailure { t ->
                                 val msg = state.error?.apiMessage
@@ -234,6 +235,9 @@ fun ChaptersScreen(
                                     ?: chaptersRefreshFailed
                                 snackbarHostState.showSnackbar(msg)
                             }
+                        val elapsed = System.currentTimeMillis() - startTime
+                        val remaining = 600L - elapsed
+                        if (remaining > 0) kotlinx.coroutines.delay(remaining)
                         isPullRefreshing = false
                     }
                 },
@@ -401,13 +405,21 @@ fun ChaptersScreen(
                         } else {
                             when (state.browseMode) {
                                 QuranBrowseMode.SURAH -> {
-                                    items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
-                                        ChapterRow(
-                                            chapter = chapter,
-                                            isRead = chapter.id in state.readChapters,
-                                            onClick = { onOpenChapter(chapter, null) },
-                                            modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
-                                        )
+                                    if (isPullRefreshing) {
+                                        items(10, key = { "surah_refresh_skeleton_$it" }) {
+                                            ChapterRowSkeleton(
+                                                modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
+                                            )
+                                        }
+                                    } else {
+                                        items(state.chapters, key = { "surah_${it.id}" }) { chapter ->
+                                            ChapterRow(
+                                                chapter = chapter,
+                                                isRead = chapter.id in state.readChapters,
+                                                onClick = { onOpenChapter(chapter, null) },
+                                                modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
+                                            )
+                                        }
                                     }
                                 }
                                 QuranBrowseMode.JUZ -> {
@@ -499,7 +511,7 @@ fun ChaptersScreen(
                                         }
                                     }
                                     when {
-                                        state.juzsLoading && state.juzs.isEmpty() -> {
+                                        isPullRefreshing || (state.juzsLoading && state.juzs.isEmpty()) -> {
                                             items(10, key = { "juz_skeleton_$it" }) { index ->
                                                 ChapterRowSkeleton(
                                                     modifier = Modifier.padding(horizontal = SaatSpacing.screenHorizontal)
