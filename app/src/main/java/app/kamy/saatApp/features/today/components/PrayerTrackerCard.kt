@@ -1,5 +1,6 @@
 package app.kamy.saatApp.features.today.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -8,7 +9,10 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
+import app.kamy.saatApp.design.components.pressScale
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -289,6 +293,9 @@ private fun JourneyBadge(
     modifier: Modifier = Modifier
 ) {
     val performTapHaptic = rememberTapHaptic()
+    val interactionSource = androidx.compose.runtime.remember {
+        androidx.compose.foundation.interaction.MutableInteractionSource()
+    }
 
     val animatedBg by animateColorAsState(
         targetValue = if (isCompleted) Color(0xFFE6F4EA) else Color(0xFFF7F4E9),
@@ -308,8 +315,12 @@ private fun JourneyBadge(
 
     Column(
         modifier = modifier
+            .pressScale(interactionSource, 0.94f)
             .clip(RoundedCornerShape(14.dp))
-            .clickable {
+            .clickable(
+                interactionSource = interactionSource,
+                indication = androidx.compose.material3.ripple()
+            ) {
                 performTapHaptic()
                 onClick()
             }
@@ -325,34 +336,51 @@ private fun JourneyBadge(
                 .border(1.dp, animatedBorderColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            if (isCompleted) {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(SaatColors.HomeDarkGreen),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = "$label completed",
-                        tint = Color.White,
-                        modifier = Modifier.size(15.dp)
+            androidx.compose.animation.AnimatedContent(
+                targetState = isCompleted,
+                transitionSpec = {
+                    (androidx.compose.animation.scaleIn(
+                        initialScale = 0.72f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    ) + androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(150)))
+                        .togetherWith(androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(100)))
+                },
+                label = "badgeCheckTransition"
+            ) { completed ->
+                if (completed) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(SaatColors.HomeDarkGreen),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Check,
+                            contentDescription = "$label completed",
+                            tint = Color.White,
+                            modifier = Modifier.size(15.dp)
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(18.dp)
+                            .border(2.dp, SaatColors.HomeDarkGreen.copy(alpha = 0.65f), CircleShape)
                     )
                 }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(18.dp)
-                        .border(2.dp, SaatColors.HomeDarkGreen.copy(alpha = 0.65f), CircleShape)
-                )
             }
         }
         Text(
             text = label,
             fontSize = 12.sp,
             fontWeight = if (isCompleted) FontWeight.Bold else FontWeight.SemiBold,
-            color = animatedLabelColor
+            color = animatedLabelColor,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
         )
     }
 }

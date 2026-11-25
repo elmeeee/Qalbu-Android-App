@@ -1,5 +1,6 @@
 package app.kamy.saatApp.design.components
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.FilterChip
@@ -10,6 +11,7 @@ import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import app.kamy.saatApp.design.theme.SaatColors
 
@@ -66,10 +68,12 @@ fun SaatFilterChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     FilterChip(
         selected = selected,
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.pressScale(interactionSource, 0.96f),
+        interactionSource = interactionSource,
         label = { Text(label) },
         colors = FilterChipDefaults.filterChipColors(
             selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,

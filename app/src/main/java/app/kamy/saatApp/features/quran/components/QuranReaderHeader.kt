@@ -2,7 +2,9 @@ package app.kamy.saatApp.features.quran.components
 
 import android.os.Build
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -133,45 +135,25 @@ fun QuranReaderHeader(
             }
 
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .then(
+                        if (onTitleClick != null) {
+                            Modifier.clickable(onClick = onTitleClick)
+                        } else {
+                            Modifier
+                        }
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (onTitleClick != null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = title,
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = titleColor,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                        IconButton(
-                            onClick = onTitleClick,
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowDropDown,
-                                contentDescription = titleActionDescription,
-                                tint = titleColor
-                            )
-                        }
-                    }
-                } else {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = titleColor,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = titleColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 Spacer(Modifier.size(2.dp))
                 Text(
                     text = subtitle,
@@ -180,6 +162,17 @@ fun QuranReaderHeader(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+            }
+
+            if (onTitleClick != null) {
+                IconButton(onClick = onTitleClick) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_quran_on),
+                        contentDescription = titleActionDescription,
+                        tint = titleColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
 
             actions()

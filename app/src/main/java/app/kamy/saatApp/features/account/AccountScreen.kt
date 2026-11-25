@@ -2542,13 +2542,45 @@ private fun SaatModalBottomSheet(
     sheetState: SheetState,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    var contentVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { contentVisible = true }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(
+                width = 36.dp,
+                height = 4.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+            )
+        },
         containerColor = MaterialTheme.colorScheme.surface,
-        content = content
-    )
+        scrimColor = Color.Black.copy(alpha = 0.32f)
+    ) {
+        androidx.compose.animation.AnimatedVisibility(
+            visible = contentVisible,
+            enter = androidx.compose.animation.fadeIn(
+                androidx.compose.animation.core.tween(
+                    180,
+                    easing = androidx.compose.animation.core.FastOutSlowInEasing
+                )
+            ) + androidx.compose.animation.slideInVertically(
+                androidx.compose.animation.core.tween(
+                    220,
+                    easing = androidx.compose.animation.core.FastOutSlowInEasing
+                )
+            ) { it / 16 }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding(),
+                content = content
+            )
+        }
+    }
 }
 
 // ─── Legal Web Views & Info Screens ──────────────────────────────────────────

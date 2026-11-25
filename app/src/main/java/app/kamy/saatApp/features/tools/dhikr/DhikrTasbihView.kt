@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -172,11 +173,15 @@ fun TasbeehCounterWidget(
 
             val isActive = i == activeIndex
 
+            val beadScale = if (isActive) pulseScale * 1.20f else 1.0f
             Box(
                 modifier = Modifier
                     .offset(x = leftDp, y = topDp)
                     .size(beadSizeDp)
-                    .scale(if (isActive) pulseScale * 1.20f else 1.0f),
+                    .graphicsLayer {
+                        scaleX = beadScale
+                        scaleY = beadScale
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Image(

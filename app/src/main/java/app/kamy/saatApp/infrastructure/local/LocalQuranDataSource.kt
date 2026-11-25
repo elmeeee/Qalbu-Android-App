@@ -541,13 +541,18 @@ class LocalQuranDataSource @Inject constructor(
             "madinah", "medina" -> "madinah"
             else -> type.lowercase()
         }
+        val localizedName = app.kamy.saatApp.domain.quran.QuranSurahNames.localizedName(
+            chapterId = id,
+            language = language,
+            fallback = tname
+        )
         return QuranChapter(
             id = id,
             revelationPlace = revelation,
             bismillahPre = (id != 1 && id != 9),
             pages = (firstPage..lastPage).toList(),
-            nameSimple = tname,
-            nameComplex = tname,
+            nameSimple = localizedName,
+            nameComplex = localizedName,
             nameArabic = getStringOrNull("name"),
             versesCount = ayas,
             translatedName = ChapterTranslatedName(name = meaning, languageName = meaningLanguage)

@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -244,10 +245,14 @@ private fun LiveStatusBadge(isLive: Boolean) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+            val dotRenderScale = if (isLive) dotScale else 1f
             Box(
                 modifier = Modifier
                     .size(8.dp)
-                    .scale(if (isLive) dotScale else 1f)
+                    .graphicsLayer {
+                        scaleX = dotRenderScale
+                        scaleY = dotRenderScale
+                    }
                     .clip(CircleShape)
                     .background(if (isLive) Color(0xFFE53935).copy(alpha = dotAlpha) else Color.Gray)
             )
@@ -447,7 +452,10 @@ private fun RadioHeroPlayerCard(
                                 shadowElevation = 6.dp,
                                 modifier = Modifier
                                     .size(52.dp)
-                                    .scale(playButtonScale)
+                                    .graphicsLayer {
+                                        scaleX = playButtonScale
+                                        scaleY = playButtonScale
+                                    }
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
@@ -690,7 +698,10 @@ private fun RadioStationCard(
                     Box(
                         modifier = Modifier
                             .size(54.dp)
-                            .scale(haloScale)
+                            .graphicsLayer {
+                                scaleX = haloScale
+                                scaleY = haloScale
+                            }
                             .clip(RoundedCornerShape(18.dp))
                             .background(SaatColors.Gold.copy(alpha = haloAlpha))
                     )
@@ -768,7 +779,10 @@ private fun RadioStationCard(
                 color = if (isPlaying) SaatColors.Gold else MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
                     .size(42.dp)
-                    .scale(btnScale)
+                    .graphicsLayer {
+                        scaleX = btnScale
+                        scaleY = btnScale
+                    }
                     .clickable(onClick = onPlayClick)
             ) {
                 Box(contentAlignment = Alignment.Center) {

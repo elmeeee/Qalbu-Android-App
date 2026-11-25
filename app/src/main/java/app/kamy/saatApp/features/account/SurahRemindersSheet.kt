@@ -24,26 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import app.kamy.saatApp.design.theme.SaatColors
 import app.kamy.saatApp.core.locale.AppLanguage
+import app.kamy.saatApp.domain.quran.QuranSurahNames
 import app.kamy.saatApp.infrastructure.preferences.AppLanguageStore
 import app.kamy.saatApp.infrastructure.preferences.SurahReminder
 import java.util.Calendar
 import java.util.UUID
-
-private val SURAH_NAMES = listOf(
-    "Al-Fatihah", "Al-Baqarah", "Ali 'Imran", "An-Nisa'", "Al-Ma'idah", "Al-An'am", "Al-A'raf", "Al-Anfal", "At-Tawbah",
-    "Yunus", "Hud", "Yusuf", "Ar-Ra'd", "Ibrahim", "Al-Hijr", "An-Nahl", "Al-Isra'", "Al-Kahf", "Maryam",
-    "Ta-Ha", "Al-Anbiya'", "Al-Hajj", "Al-Mu'minun", "An-Nur", "Al-Furqan", "Ash-Shu'ara'", "An-Naml", "Al-Qasas",
-    "Al-'Ankabut", "Ar-Rum", "Luqman", "As-Sajdah", "Al-Ahzab", "Saba'", "Fatir", "Ya-Sin", "As-Saffat",
-    "Sad", "Az-Zumar", "Ghafir", "Fussilat", "Ash-Shura", "Az-Zukhruf", "Ad-Dukhan", "Al-Jathiyah", "Al-Ahqaf",
-    "Muhammad", "Al-Fath", "Al-Hujurat", "Qaf", "Adh-Dhariyat", "At-Tur", "An-Najm", "Al-Qamar", "Ar-Rahman",
-    "Al-Waqi'ah", "Al-Hadid", "Al-Mujadilah", "Al-Hashr", "Al-Mumtahanah", "As-Saff", "Al-Jumu'ah", "Al-Munafiqun",
-    "Al-Taghabun", "At-Talaq", "At-Tahrim", "Al-Mulk", "Al-Qalam", "Al-Haqqah", "Al-Ma'arij", "Nuh", "Al-Jinn",
-    "Al-Muzzammil", "Al-Muddaththir", "Al-Qiyamah", "Al-Insan", "Al-Mursalat", "An-Naba'", "An-Nazi'at", "'Abasa",
-    "At-Takwir", "Al-Infitar", "Al-Mutaffifin", "Al-Inshiqaq", "Al-Buruj", "At-Tariq", "Al-A'la", "Al-Ghashiyah",
-    "Al-Fajr", "Al-Balad", "Ash-Shams", "Al-Layl", "Ad-Duha", "Ash-Sharh", "At-Tin", "Al-'Alaq", "Al-Qadr",
-    "Al-Bayyinah", "Al-Zalzalah", "Al-'Adiyat", "Al-Qari'ah", "At-Takathur", "Al-'Asr", "Al-Humazah", "Al-Fil",
-    "Quraysh", "Al-Ma'un", "Al-Kauthar", "Al-Kafirun", "An-Nasr", "Al-Masad", "Al-Ikhlas", "Al-Falaq", "An-Nas"
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +43,8 @@ fun SurahRemindersSheet(
     val sheetState = rememberModalBottomSheetState()
     val context = LocalContext.current
     val languageStore = remember { AppLanguageStore.from(context) }
-    val isIndoMalay = languageStore.current() == AppLanguage.INDONESIAN || languageStore.current() == AppLanguage.MALAY
+    val currentLanguage = languageStore.current()
+    val isIndoMalay = currentLanguage == AppLanguage.INDONESIAN || currentLanguage == AppLanguage.MALAY
 
     var showAddForm by remember { mutableStateOf(false) }
     var reminderToEdit by remember { mutableStateOf<SurahReminder?>(null) }
@@ -66,12 +52,21 @@ fun SurahRemindersSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         containerColor = SaatColors.OffWhite,
-        dragHandle = { BottomSheetDefaults.DragHandle() }
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(
+                width = 36.dp,
+                height = 4.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)
+            )
+        },
+        scrimColor = androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.32f)
     ) {
         Column(
             Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -243,6 +238,8 @@ private fun AddEditSurahReminderDialog(
     var showSurahPicker by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val currentLanguage = remember { AppLanguageStore.from(context).current() }
+    val surahNames = remember(currentLanguage) { QuranSurahNames.allNames(currentLanguage) }
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -293,7 +290,7 @@ private fun AddEditSurahReminderDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Surah ${SURAH_NAMES[selectedSurahIndex]}",
+                                text = "Surah ${surahNames[selectedSurahIndex]}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = SaatColors.Slate900,
                                 fontWeight = FontWeight.Medium
@@ -431,7 +428,7 @@ private fun AddEditSurahReminderDialog(
                             val finalReminder = SurahReminder(
                                 id = reminder?.id ?: UUID.randomUUID().toString(),
                                 surahNumber = selectedSurahIndex + 1,
-                                surahName = SURAH_NAMES[selectedSurahIndex],
+                                surahName = surahNames[selectedSurahIndex],
                                 weekday = selectedWeekday,
                                 hour = hour,
                                 minute = minute,
@@ -467,9 +464,9 @@ private fun AddEditSurahReminderDialog(
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
                     LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(SURAH_NAMES.size) { index ->
+                        items(surahNames.size) { index ->
                             Text(
-                                text = "${index + 1}. ${SURAH_NAMES[index]}",
+                                text = "${index + 1}. ${surahNames[index]}",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {

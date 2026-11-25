@@ -59,11 +59,6 @@ object RamadanCountdownNotificationScheduler {
             cancel(context)
             return
         }
-        if (!RamadanCountdownPreferencesStore.hasShownToday(context)) {
-            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.IO).launch {
-                showNotification(context.applicationContext)
-            }
-        }
         scheduleNext(context)
         enqueueFallbackWork(context)
     }

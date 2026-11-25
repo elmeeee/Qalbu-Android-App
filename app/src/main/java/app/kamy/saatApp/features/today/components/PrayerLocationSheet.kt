@@ -38,11 +38,13 @@ fun PrayerLocationSheet(
 ) {
     if (!visible) return
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    app.kamy.saatApp.design.components.SaatPartialBottomSheet(
+        onDismiss = onDismiss,
+        sheetState = sheetState
+    ) {
         Column(
             Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {

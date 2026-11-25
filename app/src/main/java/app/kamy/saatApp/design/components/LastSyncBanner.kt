@@ -41,7 +41,9 @@ fun LastSyncBanner(
         Text(
             text = message,
             style = MaterialTheme.typography.labelMedium,
-            color = SaatColors.Slate500
+            color = SaatColors.Slate500,
+            maxLines = 2,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
         )
     }
 }

@@ -1732,6 +1732,7 @@ private fun ReaderIndexBottomSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         scrimColor = Color.Black.copy(alpha = 0.4f),
         dragHandle = {
@@ -1824,7 +1825,7 @@ private fun ReaderIndexBottomSheet(
                 ) {
                     items(filteredJuz, key = { it.first }) { (number, title) ->
                         ReaderIndexRow(
-                            indexLabel = number.toString().padStart(2, '0'),
+                            indexLabel = number.toString(),
                             title = title,
                             subtitle = null,
                             selected = number == currentJuzNumber,
@@ -1840,7 +1841,7 @@ private fun ReaderIndexBottomSheet(
                 ) {
                     items(filteredChapters, key = { it.id }) { chapter ->
                         ReaderIndexRow(
-                            indexLabel = chapter.id.toString().padStart(3, '0'),
+                            indexLabel = chapter.id.toString(),
                             title = chapter.displayComplexName,
                             subtitle = chapter.displayTranslatedName
                                 .takeIf { it.isNotBlank() && it != chapter.displayComplexName },
@@ -1885,13 +1886,25 @@ private fun ReaderIndexRow(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = indexLabel,
-                modifier = Modifier.widthIn(min = 34.dp),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Box(
+                modifier = Modifier.size(38.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.frame_number_icon),
+                    contentDescription = null,
+                    tint = if (selected) MaterialTheme.colorScheme.primary else SaatColors.Teal,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Text(
+                    text = indexLabel,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontSize = if (indexLabel.length >= 3) 11.sp else 12.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)

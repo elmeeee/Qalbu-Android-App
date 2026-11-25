@@ -583,7 +583,7 @@ private fun RealityKitARView(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(7.dp),
-                modifier = Modifier.offset(y = arrowOffsetAnim.dp)
+                modifier = Modifier.graphicsLayer { translationY = arrowOffsetAnim.dp.toPx() }
             ) {
                 repeat(4) { idx ->
                     val opacity = (arrowAlphaAnim * (1f - idx * 0.18f)).coerceIn(0.2f, 1f)

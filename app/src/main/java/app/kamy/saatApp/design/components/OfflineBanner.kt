@@ -45,6 +45,8 @@ fun OfflineBanner(
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
             color = SaatColors.GoldDeep,
+            maxLines = 2,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
             modifier = Modifier.padding(start = 10.dp)
         )
     }

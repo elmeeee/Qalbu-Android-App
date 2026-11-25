@@ -38,6 +38,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -85,16 +87,18 @@ fun FloatingTabBar(
             val totalWidthDp = maxWidth
             val tabWidthDp = totalWidthDp / tabs.size
 
-            // 1. Super Smooth Sliding Liquid Active Pill (Netflix style)
-            val animatedPillOffset by animateDpAsState(
-                targetValue = tabWidthDp * selectedIndex,
+            // 1. Super Smooth Sliding Liquid Active Pill (GPU-accelerated translationX)
+            val density = LocalDensity.current
+            val targetOffsetPx = with(density) { (tabWidthDp * selectedIndex).toPx() }
+            val animatedPillOffsetPx by animateFloatAsState(
+                targetValue = targetOffsetPx,
                 animationSpec = spring(dampingRatio = 0.76f, stiffness = 380f),
                 label = "pill_slide"
             )
 
             Box(
                 modifier = Modifier
-                    .offset(x = animatedPillOffset)
+                    .graphicsLayer { translationX = animatedPillOffsetPx }
                     .width(tabWidthDp)
                     .height(52.dp)
                     .padding(horizontal = 2.dp)
@@ -152,7 +156,10 @@ private fun NetflixTabItem(
     Column(
         modifier = modifier
             .height(52.dp)
-            .scale(scale)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .clip(RoundedCornerShape(26.dp))
             .clickable(
                 interactionSource = interactionSource,

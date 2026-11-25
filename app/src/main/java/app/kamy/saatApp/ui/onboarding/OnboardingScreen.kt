@@ -8,6 +8,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -119,64 +120,93 @@ fun OnboardingScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        when (state.step) {
-            OnboardingStep.LANGUAGE -> {
-                LanguageStepScreen(
-                    selected = state.selectedLanguage,
-                    onSelect = vm::selectLanguage,
-                    onStart = {
-                        vm.selectLanguage(state.selectedLanguage)
-                        vm.nextStep()
-                    },
-                    onSkip = { finishOnboarding() },
-                    strings = strings
-                )
-            }
-            OnboardingStep.WELCOME -> {
-                WelcomeStepScreen(
-                    language = state.selectedLanguage,
-                    onBack = { vm.previousStep() },
-                    onContinue = { vm.nextStep() },
-                    onSkip = { finishOnboarding() },
-                    strings = strings
-                )
-            }
-            OnboardingStep.PERMISSIONS -> {
-                PermissionsStepScreen(
-                    locationGranted = state.locationGranted,
-                    notificationGranted = state.notificationGranted,
-                    onRequestLocation = {
-                        locationPermissionLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.ACCESS_FINE_LOCATION,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            )
+        androidx.compose.animation.AnimatedContent(
+            targetState = state.step,
+            transitionSpec = {
+                val forward = targetState.ordinal >= initialState.ordinal
+                val duration = 220
+                val easing = androidx.compose.animation.core.FastOutSlowInEasing
+                if (forward) {
+                    (androidx.compose.animation.slideInHorizontally(
+                        animationSpec = tween(duration, easing = easing)
+                    ) { it / 4 } + fadeIn(tween(duration, easing = easing)))
+                        .togetherWith(
+                            androidx.compose.animation.slideOutHorizontally(
+                                animationSpec = tween(duration, easing = easing)
+                            ) { -it / 6 } + fadeOut(tween(140))
                         )
-                    },
-                    onRequestNotification = {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        } else {
-                            vm.onNotificationPermissionResult(true)
-                        }
-                    },
-                    onBack = { vm.previousStep() },
-                    onContinue = { vm.nextStep() },
-                    onSkip = {
-                        vm.skipPermissions()
-                    },
-                    strings = strings
-                )
-            }
-            OnboardingStep.PRAYER_NOTIFICATIONS -> {
-                PrayerNotificationsStepScreen(
-                    toggles = state.prayerAdzanToggles,
-                    onToggle = vm::togglePrayerAdzan,
-                    onBack = { vm.previousStep() },
-                    onSave = { finishOnboarding() },
-                    onSkip = { finishOnboarding() },
-                    strings = strings
-                )
+                } else {
+                    (androidx.compose.animation.slideInHorizontally(
+                        animationSpec = tween(duration, easing = easing)
+                    ) { -it / 4 } + fadeIn(tween(duration, easing = easing)))
+                        .togetherWith(
+                            androidx.compose.animation.slideOutHorizontally(
+                                animationSpec = tween(duration, easing = easing)
+                            ) { it / 6 } + fadeOut(tween(140))
+                        )
+                }
+            },
+            label = "onboardingStepTransition"
+        ) { step ->
+            when (step) {
+                OnboardingStep.LANGUAGE -> {
+                    LanguageStepScreen(
+                        selected = state.selectedLanguage,
+                        onSelect = vm::selectLanguage,
+                        onStart = {
+                            vm.selectLanguage(state.selectedLanguage)
+                            vm.nextStep()
+                        },
+                        onSkip = { finishOnboarding() },
+                        strings = strings
+                    )
+                }
+                OnboardingStep.WELCOME -> {
+                    WelcomeStepScreen(
+                        language = state.selectedLanguage,
+                        onBack = { vm.previousStep() },
+                        onContinue = { vm.nextStep() },
+                        onSkip = { finishOnboarding() },
+                        strings = strings
+                    )
+                }
+                OnboardingStep.PERMISSIONS -> {
+                    PermissionsStepScreen(
+                        locationGranted = state.locationGranted,
+                        notificationGranted = state.notificationGranted,
+                        onRequestLocation = {
+                            locationPermissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
+                            )
+                        },
+                        onRequestNotification = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                vm.onNotificationPermissionResult(true)
+                            }
+                        },
+                        onBack = { vm.previousStep() },
+                        onContinue = { vm.nextStep() },
+                        onSkip = {
+                            vm.skipPermissions()
+                        },
+                        strings = strings
+                    )
+                }
+                OnboardingStep.PRAYER_NOTIFICATIONS -> {
+                    PrayerNotificationsStepScreen(
+                        toggles = state.prayerAdzanToggles,
+                        onToggle = vm::togglePrayerAdzan,
+                        onBack = { vm.previousStep() },
+                        onSave = { finishOnboarding() },
+                        onSkip = { finishOnboarding() },
+                        strings = strings
+                    )
+                }
             }
         }
 

@@ -1,5 +1,6 @@
 package app.kamy.saatApp.design.components
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +11,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -40,12 +42,14 @@ fun SaatCard(
     when (style) {
         SaatCardStyle.Elevated -> {
             if (onClick != null) {
+                val interactionSource = remember { MutableInteractionSource() }
                 ElevatedCard(
                     onClick = onClick,
-                    modifier = modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth().pressScale(interactionSource, 0.98f),
                     shape = shape,
                     colors = CardDefaults.elevatedCardColors(containerColor = containerColor),
-                    elevation = elevation
+                    elevation = elevation,
+                    interactionSource = interactionSource
                 ) {
                     Column(padding, content = content)
                 }
@@ -62,11 +66,13 @@ fun SaatCard(
         }
         SaatCardStyle.Filled -> {
             if (onClick != null) {
+                val interactionSource = remember { MutableInteractionSource() }
                 Card(
                     onClick = onClick,
-                    modifier = modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth().pressScale(interactionSource, 0.98f),
                     shape = shape,
-                    colors = CardDefaults.cardColors(containerColor = containerColor)
+                    colors = CardDefaults.cardColors(containerColor = containerColor),
+                    interactionSource = interactionSource
                 ) {
                     Column(padding, content = content)
                 }
@@ -82,11 +88,13 @@ fun SaatCard(
         }
         SaatCardStyle.Outlined -> {
             if (onClick != null) {
+                val interactionSource = remember { MutableInteractionSource() }
                 OutlinedCard(
                     onClick = onClick,
-                    modifier = modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth().pressScale(interactionSource, 0.98f),
                     shape = shape,
-                    colors = CardDefaults.outlinedCardColors(containerColor = containerColor)
+                    colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
+                    interactionSource = interactionSource
                 ) {
                     Column(padding, content = content)
                 }
