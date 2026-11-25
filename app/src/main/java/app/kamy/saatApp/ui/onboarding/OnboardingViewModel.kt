@@ -163,7 +163,11 @@ class OnboardingViewModel @Inject constructor(
     fun onNotificationPermissionResult(granted: Boolean) {
         _state.update { it.copy(notificationGranted = granted) }
         onboardingStore.markNotificationsHandled()
-        DailyVerseNotificationScheduler.reschedule(appContext)
+        if (granted) {
+            DailyVerseNotificationScheduler.reschedule(appContext)
+            app.kamy.saatApp.infrastructure.notifications.RamadanCountdownNotificationScheduler.reschedule(appContext)
+            app.kamy.saatApp.infrastructure.notifications.PrayerNotificationCoordinator.rescheduleFromCache(appContext, force = true)
+        }
         if (!appContext.canUseFullScreenIntent()) {
             runCatching { appContext.openFullScreenIntentSettings() }
         }
@@ -187,6 +191,8 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             onboardingStore.markComplete()
             DailyVerseNotificationScheduler.reschedule(appContext)
+            app.kamy.saatApp.infrastructure.notifications.RamadanCountdownNotificationScheduler.reschedule(appContext)
+            app.kamy.saatApp.infrastructure.notifications.PrayerNotificationCoordinator.rescheduleFromCache(appContext, force = true)
         }
     }
 }

@@ -949,6 +949,68 @@ fun NotificationAdhanScreen(
                                 prayerName = "Dzuhur"
                             )
                         },
+                        showDivider = true
+                    )
+                    val scope = rememberCoroutineScope()
+                    SettingsCustomRow(
+                        iconRes = R.drawable.ic_remainders_custom,
+                        title = "Test Menuju Ramadan Notification",
+                        subtitle = "Trigger Ramadan countdown notification now",
+                        onClick = {
+                            scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                app.kamy.saatApp.infrastructure.notifications.RamadanCountdownNotificationScheduler.showNotification(
+                                    context = context,
+                                    force = true
+                                )
+                            }
+                        },
+                        showDivider = true
+                    )
+                    SettingsCustomRow(
+                        iconRes = R.drawable.ic_remainders_custom,
+                        title = "Test Puasa Sunnah Senin-Kamis",
+                        subtitle = "Trigger Monday/Thursday fasting reminder now",
+                        onClick = {
+                            app.kamy.saatApp.infrastructure.notifications.PrayerNotificationScheduler.showNotification(
+                                context = context,
+                                notificationId = 9994,
+                                channelId = app.kamy.saatApp.infrastructure.notifications.NotificationChannels.SUNNAH,
+                                title = app.kamy.saatApp.infrastructure.notifications.AppNotificationCopy.resolveTitle(
+                                    context = context,
+                                    kind = "sunnah_mon_fast",
+                                    prayerName = null,
+                                    fireAtMillis = System.currentTimeMillis()
+                                ),
+                                body = app.kamy.saatApp.infrastructure.notifications.AppNotificationCopy.resolveBody(
+                                    context = context,
+                                    kind = "sunnah_mon_fast",
+                                    prayerName = null
+                                ),
+                                kind = "sunnah_mon_fast"
+                            )
+                        },
+                        showDivider = true
+                    )
+                    SettingsCustomRow(
+                        iconRes = R.drawable.ic_remainders_custom,
+                        title = "Test Puasa Ayyamul Bidh",
+                        subtitle = "Trigger important day fasting reminder now",
+                        onClick = {
+                            app.kamy.saatApp.infrastructure.notifications.PrayerNotificationScheduler.showNotification(
+                                context = context,
+                                notificationId = 9995,
+                                channelId = app.kamy.saatApp.infrastructure.notifications.NotificationChannels.SUNNAH,
+                                title = app.kamy.saatApp.infrastructure.notifications.AppNotificationCopy.importantDayTitle(
+                                    context = context,
+                                    eventTitle = "Ayyamul Bidh"
+                                ),
+                                body = app.kamy.saatApp.infrastructure.notifications.AppNotificationCopy.importantDayBody(
+                                    context = context,
+                                    eventTitle = "Ayyamul Bidh"
+                                ),
+                                kind = "important_day_Ayyamul Bidh"
+                            )
+                        },
                         showDivider = false
                     )
                 }

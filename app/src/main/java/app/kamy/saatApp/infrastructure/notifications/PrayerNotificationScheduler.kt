@@ -489,7 +489,7 @@ object PrayerNotificationScheduler {
         )
     }
 
-    private fun nextWeekdayTime(weekday: Int, hour: Int, minute: Int, from: Long): Long {
+    internal fun nextWeekdayTime(weekday: Int, hour: Int, minute: Int, from: Long): Long {
         val cal = Calendar.getInstance().apply { timeInMillis = from }
         cal.set(Calendar.HOUR_OF_DAY, hour)
         cal.set(Calendar.MINUTE, minute)
@@ -525,7 +525,7 @@ object PrayerNotificationScheduler {
         }
     }
 
-    private fun upcomingWeeklyOccurrences(firstFireAt: Long, now: Long, count: Int): List<Long> {
+    internal fun upcomingWeeklyOccurrences(firstFireAt: Long, now: Long, count: Int): List<Long> {
         if (count <= 0) return emptyList()
         val cal = Calendar.getInstance().apply { timeInMillis = firstFireAt }
         val compareCal = Calendar.getInstance().apply {

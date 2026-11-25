@@ -65,6 +65,9 @@ object PrayerNotificationCoordinator {
             PrayerScheduleCache.loadCoordinates(appContext) != null
         ) {
             PrayerScheduleRefresher.refresh(appContext)
+            if (!PrayerScheduleCache.isStale(appContext)) {
+                return
+            }
         }
         val bundle = PrayerScheduleCache.load(appContext)
         val options = PrayerNotificationPreferencesStore.from(appContext).scheduleOptions()

@@ -29,6 +29,7 @@ object RamadanCountdownNotificationScheduler {
     const val CHANNEL_ID = NotificationChannels.RAMADAN_COUNTDOWN
     const val REQUEST_CODE = 7080
     const val NOTIFICATION_ID = 7080
+    private const val FALLBACK_WORK_NAME = "ramadan_countdown_fallback_work"
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
@@ -64,12 +65,47 @@ object RamadanCountdownNotificationScheduler {
             }
         }
         scheduleNext(context)
+        enqueueFallbackWork(context)
     }
 
     fun cancel(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent(context))
+        cancelFallbackWork(context)
         dismissNotification(context)
+    }
+
+    fun enqueueFallbackWork(context: Context) {
+        runCatching {
+            val request = androidx.work.PeriodicWorkRequestBuilder<RamadanCountdownWorker>(
+                6,
+                java.util.concurrent.TimeUnit.HOURS
+            ).build()
+            androidx.work.WorkManager.getInstance(context.applicationContext).enqueueUniquePeriodicWork(
+                FALLBACK_WORK_NAME,
+                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+                request
+            )
+        }
+    }
+
+    private fun cancelFallbackWork(context: Context) {
+        runCatching {
+            androidx.work.WorkManager.getInstance(context.applicationContext)
+                .cancelUniqueWork(FALLBACK_WORK_NAME)
+        }
+    }
+
+    internal fun shouldShowCatchUpNotification(
+        hourNow: Int,
+        minuteNow: Int,
+        targetHour: Int,
+        targetMinute: Int,
+        hasShownToday: Boolean,
+        isEnabled: Boolean
+    ): Boolean {
+        if (!isEnabled || hasShownToday) return false
+        return hourNow > targetHour || (hourNow == targetHour && minuteNow >= targetMinute)
     }
 
     fun dismissNotification(context: Context) {
